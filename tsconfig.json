@@ -3,15 +3,8 @@
     "compilerOptions": {
         "target": "es5",
         "module": "commonjs",
-        "lib": [
-            "es2022", "dom"
-        ],
-        "types": [
-            "reflect-metadata"
-        ],
-        "typeRoots": [
-            "node_modules/@types", "typings"
-        ],
+        "lib": ["es2022", "dom"],
+        "typeRoots": ["node_modules/@types", "typings"],
         "sourceMap": true,
         "declaration": true,
         "declarationMap": true,

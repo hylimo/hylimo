@@ -9,5 +9,8 @@
     ],
     "scripts": {
         "build": "tsc"
+    },
+    "dependencies": {
+        "chevrotain": "^10.4.0"
     }
 }

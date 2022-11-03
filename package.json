@@ -4,9 +4,15 @@
         "packages/*"
     ],
     "scripts": {
-        "build": "tsc -b tsconfig.build.json"
+        "build": "tsc -b tsconfig.build.json",
+        "format": "prettier --write \"**/*.{ts,json}\" \"!package-lock.json\""
     },
     "devDependencies": {
+        "prettier": "^2.7.1",
         "typescript": "^4.8.4"
+    },
+    "prettier": {
+        "tabWidth": 4,
+        "trailingComma": "none"
     }
 }
