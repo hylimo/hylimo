@@ -1,0 +1,13 @@
+{
+    "name": "@hylimo/core",
+    "version": "0.0.1",
+    "main": "lib/index",
+    "types": "lib/index",
+    "files": [
+        "lib",
+        "src"
+    ],
+    "scripts": {
+        "build": "tsc"
+    }
+}

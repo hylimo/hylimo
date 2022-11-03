@@ -1,0 +1,29 @@
+{
+    "$schema": "https://json.schemastore.org/tsconfig",
+    "compilerOptions": {
+        "target": "es5",
+        "module": "commonjs",
+        "lib": [
+            "es2022", "dom"
+        ],
+        "types": [
+            "reflect-metadata"
+        ],
+        "typeRoots": [
+            "node_modules/@types", "typings"
+        ],
+        "sourceMap": true,
+        "declaration": true,
+        "declarationMap": true,
+        "noImplicitAny": true,
+        "noImplicitThis": true,
+        "noImplicitReturns": true,
+        "noImplicitOverride": true,
+        "noUnusedLocals": true,
+        "strictNullChecks": true,
+        "experimentalDecorators": true,
+        "emitDecoratorMetadata": true,
+        "esModuleInterop": true,
+        "jsx": "react"
+    }
+}
