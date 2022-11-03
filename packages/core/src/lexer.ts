@@ -1,104 +1,118 @@
 import { createToken, IMultiModeLexerDefinition, Lexer } from "chevrotain";
 
+/**
+ * Supported lexer modes
+ */
 export enum Modes {
+    /**
+     * Default mode, keep newlines in cst
+     */
     DEFAULT = "DEFAULT",
+    /**
+     * Skip newlines in cst
+     */
     IGNORE_NEW_LINE = "IGNORE_NEW_LINES"
 }
 
-const whiteSpace = createToken({
+export const WhiteSpace = createToken({
     name: "WhiteSpace",
     pattern: /[^\S\n]+/,
     group: Lexer.SKIPPED
 });
 
-const newLine = createToken({
+export const NewLine = createToken({
     name: "NewLine",
     pattern: /\n/,
     line_breaks: true
 });
 
-const skippedNewLine = createToken({
+export const SkippedNewLine = createToken({
     name: "SkippedNewLine",
     pattern: /\n/,
     line_breaks: true,
     group: Lexer.SKIPPED
 });
 
-const openRoundBracket = createToken({
+export const OpenRoundBracket = createToken({
     name: "OpenRoundBracket",
     pattern: /\(/,
     push_mode: Modes.IGNORE_NEW_LINE
 });
 
-const closeRoundBracket = createToken({
+export const CloseRoundBracket = createToken({
     name: "CloseRoundBracket",
     pattern: /)/,
     pop_mode: true
 });
 
-const openCurlyBracket = createToken({
+export const OpenCurlyBracket = createToken({
     name: "OpenCurlyBracket",
     pattern: /{/,
     push_mode: Modes.DEFAULT
 });
 
-const closeCurlyBracket = createToken({
+export const CloseCurlyBracket = createToken({
     name: "CloseCurlyBracket",
     pattern: /}/,
     pop_mode: true
 });
 
-const openSquareBracket = createToken({
+export const OpenSquareBracket = createToken({
     name: "OpenSquareBracket",
     pattern: /\[/,
     push_mode: Modes.IGNORE_NEW_LINE
 });
 
-const closeSquareBracket = createToken({
+export const CloseSquareBracket = createToken({
     name: "CloseSquareBracket",
     pattern: /]/,
     pop_mode: true
 });
 
-const dot = createToken({
+export const Dot = createToken({
     name: "CloseSquareBracket",
     pattern: /\./
 });
 
-const comma = createToken({
+export const Comma = createToken({
     name: "CloseSquareBracket",
     pattern: /,/
 });
 
-const identifier = createToken({
+export const Equal = createToken({
+    name: "Equal",
+    pattern: /=/
+});
+
+export const Identifier = createToken({
     name: "Identifier",
     pattern:
         /(([!#%&'*+\-\/:;<=>?@\\^`|~]|([_$](?![_$]*[a-z0-9])))+)|([a-z_$][a-z0-9_$]*)/i
 });
 
-const string = createToken({
+export const String = createToken({
     name: "String",
     pattern: /"((\\[\\"nt])|([a-zA-Z0-9!#$%&'()*+,\-.\/:;<=>?@[\]^_`{|}~]))*"/
 });
 
-const number = createToken({
+export const Number = createToken({
     name: "Number",
     pattern: /[0-9]+(\.[0-9]+)?/
 });
 
 const standardTokens = [
-    whiteSpace,
-    openRoundBracket,
-    closeRoundBracket,
-    openCurlyBracket,
-    closeCurlyBracket,
-    openSquareBracket,
-    closeSquareBracket,
-    dot,
-    comma,
-    identifier,
-    string,
-    number
+    WhiteSpace,
+    OpenRoundBracket,
+    CloseRoundBracket,
+    OpenCurlyBracket,
+    CloseCurlyBracket,
+    OpenSquareBracket,
+    CloseSquareBracket,
+    Dot,
+    Comma,
+    Identifier,
+    String,
+    Number
 ];
 
 /**
@@ -107,7 +121,7 @@ const standardTokens = [
 export const lexerDefinition: IMultiModeLexerDefinition = {
     defaultMode: "",
     modes: {
-        [Modes.DEFAULT]: [...standardTokens, newLine],
-        [Modes.IGNORE_NEW_LINE]: [...standardTokens, skippedNewLine]
+        [Modes.DEFAULT]: [...standardTokens, NewLine],
+        [Modes.IGNORE_NEW_LINE]: [...standardTokens, SkippedNewLine]
     }
 };
