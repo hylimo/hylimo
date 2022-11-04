@@ -23,6 +23,7 @@ export enum Rules {
     EXPRESSIONS = "expressions",
     CALLABLE_EXPRESSION = "callableExpression",
     CALL_EXPRESSION = "callExpression",
+    CALL_BRACKETS = "callBrackets",
     BRACKET_EXPRESSION = "bracketExpression",
     FIELD_ACCESS_EXPRESSION = "fieldAccessExpression",
     OPERATOR_EXPRESSION = "operatorExpression",
@@ -84,15 +85,13 @@ export class Parser extends CstParser {
         this.OR([
             { ALT: () => this.SUBRULE(this.literal) },
             { ALT: () => this.CONSUME(Identifier) },
-            { ALT: () => this.SUBRULE(this.callExpression) },
             { ALT: () => this.SUBRULE(this.function) },
             { ALT: () => this.SUBRULE(this.bracketExpression) },
             { ALT: () => this.SUBRULE(this.fieldAccessExpression) }
         ]);
     });
 
-    callExpression = this.RULE(Rules.CALL_EXPRESSION, () => {
-        this.SUBRULE(this.callableExpression);
+    callBrackets = this.RULE(Rules.CALL_BRACKETS, () => {
         this.OPTION(() => {
             this.CONSUME(OpenRoundBracket);
             this.MANY_SEP({
@@ -103,6 +102,13 @@ export class Parser extends CstParser {
         });
         this.MANY(() => {
             this.SUBRULE(this.function);
+        });
+    });
+
+    callExpression = this.RULE(Rules.CALL_EXPRESSION, () => {
+        this.SUBRULE(this.callableExpression);
+        this.MANY(() => {
+            this.SUBRULE(this.callBrackets);
         });
     });
 
