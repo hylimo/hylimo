@@ -35,7 +35,7 @@ export class Parser extends CstParser {
     private readonly lexer = new Lexer(lexerDefinition);
 
     constructor() {
-        super(Object.values(lexerDefinition), {
+        super(lexerDefinition, {
             nodeLocationTracking: "full"
         });
         this.performSelfAnalysis();

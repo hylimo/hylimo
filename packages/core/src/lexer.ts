@@ -119,7 +119,7 @@ const standardTokens = [
  * All supported token types of the base language
  */
 export const lexerDefinition: IMultiModeLexerDefinition = {
-    defaultMode: "",
+    defaultMode: Modes.DEFAULT,
     modes: {
         [Modes.DEFAULT]: [...standardTokens, NewLine],
         [Modes.IGNORE_NEW_LINE]: [...standardTokens, SkippedNewLine]
