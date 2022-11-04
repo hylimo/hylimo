@@ -1,4 +1,4 @@
-import { CstParser } from "chevrotain";
+import { CstParser, Lexer } from "chevrotain";
 import {
     CloseCurlyBracket,
     CloseRoundBracket,
@@ -31,6 +31,9 @@ export enum Rules {
 }
 
 export class Parser extends CstParser {
+
+    private readonly lexer = new Lexer(lexerDefinition);
+
     constructor() {
         super(Object.values(lexerDefinition), {
             nodeLocationTracking: "full"
@@ -38,14 +41,14 @@ export class Parser extends CstParser {
         this.performSelfAnalysis();
     }
 
-    literal = this.RULE(Rules.LITERAL, () => {
+    private literal = this.RULE(Rules.LITERAL, () => {
         this.OR([
             { ALT: () => this.CONSUME(String) },
             { ALT: () => this.CONSUME(Number) }
         ]);
     });
 
-    decorator = this.RULE(Rules.DECORATOR, () => {
+    private decorator = this.RULE(Rules.DECORATOR, () => {
         this.CONSUME(OpenSquareBracket);
         this.MANY_SEP({
             SEP: Comma,
@@ -55,7 +58,7 @@ export class Parser extends CstParser {
         });
     });
 
-    decoratorEntry = this.RULE(Rules.DECORATOR_ENTRY, () => {
+    private decoratorEntry = this.RULE(Rules.DECORATOR_ENTRY, () => {
         this.CONSUME(Identifier);
         this.OPTION(() => {
             this.CONSUME(Equal);
@@ -63,7 +66,7 @@ export class Parser extends CstParser {
         });
     });
 
-    function = this.RULE(Rules.FUNCTION, () => {
+    private function = this.RULE(Rules.FUNCTION, () => {
         this.OPTION(() => {
             this.SUBRULE(this.decorator);
         });
@@ -72,7 +75,7 @@ export class Parser extends CstParser {
         this.CONSUME(CloseCurlyBracket);
     });
 
-    expressions = this.RULE(Rules.EXPRESSIONS, () => {
+    private expressions = this.RULE(Rules.EXPRESSIONS, () => {
         this.MANY_SEP({
             SEP: NewLine,
             DEF: () => {
@@ -81,7 +84,7 @@ export class Parser extends CstParser {
         });
     });
 
-    callableExpression = this.RULE(Rules.CALLABLE_EXPRESSION, () => {
+    private callableExpression = this.RULE(Rules.CALLABLE_EXPRESSION, () => {
         this.OR([
             { ALT: () => this.SUBRULE(this.literal) },
             { ALT: () => this.CONSUME(Identifier) },
@@ -91,7 +94,7 @@ export class Parser extends CstParser {
         ]);
     });
 
-    callBrackets = this.RULE(Rules.CALL_BRACKETS, () => {
+    private callBrackets = this.RULE(Rules.CALL_BRACKETS, () => {
         this.OPTION(() => {
             this.CONSUME(OpenRoundBracket);
             this.MANY_SEP({
@@ -105,20 +108,20 @@ export class Parser extends CstParser {
         });
     });
 
-    callExpression = this.RULE(Rules.CALL_EXPRESSION, () => {
+    private callExpression = this.RULE(Rules.CALL_EXPRESSION, () => {
         this.SUBRULE(this.callableExpression);
         this.MANY(() => {
             this.SUBRULE(this.callBrackets);
         });
     });
 
-    bracketExpression = this.RULE(Rules.BRACKET_EXPRESSION, () => {
+    private bracketExpression = this.RULE(Rules.BRACKET_EXPRESSION, () => {
         this.CONSUME(OpenRoundBracket);
         this.SUBRULE(this.expression);
         this.CONSUME(CloseRoundBracket);
     });
 
-    fieldAccessExpression = this.RULE(Rules.FIELD_ACCESS_EXPRESSION, () => {
+    private fieldAccessExpression = this.RULE(Rules.FIELD_ACCESS_EXPRESSION, () => {
         this.SUBRULE(this.callExpression);
         this.OPTION(() => {
             this.CONSUME(Dot);
@@ -126,7 +129,7 @@ export class Parser extends CstParser {
         });
     });
 
-    operatorExpression = this.RULE(Rules.OPERATOR_EXPRESSION, () => {
+    private operatorExpression = this.RULE(Rules.OPERATOR_EXPRESSION, () => {
         this.SUBRULE1(this.fieldAccessExpression);
         this.MANY(() => {
             this.AT_LEAST_ONE_SEP({
@@ -137,7 +140,7 @@ export class Parser extends CstParser {
         });
     });
 
-    expression = this.RULE(Rules.EXPRESSION, () => {
+    private expression = this.RULE(Rules.EXPRESSION, () => {
         this.OPTION1(() => {
             this.OPTION2(() => {
                 this.SUBRULE(this.callExpression);
@@ -148,4 +151,11 @@ export class Parser extends CstParser {
         });
         this.SUBRULE(this.operatorExpression);
     });
+
+    public parse(text: string) {
+        const lexerResult = this.lexer.tokenize(text);
+        this.input = lexerResult.tokens;
+        const result = this.expressions();
+        return result;
+    }
 }

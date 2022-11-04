@@ -41,7 +41,7 @@ export const OpenRoundBracket = createToken({
 
 export const CloseRoundBracket = createToken({
     name: "CloseRoundBracket",
-    pattern: /)/,
+    pattern: /\)/,
     pop_mode: true
 });
 
