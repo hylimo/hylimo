@@ -2,6 +2,7 @@ import { CstParser, Lexer } from "chevrotain";
 import {
     CloseCurlyBracket,
     CloseRoundBracket,
+    CloseSquareBracket,
     Comma,
     Dot,
     Equal,
@@ -51,6 +52,7 @@ export class Parser extends CstParser {
                 this.SUBRULE(this.decoratorEntry);
             }
         });
+        this.CONSUME(CloseSquareBracket);
     });
 
     private decoratorEntry = this.RULE(Rules.DECORATOR_ENTRY, () => {
@@ -71,25 +73,27 @@ export class Parser extends CstParser {
     });
 
     private expressions = this.RULE(Rules.EXPRESSIONS, () => {
-        this.MANY_SEP({
-            SEP: NewLine,
-            DEF: () => {
-                this.SUBRULE(this.expression);
-            }
+        this.MANY(() => {
+            this.OR([{ ALT: () => this.SUBRULE(this.expression) }, { ALT: () => this.CONSUME(NewLine) }]);
         });
     });
 
     private callBrackets = this.RULE(Rules.CALL_BRACKETS, () => {
-        this.OPTION(() => {
-            this.CONSUME(OpenRoundBracket);
-            this.MANY_SEP({
-                SEP: Comma,
-                DEF: () => this.SUBRULE(this.expression)
-            });
-            this.CONSUME(CloseRoundBracket);
-        });
+        this.OR([
+            {
+                ALT: () => {
+                    this.CONSUME(OpenRoundBracket);
+                    this.MANY_SEP({
+                        SEP: Comma,
+                        DEF: () => this.SUBRULE(this.expression)
+                    });
+                    this.CONSUME(CloseRoundBracket);
+                }
+            },
+            { ALT: () => this.SUBRULE1(this.function) }
+        ]);
         this.MANY(() => {
-            this.SUBRULE(this.function);
+            this.SUBRULE2(this.function);
         });
     });
 
@@ -102,7 +106,7 @@ export class Parser extends CstParser {
                     this.OR2([
                         { ALT: () => this.SUBRULE(this.literal) },
                         { ALT: () => this.SUBRULE(this.function) },
-                        { ALT: () => this.SUBRULE(this.bracketExpression) },
+                        { ALT: () => this.SUBRULE(this.bracketExpression) }
                     ])
             }
         ]);

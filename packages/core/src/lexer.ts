@@ -86,8 +86,7 @@ export const Equal = createToken({
 
 export const Identifier = createToken({
     name: "Identifier",
-    pattern:
-        /(([!#%&'*+\-\/:;<=>?@\\^`|~]|([_$](?![_$]*[a-z0-9])))+)|([a-z_$][a-z0-9_$]*)/i
+    pattern: /(([!#%&'*+\-\/:;<=>?@\\^`|~]|([_$](?![_$]*[a-z0-9])))+)|([a-z_$][a-z0-9_$]*)/i
 });
 
 export const String = createToken({

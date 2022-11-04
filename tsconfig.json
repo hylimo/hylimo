@@ -12,7 +12,7 @@
         "noImplicitThis": true,
         "noImplicitReturns": true,
         "noImplicitOverride": true,
-        "noUnusedLocals": true,
+        "noUnusedLocals": false,
         "strictNullChecks": true,
         "experimentalDecorators": true,
         "emitDecoratorMetadata": true,
