@@ -21,7 +21,6 @@ export enum Rules {
     DECORATOR_ENTRY = "decoratorEntry",
     FUNCTION = "function",
     EXPRESSIONS = "expressions",
-    CALLABLE_EXPRESSION = "callableExpression",
     CALL_EXPRESSION = "callExpression",
     CALL_BRACKETS = "callBrackets",
     BRACKET_EXPRESSION = "bracketExpression",
@@ -31,7 +30,6 @@ export enum Rules {
 }
 
 export class Parser extends CstParser {
-
     private readonly lexer = new Lexer(lexerDefinition);
 
     constructor() {
@@ -42,10 +40,7 @@ export class Parser extends CstParser {
     }
 
     private literal = this.RULE(Rules.LITERAL, () => {
-        this.OR([
-            { ALT: () => this.CONSUME(String) },
-            { ALT: () => this.CONSUME(Number) }
-        ]);
+        this.OR([{ ALT: () => this.CONSUME(String) }, { ALT: () => this.CONSUME(Number) }]);
     });
 
     private decorator = this.RULE(Rules.DECORATOR, () => {
@@ -84,16 +79,6 @@ export class Parser extends CstParser {
         });
     });
 
-    private callableExpression = this.RULE(Rules.CALLABLE_EXPRESSION, () => {
-        this.OR([
-            { ALT: () => this.SUBRULE(this.literal) },
-            { ALT: () => this.CONSUME(Identifier) },
-            { ALT: () => this.SUBRULE(this.function) },
-            { ALT: () => this.SUBRULE(this.bracketExpression) },
-            { ALT: () => this.SUBRULE(this.fieldAccessExpression) }
-        ]);
-    });
-
     private callBrackets = this.RULE(Rules.CALL_BRACKETS, () => {
         this.OPTION(() => {
             this.CONSUME(OpenRoundBracket);
@@ -108,12 +93,23 @@ export class Parser extends CstParser {
         });
     });
 
-    private callExpression = this.RULE(Rules.CALL_EXPRESSION, () => {
-        this.SUBRULE(this.callableExpression);
+    private callExpression = this.RULE(Rules.CALL_EXPRESSION, ((onlyIdentifier: boolean) => {
+        this.OR1([
+            { ALT: () => this.CONSUME(Identifier) },
+            {
+                GATE: () => !onlyIdentifier,
+                ALT: () =>
+                    this.OR2([
+                        { ALT: () => this.SUBRULE(this.literal) },
+                        { ALT: () => this.SUBRULE(this.function) },
+                        { ALT: () => this.SUBRULE(this.bracketExpression) },
+                    ])
+            }
+        ]);
         this.MANY(() => {
             this.SUBRULE(this.callBrackets);
         });
-    });
+    }) as any);
 
     private bracketExpression = this.RULE(Rules.BRACKET_EXPRESSION, () => {
         this.CONSUME(OpenRoundBracket);
@@ -122,10 +118,10 @@ export class Parser extends CstParser {
     });
 
     private fieldAccessExpression = this.RULE(Rules.FIELD_ACCESS_EXPRESSION, () => {
-        this.SUBRULE(this.callExpression);
-        this.OPTION(() => {
+        this.SUBRULE1(this.callExpression, { ARGS: [false] });
+        this.MANY(() => {
             this.CONSUME(Dot);
-            this.CONSUME(Identifier);
+            this.SUBRULE2(this.callExpression, { ARGS: [true] });
         });
     });
 
