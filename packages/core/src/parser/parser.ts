@@ -1,4 +1,4 @@
-import { CstParser, Lexer } from "chevrotain";
+import { CstNode, CstParser, ILexingError, IRecognitionException, Lexer } from "chevrotain";
 import {
     CloseCurlyBracket,
     CloseRoundBracket,
@@ -27,10 +27,29 @@ export enum Rules {
     EXPRESSIONS = "expressions",
     CALL_EXPRESSION = "callExpression",
     CALL_BRACKETS = "callBrackets",
+    CALL_ARGUMENT = "callArgument",
     BRACKET_EXPRESSION = "bracketExpression",
     FIELD_ACCESS_EXPRESSION = "fieldAccessExpression",
     OPERATOR_EXPRESSION = "operatorExpression",
     EXPRESSION = "expression"
+}
+
+/**
+ * Cst result of the parser
+ */
+interface CstResult {
+    /**
+     * Errors during lexing
+     */
+    lexingErrors: ILexingError[];
+    /**
+     * Errors during parsing
+     */
+    parserErrors: IRecognitionException[];
+    /**
+     * Resulting CST
+     */
+    cst?: CstNode;
 }
 
 /**
@@ -99,11 +118,30 @@ export class Parser extends CstParser {
      * Rule for multiple expressions separated by newlines
      */
     private expressions = this.RULE(Rules.EXPRESSIONS, () => {
-        this.MANY1(() => this.CONSUME1(NewLine));
-        this.MANY2(() => {
-            this.SUBRULE(this.expression);
-            this.AT_LEAST_ONE(() => this.CONSUME2(NewLine));
+        this.MANY1(() => {
+            this.CONSUME1(NewLine)
+        })
+        this.OPTION1(() => {
+            this.SUBRULE1(this.expression)
+            this.MANY2(() => {
+                this.AT_LEAST_ONE(() => {
+                    this.CONSUME2(NewLine)
+                })
+                this.OPTION2(() => this.SUBRULE2(this.expression))
+            })
+        })
+    });
+
+    /**
+     * Argument of a function invocation
+     * An (optionally named) operator expression (no assignment)
+     */
+    private callArgument = this.RULE(Rules.CALL_ARGUMENT, () => {
+        this.OPTION(() => {
+            this.CONSUME(Identifier);
+            this.CONSUME(Equal);
         });
+        this.SUBRULE(this.operatorExpression);
     });
 
     /**
@@ -119,7 +157,7 @@ export class Parser extends CstParser {
                     this.CONSUME(OpenRoundBracket);
                     this.MANY_SEP({
                         SEP: Comma,
-                        DEF: () => this.SUBRULE(this.expression)
+                        DEF: () => this.SUBRULE(this.callArgument)
                     });
                     this.CONSUME(CloseRoundBracket);
                 }
@@ -169,9 +207,11 @@ export class Parser extends CstParser {
      */
     private fieldAccessExpression = this.RULE(Rules.FIELD_ACCESS_EXPRESSION, () => {
         this.SUBRULE1(this.callExpression, { ARGS: [false] });
-        this.MANY(() => {
-            this.CONSUME(Dot);
-            this.SUBRULE2(this.callExpression, { ARGS: [true] });
+        this.MANY({
+            DEF: () => {
+                this.CONSUME(Dot);
+                this.SUBRULE2(this.callExpression, { ARGS: [true] });
+            }
         });
     });
 
@@ -192,30 +232,37 @@ export class Parser extends CstParser {
 
     /**
      * Expression, consisting of an operator expression and an assignment target
-     *
-     * @param allowComplexAssignmentTarget if false, the assignment target must be an identifier
      */
     private expression = this.RULE(Rules.EXPRESSION, () => {
-        this.OPTION1(() => {
-            this.OPTION2(() => {
-                this.SUBRULE(this.fieldAccessExpression);
-                this.CONSUME(Dot);
-            });
-            this.CONSUME(Identifier);
-            this.CONSUME(Equal);
+        const leftSide = this.SUBRULE1(this.operatorExpression);
+        this.OPTION({
+            GATE: () => this.LA(0).tokenType == Identifier && leftSide.children.fieldAccessExpression.length == 1,
+            DEF: () => {
+                this.CONSUME2(Equal);
+                this.SUBRULE3(this.operatorExpression);
+            }
         });
-        this.SUBRULE(this.operatorExpression);
     });
 
     /**
      * Parses a text to a CST
      * @param text the text to parse
-     * @returns the generated CST
+     * @returns the generated CST and possible errors
      */
-    public parse(text: string) {
+    public parse(text: string): CstResult {
         const lexerResult = this.lexer.tokenize(text);
+        if (lexerResult.errors.length > 0) {
+            return {
+                lexingErrors: lexerResult.errors,
+                parserErrors: []
+            };
+        }
         this.input = lexerResult.tokens;
         const result = this.expressions();
-        return result;
+        return {
+            lexingErrors: [],
+            parserErrors: this.errors,
+            cst: result
+        };
     }
 }

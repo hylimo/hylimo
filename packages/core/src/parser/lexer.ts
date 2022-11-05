@@ -100,7 +100,7 @@ export const CloseSquareBracket = createToken({
  * Dot token
  */
 export const Dot = createToken({
-    name: "CloseSquareBracket",
+    name: "Dot",
     pattern: /\./
 });
 
@@ -155,7 +155,7 @@ export const Equal = createToken({
  */
 export const String = createToken({
     name: "String",
-    pattern: /"((\\[\\"nt])|([a-zA-Z0-9!#$%&'()*+,\-.\/:;<=>?@[\]^_`{|}~]))*"/
+    pattern: /"((\\[\\"nt])|([a-zA-Z0-9!#$%&'()*+,\-.\/:;<=>?@[\]^_`{|}~ ]))*"/
 });
 
 /**
