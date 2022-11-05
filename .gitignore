@@ -1,2 +1,4 @@
 node_modules/
 **/lib/
+# debug files
+**/test.ts

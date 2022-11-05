@@ -16,6 +16,9 @@ import {
     String
 } from "./lexer";
 
+/**
+ * All existing grammar rules
+ */
 export enum Rules {
     LITERAL = "literal",
     DECORATOR = "decorator",
@@ -30,7 +33,13 @@ export enum Rules {
     EXPRESSION = "expression"
 }
 
+/**
+ * Parser used to generate a CST or AST
+ */
 export class Parser extends CstParser {
+    /**
+     * Lexer used to split text into tokens
+     */
     private readonly lexer = new Lexer(lexerDefinition);
 
     constructor() {
@@ -40,10 +49,17 @@ export class Parser extends CstParser {
         this.performSelfAnalysis();
     }
 
+    /**
+     * Literal rule, matches String and Number Tokens
+     */
     private literal = this.RULE(Rules.LITERAL, () => {
         this.OR([{ ALT: () => this.CONSUME(String) }, { ALT: () => this.CONSUME(Number) }]);
     });
 
+    /**
+     * Decorator which can be applied to functions
+     * Consists of square brackets with decorator entries inside
+     */
     private decorator = this.RULE(Rules.DECORATOR, () => {
         this.CONSUME(OpenSquareBracket);
         this.MANY_SEP({
@@ -55,6 +71,10 @@ export class Parser extends CstParser {
         this.CONSUME(CloseSquareBracket);
     });
 
+    /**
+     * Decorator entry rule, either an identifier or an identifier
+     * followed by a string assignment
+     */
     private decoratorEntry = this.RULE(Rules.DECORATOR_ENTRY, () => {
         this.CONSUME(Identifier);
         this.OPTION(() => {
@@ -63,6 +83,9 @@ export class Parser extends CstParser {
         });
     });
 
+    /**
+     * Function consisting of curly brackets with expressions inside
+     */
     private function = this.RULE(Rules.FUNCTION, () => {
         this.OPTION(() => {
             this.SUBRULE(this.decorator);
@@ -72,12 +95,23 @@ export class Parser extends CstParser {
         this.CONSUME(CloseCurlyBracket);
     });
 
+    /**
+     * Rule for multiple expressions separated by newlines
+     */
     private expressions = this.RULE(Rules.EXPRESSIONS, () => {
-        this.MANY(() => {
-            this.OR([{ ALT: () => this.SUBRULE(this.expression) }, { ALT: () => this.CONSUME(NewLine) }]);
+        this.MANY1(() => this.CONSUME1(NewLine));
+        this.MANY2(() => {
+            this.SUBRULE(this.expression);
+            this.AT_LEAST_ONE(() => this.CONSUME2(NewLine));
         });
     });
 
+    /**
+     * Rule for function invocation brackets
+     * Consists of optional round brackets with comma separated expressions inside,
+     * followed by any amount of functions (which are treated like additional parameters).
+     * Caution: at least one function or the round brackets block must be present to match.
+     */
     private callBrackets = this.RULE(Rules.CALL_BRACKETS, () => {
         this.OR([
             {
@@ -97,6 +131,12 @@ export class Parser extends CstParser {
         });
     });
 
+    /**
+     * Call expression, consisting of a expression in brackets, literal, function or identifier
+     * followed by any amount of call brackets.
+     *
+     * @param onlyIdentifier if true, only an identifier is match for the first part
+     */
     private callExpression = this.RULE(Rules.CALL_EXPRESSION, ((onlyIdentifier: boolean) => {
         this.OR1([
             { ALT: () => this.CONSUME(Identifier) },
@@ -115,12 +155,18 @@ export class Parser extends CstParser {
         });
     }) as any);
 
+    /**
+     * Bracket expression consisting of round brackets with an expression inside
+     */
     private bracketExpression = this.RULE(Rules.BRACKET_EXPRESSION, () => {
         this.CONSUME(OpenRoundBracket);
         this.SUBRULE(this.expression);
         this.CONSUME(CloseRoundBracket);
     });
 
+    /**
+     * Any amount of call expressions separated by dots
+     */
     private fieldAccessExpression = this.RULE(Rules.FIELD_ACCESS_EXPRESSION, () => {
         this.SUBRULE1(this.callExpression, { ARGS: [false] });
         this.MANY(() => {
@@ -129,6 +175,10 @@ export class Parser extends CstParser {
         });
     });
 
+    /**
+     * Any amount of field access expressins separated by infix functions, which
+     * consist of any amount of identifiers separated by dots.
+     */
     private operatorExpression = this.RULE(Rules.OPERATOR_EXPRESSION, () => {
         this.SUBRULE1(this.fieldAccessExpression);
         this.MANY(() => {
@@ -140,10 +190,15 @@ export class Parser extends CstParser {
         });
     });
 
+    /**
+     * Expression, consisting of an operator expression and an assignment target
+     *
+     * @param allowComplexAssignmentTarget if false, the assignment target must be an identifier
+     */
     private expression = this.RULE(Rules.EXPRESSION, () => {
         this.OPTION1(() => {
             this.OPTION2(() => {
-                this.SUBRULE(this.callExpression);
+                this.SUBRULE(this.fieldAccessExpression);
                 this.CONSUME(Dot);
             });
             this.CONSUME(Identifier);
@@ -152,6 +207,11 @@ export class Parser extends CstParser {
         this.SUBRULE(this.operatorExpression);
     });
 
+    /**
+     * Parses a text to a CST
+     * @param text the text to parse
+     * @returns the generated CST
+     */
     public parse(text: string) {
         const lexerResult = this.lexer.tokenize(text);
         this.input = lexerResult.tokens;
