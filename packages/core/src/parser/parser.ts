@@ -119,17 +119,17 @@ export class Parser extends CstParser {
      */
     private expressions = this.RULE(Rules.EXPRESSIONS, () => {
         this.MANY1(() => {
-            this.CONSUME1(NewLine)
-        })
+            this.CONSUME1(NewLine);
+        });
         this.OPTION1(() => {
-            this.SUBRULE1(this.expression)
+            this.SUBRULE1(this.expression);
             this.MANY2(() => {
                 this.AT_LEAST_ONE(() => {
-                    this.CONSUME2(NewLine)
-                })
-                this.OPTION2(() => this.SUBRULE2(this.expression))
-            })
-        })
+                    this.CONSUME2(NewLine);
+                });
+                this.OPTION2(() => this.SUBRULE2(this.expression));
+            });
+        });
     });
 
     /**
@@ -251,16 +251,10 @@ export class Parser extends CstParser {
      */
     public parse(text: string): CstResult {
         const lexerResult = this.lexer.tokenize(text);
-        if (lexerResult.errors.length > 0) {
-            return {
-                lexingErrors: lexerResult.errors,
-                parserErrors: []
-            };
-        }
         this.input = lexerResult.tokens;
         const result = this.expressions();
         return {
-            lexingErrors: [],
+            lexingErrors: lexerResult.errors,
             parserErrors: this.errors,
             cst: result
         };
