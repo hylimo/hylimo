@@ -4,14 +4,12 @@ import { IToken } from "chevrotain";
  * Position of an AST element in the source code
  */
 export interface ASTExpressionPosition {
-    /**
-     * The token where the expression starts (inclusive)
-     */
-    startToken: IToken;
-    /**
-     * The token where the expression ends (inclusive)
-     */
-    endToken: IToken;
+    startOffset: number;
+    startLine: number;
+    startColumn: number;
+    endOffset: number;
+    endLine: number;
+    endColumn: number;
 }
 
 /**
@@ -21,24 +19,9 @@ export abstract class Expression {
     /**
      * Base constructor for all Expressions
      * @param position if defined, where in the source code the expression is
+     * @param type used for serialization and debugging
      */
-    constructor(readonly position?: ASTExpressionPosition) {}
-}
-
-/**
- * Expression consisting of multiple expressions
- * Evaluates to the result of the last expression
- */
-export class BlockExpression extends Expression {
-    /**
-     * Creates a new BlockExpression consisting out of a list of Expressions
-     *
-     * @param expressions subexpressions to be evaluated with this expression
-     * @param position if defined, where in the source code the expression is
-     */
-    constructor(readonly expressions: Expression[], position?: ASTExpressionPosition) {
-        super(position);
-    }
+    constructor(readonly type: string, readonly position?: ASTExpressionPosition) {}
 }
 
 /**
@@ -48,32 +31,63 @@ export class BlockExpression extends Expression {
  */
 export abstract class LiteralExpression<T> extends Expression {
     /**
-     * Creates a new LiteralExpression consisting out of a constant literalof t
+     * Creates a new LiteralExpression consisting out of a constant literal of T
      *
      * @param value the constant literal
      * @param position if defined, where in the source code the expression is
+     * @param type used for serialization and debugging
      */
-    constructor(readonly value: T, position?: ASTExpressionPosition) {
-        super(position);
+    constructor(readonly value: T, type: string, position?: ASTExpressionPosition) {
+        super(type, position);
     }
 }
 
 /**
  * String expression
  */
-export class StringLiteralExpression extends LiteralExpression<string> {}
+export class StringLiteralExpression extends LiteralExpression<string> {
+    /**
+     * Creates a new StringLiteralExpression consisting out of a constant string
+     *
+     * @param value the constant literal
+     * @param position if defined, where in the source code the expression is
+     */
+    constructor(value: string, position?: ASTExpressionPosition) {
+        super(value, "StringLiteralExpression", position);
+    }
+}
 
 /**
  * Number expression
  */
-export class NumberLiteralExpression extends LiteralExpression<number> {}
+export class NumberLiteralExpression extends LiteralExpression<number> {
+    /**
+     * Creates a new NumberLiteralExpression consisting out of a constant number
+     *
+     * @param value the constant literal
+     * @param position if defined, where in the source code the expression is
+     */
+    constructor(value: number, position?: ASTExpressionPosition) {
+        super(value, "NumberLiteralExpression", position);
+    }
+}
 
 /**
  * Expression evaluating to a constant natively defined literal
  *
  * @param T the type of the literal
  */
-export class ConstLiteralExpression<T> extends LiteralExpression<T> {}
+export class ConstLiteralExpression<T> extends LiteralExpression<T> {
+    /**
+     * Creates a new ConstLiteralExpression consisting out of a constant T
+     *
+     * @param value the constant literal
+     * @param position if defined, where in the source code the expression is
+     */
+    constructor(value: T, position?: ASTExpressionPosition) {
+        super(value, "ConstLiteralExpression", position);
+    }
+}
 
 /**
  * Base class for function (normal, native) expressions
@@ -85,9 +99,10 @@ export abstract class AbstractFunctionExpression extends Expression {
      *
      * @param decorator the decorator entries
      * @param position if defined, where in the source code the expression is
+     * @param type used for serialization and debugging
      */
-    constructor(readonly decorator: Map<string, string | undefined>, position?: ASTExpressionPosition) {
-        super(position);
+    constructor(readonly decorator: Map<string, string | undefined>, type: string, position?: ASTExpressionPosition) {
+        super(type, position);
     }
 }
 
@@ -99,16 +114,16 @@ export class FunctionExpression extends AbstractFunctionExpression {
      * Creates a new FunctionExpression consisting of a set of decorator entries and a block
      * which is executed.
      *
-     * @param block the statement executed on function execution
+     * @param expressions the content of the function
      * @param decorator the decorator entries
      * @param position if defined, where in the source code the expression is
      */
     constructor(
-        readonly block: BlockExpression,
+        readonly expressions: Expression[],
         decorator: Map<string, string | undefined>,
         position?: ASTExpressionPosition
     ) {
-        super(decorator, position);
+        super(decorator, "FunctionExpression", position);
     }
 }
 
@@ -127,7 +142,7 @@ export class NativeFunctionExpression extends AbstractFunctionExpression {
      * @param position if defined, where in the source code the expression is
      */
     constructor(callback: any, decorator: Map<string, string | undefined>, position?: ASTExpressionPosition) {
-        super(decorator, position);
+        super(decorator, "NativeFunctionExpression", position);
     }
 }
 
@@ -140,16 +155,16 @@ export class InvocationExpression extends Expression {
      * Creates a new InvocationExpression consisting of an expression of which the result should be invoked,
      * and a set of optionally named expressions as arguments
      *
-     * @param functionExpression evaluated to provide the function to invoke
+     * @param target evaluated to provide the function to invoke
      * @param argumentExpressions evaluated to provide arguments
      * @param position if defined, where in the source code the expression is
      */
     constructor(
-        readonly functionExpression: Expression,
+        readonly target: Expression,
         readonly argumentExpressions: InvocationArgument[],
         position?: ASTExpressionPosition
     ) {
-        super(position);
+        super("InvokationExpression", position);
     }
 }
 
@@ -165,8 +180,8 @@ export class FieldAccessExpression extends Expression {
      * @param field name or index of the field to access
      * @param position if defined, where in the source code the expression is
      */
-    constructor(readonly target: Expression, readonly field: string | number, position?: ASTExpressionPosition) {
-        super(position);
+    constructor(readonly field: string | number, readonly target: Expression, position?: ASTExpressionPosition) {
+        super("FieldAccessExpression", position);
     }
 }
 
@@ -181,7 +196,31 @@ export class IdentifierExpression extends Expression {
      * @param position if defined, where in the source code the expression is
      */
     constructor(readonly identifier: string, position?: ASTExpressionPosition) {
-        super(position);
+        super("IdentifierExpression", position);
+    }
+}
+
+/**
+ * Assignment Expression
+ * Evaluates to the assigned value
+ */
+export class AssignmentExpression extends Expression {
+    /**
+     * Creates a new AssignmentExpression consisting of a value, a field, and an optional target on which the
+     * identifier is accessed.
+     *
+     * @param field name of the assigned field
+     * @param target evaluates to the object where the field is located on, if not present, the scope is used
+     * @param value evaluates to the assigned value
+     * @param position if defined, where in the source code the expression is
+     */
+    constructor(
+        readonly field: string,
+        readonly target: Expression | undefined,
+        readonly value: Expression,
+        position?: ASTExpressionPosition
+    ) {
+        super("AssignmentExpression", position);
     }
 }
 

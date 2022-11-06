@@ -1,4 +1,6 @@
-import { CstNode, CstParser, ILexingError, IRecognitionException, Lexer } from "chevrotain";
+import { CstNode, CstParser, ICstVisitor, ILexingError, IRecognitionException, Lexer } from "chevrotain";
+import { Expression } from "./ast";
+import { generateVisitor } from "./cst-visitor";
 import {
     CloseCurlyBracket,
     CloseRoundBracket,
@@ -26,10 +28,12 @@ export enum Rules {
     FUNCTION = "function",
     EXPRESSIONS = "expressions",
     CALL_EXPRESSION = "callExpression",
+    SIMPLE_CALL_EXPRESSION = "simpleCallExpression",
     CALL_BRACKETS = "callBrackets",
     CALL_ARGUMENT = "callArgument",
     BRACKET_EXPRESSION = "bracketExpression",
     FIELD_ACCESS_EXPRESSION = "fieldAccessExpression",
+    SIMPLE_FIELD_ACCESS_EXPRESSION = "simpleFieldAccessExpression",
     OPERATOR_EXPRESSION = "operatorExpression",
     EXPRESSION = "expression"
 }
@@ -50,6 +54,10 @@ interface CstResult {
      * Resulting CST
      */
     cst?: CstNode;
+    /**
+     * The executable
+     */
+    ast?: Expression[];
 }
 
 /**
@@ -61,11 +69,17 @@ export class Parser extends CstParser {
      */
     private readonly lexer = new Lexer(lexerDefinition);
 
+    /**
+     * Visitor to be used to generate the AST
+     */
+    private readonly visitor: ICstVisitor<never, any>;
+
     constructor() {
         super(lexerDefinition, {
             nodeLocationTracking: "full"
         });
         this.performSelfAnalysis();
+        this.visitor = generateVisitor(this);
     }
 
     /**
@@ -175,23 +189,30 @@ export class Parser extends CstParser {
      *
      * @param onlyIdentifier if true, only an identifier is match for the first part
      */
-    private callExpression = this.RULE(Rules.CALL_EXPRESSION, ((onlyIdentifier: boolean) => {
+    private callExpression = this.RULE(Rules.CALL_EXPRESSION, () => {
         this.OR1([
             { ALT: () => this.CONSUME(Identifier) },
-            {
-                GATE: () => !onlyIdentifier,
-                ALT: () =>
-                    this.OR2([
-                        { ALT: () => this.SUBRULE(this.literal) },
-                        { ALT: () => this.SUBRULE(this.function) },
-                        { ALT: () => this.SUBRULE(this.bracketExpression) }
-                    ])
-            }
+            { ALT: () => this.SUBRULE(this.literal) },
+            { ALT: () => this.SUBRULE(this.function) },
+            { ALT: () => this.SUBRULE(this.bracketExpression) }
         ]);
         this.MANY(() => {
             this.SUBRULE(this.callBrackets);
         });
-    }) as any);
+    });
+
+    /**
+     * Call expression, consisting of a expression in brackets, literal, function or identifier
+     * followed by any amount of call brackets.
+     *
+     * @param onlyIdentifier if true, only an identifier is match for the first part
+     */
+    private simpleCallExpression = this.RULE(Rules.SIMPLE_CALL_EXPRESSION, () => {
+        this.CONSUME(Identifier);
+        this.MANY(() => {
+            this.SUBRULE(this.callBrackets);
+        });
+    });
 
     /**
      * Bracket expression consisting of round brackets with an expression inside
@@ -206,12 +227,22 @@ export class Parser extends CstParser {
      * Any amount of call expressions separated by dots
      */
     private fieldAccessExpression = this.RULE(Rules.FIELD_ACCESS_EXPRESSION, () => {
-        this.SUBRULE1(this.callExpression, { ARGS: [false] });
+        this.SUBRULE1(this.callExpression);
         this.MANY({
             DEF: () => {
                 this.CONSUME(Dot);
-                this.SUBRULE2(this.callExpression, { ARGS: [true] });
+                this.SUBRULE2(this.simpleCallExpression);
             }
+        });
+    });
+
+    /**
+     * Any amount of identifiers separated by dots
+     */
+    private simpleFieldAccessExpression = this.RULE(Rules.SIMPLE_FIELD_ACCESS_EXPRESSION, () => {
+        this.AT_LEAST_ONE_SEP({
+            SEP: Dot,
+            DEF: () => this.CONSUME(Identifier)
         });
     });
 
@@ -222,10 +253,7 @@ export class Parser extends CstParser {
     private operatorExpression = this.RULE(Rules.OPERATOR_EXPRESSION, () => {
         this.SUBRULE1(this.fieldAccessExpression);
         this.MANY(() => {
-            this.AT_LEAST_ONE_SEP({
-                SEP: Dot,
-                DEF: () => this.CONSUME(Identifier)
-            });
+            this.SUBRULE(this.simpleFieldAccessExpression);
             this.SUBRULE2(this.fieldAccessExpression);
         });
     });
@@ -239,10 +267,14 @@ export class Parser extends CstParser {
             GATE: () => this.LA(0).tokenType == Identifier && leftSide.children.fieldAccessExpression.length == 1,
             DEF: () => {
                 this.CONSUME2(Equal);
-                this.SUBRULE3(this.operatorExpression);
+                this.SUBRULE2(this.operatorExpression);
             }
         });
     });
+
+    private generateAST(cst: CstNode): Expression[] {
+        return this.visitor.visit(cst) as Expression[];
+    }
 
     /**
      * Parses a text to a CST
@@ -253,10 +285,15 @@ export class Parser extends CstParser {
         const lexerResult = this.lexer.tokenize(text);
         this.input = lexerResult.tokens;
         const result = this.expressions();
+        let ast = undefined;
+        if (result) {
+            ast = this.generateAST(result);
+        }
         return {
             lexingErrors: lexerResult.errors,
             parserErrors: this.errors,
-            cst: result
+            cst: result,
+            ast: ast
         };
     }
 }
