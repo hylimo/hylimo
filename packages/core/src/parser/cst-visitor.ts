@@ -62,10 +62,10 @@ export function generateVisitor(parser: Parser): ICstVisitor<never, any> {
         private literal(ctx: any): LiteralExpression<any> {
             if (ctx.String) {
                 const token = ctx.String[0];
-                return new StringLiteralExpression(parseString(token), token);
+                return new StringLiteralExpression(parseString(token.image), token);
             } else {
                 const token = ctx.Number[0];
-                return new NumberLiteralExpression(parseNumber(token), token);
+                return new NumberLiteralExpression(parseNumber(token.image), token);
             }
         }
 
@@ -344,8 +344,31 @@ export function generateVisitor(parser: Parser): ICstVisitor<never, any> {
  * @returns the parsed string
  */
 function parseString(value: string): string {
-    // TODO
-    return value;
+    let res = "";
+    for (let i = 1; i < value.length - 1; i++) {
+        const char = value[i];
+        if (char == "\\") {
+            i++;
+            const newChar = value[i];
+            switch (newChar) {
+                case "n":
+                    res += "\n";
+                    break;
+                case "\\":
+                    res += "\\";
+                    break;
+                case "t":
+                    res += "\t";
+                    break;
+                case '"':
+                    res += '"';
+                    break;
+            }
+        } else {
+            res += char;
+        }
+    }
+    return res;
 }
 
 /**
