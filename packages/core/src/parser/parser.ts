@@ -1,6 +1,6 @@
 import { CstNode, CstParser, ICstVisitor, ILexingError, IRecognitionException, Lexer } from "chevrotain";
 import { Expression } from "./ast";
-import { generateVisitor } from "./cst-visitor";
+import { generateVisitor } from "./cstVsitor";
 import {
     CloseCurlyBracket,
     CloseRoundBracket,
