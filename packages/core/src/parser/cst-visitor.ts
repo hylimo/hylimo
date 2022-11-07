@@ -1,4 +1,4 @@
-import { CstNode, ICstVisitor, IToken, tokenLabel } from "chevrotain";
+import { CstNode, ICstVisitor, IToken } from "chevrotain";
 import {
     AssignmentExpression,
     ASTExpressionPosition,
@@ -324,7 +324,7 @@ export function generateVisitor(parser: Parser): ICstVisitor<never, any> {
                 if (target instanceof IdentifierExpression) {
                     return new AssignmentExpression(target.identifier, undefined, value, position);
                 } else if (target instanceof FieldAccessExpression) {
-                    return new AssignmentExpression(target.field as string, target.target, value, position);
+                    return new AssignmentExpression(target.name as string, target.target, value, position);
                 } else {
                     throw Error("invalid assignment target");
                 }

@@ -272,6 +272,12 @@ export class Parser extends CstParser {
         });
     });
 
+    /**
+     * Generates the AST based on a CST
+     *
+     * @param cst the top level cst node (should always be of type Expressions)
+     * @returns the generated AST
+     */
     private generateAST(cst: CstNode): Expression[] {
         return this.visitor.visit(cst) as Expression[];
     }

@@ -13,7 +13,8 @@ export interface ASTExpressionPosition {
 }
 
 /**
- * Base class for all AST elements
+ * Base class for all AST elements.
+ * Subclasses must be treated as immutable.
  */
 export abstract class Expression {
     /**
@@ -22,6 +23,40 @@ export abstract class Expression {
      * @param type used for serialization and debugging
      */
     constructor(readonly type: string, readonly position?: ASTExpressionPosition) {}
+
+    /**
+     * Helper function to create a FieldAccessExpression without a position
+     * and this as the taget
+     *
+     * @param name the name of the field
+     * @returns the created FieldAccessExpression
+     */
+    field(name: string): FieldAccessExpression {
+        return new FieldAccessExpression(name, this);
+    }
+
+    /**
+     * Helper function to create an InvocationExpression without a position
+     * and this as the target
+     *
+     * @param args arguments passt to the function
+     * @returns the created InvocationExpression
+     */
+    call(args: InvocationArgument[]): InvocationExpression {
+        return new InvocationExpression(this, args);
+    }
+
+    /**
+     * Helper function to create an AssignmentExpression which assigns
+     * a field on this as the target
+     *
+     * @param field the name of the field
+     * @param value the new value of the field
+     * @returns the created AssignmentExpression
+     */
+    assignField(field: string, value: Expression): AssignmentExpression {
+        return new AssignmentExpression(field, this, value);
+    }
 }
 
 /**
@@ -177,10 +212,10 @@ export class FieldAccessExpression extends Expression {
      * Creates a new IdentifierExpression consisting of a target and a field to access
      *
      * @param target evaluated to provide the target of the field access
-     * @param field name or index of the field to access
+     * @param name name or index of the field to access
      * @param position if defined, where in the source code the expression is
      */
-    constructor(readonly field: string | number, readonly target: Expression, position?: ASTExpressionPosition) {
+    constructor(readonly name: string | number, readonly target: Expression, position?: ASTExpressionPosition) {
         super("FieldAccessExpression", position);
     }
 }
@@ -209,13 +244,13 @@ export class AssignmentExpression extends Expression {
      * Creates a new AssignmentExpression consisting of a value, a field, and an optional target on which the
      * identifier is accessed.
      *
-     * @param field name of the assigned field
+     * @param name name of the assigned field
      * @param target evaluates to the object where the field is located on, if not present, the scope is used
      * @param value evaluates to the assigned value
      * @param position if defined, where in the source code the expression is
      */
     constructor(
-        readonly field: string,
+        readonly name: string,
         readonly target: Expression | undefined,
         readonly value: Expression,
         position?: ASTExpressionPosition
