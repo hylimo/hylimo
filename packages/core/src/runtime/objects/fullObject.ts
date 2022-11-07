@@ -8,6 +8,18 @@ import { BaseObject, FieldEntry, SemanticFieldNames } from "./baseObject";
 export class FullObject extends BaseObject {
     readonly fields: Map<string | number, FieldEntry> = new Map();
 
+    /**
+     * Creates a new FullObject with the correct proto from the context
+     *
+     * @param context used to access the prototype
+     * @returns the created empty FullObject
+     */
+    static create(context: InterpreterContext): FullObject {
+        const instance = new FullObject();
+        instance.setField(SemanticFieldNames.PROTO, { value: context.objectPrototype }, context);
+        return instance;
+    }
+
     override getField(key: string | number, context: InterpreterContext): FieldEntry {
         this.checkValidKey(key);
         return this.getFieldInternal(key, context);

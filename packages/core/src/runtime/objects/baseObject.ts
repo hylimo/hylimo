@@ -32,8 +32,9 @@ export abstract class BaseObject {
      * Throws an error by default, should be overwritten if call is supported
      *
      * @param args Table containing all parameters
+     * @param context context in which this is performed
      */
-    invoke(args: FullObject): BaseObject {
+    invoke(args: FullObject, context: InterpreterContext): BaseObject {
         throw new RuntimeError("Invoke not supported");
     }
 }

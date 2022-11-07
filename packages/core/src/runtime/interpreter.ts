@@ -6,27 +6,44 @@ import { Null } from "./objects/null";
  */
 export interface InterpreterContext {
     /**
-     * Prototype for number objects
+     * Singleton considered "null"
      */
-    numberPrototype: FullObject;
-    /**
-     * Prototype for string objects
-     */
-    stringPrototype: FullObject;
+    readonly null: Null;
     /**
      * Prototype for all created table objects
      */
-    objectPrototype: FullObject;
+    readonly objectPrototype: FullObject;
+    /**
+     * Prototype for number objects
+     */
+    readonly numberPrototype: FullObject;
+    /**
+     * Prototype for string objects
+     */
+    readonly stringPrototype: FullObject;
     /**
      * Prototype for all created DSL functions
      */
-    functionPrototype: FullObject;
+    readonly functionPrototype: FullObject;
     /**
      * Prototype for all native js functions
      */
-    nativeFunctionPrototype: FullObject;
+    readonly nativeFunctionPrototype: FullObject;
     /**
-     * Singleton considered "null"
+     * The maximum amount of execution steps.
+     * currentExecutionSteps should never exceed this number.
      */
-    null: Null;
+    readonly maxExecutionSteps: number;
+    /**
+     * The current amount of execution steps.
+     * Should never get larger than maxExecutionSteps.
+     * Each action which can lead to infinite loops should (e.g. jumps) should increase this counter
+     */
+    currentExecutionSteps: number;
+    /**
+     * Current execution scope.
+     * Code modifying this is responsible for recreating the correct scope afterwards.
+     * No automatic management is performed.
+     */
+    currentScope: FullObject;
 }

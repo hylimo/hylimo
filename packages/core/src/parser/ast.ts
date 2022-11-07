@@ -1,4 +1,10 @@
 import { IToken } from "chevrotain";
+import { InterpreterContext } from "../runtime/interpreter";
+import { BaseObject, FieldEntry } from "../runtime/objects/baseObject";
+import { FullObject } from "../runtime/objects/fullObject";
+import { Function, NativeFunction } from "../runtime/objects/function";
+import { Number } from "../runtime/objects/number";
+import { String } from "../runtime/objects/string";
 
 /**
  * Position of an AST element in the source code
@@ -23,6 +29,28 @@ export abstract class Expression {
      * @param type used for serialization and debugging
      */
     constructor(readonly type: string, readonly position?: ASTExpressionPosition) {}
+
+    /**
+     * Evaluates this expression
+     *
+     * @param context context in which this is performed
+     */
+    abstract evaluate(context: InterpreterContext): BaseObject;
+
+    /**
+     * Evaluates this expression, also provides the source of the result.
+     * This default implementation returns itself as the source.
+     * Should be overwritten if other semantics are wanted (e.g. for field access).
+     *
+     * @param context context in which this is performed
+     * @returns the evaluation result
+     */
+    evaluateWithSource(context: InterpreterContext): FieldEntry {
+        return {
+            value: this.evaluate(context),
+            source: this
+        };
+    }
 
     /**
      * Helper function to create a FieldAccessExpression without a position
@@ -90,6 +118,10 @@ export class StringLiteralExpression extends LiteralExpression<string> {
     constructor(value: string, position?: ASTExpressionPosition) {
         super(value, "StringLiteralExpression", position);
     }
+
+    override evaluate(context: InterpreterContext): BaseObject {
+        return new String(this.value, context.stringPrototype);
+    }
 }
 
 /**
@@ -105,6 +137,10 @@ export class NumberLiteralExpression extends LiteralExpression<number> {
     constructor(value: number, position?: ASTExpressionPosition) {
         super(value, "NumberLiteralExpression", position);
     }
+
+    override evaluate(context: InterpreterContext): BaseObject {
+        return new Number(this.value, context.numberPrototype);
+    }
 }
 
 /**
@@ -112,7 +148,7 @@ export class NumberLiteralExpression extends LiteralExpression<number> {
  *
  * @param T the type of the literal
  */
-export class ConstLiteralExpression<T> extends LiteralExpression<T> {
+export class ConstLiteralExpression<T extends BaseObject> extends LiteralExpression<T> {
     /**
      * Creates a new ConstLiteralExpression consisting out of a constant T
      *
@@ -121,6 +157,10 @@ export class ConstLiteralExpression<T> extends LiteralExpression<T> {
      */
     constructor(value: T, position?: ASTExpressionPosition) {
         super(value, "ConstLiteralExpression", position);
+    }
+
+    override evaluate(context: InterpreterContext): BaseObject {
+        return this.value;
     }
 }
 
@@ -160,7 +200,13 @@ export class FunctionExpression extends AbstractFunctionExpression {
     ) {
         super(decorator, "FunctionExpression", position);
     }
+
+    override evaluate(context: InterpreterContext): BaseObject {
+        return new Function(this, context.currentScope, context.functionPrototype);
+    }
 }
+
+export type NativeFunctionType = (args: FullObject, context: InterpreterContext) => BaseObject;
 
 /**
  * Native (JS) function expression
@@ -176,8 +222,16 @@ export class NativeFunctionExpression extends AbstractFunctionExpression {
      * @param decorator the decorator entries
      * @param position if defined, where in the source code the expression is
      */
-    constructor(callback: any, decorator: Map<string, string | undefined>, position?: ASTExpressionPosition) {
+    constructor(
+        readonly callback: NativeFunctionType,
+        decorator: Map<string, string | undefined>,
+        position?: ASTExpressionPosition
+    ) {
         super(decorator, "NativeFunctionExpression", position);
+    }
+
+    override evaluate(context: InterpreterContext): BaseObject {
+        return new NativeFunction(this, context.nativeFunctionPrototype);
     }
 }
 
@@ -201,6 +255,17 @@ export class InvocationExpression extends Expression {
     ) {
         super("InvokationExpression", position);
     }
+
+    override evaluate(context: InterpreterContext): BaseObject {
+        const targetValue = this.target.evaluate(context);
+        const args = FullObject.create(context);
+        let indexCounter = 0;
+        for (const argumentExpression of this.argumentExpressions) {
+            const value = argumentExpression.value.evaluateWithSource(context);
+            args.setField(argumentExpression.name ?? indexCounter++, value, context);
+        }
+        return targetValue.invoke(args, context);
+    }
 }
 
 /**
@@ -218,6 +283,15 @@ export class FieldAccessExpression extends Expression {
     constructor(readonly name: string | number, readonly target: Expression, position?: ASTExpressionPosition) {
         super("FieldAccessExpression", position);
     }
+
+    override evaluate(context: InterpreterContext): BaseObject {
+        return this.evaluateWithSource(context).value;
+    }
+
+    override evaluateWithSource(context: InterpreterContext): FieldEntry {
+        const targetValue = this.target.evaluate(context);
+        return targetValue.getField(this.name, context);
+    }
 }
 
 /**
@@ -232,6 +306,14 @@ export class IdentifierExpression extends Expression {
      */
     constructor(readonly identifier: string, position?: ASTExpressionPosition) {
         super("IdentifierExpression", position);
+    }
+
+    override evaluate(context: InterpreterContext): BaseObject {
+        return this.evaluateWithSource(context).value;
+    }
+
+    override evaluateWithSource(context: InterpreterContext): FieldEntry {
+        return context.currentScope.getField(this.identifier, context);
     }
 }
 
@@ -256,6 +338,28 @@ export class AssignmentExpression extends Expression {
         position?: ASTExpressionPosition
     ) {
         super("AssignmentExpression", position);
+    }
+
+    override evaluate(context: InterpreterContext): BaseObject {
+        return this.evaluateWithSource(context).value;
+    }
+
+    override evaluateWithSource(context: InterpreterContext): FieldEntry {
+        let targetValue: BaseObject;
+        if (this.target) {
+            targetValue = this.target.evaluate(context);
+        } else {
+            targetValue = context.currentScope;
+        }
+        let valueValue = this.value.evaluateWithSource(context);
+        if (!valueValue.source) {
+            valueValue = {
+                value: valueValue.value,
+                source: this
+            };
+        }
+        targetValue.setField(this.name, valueValue, context);
+        return valueValue;
     }
 }
 

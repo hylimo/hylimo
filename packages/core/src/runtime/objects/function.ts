@@ -1,5 +1,6 @@
 import { FunctionExpression, NativeFunctionExpression } from "../../parser/ast";
-import { SimpleObject } from "./baseObject";
+import { InterpreterContext } from "../interpreter";
+import { BaseObject, SemanticFieldNames, SimpleObject } from "./baseObject";
 import { FullObject } from "./fullObject";
 
 /**
@@ -21,6 +22,20 @@ export class Function extends AbstractFunction {
     constructor(readonly definition: FunctionExpression, readonly parentScope: FullObject, proto: FullObject) {
         super(proto);
     }
+
+    override invoke(args: FullObject, context: InterpreterContext): BaseObject {
+        const oldScope = context.currentScope;
+        const newScope = new FullObject();
+        newScope.setField(SemanticFieldNames.PROTO, { value: this.parentScope }, context);
+        newScope.setField(SemanticFieldNames.THIS, { value: newScope }, context);
+        context.currentScope = newScope;
+        let lastValue: BaseObject = context.null;
+        for (const expression of this.definition.expressions) {
+            lastValue = expression.evaluate(context);
+        }
+        context.currentScope = oldScope;
+        return lastValue;
+    }
 }
 
 /**
@@ -35,5 +50,9 @@ export class NativeFunction extends AbstractFunction {
      */
     constructor(readonly definition: NativeFunctionExpression, proto: FullObject) {
         super(proto);
+    }
+
+    override invoke(args: FullObject, context: InterpreterContext): BaseObject {
+        return this.definition.callback(args, context);
     }
 }

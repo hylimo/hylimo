@@ -4,6 +4,8 @@ import {
     FunctionExpression,
     IdentifierExpression,
     InvocationArgument,
+    NativeFunctionExpression,
+    NativeFunctionType,
     NumberLiteralExpression,
     StringLiteralExpression
 } from "./ast";
@@ -77,6 +79,20 @@ export function namedArg(name: string, value: Expression): InvocationArgument {
 }
 
 /**
+ * Parsdes a set of decorators provided as object
+ *
+ * @param decorators the decorators before parsing
+ * @returns the parsed decorators
+ */
+function parseDecorators(decorators: { [index: string]: string | null }): Map<string, string | undefined> {
+    const parsedDecorators = new Map<string, string | undefined>();
+    for (const [name, value] of Object.entries(decorators)) {
+        parsedDecorators.set(name, value ?? undefined);
+    }
+    return parsedDecorators;
+}
+
+/**
  * Helper to create a FunctionExpression
  *
  * @param expressions body of the function
@@ -84,9 +100,19 @@ export function namedArg(name: string, value: Expression): InvocationArgument {
  * @returns the created FunctionExpression
  */
 export function fun(expressions: Expression[], decorators: { [index: string]: string | null }): FunctionExpression {
-    const parsedDecorators = new Map<string, string | undefined>();
-    for (const [name, value] of Object.entries(decorators)) {
-        parsedDecorators.set(name, value ?? undefined);
-    }
-    return new FunctionExpression(expressions, parsedDecorators);
+    return new FunctionExpression(expressions, parseDecorators(decorators));
+}
+
+/**
+ * Helper to create a NativeFunctionExpression
+ *
+ * @param callback executed to get the result of the function
+ * @param decorators decorators applied to the function
+ * @returns the created FunctionExpression
+ */
+export function native(
+    callback: NativeFunctionType,
+    decorators: { [index: string]: string | null }
+): NativeFunctionExpression {
+    return new NativeFunctionExpression(callback, parseDecorators(decorators));
 }
