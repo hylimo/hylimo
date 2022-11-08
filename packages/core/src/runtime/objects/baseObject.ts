@@ -1,6 +1,7 @@
-import { ASTExpressionPosition, Expression } from "../../parser/ast";
+import { Expression } from "../../parser/ast";
 import { InterpreterContext } from "../interpreter";
 import { RuntimeError } from "../runtimeError";
+import { SemanticFieldNames } from "../semanticFieldNames";
 import { FullObject } from "./fullObject";
 
 /**
@@ -78,18 +79,4 @@ export interface FieldEntry {
      *
      */
     source?: Expression;
-}
-
-/**
- * Well known field names which (usually) have a semantic meaning
- */
-export enum SemanticFieldNames {
-    /**
-     * Prototype, should always be a table
-     */
-    PROTO = "proto",
-    /**
-     * Current scope
-     */
-    THIS = "this"
 }

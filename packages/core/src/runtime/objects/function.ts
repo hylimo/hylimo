@@ -1,6 +1,7 @@
 import { FunctionExpression, NativeFunctionExpression } from "../../parser/ast";
 import { InterpreterContext } from "../interpreter";
-import { BaseObject, SemanticFieldNames, SimpleObject } from "./baseObject";
+import { SemanticFieldNames } from "../semanticFieldNames";
+import { BaseObject, SimpleObject } from "./baseObject";
 import { FullObject } from "./fullObject";
 
 /**

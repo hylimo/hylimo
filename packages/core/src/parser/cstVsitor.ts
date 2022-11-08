@@ -10,6 +10,7 @@ import {
     InvocationExpression,
     LiteralExpression,
     NumberLiteralExpression,
+    SelfInvocationExpression,
     StringLiteralExpression
 } from "./ast";
 import { Parser } from "./parser";
@@ -253,12 +254,23 @@ export function generateVisitor(parser: Parser): ICstVisitor<never, any> {
                     this.visit(exp)
                 );
                 for (const accessDefinition of accessDefininitions) {
-                    baseExpression = new FieldAccessExpression(
-                        accessDefinition.identifier,
-                        baseExpression,
-                        generatePosition(startPos, accessDefinition.identifierPosition)
-                    );
-                    baseExpression = this.applyCallBrackets(baseExpression, accessDefinition.callBrackets);
+                    if (accessDefinition.callBrackets.length > 0) {
+                        const [first, ...remaining] = accessDefinition.callBrackets;
+                        const [args, endPos] = first;
+                        baseExpression = new SelfInvocationExpression(
+                            accessDefinition.identifier,
+                            baseExpression,
+                            args,
+                            generatePosition(startPos, endPos)
+                        );
+                        baseExpression = this.applyCallBrackets(baseExpression, accessDefinition.callBrackets);
+                    } else {
+                        baseExpression = new FieldAccessExpression(
+                            accessDefinition.identifier,
+                            baseExpression,
+                            generatePosition(startPos, accessDefinition.identifierPosition)
+                        );
+                    }
                 }
             }
             return baseExpression;

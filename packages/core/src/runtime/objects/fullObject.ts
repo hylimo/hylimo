@@ -1,6 +1,7 @@
 import { InterpreterContext } from "../interpreter";
 import { RuntimeError } from "../runtimeError";
-import { BaseObject, FieldEntry, SemanticFieldNames } from "./baseObject";
+import { SemanticFieldNames } from "../semanticFieldNames";
+import { BaseObject, FieldEntry } from "./baseObject";
 
 /**
  * Object with full support for both number (integer) and

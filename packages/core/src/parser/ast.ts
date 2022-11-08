@@ -5,6 +5,7 @@ import { FullObject } from "../runtime/objects/fullObject";
 import { Function, NativeFunction } from "../runtime/objects/function";
 import { Number } from "../runtime/objects/number";
 import { String } from "../runtime/objects/string";
+import { SemanticFieldNames } from "../runtime/semanticFieldNames";
 
 /**
  * Position of an AST element in the source code
@@ -236,10 +237,40 @@ export class NativeFunctionExpression extends AbstractFunctionExpression {
 }
 
 /**
+ * Base class for all invocation expressions, provides helper to generate args
+ */
+export abstract class AbstractInvocationExpression extends Expression {
+    /**
+     * Base constructor for all AbstractInvocationExpressions
+     * @param position if defined, where in the source code the expression is
+     * @param type used for serialization and debugging
+     */
+    constructor(readonly argumentExpressions: InvocationArgument[], type: string, position?: ASTExpressionPosition) {
+        super(type, position);
+    }
+
+    /**
+     * Generates the arguments map based on argumentExpressions
+     *
+     * @param context
+     * @returns
+     */
+    protected generateArgs(context: InterpreterContext): FullObject {
+        const args = FullObject.create(context);
+        let indexCounter = 0;
+        for (const argumentExpression of this.argumentExpressions) {
+            const value = argumentExpression.value.evaluateWithSource(context);
+            args.setField(argumentExpression.name ?? indexCounter++, value, context);
+        }
+        return args;
+    }
+}
+
+/**
  * Function invocation expression
  * Evaluates to the result of the called function
  */
-export class InvocationExpression extends Expression {
+export class InvocationExpression extends AbstractInvocationExpression {
     /**
      * Creates a new InvocationExpression consisting of an expression of which the result should be invoked,
      * and a set of optionally named expressions as arguments
@@ -250,21 +281,48 @@ export class InvocationExpression extends Expression {
      */
     constructor(
         readonly target: Expression,
-        readonly argumentExpressions: InvocationArgument[],
+        argumentExpressions: InvocationArgument[],
         position?: ASTExpressionPosition
     ) {
-        super("InvokationExpression", position);
+        super(argumentExpressions, "InvokationExpression", position);
     }
 
     override evaluate(context: InterpreterContext): BaseObject {
         const targetValue = this.target.evaluate(context);
-        const args = FullObject.create(context);
-        let indexCounter = 0;
-        for (const argumentExpression of this.argumentExpressions) {
-            const value = argumentExpression.value.evaluateWithSource(context);
-            args.setField(argumentExpression.name ?? indexCounter++, value, context);
-        }
+        const args = this.generateArgs(context);
         return targetValue.invoke(args, context);
+    }
+}
+
+/**
+ * Function invocation which provides the self parameter automatically
+ * Accesses the field name on target, invokes it and provides target as self
+ */
+export class SelfInvocationExpression extends AbstractInvocationExpression {
+    /**
+     * Creates a new InvocationExpression consisting of an expression of which the result should be invoked,
+     * and a set of optionally named expressions as arguments
+     *
+     * @param target evaluated to provide the function to invoke
+     * @param name the name or index to access on target
+     * @param argumentExpressions evaluated to provide arguments
+     * @param position if defined, where in the source code the expression is
+     */
+    constructor(
+        readonly name: string | number,
+        readonly target: Expression,
+        argumentExpressions: InvocationArgument[],
+        position?: ASTExpressionPosition
+    ) {
+        super(argumentExpressions, "InvokationExpression", position);
+    }
+
+    override evaluate(context: InterpreterContext): BaseObject {
+        const targetValue = this.target.evaluate(context);
+        const fieldValue = targetValue.getField(this.name, context).value;
+        const args = this.generateArgs(context);
+        args.setField(SemanticFieldNames.SELF, { value: targetValue }, context);
+        return fieldValue.invoke(args, context);
     }
 }
 
