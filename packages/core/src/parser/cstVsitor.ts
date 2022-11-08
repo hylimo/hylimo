@@ -159,12 +159,12 @@ export function generateVisitor(parser: Parser): ICstVisitor<never, any> {
          */
         private callBrackets(ctx: any): CallBracketsDefinition {
             const normalArguments = (ctx.callArgument ?? []).map((argument: CstNode) => this.visit(argument));
-            const functions = (ctx.function ?? []).map((func: CstNode) => {
-                value: this.visit(func);
-            });
+            const functions = (ctx.function ?? []).map((func: CstNode) => ({
+                value: this.visit(func)
+            }));
             let endPosition;
             if (functions.length > 0) {
-                endPosition = functions.at(-1).position;
+                endPosition = functions.at(-1).value.position;
             } else {
                 endPosition = ctx.CloseRoundBracket[0];
             }
@@ -263,7 +263,7 @@ export function generateVisitor(parser: Parser): ICstVisitor<never, any> {
                             args,
                             generatePosition(startPos, endPos)
                         );
-                        baseExpression = this.applyCallBrackets(baseExpression, accessDefinition.callBrackets);
+                        baseExpression = this.applyCallBrackets(baseExpression, remaining);
                     } else {
                         baseExpression = new FieldAccessExpression(
                             accessDefinition.identifier,

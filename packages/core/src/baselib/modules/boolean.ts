@@ -1,4 +1,4 @@
-import { assign, fun, id, native } from "../../parser/astHelper";
+import { assign, fun, id, native, str } from "../../parser/astHelper";
 import { InterpreterModule } from "../../runtime/interpreter";
 import { FullObject } from "../../runtime/objects/fullObject";
 import { LiteralObject } from "../../runtime/objects/literal";
@@ -31,19 +31,17 @@ export const booleanModule: InterpreterModule = {
     name: DefaultModuleNames.BOOLEAN,
     dependencies: [],
     expressions: [
-        assign("true", id("null")),
-        assign("false", id("null")),
         fun([
             assign(booleanProto, id(SemanticFieldNames.ARGS)),
-            assign(
+            id(SemanticFieldNames.PROTO).assignField(
                 "true",
-                native((args, context) => new BooleanObject(true, args.getField(1, context) as FullObject)).call(
+                native((args, context) => new BooleanObject(true, args.getField(0, context) as FullObject)).call(
                     id(booleanProto)
                 )
             ),
-            assign(
+            id(SemanticFieldNames.PROTO).assignField(
                 "false",
-                native((args, context) => new BooleanObject(false, args.getField(1, context) as FullObject)).call(
+                native((args, context) => new BooleanObject(false, args.getField(0, context) as FullObject)).call(
                     id(booleanProto)
                 )
             ),
@@ -51,8 +49,11 @@ export const booleanModule: InterpreterModule = {
                 "&&",
                 native(
                     (args, context) => {
-                        const first = assertBoolean(args.getField(0, context), "first argument of &&");
-                        const second = assertBoolean(args.getField(1, context), "second argument of &&");
+                        const first = assertBoolean(
+                            args.getField(SemanticFieldNames.SELF, context),
+                            "first argument of &&"
+                        );
+                        const second = assertBoolean(args.getField(0, context), "second argument of &&");
                         if (first && second) {
                             return context.getField("true");
                         } else {
@@ -63,11 +64,14 @@ export const booleanModule: InterpreterModule = {
                 )
             ),
             id(booleanProto).assignField(
-                "&&",
+                "||",
                 native(
                     (args, context) => {
-                        const first = assertBoolean(args.getField(0, context), "first argument of &&");
-                        const second = assertBoolean(args.getField(1, context), "second argument of &&");
+                        const first = assertBoolean(
+                            args.getField(SemanticFieldNames.SELF, context),
+                            "first argument of ||"
+                        );
+                        const second = assertBoolean(args.getField(0, context), "second argument of ||");
                         if (first || second) {
                             return context.getField("true");
                         } else {

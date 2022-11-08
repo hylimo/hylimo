@@ -32,12 +32,11 @@ export const objectModule: InterpreterModule = {
             "toStr",
             fun(
                 [
+                    id(SemanticFieldNames.THIS).assignField("_value", id(SemanticFieldNames.ARGS).field(0)),
                     id("if").call(
-                        id("isNull").call(
-                            id(SemanticFieldNames.ARGS).field(0),
-                            fun([str("null")]),
-                            fun([id(SemanticFieldNames.ARGS).field(0).callField("toString")])
-                        )
+                        id("isNull").call(id("_value")),
+                        fun([str("null")]),
+                        fun([id("_value").callField("toString")])
                     )
                 ],
                 {

@@ -1,4 +1,4 @@
-import { assign, native } from "../../parser/astHelper";
+import { arg, assign, native } from "../../parser/astHelper";
 import { InterpreterModule } from "../../runtime/interpreter";
 import { DefaultModuleNames } from "../defaultModuleNames";
 import { assertFunction } from "../typeHelpers";
