@@ -7,12 +7,12 @@ import { FullObject } from "./fullObject";
 /**
  * Base class for js functions and normal functions
  */
-export abstract class AbstractFunction extends SimpleObject {}
+export abstract class AbstractFunctionObject extends SimpleObject {}
 
 /**
  * Function based on a DSL function
  */
-export class Function extends AbstractFunction {
+export class FunctionObject extends AbstractFunctionObject {
     /**
      * Creates a new DSL function
      *
@@ -29,6 +29,7 @@ export class Function extends AbstractFunction {
         const newScope = new FullObject();
         newScope.setField(SemanticFieldNames.PROTO, { value: this.parentScope }, context);
         newScope.setField(SemanticFieldNames.THIS, { value: newScope }, context);
+        newScope.setField(SemanticFieldNames.ARGS, { value: args }, context);
         context.currentScope = newScope;
         let lastValue: BaseObject = context.null;
         for (const expression of this.definition.expressions) {
@@ -37,12 +38,16 @@ export class Function extends AbstractFunction {
         context.currentScope = oldScope;
         return lastValue;
     }
+
+    override toString(): string {
+        return "{ function }";
+    }
 }
 
 /**
  * Function based on a native js function
  */
-export class NativeFunction extends AbstractFunction {
+export class NativeFunctionObject extends AbstractFunctionObject {
     /**
      * Creates a new native js function
      *
@@ -55,5 +60,9 @@ export class NativeFunction extends AbstractFunction {
 
     override invoke(args: FullObject, context: InterpreterContext): BaseObject {
         return this.definition.callback(args, context);
+    }
+
+    override toString(): string {
+        return "{ native function }";
     }
 }

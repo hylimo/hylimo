@@ -38,6 +38,13 @@ export abstract class BaseObject {
     invoke(args: FullObject, context: InterpreterContext): BaseObject {
         throw new RuntimeError("Invoke not supported");
     }
+
+    /**
+     * Creates a readable string representation
+     *
+     * @returns a string representation
+     */
+    abstract toString(): string;
 }
 
 /**

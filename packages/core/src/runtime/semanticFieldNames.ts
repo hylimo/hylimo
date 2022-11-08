@@ -13,5 +13,9 @@ export enum SemanticFieldNames {
     /**
      * Self parameter providing the target to functions
      */
-    SELF = "self"
+    SELF = "self",
+    /**
+     * Arguments passed to a function
+     */
+    ARGS = "args"
 }

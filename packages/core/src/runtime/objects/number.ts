@@ -4,7 +4,7 @@ import { FullObject } from "./fullObject";
 /**
  * Represents a Number
  */
-export class Number extends SimpleObject {
+export class NumberObject extends SimpleObject {
     /**
      * Creates a new Number
      *
@@ -13,5 +13,9 @@ export class Number extends SimpleObject {
      */
     constructor(readonly value: number, proto: FullObject) {
         super(proto);
+    }
+
+    override toString(): string {
+        return this.value.toString();
     }
 }

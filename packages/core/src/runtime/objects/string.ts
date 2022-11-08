@@ -4,7 +4,7 @@ import { FullObject } from "./fullObject";
 /**
  * Represents a String
  */
-export class String extends SimpleObject {
+export class StringObject extends SimpleObject {
     /**
      * Creates a new String
      *
@@ -13,5 +13,9 @@ export class String extends SimpleObject {
      */
     constructor(readonly value: string, proto: FullObject) {
         super(proto);
+    }
+
+    override toString(): string {
+        return this.value;
     }
 }

@@ -2,9 +2,9 @@ import { IToken } from "chevrotain";
 import { InterpreterContext } from "../runtime/interpreter";
 import { BaseObject, FieldEntry } from "../runtime/objects/baseObject";
 import { FullObject } from "../runtime/objects/fullObject";
-import { Function, NativeFunction } from "../runtime/objects/function";
-import { Number } from "../runtime/objects/number";
-import { String } from "../runtime/objects/string";
+import { FunctionObject, NativeFunctionObject } from "../runtime/objects/function";
+import { NumberObject } from "../runtime/objects/number";
+import { StringObject } from "../runtime/objects/string";
 import { SemanticFieldNames } from "../runtime/semanticFieldNames";
 
 /**
@@ -71,7 +71,7 @@ export abstract class Expression {
      * @param args arguments passt to the function
      * @returns the created InvocationExpression
      */
-    call(args: InvocationArgument[]): InvocationExpression {
+    call(args: InvocationArgument[] = []): InvocationExpression {
         return new InvocationExpression(this, args);
     }
 
@@ -121,7 +121,7 @@ export class StringLiteralExpression extends LiteralExpression<string> {
     }
 
     override evaluate(context: InterpreterContext): BaseObject {
-        return new String(this.value, context.stringPrototype);
+        return new StringObject(this.value, context.stringPrototype);
     }
 }
 
@@ -140,7 +140,7 @@ export class NumberLiteralExpression extends LiteralExpression<number> {
     }
 
     override evaluate(context: InterpreterContext): BaseObject {
-        return new Number(this.value, context.numberPrototype);
+        return new NumberObject(this.value, context.numberPrototype);
     }
 }
 
@@ -203,7 +203,7 @@ export class FunctionExpression extends AbstractFunctionExpression {
     }
 
     override evaluate(context: InterpreterContext): BaseObject {
-        return new Function(this, context.currentScope, context.functionPrototype);
+        return new FunctionObject(this, context.currentScope, context.functionPrototype);
     }
 }
 
@@ -232,7 +232,7 @@ export class NativeFunctionExpression extends AbstractFunctionExpression {
     }
 
     override evaluate(context: InterpreterContext): BaseObject {
-        return new NativeFunction(this, context.nativeFunctionPrototype);
+        return new NativeFunctionObject(this, context.nativeFunctionPrototype);
     }
 }
 
@@ -256,7 +256,7 @@ export abstract class AbstractInvocationExpression extends Expression {
      * @returns
      */
     protected generateArgs(context: InterpreterContext): FullObject {
-        const args = FullObject.create(context);
+        const args = context.newObject();
         let indexCounter = 0;
         for (const argumentExpression of this.argumentExpressions) {
             const value = argumentExpression.value.evaluateWithSource(context);

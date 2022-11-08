@@ -99,7 +99,10 @@ function parseDecorators(decorators: { [index: string]: string | null }): Map<st
  * @param decorators decorators applied to the function
  * @returns the created FunctionExpression
  */
-export function fun(expressions: Expression[], decorators: { [index: string]: string | null }): FunctionExpression {
+export function fun(
+    expressions: Expression[],
+    decorators: { [index: string]: string | null } = {}
+): FunctionExpression {
     return new FunctionExpression(expressions, parseDecorators(decorators));
 }
 
@@ -112,7 +115,7 @@ export function fun(expressions: Expression[], decorators: { [index: string]: st
  */
 export function native(
     callback: NativeFunctionType,
-    decorators: { [index: string]: string | null }
+    decorators: { [index: string]: string | null } = {}
 ): NativeFunctionExpression {
     return new NativeFunctionExpression(callback, parseDecorators(decorators));
 }
