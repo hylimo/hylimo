@@ -1,4 +1,5 @@
 import { Expression } from "../parser/ast";
+import { BaseObject } from "./objects/baseObject";
 import { FullObject } from "./objects/fullObject";
 import { NullObject } from "./objects/null";
 import { NumberObject } from "./objects/number";
@@ -47,11 +48,21 @@ export class InterpreterContext {
     currentScope: FullObject;
 
     /**
+     * Map to store module specific values by module
+     */
+    private readonly moduleValues = new Map<string, Map<string, any>>();
+
+    /**
+     * Initial global execution scope
+     */
+    private readonly globalScope: FullObject;
+
+    /**
      * Creates a new DefaultInterpreterContext
      *
      * @param maxExecutionSteps The maximum amount of execution steps
      */
-    constructor(readonly maxExecutionSteps: number) {
+    constructor(readonly maxExecutionSteps: number, modules: string[]) {
         this.null = new NullObject();
         this.objectPrototype = new FullObject();
         this.numberPrototype = this.newObject();
@@ -59,6 +70,47 @@ export class InterpreterContext {
         this.functionPrototype = this.newObject();
         this.nativeFunctionPrototype = this.newObject();
         this.currentScope = this.newObject();
+        this.currentScope.setFieldEntry(SemanticFieldNames.THIS, { value: this.currentScope }, this);
+        this.globalScope = this.currentScope;
+        for (const module of modules) {
+            this.moduleValues.set(module, new Map());
+        }
+    }
+
+    /**
+     * Sets a module specific value, ensures that the module actually exists
+     *
+     * @param module the name of the module
+     * @param key the name of the field to access
+     * @param value the new value stored under key
+     */
+    setModuleValue(module: string, key: string, value: any): void {
+        this.getModuleMap(module).set(key, value);
+    }
+
+    /**
+     * Gets a module specific value, ensures that the module actually exists
+     *
+     * @param module the name of the module
+     * @param key the name of the field to access
+     * @returns the stored value
+     */
+    getModuleValue(module: string, key: string): any {
+        return this.getModuleMap(module).get(key);
+    }
+
+    /**
+     * Gets the module specific map of values, throws an Error if no map was found
+     *
+     * @param module the name of the module
+     * @returns the found value
+     */
+    private getModuleMap(module: string): Map<string, any> {
+        const moduleMap = this.moduleValues.get(module);
+        if (!moduleMap) {
+            throw new Error(`unknown module ${module}`);
+        }
+        return moduleMap;
     }
 
     /**
@@ -88,8 +140,18 @@ export class InterpreterContext {
      */
     newObject(): FullObject {
         const instance = new FullObject();
-        instance.setField(SemanticFieldNames.PROTO, { value: this.objectPrototype }, this);
+        instance.setLocalField(SemanticFieldNames.PROTO, { value: this.objectPrototype }, this);
         return instance;
+    }
+
+    /**
+     * Gets a field on the global scope
+     *
+     * @param key identifier of the field
+     * @returns the value of the field
+     */
+    getField(key: string | number): BaseObject {
+        return this.globalScope.getField(key, this);
     }
 }
 
@@ -99,8 +161,18 @@ export class InterpreterContext {
  * Dependencies have to be loaded before the module
  */
 export interface InterpreterModule {
+    /**
+     * The name of the module, must be unique
+     */
     name: string;
+    /**
+     * Dependencies which must be loaded before this module can be loaded
+     * Dependencies must form an acyclic graph, otherwise they cannot be loaded
+     */
     dependencies: string[];
+    /**
+     * Expressions to execute to load the module
+     */
     expressions: Expression[];
 }
 
@@ -187,7 +259,10 @@ export class Interpreter {
      * @returns
      */
     run(expressions: Expression[], maxExecutionSteps: number): FullObject {
-        const context = new InterpreterContext(maxExecutionSteps);
+        const context = new InterpreterContext(
+            maxExecutionSteps,
+            this.modules.map((module) => module.name)
+        );
         for (const module of this.modules) {
             for (const expression of module.expressions) {
                 expression.evaluate(context);

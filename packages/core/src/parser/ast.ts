@@ -60,7 +60,7 @@ export abstract class Expression {
      * @param name the name of the field
      * @returns the created FieldAccessExpression
      */
-    field(name: string): FieldAccessExpression {
+    field(name: string | number): FieldAccessExpression {
         return new FieldAccessExpression(name, this);
     }
 
@@ -71,8 +71,34 @@ export abstract class Expression {
      * @param args arguments passt to the function
      * @returns the created InvocationExpression
      */
-    call(args: InvocationArgument[] = []): InvocationExpression {
-        return new InvocationExpression(this, args);
+    call(...args: (InvocationArgument | Expression)[]): InvocationExpression {
+        const escapedArgs = args.map((arg) => {
+            if (arg instanceof Expression) {
+                return { value: arg };
+            } else {
+                return arg;
+            }
+        });
+        return new InvocationExpression(this, escapedArgs);
+    }
+
+    /**
+     * Helper function to create an InvocationExpression without a position
+     * and a field on this as target
+     *
+     * @param field the name of the field to access and call
+     * @param args arguments passt to the function
+     * @returns the created InvocationExpression
+     */
+    callField(name: string, ...args: (InvocationArgument | Expression)[]): InvocationExpression {
+        const escapedArgs = args.map((arg) => {
+            if (arg instanceof Expression) {
+                return { value: arg };
+            } else {
+                return arg;
+            }
+        });
+        return new SelfInvocationExpression(name, this, escapedArgs);
     }
 
     /**
@@ -141,27 +167,6 @@ export class NumberLiteralExpression extends LiteralExpression<number> {
 
     override evaluate(context: InterpreterContext): BaseObject {
         return new NumberObject(this.value, context.numberPrototype);
-    }
-}
-
-/**
- * Expression evaluating to a constant natively defined literal
- *
- * @param T the type of the literal
- */
-export class ConstLiteralExpression<T extends BaseObject> extends LiteralExpression<T> {
-    /**
-     * Creates a new ConstLiteralExpression consisting out of a constant T
-     *
-     * @param value the constant literal
-     * @param position if defined, where in the source code the expression is
-     */
-    constructor(value: T, position?: ASTExpressionPosition) {
-        super(value, "ConstLiteralExpression", position);
-    }
-
-    override evaluate(context: InterpreterContext): BaseObject {
-        return this.value;
     }
 }
 
@@ -260,7 +265,7 @@ export abstract class AbstractInvocationExpression extends Expression {
         let indexCounter = 0;
         for (const argumentExpression of this.argumentExpressions) {
             const value = argumentExpression.value.evaluateWithSource(context);
-            args.setField(argumentExpression.name ?? indexCounter++, value, context);
+            args.setLocalField(argumentExpression.name ?? indexCounter++, value, context);
         }
         return args;
     }
@@ -319,9 +324,9 @@ export class SelfInvocationExpression extends AbstractInvocationExpression {
 
     override evaluate(context: InterpreterContext): BaseObject {
         const targetValue = this.target.evaluate(context);
-        const fieldValue = targetValue.getField(this.name, context).value;
+        const fieldValue = targetValue.getField(this.name, context);
         const args = this.generateArgs(context);
-        args.setField(SemanticFieldNames.SELF, { value: targetValue }, context);
+        args.setLocalField(SemanticFieldNames.SELF, { value: targetValue }, context);
         return fieldValue.invoke(args, context);
     }
 }
@@ -348,7 +353,7 @@ export class FieldAccessExpression extends Expression {
 
     override evaluateWithSource(context: InterpreterContext): FieldEntry {
         const targetValue = this.target.evaluate(context);
-        return targetValue.getField(this.name, context);
+        return targetValue.getFieldEntry(this.name, context);
     }
 }
 
@@ -371,7 +376,7 @@ export class IdentifierExpression extends Expression {
     }
 
     override evaluateWithSource(context: InterpreterContext): FieldEntry {
-        return context.currentScope.getField(this.identifier, context);
+        return context.currentScope.getFieldEntry(this.identifier, context);
     }
 }
 
@@ -416,7 +421,11 @@ export class AssignmentExpression extends Expression {
                 source: this
             };
         }
-        targetValue.setField(this.name, valueValue, context);
+        if (this.target) {
+            targetValue.setLocalField(this.name, valueValue, context);
+        } else {
+            targetValue.setFieldEntry(this.name, valueValue, context);
+        }
         return valueValue;
     }
 }

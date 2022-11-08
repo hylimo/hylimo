@@ -7,11 +7,15 @@ import { BaseObject, FieldEntry } from "./baseObject";
  * There shouls only be one instance during the lifetime of an interpreter
  */
 export class NullObject extends BaseObject {
-    override getField(key: string | number, context: InterpreterContext): FieldEntry {
+    override getFieldEntry(_key: string | number, _context: InterpreterContext): FieldEntry {
         throw new RuntimeError("Getting fields on null not supported");
     }
 
-    override setField(key: string | number, value: FieldEntry, context: InterpreterContext): void {
+    override setFieldEntry(_key: string | number, _value: FieldEntry, _context: InterpreterContext): void {
+        throw new RuntimeError("Setting fields on null not supported");
+    }
+
+    override setLocalField(_key: string | number, _value: FieldEntry, _context: InterpreterContext): void {
         throw new RuntimeError("Setting fields on null not supported");
     }
 

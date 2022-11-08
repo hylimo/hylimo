@@ -14,4 +14,4 @@ export * from "./runtime/objects/number";
 export * from "./runtime/objects/string";
 export * from "./baselib/modules";
 export * from "./baselib/defaultModuleNames";
-export * from "./baselib/object";
+export * from "./baselib/modules/object";

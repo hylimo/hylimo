@@ -17,5 +17,9 @@ export enum SemanticFieldNames {
     /**
      * Arguments passed to a function
      */
-    ARGS = "args"
+    ARGS = "args",
+    /**
+     * Name of the stringify function
+     */
+    TO_STRING = "toString"
 }

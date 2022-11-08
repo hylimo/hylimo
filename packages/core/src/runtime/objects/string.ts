@@ -16,6 +16,6 @@ export class StringObject extends SimpleObject {
     }
 
     override toString(): string {
-        return this.value;
+        return `"${this.value}"`;
     }
 }

@@ -9,7 +9,7 @@ import { BaseObject, FieldEntry } from "./baseObject";
 export class FullObject extends BaseObject {
     readonly fields: Map<string | number, FieldEntry> = new Map();
 
-    override getField(key: string | number, context: InterpreterContext): FieldEntry {
+    override getFieldEntry(key: string | number, context: InterpreterContext): FieldEntry {
         this.checkValidKey(key);
         return this.getFieldInternal(key, context);
     }
@@ -33,7 +33,7 @@ export class FullObject extends BaseObject {
         }
     }
 
-    override setField(key: string | number, value: FieldEntry, context: InterpreterContext): void {
+    override setFieldEntry(key: string | number, value: FieldEntry, context: InterpreterContext): void {
         this.checkValidKey(key);
         const isProto = key === SemanticFieldNames.PROTO;
         if (isProto) {
@@ -42,7 +42,7 @@ export class FullObject extends BaseObject {
             }
         }
         if (!this.setExistingField(key, value, context)) {
-            this.setFieldInternal(key, value, context);
+            this.setLocalField(key, value, context);
         }
         if (isProto) {
             this.validateProto();
@@ -59,7 +59,7 @@ export class FullObject extends BaseObject {
      */
     private setExistingField(key: string | number, value: FieldEntry, context: InterpreterContext): boolean {
         if (this.fields.has(key)) {
-            this.setFieldInternal(key, value, context);
+            this.setLocalField(key, value, context);
             return true;
         } else {
             const proto = this.getProto();
@@ -71,15 +71,7 @@ export class FullObject extends BaseObject {
         }
     }
 
-    /**
-     * Sets a field
-     * If the value contains the null value, the field is removed, otherwise the value is set
-     *
-     * @param key the identifier of the field
-     * @param value the new value of the field
-     * @param context context in which this is performed
-     */
-    private setFieldInternal(key: string | number, value: FieldEntry, context: InterpreterContext) {
+    override setLocalField(key: string | number, value: FieldEntry, context: InterpreterContext): void {
         if (value.value === context.null) {
             this.fields.delete(key);
         } else {
@@ -127,7 +119,7 @@ export class FullObject extends BaseObject {
         let res = "{\n";
         for (const [name, value] of this.fields.entries()) {
             if (name != SemanticFieldNames.THIS && name != SemanticFieldNames.PROTO) {
-                res += `  ${name}: ${value.value.toString().replaceAll("\n", "  \n")}\n`;
+                res += `  ${name}: ${value.value.toString().replaceAll("\n", "\n  ")}\n`;
             }
         }
         res += "}";

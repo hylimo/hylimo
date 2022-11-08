@@ -27,9 +27,9 @@ export class FunctionObject extends AbstractFunctionObject {
     override invoke(args: FullObject, context: InterpreterContext): BaseObject {
         const oldScope = context.currentScope;
         const newScope = new FullObject();
-        newScope.setField(SemanticFieldNames.PROTO, { value: this.parentScope }, context);
-        newScope.setField(SemanticFieldNames.THIS, { value: newScope }, context);
-        newScope.setField(SemanticFieldNames.ARGS, { value: args }, context);
+        newScope.setLocalField(SemanticFieldNames.PROTO, { value: this.parentScope }, context);
+        newScope.setLocalField(SemanticFieldNames.THIS, { value: newScope }, context);
+        newScope.setLocalField(SemanticFieldNames.ARGS, { value: args }, context);
         context.currentScope = newScope;
         let lastValue: BaseObject = context.null;
         for (const expression of this.definition.expressions) {

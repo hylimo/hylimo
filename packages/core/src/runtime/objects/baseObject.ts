@@ -13,19 +13,40 @@ export abstract class BaseObject {
      *
      * @param key the identifier of the field
      * @param context context in which this is performed
+     * @returns the field entry
+     */
+    abstract getFieldEntry(key: string | number, context: InterpreterContext): FieldEntry;
+
+    /**
+     * Wrapper for getFieldEntry which only returns the value
+     *
+     * @param key the identifier of the field
+     * @param context context in which this is performed
      * @returns the value of the field
      */
-    abstract getField(key: string | number, context: InterpreterContext): FieldEntry;
+    getField(key: string | number, context: InterpreterContext): BaseObject {
+        return this.getFieldEntry(key, context).value;
+    }
 
     /**
      * Sets the value of a field.
      * May throw an error if setting the field is not supported
      *
      * @param key the identifier of the field
+     * @param value the new field entry
+     * @param context context in which this is performed
+     */
+    abstract setFieldEntry(key: string | number, value: FieldEntry, context: InterpreterContext): void;
+
+    /**
+     * Sets a field locally
+     * If the value contains the null value, the field is removed, otherwise the value is set
+     *
+     * @param key the identifier of the field
      * @param value the new value of the field
      * @param context context in which this is performed
      */
-    abstract setField(key: string | number, value: FieldEntry, context: InterpreterContext): void;
+    abstract setLocalField(key: string | number, value: FieldEntry, context: InterpreterContext): void;
 
     /**
      * Invokes this obeject.
@@ -55,22 +76,26 @@ export abstract class SimpleObject extends BaseObject {
         super();
     }
 
-    override getField(key: string | number, context: InterpreterContext): FieldEntry {
+    override getFieldEntry(key: string | number, context: InterpreterContext): FieldEntry {
         if (key === SemanticFieldNames.PROTO) {
             return {
                 value: this.proto
             };
         } else {
-            return this.proto.getField(key, context);
+            return this.proto.getFieldEntry(key, context);
         }
     }
 
-    override setField(key: string | number, value: FieldEntry, context: InterpreterContext): void {
+    override setFieldEntry(key: string | number, value: FieldEntry, context: InterpreterContext): void {
         if (key === SemanticFieldNames.PROTO) {
-            throw new RuntimeError("Cannot set field proto of a non-Table");
+            throw new RuntimeError("Cannot set field proto of a non-Object");
         } else {
-            this.proto.setField(key, value, context);
+            this.proto.setFieldEntry(key, value, context);
         }
+    }
+
+    override setLocalField(key: string | number, value: FieldEntry, context: InterpreterContext) {
+        throw new RuntimeError("Cannot set field directly of a non-Object");
     }
 }
 
