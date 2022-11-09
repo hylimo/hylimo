@@ -20,3 +20,4 @@ export * from "./baselib/modules/boolean";
 export * from "./baselib/modules/common";
 export * from "./baselib/modules/debug";
 export * from "./baselib/modules/operator";
+export * from "./baselib/modules/number";

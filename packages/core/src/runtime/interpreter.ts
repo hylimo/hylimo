@@ -236,8 +236,8 @@ export class Interpreter {
         if (module.temporaryMark) {
             throw new Error(`Cycle in module dependencies: ${module.module.name}`);
         }
-        module.temporaryMark = true;
         if (!module.mark) {
+            module.temporaryMark = true;
             for (const child of module.module.dependencies) {
                 const childModule = moduleLookup.get(child);
                 if (!childModule) {
@@ -245,10 +245,10 @@ export class Interpreter {
                 }
                 this.visit(childModule, moduleLookup);
             }
+            module.temporaryMark = false;
+            module.mark = true;
+            this.modules.push(module.module);
         }
-        module.temporaryMark = false;
-        module.mark = true;
-        this.modules.push(module.module);
     }
 
     /**

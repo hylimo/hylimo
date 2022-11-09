@@ -13,7 +13,7 @@ import { DefaultModuleNames } from "../defaultModuleNames";
 export const operatorModule: InterpreterModule = {
     name: DefaultModuleNames.OPERATOR,
     dependencies: [],
-    expressions: ["+", "-", "*", "/", "&&", "||"].map((operator) =>
+    expressions: ["+", "-", "*", "/", "%", "&&", "||", "==", "!=", ">", ">=", "<", "<="].map((operator) =>
         assign(
             operator,
             native(

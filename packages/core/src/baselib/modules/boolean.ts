@@ -1,6 +1,7 @@
 import { Expression } from "../../parser/ast";
 import { arg, assign, fun, id, jsFun, native, str } from "../../parser/astHelper";
-import { InterpreterModule } from "../../runtime/interpreter";
+import { InterpreterContext, InterpreterModule } from "../../runtime/interpreter";
+import { BaseObject } from "../../runtime/objects/baseObject";
 import { FullObject } from "../../runtime/objects/fullObject";
 import { LiteralObject } from "../../runtime/objects/literal";
 import { RuntimeError } from "../../runtime/runtimeError";
@@ -11,7 +12,7 @@ import { assertSelfShortCircuitArguments } from "../typeHelpers";
 /**
  * Boolean literal
  */
-export class BooleanObject extends LiteralObject<boolean> {}
+class BooleanObject extends LiteralObject<boolean> {}
 
 /**
  * Helper to check that an object is a BooleanObject, throws an error if not
@@ -25,6 +26,21 @@ export function assertBoolean(value: any, description: string): boolean {
         throw new RuntimeError(`${description} is not a boolean`);
     }
     return value.value;
+}
+
+/**
+ * Converts a js boolean to a BooleanObject
+ *
+ * @param value the js boolean to convert
+ * @param context the interpreter context used to access true or false
+ * @returns the BooleanObject equivalence of value
+ */
+export function toBoolean(value: boolean, context: InterpreterContext): BaseObject {
+    if (value) {
+        return context.getField("true");
+    } else {
+        return context.getField("false");
+    }
 }
 
 /**
@@ -59,14 +75,13 @@ export const booleanModule: InterpreterModule = {
                 native(
                     (args, context) => {
                         const [first, second] = assertSelfShortCircuitArguments(args, "&&");
-                        if (
-                            assertBoolean(first.evaluate(context), "first argument of &&") &&
-                            assertBoolean(second.evaluate(context), "second argument of &&")
-                        ) {
-                            return { value: context.getField("true") };
-                        } else {
-                            return { value: context.getField("false") };
-                        }
+                        return {
+                            value: toBoolean(
+                                assertBoolean(first.evaluate(context), "left side of &&") &&
+                                    assertBoolean(second.evaluate(context), "right side of &&"),
+                                context
+                            )
+                        };
                     },
                     {
                         docs: `
@@ -86,14 +101,13 @@ export const booleanModule: InterpreterModule = {
                 native(
                     (args, context) => {
                         const [first, second] = assertSelfShortCircuitArguments(args, "||");
-                        if (
-                            assertBoolean(first.evaluate(context), "first argument of ||") ||
-                            assertBoolean(second.evaluate(context), "second argument of ||")
-                        ) {
-                            return { value: context.getField("true") };
-                        } else {
-                            return { value: context.getField("false") };
-                        }
+                        return {
+                            value: toBoolean(
+                                assertBoolean(first.evaluate(context), "left side of ||") ||
+                                    assertBoolean(second.evaluate(context), "right side of ||"),
+                                context
+                            )
+                        };
                     },
                     {
                         docs: `

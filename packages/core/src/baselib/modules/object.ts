@@ -140,7 +140,7 @@ export const objectModule: InterpreterModule = {
                         If the input is null, returns null directly, otherwise calls toString on the input
                         Params:
                             - 0: the input to transform
-                        Return:
+                        Returns:
                             The string representation
                     `
                 }
