@@ -55,6 +55,7 @@ const booleanProto = "booleanProto";
 export const booleanModule: InterpreterModule = {
     name: DefaultModuleNames.BOOLEAN,
     dependencies: [],
+    runtimeDependencies: [],
     expressions: [
         fun([
             assign(booleanProto, id(SemanticFieldNames.ARGS)),

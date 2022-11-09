@@ -15,7 +15,8 @@ const numberProto = "numberProto";
  */
 export const numberModule: InterpreterModule = {
     name: DefaultModuleNames.NUMBER,
-    dependencies: [DefaultModuleNames.BOOLEAN],
+    dependencies: [],
+    runtimeDependencies: [DefaultModuleNames.BOOLEAN],
     expressions: [
         fun([
             assign(numberProto, num(0).field(SemanticFieldNames.PROTO)),

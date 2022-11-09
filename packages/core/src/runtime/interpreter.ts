@@ -182,6 +182,12 @@ export interface InterpreterModule {
      */
     dependencies: string[];
     /**
+     * Runtime dependencies must be loaded before code provided by this module is used,
+     * but may not be loaded before this module is loaded.
+     * Therefore, cycles in runtime dependencies are allowed.
+     */
+    runtimeDependencies: string[];
+    /**
      * Expressions to execute to load the module
      */
     expressions: Expression[];
@@ -249,16 +255,28 @@ export class Interpreter {
         }
         if (!module.mark) {
             module.temporaryMark = true;
-            for (const child of module.module.dependencies) {
-                const childModule = moduleLookup.get(child);
-                if (!childModule) {
-                    throw new Error(`Unknown module dependency: ${child}`);
-                }
-                this.visit(childModule, moduleLookup);
-            }
+            this.visitDependencies(module.module.dependencies, moduleLookup);
             module.temporaryMark = false;
             module.mark = true;
             this.modules.push(module.module);
+            this.visitDependencies(module.module.runtimeDependencies, moduleLookup);
+        }
+    }
+
+    /**
+     * Visits each dependency in dependencies.
+     * Used for visit. Detects cycles and missing modules.
+     *
+     * @param dependencies the dependencies to visit, must be existant in moduleLookup
+     * @param moduleLookup lookup from depenency name to module
+     */
+    private visitDependencies(dependencies: string[], moduleLookup: Map<string, MarkedModule>) {
+        for (const child of dependencies) {
+            const childModule = moduleLookup.get(child);
+            if (!childModule) {
+                throw new Error(`Unknown module dependency: ${child}`);
+            }
+            this.visit(childModule, moduleLookup);
         }
     }
 

@@ -10,7 +10,8 @@ import { assertBoolean } from "./boolean";
  */
 export const commonModule: InterpreterModule = {
     name: DefaultModuleNames.COMMON,
-    dependencies: [DefaultModuleNames.BOOLEAN],
+    dependencies: [],
+    runtimeDependencies: [DefaultModuleNames.BOOLEAN],
     expressions: [
         assign("null", jsFun((_, context) => context.null).call()),
         assign(

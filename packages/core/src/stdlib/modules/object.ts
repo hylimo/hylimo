@@ -35,7 +35,8 @@ function assertIndex(value: BaseObject): string | number {
  */
 export const objectModule: InterpreterModule = {
     name: DefaultModuleNames.OBJECT,
-    dependencies: [DefaultModuleNames.COMMON, DefaultModuleNames.BOOLEAN],
+    dependencies: [],
+    runtimeDependencies: [DefaultModuleNames.COMMON, DefaultModuleNames.BOOLEAN],
     expressions: [
         fun([
             assign(objectProto, id(SemanticFieldNames.ARGS).field(SemanticFieldNames.PROTO)),

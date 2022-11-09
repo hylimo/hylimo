@@ -1,5 +1,4 @@
 import { Expression, InvocationArgument } from "../parser/ast";
-import { arg } from "../parser/astHelper";
 import { FullObject } from "../runtime/objects/fullObject";
 import { AbstractFunctionObject } from "../runtime/objects/function";
 import { NumberObject } from "../runtime/objects/number";

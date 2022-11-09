@@ -10,7 +10,8 @@ import { assertString } from "../typeHelpers";
  */
 export const debugModule: InterpreterModule = {
     name: DefaultModuleNames.DEBUG,
-    dependencies: [DefaultModuleNames.OBJECT, DefaultModuleNames.COMMON],
+    dependencies: [],
+    runtimeDependencies: [DefaultModuleNames.OBJECT, DefaultModuleNames.COMMON],
     expressions: [
         assign(
             "rawPrintln",
