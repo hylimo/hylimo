@@ -145,6 +145,18 @@ export const objectModule: InterpreterModule = {
                     `
                 }
             )
+        ),
+        assign(
+            "object",
+            fun([id(SemanticFieldNames.ARGS)], {
+                docs: `
+                    Function which returns its arguments. Can be used to construct an object
+                    Params:
+                        any
+                    Returns:
+                        An object with all provided params
+                `
+            })
         )
     ]
 };

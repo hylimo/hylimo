@@ -4,6 +4,7 @@ import { FullObject } from "./objects/fullObject";
 import { NullObject } from "./objects/null";
 import { NumberObject } from "./objects/number";
 import { StringObject } from "./objects/string";
+import { RuntimeError } from "./runtimeError";
 import { SemanticFieldNames } from "./semanticFieldNames";
 
 /**
@@ -152,6 +153,16 @@ export class InterpreterContext {
      */
     getField(key: string | number): BaseObject {
         return this.globalScope.getField(key, this);
+    }
+
+    /**
+     * Increases the step counter, and throws an error if the counter is bigger than the max allowed value
+     */
+    nextStep(): void {
+        this.currentExecutionSteps++;
+        if (this.currentExecutionSteps > this.maxExecutionSteps) {
+            throw new RuntimeError("Max execution steps exceeded, possible infinite loop detected.");
+        }
     }
 }
 

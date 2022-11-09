@@ -119,7 +119,8 @@ export class FullObject extends BaseObject {
         let res = "{\n";
         for (const [name, value] of this.fields.entries()) {
             if (name != SemanticFieldNames.THIS && name != SemanticFieldNames.PROTO) {
-                res += `  ${name}: ${value.value.toString().replaceAll("\n", "\n  ")}\n`;
+                const escapedName = typeof name === "string" ? `"${name}"` : name.toString();
+                res += `  ${escapedName}: ${value.value.toString().replaceAll("\n", "\n  ")}\n`;
             }
         }
         res += "}";

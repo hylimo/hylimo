@@ -64,6 +64,36 @@ export const commonModule: InterpreterModule = {
                     `
                 }
             )
+        ),
+        assign(
+            "while",
+            jsFun(
+                (args, context) => {
+                    const condition = args.getField(0, context);
+                    const body = args.getField(1, context);
+                    assertFunction(condition, "first argument of while");
+                    assertFunction(body, "second argument of while");
+                    let lastRes = { value: context.null };
+                    while (true) {
+                        const conditionRes = condition.invoke([], context).value;
+                        if (!assertBoolean(conditionRes, "result of the condition function")) {
+                            break;
+                        }
+                        lastRes = body.invoke([], context);
+                    }
+                    return lastRes;
+                },
+                {
+                    docs: `
+                        While control flow statement.
+                        Params:
+                            - 0: the condition function, executed before each loop, must return a boolean
+                            - 1: the body function, executed on each loop
+                        Returns:
+                            The result of the last execution of the body function, if never executed null   
+                    `
+                }
+            )
         )
     ]
 };

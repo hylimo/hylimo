@@ -41,6 +41,7 @@ export class FunctionObject extends AbstractFunctionObject {
     }
 
     override invoke(args: InvocationArgument[], context: InterpreterContext): FieldEntry {
+        context.nextStep();
         const oldScope = context.currentScope;
         const newScope = new FullObject();
         newScope.setLocalField(SemanticFieldNames.PROTO, { value: this.parentScope }, context);
@@ -75,6 +76,7 @@ export class NativeFunctionObject extends AbstractFunctionObject {
     }
 
     override invoke(args: InvocationArgument[], context: InterpreterContext): FieldEntry {
+        context.nextStep();
         return this.definition.callback(args, context);
     }
 
