@@ -112,6 +112,24 @@ export abstract class Expression {
     assignField(field: string, value: Expression): AssignmentExpression {
         return new AssignmentExpression(field, this, value);
     }
+
+    /**
+     * Ensures that fieldEntry has a source.
+     * If source is not set, creates a new FieldEntry with the same value and this as source
+     *
+     * @param fieldEntry the field entry to check
+     * @returns fieldEntry or the new FieldEntry with the same value
+     */
+    protected ensureSource(fieldEntry: FieldEntry): FieldEntry {
+        if (fieldEntry.source) {
+            return fieldEntry;
+        } else {
+            return {
+                value: fieldEntry.value,
+                source: this
+            };
+        }
+    }
 }
 
 /**
@@ -236,7 +254,7 @@ export class FunctionExpression extends AbstractFunctionExpression {
 /**
  * Type for the callback of native functions
  */
-export type NativeFunctionType = (args: InvocationArgument[], context: InterpreterContext) => BaseObject;
+export type NativeFunctionType = (args: InvocationArgument[], context: InterpreterContext) => FieldEntry;
 
 /**
  * Native (JS) function expression
@@ -276,6 +294,21 @@ export abstract class AbstractInvocationExpression extends Expression {
     constructor(readonly argumentExpressions: InvocationArgument[], type: string, position?: ASTExpressionPosition) {
         super(type, position);
     }
+
+    /**
+     * Evaluates this expression, returns a field entry where the source can optionally be set
+     *
+     * @param context context in which this is performed
+     */
+    abstract rawEvaluate(context: InterpreterContext): FieldEntry;
+
+    override evaluate(context: InterpreterContext): BaseObject {
+        return this.rawEvaluate(context).value;
+    }
+
+    override evaluateWithSource(context: InterpreterContext): FieldEntry {
+        return this.ensureSource(this.rawEvaluate(context));
+    }
 }
 
 /**
@@ -299,7 +332,7 @@ export class InvocationExpression extends AbstractInvocationExpression {
         super(argumentExpressions, "InvokationExpression", position);
     }
 
-    override evaluate(context: InterpreterContext): BaseObject {
+    override rawEvaluate(context: InterpreterContext): FieldEntry {
         const targetValue = this.target.evaluate(context);
         return targetValue.invoke(this.argumentExpressions, context);
     }
@@ -328,7 +361,7 @@ export class SelfInvocationExpression extends AbstractInvocationExpression {
         super(argumentExpressions, "InvokationExpression", position);
     }
 
-    override evaluate(context: InterpreterContext): BaseObject {
+    override rawEvaluate(context: InterpreterContext): FieldEntry {
         const targetValue = this.target.evaluateWithSource(context);
         const fieldValue = targetValue.value.getField(this.name, context);
         return fieldValue.invoke(
@@ -421,13 +454,7 @@ export class AssignmentExpression extends Expression {
         } else {
             targetValue = context.currentScope;
         }
-        let valueValue = this.value.evaluateWithSource(context);
-        if (!valueValue.source) {
-            valueValue = {
-                value: valueValue.value,
-                source: this
-            };
-        }
+        let valueValue = this.ensureSource(this.value.evaluateWithSource(context));
         if (this.target) {
             targetValue.setLocalField(this.name, valueValue, context);
         } else {

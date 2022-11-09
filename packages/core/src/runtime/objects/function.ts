@@ -1,7 +1,7 @@
 import { FunctionExpression, InvocationArgument, NativeFunctionExpression } from "../../parser/ast";
 import { InterpreterContext } from "../interpreter";
 import { SemanticFieldNames } from "../semanticFieldNames";
-import { BaseObject, SimpleObject } from "./baseObject";
+import { BaseObject, FieldEntry, SimpleObject } from "./baseObject";
 import { FullObject } from "./fullObject";
 
 /**
@@ -40,7 +40,7 @@ export class FunctionObject extends AbstractFunctionObject {
         super(proto);
     }
 
-    override invoke(args: InvocationArgument[], context: InterpreterContext): BaseObject {
+    override invoke(args: InvocationArgument[], context: InterpreterContext): FieldEntry {
         const oldScope = context.currentScope;
         const newScope = new FullObject();
         newScope.setLocalField(SemanticFieldNames.PROTO, { value: this.parentScope }, context);
@@ -52,7 +52,7 @@ export class FunctionObject extends AbstractFunctionObject {
             lastValue = expression.evaluate(context);
         }
         context.currentScope = oldScope;
-        return lastValue;
+        return { value: lastValue };
     }
 
     override toString(): string {
@@ -74,7 +74,7 @@ export class NativeFunctionObject extends AbstractFunctionObject {
         super(proto);
     }
 
-    override invoke(args: InvocationArgument[], context: InterpreterContext): BaseObject {
+    override invoke(args: InvocationArgument[], context: InterpreterContext): FieldEntry {
         return this.definition.callback(args, context);
     }
 

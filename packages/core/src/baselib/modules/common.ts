@@ -4,6 +4,10 @@ import { DefaultModuleNames } from "../defaultModuleNames";
 import { assertFunction } from "../typeHelpers";
 import { assertBoolean } from "./boolean";
 
+/**
+ * Common module
+ * Adds support for null, isNull, and common control flow structures (if, while)
+ */
 export const commonModule: InterpreterModule = {
     name: DefaultModuleNames.COMMON,
     dependencies: [DefaultModuleNames.BOOLEAN],
@@ -19,7 +23,15 @@ export const commonModule: InterpreterModule = {
                         return context.getField("false");
                     }
                 },
-                { docs: "Expects one parameter, returns true if it is null, otherwise false" }
+                {
+                    docs: `
+                        Checks if the first argument is null
+                        Params:
+                            - 0: input to check for equality with null
+                        Returns:
+                            true if the first argument is null, otherwise false
+                    `
+                }
             )
         ),
         assign(
@@ -41,11 +53,15 @@ export const commonModule: InterpreterModule = {
                     }
                 },
                 {
-                    docs: `If control flow statement. Takes two or three arguments:
-                            - first must be a boolean (true or false)
-                            - second argument must be a function, which is called if the first argument is true, and its value returned
-                            - third argument is optional, if present must be a function which is called if the first argument is false, 
-                            and its value returned. If no value was provided, null is returned`
+                    docs: `
+                        If control flow statement.
+                        Params:
+                            - 0: boolean which decides if the second or third argument is executed
+                            - 1: a function which is called if the first argument is true
+                            - 2: optional, if present must be a function which is called if the first argument is false
+                        Returns:
+                            If a function was called, the result of the function. Otherwise null
+                    `
                 }
             )
         )

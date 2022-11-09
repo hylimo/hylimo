@@ -1,10 +1,12 @@
-import { assign, fun, id, jsFun, str } from "../../parser/astHelper";
+import { Expression } from "../../parser/ast";
+import { arg, assign, fun, id, jsFun, native, str } from "../../parser/astHelper";
 import { InterpreterModule } from "../../runtime/interpreter";
 import { FullObject } from "../../runtime/objects/fullObject";
 import { LiteralObject } from "../../runtime/objects/literal";
 import { RuntimeError } from "../../runtime/runtimeError";
 import { SemanticFieldNames } from "../../runtime/semanticFieldNames";
 import { DefaultModuleNames } from "../defaultModuleNames";
+import { assertSelfShortCircuitArguments } from "../typeHelpers";
 
 /**
  * Boolean literal
@@ -25,8 +27,15 @@ export function assertBoolean(value: any, description: string): boolean {
     return value.value;
 }
 
+/**
+ * Name of the boolean proto object
+ */
 const booleanProto = "booleanProto";
 
+/**
+ * Boolean module
+ * Adds support for booleans
+ */
 export const booleanModule: InterpreterModule = {
     name: DefaultModuleNames.BOOLEAN,
     dependencies: [],
@@ -47,38 +56,56 @@ export const booleanModule: InterpreterModule = {
             ),
             id(booleanProto).assignField(
                 "&&",
-                jsFun(
+                native(
                     (args, context) => {
-                        const first = assertBoolean(
-                            args.getField(SemanticFieldNames.SELF, context),
-                            "first argument of &&"
-                        );
-                        const second = assertBoolean(args.getField(0, context), "second argument of &&");
-                        if (first && second) {
-                            return context.getField("true");
+                        const [first, second] = assertSelfShortCircuitArguments(args, "&&");
+                        if (
+                            assertBoolean(first.evaluate(context), "first argument of &&") &&
+                            assertBoolean(second.evaluate(context), "second argument of &&")
+                        ) {
+                            return { value: context.getField("true") };
                         } else {
-                            return context.getField("false");
+                            return { value: context.getField("false") };
                         }
                     },
-                    { docs: "Performs logical and (&&). Expects two parameters, both boolean. Not semistrict!" }
+                    {
+                        docs: `
+                            Performs logical and (&&).
+                            Short circuit evaluation! If self is false, the positional argument is not evaluated
+                            Params:
+                                - "self": the left side of the logical and, always evaluated
+                                - 0: the right side of the logical and, only evaluated if the left side is true
+                            Returns:
+                                The result of the logical and
+                        `
+                    }
                 )
             ),
             id(booleanProto).assignField(
                 "||",
-                jsFun(
+                native(
                     (args, context) => {
-                        const first = assertBoolean(
-                            args.getField(SemanticFieldNames.SELF, context),
-                            "first argument of ||"
-                        );
-                        const second = assertBoolean(args.getField(0, context), "second argument of ||");
-                        if (first || second) {
-                            return context.getField("true");
+                        const [first, second] = assertSelfShortCircuitArguments(args, "||");
+                        if (
+                            assertBoolean(first.evaluate(context), "first argument of ||") ||
+                            assertBoolean(second.evaluate(context), "second argument of ||")
+                        ) {
+                            return { value: context.getField("true") };
                         } else {
-                            return context.getField("false");
+                            return { value: context.getField("false") };
                         }
                     },
-                    { docs: "Performs logical or (||). Expects two parameters, both boolean. Not semistrict!" }
+                    {
+                        docs: `
+                            Performs logical or (||).
+                            Short circuit evaluation! If self is true, the positional argument is not evaluated
+                            Params:
+                                - "self": the left side of the logical or, always evaluated
+                                - 0: the right side of the logical or, only evaluated if the left side is false
+                            Returns:
+                                The result of the logical or
+                        `
+                    }
                 )
             )
         ]).call()

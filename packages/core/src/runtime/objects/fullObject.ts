@@ -11,7 +11,7 @@ export class FullObject extends BaseObject {
 
     override getFieldEntry(key: string | number, context: InterpreterContext): FieldEntry {
         this.checkValidKey(key);
-        return this.getFieldInternal(key, context);
+        return this.getLocalField(key, context);
     }
 
     /**
@@ -23,13 +23,13 @@ export class FullObject extends BaseObject {
      * @param context context in which this is performed
      * @returns the value of the field
      */
-    private getFieldInternal(key: string | number, context: InterpreterContext): FieldEntry {
+    getLocalField(key: string | number, context: InterpreterContext): FieldEntry {
         const value = this.fields.get(key);
         if (value) {
             return value;
         } else {
             const proto = this.getProto();
-            return proto?.getFieldInternal(key, context) ?? { value: context.null };
+            return proto?.getLocalField(key, context) ?? { value: context.null };
         }
     }
 

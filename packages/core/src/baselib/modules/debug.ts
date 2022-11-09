@@ -5,28 +5,43 @@ import { DefaultModuleNames } from "../defaultModuleNames";
 import { assertString } from "../typeHelpers";
 
 /**
- * The debug module
+ * Debug module
+ * Adds println support which logs to console
  */
 export const debugModule: InterpreterModule = {
     name: DefaultModuleNames.DEBUG,
     dependencies: [DefaultModuleNames.OBJECT, DefaultModuleNames.COMMON],
     expressions: [
         assign(
-            "printlnInternal",
+            "rawPrintln",
             jsFun(
                 (args, context) => {
                     const value = args.getField(0, context);
-                    const stringValue = assertString(value, "first argument of printlnInternal");
+                    const stringValue = assertString(value, "first argument of rawPrintln");
                     console.log(stringValue);
                     return context.null;
                 },
-                { docs: "Logs the first argument to the console, must be a string" }
+                {
+                    docs: `
+                        Logs the first argument to the console, must be a string
+                        Params:
+                            - 0: the string to log to the console
+                        Returns:
+                            null
+                    `
+                }
             )
         ),
         assign(
             "println",
-            fun([id("printlnInternal").call(id("toStr").call(id(SemanticFieldNames.ARGS).field(0)))], {
-                docs: "Logs the first argument to the console"
+            fun([id("rawPrintln").call(id("toStr").call(id(SemanticFieldNames.ARGS).field(0)))], {
+                docs: `
+                    Transforms the first argument to a string and logs it to the console
+                    Params:
+                        - 0: the input to log
+                    Returns:
+                        null
+                `
             })
         )
     ]

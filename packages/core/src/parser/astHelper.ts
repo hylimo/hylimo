@@ -1,5 +1,5 @@
 import { InterpreterContext } from "../runtime/interpreter";
-import { BaseObject } from "../runtime/objects/baseObject";
+import { BaseObject, FieldEntry } from "../runtime/objects/baseObject";
 import { FullObject } from "../runtime/objects/fullObject";
 import { generateArgs } from "../runtime/objects/function";
 import {
@@ -118,13 +118,17 @@ export function fun(
  * @returns the created FunctionExpression
  */
 export function jsFun(
-    callback: (args: FullObject, context: InterpreterContext) => BaseObject,
+    callback: (args: FullObject, context: InterpreterContext) => BaseObject | FieldEntry,
     decorators: { [index: string]: string | null } = {}
 ): NativeFunctionExpression {
-    return new NativeFunctionExpression(
-        (args, context) => callback(generateArgs(args, context), context),
-        parseDecorators(decorators)
-    );
+    return new NativeFunctionExpression((args, context) => {
+        const res = callback(generateArgs(args, context), context);
+        if (res instanceof BaseObject) {
+            return { value: res };
+        } else {
+            return res;
+        }
+    }, parseDecorators(decorators));
 }
 
 /**

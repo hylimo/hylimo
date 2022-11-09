@@ -56,7 +56,7 @@ export abstract class BaseObject {
      * @param args Arguments of the function, not yet evaluated
      * @param context context in which this is performed
      */
-    invoke(args: InvocationArgument[], context: InterpreterContext): BaseObject {
+    invoke(args: InvocationArgument[], context: InterpreterContext): FieldEntry {
         throw new RuntimeError("Invoke not supported");
     }
 
