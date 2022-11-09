@@ -1,6 +1,6 @@
 import { DefaultModuleNames } from "../defaultModuleNames";
 import { InterpreterModule } from "../../runtime/interpreter";
-import { assign, fun, id, native, str } from "../../parser/astHelper";
+import { assign, fun, id, jsFun, str } from "../../parser/astHelper";
 import { SemanticFieldNames } from "../../runtime/semanticFieldNames";
 
 /**
@@ -19,7 +19,7 @@ export const objectModule: InterpreterModule = {
             assign(objectProto, id(SemanticFieldNames.ARGS).field(SemanticFieldNames.PROTO)),
             id(objectProto).assignField(
                 "toString",
-                native(
+                jsFun(
                     (args, context) => {
                         const self = args.getFieldEntry(SemanticFieldNames.SELF, context).value;
                         return context.newString(self.toString());

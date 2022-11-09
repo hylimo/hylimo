@@ -1,4 +1,4 @@
-import { Expression } from "../../parser/ast";
+import { Expression, InvocationArgument } from "../../parser/ast";
 import { InterpreterContext } from "../interpreter";
 import { RuntimeError } from "../runtimeError";
 import { SemanticFieldNames } from "../semanticFieldNames";
@@ -53,10 +53,10 @@ export abstract class BaseObject {
      * Only supported on some subclasses.
      * Throws an error by default, should be overwritten if call is supported
      *
-     * @param args Table containing all parameters
+     * @param args Arguments of the function, not yet evaluated
      * @param context context in which this is performed
      */
-    invoke(args: FullObject, context: InterpreterContext): BaseObject {
+    invoke(args: InvocationArgument[], context: InterpreterContext): BaseObject {
         throw new RuntimeError("Invoke not supported");
     }
 

@@ -86,7 +86,7 @@ export abstract class Expression {
      * Helper function to create an InvocationExpression without a position
      * and a field on this as target
      *
-     * @param field the name of the field to access and call
+     * @param name the name of the field to access and call
      * @param args arguments passt to the function
      * @returns the created InvocationExpression
      */
@@ -111,6 +111,27 @@ export abstract class Expression {
      */
     assignField(field: string, value: Expression): AssignmentExpression {
         return new AssignmentExpression(field, this, value);
+    }
+}
+
+/**
+ * Wrapper over an already existing expression, can be used to prevent re-evaluation
+ */
+export class ConstExpression extends Expression {
+    /**
+     * Creates a new ConstExpression with the specified value
+     * @param value the value which is wrapped
+     */
+    constructor(readonly value: FieldEntry) {
+        super("ConstExpression");
+    }
+
+    override evaluate(_context: InterpreterContext): BaseObject {
+        return this.value.value;
+    }
+
+    override evaluateWithSource(_context: InterpreterContext): FieldEntry {
+        return this.value;
     }
 }
 
@@ -212,7 +233,10 @@ export class FunctionExpression extends AbstractFunctionExpression {
     }
 }
 
-export type NativeFunctionType = (args: FullObject, context: InterpreterContext) => BaseObject;
+/**
+ * Type for the callback of native functions
+ */
+export type NativeFunctionType = (args: InvocationArgument[], context: InterpreterContext) => BaseObject;
 
 /**
  * Native (JS) function expression
@@ -222,7 +246,6 @@ export class NativeFunctionExpression extends AbstractFunctionExpression {
     /**
      * Creates a new NativeFunctionExpression consiting of a set of decorator entires
      * and a callback which is executed to get the result of the function
-     * TODO: fix callback type
      *
      * @param callback executed to get the result of the function
      * @param decorator the decorator entries
@@ -253,22 +276,6 @@ export abstract class AbstractInvocationExpression extends Expression {
     constructor(readonly argumentExpressions: InvocationArgument[], type: string, position?: ASTExpressionPosition) {
         super(type, position);
     }
-
-    /**
-     * Generates the arguments map based on argumentExpressions
-     *
-     * @param context
-     * @returns
-     */
-    protected generateArgs(context: InterpreterContext): FullObject {
-        const args = context.newObject();
-        let indexCounter = 0;
-        for (const argumentExpression of this.argumentExpressions) {
-            const value = argumentExpression.value.evaluateWithSource(context);
-            args.setLocalField(argumentExpression.name ?? indexCounter++, value, context);
-        }
-        return args;
-    }
 }
 
 /**
@@ -294,8 +301,7 @@ export class InvocationExpression extends AbstractInvocationExpression {
 
     override evaluate(context: InterpreterContext): BaseObject {
         const targetValue = this.target.evaluate(context);
-        const args = this.generateArgs(context);
-        return targetValue.invoke(args, context);
+        return targetValue.invoke(this.argumentExpressions, context);
     }
 }
 
@@ -323,11 +329,12 @@ export class SelfInvocationExpression extends AbstractInvocationExpression {
     }
 
     override evaluate(context: InterpreterContext): BaseObject {
-        const targetValue = this.target.evaluate(context);
-        const fieldValue = targetValue.getField(this.name, context);
-        const args = this.generateArgs(context);
-        args.setLocalField(SemanticFieldNames.SELF, { value: targetValue }, context);
-        return fieldValue.invoke(args, context);
+        const targetValue = this.target.evaluateWithSource(context);
+        const fieldValue = targetValue.value.getField(this.name, context);
+        return fieldValue.invoke(
+            [...this.argumentExpressions, { value: new ConstExpression(targetValue), name: SemanticFieldNames.SELF }],
+            context
+        );
     }
 }
 

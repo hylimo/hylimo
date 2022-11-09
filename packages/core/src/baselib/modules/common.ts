@@ -1,4 +1,4 @@
-import { arg, assign, native } from "../../parser/astHelper";
+import { arg, assign, jsFun } from "../../parser/astHelper";
 import { InterpreterModule } from "../../runtime/interpreter";
 import { DefaultModuleNames } from "../defaultModuleNames";
 import { assertFunction } from "../typeHelpers";
@@ -8,10 +8,10 @@ export const commonModule: InterpreterModule = {
     name: DefaultModuleNames.COMMON,
     dependencies: [DefaultModuleNames.BOOLEAN],
     expressions: [
-        assign("null", native((_, context) => context.null).call()),
+        assign("null", jsFun((_, context) => context.null).call()),
         assign(
             "isNull",
-            native(
+            jsFun(
                 (args, context) => {
                     if (args.getField(0, context) === context.null) {
                         return context.getField("true");
@@ -24,19 +24,19 @@ export const commonModule: InterpreterModule = {
         ),
         assign(
             "if",
-            native(
+            jsFun(
                 (args, context) => {
                     if (assertBoolean(args.getField(0, context), "first argument of if")) {
                         const ifBranch = args.getField(1, context);
                         assertFunction(ifBranch, "second argument of if");
-                        return ifBranch.invoke(context.newObject(), context);
+                        return ifBranch.invoke([], context);
                     } else {
                         const elseBranch = args.getField(2, context);
                         if (elseBranch === context.null) {
                             return context.null;
                         } else {
                             assertFunction(elseBranch, "third argument of if");
-                            return elseBranch.invoke(context.newObject(), context);
+                            return elseBranch.invoke([], context);
                         }
                     }
                 },

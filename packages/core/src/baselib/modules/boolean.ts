@@ -1,4 +1,4 @@
-import { assign, fun, id, native, str } from "../../parser/astHelper";
+import { assign, fun, id, jsFun, str } from "../../parser/astHelper";
 import { InterpreterModule } from "../../runtime/interpreter";
 import { FullObject } from "../../runtime/objects/fullObject";
 import { LiteralObject } from "../../runtime/objects/literal";
@@ -35,19 +35,19 @@ export const booleanModule: InterpreterModule = {
             assign(booleanProto, id(SemanticFieldNames.ARGS)),
             id(SemanticFieldNames.PROTO).assignField(
                 "true",
-                native((args, context) => new BooleanObject(true, args.getField(0, context) as FullObject)).call(
+                jsFun((args, context) => new BooleanObject(true, args.getField(0, context) as FullObject)).call(
                     id(booleanProto)
                 )
             ),
             id(SemanticFieldNames.PROTO).assignField(
                 "false",
-                native((args, context) => new BooleanObject(false, args.getField(0, context) as FullObject)).call(
+                jsFun((args, context) => new BooleanObject(false, args.getField(0, context) as FullObject)).call(
                     id(booleanProto)
                 )
             ),
             id(booleanProto).assignField(
                 "&&",
-                native(
+                jsFun(
                     (args, context) => {
                         const first = assertBoolean(
                             args.getField(SemanticFieldNames.SELF, context),
@@ -65,7 +65,7 @@ export const booleanModule: InterpreterModule = {
             ),
             id(booleanProto).assignField(
                 "||",
-                native(
+                jsFun(
                     (args, context) => {
                         const first = assertBoolean(
                             args.getField(SemanticFieldNames.SELF, context),

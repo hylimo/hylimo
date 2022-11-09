@@ -1,4 +1,4 @@
-import { assign, fun, id, native } from "../../parser/astHelper";
+import { assign, fun, id, jsFun } from "../../parser/astHelper";
 import { Interpreter, InterpreterModule } from "../../runtime/interpreter";
 import { SemanticFieldNames } from "../../runtime/semanticFieldNames";
 import { DefaultModuleNames } from "../defaultModuleNames";
@@ -13,7 +13,7 @@ export const debugModule: InterpreterModule = {
     expressions: [
         assign(
             "printlnInternal",
-            native(
+            jsFun(
                 (args, context) => {
                     const value = args.getField(0, context);
                     const stringValue = assertString(value, "first argument of printlnInternal");

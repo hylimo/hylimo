@@ -1,4 +1,4 @@
-import { FunctionExpression, NativeFunctionExpression } from "../../parser/ast";
+import { FunctionExpression, InvocationArgument, NativeFunctionExpression } from "../../parser/ast";
 import { InterpreterContext } from "../interpreter";
 import { SemanticFieldNames } from "../semanticFieldNames";
 import { BaseObject, SimpleObject } from "./baseObject";
@@ -8,6 +8,22 @@ import { FullObject } from "./fullObject";
  * Base class for js functions and normal functions
  */
 export abstract class AbstractFunctionObject extends SimpleObject {}
+
+/**
+ * * Generates the arguments map based on argumentExpressions
+ *
+ * @param context context in which this is performed
+ * @returns the generated args
+ */
+export function generateArgs(args: InvocationArgument[], context: InterpreterContext): FullObject {
+    const argsObject = context.newObject();
+    let indexCounter = 0;
+    for (const argumentExpression of args) {
+        const value = argumentExpression.value.evaluateWithSource(context);
+        argsObject.setLocalField(argumentExpression.name ?? indexCounter++, value, context);
+    }
+    return argsObject;
+}
 
 /**
  * Function based on a DSL function
@@ -24,12 +40,12 @@ export class FunctionObject extends AbstractFunctionObject {
         super(proto);
     }
 
-    override invoke(args: FullObject, context: InterpreterContext): BaseObject {
+    override invoke(args: InvocationArgument[], context: InterpreterContext): BaseObject {
         const oldScope = context.currentScope;
         const newScope = new FullObject();
         newScope.setLocalField(SemanticFieldNames.PROTO, { value: this.parentScope }, context);
         newScope.setLocalField(SemanticFieldNames.THIS, { value: newScope }, context);
-        newScope.setLocalField(SemanticFieldNames.ARGS, { value: args }, context);
+        newScope.setLocalField(SemanticFieldNames.ARGS, { value: generateArgs(args, context) }, context);
         context.currentScope = newScope;
         let lastValue: BaseObject = context.null;
         for (const expression of this.definition.expressions) {
@@ -58,7 +74,7 @@ export class NativeFunctionObject extends AbstractFunctionObject {
         super(proto);
     }
 
-    override invoke(args: FullObject, context: InterpreterContext): BaseObject {
+    override invoke(args: InvocationArgument[], context: InterpreterContext): BaseObject {
         return this.definition.callback(args, context);
     }
 

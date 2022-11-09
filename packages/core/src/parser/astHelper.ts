@@ -1,3 +1,7 @@
+import { InterpreterContext } from "../runtime/interpreter";
+import { BaseObject } from "../runtime/objects/baseObject";
+import { FullObject } from "../runtime/objects/fullObject";
+import { generateArgs } from "../runtime/objects/function";
 import {
     AssignmentExpression,
     Expression,
@@ -107,7 +111,24 @@ export function fun(
 }
 
 /**
- * Helper to create a NativeFunctionExpression
+ * Helper to create a NativeFunctionExpression with already evaluated arguments
+ *
+ * @param callback executed to get the result of the function
+ * @param decorators decorators applied to the function
+ * @returns the created FunctionExpression
+ */
+export function jsFun(
+    callback: (args: FullObject, context: InterpreterContext) => BaseObject,
+    decorators: { [index: string]: string | null } = {}
+): NativeFunctionExpression {
+    return new NativeFunctionExpression(
+        (args, context) => callback(generateArgs(args, context), context),
+        parseDecorators(decorators)
+    );
+}
+
+/**
+ * Helper to create a NativeFunctionExpression with already evaluated arguments
  *
  * @param callback executed to get the result of the function
  * @param decorators decorators applied to the function
