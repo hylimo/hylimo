@@ -123,6 +123,23 @@ export const booleanModule: InterpreterModule = {
                     }
                 )
             )
-        ]).call()
+        ]).call(),
+        assign(
+            "!",
+            jsFun(
+                (args, context) => {
+                    return toBoolean(!assertBoolean(args.getField(0, context), "first argument of not"), context);
+                },
+                {
+                    docs: `
+                        Negates a boolean
+                        Params:
+                            0: the boolean to negate
+                        Returns:
+                            The negated argument
+                    `
+                }
+            )
+        )
     ]
 };

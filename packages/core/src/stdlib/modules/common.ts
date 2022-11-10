@@ -1,5 +1,6 @@
-import { arg, assign, jsFun } from "../../parser/astHelper";
+import { assign, fun, id, jsFun, str } from "../../parser/astHelper";
 import { InterpreterModule } from "../../runtime/interpreter";
+import { SemanticFieldNames } from "../../runtime/semanticFieldNames";
 import { DefaultModuleNames } from "../defaultModuleNames";
 import { assertFunction } from "../typeHelpers";
 import { assertBoolean } from "./boolean";
@@ -11,30 +12,9 @@ import { assertBoolean } from "./boolean";
 export const commonModule: InterpreterModule = {
     name: DefaultModuleNames.COMMON,
     dependencies: [],
-    runtimeDependencies: [DefaultModuleNames.BOOLEAN],
+    runtimeDependencies: [DefaultModuleNames.BOOLEAN, DefaultModuleNames.OPERATOR],
     expressions: [
         assign("null", jsFun((_, context) => context.null).call()),
-        assign(
-            "isNull",
-            jsFun(
-                (args, context) => {
-                    if (args.getField(0, context) === context.null) {
-                        return context.getField("true");
-                    } else {
-                        return context.getField("false");
-                    }
-                },
-                {
-                    docs: `
-                        Checks if the first argument is null
-                        Params:
-                            - 0: input to check for equality with null
-                        Returns:
-                            true if the first argument is null, otherwise false
-                    `
-                }
-            )
-        ),
         assign(
             "if",
             jsFun(
@@ -74,15 +54,14 @@ export const commonModule: InterpreterModule = {
                     const body = args.getField(1, context);
                     assertFunction(condition, "first argument of while");
                     assertFunction(body, "second argument of while");
-                    let lastRes = { value: context.null };
                     while (true) {
                         const conditionRes = condition.invoke([], context).value;
                         if (!assertBoolean(conditionRes, "result of the condition function")) {
                             break;
                         }
-                        lastRes = body.invoke([], context);
+                        body.invoke([], context);
                     }
-                    return lastRes;
+                    return context.null;
                 },
                 {
                     docs: `
@@ -91,7 +70,30 @@ export const commonModule: InterpreterModule = {
                             - 0: the condition function, executed before each loop, must return a boolean
                             - 1: the body function, executed on each loop
                         Returns:
-                            The result of the last execution of the body function, if never executed null   
+                            null
+                    `
+                }
+            )
+        ),
+        assign(
+            "toStr",
+            fun(
+                [
+                    id(SemanticFieldNames.THIS).assignField("_value", id(SemanticFieldNames.ARGS).field(0)),
+                    id("if").call(
+                        id("==").call(id("null"), id("_value")),
+                        fun([str("null")]),
+                        fun([id("_value").callField("toString")])
+                    )
+                ],
+                {
+                    docs: `
+                        Transforms the input to a string and returns it.
+                        If the input is null, returns null directly, otherwise calls toString on the input
+                        Params:
+                            - 0: the input to transform
+                        Returns:
+                            The string representation
                     `
                 }
             )

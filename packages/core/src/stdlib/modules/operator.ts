@@ -1,9 +1,10 @@
 import { ConstExpression } from "../../parser/ast";
-import { assign, native } from "../../parser/astHelper";
+import { assign, fun, id, jsFun, native } from "../../parser/astHelper";
 import { InterpreterModule } from "../../runtime/interpreter";
 import { RuntimeError } from "../../runtime/runtimeError";
 import { SemanticFieldNames } from "../../runtime/semanticFieldNames";
 import { DefaultModuleNames } from "../defaultModuleNames";
+import { toBoolean } from "./boolean";
 
 /**
  * Operator module
@@ -13,25 +14,26 @@ import { DefaultModuleNames } from "../defaultModuleNames";
 export const operatorModule: InterpreterModule = {
     name: DefaultModuleNames.OPERATOR,
     dependencies: [],
-    runtimeDependencies: [],
-    expressions: ["+", "-", "*", "/", "%", "&&", "||", "==", "!=", ">", ">=", "<", "<="].map((operator) =>
-        assign(
-            operator,
-            native(
-                (args, context) => {
-                    if (args.length != 2 || args[0].name !== undefined || args[1].name !== undefined) {
-                        throw new RuntimeError(`Expected exactly two positional arguments for ${operator}`);
-                    }
-                    const target = args[0].value.evaluateWithSource(context);
-                    return target.value
-                        .getField(operator, context)
-                        .invoke(
-                            [args[1], { name: SemanticFieldNames.SELF, value: new ConstExpression(target) }],
-                            context
-                        );
-                },
-                {
-                    docs: `
+    runtimeDependencies: [DefaultModuleNames.BOOLEAN],
+    expressions: [
+        ...["+", "-", "*", "/", "%", "&&", "||", ">", ">=", "<", "<="].map((operator) =>
+            assign(
+                operator,
+                native(
+                    (args, context) => {
+                        if (args.length != 2 || args[0].name !== undefined || args[1].name !== undefined) {
+                            throw new RuntimeError(`Expected exactly two positional arguments for ${operator}`);
+                        }
+                        const target = args[0].value.evaluateWithSource(context);
+                        return target.value
+                            .getField(operator, context)
+                            .invoke(
+                                [args[1], { name: SemanticFieldNames.SELF, value: new ConstExpression(target) }],
+                                context
+                            );
+                    },
+                    {
+                        docs: `
                         The ${operator} operator, expects two arguments, calls ${operator} on the first 
                         argument with the second argument.
                         Params:
@@ -40,8 +42,63 @@ export const operatorModule: InterpreterModule = {
                         Returns:
                             The result of the invokation of ${operator} on the first argument
                     `
+                    }
+                )
+            )
+        ),
+        assign(
+            "==",
+            jsFun(
+                (args, context) => {
+                    const first = args.getFieldEntry(0, context);
+                    const second = args.getFieldEntry(1, context);
+                    if (first.value === context.null) {
+                        return toBoolean(second.value === context.null, context);
+                    } else {
+                        return first.value
+                            .getField("==", context)
+                            .invoke(
+                                [
+                                    { name: SemanticFieldNames.SELF, value: new ConstExpression(first) },
+                                    { value: new ConstExpression(second) }
+                                ],
+                                context
+                            );
+                    }
+                },
+                {
+                    docs: `
+                        Equality operator. If first argument is null, returns true iff second argument is null.
+                        Otherwise calls == on the first argument with the second argument.
+                        Params:
+                            - 0: the left side of the == operator
+                            - 1: the right side of the == operator
+                        Returns:
+                            The result of the comparison, if the left side is null guaranteed a boolean, otherwise
+                            the result of the invokedc function.
+                    `
+                }
+            )
+        ),
+        assign(
+            "!=",
+            fun(
+                [
+                    id("!").call(
+                        id("==").call(id(SemanticFieldNames.ARGS).field(0), id(SemanticFieldNames.ARGS).field(1))
+                    )
+                ],
+                {
+                    docs: `
+                        Unequality operator, negates the result of the equality operator
+                        Params:
+                            - 0: the left side of the != operator
+                            - 1: the right side of the != operator
+                        Returns:
+                            The negated result of the == operator
+                    `
                 }
             )
         )
-    )
+    ]
 };

@@ -2,11 +2,12 @@ import { DefaultModuleNames } from "../defaultModuleNames";
 import { InterpreterModule } from "../../runtime/interpreter";
 import { assign, fun, id, jsFun, str } from "../../parser/astHelper";
 import { SemanticFieldNames } from "../../runtime/semanticFieldNames";
-import { assertObject } from "../typeHelpers";
+import { assertFunction, assertObject } from "../typeHelpers";
 import { BaseObject } from "../../runtime/objects/baseObject";
 import { StringObject } from "../../runtime/objects/string";
 import { NumberObject } from "../../runtime/objects/number";
 import { RuntimeError } from "../../runtime/runtimeError";
+import { ConstExpression, NumberLiteralExpression, StringLiteralExpression } from "../../parser/ast";
 
 /**
  * Name of the temporary field where the object prototype is assigned
@@ -122,31 +123,39 @@ export const objectModule: InterpreterModule = {
                         `
                     }
                 )
+            ),
+            id(objectProto).assignField(
+                "forEach",
+                jsFun(
+                    (args, context) => {
+                        const self = args.getField(SemanticFieldNames.SELF, context);
+                        const callback = args.getField(0, context);
+                        assertFunction(callback, "first positional argument of forEach");
+                        assertObject(self, "self argument of forEach");
+                        self.fields.forEach((value, key) => {
+                            const keyExpression =
+                                typeof key === "string"
+                                    ? new StringLiteralExpression(key)
+                                    : new NumberLiteralExpression(key);
+                            callback.invoke([{ value: new ConstExpression(value) }, { value: keyExpression }], context);
+                        });
+                        return context.null;
+                    },
+                    {
+                        docs: `
+                            Iterates over all fields of self and calls the callback with the value and key of the field.
+                            Includes the proto field.
+                            Does not guarantee any order of the visited fields.
+                            Params:
+                                - "self": the object on which all fields are iterated
+                                - 0: the callback, called with two positional parameters (value and key)
+                            Returns:
+                                null
+                        `
+                    }
+                )
             )
         ]).call(),
-        assign(
-            "toStr",
-            fun(
-                [
-                    id(SemanticFieldNames.THIS).assignField("_value", id(SemanticFieldNames.ARGS).field(0)),
-                    id("if").call(
-                        id("isNull").call(id("_value")),
-                        fun([str("null")]),
-                        fun([id("_value").callField("toString")])
-                    )
-                ],
-                {
-                    docs: `
-                        Transforms the input to a string and returns it.
-                        If the input is null, returns null directly, otherwise calls toString on the input
-                        Params:
-                            - 0: the input to transform
-                        Returns:
-                            The string representation
-                    `
-                }
-            )
-        ),
         assign(
             "object",
             fun([id(SemanticFieldNames.ARGS)], {
