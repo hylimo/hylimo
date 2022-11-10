@@ -2,6 +2,7 @@ import { CstNode, ICstVisitor, IToken } from "chevrotain";
 import {
     AssignmentExpression,
     ASTExpressionPosition,
+    DestructuringExpression,
     Expression,
     FieldAccessExpression,
     FunctionExpression,
@@ -322,26 +323,45 @@ export function generateVisitor(parser: Parser): ICstVisitor<never, any> {
         }
 
         /**
+         * Maps a destructuring expression
+         *
+         * @param ctx the children of the current CST node
+         * @returns the resulting expression
+         */
+        private destructuringExpression(ctx: any): Expression {
+            const expression = this.visit(ctx.operatorExpression);
+            return new DestructuringExpression(
+                ctx.Identifier.map((identifier: IToken) => identifier.image),
+                expression,
+                generatePosition(ctx.OpenRoundBracket[0], expression.position)
+            );
+        }
+
+        /**
          * Maps an expression
          *
          * @param ctx the children of the current CST node
          * @returns the resulting expression
          */
-        private expression(ctx: any) {
-            const expressions = ctx.operatorExpression.map((exp: CstNode) => this.visit(exp));
-            if (expressions.length > 1) {
-                const target = expressions[0];
-                const value = expressions[1];
-                const position = generatePosition(target.position, value.position);
-                if (target instanceof IdentifierExpression) {
-                    return new AssignmentExpression(target.identifier, undefined, value, position);
-                } else if (target instanceof FieldAccessExpression) {
-                    return new AssignmentExpression(target.name as string, target.target, value, position);
-                } else {
-                    throw Error("invalid assignment target");
-                }
+        private expression(ctx: any): Expression {
+            if (ctx.destructuringExpression) {
+                return this.visit(ctx.destructuringExpression);
             } else {
-                return expressions[0];
+                const expressions = ctx.operatorExpression.map((exp: CstNode) => this.visit(exp));
+                if (expressions.length > 1) {
+                    const target = expressions[0];
+                    const value = expressions[1];
+                    const position = generatePosition(target.position, value.position);
+                    if (target instanceof IdentifierExpression) {
+                        return new AssignmentExpression(target.identifier, undefined, value, position);
+                    } else if (target instanceof FieldAccessExpression) {
+                        return new AssignmentExpression(target.name as string, target.target, value, position);
+                    } else {
+                        throw Error("invalid assignment target");
+                    }
+                } else {
+                    return expressions[0];
+                }
             }
         }
     }

@@ -35,7 +35,8 @@ export enum Rules {
     FIELD_ACCESS_EXPRESSION = "fieldAccessExpression",
     SIMPLE_FIELD_ACCESS_EXPRESSION = "simpleFieldAccessExpression",
     OPERATOR_EXPRESSION = "operatorExpression",
-    EXPRESSION = "expression"
+    EXPRESSION = "expression",
+    DESTRUCTURING_EXPRESSION = "destructuringExpression"
 }
 
 /**
@@ -259,17 +260,43 @@ export class Parser extends CstParser {
     });
 
     /**
+     * Destructuring expression, consisting of a left side of one or more identifiers in brackets,
+     * an Equal sign and an operatorExpression on the right side.
+     */
+    private destructuringExpression = this.RULE(Rules.DESTRUCTURING_EXPRESSION, () => {
+        this.CONSUME(OpenRoundBracket);
+        this.AT_LEAST_ONE_SEP({
+            SEP: Comma,
+            DEF: () => this.CONSUME(Identifier)
+        });
+        this.CONSUME(CloseRoundBracket);
+        this.CONSUME(Equal);
+        this.SUBRULE(this.operatorExpression);
+    });
+
+    /**
      * Expression, consisting of an operator expression and an assignment target
      */
     private expression = this.RULE(Rules.EXPRESSION, () => {
-        const leftSide = this.SUBRULE1(this.operatorExpression);
-        this.OPTION({
-            GATE: () => this.LA(0).tokenType == Identifier && leftSide.children.fieldAccessExpression.length == 1,
-            DEF: () => {
-                this.CONSUME2(Equal);
-                this.SUBRULE2(this.operatorExpression);
+        this.OR([
+            {
+                GATE: () => this.LA(3).tokenType === Comma || this.LA(4).tokenType === Equal,
+                ALT: () => this.SUBRULE(this.destructuringExpression)
+            },
+            {
+                ALT: () => {
+                    const leftSide = this.SUBRULE1(this.operatorExpression);
+                    this.OPTION({
+                        GATE: () =>
+                            this.LA(0).tokenType == Identifier && leftSide.children.fieldAccessExpression.length == 1,
+                        DEF: () => {
+                            this.CONSUME(Equal);
+                            this.SUBRULE2(this.operatorExpression);
+                        }
+                    });
+                }
             }
-        });
+        ]);
     });
 
     /**

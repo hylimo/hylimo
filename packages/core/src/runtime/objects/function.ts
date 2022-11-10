@@ -50,7 +50,7 @@ export class FunctionObject extends AbstractFunctionObject {
         context.currentScope = newScope;
         let lastValue: BaseObject = context.null;
         for (const expression of this.definition.expressions) {
-            lastValue = expression.evaluate(context);
+            lastValue = expression.evaluate(context).value;
         }
         context.currentScope = oldScope;
         return { value: lastValue };

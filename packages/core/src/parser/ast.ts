@@ -36,21 +36,18 @@ export abstract class Expression {
      *
      * @param context context in which this is performed
      */
-    abstract evaluate(context: InterpreterContext): BaseObject;
+    abstract evaluate(context: InterpreterContext): FieldEntry;
 
     /**
      * Evaluates this expression, also provides the source of the result.
-     * This default implementation returns itself as the source.
-     * Should be overwritten if other semantics are wanted (e.g. for field access).
+     * Uses evaluate, if no source is set, sets itelf as source.
+     * Should be overwritten if other logic is required.
      *
      * @param context context in which this is performed
      * @returns the evaluation result
      */
     evaluateWithSource(context: InterpreterContext): FieldEntry {
-        return {
-            value: this.evaluate(context),
-            source: this
-        };
+        return this.ensureSource(this.evaluate(context));
     }
 
     /**
@@ -144,11 +141,7 @@ export class ConstExpression extends Expression {
         super("ConstExpression");
     }
 
-    override evaluate(_context: InterpreterContext): BaseObject {
-        return this.value.value;
-    }
-
-    override evaluateWithSource(_context: InterpreterContext): FieldEntry {
+    override evaluate(_context: InterpreterContext): FieldEntry {
         return this.value;
     }
 }
@@ -185,8 +178,8 @@ export class StringLiteralExpression extends LiteralExpression<string> {
         super(value, "StringLiteralExpression", position);
     }
 
-    override evaluate(context: InterpreterContext): BaseObject {
-        return new StringObject(this.value, context.stringPrototype);
+    override evaluate(context: InterpreterContext): FieldEntry {
+        return { value: new StringObject(this.value, context.stringPrototype) };
     }
 }
 
@@ -204,8 +197,8 @@ export class NumberLiteralExpression extends LiteralExpression<number> {
         super(value, "NumberLiteralExpression", position);
     }
 
-    override evaluate(context: InterpreterContext): BaseObject {
-        return new NumberObject(this.value, context.numberPrototype);
+    override evaluate(context: InterpreterContext): FieldEntry {
+        return { value: new NumberObject(this.value, context.numberPrototype) };
     }
 }
 
@@ -246,8 +239,8 @@ export class FunctionExpression extends AbstractFunctionExpression {
         super(decorator, "FunctionExpression", position);
     }
 
-    override evaluate(context: InterpreterContext): BaseObject {
-        return new FunctionObject(this, context.currentScope, context.functionPrototype);
+    override evaluate(context: InterpreterContext): FieldEntry {
+        return { value: new FunctionObject(this, context.currentScope, context.functionPrototype) };
     }
 }
 
@@ -277,8 +270,8 @@ export class NativeFunctionExpression extends AbstractFunctionExpression {
         super(decorator, "NativeFunctionExpression", position);
     }
 
-    override evaluate(context: InterpreterContext): BaseObject {
-        return new NativeFunctionObject(this, context.nativeFunctionPrototype);
+    override evaluate(context: InterpreterContext): FieldEntry {
+        return { value: new NativeFunctionObject(this, context.nativeFunctionPrototype) };
     }
 }
 
@@ -293,21 +286,6 @@ export abstract class AbstractInvocationExpression extends Expression {
      */
     constructor(readonly argumentExpressions: InvocationArgument[], type: string, position?: ASTExpressionPosition) {
         super(type, position);
-    }
-
-    /**
-     * Evaluates this expression, returns a field entry where the source can optionally be set
-     *
-     * @param context context in which this is performed
-     */
-    abstract rawEvaluate(context: InterpreterContext): FieldEntry;
-
-    override evaluate(context: InterpreterContext): BaseObject {
-        return this.rawEvaluate(context).value;
-    }
-
-    override evaluateWithSource(context: InterpreterContext): FieldEntry {
-        return this.ensureSource(this.rawEvaluate(context));
     }
 }
 
@@ -332,8 +310,8 @@ export class InvocationExpression extends AbstractInvocationExpression {
         super(argumentExpressions, "InvokationExpression", position);
     }
 
-    override rawEvaluate(context: InterpreterContext): FieldEntry {
-        const targetValue = this.target.evaluate(context);
+    override evaluate(context: InterpreterContext): FieldEntry {
+        const targetValue = this.target.evaluate(context).value;
         return targetValue.invoke(this.argumentExpressions, context);
     }
 }
@@ -361,7 +339,7 @@ export class SelfInvocationExpression extends AbstractInvocationExpression {
         super(argumentExpressions, "InvokationExpression", position);
     }
 
-    override rawEvaluate(context: InterpreterContext): FieldEntry {
+    override evaluate(context: InterpreterContext): FieldEntry {
         const targetValue = this.target.evaluateWithSource(context);
         const fieldValue = targetValue.value.getField(this.name, context);
         return fieldValue.invoke(
@@ -387,12 +365,8 @@ export class FieldAccessExpression extends Expression {
         super("FieldAccessExpression", position);
     }
 
-    override evaluate(context: InterpreterContext): BaseObject {
-        return this.evaluateWithSource(context).value;
-    }
-
-    override evaluateWithSource(context: InterpreterContext): FieldEntry {
-        const targetValue = this.target.evaluate(context);
+    override evaluate(context: InterpreterContext): FieldEntry {
+        const targetValue = this.target.evaluate(context).value;
         return targetValue.getFieldEntry(this.name, context);
     }
 }
@@ -411,11 +385,7 @@ export class IdentifierExpression extends Expression {
         super("IdentifierExpression", position);
     }
 
-    override evaluate(context: InterpreterContext): BaseObject {
-        return this.evaluateWithSource(context).value;
-    }
-
-    override evaluateWithSource(context: InterpreterContext): FieldEntry {
+    override evaluate(context: InterpreterContext): FieldEntry {
         return context.currentScope.getFieldEntry(this.identifier, context);
     }
 }
@@ -443,22 +413,43 @@ export class AssignmentExpression extends Expression {
         super("AssignmentExpression", position);
     }
 
-    override evaluate(context: InterpreterContext): BaseObject {
-        return this.evaluateWithSource(context).value;
-    }
-
-    override evaluateWithSource(context: InterpreterContext): FieldEntry {
+    override evaluate(context: InterpreterContext): FieldEntry {
         let targetValue: BaseObject;
         if (this.target) {
-            targetValue = this.target.evaluate(context);
+            targetValue = this.target.evaluate(context).value;
         } else {
             targetValue = context.currentScope;
         }
-        let valueValue = this.ensureSource(this.value.evaluateWithSource(context));
+        let valueValue = this.value.evaluateWithSource(context);
         if (this.target) {
             targetValue.setLocalField(this.name, valueValue, context);
         } else {
             targetValue.setFieldEntry(this.name, valueValue, context);
+        }
+        return valueValue;
+    }
+}
+
+/**
+ * Destructuring expression
+ * Evaluates the right side, and assigns all names on the left side the value at their index
+ */
+export class DestructuringExpression extends Expression {
+    /**
+     * Creates a new DestructuringExpression consisting of a set of names to assign, and the value to destructure
+     *
+     * @param names the names of the field on the current context to assign
+     * @param value the right hand side, provides the values
+     * @param position if defined, where in the source code the expression is
+     */
+    constructor(readonly names: string[], readonly value: Expression, position?: ASTExpressionPosition) {
+        super("DestructuringExpression", position);
+    }
+
+    override evaluate(context: InterpreterContext): FieldEntry {
+        const valueValue = this.value.evaluate(context);
+        for (let i = 0; i < this.names.length; i++) {
+            context.currentScope.setFieldEntry(this.names[i], valueValue.value.getFieldEntry(i, context), context);
         }
         return valueValue;
     }
