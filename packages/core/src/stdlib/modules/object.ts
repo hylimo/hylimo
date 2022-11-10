@@ -1,6 +1,6 @@
 import { DefaultModuleNames } from "../defaultModuleNames";
 import { InterpreterModule } from "../../runtime/interpreter";
-import { assign, fun, id, jsFun, str } from "../../parser/astHelper";
+import { assign, fun, id, jsFun } from "../../parser/astHelper";
 import { SemanticFieldNames } from "../../runtime/semanticFieldNames";
 import { assertFunction, assertObject } from "../typeHelpers";
 import { BaseObject } from "../../runtime/objects/baseObject";
@@ -8,6 +8,7 @@ import { StringObject } from "../../runtime/objects/string";
 import { NumberObject } from "../../runtime/objects/number";
 import { RuntimeError } from "../../runtime/runtimeError";
 import { ConstExpression, NumberLiteralExpression, StringLiteralExpression } from "../../parser/ast";
+import { toBoolean } from "./boolean";
 
 /**
  * Name of the temporary field where the object prototype is assigned
@@ -151,6 +152,26 @@ export const objectModule: InterpreterModule = {
                                 - 0: the callback, called with two positional parameters (value and key)
                             Returns:
                                 null
+                        `
+                    }
+                )
+            ),
+            id(objectProto).assignField(
+                "==",
+                jsFun(
+                    (args, context) => {
+                        const self = args.getField(SemanticFieldNames.SELF, context);
+                        const other = args.getField(0, context);
+                        return toBoolean(self === other, context);
+                    },
+                    {
+                        docs: `
+                            Compares self to another value, returns true if they are the same.
+                            Params:
+                                - "self": one value for the comparison
+                                - 0: other value for the comparison
+                            Returns:
+                                true iff both values are the same
                         `
                     }
                 )

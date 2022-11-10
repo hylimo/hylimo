@@ -1,5 +1,6 @@
-import { arg, assign, fun, id, jsFun, num } from "../../parser/astHelper";
+import { assign, fun, id, jsFun, num } from "../../parser/astHelper";
 import { InterpreterModule } from "../../runtime/interpreter";
+import { NumberObject } from "../../runtime/objects/number";
 import { SemanticFieldNames } from "../../runtime/semanticFieldNames";
 import { DefaultModuleNames } from "../defaultModuleNames";
 import { assertNumber } from "../typeHelpers";
@@ -11,7 +12,7 @@ import { toBoolean } from "./boolean";
 const numberProto = "numberProto";
 
 /**
- * Number module providing numerical operators (+, -, *, /, %, <, <=, >, >=)
+ * Number module providing numerical operators (+, -, *, /, %, <, <=, >, >=, ==)
  */
 export const numberModule: InterpreterModule = {
     name: DefaultModuleNames.NUMBER,
@@ -209,6 +210,35 @@ export const numberModule: InterpreterModule = {
                                 - 0: the right side of the comparison, must be a number
                             Returns:
                                 true if the left side is greater than or equal to the right side
+                        `
+                    }
+                )
+            ),
+            id(numberProto).assignField(
+                "==",
+                jsFun(
+                    (args, context) => {
+                        const self = assertNumber(
+                            args.getField(SemanticFieldNames.SELF, context),
+                            "self argument of =="
+                        );
+                        const other = args.getField(0, context);
+                        let res: boolean;
+                        if (other instanceof NumberObject) {
+                            res = self === other.value;
+                        } else {
+                            res = false;
+                        }
+                        return toBoolean(res, context);
+                    },
+                    {
+                        docs: `
+                            Compares self to another value, returns true if they are the same number.
+                            Params:
+                                - "self": a number to compare
+                                - 0: other value for the comparison
+                            Returns:
+                                true iff both values are the same number
                         `
                     }
                 )

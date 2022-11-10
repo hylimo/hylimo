@@ -1,4 +1,5 @@
 import { Expression, InvocationArgument } from "../parser/ast";
+import { BaseObject } from "../runtime/objects/baseObject";
 import { FullObject } from "../runtime/objects/fullObject";
 import { AbstractFunctionObject } from "../runtime/objects/function";
 import { NumberObject } from "../runtime/objects/number";
@@ -13,11 +14,21 @@ import { SemanticFieldNames } from "../runtime/semanticFieldNames";
  * @param description the description of the value, part of the error message
  * @returns the value of the StringObject
  */
-export function assertString(value: any, description: string): string {
+export function assertString(value: BaseObject, description: string): string {
     if (!(value instanceof StringObject)) {
         throw new RuntimeError(`${description} is not a string`);
     }
     return value.value;
+}
+
+/**
+ * Checks if a value is a StringObjectring
+ *
+ * @param value the value to check
+ * @returns true iff it is a StringObject
+ */
+export function isString(value: BaseObject): boolean {
+    return value instanceof StringObject;
 }
 
 /**
@@ -27,11 +38,21 @@ export function assertString(value: any, description: string): string {
  * @param description the description of the value, part of the error message
  * @returns the value of the NumberObject
  */
-export function assertNumber(value: any, description: string): number {
+export function assertNumber(value: BaseObject, description: string): number {
     if (!(value instanceof NumberObject)) {
         throw new RuntimeError(`${description} is not a number`);
     }
     return value.value;
+}
+
+/**
+ * Checks if a value is a NumberObject
+ *
+ * @param value the value to check
+ * @returns true iff it is a NumberObject
+ */
+export function isNumber(value: BaseObject): boolean {
+    return value instanceof NumberObject;
 }
 
 /**
@@ -40,7 +61,7 @@ export function assertNumber(value: any, description: string): number {
  * @param value the value to check
  * @param description the description of the value, part of the error message
  */
-export function assertFunction(value: any, description: string): asserts value is AbstractFunctionObject {
+export function assertFunction(value: BaseObject, description: string): asserts value is AbstractFunctionObject {
     if (!(value instanceof AbstractFunctionObject)) {
         throw new RuntimeError(`${description} is not a function`);
     }
@@ -52,7 +73,7 @@ export function assertFunction(value: any, description: string): asserts value i
  * @param value the value to check
  * @param description the description of the value, part of the error message
  */
-export function assertObject(value: any, description: string): asserts value is FullObject {
+export function assertObject(value: BaseObject, description: string): asserts value is FullObject {
     if (!(value instanceof FullObject)) {
         throw new RuntimeError(`${description} is not an object`);
     }

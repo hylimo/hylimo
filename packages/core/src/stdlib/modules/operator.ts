@@ -4,6 +4,7 @@ import { InterpreterModule } from "../../runtime/interpreter";
 import { RuntimeError } from "../../runtime/runtimeError";
 import { SemanticFieldNames } from "../../runtime/semanticFieldNames";
 import { DefaultModuleNames } from "../defaultModuleNames";
+import { isString } from "../typeHelpers";
 import { toBoolean } from "./boolean";
 
 /**
@@ -16,7 +17,7 @@ export const operatorModule: InterpreterModule = {
     dependencies: [],
     runtimeDependencies: [DefaultModuleNames.BOOLEAN],
     expressions: [
-        ...["+", "-", "*", "/", "%", "&&", "||", ">", ">=", "<", "<="].map((operator) =>
+        ...["-", "*", "/", "%", "&&", "||", ">", ">=", "<", "<="].map((operator) =>
             assign(
                 operator,
                 native(
@@ -34,14 +35,14 @@ export const operatorModule: InterpreterModule = {
                     },
                     {
                         docs: `
-                        The ${operator} operator, expects two arguments, calls ${operator} on the first 
-                        argument with the second argument.
-                        Params:
-                            - 0: the target where ${operator} is invoked
-                            - 1: the value passed to the ${operator} function
-                        Returns:
-                            The result of the invokation of ${operator} on the first argument
-                    `
+                            The ${operator} operator, expects two arguments, calls ${operator} on the first 
+                            argument with the second argument.
+                            Params:
+                                - 0: the target where ${operator} is invoked
+                                - 1: the value passed to the ${operator} function
+                            Returns:
+                                The result of the invokation of ${operator} on the first argument
+                        `
                     }
                 )
             )
@@ -96,6 +97,41 @@ export const operatorModule: InterpreterModule = {
                             - 1: the right side of the != operator
                         Returns:
                             The negated result of the == operator
+                    `
+                }
+            )
+        ),
+        assign(
+            "+",
+            jsFun(
+                (args, context) => {
+                    let first = args.getFieldEntry(0, context);
+                    let second = args.getFieldEntry(1, context);
+                    if (isString(first.value) && !isString(second.value)) {
+                        second = context.getField("toStr").invoke([{ value: new ConstExpression(second) }], context);
+                    } else if (isString(second.value) && !isString(first.value)) {
+                        first = context.getField("toStr").invoke([{ value: new ConstExpression(first) }], context);
+                    }
+                    return first.value
+                        .getField("+", context)
+                        .invoke(
+                            [
+                                { name: SemanticFieldNames.SELF, value: new ConstExpression(first) },
+                                { value: new ConstExpression(second) }
+                            ],
+                            context
+                        );
+                },
+                {
+                    docs: `
+                        The + operator, expects two arguments, calls + on the first 
+                        argument with the second argument.
+                        If any of the two arguments is a string, implicitely converts the other to a string.
+                        Params:
+                            - 0: the target where + is invoked
+                            - 1: the value passed to the + function
+                        Returns:
+                            The result of the invokation of + on the first argument
                     `
                 }
             )
