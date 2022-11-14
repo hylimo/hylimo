@@ -1,6 +1,7 @@
 import { booleanModule } from "./modules/boolean";
 import { commonModule } from "./modules/common";
 import { debugModule } from "./modules/debug";
+import { listModule } from "./modules/list";
 import { numberModule } from "./modules/number";
 import { objectModule } from "./modules/object";
 import { operatorModule } from "./modules/operator";
@@ -16,5 +17,6 @@ export const defaultModules = [
     booleanModule,
     operatorModule,
     numberModule,
-    stringModule
+    stringModule,
+    listModule
 ];

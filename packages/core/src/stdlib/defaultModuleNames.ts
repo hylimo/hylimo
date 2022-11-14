@@ -8,5 +8,6 @@ export enum DefaultModuleNames {
     OBJECT = "baselib/object",
     DEBUG = "baselib/debug",
     COMMON = "baselib/common",
-    BOOLEAN = "baselib/boolean"
+    BOOLEAN = "baselib/boolean",
+    LIST = "baselib/list"
 }

@@ -1,6 +1,6 @@
 import { DefaultModuleNames } from "../defaultModuleNames";
 import { InterpreterModule } from "../../runtime/interpreter";
-import { assign, fun, id, jsFun } from "../../parser/astHelper";
+import { assign, fun, id, jsFun, num, str } from "../../parser/astHelper";
 import { SemanticFieldNames } from "../../runtime/semanticFieldNames";
 import { assertFunction, assertObject } from "../typeHelpers";
 import { BaseObject } from "../../runtime/objects/baseObject";
@@ -134,10 +134,7 @@ export const objectModule: InterpreterModule = {
                         assertFunction(callback, "first positional argument of forEach");
                         assertObject(self, "self argument of forEach");
                         self.fields.forEach((value, key) => {
-                            const keyExpression =
-                                typeof key === "string"
-                                    ? new StringLiteralExpression(key)
-                                    : new NumberLiteralExpression(key);
+                            const keyExpression = typeof key === "string" ? str(key) : num(key);
                             callback.invoke([{ value: new ConstExpression(value) }, { value: keyExpression }], context);
                         });
                         return context.null;

@@ -1,8 +1,9 @@
 import { assign, fun, id, jsFun, str } from "../../parser/astHelper";
 import { InterpreterModule } from "../../runtime/interpreter";
+import { RuntimeError } from "../../runtime/runtimeError";
 import { SemanticFieldNames } from "../../runtime/semanticFieldNames";
 import { DefaultModuleNames } from "../defaultModuleNames";
-import { assertFunction } from "../typeHelpers";
+import { assertFunction, assertString } from "../typeHelpers";
 import { assertBoolean } from "./boolean";
 
 /**
@@ -94,6 +95,21 @@ export const commonModule: InterpreterModule = {
                             - 0: the input to transform
                         Returns:
                             The string representation
+                    `
+                }
+            )
+        ),
+        assign(
+            "error",
+            jsFun(
+                (args, context) => {
+                    throw new RuntimeError(assertString(args.getField(0, context), "first argument of error"));
+                },
+                {
+                    docs: `
+                        Throws an error with the specified message.
+                        Params:
+                            - 0: the error message, must be a string
                     `
                 }
             )
