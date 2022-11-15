@@ -40,14 +40,18 @@ export class FunctionObject extends AbstractFunctionObject {
         super(proto);
     }
 
-    override invoke(args: InvocationArgument[], context: InterpreterContext): FieldEntry {
+    override invoke(args: InvocationArgument[], context: InterpreterContext, scope?: FullObject): FieldEntry {
         context.nextStep();
         const oldScope = context.currentScope;
-        const newScope = new FullObject();
-        newScope.setLocalField(SemanticFieldNames.PROTO, { value: this.parentScope }, context);
-        newScope.setLocalField(SemanticFieldNames.THIS, { value: newScope }, context);
-        newScope.setLocalField(SemanticFieldNames.ARGS, { value: generateArgs(args, context) }, context);
-        context.currentScope = newScope;
+        if (!scope) {
+            scope = new FullObject();
+            scope.setLocalField(SemanticFieldNames.PROTO, { value: this.parentScope }, context);
+        }
+        scope.setLocalField(SemanticFieldNames.THIS, { value: scope }, context);
+        const generatedArgs = generateArgs(args, context);
+        scope.setLocalField(SemanticFieldNames.ARGS, { value: generatedArgs }, context);
+        scope.setLocalField(SemanticFieldNames.IT, generatedArgs.getFieldEntry(0, context), context);
+        context.currentScope = scope;
         let lastValue: BaseObject = context.null;
         for (const expression of this.definition.expressions) {
             lastValue = expression.evaluate(context).value;

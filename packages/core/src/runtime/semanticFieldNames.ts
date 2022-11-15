@@ -21,5 +21,9 @@ export enum SemanticFieldNames {
     /**
      * Name of the stringify function
      */
-    TO_STRING = "toString"
+    TO_STRING = "toString",
+    /**
+     * Common name under which the first argument for a callback is stored into the scope
+     */
+    IT = "it"
 }
