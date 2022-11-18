@@ -1,5 +1,6 @@
 // @ts-check
 
+const MonacoWebpackPlugin = require("monaco-editor-webpack-plugin");
 const lightCodeTheme = require("prism-react-renderer/themes/github");
 const darkCodeTheme = require("prism-react-renderer/themes/dracula");
 
@@ -57,7 +58,27 @@ const config = {
                 theme: lightCodeTheme,
                 darkTheme: darkCodeTheme
             }
-        })
+        }),
+    plugins: [
+        () => ({
+            name: "custom-webpack-loaders",
+            configureWebpack: () => ({
+                module: {
+                    rules: [
+                        {
+                            test: /\.ttf$/,
+                            use: ["file-loader"]
+                        }
+                    ]
+                },
+                plugins: [
+                    new MonacoWebpackPlugin({
+                        languages: []
+                    })
+                ]
+            })
+        }),
+    ]
 };
 
 module.exports = config;
