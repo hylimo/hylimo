@@ -1,5 +1,11 @@
 import { InterpreterModule, Interpreter } from "@hylimo/core";
-import { Connection, TextDocumentChangeEvent, TextDocuments } from "vscode-languageserver";
+import {
+    Connection,
+    InitializeResult,
+    ServerCapabilities,
+    TextDocumentChangeEvent,
+    TextDocuments
+} from "vscode-languageserver";
 import { TextDocument } from "vscode-languageserver-textdocument";
 import { Diagram } from "./diagram";
 
@@ -48,6 +54,7 @@ export class LanguageServer {
      */
     constructor(readonly config: LanguageServerConfig) {
         this.connection = config.connection;
+        this.connection.onInitialize(this.onInitialize);
         this.textDocuments.listen(this.connection);
         this.interpreter = new Interpreter(config.interpreterModules);
         this.textDocuments.onDidOpen(this.onDidOpenTextDocument);
@@ -64,12 +71,22 @@ export class LanguageServer {
     }
 
     /**
+     * Called on initialize
+     * 
+     * @returns the init result including capabilities
+     */
+    private onInitialize(): InitializeResult {
+        const capabilities: ServerCapabilities = {};
+        return { capabilities };
+    }
+
+    /**
      * Callback for textDocuments.onDidOpen
      *
      * @param e the provided event
      */
     private onDidOpenTextDocument(e: TextDocumentChangeEvent<TextDocument>): void {
-        console.log("open")
+        console.log("open");
         this.diagrams.set(e.document.uri, new Diagram(e.document));
     }
 
@@ -79,7 +96,7 @@ export class LanguageServer {
      * @param e the provided event
      */
     private onDidCloseTextDocument(e: TextDocumentChangeEvent<TextDocument>): void {
-        console.log("close")
+        console.log("close");
         this.diagrams.delete(e.document.uri);
     }
 
@@ -88,7 +105,7 @@ export class LanguageServer {
      *
      * @param e the provided event
      */
-     private onDidChangeContentTextDocument(e: TextDocumentChangeEvent<TextDocument>): void {
+    private onDidChangeContentTextDocument(e: TextDocumentChangeEvent<TextDocument>): void {
         console.log("content changed");
     }
 }

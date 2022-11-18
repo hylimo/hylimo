@@ -1,12 +1,12 @@
 import { Allotment } from "allotment";
-import React, { lazy, Suspense, useEffect } from "react";
+import React, { lazy, Suspense } from "react";
 import { useColorMode } from "@docusaurus/theme-common";
 import "allotment/dist/style.css";
 import { customDarkTheme, customLightTheme, languageConfiguration, monarchTokenProvider } from "./language";
-import * as monaco from "monaco-editor";
 import BrowserOnly from "@docusaurus/BrowserOnly";
-import Loading from "@theme/Loading";
-import { defaultProps } from "prism-react-renderer";
+import { MonacoLanguageClient, CloseAction, ErrorAction, MonacoServices, MessageTransports } from 'monaco-languageclient';
+import { BrowserMessageReader, BrowserMessageWriter } from 'vscode-languageserver-protocol/browser.js';
+import { StandaloneServices } from 'vscode/services';
 
 /**
  * Monaco editor
@@ -37,23 +37,31 @@ export function HylimoEditor(): JSX.Element {
                                     }}
                                     theme={colorMode === "dark" ? "custom-dark" : "custom-light"}
                                     editorWillMount={(editor) => {
-                                        console.log("this shit again")
+                                        console.log("mount")
                                         editor.languages.register({ id: language });
                                         editor.languages.setLanguageConfiguration(
                                             language,
                                             languageConfiguration as any
                                         );
                                         editor.languages.setMonarchTokensProvider(
-                                            "syncscript",
+                                            language,
                                             monarchTokenProvider as any
                                         );
                                         editor.editor.defineTheme("custom-dark", customDarkTheme as any);
                                         editor.editor.defineTheme("custom-light", customLightTheme as any);
+                                        
+                                        StandaloneServices.initialize({});
+                                        MonacoServices.install();
+                                        const worker = new Worker(new URL("./languageServer.ts", import.meta.url));
+                                        const reader = new BrowserMessageReader(worker);
+                                        const writer = new BrowserMessageWriter(worker);
+                                        const languageClient = createLanguageClient({ reader, writer });
+                                        languageClient.start();
                                     }}
                                     editorWillUnmount={(editor) => {
                                         
                                     }}
-                                    language="syncscript"
+                                    language={language}
                                 ></MonacoEditor>
                             </Suspense>
                         </Allotment.Pane>
@@ -65,4 +73,28 @@ export function HylimoEditor(): JSX.Element {
             }}
         </BrowserOnly>
     );
+}
+
+/**
+ * Creates the language client
+ * 
+ * @param transports used for the JSON rpc
+ * @returns the crated MonacoLangaugeClient
+ */
+function createLanguageClient (transports: MessageTransports): MonacoLanguageClient {
+    return new MonacoLanguageClient({
+        name: 'SyncScript Language Client',
+        clientOptions: {
+            documentSelector: [{ language }],
+            errorHandler: {
+                error: () => ({ action: ErrorAction.Continue }),
+                closed: () => ({ action: CloseAction.DoNotRestart })
+            }
+        },
+        connectionProvider: {
+            get: () => {
+                return Promise.resolve(transports);
+            }
+        }
+    });
 }

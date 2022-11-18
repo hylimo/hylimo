@@ -2,6 +2,8 @@ import { createConnection, BrowserMessageReader, BrowserMessageWriter } from "vs
 import { LanguageServer } from "@hylimo/language-server";
 import { defaultModules } from "@hylimo/core";
 
+console.log("start language server")
+
 const messageReader = new BrowserMessageReader(self);
 const messageWriter = new BrowserMessageWriter(self);
 
