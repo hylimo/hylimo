@@ -12,5 +12,5 @@
             "path": "../packages/core"
         }
     ],
-    "include": ["src/**/*.ts(x?)"],
+    "include": ["src/**/*.ts(x?)"]
 }

@@ -54,12 +54,12 @@ export class LanguageServer {
      */
     constructor(readonly config: LanguageServerConfig) {
         this.connection = config.connection;
-        this.connection.onInitialize(this.onInitialize);
+        this.connection.onInitialize(this.onInitialize.bind(this));
         this.textDocuments.listen(this.connection);
         this.interpreter = new Interpreter(config.interpreterModules);
-        this.textDocuments.onDidOpen(this.onDidOpenTextDocument);
-        this.textDocuments.onDidClose(this.onDidCloseTextDocument);
-        this.textDocuments.onDidChangeContent(this.onDidChangeContentTextDocument);
+        this.textDocuments.onDidOpen(this.onDidOpenTextDocument.bind(this));
+        this.textDocuments.onDidClose(this.onDidCloseTextDocument.bind(this));
+        this.textDocuments.onDidChangeContent(this.onDidChangeContentTextDocument.bind(this));
     }
 
     /**
@@ -72,7 +72,7 @@ export class LanguageServer {
 
     /**
      * Called on initialize
-     * 
+     *
      * @returns the init result including capabilities
      */
     private onInitialize(): InitializeResult {
@@ -86,7 +86,6 @@ export class LanguageServer {
      * @param e the provided event
      */
     private onDidOpenTextDocument(e: TextDocumentChangeEvent<TextDocument>): void {
-        console.log("open");
         this.diagrams.set(e.document.uri, new Diagram(e.document));
     }
 
@@ -96,7 +95,6 @@ export class LanguageServer {
      * @param e the provided event
      */
     private onDidCloseTextDocument(e: TextDocumentChangeEvent<TextDocument>): void {
-        console.log("close");
         this.diagrams.delete(e.document.uri);
     }
 

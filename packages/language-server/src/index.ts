@@ -1,2 +1,2 @@
-export * from "./languageServer"
-export * from "./diagram"
+export * from "./languageServer";
+export * from "./diagram";
