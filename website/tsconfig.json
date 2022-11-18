@@ -1,0 +1,16 @@
+{
+    "extends": "../tsconfig.json",
+    "compilerOptions": {
+        "rootDir": "src",
+        "outDir": "lib"
+    },
+    "references": [
+        {
+            "path": "../packages/language-server"
+        },
+        {
+            "path": "../packages/core"
+        }
+    ],
+    "include": ["src/**/*.ts(x?)"],
+}
