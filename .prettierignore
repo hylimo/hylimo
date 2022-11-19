@@ -1,0 +1,4 @@
+package-lock.json
+website/build/
+website/.docusaurus/
+packages/**/lib

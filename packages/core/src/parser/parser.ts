@@ -42,7 +42,7 @@ export enum Rules {
 /**
  * Cst result of the parser
  */
-interface CstResult {
+export interface CstResult {
     /**
      * Errors during lexing
      */
@@ -319,7 +319,7 @@ export class Parser extends CstParser {
         this.input = lexerResult.tokens;
         const result = this.expressions();
         let ast = undefined;
-        if (result) {
+        if (result && lexerResult.errors.length == 0 && this.errors.length == 0) {
             ast = this.generateAST(result);
         }
         return {

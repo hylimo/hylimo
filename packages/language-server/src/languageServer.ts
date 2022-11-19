@@ -1,10 +1,15 @@
-import { InterpreterModule, Interpreter } from "@hylimo/core";
+import { InterpreterModule, Interpreter, Parser, CstResult } from "@hylimo/core";
 import {
     Connection,
+    Diagnostic,
+    DiagnosticSeverity,
     InitializeResult,
+    Position,
+    Range,
     ServerCapabilities,
     TextDocumentChangeEvent,
-    TextDocuments
+    TextDocuments,
+    uinteger
 } from "vscode-languageserver";
 import { TextDocument } from "vscode-languageserver-textdocument";
 import { Diagram } from "./diagram";
@@ -21,6 +26,10 @@ export interface LanguageServerConfig {
      * Modules for running the interpreter
      */
     interpreterModules: InterpreterModule[];
+    /**
+     * The maximum amount of execution steps a single execution can use
+     */
+    maxExecutionSteps: number;
 }
 
 /**
@@ -41,6 +50,11 @@ export class LanguageServer {
      * Interpreter used to run the code
      */
     private readonly interpreter;
+
+    /**
+     * Parser used to parse the document
+     */
+    private readonly parser = new Parser();
 
     /**
      * Lookup of all known diagrams
@@ -104,6 +118,70 @@ export class LanguageServer {
      * @param e the provided event
      */
     private onDidChangeContentTextDocument(e: TextDocumentChangeEvent<TextDocument>): void {
-        console.log("content changed");
+        const diagram = this.diagrams.get(e.document.uri)!;
+        const parserResult = this.parser.parse(e.document.getText());
+        diagram.lastParserResult = parserResult;
+        const diagnostics: Diagnostic[] = [];
+        diagnostics.push(...this.getParserResultDiagnostics(e.document, parserResult));
+        if (parserResult.ast) {
+            const interpretationResult = this.interpreter.run(parserResult.ast, this.config.maxExecutionSteps);
+            const error = interpretationResult.error;
+            if (error) {
+                const pos = error.findFirstPosition();
+                console.log(pos);
+                if (pos) {
+                    diagnostics.push(
+                        Diagnostic.create(
+                            Range.create(pos.startLine - 1, pos.startColumn - 1, pos.endLine - 1, pos.endColumn),
+                            error.message || "[no message provided]",
+                            DiagnosticSeverity.Error
+                        )
+                    );
+                }
+                //TODO do sth else with error
+            }
+        }
+        this.connection.sendDiagnostics({
+            uri: e.document.uri,
+            diagnostics: diagnostics
+        });
+    }
+
+    /**
+     * Creates diagnostics from lexical and parsing errors
+     *
+     * @param document the document which was parsed
+     * @param parserResult the parsing result
+     * @returns the found diagnostics
+     */
+    private getParserResultDiagnostics(document: TextDocument, parserResult: CstResult): Diagnostic[] {
+        const diagnostics: Diagnostic[] = [];
+        parserResult.lexingErrors.forEach((error) => {
+            diagnostics.push(
+                Diagnostic.create(
+                    Range.create(error.line! - 1, error.column! - 1, error.line! - 1, error.column! + error.length),
+                    error.message || "unknown lexical error",
+                    DiagnosticSeverity.Error
+                )
+            );
+        });
+        parserResult.parserErrors.forEach((error) => {
+            const token = error.token;
+            let location: Range;
+            if (!Number.isNaN(error.token.startLine)) {
+                location = Range.create(
+                    token.startLine! - 1,
+                    token.startColumn! - 1,
+                    token.endLine! - 1,
+                    token.endColumn!
+                );
+            } else {
+                location = Range.create(document.lineCount, uinteger.MAX_VALUE, document.lineCount, uinteger.MAX_VALUE);
+            }
+            diagnostics.push(
+                Diagnostic.create(location, error.message || "unknown syntax error", DiagnosticSeverity.Error)
+            );
+        });
+        return diagnostics;
     }
 }

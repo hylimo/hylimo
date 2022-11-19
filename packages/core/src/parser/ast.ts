@@ -5,6 +5,7 @@ import { FullObject } from "../runtime/objects/fullObject";
 import { FunctionObject, NativeFunctionObject } from "../runtime/objects/function";
 import { NumberObject } from "../runtime/objects/number";
 import { StringObject } from "../runtime/objects/string";
+import { RuntimeError } from "../runtime/runtimeError";
 import { SemanticFieldNames } from "../runtime/semanticFieldNames";
 
 /**
@@ -32,11 +33,31 @@ export abstract class Expression {
     constructor(readonly type: string, readonly position?: ASTExpressionPosition) {}
 
     /**
-     * Evaluates this expression
+     * Evaluates this expression by calling evaluateInternal
+     * Also does error handling
      *
      * @param context context in which this is performed
+     * @returns the evaluation result
      */
-    abstract evaluate(context: InterpreterContext): FieldEntry;
+    evaluate(context: InterpreterContext): FieldEntry {
+        try {
+            return this.evaluateInternal(context);
+        } catch (e) {
+            if (e instanceof RuntimeError) {
+                e.interpretationStack.push(this);
+            }
+            throw e;
+        }
+    }
+
+    /**
+     * Evaluates this expression
+     * Must be overwritten to impplement the logic
+     *
+     * @param context context in which this is performed
+     * @returns the evaluation result
+     */
+    abstract evaluateInternal(context: InterpreterContext): FieldEntry;
 
     /**
      * Evaluates this expression, also provides the source of the result.
@@ -141,7 +162,7 @@ export class ConstExpression extends Expression {
         super("ConstExpression");
     }
 
-    override evaluate(_context: InterpreterContext): FieldEntry {
+    override evaluateInternal(_context: InterpreterContext): FieldEntry {
         return this.value;
     }
 }
@@ -178,7 +199,7 @@ export class StringLiteralExpression extends LiteralExpression<string> {
         super(value, "StringLiteralExpression", position);
     }
 
-    override evaluate(context: InterpreterContext): FieldEntry {
+    override evaluateInternal(context: InterpreterContext): FieldEntry {
         return { value: new StringObject(this.value, context.stringPrototype) };
     }
 }
@@ -197,7 +218,7 @@ export class NumberLiteralExpression extends LiteralExpression<number> {
         super(value, "NumberLiteralExpression", position);
     }
 
-    override evaluate(context: InterpreterContext): FieldEntry {
+    override evaluateInternal(context: InterpreterContext): FieldEntry {
         return { value: new NumberObject(this.value, context.numberPrototype) };
     }
 }
@@ -239,7 +260,7 @@ export class FunctionExpression extends AbstractFunctionExpression {
         super(decorator, "FunctionExpression", position);
     }
 
-    override evaluate(context: InterpreterContext): FieldEntry {
+    override evaluateInternal(context: InterpreterContext): FieldEntry {
         return { value: new FunctionObject(this, context.currentScope, context.functionPrototype) };
     }
 }
@@ -270,7 +291,7 @@ export class NativeFunctionExpression extends AbstractFunctionExpression {
         super(decorator, "NativeFunctionExpression", position);
     }
 
-    override evaluate(context: InterpreterContext): FieldEntry {
+    override evaluateInternal(context: InterpreterContext): FieldEntry {
         return { value: new NativeFunctionObject(this, context.nativeFunctionPrototype) };
     }
 }
@@ -310,7 +331,7 @@ export class InvocationExpression extends AbstractInvocationExpression {
         super(argumentExpressions, "InvokationExpression", position);
     }
 
-    override evaluate(context: InterpreterContext): FieldEntry {
+    override evaluateInternal(context: InterpreterContext): FieldEntry {
         const targetValue = this.target.evaluate(context).value;
         return targetValue.invoke(this.argumentExpressions, context);
     }
@@ -339,7 +360,7 @@ export class SelfInvocationExpression extends AbstractInvocationExpression {
         super(argumentExpressions, "InvokationExpression", position);
     }
 
-    override evaluate(context: InterpreterContext): FieldEntry {
+    override evaluateInternal(context: InterpreterContext): FieldEntry {
         const targetValue = this.target.evaluateWithSource(context);
         const fieldValue = targetValue.value.getField(this.name, context);
         return fieldValue.invoke(
@@ -365,7 +386,7 @@ export class FieldAccessExpression extends Expression {
         super("FieldAccessExpression", position);
     }
 
-    override evaluate(context: InterpreterContext): FieldEntry {
+    override evaluateInternal(context: InterpreterContext): FieldEntry {
         const targetValue = this.target.evaluate(context).value;
         return targetValue.getFieldEntry(this.name, context);
     }
@@ -385,7 +406,7 @@ export class IdentifierExpression extends Expression {
         super("IdentifierExpression", position);
     }
 
-    override evaluate(context: InterpreterContext): FieldEntry {
+    override evaluateInternal(context: InterpreterContext): FieldEntry {
         return context.currentScope.getFieldEntry(this.identifier, context);
     }
 }
@@ -413,7 +434,7 @@ export class AssignmentExpression extends Expression {
         super("AssignmentExpression", position);
     }
 
-    override evaluate(context: InterpreterContext): FieldEntry {
+    override evaluateInternal(context: InterpreterContext): FieldEntry {
         let targetValue: BaseObject;
         if (this.target) {
             targetValue = this.target.evaluate(context).value;
@@ -446,7 +467,7 @@ export class DestructuringExpression extends Expression {
         super("DestructuringExpression", position);
     }
 
-    override evaluate(context: InterpreterContext): FieldEntry {
+    override evaluateInternal(context: InterpreterContext): FieldEntry {
         const valueValue = this.value.evaluate(context);
         for (let i = 0; i < this.names.length; i++) {
             context.currentScope.setFieldEntry(this.names[i], valueValue.value.getFieldEntry(i, context), context);

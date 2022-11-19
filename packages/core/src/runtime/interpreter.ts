@@ -212,6 +212,21 @@ interface MarkedModule {
 }
 
 /**
+ * The result of an interpreter run
+ */
+export interface InterpretationResult {
+    /**
+     * The global scope, can be used to process results
+     * Only provided if no error was thrown
+     */
+    globalScope?: FullObject;
+    /**
+     * If existing, the error which caused the abortion of the execution
+     */
+    error?: RuntimeError;
+}
+
+/**
  * Interpreter able to execute scripts
  * Must be reset after each execution
  */
@@ -285,21 +300,29 @@ export class Interpreter {
      *
      * @param expressions the expressions to evaluate
      * @param maxExecutionSteps the max amount of execution steps to prevent infinite loops
-     * @returns
+     * @returns the result of the interpretation, consting of a scope or an error
      */
-    run(expressions: Expression[], maxExecutionSteps: number): FullObject {
+    run(expressions: Expression[], maxExecutionSteps: number): InterpretationResult {
         const context = new InterpreterContext(
             maxExecutionSteps,
             this.modules.map((module) => module.name)
         );
-        for (const module of this.modules) {
-            for (const expression of module.expressions) {
+        try {
+            for (const module of this.modules) {
+                for (const expression of module.expressions) {
+                    expression.evaluate(context);
+                }
+            }
+            for (const expression of expressions) {
                 expression.evaluate(context);
             }
+            return { globalScope: context.currentScope };
+        } catch (e) {
+            if (e instanceof RuntimeError) {
+                return { error: e };
+            } else {
+                throw e;
+            }
         }
-        for (const expression of expressions) {
-            expression.evaluate(context);
-        }
-        return context.currentScope;
     }
 }

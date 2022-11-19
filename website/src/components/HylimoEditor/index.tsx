@@ -21,6 +21,7 @@ const language = "syncscript";
 
 /**
  * Editor Component
+ * 
  * @returns the created editor component
  */
 export default function HylimoEditor(): JSX.Element {
