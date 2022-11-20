@@ -63,19 +63,16 @@ const config = {
         () => ({
             name: "custom-webpack-loaders",
             configureWebpack: () => ({
-                module: {
-                    rules: [
-                        {
-                            test: /\.ttf$/,
-                            use: ["file-loader"]
-                        }
-                    ]
-                },
                 plugins: [
                     new MonacoWebpackPlugin({
                         languages: []
                     })
-                ]
+                ],
+                resolve: {
+                    fallback: {
+                        path: false
+                    }
+                }
             })
         })
     ]

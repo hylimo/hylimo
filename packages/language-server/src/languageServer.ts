@@ -128,7 +128,6 @@ export class LanguageServer {
             const error = interpretationResult.error;
             if (error) {
                 const pos = error.findFirstPosition();
-                console.log(pos);
                 if (pos) {
                     diagnostics.push(
                         Diagnostic.create(
