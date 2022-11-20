@@ -3,16 +3,19 @@ import {
     Connection,
     Diagnostic,
     DiagnosticSeverity,
+    DocumentFormattingParams,
     InitializeResult,
     Position,
     Range,
     ServerCapabilities,
     TextDocumentChangeEvent,
     TextDocuments,
+    TextEdit,
     uinteger
 } from "vscode-languageserver";
 import { TextDocument } from "vscode-languageserver-textdocument";
 import { Diagram } from "./diagram";
+import { Formatter } from "./formatter";
 
 /**
  * Config for creating a new language server
@@ -57,6 +60,11 @@ export class LanguageServer {
     private readonly parser = new Parser();
 
     /**
+     * Formatter to use for formatting requests
+     */
+    private readonly formatter = new Formatter(this.parser);
+
+    /**
      * Lookup of all known diagrams
      */
     private readonly diagrams = new Map<string, Diagram>();
@@ -74,6 +82,7 @@ export class LanguageServer {
         this.textDocuments.onDidOpen(this.onDidOpenTextDocument.bind(this));
         this.textDocuments.onDidClose(this.onDidCloseTextDocument.bind(this));
         this.textDocuments.onDidChangeContent(this.onDidChangeContentTextDocument.bind(this));
+        this.connection.onDocumentFormatting(this.onDocumentFormatting.bind(this));
     }
 
     /**
@@ -90,7 +99,9 @@ export class LanguageServer {
      * @returns the init result including capabilities
      */
     private onInitialize(): InitializeResult {
-        const capabilities: ServerCapabilities = {};
+        const capabilities: ServerCapabilities = {
+            documentFormattingProvider: true
+        };
         return { capabilities };
     }
 
@@ -182,5 +193,23 @@ export class LanguageServer {
             );
         });
         return diagnostics;
+    }
+
+    /**
+     * Callback for onDocumentFormatting
+     * @param params defines the document and additional options
+     * @returns edits which define how to update the document
+     */
+    private onDocumentFormatting(params: DocumentFormattingParams): TextEdit[] {
+        const diagram = this.diagrams.get(params.textDocument.uri)!;
+        return [
+            TextEdit.replace(
+                Range.create(0, 0, uinteger.MAX_VALUE, uinteger.MAX_VALUE),
+                this.formatter.formatDocument(diagram.document, {
+                    useTabs: !params.options.insertSpaces,
+                    tabWidth: params.options.tabSize
+                })
+            )
+        ];
     }
 }
