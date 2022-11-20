@@ -18,6 +18,7 @@
         "@hylimo/core": "^0.0.1",
         "@hylimo/language-server": "^0.0.1",
         "@mdx-js/react": "^1.6.22",
+        "@rehooks/local-storage": "^2.4.4",
         "allotment": "^1.17.0",
         "clsx": "^1.2.1",
         "monaco-editor-workers": "^0.34.2",

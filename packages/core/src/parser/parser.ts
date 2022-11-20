@@ -134,7 +134,7 @@ export class Parser extends CstParser {
      */
     private expressions = this.RULE(Rules.EXPRESSIONS, () => {
         this.MANY1(() => {
-            this.CONSUME1(NewLine);
+            this.CONSUME1(NewLine, { LABEL: "StartNewLine" });
         });
         this.OPTION1(() => {
             this.SUBRULE1(this.expression);

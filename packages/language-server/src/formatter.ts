@@ -3,6 +3,7 @@ import { Plugin, doc, Doc } from "prettier";
 import { format } from "prettier/standalone";
 import { TextDocument, TextEdit } from "vscode-languageserver-textdocument";
 import { CstNode, ICstVisitor, IToken } from "chevrotain";
+import { uinteger } from "vscode-languageserver";
 
 const { group, indent, join, line, hardline, softline } = doc.builders;
 
@@ -133,7 +134,13 @@ function generateFormatVisitor(parser: Parser): ICstVisitor<never, Doc> {
                 decorator = [];
             }
             const expressions = this.visit(ctx.expressions);
-            return [decorator, group(["{", indent([line, expressions]), line, "}"])];
+            const expressionsChildren = ctx.expressions[0].children;
+            if (!expressionsChildren.expression) {
+                return "{ }";
+            } else {
+                const newLine = !!expressionsChildren.StartNewLine ? hardline : line;
+                return [decorator, group(["{", indent([newLine, expressions]), newLine, "}"])];
+            }
         }
 
         /**
@@ -143,8 +150,15 @@ function generateFormatVisitor(parser: Parser): ICstVisitor<never, Doc> {
          * @returns the formatted list of expressions
          */
         private expressions(ctx: any): Doc {
-            //TODO respect custom linebreaks???
-            const lines = (ctx.expression ?? []).map((exp: CstNode) => this.visit(exp));
+            const lines: Doc[] = [];
+            let lastLine = uinteger.MAX_VALUE;
+            for (const expression of ctx.expression ?? []) {
+                if (expression.location.startLine > lastLine + 1) {
+                    lines.push("");
+                }
+                lines.push(this.visit(expression));
+                lastLine = expression.location.endLine;
+            }
             return join(hardline, lines);
         }
 

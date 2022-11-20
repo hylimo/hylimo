@@ -13,6 +13,7 @@ import {
 import { BrowserMessageReader, BrowserMessageWriter } from "vscode-languageserver-protocol/browser.js";
 import { StandaloneServices } from "vscode/services";
 import MonacoEditor from "react-monaco-editor";
+import { useLocalStorage } from "@rehooks/local-storage";
 
 /**
  * Name of the language
@@ -21,11 +22,12 @@ const language = "syncscript";
 
 /**
  * Editor Component
- * 
+ *
  * @returns the created editor component
  */
 export default function HylimoEditor(): JSX.Element {
     const { colorMode } = useColorMode();
+    const [code, setCode] = useLocalStorage<string>("code");
 
     return (
         <Allotment>
@@ -52,6 +54,8 @@ export default function HylimoEditor(): JSX.Element {
                     }}
                     editorWillUnmount={(editor) => {}}
                     language={language}
+                    value={code}
+                    onChange={setCode}
                 ></MonacoEditor>
             </Allotment.Pane>
             <Allotment.Pane>
