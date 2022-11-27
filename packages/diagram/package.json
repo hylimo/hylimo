@@ -14,5 +14,8 @@
         "fontkit": "^2.0.2",
         "linebreak": "^1.1.0",
         "svg-path-bbox": "^1.2.2"
+    },
+    "devDependencies": {
+        "@types/fontkit": "^2.0.1"
     }
 }
