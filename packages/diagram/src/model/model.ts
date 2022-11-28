@@ -1,9 +1,10 @@
-import { Shape } from "./base";
+import { Shape, Element } from "./base";
 
 /**
  * A rectangle with content
  */
 export interface Rect extends Shape {
+    type: "rect";
     /**
      * The radius of the corners
      */
@@ -13,17 +14,22 @@ export interface Rect extends Shape {
 /**
  * An ellipse with content
  */
-export interface Ellipse extends Shape {}
+export interface Ellipse extends Shape {
+    type: "ellipse";
+}
 
 /**
  *  A circle with content
  */
-export interface Circle extends Shape {}
+export interface Circle extends Shape {
+    type: "circle";
+}
 
 /**
  * An SVG path shape
  */
 export interface Path extends Shape {
+    type: "path";
     /**
      * Defines the path
      */
@@ -35,6 +41,7 @@ export interface Path extends Shape {
  * Always rendered in a single line
  */
 export interface Text extends Element {
+    type: "text";
     /**
      * The text to display
      */
@@ -54,9 +61,9 @@ export interface Text extends Element {
     /**
      * normal or bold weight
      */
-    fontWeight: "normal" | "bold"
+    fontWeight: "normal" | "bold";
     /**
      * normal or italic style
      */
-    fontStyle: "normal" | "italic"
+    fontStyle: "normal" | "italic";
 }

@@ -104,16 +104,23 @@ export const listModule: InterpreterModule = {
                         }
                     )
                 ),
-                fun(
-                    [
-                        assign("_value", id("object").call()),
-                        id("_value").assignField(SemanticFieldNames.PROTO, id(listProto)),
-                        id("_value").assignField(lengthField, num(0)),
-                        id("_value")
-                    ],
+                jsFun(
+                    (args, context, originalArgs) => {
+                        args.setLocalField(SemanticFieldNames.PROTO, { value: context.getField(listProto) }, context);
+                        let initialLength = 0;
+                        for (const entry of originalArgs) {
+                            if (!entry.name) {
+                                initialLength++;
+                            }
+                        }
+                        args.setLocalField(lengthField, { value: context.newNumber(initialLength) }, context);
+                        return { value: args };
+                    },
                     {
                         docs: `
-                        Creates a new empty list
+                        Creates a new list with the defined elements
+                        Params:
+                            - 0..*: the elements to add
                         Returns:
                             The created empty list
                     `

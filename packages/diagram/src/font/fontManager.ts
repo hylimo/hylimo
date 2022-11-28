@@ -19,7 +19,7 @@ export class FontManager {
 
     /**
      * Gets a font family, caches results if possible
-     * 
+     *
      * @param config the config of the font family
      * @returns the created font family
      */

@@ -3,6 +3,10 @@
  */
 export interface Element {
     /**
+     * The type of the element
+     */
+    type: string;
+    /**
      * A unique id of the element
      */
     id: string;
@@ -29,24 +33,6 @@ export interface Element {
 }
 
 /**
- * Defines dashes for a stroke
- */
-export interface StrokeDash {
-    /**
-     * The length of the individual dash
-     */
-    length: number;
-    /**
-     * The length of the space between dashes, defaults to length
-     */
-    space?: number;
-    /**
-     * The offset of the first dash, defaults to 0
-     */
-    offset?: number;
-}
-
-/**
  * An element which displays some graphics
  */
 export interface Shape extends Element {
@@ -70,8 +56,4 @@ export interface Shape extends Element {
      * The width of the stroke
      */
     strokeWidth?: number;
-    /**
-     * If provided, the dashes used for the stroke
-     */
-    strokeDash?: StrokeDash;
 }

@@ -118,11 +118,15 @@ export function fun(
  * @returns the created FunctionExpression
  */
 export function jsFun(
-    callback: (args: FullObject, context: InterpreterContext) => BaseObject | FieldEntry,
+    callback: (
+        args: FullObject,
+        context: InterpreterContext,
+        originalArgs: InvocationArgument[]
+    ) => BaseObject | FieldEntry,
     decorators: { [index: string]: string | null } = {}
 ): NativeFunctionExpression {
     return new NativeFunctionExpression((args, context) => {
-        const res = callback(generateArgs(args, context), context);
+        const res = callback(generateArgs(args, context), context, args);
         if (res instanceof BaseObject) {
             return { value: res };
         } else {
