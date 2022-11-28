@@ -1,4 +1,3 @@
-import { IToken } from "chevrotain";
 import { InterpreterContext } from "../runtime/interpreter";
 import { BaseObject, FieldEntry } from "../runtime/objects/baseObject";
 import { FullObject } from "../runtime/objects/fullObject";
@@ -268,7 +267,11 @@ export class FunctionExpression extends AbstractFunctionExpression {
 /**
  * Type for the callback of native functions
  */
-export type NativeFunctionType = (args: InvocationArgument[], context: InterpreterContext) => FieldEntry;
+export type NativeFunctionType = (
+    args: InvocationArgument[],
+    context: InterpreterContext,
+    staticScope: FullObject
+) => FieldEntry;
 
 /**
  * Native (JS) function expression
@@ -292,7 +295,7 @@ export class NativeFunctionExpression extends AbstractFunctionExpression {
     }
 
     override evaluateInternal(context: InterpreterContext): FieldEntry {
-        return { value: new NativeFunctionObject(this, context.nativeFunctionPrototype) };
+        return { value: new NativeFunctionObject(this, context.currentScope, context.nativeFunctionPrototype) };
     }
 }
 

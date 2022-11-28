@@ -106,7 +106,11 @@ export const listModule: InterpreterModule = {
                 ),
                 jsFun(
                     (args, context, originalArgs) => {
-                        args.setLocalField(SemanticFieldNames.PROTO, { value: context.getField(listProto) }, context);
+                        args.setLocalField(
+                            SemanticFieldNames.PROTO,
+                            { value: context.currentScope.getField(listProto, context) },
+                            context
+                        );
                         let initialLength = 0;
                         for (const entry of originalArgs) {
                             if (!entry.name) {

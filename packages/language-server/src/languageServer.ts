@@ -148,6 +148,7 @@ export class LanguageServer {
                         )
                     );
                 }
+                console.error(error);
                 //TODO do sth else with error
             }
         }

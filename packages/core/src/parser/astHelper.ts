@@ -125,8 +125,12 @@ export function jsFun(
     ) => BaseObject | FieldEntry,
     decorators: { [index: string]: string | null } = {}
 ): NativeFunctionExpression {
-    return new NativeFunctionExpression((args, context) => {
-        const res = callback(generateArgs(args, context), context, args);
+    return new NativeFunctionExpression((args, context, staticScope) => {
+        const evaluatedArgs = generateArgs(args, context);
+        const oldScope = context.currentScope;
+        context.currentScope = staticScope;
+        const res = callback(evaluatedArgs, context, args);
+        context.currentScope = oldScope;
         if (res instanceof BaseObject) {
             return { value: res };
         } else {

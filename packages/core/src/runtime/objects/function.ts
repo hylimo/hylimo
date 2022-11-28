@@ -7,7 +7,17 @@ import { FullObject } from "./fullObject";
 /**
  * Base class for js functions and normal functions
  */
-export abstract class AbstractFunctionObject extends SimpleObject {}
+export abstract class AbstractFunctionObject extends SimpleObject {
+    /**
+     * Defines parentScope
+     *
+     * @param parentScope the parent scope, on exec a new scope with this as parent is created
+     * @param proto the prototype of this object
+     */
+    constructor(readonly parentScope: FullObject, proto: FullObject) {
+        super(proto);
+    }
+}
 
 /**
  * * Generates the arguments map based on argumentExpressions
@@ -36,8 +46,8 @@ export class FunctionObject extends AbstractFunctionObject {
      * @param parentScope the parent scope, on exec a new scope with this as parent is created
      * @param proto the prototype of this object
      */
-    constructor(readonly definition: FunctionExpression, readonly parentScope: FullObject, proto: FullObject) {
-        super(proto);
+    constructor(readonly definition: FunctionExpression, parentScope: FullObject, proto: FullObject) {
+        super(parentScope, proto);
     }
 
     override invoke(args: InvocationArgument[], context: InterpreterContext, scope?: FullObject): FieldEntry {
@@ -67,21 +77,24 @@ export class FunctionObject extends AbstractFunctionObject {
 
 /**
  * Function based on a native js function
+ * Does NOT create a new scope on invoke, but provides the parent scope
  */
 export class NativeFunctionObject extends AbstractFunctionObject {
     /**
      * Creates a new native js function
      *
      * @param definition defines the function (what to execute)
+     * @param parentScope the parent scope, on exec a new scope with this as parent is created
      * @param proto the prototype of this object
      */
-    constructor(readonly definition: NativeFunctionExpression, proto: FullObject) {
-        super(proto);
+    constructor(readonly definition: NativeFunctionExpression, parentScope: FullObject, proto: FullObject) {
+        super(parentScope, proto);
     }
 
     override invoke(args: InvocationArgument[], context: InterpreterContext): FieldEntry {
         context.nextStep();
-        return this.definition.callback(args, context);
+        const res = this.definition.callback(args, context, this.parentScope);
+        return res;
     }
 
     override toString(): string {
