@@ -6,9 +6,7 @@ import {
     id,
     InterpreterContext,
     InterpreterModule,
-    jsFun,
-    SemanticFieldNames,
-    str
+    jsFun
 } from "@hylimo/core";
 
 /**
@@ -80,8 +78,8 @@ export const diagramModule: InterpreterModule = {
     runtimeDependencies: [DefaultModuleNames.LIST],
     expressions: [
         assign(
-            "Text",
-            jsFun(assignTypeFunction("Text"), {
+            "text",
+            jsFun(assignTypeFunction("text"), {
                 docs: `
                     Creates a new Text element with the specified Spans
                     Params:
@@ -93,8 +91,8 @@ export const diagramModule: InterpreterModule = {
             })
         ),
         assign(
-            "Span",
-            jsFun(assignTypeFunction("Span"), {
+            "span",
+            jsFun(assignTypeFunction("span"), {
                 docs: `
                     Creates a new Span
                     Params:
@@ -111,8 +109,8 @@ export const diagramModule: InterpreterModule = {
             })
         ),
         assign(
-            "Rect",
-            jsFun(assignTypeFunction("Rect"), {
+            "rect",
+            jsFun(assignTypeFunction("rect"), {
                 docs: `
                     Creates a new Rect element with a content
                     Params:
@@ -124,8 +122,8 @@ export const diagramModule: InterpreterModule = {
             })
         ),
         assign(
-            "Ellipse",
-            jsFun(assignTypeFunction("Ellipse"), {
+            "ellipse",
+            jsFun(assignTypeFunction("ellipse"), {
                 docs: `
                     Creates a new Ellipse element with a content
                     Params:
@@ -137,8 +135,8 @@ export const diagramModule: InterpreterModule = {
             })
         ),
         assign(
-            "Circle",
-            jsFun(assignTypeFunction("Circle"), {
+            "circle",
+            jsFun(assignTypeFunction("circle"), {
                 docs: `
                     Creates a new Circle element with a content
                     Params:
@@ -150,8 +148,8 @@ export const diagramModule: InterpreterModule = {
             })
         ),
         assign(
-            "Path",
-            jsFun(assignTypeFunction("Path"), {
+            "path",
+            jsFun(assignTypeFunction("path"), {
                 docs: `
                     Creates a new Rect element with a content
                     Params:
@@ -163,8 +161,8 @@ export const diagramModule: InterpreterModule = {
             })
         ),
         assign(
-            "HBox",
-            jsFun(assignTypeFunction("HBox"), {
+            "hbox",
+            jsFun(assignTypeFunction("hbox"), {
                 docs: `
                     Creates a new HBox element with a content.
                     Stacks contents from left to right.
@@ -177,8 +175,8 @@ export const diagramModule: InterpreterModule = {
             })
         ),
         assign(
-            "VBox",
-            jsFun(assignTypeFunction("VBox"), {
+            "vbox",
+            jsFun(assignTypeFunction("vbox"), {
                 docs: `
                     Creates a new VBox element with a content.
                     Stacks contents from top to bottom
@@ -191,8 +189,8 @@ export const diagramModule: InterpreterModule = {
             })
         ),
         assign(
-            "Stack",
-            jsFun(assignTypeFunction("Stack"), {
+            "stack",
+            jsFun(assignTypeFunction("stack"), {
                 docs: `
                     Creates a new Stack element with a content.
                     Stacks contents from top to bottom
@@ -205,11 +203,11 @@ export const diagramModule: InterpreterModule = {
             })
         ),
         assign(
-            "Canvas",
-            jsFun(assignTypeFunction("Canvas"), {
+            "canvas",
+            jsFun(assignTypeFunction("canvas"), {
                 docs: `
                     Creates a new Canvas element with contents.
-                    Contents should be CanvasContents which provide a position
+                    Contents should be positioned which provide a position and an element
                     Params:
                         - "contents": the inner elements
                         ${elementDoc}
@@ -219,8 +217,8 @@ export const diagramModule: InterpreterModule = {
             })
         ),
         assign(
-            "CanvasContent",
-            jsFun(assignTypeFunction("CanvasContent"), {
+            "positioned",
+            jsFun(assignTypeFunction("positioned"), {
                 docs: `
                     Creates a new CanvasContent element with a content.
                     Should be used inside a Canvas.
@@ -282,11 +280,11 @@ export const diagramModule: InterpreterModule = {
                         `
                             (type) = args
                             [docs = "Creates a new selector"] {
-                                (name, callback) = args
-                                selector = object(type = type, name = name, styles = list())
+                                (value, callback) = args
+                                selector = object(selectorType = type, selectorValue = value, styles = list())
                                 args.self.styles.add(selector)
                                 selector.proto = ${selectorProto}
-                                callback.callWithScope(selector, selector)
+                                callback.callWithScope(selector)
                                 selector
                             }
                         `,
@@ -301,14 +299,13 @@ export const diagramModule: InterpreterModule = {
                         }
                     )
                 ),
-                id(selectorProto).assignField("type", id("selector").call(str("type"))),
-                id(selectorProto).assignField("cls", id("selector").call(str("cls"))),
                 fun(
                     `
                         (callback) = args
                         res = object(styles = list())
-                        res.proto = ${selectorProto}
-                        callback.callWithScope(res, ${selectorProto})
+                        res.type = selector("type")
+                        res.cls = selector("cls")
+                        callback.callWithScope(res)
                         res
                     `,
                     {

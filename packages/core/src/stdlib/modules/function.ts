@@ -26,14 +26,10 @@ export const functionModule: InterpreterModule = {
                     (args, context) => {
                         const self = args.getField(SemanticFieldNames.SELF, context);
                         const scope = args.getField(0, context);
-                        const parentScope = args.getField(1, context);
                         assertFunction(self, "self argument of callWithScope");
                         assertObject(scope, "first positional argument of callWithScope");
-                        assertObject(parentScope, "second positional argument of callWithScope");
-                        const oldProto = parentScope.getLocalField(SemanticFieldNames.PROTO, context);
-                        parentScope.setLocalField(SemanticFieldNames.PROTO, { value: self.parentScope }, context);
+                        scope.setLocalField(SemanticFieldNames.PROTO, { value: self.parentScope }, context);
                         const res = self.invoke([], context, scope);
-                        parentScope.setLocalField(SemanticFieldNames.PROTO, oldProto, context);
                         scope.setLocalField(SemanticFieldNames.ARGS, { value: context.null }, context);
                         scope.setLocalField(SemanticFieldNames.IT, { value: context.null }, context);
                         scope.setLocalField(SemanticFieldNames.THIS, { value: context.null }, context);
@@ -42,12 +38,11 @@ export const functionModule: InterpreterModule = {
                     {
                         docs: `
                             Calls a function with a provided scope.
-                            The scope's highest-level prototype (the object prototype)
-                            will be replaced with the static scope of the function.
+                            Sets the prototype of the provided object.
+                            This should never be set again, otherwise bugs might occur with static scoping.
                             Params:
                                 - "self": the function to call
                                 - 0: the scope to use
-                                - 1: the highest level scope to keep, it will temporarily get its prototype reassigned, ust be a parent scope of 0
                             Returns:
                                 the result of the call
                         `

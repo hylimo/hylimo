@@ -4,7 +4,11 @@
         "rootDir": "src",
         "outDir": "lib"
     },
-    "references": [],
+    "references": [
+        {
+            "path": "../core"
+        }
+    ],
     "include": ["src/**/*.ts"],
     "exclude": ["lib", "node_modules"]
 }
