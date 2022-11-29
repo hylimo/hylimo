@@ -21,6 +21,7 @@ export const operatorModule: InterpreterModule = {
                 operator,
                 native(
                     (args, context) => {
+                        args.pop();
                         if (args.length != 2 || args[0].name !== undefined || args[1].name !== undefined) {
                             throw new RuntimeError(`Expected exactly two positional arguments for ${operator}`);
                         }
@@ -131,6 +132,35 @@ export const operatorModule: InterpreterModule = {
                             - 1: the value passed to the + function
                         Returns:
                             The result of the invokation of + on the first argument
+                    `
+                }
+            )
+        ),
+        assign(
+            "??",
+            native(
+                (args, context) => {
+                    args.pop();
+                    if (args.length != 2 || args[0].name !== undefined || args[1].name !== undefined) {
+                        throw new RuntimeError(`Expected exactly two positional arguments for ??}`);
+                    }
+                    const leftSide = args[0].value.evaluateWithSource(context);
+                    if (leftSide.value === context.null) {
+                        return args[1].value.evaluateWithSource(context);
+                    } else {
+                        return leftSide;
+                    }
+                },
+                {
+                    docs: `
+                        The ?? operator, expects two arguments, returns the second argument if the first
+                        argument is null, otherwise returns the first argument.
+                        Evaluates the second argument only if the first is null.
+                        Params:
+                            - 0: the first argument, returned if not null
+                            - 1: the second argument, returned if the first is null
+                        Returns:
+                            The second argument if the first is null, otherwise the first
                     `
                 }
             )
