@@ -75,7 +75,7 @@ const selectorProto = "selectorProto";
 export const diagramModule: InterpreterModule = {
     name: "diagram",
     dependencies: [DefaultModuleNames.OBJECT],
-    runtimeDependencies: [DefaultModuleNames.LIST],
+    runtimeDependencies: [DefaultModuleNames.LIST, DefaultModuleNames.FUNCTION],
     expressions: [
         assign(
             "text",
@@ -317,6 +317,75 @@ export const diagramModule: InterpreterModule = {
                     }
                 )
             ]).call()
+        ),
+        assign(
+            "fontFamily",
+            fun(
+                `
+                    (fontFamily) = args
+                    object(
+                        fontFamily = fontFamily,
+                        normal = args.normal,
+                        italic = args.italic,
+                        bold = args.bold,
+                        boldItalic = args.boldItalic
+                    )
+                `,
+                {
+                    docs: `
+                        Creates a new font family.
+                        Params:
+                            - 0: the name of the font family
+                            - "normal": the normal font, should be a font
+                            - "italic": optional italic font
+                            - "bold": optional bold font
+                            - "boldItalic": optional bold italic font
+                        Returns:
+                            the created font family object
+                    `
+                }
+            )
+        ),
+        assign(
+            "font",
+            fun(
+                `
+                    (url, name, variationSettings) = args
+                    object(url = url, name = name, variationSettings = variationSettings)
+                `,
+                {
+                    docs: `
+                        Creates a new font, should be used with fontFamily.
+                        Params:
+                            - 0: the url where the font can be found, e.g. a google fonts url
+                            - 1: if a collection font file is used, the name of the font to use
+                            - 2: if a variation font file is used, either the name of the named
+                                variation or an object with values for variation axes
+                        Returns:
+                            the created font object
+                    `
+                }
+            )
+        ),
+        assign(
+            "diagram",
+            fun(
+                `
+                    (element, styles, fonts) = args
+                    object(element = element, styles = styles, fonts = fonts)
+                `,
+                {
+                    docs: `
+                        Creates a new diagram, consisting of a ui element, styles and fonts
+                        Params:
+                            - 0: the root ui element
+                            - 1: the styles object created by the styles function
+                            - 2: a list of font family objects
+                        Returns:
+                            the created diagram object
+                    `
+                }
+            )
         )
     ]
 };
