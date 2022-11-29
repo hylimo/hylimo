@@ -1,6 +1,6 @@
 import { DefaultModuleNames } from "../defaultModuleNames";
 import { InterpreterModule } from "../../runtime/interpreter";
-import { assign, fun, id, jsFun, num, str } from "../../parser/astHelper";
+import { arg, assign, fun, id, jsFun, native, num, str } from "../../parser/astHelper";
 import { SemanticFieldNames } from "../../runtime/semanticFieldNames";
 import { assertFunction, assertObject } from "../typeHelpers";
 import { BaseObject } from "../../runtime/objects/baseObject";
@@ -9,6 +9,7 @@ import { NumberObject } from "../../runtime/objects/number";
 import { RuntimeError } from "../../runtime/runtimeError";
 import { ConstExpression, NumberLiteralExpression, StringLiteralExpression } from "../../parser/ast";
 import { toBoolean } from "./boolean";
+import { generateArgs } from "../../runtime/objects/function";
 
 /**
  * Name of the temporary field where the object prototype is assigned
@@ -176,15 +177,22 @@ export const objectModule: InterpreterModule = {
         ]).call(),
         assign(
             "object",
-            fun([id(SemanticFieldNames.ARGS)], {
-                docs: `
-                    Function which returns its arguments. Can be used to construct an object
-                    Params:
-                        any
-                    Returns:
-                        An object with all provided params
-                `
-            })
+            native(
+                (args, context) => {
+                    args.pop();
+                    const evaluatedArgs = generateArgs(args, context);
+                    return { value: evaluatedArgs };
+                },
+                {
+                    docs: `
+                        Function which returns its arguments. Can be used to construct an object
+                        Params:
+                            any
+                        Returns:
+                            An object with all provided params
+                    `
+                }
+            )
         )
     ]
 };

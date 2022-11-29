@@ -1,5 +1,4 @@
 import {
-    arg,
     assign,
     DefaultModuleNames,
     FullObject,
@@ -8,7 +7,8 @@ import {
     InterpreterContext,
     InterpreterModule,
     jsFun,
-    SemanticFieldNames
+    SemanticFieldNames,
+    str
 } from "@hylimo/core";
 
 /**
@@ -67,12 +67,17 @@ function assignTypeFunction(type: string): (args: FullObject, context: Interpret
 }
 
 /**
+ * The name of the field containing the selector prototype
+ */
+const selectorProto = "selectorProto";
+
+/**
  * Diagram module providing standard diagram UI elements
  */
-export const listModule: InterpreterModule = {
+export const diagramModule: InterpreterModule = {
     name: "diagram",
-    dependencies: [],
-    runtimeDependencies: [DefaultModuleNames.OBJECT],
+    dependencies: [DefaultModuleNames.OBJECT],
+    runtimeDependencies: [DefaultModuleNames.LIST],
     expressions: [
         assign(
             "Text",
@@ -231,18 +236,10 @@ export const listModule: InterpreterModule = {
         assign(
             "point",
             fun(
-                [
-                    id("object").call(
-                        {
-                            name: "x",
-                            value: id(SemanticFieldNames.ARGS).field(0)
-                        },
-                        {
-                            name: "y",
-                            value: id(SemanticFieldNames.ARGS).field(1)
-                        }
-                    )
-                ],
+                `
+                    (x, y) = args
+                    object(x = x, y = y)
+                `,
                 {
                     docs: `
                         Creates a new absolute point
@@ -258,22 +255,10 @@ export const listModule: InterpreterModule = {
         assign(
             "relative",
             fun(
-                [
-                    id("object").call(
-                        {
-                            name: "target",
-                            value: id(SemanticFieldNames.ARGS).field(0)
-                        },
-                        {
-                            name: "x",
-                            value: id(SemanticFieldNames.ARGS).field(1)
-                        },
-                        {
-                            name: "y",
-                            value: id(SemanticFieldNames.ARGS).field(2)
-                        }
-                    )
-                ],
+                `
+                    (target, x, y) = args
+                    object(target = target, x = x, y = y)
+                `,
                 {
                     docs: `
                         Creates a new relative point
@@ -286,6 +271,55 @@ export const listModule: InterpreterModule = {
                     `
                 }
             )
+        ),
+        assign(
+            "styles",
+            fun([
+                assign(selectorProto, id("object").call()),
+                assign(
+                    "selector",
+                    fun(
+                        `
+                            (type) = args
+                            [docs = "Creates a new selector"] {
+                                (name, callback) = args
+                                selector = object(type = type, name = name, styles = list())
+                                args.self.styles.add(selector)
+                                selector.proto = ${selectorProto}
+                                callback.callWithScope(selector, selector)
+                                selector
+                            }
+                        `,
+                        {
+                            docs: `
+                                Creates a selector with a specific type
+                                Params:
+                                    - 0: the type of the selector
+                                Returns:
+                                    A function which can be used to create instances of the selector type
+                            `
+                        }
+                    )
+                ),
+                id(selectorProto).assignField("type", id("selector").call(str("type"))),
+                id(selectorProto).assignField("cls", id("selector").call(str("cls"))),
+                fun(
+                    `
+                        (callback) = args
+                        res = object(styles = list())
+                        res.proto = ${selectorProto}
+                        callback.callWithScope(res, ${selectorProto})
+                        res
+                    `,
+                    {
+                        docs: `
+                            Creates a new styles object. Use "cls" and "type" to create rules.
+                            Returns:
+                                The created styles object
+                        `
+                    }
+                )
+            ]).call()
         )
     ]
 };

@@ -1,6 +1,7 @@
 import { ConstExpression } from "../../parser/ast";
-import { assign, fun, id, jsFun, num } from "../../parser/astHelper";
+import { assign, fun, id, jsFun, native, num } from "../../parser/astHelper";
 import { InterpreterModule } from "../../runtime/interpreter";
+import { generateArgs } from "../../runtime/objects/function";
 import { RuntimeError } from "../../runtime/runtimeError";
 import { SemanticFieldNames } from "../../runtime/semanticFieldNames";
 import { DefaultModuleNames } from "../defaultModuleNames";
@@ -104,21 +105,17 @@ export const listModule: InterpreterModule = {
                         }
                     )
                 ),
-                jsFun(
-                    (args, context, originalArgs) => {
-                        args.setLocalField(
+                native(
+                    (args, context, staticScope) => {
+                        const indexOnlyArgs = args.filter((value) => !value.name);
+                        const list = generateArgs(indexOnlyArgs, context);
+                        list.setLocalField(
                             SemanticFieldNames.PROTO,
-                            { value: context.currentScope.getField(listProto, context) },
+                            staticScope.getFieldEntry(listProto, context),
                             context
                         );
-                        let initialLength = 0;
-                        for (const entry of originalArgs) {
-                            if (!entry.name) {
-                                initialLength++;
-                            }
-                        }
-                        args.setLocalField(lengthField, { value: context.newNumber(initialLength) }, context);
-                        return { value: args };
+                        list.setLocalField(lengthField, { value: context.newNumber(indexOnlyArgs.length) }, context);
+                        return { value: list };
                     },
                     {
                         docs: `

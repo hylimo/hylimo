@@ -13,6 +13,7 @@ import {
     NumberLiteralExpression,
     StringLiteralExpression
 } from "./ast";
+import { Parser } from "./parser";
 
 /**
  * Helper function to create an IdentifierExpression without a position
@@ -97,17 +98,32 @@ function parseDecorators(decorators: { [index: string]: string | null }): Map<st
 }
 
 /**
+ * Helper to parse function bodies
+ */
+const parser = new Parser();
+
+/**
  * Helper to create a FunctionExpression
  *
- * @param expressions body of the function
+ * @param expressions body of the function, if a string is provided it is parsed first
  * @param decorators decorators applied to the function
  * @returns the created FunctionExpression
  */
 export function fun(
-    expressions: Expression[],
+    expressions: Expression[] | string,
     decorators: { [index: string]: string | null } = {}
 ): FunctionExpression {
-    return new FunctionExpression(expressions, parseDecorators(decorators));
+    let parsedExpressions: Expression[];
+    if (typeof expressions === "string") {
+        const parserResult = parser.parse(expressions);
+        if (parserResult.lexingErrors.length > 0 || parserResult.parserErrors.length > 0) {
+            throw new Error("Invalid fun to parse");
+        }
+        parsedExpressions = parserResult.ast!;
+    } else {
+        parsedExpressions = expressions;
+    }
+    return new FunctionExpression(parsedExpressions, parseDecorators(decorators));
 }
 
 /**
@@ -118,18 +134,14 @@ export function fun(
  * @returns the created FunctionExpression
  */
 export function jsFun(
-    callback: (
-        args: FullObject,
-        context: InterpreterContext,
-        originalArgs: InvocationArgument[]
-    ) => BaseObject | FieldEntry,
+    callback: (args: FullObject, context: InterpreterContext) => BaseObject | FieldEntry,
     decorators: { [index: string]: string | null } = {}
 ): NativeFunctionExpression {
     return new NativeFunctionExpression((args, context, staticScope) => {
         const evaluatedArgs = generateArgs(args, context);
         const oldScope = context.currentScope;
         context.currentScope = staticScope;
-        const res = callback(evaluatedArgs, context, args);
+        const res = callback(evaluatedArgs, context);
         context.currentScope = oldScope;
         if (res instanceof BaseObject) {
             return { value: res };

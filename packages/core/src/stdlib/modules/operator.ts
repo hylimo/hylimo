@@ -10,14 +10,13 @@ import { toBoolean } from "./boolean";
 /**
  * Operator module
  * Adds operators which delegate the call to the first argument
- * Provides +, -, *, /, &&, ||
  */
 export const operatorModule: InterpreterModule = {
     name: DefaultModuleNames.OPERATOR,
     dependencies: [],
     runtimeDependencies: [DefaultModuleNames.BOOLEAN],
     expressions: [
-        ...["-", "*", "/", "%", "&&", "||", ">", ">=", "<", "<="].map((operator) =>
+        ...["-", "*", "/", "%", "&&", "||", ">", ">=", "<", "<=", ">>", "<<"].map((operator) =>
             assign(
                 operator,
                 native(

@@ -1,5 +1,4 @@
-import { Expression } from "../../parser/ast";
-import { arg, assign, fun, id, jsFun, native, str } from "../../parser/astHelper";
+import { assign, fun, id, jsFun, native } from "../../parser/astHelper";
 import { InterpreterContext, InterpreterModule } from "../../runtime/interpreter";
 import { BaseObject } from "../../runtime/objects/baseObject";
 import { FullObject } from "../../runtime/objects/fullObject";
@@ -54,11 +53,11 @@ const booleanProto = "booleanProto";
  */
 export const booleanModule: InterpreterModule = {
     name: DefaultModuleNames.BOOLEAN,
-    dependencies: [],
+    dependencies: [DefaultModuleNames.OBJECT],
     runtimeDependencies: [],
     expressions: [
         fun([
-            assign(booleanProto, id(SemanticFieldNames.ARGS)),
+            assign(booleanProto, id("object").call()),
             id(SemanticFieldNames.PROTO).assignField(
                 "true",
                 jsFun((args, context) => new BooleanObject(true, args.getField(0, context) as FullObject)).call(

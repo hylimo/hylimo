@@ -9,5 +9,6 @@ export enum DefaultModuleNames {
     DEBUG = "baselib/debug",
     COMMON = "baselib/common",
     BOOLEAN = "baselib/boolean",
-    LIST = "baselib/list"
+    LIST = "baselib/list",
+    FUNCTION = "baselib/function"
 }

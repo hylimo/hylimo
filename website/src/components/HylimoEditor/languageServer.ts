@@ -9,7 +9,7 @@ const connection = createConnection(messageReader, messageWriter);
 
 const languageServer = new LanguageServer({
     connection,
-    interpreterModules: defaultModules,
+    additionalInterpreterModules: [],
     maxExecutionSteps: 1000000
 });
 languageServer.listen();

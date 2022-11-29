@@ -1,11 +1,10 @@
-import { InterpreterModule, Interpreter, Parser, CstResult } from "@hylimo/core";
+import { InterpreterModule, Interpreter, Parser, CstResult, defaultModules } from "@hylimo/core";
 import {
     Connection,
     Diagnostic,
     DiagnosticSeverity,
     DocumentFormattingParams,
     InitializeResult,
-    Position,
     Range,
     ServerCapabilities,
     TextDocumentChangeEvent,
@@ -16,6 +15,7 @@ import {
 import { TextDocument } from "vscode-languageserver-textdocument";
 import { Diagram } from "./diagram";
 import { Formatter } from "./formatter";
+import { diagramModule } from "@hylimo/diagram";
 
 /**
  * Config for creating a new language server
@@ -26,9 +26,9 @@ export interface LanguageServerConfig {
      */
     connection: Connection;
     /**
-     * Modules for running the interpreter
+     * Additional modules for running the interpreter
      */
-    interpreterModules: InterpreterModule[];
+    additionalInterpreterModules: InterpreterModule[];
     /**
      * The maximum amount of execution steps a single execution can use
      */
@@ -78,7 +78,8 @@ export class LanguageServer {
         this.connection = config.connection;
         this.connection.onInitialize(this.onInitialize.bind(this));
         this.textDocuments.listen(this.connection);
-        this.interpreter = new Interpreter(config.interpreterModules);
+        const interpreterModules = [...defaultModules, diagramModule, ...config.additionalInterpreterModules];
+        this.interpreter = new Interpreter(interpreterModules);
         this.textDocuments.onDidOpen(this.onDidOpenTextDocument.bind(this));
         this.textDocuments.onDidClose(this.onDidCloseTextDocument.bind(this));
         this.textDocuments.onDidChangeContent(this.onDidChangeContentTextDocument.bind(this));

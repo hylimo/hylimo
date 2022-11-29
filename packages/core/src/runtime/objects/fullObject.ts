@@ -35,17 +35,8 @@ export class FullObject extends BaseObject {
 
     override setFieldEntry(key: string | number, value: FieldEntry, context: InterpreterContext): void {
         this.checkValidKey(key);
-        const isProto = key === SemanticFieldNames.PROTO;
-        if (isProto) {
-            if (value.value !== context.null && !(value.value instanceof FullObject)) {
-                throw new RuntimeError('"proto" must be set to an object or null');
-            }
-        }
         if (!this.setExistingField(key, value, context)) {
             this.setLocalField(key, value, context);
-        }
-        if (isProto) {
-            this.validateProto();
         }
     }
 
@@ -72,10 +63,19 @@ export class FullObject extends BaseObject {
     }
 
     override setLocalField(key: string | number, value: FieldEntry, context: InterpreterContext): void {
+        const isProto = key === SemanticFieldNames.PROTO;
+        if (isProto) {
+            if (value.value !== context.null && !(value.value instanceof FullObject)) {
+                throw new RuntimeError('"proto" must be set to an object or null');
+            }
+        }
         if (value.value === context.null) {
             this.fields.delete(key);
         } else {
             this.fields.set(key, value);
+        }
+        if (isProto) {
+            this.validateProto();
         }
     }
 

@@ -336,7 +336,13 @@ export class InvocationExpression extends AbstractInvocationExpression {
 
     override evaluateInternal(context: InterpreterContext): FieldEntry {
         const targetValue = this.target.evaluate(context).value;
-        return targetValue.invoke(this.argumentExpressions, context);
+        return targetValue.invoke(
+            [
+                ...this.argumentExpressions,
+                { value: new ConstExpression({ value: context.currentScope }), name: SemanticFieldNames.SELF }
+            ],
+            context
+        );
     }
 }
 

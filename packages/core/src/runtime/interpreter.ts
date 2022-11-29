@@ -216,6 +216,10 @@ interface MarkedModule {
  */
 export interface InterpretationResult {
     /**
+     * The result of the execution
+     */
+    result?: BaseObject;
+    /**
      * The global scope, can be used to process results
      * Only provided if no error was thrown
      */
@@ -313,10 +317,11 @@ export class Interpreter {
                     expression.evaluate(context);
                 }
             }
+            let lastRes: BaseObject = context.null;
             for (const expression of expressions) {
-                expression.evaluate(context);
+                lastRes = expression.evaluate(context).value;
             }
-            return { globalScope: context.currentScope };
+            return { result: lastRes, globalScope: context.currentScope };
         } catch (e) {
             if (e instanceof RuntimeError) {
                 return { error: e };
