@@ -1,5 +1,4 @@
-import { FullObject } from "@hylimo/core";
-import { toNativeList } from "@hylimo/core/src/stdlib/modules/list";
+import { FullObject, toNativeList } from "@hylimo/core";
 import { FontFamily } from "../font/font";
 import { FontManager } from "../font/fontManager";
 import { Element } from "../model/base";
@@ -46,7 +45,7 @@ export class LayoutEngine {
      *
      * @param diagram the diagram to layout
      */
-    async layout(diagram: FullObject): Promise<Element> {
+    async layout(diagram: FullObject): Promise<Element[]> {
         const nativeDiagram = diagram.toNative();
         const fontMap = new Map<string, FontFamily>();
         for (const config of toNativeList(nativeDiagram.fonts)) {
@@ -88,7 +87,7 @@ export class Layout {
      */
     private matchesSelector(element: LayoutElement, selector: Selector): boolean {
         if (selector.type === SelectorType.CLASS) {
-            return element.element.classes.includes(selector.value);
+            return element.class.has(selector.value);
         } else if (selector.type === SelectorType.TYPE) {
             return element.element.type === selector.value;
         } else {
@@ -105,13 +104,17 @@ export class Layout {
      */
     private matchesStyle(element: LayoutElement, style: Style): boolean {
         let currentElement: LayoutElement | undefined = element;
-        let i = style.selectorChain.length - 1;
+        const initialElementIndex = style.selectorChain.length - 1;
+        let i = initialElementIndex;
+
         while (currentElement) {
             if (this.matchesSelector(currentElement, style.selectorChain[i])) {
                 i--;
                 if (i < 0) {
                     return true;
                 }
+            } else if (i == initialElementIndex) {
+                return false;
             }
             currentElement = currentElement.parent;
         }
@@ -175,7 +178,8 @@ export class Layout {
             element,
             parent,
             styles: {},
-            layoutConfig: this.engine.layoutConfigs.get(element.type)!
+            layoutConfig: this.engine.layoutConfigs.get(element.type)!,
+            class: new Set(element.class ? toNativeList(element.class) : [])
         };
         this.applyStyles(layoutElement);
         const styles = layoutElement.styles;
@@ -185,12 +189,20 @@ export class Layout {
         const marginY = layoutInformation.marginTop + layoutInformation.marginBottom;
         const computedConstraints: SizeConstraints = {
             min: {
-                width: styles.width ?? Math.max(styles.minWidth ?? 0, constraints.min.width - marginX),
-                height: styles.height ?? Math.max(styles.minHeight ?? 0, constraints.min.height - marginY)
+                width: Math.max(styles.width ?? Math.max(styles.minWidth ?? 0, constraints.min.width - marginX), 0),
+                height: Math.max(styles.height ?? Math.max(styles.minHeight ?? 0, constraints.min.height - marginY), 0)
             },
             max: {
-                width: styles.width ?? Math.min(styles.maxWidth ?? 0, constraints.max.width - marginX),
-                height: styles.height ?? Math.min(styles.maxHeight ?? 0, constraints.max.height - marginY)
+                width: Math.max(
+                    styles.width ??
+                        Math.min(styles.maxWidth ?? Number.POSITIVE_INFINITY, constraints.max.width - marginX),
+                    0
+                ),
+                height: Math.max(
+                    styles.height ??
+                        Math.min(styles.maxHeight ?? Number.POSITIVE_INFINITY, constraints.max.height - marginY),
+                    0
+                )
             }
         };
         const computedSize = layoutElement.layoutConfig.measure(this, layoutElement, computedConstraints);
@@ -207,7 +219,7 @@ export class Layout {
      * @param size the size of the element
      * @returns the layouted element
      */
-    layout(element: LayoutElement, position: Position, size: Size): Element {
+    layout(element: LayoutElement, position: Position, size: Size): Element[] {
         const layoutInformation = element.layoutInformation!;
         const marginX = layoutInformation.marginLeft + layoutInformation.marginRight;
         const marginY = layoutInformation.marginTop + layoutInformation.marginBottom;

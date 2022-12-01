@@ -144,6 +144,10 @@ export interface LayoutElement {
      * Helper for layouting
      */
     layoutConfig: LayoutElementConfig;
+    /**
+     * Set of classes
+     */
+    class: Set<string>;
 }
 
 /**
@@ -176,5 +180,5 @@ export interface LayoutElementConfig {
      * @param size the size of the element
      * @returns the rendered element
      */
-    layout(layout: Layout, element: LayoutElement, position: Position, size: Size): Element;
+    layout(layout: Layout, element: LayoutElement, position: Position, size: Size): Element[];
 }

@@ -135,12 +135,12 @@ export class FullObject extends BaseObject {
     override toNative(): any {
         if (!this.nativeObject) {
             const newObject: { [key: string]: any } = {};
+            this.nativeObject = newObject;
             this.fields.forEach((value, key) => {
                 if (key !== SemanticFieldNames.PROTO) {
-                    newObject[key] = value;
+                    newObject[key] = value.value.toNative();
                 }
             });
-            this.nativeObject = newObject;
         }
         return this.nativeObject;
     }

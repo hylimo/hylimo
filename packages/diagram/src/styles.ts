@@ -1,4 +1,4 @@
-import { FullObject } from "@hylimo/core";
+import { FullObject, toNativeList } from "@hylimo/core";
 
 /**
  * Different types of selectors
@@ -49,7 +49,7 @@ export interface Style {
  * @returns the computed styles
  */
 export function generateStyles(styles: any): Style[] {
-    return generateStylesForStyles([], styles);
+    return generateStylesForStyles([], styles.styles);
 }
 
 /**
@@ -60,7 +60,7 @@ export function generateStyles(styles: any): Style[] {
  * @returns a list of styles
  */
 function generateStylesForStyles(selectorChain: Selector[], styles: any[]): Style[] {
-    return styles.flatMap((value) => generateStylesRecursive(selectorChain, value));
+    return toNativeList(styles).flatMap((value) => generateStylesRecursive(selectorChain, value));
 }
 
 /**
@@ -79,7 +79,7 @@ function generateStylesRecursive(selectorChain: Selector[], currentObject: any):
         }
     ];
     const styles: Style[] = [];
-    if (currentObject.has("styles")) {
+    if (currentObject.hasOwnProperty("styles")) {
         styles.push(...generateStylesForStyles(currentSelectorChain, currentObject.styles));
     }
     if (Object.keys(currentObject).length > 3) {

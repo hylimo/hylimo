@@ -6,7 +6,8 @@ import {
     id,
     InterpreterContext,
     InterpreterModule,
-    jsFun
+    jsFun,
+    SemanticFieldNames
 } from "@hylimo/core";
 
 /**
@@ -59,6 +60,7 @@ const shapeDoc =
  */
 function assignTypeFunction(type: string): (args: FullObject, context: InterpreterContext) => FullObject {
     return (args, context) => {
+        args.setLocalField(SemanticFieldNames.SELF, { value: context.null }, context);
         args.setLocalField("type", { value: context.newString(type) }, context);
         return args;
     };
@@ -304,7 +306,7 @@ export const diagramModule: InterpreterModule = {
                         (callback) = args
                         res = object(styles = list())
                         res.type = selector("type")
-                        res.cls = selector("cls")
+                        res.class = selector("class")
                         callback.callWithScope(res)
                         res
                     `,

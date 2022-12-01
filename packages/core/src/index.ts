@@ -21,3 +21,6 @@ export * from "./stdlib/modules/common";
 export * from "./stdlib/modules/debug";
 export * from "./stdlib/modules/operator";
 export * from "./stdlib/modules/number";
+export * from "./stdlib/modules/function";
+export * from "./stdlib/modules/list";
+export * from "./stdlib/modules/string";
