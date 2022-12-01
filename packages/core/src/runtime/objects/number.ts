@@ -18,4 +18,8 @@ export class NumberObject extends SimpleObject {
     override toString(): string {
         return this.value.toString();
     }
+
+    override toNative(): any {
+        return this.value;
+    }
 }

@@ -17,6 +17,10 @@ export abstract class AbstractFunctionObject extends SimpleObject {
     constructor(readonly parentScope: FullObject, proto: FullObject) {
         super(proto);
     }
+
+    override toNative(): any {
+        return null;
+    }
 }
 
 /**

@@ -22,4 +22,8 @@ export class NullObject extends BaseObject {
     override toString(): string {
         return "null";
     }
+
+    override toNative(): any {
+        return null;
+    }
 }

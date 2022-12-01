@@ -18,4 +18,8 @@ export class StringObject extends SimpleObject {
     override toString(): string {
         return `"${this.value}"`;
     }
+
+    override toNative(): any {
+        return this.value;
+    }
 }

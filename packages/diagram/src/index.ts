@@ -4,3 +4,6 @@ export * from "./font/font";
 export * from "./font/fontConfig";
 export * from "./font/fontManager";
 export * from "./module/module";
+export * from "./layout/layoutElement";
+export * from "./layout/layoutEngine";
+export * from "./layout/layouts";

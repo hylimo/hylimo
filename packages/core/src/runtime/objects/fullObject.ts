@@ -9,6 +9,11 @@ import { BaseObject, FieldEntry } from "./baseObject";
 export class FullObject extends BaseObject {
     readonly fields: Map<string | number, FieldEntry> = new Map();
 
+    /**
+     * If generated, the native object
+     */
+    private nativeObject?: { [key: string]: any };
+
     override getFieldEntry(key: string | number, context: InterpreterContext): FieldEntry {
         this.checkValidKey(key);
         return this.getLocalField(key, context);
@@ -125,5 +130,18 @@ export class FullObject extends BaseObject {
         }
         res += "}";
         return res;
+    }
+
+    override toNative(): any {
+        if (!this.nativeObject) {
+            const newObject: { [key: string]: any } = {};
+            this.fields.forEach((value, key) => {
+                if (key !== SemanticFieldNames.PROTO) {
+                    newObject[key] = value;
+                }
+            });
+            this.nativeObject = newObject;
+        }
+        return this.nativeObject;
     }
 }

@@ -67,6 +67,14 @@ export abstract class BaseObject {
      * @returns a string representation
      */
     abstract toString(): string;
+
+    /**
+     * Transforms this to a js number/string/object
+     * Does not consider the prototype
+     *
+     * @returns the js representation
+     */
+    abstract toNative(): any;
 }
 
 /**

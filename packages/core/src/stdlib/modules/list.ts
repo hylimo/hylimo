@@ -131,3 +131,21 @@ export const listModule: InterpreterModule = {
         )
     ]
 };
+
+/**
+ * Helper to convert a native list object to a native list
+ *
+ * @param native the result of toNative() on a list object
+ * @returns the list with all values
+ */
+export function toNativeList(native: { [key: string | number]: any }): any[] {
+    let length = native[lengthField];
+    if (typeof length !== "number") {
+        length = -1;
+    }
+    const res: any[] = [];
+    for (let i = 0; i < length; i++) {
+        res.push(native[i]);
+    }
+    return res;
+}
