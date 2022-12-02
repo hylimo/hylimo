@@ -1,5 +1,5 @@
 import { LayoutElement } from "../layoutElement";
-import { BaseElementLayoutConfig } from "./BaseElementLayoutConfig";
+import { BaseElementLayoutConfig } from "./baseElementLayoutConfig";
 
 /**
  * Base class for all shape layout configs
