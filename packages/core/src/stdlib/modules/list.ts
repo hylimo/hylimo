@@ -1,6 +1,8 @@
 import { ConstExpression } from "../../parser/ast";
 import { assign, fun, id, jsFun, native, num } from "../../parser/astHelper";
 import { InterpreterModule } from "../../runtime/interpreter";
+import { BaseObject } from "../../runtime/objects/baseObject";
+import { FullObject } from "../../runtime/objects/fullObject";
 import { generateArgs } from "../../runtime/objects/function";
 import { RuntimeError } from "../../runtime/runtimeError";
 import { SemanticFieldNames } from "../../runtime/semanticFieldNames";
@@ -138,7 +140,7 @@ export const listModule: InterpreterModule = {
  * @param native the result of toNative() on a list object
  * @returns the list with all values
  */
-export function toNativeList(native: { [key: string | number]: any }): any[] {
+export function nativeToList(native: { [key: string | number]: any }): any[] {
     let length = native[lengthField];
     if (typeof length !== "number") {
         length = -1;
@@ -146,6 +148,25 @@ export function toNativeList(native: { [key: string | number]: any }): any[] {
     const res: any[] = [];
     for (let i = 0; i < length; i++) {
         res.push(native[i]);
+    }
+    return res;
+}
+
+/**
+ * Helper to convert a FullObject which is a list to a list of BaseObject.
+ * Missing values are replaced with undefined, as access to th null object is not available
+ *
+ * @param object the object to convert
+ * @returns the list with all values
+ */
+export function objectToList(object: FullObject): (BaseObject | undefined)[] {
+    let length = object.getLocalFieldOrUndefined(lengthField)?.value?.toNative();
+    if (typeof length !== "number") {
+        length = -1;
+    }
+    const res: (BaseObject | undefined)[] = [];
+    for (let i = 0; i < length; i++) {
+        res.push(object.getLocalFieldOrUndefined(i)?.value);
     }
     return res;
 }

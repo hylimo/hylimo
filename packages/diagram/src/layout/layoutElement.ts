@@ -1,3 +1,4 @@
+import { FieldEntry, FullObject } from "@hylimo/core";
 import { Element } from "../model/base";
 import { Layout } from "./layoutEngine";
 
@@ -119,7 +120,7 @@ export interface LayoutElement {
     /**
      * The element to layout
      */
-    element: { [key: string]: any };
+    element: FullObject;
     /**
      * The parent element, required for style matching
      */
@@ -128,6 +129,10 @@ export interface LayoutElement {
      * Computed styles
      */
     styles: { [key: string]: any };
+    /**
+     * Sources of the styles
+     */
+    styleSources: Map<string, FieldEntry>;
     /**
      * After measure the computed size
      */

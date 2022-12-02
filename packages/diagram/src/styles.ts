@@ -1,4 +1,5 @@
-import { FullObject, toNativeList } from "@hylimo/core";
+import { FullObject, objectToList } from "@hylimo/core";
+import { assertString } from "@hylimo/core";
 
 /**
  * Different types of selectors
@@ -39,7 +40,7 @@ export interface Style {
     /**
      * The fields which are applied if the selector matches
      */
-    fields: { [key: string]: any };
+    fields: FullObject;
 }
 
 /**
@@ -48,8 +49,8 @@ export interface Style {
  * @param styles the syncscript styles version
  * @returns the computed styles
  */
-export function generateStyles(styles: any): Style[] {
-    return generateStylesForStyles([], styles.styles);
+export function generateStyles(styles: FullObject): Style[] {
+    return generateStylesForStyles([], styles.getLocalFieldOrUndefined("styles")?.value as FullObject);
 }
 
 /**
@@ -59,8 +60,8 @@ export function generateStyles(styles: any): Style[] {
  * @param styles the styles to map
  * @returns a list of styles
  */
-function generateStylesForStyles(selectorChain: Selector[], styles: any[]): Style[] {
-    return toNativeList(styles).flatMap((value) => generateStylesRecursive(selectorChain, value));
+function generateStylesForStyles(selectorChain: Selector[], styles: FullObject): Style[] {
+    return objectToList(styles).flatMap((value) => generateStylesRecursive(selectorChain, value as FullObject));
 }
 
 /**
@@ -70,19 +71,27 @@ function generateStylesForStyles(selectorChain: Selector[], styles: any[]): Styl
  * @param currentObject contains current styles
  * @returns a list of styles
  */
-function generateStylesRecursive(selectorChain: Selector[], currentObject: any): Style[] {
+function generateStylesRecursive(selectorChain: Selector[], currentObject: FullObject): Style[] {
     const currentSelectorChain: Selector[] = [
         ...selectorChain,
         {
-            type: currentObject.selectorType,
-            value: currentObject.selectorValue
+            type: assertString(
+                currentObject.getLocalFieldOrUndefined("selectorType")?.value!,
+                "selectorType"
+            ) as SelectorType,
+            value: assertString(currentObject.getLocalFieldOrUndefined("selectorValue")?.value!, "selectorValue")
         }
     ];
     const styles: Style[] = [];
     if (currentObject.hasOwnProperty("styles")) {
-        styles.push(...generateStylesForStyles(currentSelectorChain, currentObject.styles));
+        styles.push(
+            ...generateStylesForStyles(
+                currentSelectorChain,
+                currentObject.getLocalFieldOrUndefined("styles")?.value as FullObject
+            )
+        );
     }
-    if (Object.keys(currentObject).length > 3) {
+    if (currentObject.fields.size > 4) {
         styles.push({
             selectorChain: currentSelectorChain,
             fields: currentObject

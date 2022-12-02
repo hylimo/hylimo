@@ -16,13 +16,32 @@ export class FullObject extends BaseObject {
 
     override getFieldEntry(key: string | number, context: InterpreterContext): FieldEntry {
         this.checkValidKey(key);
-        return this.getLocalField(key, context);
+        return this.getFieldEntryInternal(key, context);
     }
 
     /**
-     * Gets the value of a field without performing any checks
-     * If the field is not found on this, returns it from the proto field
-     * If it is not found on any parent, returns null from the provided context
+     * Gets the value of a field without performing any checks.
+     * If the field is not found on this, returns it from the proto field.
+     * If it is not found on any parent, returns null from the provided context.
+     * Does not validate the key.
+     *
+     * @param key the identifier of the field
+     * @param context context in which this is performed
+     * @returns the value of the field
+     */
+    private getFieldEntryInternal(key: string | number, context: InterpreterContext): FieldEntry {
+        const value = this.fields.get(key);
+        if (value) {
+            return value;
+        } else {
+            const proto = this.getProto();
+            return proto?.getFieldEntryInternal(key, context) ?? { value: context.null };
+        }
+    }
+
+    /**
+     * Gets the value of a field without performing any checks.
+     * If the field is not found on this, returns null from the provided context.
      *
      * @param key the identifier of the field
      * @param context context in which this is performed
@@ -33,9 +52,12 @@ export class FullObject extends BaseObject {
         if (value) {
             return value;
         } else {
-            const proto = this.getProto();
-            return proto?.getLocalField(key, context) ?? { value: context.null };
+            return { value: context.null };
         }
+    }
+
+    getLocalFieldOrUndefined(key: string | number): FieldEntry | undefined {
+        return this.fields.get(key);
     }
 
     override setFieldEntry(key: string | number, value: FieldEntry, context: InterpreterContext): void {

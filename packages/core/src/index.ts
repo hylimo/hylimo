@@ -15,6 +15,7 @@ export * from "./runtime/objects/string";
 export * from "./runtime/objects/literal";
 export * from "./stdlib/modules";
 export * from "./stdlib/defaultModuleNames";
+export * from "./stdlib/typeHelpers";
 export * from "./stdlib/modules/object";
 export * from "./stdlib/modules/boolean";
 export * from "./stdlib/modules/common";

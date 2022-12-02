@@ -1,4 +1,5 @@
-import { FullObject, toNativeList } from "@hylimo/core";
+import { FullObject, nativeToList } from "@hylimo/core";
+import { assertString } from "@hylimo/core";
 import { FontFamily } from "../font/font";
 import { FontManager } from "../font/fontManager";
 import { Element } from "../model/base";
@@ -46,22 +47,30 @@ export class LayoutEngine {
      * @param diagram the diagram to layout
      */
     async layout(diagram: FullObject): Promise<Element[]> {
-        const nativeDiagram = diagram.toNative();
+        const nativeFonts = diagram.getLocalFieldOrUndefined("fonts")?.value?.toNative();
         const fontMap = new Map<string, FontFamily>();
-        for (const config of toNativeList(nativeDiagram.fonts)) {
+        for (const config of nativeToList(nativeFonts)) {
             fontMap.set(config.fontFamily, await this.fontManager.getFontFamily(config));
         }
-        const layout = new Layout(this, generateStyles(nativeDiagram.styles), fontMap);
-        const layoutElement = layout.measure(nativeDiagram.element, undefined, {
-            min: {
-                width: 0,
-                height: 0
-            },
-            max: {
-                width: Number.POSITIVE_INFINITY,
-                height: Number.POSITIVE_INFINITY
+        const layout = new Layout(
+            this,
+            generateStyles(diagram.getLocalFieldOrUndefined("styles")?.value as FullObject),
+            fontMap
+        );
+        const layoutElement = layout.measure(
+            diagram.getLocalFieldOrUndefined("element")?.value as FullObject,
+            undefined,
+            {
+                min: {
+                    width: 0,
+                    height: 0
+                },
+                max: {
+                    width: Number.POSITIVE_INFINITY,
+                    height: Number.POSITIVE_INFINITY
+                }
             }
-        });
+        );
         return layout.layout(layoutElement, { x: 0, y: 0 }, layoutElement.measuredSize!);
     }
 }
@@ -89,7 +98,7 @@ export class Layout {
         if (selector.type === SelectorType.CLASS) {
             return element.class.has(selector.value);
         } else if (selector.type === SelectorType.TYPE) {
-            return element.element.type === selector.value;
+            return element.layoutConfig.type === selector.value;
         } else {
             return false;
         }
@@ -137,8 +146,10 @@ export class Layout {
         matchingStyles.reverse();
         for (const attribute of styleAttributes) {
             for (const style of matchingStyles) {
-                if (style[attribute]) {
-                    layoutElement.styles[attribute] = style[attribute];
+                const entry = style.getLocalFieldOrUndefined(attribute);
+                if (entry) {
+                    layoutElement.styles[attribute] = entry.value.toNative();
+                    layoutElement.styleSources.set(attribute, entry);
                     break;
                 }
             }
@@ -169,17 +180,16 @@ export class Layout {
      * @param constraints size constraitns required for measure
      * @returns the generated LayoutElement
      */
-    measure(
-        element: { [key: string]: any },
-        parent: LayoutElement | undefined,
-        constraints: SizeConstraints
-    ): LayoutElement {
+    measure(element: FullObject, parent: LayoutElement | undefined, constraints: SizeConstraints): LayoutElement {
+        const type = assertString(element.getLocalFieldOrUndefined("type")?.value!, "type");
+        const cls = nativeToList(element.getLocalFieldOrUndefined("class")?.value?.toNative() ?? {});
         const layoutElement: LayoutElement = {
             element,
             parent,
             styles: {},
-            layoutConfig: this.engine.layoutConfigs.get(element.type)!,
-            class: new Set(element.class ? toNativeList(element.class) : [])
+            styleSources: new Map(),
+            layoutConfig: this.engine.layoutConfigs.get(type)!,
+            class: new Set(cls)
         };
         this.applyStyles(layoutElement);
         const styles = layoutElement.styles;
