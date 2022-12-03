@@ -30,14 +30,14 @@ export class RectLayoutConfig extends ShapeLayoutConfig {
         }
     }
 
-    override layout(layout: Layout, element: LayoutElement, position: Position, size: Size): Element[] {
+    override layout(layout: Layout, element: LayoutElement, position: Position, size: Size, id: string): Element[] {
         const result: Rect = {
             type: "rect",
-            id: "",
-            ...position,
-            ...size,
+            id,
+            position,
+            size,
             ...this.extractShapeProperties(element),
-            contents: []
+            children: []
         };
         if (element.content) {
             let contentSize = size;
@@ -46,7 +46,7 @@ export class RectLayoutConfig extends ShapeLayoutConfig {
                 contentSize = addToSize(contentSize, 2 * result.strokeWidth, 2 * result.strokeWidth);
                 contentPosition = { x: position.x + result.strokeWidth, y: position.y + result.strokeWidth };
             }
-            result.contents.push(...layout.layout(element.content, contentPosition, contentSize));
+            result.children.push(...layout.layout(element.content, contentPosition, contentSize, `${id}_0`));
         }
         return [result];
     }

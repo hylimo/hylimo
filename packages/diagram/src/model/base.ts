@@ -1,35 +1,13 @@
+import { BoundsAware, SModelElement } from "sprotty-protocol";
+
 /**
  * Base class for all elements
  */
-export interface Element {
+export interface Element extends SModelElement, BoundsAware {
     /**
-     * The type of the element
+     * Child elementes
      */
-    type: string;
-    /**
-     * A unique id of the element
-     */
-    id: string;
-    /**
-     * The x coordinate of the element
-     */
-    x: number;
-    /**
-     * The y coordinate of the element
-     */
-    y: number;
-    /**
-     * The width of the element
-     */
-    width: number;
-    /**
-     * The height of the element
-     */
-    height: number;
-    /**
-     * Child elements
-     */
-    contents: Element[];
+    children: Element[];
 }
 
 /**

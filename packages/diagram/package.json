@@ -14,6 +14,7 @@
         "@hylimo/core": "^0.0.1",
         "fontkit": "^2.0.2",
         "linebreak": "^1.1.0",
+        "sprotty-protocol": "^0.12.0",
         "svg-path-bbox": "^1.2.2"
     },
     "devDependencies": {

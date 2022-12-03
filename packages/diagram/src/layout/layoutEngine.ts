@@ -71,7 +71,7 @@ export class LayoutEngine {
                 }
             }
         );
-        return layout.layout(layoutElement, { x: 0, y: 0 }, layoutElement.measuredSize!);
+        return layout.layout(layoutElement, { x: 0, y: 0 }, layoutElement.measuredSize!, "0");
     }
 }
 
@@ -227,9 +227,10 @@ export class Layout {
      * @param element the element to layout
      * @param position the position of the element
      * @param size the size of the element
+     * @param id the id of the element
      * @returns the layouted element
      */
-    layout(element: LayoutElement, position: Position, size: Size): Element[] {
+    layout(element: LayoutElement, position: Position, size: Size, id: string): Element[] {
         const layoutInformation = element.layoutInformation!;
         const marginX = layoutInformation.marginLeft + layoutInformation.marginRight;
         const marginY = layoutInformation.marginTop + layoutInformation.marginBottom;
@@ -278,7 +279,8 @@ export class Layout {
             this,
             element,
             { x: posX, y: posY },
-            { width: realWidth, height: realHeight }
+            { width: realWidth, height: realHeight },
+            id
         );
     }
 }

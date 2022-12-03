@@ -1,14 +1,12 @@
 import { FieldEntry, FullObject } from "@hylimo/core";
+import { Dimension, Point } from "sprotty-protocol";
 import { Element } from "../model/base";
 import { Layout } from "./layoutEngine";
 
 /**
  * Simple size interface with a width and a height
  */
-export interface Size {
-    width: number;
-    height: number;
-}
+export type Size = Dimension;
 
 /**
  * Size constraints from min to max size
@@ -68,10 +66,7 @@ export function matchToConstraints(size: Size, constraints: SizeConstraints): Si
 /**
  * Simple position interface consisting of an x and y coordinate
  */
-export interface Position {
-    x: number;
-    y: number;
-}
+export type Position = Point;
 
 /**
  * Controls the horizontal alignment of an element
@@ -183,7 +178,8 @@ export interface LayoutElementConfig {
      * @param element the element to render
      * @param position offset in current context
      * @param size the size of the element
+     * @param id the id of the element
      * @returns the rendered element
      */
-    layout(layout: Layout, element: LayoutElement, position: Position, size: Size): Element[];
+    layout(layout: Layout, element: LayoutElement, position: Position, size: Size, id: string): Element[];
 }

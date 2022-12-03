@@ -49,7 +49,8 @@ export abstract class BaseElementLayoutConfig implements LayoutElementConfig {
      * @param element the element to render
      * @param position offset in current context
      * @param size the size of the element
+     * @param id the id of the element
      * @returns the rendered element
      */
-    abstract layout(layout: Layout, element: LayoutElement, position: Position, size: Size): Element[];
+    abstract layout(layout: Layout, element: LayoutElement, position: Position, size: Size, id: string): Element[];
 }
