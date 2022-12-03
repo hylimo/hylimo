@@ -1,0 +1,19 @@
+{
+    "name": "@hylimo/diagram-ui",
+    "version": "0.0.1",
+    "main": "lib/index",
+    "types": "lib/index",
+    "files": [
+        "lib",
+        "src"
+    ],
+    "scripts": {
+        "build": "tsc"
+    },
+    "devDependencies": {
+        "@hylimo/diagram": "^0.0.1"
+    },
+    "dependencies": {
+        "sprotty": "^0.12.0"
+    }
+}
