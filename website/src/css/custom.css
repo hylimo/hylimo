@@ -33,3 +33,20 @@
 .main-wrapper {
   display: flex;
 }
+
+/* Sprotty */
+.sprotty {
+  display: flex;
+  height: 100%;
+}
+
+.sprotty-hidden {
+  height: 0px !important;
+}
+
+.sprotty svg {
+  width: 100%;
+  flex: 1;
+  border-style: none;
+  border-width: 0px;
+}

@@ -1,4 +1,4 @@
-import { InterpreterModule, Interpreter, Parser, CstResult, defaultModules } from "@hylimo/core";
+import { InterpreterModule, Interpreter, Parser, CstResult, defaultModules, FullObject } from "@hylimo/core";
 import {
     Connection,
     Diagnostic,
@@ -15,7 +15,9 @@ import {
 import { TextDocument } from "vscode-languageserver-textdocument";
 import { Diagram } from "./diagram";
 import { Formatter } from "./formatter";
-import { diagramModule } from "@hylimo/diagram";
+import { diagramModule, LayoutEngine } from "@hylimo/diagram";
+import { DiagramServerManager } from "./diagramServerManager";
+import { DiagramActionNotification, DiagramCloseNotification, DiagramOpenNotification, OpenDiagramMessage } from "./diagramNotificationTypes";
 
 /**
  * Config for creating a new language server
@@ -70,6 +72,16 @@ export class LanguageServer {
     private readonly diagrams = new Map<string, Diagram>();
 
     /**
+     * Manages diagram servers
+     */
+    private readonly diagramServerManager: DiagramServerManager;
+
+    /**
+     * Performs layouting of diagrams
+     */
+    private readonly layoutEngine = new LayoutEngine();
+
+    /**
      * Creates a new language server
      *
      * @param config configures the language server
@@ -77,6 +89,7 @@ export class LanguageServer {
     constructor(readonly config: LanguageServerConfig) {
         this.connection = config.connection;
         this.connection.onInitialize(this.onInitialize.bind(this));
+        this.diagramServerManager = new DiagramServerManager(this.connection);
         this.textDocuments.listen(this.connection);
         const interpreterModules = [...defaultModules, diagramModule, ...config.additionalInterpreterModules];
         this.interpreter = new Interpreter(interpreterModules);
@@ -84,6 +97,13 @@ export class LanguageServer {
         this.textDocuments.onDidClose(this.onDidCloseTextDocument.bind(this));
         this.textDocuments.onDidChangeContent(this.onDidChangeContentTextDocument.bind(this));
         this.connection.onDocumentFormatting(this.onDocumentFormatting.bind(this));
+        this.connection.onNotification(DiagramOpenNotification.type, this.onOpenDiagram.bind(this));
+        this.connection.onNotification(DiagramActionNotification.type, (message) => {
+            this.diagramServerManager.acceptAction(message);
+        });
+        this.connection.onNotification(DiagramCloseNotification.type, (clientId) => {
+            this.diagramServerManager.removeClient(clientId);
+        });
     }
 
     /**
@@ -129,7 +149,7 @@ export class LanguageServer {
      *
      * @param e the provided event
      */
-    private onDidChangeContentTextDocument(e: TextDocumentChangeEvent<TextDocument>): void {
+    private async onDidChangeContentTextDocument(e: TextDocumentChangeEvent<TextDocument>): Promise<void> {
         const diagram = this.diagrams.get(e.document.uri)!;
         const parserResult = this.parser.parse(e.document.getText());
         diagram.lastParserResult = parserResult;
@@ -151,6 +171,11 @@ export class LanguageServer {
                 }
                 console.error(error);
                 //TODO do sth else with error
+            }
+            if (interpretationResult.result) {
+                const layoutedDiagram = await this.layoutEngine.layout(interpretationResult.result as FullObject);
+                diagram.layoutedDiagram = layoutedDiagram;
+                this.diagramServerManager.updatedDiagram(diagram);
             }
         }
         this.connection.sendDiagnostics({
@@ -213,5 +238,18 @@ export class LanguageServer {
                 })
             )
         ];
+    }
+
+    /**
+     * Registers a diagram client
+     * 
+     * @param params defines the id of the client and the diagram to open
+     */
+    private onOpenDiagram(params: OpenDiagramMessage): void {
+        const diagram = this.diagrams.get(params.diagramUri);
+        if (!diagram) {
+            throw new Error(`Unknown diagram: ${params.diagramUri}`)
+        }
+        this.diagramServerManager.addClient(params.clientId, diagram);
     }
 }

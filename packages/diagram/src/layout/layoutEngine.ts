@@ -1,9 +1,11 @@
 import { FullObject, nativeToList } from "@hylimo/core";
 import { assertString } from "@hylimo/core";
 import { FontFamily } from "../font/font";
+import { FontFamilyConfig } from "../font/fontConfig";
 import { FontManager } from "../font/fontManager";
 import { Element } from "../model/base";
 import { generateStyles, Selector, SelectorType, Style } from "../styles";
+import { LayoutedDiagram } from "./layoutedDiagram";
 import {
     addToSize,
     HorizontalAlignment,
@@ -46,11 +48,13 @@ export class LayoutEngine {
      *
      * @param diagram the diagram to layout
      */
-    async layout(diagram: FullObject): Promise<Element[]> {
+    async layout(diagram: FullObject): Promise<LayoutedDiagram> {
         const nativeFonts = diagram.getLocalFieldOrUndefined("fonts")?.value?.toNative();
         const fontMap = new Map<string, FontFamily>();
+        const fontFamilyConfigs: FontFamilyConfig[] = [];
         for (const config of nativeToList(nativeFonts)) {
             fontMap.set(config.fontFamily, await this.fontManager.getFontFamily(config));
+            fontFamilyConfigs.push(config.fontFamily);
         }
         const layout = new Layout(
             this,
@@ -71,7 +75,17 @@ export class LayoutEngine {
                 }
             }
         );
-        return layout.layout(layoutElement, { x: 0, y: 0 }, layoutElement.measuredSize!, "0");
+        const elements = layout.layout(layoutElement, { x: 0, y: 0 }, layoutElement.measuredSize!, "0");
+        console.log(JSON.stringify(elements, null, 4))
+        return {
+            rootElement: {
+                type: "root",
+                id: "root",
+                children: elements,
+                fonts: fontFamilyConfigs
+            },
+            layoutElementLookup: layout.layoutElementLookup
+        };
     }
 }
 
@@ -79,6 +93,11 @@ export class LayoutEngine {
  * Performs the layout, uses a layout engine to do so
  */
 export class Layout {
+    /**
+     * Lookup for layout elements
+     */
+    readonly layoutElementLookup = new Map<string, LayoutElement>();
+
     /**
      * Creates a new layout
      *
@@ -274,6 +293,8 @@ export class Layout {
         } else {
             posY += layoutInformation.marginTop;
         }
+
+        this.layoutElementLookup.set(id, element);
 
         return element.layoutConfig.layout(
             this,

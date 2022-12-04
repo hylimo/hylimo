@@ -1,5 +1,6 @@
 export * from "./model/model";
 export * from "./model/base";
+export * from "./model/root";
 export * from "./font/font";
 export * from "./font/fontConfig";
 export * from "./font/fontManager";
@@ -7,3 +8,4 @@ export * from "./module/diagramModule";
 export * from "./layout/layoutElement";
 export * from "./layout/layoutEngine";
 export * from "./layout/layouts";
+export * from "./layout/layoutedDiagram";

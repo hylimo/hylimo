@@ -7,6 +7,12 @@
         },
         {
             "path": "packages/language-server"
+        },
+        {
+            "path": "packages/diagram"
+        },
+        {
+            "path": "packages/diagram-ui"
         }
     ]
 }

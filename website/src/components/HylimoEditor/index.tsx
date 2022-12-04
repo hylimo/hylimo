@@ -1,5 +1,6 @@
+import "reflect-metadata";
 import { Allotment } from "allotment";
-import React from "react";
+import React, { useEffect } from "react";
 import { useColorMode } from "@docusaurus/theme-common";
 import "allotment/dist/style.css";
 import { customDarkTheme, customLightTheme, languageConfiguration, monarchTokenProvider } from "./language";
@@ -14,11 +15,20 @@ import { BrowserMessageReader, BrowserMessageWriter } from "vscode-languageserve
 import { StandaloneServices } from "vscode/services";
 import MonacoEditor from "react-monaco-editor";
 import { useLocalStorage } from "@rehooks/local-storage";
+import { createContainer } from "@hylimo/diagram-ui";
+import { ActionHandlerRegistry, DiagramServerProxy, IActionDispatcher, LocalModelSource, TYPES } from "sprotty";
+import { RequestModelAction, ActionMessage } from "sprotty-protocol";
+import { DiagramActionNotification, DiagramOpenNotification } from "@hylimo/language-server";
 
 /**
  * Name of the language
  */
 const language = "syncscript";
+
+/**
+ * The uri of the TextDocument
+ */
+const uri = "inmemory://model/1"
 
 /**
  * Editor Component
@@ -29,12 +39,50 @@ export default function HylimoEditor(): JSX.Element {
     const { colorMode } = useColorMode();
     const [code, setCode] = useLocalStorage<string>("code");
 
+    useEffect(() => {
+        StandaloneServices.initialize({});
+        MonacoServices.install();
+        const worker = new Worker(new URL("./languageServer.ts", import.meta.url));
+        const reader = new BrowserMessageReader(worker);
+        const writer = new BrowserMessageWriter(worker);
+        const languageClient = createLanguageClient({ reader, writer });
+        languageClient.start().then(() => {
+            console.log("send this shit")
+            languageClient.sendNotification(DiagramOpenNotification.type, {
+                clientId: uri,
+                diagramUri: uri
+            });
+    
+            class LspDiagramServerProxy extends DiagramServerProxy {
+                clientId = uri
+            
+                override initialize(registry: ActionHandlerRegistry): void {
+                    super.initialize(registry);
+                    languageClient.onNotification(DiagramActionNotification.type, message => {
+                        this.messageReceived(message);
+                    })
+                }
+            
+                protected override sendMessage(message: ActionMessage): void {
+                    languageClient.sendNotification(DiagramActionNotification.type, message)
+                }
+            }
+    
+            const container = createContainer("sprotty-container");
+            container.bind(TYPES.ModelSource).to(LspDiagramServerProxy);
+            const actionDispatcher = container.get<IActionDispatcher>(TYPES.IActionDispatcher);
+            actionDispatcher.request(RequestModelAction.create()).then(response => {
+                actionDispatcher.dispatch(response);
+            });
+        })
+    }, []);
+
     return (
         <Allotment>
             <Allotment.Pane>
                 <MonacoEditor
                     options={{
-                        automaticLayout: true
+                        automaticLayout: true,
                     }}
                     theme={colorMode === "dark" ? "custom-dark" : "custom-light"}
                     editorWillMount={(editor) => {
@@ -43,14 +91,6 @@ export default function HylimoEditor(): JSX.Element {
                         editor.languages.setMonarchTokensProvider(language, monarchTokenProvider as any);
                         editor.editor.defineTheme("custom-dark", customDarkTheme as any);
                         editor.editor.defineTheme("custom-light", customLightTheme as any);
-
-                        StandaloneServices.initialize({});
-                        MonacoServices.install();
-                        const worker = new Worker(new URL("./languageServer.ts", import.meta.url));
-                        const reader = new BrowserMessageReader(worker);
-                        const writer = new BrowserMessageWriter(worker);
-                        const languageClient = createLanguageClient({ reader, writer });
-                        languageClient.start();
                     }}
                     editorWillUnmount={(editor) => {}}
                     language={language}
@@ -59,7 +99,7 @@ export default function HylimoEditor(): JSX.Element {
                 ></MonacoEditor>
             </Allotment.Pane>
             <Allotment.Pane>
-                <div>Hello world</div>
+                <div id="sprotty-container"></div>
             </Allotment.Pane>
         </Allotment>
     );

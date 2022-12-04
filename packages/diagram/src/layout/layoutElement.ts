@@ -1,6 +1,7 @@
 import { FieldEntry, FullObject } from "@hylimo/core";
 import { Dimension, Point } from "sprotty-protocol";
 import { Element } from "../model/base";
+import { Root } from "../model/root";
 import { Layout } from "./layoutEngine";
 
 /**

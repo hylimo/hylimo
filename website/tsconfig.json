@@ -2,7 +2,8 @@
     "extends": "../tsconfig.json",
     "compilerOptions": {
         "rootDir": "src",
-        "outDir": "lib"
+        "outDir": "lib",
+        "module": "ES2020"
     },
     "references": [
         {
@@ -10,6 +11,9 @@
         },
         {
             "path": "../packages/core"
+        },
+        {
+            "path": "../packages/diagram-ui"
         }
     ],
     "include": ["src/**/*.ts(x?)"]

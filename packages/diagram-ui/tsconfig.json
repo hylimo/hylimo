@@ -4,6 +4,11 @@
         "rootDir": "src",
         "outDir": "lib"
     },
+    "references": [
+        {
+            "path": "../diagram"
+        }
+    ],
     "include": ["src/**/*.ts"],
     "exclude": ["lib", "node_modules"]
 }
