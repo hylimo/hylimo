@@ -47,6 +47,38 @@ type AccessDefinition = {
  */
 export function generateVisitor(parser: Parser): ICstVisitor<never, any> {
     /**
+     * Helper to discard position information if parser does not allow tracking
+     *
+     * @param position the position to maybe return
+     * @returns parser.astPositions ? position : undefined
+     */
+    function optionalPosition(position: ASTExpressionPosition): ASTExpressionPosition | undefined {
+        if (parser.astPositions) {
+            return position;
+        } else {
+            return undefined;
+        }
+    }
+
+    /**
+     * Helper which wraps generatePosition in optionalPosition.
+     * Also returns undefined if start or end is undefined.
+     *
+     * @param start the start position
+     * @param end the end position
+     * @returns the combined start and end position or undefined
+     */
+    function generateOptionalPosition(
+        start: ASTExpressionPosition,
+        end: ASTExpressionPosition
+    ): ASTExpressionPosition | undefined {
+        if (start == undefined || end == undefined) {
+            return undefined;
+        }
+        return optionalPosition(generatePosition(start, end));
+    }
+
+    /**
      * Visitor which visists each node and generates the AST based on it
      */
     class GenerateASTVisitor extends parser.getBaseCstVisitorConstructor<never, any>() {
@@ -64,10 +96,10 @@ export function generateVisitor(parser: Parser): ICstVisitor<never, any> {
         private literal(ctx: any): LiteralExpression<any> {
             if (ctx.String) {
                 const token = ctx.String[0];
-                return new StringLiteralExpression(parseString(token.image), token);
+                return new StringLiteralExpression(parseString(token.image), optionalPosition(token));
             } else {
                 const token = ctx.Number[0];
-                return new NumberLiteralExpression(parseNumber(token.image), token);
+                return new NumberLiteralExpression(parseNumber(token.image), optionalPosition(token));
             }
         }
 
@@ -122,7 +154,11 @@ export function generateVisitor(parser: Parser): ICstVisitor<never, any> {
                 startPos = ctx.OpenCurlyBracket[0];
             }
             const expressions = this.visit(ctx.expressions);
-            return new FunctionExpression(expressions, decorator, generatePosition(startPos, ctx.CloseCurlyBracket[0]));
+            return new FunctionExpression(
+                expressions,
+                decorator,
+                generateOptionalPosition(startPos, ctx.CloseCurlyBracket[0])
+            );
         }
 
         /**
@@ -182,7 +218,7 @@ export function generateVisitor(parser: Parser): ICstVisitor<never, any> {
             let baseExpression;
             if (ctx.Identifier) {
                 const token = ctx.Identifier[0];
-                baseExpression = new IdentifierExpression(token.image, token);
+                baseExpression = new IdentifierExpression(token.image, optionalPosition(token));
             } else if (ctx.literal) {
                 baseExpression = this.visit(ctx.literal);
             } else if (ctx.function) {
@@ -211,7 +247,7 @@ export function generateVisitor(parser: Parser): ICstVisitor<never, any> {
             const startPos = baseExpression.position!;
             for (let i = 0; i < callBrackets.length; i++) {
                 const [args, endPos] = callBrackets[i];
-                expression = new InvocationExpression(expression, args, generatePosition(startPos, endPos));
+                expression = new InvocationExpression(expression, args, generateOptionalPosition(startPos, endPos));
             }
             return expression;
         }
@@ -262,14 +298,14 @@ export function generateVisitor(parser: Parser): ICstVisitor<never, any> {
                             accessDefinition.identifier,
                             baseExpression,
                             args,
-                            generatePosition(startPos, endPos)
+                            generateOptionalPosition(startPos, endPos)
                         );
                         baseExpression = this.applyCallBrackets(baseExpression, remaining);
                     } else {
                         baseExpression = new FieldAccessExpression(
                             accessDefinition.identifier,
                             baseExpression,
-                            generatePosition(startPos, accessDefinition.identifierPosition)
+                            generateOptionalPosition(startPos, accessDefinition.identifierPosition)
                         );
                     }
                 }
@@ -291,10 +327,13 @@ export function generateVisitor(parser: Parser): ICstVisitor<never, any> {
                     expression = new FieldAccessExpression(
                         identifier.image,
                         expression,
-                        generatePosition(expression.position!, identifier as ASTExpressionPosition)
+                        generateOptionalPosition(expression.position!, identifier as ASTExpressionPosition)
                     );
                 } else {
-                    expression = new IdentifierExpression(identifier.image, identifier as ASTExpressionPosition);
+                    expression = new IdentifierExpression(
+                        identifier.image,
+                        optionalPosition(identifier as ASTExpressionPosition)
+                    );
                 }
             }
             return expression!;
@@ -316,7 +355,7 @@ export function generateVisitor(parser: Parser): ICstVisitor<never, any> {
                 expression = new InvocationExpression(
                     operators[i],
                     [{ value: expression }, { value: rightHandSide }],
-                    generatePosition(startPos, rightHandSide.position)
+                    generateOptionalPosition(startPos, rightHandSide.position)
                 );
             }
             return expression;
@@ -333,7 +372,7 @@ export function generateVisitor(parser: Parser): ICstVisitor<never, any> {
             return new DestructuringExpression(
                 ctx.Identifier.map((identifier: IToken) => identifier.image),
                 expression,
-                generatePosition(ctx.OpenRoundBracket[0], expression.position)
+                generateOptionalPosition(ctx.OpenRoundBracket[0], expression.position)
             );
         }
 
@@ -351,7 +390,7 @@ export function generateVisitor(parser: Parser): ICstVisitor<never, any> {
                 if (expressions.length > 1) {
                     const target = expressions[0];
                     const value = expressions[1];
-                    const position = generatePosition(target.position, value.position);
+                    const position = generateOptionalPosition(target.position, value.position);
                     if (target instanceof IdentifierExpression) {
                         return new AssignmentExpression(target.identifier, undefined, value, position);
                     } else if (target instanceof FieldAccessExpression) {

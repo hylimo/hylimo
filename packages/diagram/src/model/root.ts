@@ -9,13 +9,13 @@ export interface Root extends SModelRoot {
     /**
      * Type of the element
      */
-    type: "root"
+    type: "root";
     /**
      * Child elementes
      */
-    children: Element[],
+    children: Element[];
     /**
      * Defined font families
      */
-    fonts: FontFamilyConfig[]
+    fonts: FontFamilyConfig[];
 }

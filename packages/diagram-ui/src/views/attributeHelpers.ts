@@ -1,13 +1,13 @@
 import { SChildElement, SShapeElement } from "sprotty";
 
 export function extractLayoutAttributes(model: any): object {
-    model as SShapeElement
+    model as SShapeElement;
     return {
         x: model.x,
         y: model.y,
         width: model.width,
         height: model.height
-    }
+    };
 }
 
 export function extractShapeAttributes(model: any): object {
@@ -18,5 +18,5 @@ export function extractShapeAttributes(model: any): object {
         stroke: model.stroke,
         strokeOpacity: model.strokeOpacity,
         strokeWidth: model.strokeWidth
-    }
+    };
 }

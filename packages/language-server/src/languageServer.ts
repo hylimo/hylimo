@@ -17,7 +17,12 @@ import { Diagram } from "./diagram";
 import { Formatter } from "./formatter";
 import { diagramModule, LayoutEngine } from "@hylimo/diagram";
 import { DiagramServerManager } from "./diagramServerManager";
-import { DiagramActionNotification, DiagramCloseNotification, DiagramOpenNotification, OpenDiagramMessage } from "./diagramNotificationTypes";
+import {
+    DiagramActionNotification,
+    DiagramCloseNotification,
+    DiagramOpenNotification,
+    OpenDiagramMessage
+} from "./diagramNotificationTypes";
 
 /**
  * Config for creating a new language server
@@ -59,7 +64,7 @@ export class LanguageServer {
     /**
      * Parser used to parse the document
      */
-    private readonly parser = new Parser();
+    private readonly parser = new Parser(true);
 
     /**
      * Formatter to use for formatting requests
@@ -170,6 +175,7 @@ export class LanguageServer {
                     );
                 }
                 console.error(error);
+                console.error(error.interpretationStack);
                 //TODO do sth else with error
             }
             if (interpretationResult.result) {
@@ -242,13 +248,13 @@ export class LanguageServer {
 
     /**
      * Registers a diagram client
-     * 
+     *
      * @param params defines the id of the client and the diagram to open
      */
     private onOpenDiagram(params: OpenDiagramMessage): void {
         const diagram = this.diagrams.get(params.diagramUri);
         if (!diagram) {
-            throw new Error(`Unknown diagram: ${params.diagramUri}`)
+            throw new Error(`Unknown diagram: ${params.diagramUri}`);
         }
         this.diagramServerManager.addClient(params.clientId, diagram);
     }

@@ -4,13 +4,13 @@ import { LayoutElement } from "./layoutElement";
 /**
  * Defines a rendered diagram with tracing information
  */
- export interface LayoutedDiagram {
+export interface LayoutedDiagram {
     /**
      * The root element of the diagram
      */
-    rootElement: Root,
+    rootElement: Root;
     /**
      * Lookup of id to the LayoutElement containing required tracing information
      */
-    layoutElementLookup: Map<string, LayoutElement>
+    layoutElementLookup: Map<string, LayoutElement>;
 }

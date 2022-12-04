@@ -29,9 +29,7 @@ export class DiagramServerManager {
      *
      * @param connection handles LSP communication
      */
-    constructor(private readonly connection: Connection) {
-        
-    }
+    constructor(private readonly connection: Connection) {}
 
     /**
      * Adds a new client with the diagram to serve
@@ -62,7 +60,7 @@ export class DiagramServerManager {
                 }
             }
         );
-        
+
         this.diagramServers.set(clientId, diagramServer);
         this.diagramServersByDocument.get(uri)?.push(clientId);
         this.documentLookup.set(clientId, uri);

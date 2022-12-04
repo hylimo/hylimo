@@ -283,7 +283,7 @@ export const diagramModule: InterpreterModule = {
                             (type) = args
                             [docs = "Creates a new selector"] {
                                 (value, callback) = args
-                                selector = object(selectorType = type, selectorValue = value, styles = list())
+                                this.selector = object(selectorType = type, selectorValue = value, styles = list())
                                 args.self.styles.add(selector)
                                 selector.proto = ${selectorProto}
                                 callback.callWithScope(selector)
@@ -373,8 +373,8 @@ export const diagramModule: InterpreterModule = {
             "diagram",
             fun(
                 `
-                    (element, styles, fonts) = args
-                    object(element = element, styles = styles, fonts = fonts)
+                    (element, stylesObject, fonts) = args
+                    object(element = element, styles = stylesObject, fonts = fonts)
                 `,
                 {
                     docs: `

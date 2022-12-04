@@ -75,7 +75,12 @@ export class Parser extends CstParser {
      */
     private readonly visitor: ICstVisitor<never, any>;
 
-    constructor() {
+    /**
+     * Creates a new parser
+     *
+     * @param astPositions iff true, the ast will contain position tracking
+     */
+    constructor(readonly astPositions: boolean) {
         super(lexerDefinition, {
             nodeLocationTracking: "full"
         });

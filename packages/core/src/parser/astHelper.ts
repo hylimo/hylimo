@@ -100,7 +100,7 @@ function parseDecorators(decorators: { [index: string]: string | null }): Map<st
 /**
  * Helper to parse function bodies
  */
-const parser = new Parser();
+const parser = new Parser(false);
 
 /**
  * Helper to create a FunctionExpression

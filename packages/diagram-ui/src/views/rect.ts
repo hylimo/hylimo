@@ -5,11 +5,7 @@ import { extractShapeAttributes } from "./attributeHelpers";
 
 @injectable()
 export class RectView implements IView {
-    render(
-        model: Readonly<SChildElement>,
-        context: RenderingContext,
-        args?: IViewArgs | undefined
-    ): VNode | undefined {
+    render(model: Readonly<SChildElement>, context: RenderingContext, args?: IViewArgs | undefined): VNode | undefined {
         return svg(
             "g",
             null,

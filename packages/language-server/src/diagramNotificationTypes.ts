@@ -18,7 +18,7 @@ export namespace DiagramCloseNotification {
     /**
      * Notification type for close diagram
      */
-    export const type = new NotificationType<string>("diagram/close")
+    export const type = new NotificationType<string>("diagram/close");
 }
 
 /**

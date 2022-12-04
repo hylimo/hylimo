@@ -18,7 +18,7 @@ const diagramModule = new ContainerModule((bind, unbind, isBound, rebind) => {
     const context = { bind, unbind, isBound, rebind };
 
     // TODO replace with custom implementation which handles fonts
-    configureModelElement(context, 'root', SGraph, SGraphView);
+    configureModelElement(context, "root", SGraph, SGraphView);
     configureModelElement(context, "rect", SRectElement, RectView);
 });
 
