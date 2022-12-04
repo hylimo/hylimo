@@ -34,8 +34,8 @@ export class RectLayoutConfig extends ShapeLayoutConfig {
         const result: Rect = {
             type: "rect",
             id,
-            position,
-            size,
+            ...position,
+            ...size,
             ...this.extractShapeProperties(element),
             children: []
         };

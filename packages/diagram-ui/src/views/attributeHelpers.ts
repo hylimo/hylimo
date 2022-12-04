@@ -3,10 +3,10 @@ import { SChildElement, SShapeElement } from "sprotty";
 export function extractLayoutAttributes(model: any): object {
     model as SShapeElement
     return {
-        x: model.position.x,
-        y: model.position.y,
-        width: model.size.width,
-        height: model.size.height
+        x: model.x,
+        y: model.y,
+        width: model.width,
+        height: model.height
     }
 }
 

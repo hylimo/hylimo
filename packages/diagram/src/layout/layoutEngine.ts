@@ -76,7 +76,6 @@ export class LayoutEngine {
             }
         );
         const elements = layout.layout(layoutElement, { x: 0, y: 0 }, layoutElement.measuredSize!, "0");
-        console.log(JSON.stringify(elements, null, 4))
         return {
             rootElement: {
                 type: "root",

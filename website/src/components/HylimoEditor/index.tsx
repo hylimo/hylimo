@@ -47,7 +47,6 @@ export default function HylimoEditor(): JSX.Element {
         const writer = new BrowserMessageWriter(worker);
         const languageClient = createLanguageClient({ reader, writer });
         languageClient.start().then(() => {
-            console.log("send this shit")
             languageClient.sendNotification(DiagramOpenNotification.type, {
                 clientId: uri,
                 diagramUri: uri
