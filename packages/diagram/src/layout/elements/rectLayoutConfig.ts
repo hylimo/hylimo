@@ -43,7 +43,7 @@ export class RectLayoutConfig extends ShapeLayoutConfig {
             let contentSize = size;
             let contentPosition = position;
             if (result.strokeWidth) {
-                contentSize = addToSize(contentSize, 2 * result.strokeWidth, 2 * result.strokeWidth);
+                contentSize = addToSize(contentSize, -2 * result.strokeWidth, -2 * result.strokeWidth);
                 contentPosition = { x: position.x + result.strokeWidth, y: position.y + result.strokeWidth };
             }
             result.children.push(...layout.layout(element.content, contentPosition, contentSize, `${id}_0`));

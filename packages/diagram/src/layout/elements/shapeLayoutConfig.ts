@@ -2,6 +2,32 @@ import { LayoutElement } from "../layoutElement";
 import { BaseElementLayoutConfig } from "./baseElementLayoutConfig";
 
 /**
+ * Helper interface for shape properties
+ */
+export interface ShapeProperties {
+    /**
+     * The fill color
+     */
+    fill?: string;
+    /**
+     * The fill opacity
+     */
+    fillOpacity?: number;
+    /**
+     * The stroke color
+     */
+    stroke?: string;
+    /**
+     * The stroke opacity
+     */
+    strokeOpacity?: number;
+    /**
+     * The stroke width
+     */
+    strokeWidth?: number;
+}
+
+/**
  * Base class for all shape layout configs
  */
 export abstract class ShapeLayoutConfig extends BaseElementLayoutConfig {
@@ -29,20 +55,16 @@ export abstract class ShapeLayoutConfig extends BaseElementLayoutConfig {
      * @param element provides the styles
      * @returns an object with all shape style properties
      */
-    extractShapeProperties(element: LayoutElement): {
-        fill?: string;
-        fillOpacity?: number;
-        stroke?: string;
-        strokeOpacity?: number;
-        strokeWidth?: number;
-    } {
+    extractShapeProperties(element: LayoutElement): ShapeProperties {
         const styles = element.styles;
-        return {
+        const res: ShapeProperties = {
             fill: styles.fill,
             fillOpacity: styles.fillOpacity,
-            stroke: styles.stroke,
-            strokeOpacity: styles.strokeOpacity,
-            strokeWidth: styles.strokeWidth
+            stroke: styles.stroke
         };
+        if (res.stroke) {
+            (res.strokeOpacity = styles.strokeOpacity), (res.strokeWidth = styles.strokeWidth ?? 1);
+        }
+        return res;
     }
 }

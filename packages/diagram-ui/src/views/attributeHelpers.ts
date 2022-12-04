@@ -1,7 +1,10 @@
-import { SChildElement, SShapeElement } from "sprotty";
-
-export function extractLayoutAttributes(model: any): object {
-    model as SShapeElement;
+/**
+ * Extracts layout attributes
+ *
+ * @param model the model which provides the attributes
+ * @returns the extracted attribzutes
+ */
+export function extractLayoutAttributes(model: any): { x: number; y: number; width: number; height: number } {
     return {
         x: model.x,
         y: model.y,
@@ -10,13 +13,26 @@ export function extractLayoutAttributes(model: any): object {
     };
 }
 
+/**
+ * Extracts layout and style properties for shapes
+ *
+ * @param model the model which provides the attributes
+ * @returns the extracted attributes
+ */
 export function extractShapeAttributes(model: any): object {
-    return {
+    const res = {
         ...extractLayoutAttributes(model),
         fill: model.fill,
-        fillOpacity: model.fillOpacity,
+        "fill-opacity": model.fillOpacity,
         stroke: model.stroke,
-        strokeOpacity: model.strokeOpacity,
-        strokeWidth: model.strokeWidth
+        "stroke-opacity": model.strokeOpacity,
+        "stroke-width": model.strokeWidth
     };
+    if (model.strokeWidth) {
+        res.x += model.strokeWidth / 2;
+        res.y += model.strokeWidth / 2;
+        res.width -= model.strokeWidth;
+        res.height -= model.strokeWidth;
+    }
+    return res;
 }
