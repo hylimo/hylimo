@@ -233,9 +233,11 @@ export class Layout {
                 )
             }
         };
-        const computedSize = layoutElement.layoutConfig.measure(this, layoutElement, computedConstraints);
-        const realSize = matchToConstraints(addToSize(computedSize, marginX, marginY), constraints);
+        const requestedSize = layoutElement.layoutConfig.measure(this, layoutElement, computedConstraints);
+        const computedSize = addToSize(requestedSize, marginX, marginY);
+        const realSize = matchToConstraints(computedSize, constraints);
         layoutElement.measuredSize = realSize;
+        layoutElement.requestesSize = requestedSize;
         return layoutElement;
     }
 
@@ -249,16 +251,22 @@ export class Layout {
      * @returns the layouted element
      */
     layout(element: LayoutElement, position: Position, size: Size, id: string): Element[] {
-        const layoutInformation = element.layoutInformation!;
-        const marginX = layoutInformation.marginLeft + layoutInformation.marginRight;
-        const marginY = layoutInformation.marginTop + layoutInformation.marginBottom;
-        let realWidth = size.width - marginX;
-        let realHeight = size.height - marginY;
-        let posX = position.x;
-        let posY = position.y;
         const styles = element.styles;
         const horizontalAlignment = styles.horizontalAlignment;
         const verticalAlignment = styles.verticalAlignment;
+        const layoutInformation = element.layoutInformation!;
+        const marginX = layoutInformation.marginLeft + layoutInformation.marginRight;
+        const marginY = layoutInformation.marginTop + layoutInformation.marginBottom;
+        let realWidth = element.requestesSize!.width;
+        if (!horizontalAlignment) {
+            realWidth = Math.max(realWidth, size.width - marginX);
+        }
+        let realHeight = element.requestesSize!.height;
+        if (!verticalAlignment) {
+            realHeight = Math.max(realHeight, size.height - marginY);
+        }
+        let posX = position.x;
+        let posY = position.y;
         if (styles.minWidth != undefined) {
             realWidth = Math.max(realWidth, styles.minWidth);
         }
@@ -271,7 +279,7 @@ export class Layout {
         if (horizontalAlignment === HorizontalAlignment.RIGHT) {
             posX += size.width - (realWidth + layoutInformation.marginRight);
         } else if (horizontalAlignment === HorizontalAlignment.CENTER) {
-            posX += (size.width - (realWidth + marginX)) / 2;
+            posX += (size.width - realWidth) / 2;
         } else {
             posX += layoutInformation.marginLeft;
         }
@@ -288,7 +296,7 @@ export class Layout {
         if (verticalAlignment === VerticalAlignment.BOTTOM) {
             posY += size.height - (realHeight + layoutInformation.marginBottom);
         } else if (verticalAlignment === VerticalAlignment.CENTER) {
-            posY += (size.height - (realHeight + marginY)) / 2;
+            posY += (size.height - realHeight) / 2;
         } else {
             posY += layoutInformation.marginTop;
         }

@@ -85,7 +85,7 @@ export const diagramModule: InterpreterModule = {
                 docs: `
                     Creates a new Text element with the specified Spans
                     Params:
-                        - "children": A list of Spans to display
+                        - "contents": A list of Spans to display
                         ${elementDoc}
                     Returns:
                         The created Text element
@@ -167,9 +167,9 @@ export const diagramModule: InterpreterModule = {
             jsFun(assignTypeFunction("hbox"), {
                 docs: `
                     Creates a new HBox element with a content.
-                    Stacks children from left to right.
+                    Stacks contents from left to right.
                     Params:
-                        - "children": the inner elements, stacked from left to right
+                        - "contents": the inner elements, stacked from left to right
                         ${elementDoc}
                     Returns:
                         The created HBox element
@@ -181,9 +181,9 @@ export const diagramModule: InterpreterModule = {
             jsFun(assignTypeFunction("vbox"), {
                 docs: `
                     Creates a new VBox element with a content.
-                    Stacks children from top to bottom
+                    Stacks contents from top to bottom
                     Params:
-                        - "children": the inner elements. stacked from top to bottom
+                        - "contents": the inner elements. stacked from top to bottom
                         ${elementDoc}
                     Returns:
                         The created VBox element
@@ -195,9 +195,9 @@ export const diagramModule: InterpreterModule = {
             jsFun(assignTypeFunction("stack"), {
                 docs: `
                     Creates a new Stack element with a content.
-                    Stacks children from top to bottom
+                    Stacks contents from top to bottom
                     Params:
-                        - "children": the inner elements
+                        - "contents": the inner elements
                         ${elementDoc}
                     Returns:
                         The created VBox element
@@ -208,10 +208,10 @@ export const diagramModule: InterpreterModule = {
             "canvas",
             jsFun(assignTypeFunction("canvas"), {
                 docs: `
-                    Creates a new Canvas element with children.
-                    Children should be positioned which provide a position and an element
+                    Creates a new Canvas element with contents.
+                    Contents should be positioned which provide a position and an element
                     Params:
-                        - "children": the inner elements
+                        - "contents": the inner elements
                         ${elementDoc}
                     Returns:
                         The created Canvas element

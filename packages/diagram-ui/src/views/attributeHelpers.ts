@@ -22,7 +22,7 @@ export function extractLayoutAttributes(model: any): { x: number; y: number; wid
 export function extractShapeAttributes(model: any): object {
     const res = {
         ...extractLayoutAttributes(model),
-        fill: model.fill,
+        fill: model.fill ?? "none",
         "fill-opacity": model.fillOpacity,
         stroke: model.stroke,
         "stroke-opacity": model.strokeOpacity,

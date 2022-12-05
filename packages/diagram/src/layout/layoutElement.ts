@@ -134,6 +134,10 @@ export interface LayoutElement {
      */
     measuredSize?: Size;
     /**
+     * The size the element requested
+     */
+    requestesSize?: Size;
+    /**
      * Other required layout data
      */
     [key: string]: any;
