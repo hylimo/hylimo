@@ -31,8 +31,8 @@ export function extractShapeAttributes(model: any): object {
     if (model.strokeWidth) {
         res.x += model.strokeWidth / 2;
         res.y += model.strokeWidth / 2;
-        res.width -= model.strokeWidth;
-        res.height -= model.strokeWidth;
+        res.width = Math.max(0, res.width - model.strokeWidth);
+        res.height = Math.max(0, res.height - model.strokeWidth);
     }
     return res;
 }
