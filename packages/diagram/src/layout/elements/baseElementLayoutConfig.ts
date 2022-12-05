@@ -18,8 +18,8 @@ export abstract class BaseElementLayoutConfig implements LayoutElementConfig {
         "marginBottom",
         "marginLeft",
         "margin",
-        "horizontalAlignment",
-        "verticalAlignment"
+        "hAlign",
+        "vAlign"
     ];
 
     /**

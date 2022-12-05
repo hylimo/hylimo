@@ -252,8 +252,8 @@ export class Layout {
      */
     layout(element: LayoutElement, position: Position, size: Size, id: string): Element[] {
         const styles = element.styles;
-        const horizontalAlignment = styles.horizontalAlignment;
-        const verticalAlignment = styles.verticalAlignment;
+        const horizontalAlignment = styles.hAlign;
+        const verticalAlignment = styles.vAlign;
         const layoutInformation = element.layoutInformation!;
         const marginX = layoutInformation.marginLeft + layoutInformation.marginRight;
         const marginY = layoutInformation.marginTop + layoutInformation.marginBottom;

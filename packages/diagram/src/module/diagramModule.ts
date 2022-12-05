@@ -34,8 +34,8 @@ const elementDoc =
     - "marginBottom": optional bottom margin of the element, must be a number
     - "marginLeft": optional left margin of the element, must be a number
     - "margin": optional margin of the element, must be a number
-    - "horizontalAlignment": optional horizontal alignment, must be one of "left", "right", "center" or "fill"
-    - "verticalAlignment": optional vertical alignment, must be one of "top", "bottom", "center" or "fill"
+    - "hAlign": optional horizontal alignment, must be one of "left", "right" or "center"
+    - "vAlign": optional vertical alignment, must be one of "top", "bottom" or "center"
 `;
 
 /**

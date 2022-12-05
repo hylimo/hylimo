@@ -53,7 +53,7 @@ export default function HylimoEditor(): JSX.Element {
             });
     
             class LspDiagramServerProxy extends DiagramServerProxy {
-                clientId = uri
+                override clientId = uri
             
                 override initialize(registry: ActionHandlerRegistry): void {
                     super.initialize(registry);
