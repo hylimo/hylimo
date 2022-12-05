@@ -8,7 +8,7 @@ import {
     SGraphView,
     SShapeElement
 } from "sprotty";
-import { SRectElement } from "./model/rect";
+import { SRect } from "./model/rect";
 import { RectView } from "./views/rect";
 
 /**
@@ -19,7 +19,7 @@ const diagramModule = new ContainerModule((bind, unbind, isBound, rebind) => {
 
     // TODO replace with custom implementation which handles fonts
     configureModelElement(context, "root", SGraph, SGraphView);
-    configureModelElement(context, "rect", SRectElement, RectView);
+    configureModelElement(context, "rect", SRect, RectView);
 });
 
 /**

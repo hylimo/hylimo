@@ -1,3 +1,3 @@
-import { SChildElement } from "sprotty";
+import { SShape } from "./shape";
 
-export class SRectElement extends SChildElement {}
+export class SRect extends SShape {}

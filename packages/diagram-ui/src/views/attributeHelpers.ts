@@ -1,10 +1,13 @@
+import { SElement } from "../model/element";
+import { SShape } from "../model/shape";
+
 /**
  * Extracts layout attributes
  *
  * @param model the model which provides the attributes
  * @returns the extracted attribzutes
  */
-export function extractLayoutAttributes(model: any): { x: number; y: number; width: number; height: number } {
+export function extractLayoutAttributes(model: SElement): { x: number; y: number; width: number; height: number } {
     return {
         x: model.x,
         y: model.y,
@@ -19,7 +22,7 @@ export function extractLayoutAttributes(model: any): { x: number; y: number; wid
  * @param model the model which provides the attributes
  * @returns the extracted attributes
  */
-export function extractShapeAttributes(model: any): object {
+export function extractShapeAttributes(model: SShape): object {
     const res = {
         ...extractLayoutAttributes(model),
         fill: model.fill ?? "none",
