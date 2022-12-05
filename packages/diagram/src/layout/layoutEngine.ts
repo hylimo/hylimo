@@ -4,7 +4,7 @@ import { FontFamily } from "../font/font";
 import { FontFamilyConfig } from "../font/fontConfig";
 import { FontManager } from "../font/fontManager";
 import { Element } from "../model/base";
-import { generateStyles, Selector, SelectorType, Style } from "../styles";
+import { generateStyles, Selector, SelectorType, Style, StyleList } from "../styles";
 import { LayoutedDiagram } from "./layoutedDiagram";
 import {
     addToSize,
@@ -104,7 +104,7 @@ export class Layout {
      * @param styles styles to possibly apply to elements
      * @param fonts fonts to use
      */
-    constructor(readonly engine: LayoutEngine, readonly styles: Style[], readonly fonts: Map<string, FontFamily>) {}
+    constructor(readonly engine: LayoutEngine, readonly styles: StyleList, readonly fonts: Map<string, FontFamily>) {}
 
     /**
      * Checks if an element matches a selector
@@ -156,7 +156,7 @@ export class Layout {
     private applyStyles(layoutElement: LayoutElement): void {
         const styleAttributes = layoutElement.layoutConfig.styleAttributes;
         const matchingStyles = [layoutElement.element];
-        for (const style of this.styles) {
+        for (const style of this.styles.styles) {
             if (this.matchesStyle(layoutElement, style)) {
                 matchingStyles.push(style.fields);
             }
@@ -165,8 +165,12 @@ export class Layout {
         for (const attribute of styleAttributes) {
             for (const style of matchingStyles) {
                 const entry = style.getLocalFieldOrUndefined(attribute);
-                if (entry) {
-                    layoutElement.styles[attribute] = entry.value.toNative();
+                if (entry && entry.value != this.styles.default) {
+                    if (entry.value != this.styles.unset) {
+                        layoutElement.styles[attribute] = entry.value.toNative();
+                    } else {
+                        layoutElement.styles[attribute] = undefined;
+                    }
                     layoutElement.styleSources.set(attribute, entry);
                     break;
                 }

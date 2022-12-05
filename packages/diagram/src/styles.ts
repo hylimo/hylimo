@@ -1,4 +1,4 @@
-import { FullObject, objectToList } from "@hylimo/core";
+import { BaseObject, FullObject, objectToList } from "@hylimo/core";
 import { assertString } from "@hylimo/core";
 
 /**
@@ -44,13 +44,36 @@ export interface Style {
 }
 
 /**
+ * A list of styles
+ */
+export interface StyleList {
+    /**
+     * The actual list of styles
+     */
+    styles: Style[];
+    /**
+     * Value representing the unset option
+     */
+    unset: BaseObject;
+    /**
+     * Default option, should be ignored
+     */
+    default: BaseObject;
+}
+
+/**
  * Generates the styles based on the provided styles
  *
  * @param styles the syncscript styles version
  * @returns the computed styles
  */
-export function generateStyles(styles: FullObject): Style[] {
-    return generateStylesForStyles([], styles.getLocalFieldOrUndefined("styles")?.value as FullObject);
+export function generateStyles(styles: FullObject): StyleList {
+    const elements = generateStylesForStyles([], styles.getLocalFieldOrUndefined("styles")?.value as FullObject);
+    return {
+        styles: elements,
+        unset: styles.getLocalFieldOrUndefined("unset")!.value,
+        default: styles.getLocalFieldOrUndefined("default")!.value
+    };
 }
 
 /**
@@ -83,7 +106,7 @@ function generateStylesRecursive(selectorChain: Selector[], currentObject: FullO
         }
     ];
     const styles: Style[] = [];
-    if (currentObject.hasOwnProperty("styles")) {
+    if (currentObject.getLocalFieldOrUndefined("styles")) {
         styles.push(
             ...generateStylesForStyles(
                 currentSelectorChain,

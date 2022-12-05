@@ -9,6 +9,7 @@ import {
     jsFun,
     SemanticFieldNames
 } from "@hylimo/core";
+import { layouts } from "../layout/layouts";
 
 /**
  * Documentation for everything which can have style fields
@@ -64,6 +65,15 @@ function assignTypeFunction(type: string): (args: FullObject, context: Interpret
         args.setLocalField("type", { value: context.newString(type) }, context);
         return args;
     };
+}
+
+/**
+ * Gets a list of all known style attributes
+ *
+ * @returns the list of style attributes
+ */
+function computeAllStyleAttributes(): string[] {
+    return [...new Set(layouts.flatMap((layout) => layout.styleAttributes))];
 }
 
 /**
@@ -276,6 +286,7 @@ export const diagramModule: InterpreterModule = {
             "styles",
             fun([
                 assign(selectorProto, id("object").call()),
+                assign("default", id("object").call()),
                 assign(
                     "selector",
                     fun(
@@ -283,7 +294,14 @@ export const diagramModule: InterpreterModule = {
                             (type) = args
                             [docs = "Creates a new selector"] {
                                 (value, callback) = args
-                                this.selector = object(selectorType = type, selectorValue = value, styles = list())
+                                this.selector = object(
+                                    selectorType = type,
+                                    selectorValue = value,
+                                    styles = list(),
+                                    ${computeAllStyleAttributes()
+                                        .map((attr) => `${attr} = default`)
+                                        .join(",")}
+                                )
                                 args.self.styles.add(selector)
                                 selector.proto = ${selectorProto}
                                 callback.callWithScope(selector)
@@ -307,6 +325,8 @@ export const diagramModule: InterpreterModule = {
                         res = object(styles = list())
                         res.type = selector("type")
                         res.class = selector("class")
+                        res.unset = object()
+                        res.default = default
                         callback.callWithScope(res)
                         res
                     `,
