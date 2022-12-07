@@ -20,14 +20,21 @@ export class SRoot extends ViewportRootElement {
      * @returns the generated style string
      */
     generateStyle(): string {
-        return this.fonts
-            .flatMap((font) => [
-                this.generateFontFace(font.fontFamily, font.normal, false, false),
-                this.generateFontFace(font.fontFamily, font.italic, true, false),
-                this.generateFontFace(font.fontFamily, font.bold, false, true),
-                this.generateFontFace(font.fontFamily, font.boldItalic, true, true)
-            ])
-            .join("\n");
+        const staticStyles = `
+        text {
+            white-space: pre;
+        }
+        `;
+        return (
+            this.fonts
+                .flatMap((font) => [
+                    this.generateFontFace(font.fontFamily, font.normal, false, false),
+                    this.generateFontFace(font.fontFamily, font.italic, true, false),
+                    this.generateFontFace(font.fontFamily, font.bold, false, true),
+                    this.generateFontFace(font.fontFamily, font.boldItalic, true, true)
+                ])
+                .join("\n") + staticStyles
+        );
     }
 
     /**

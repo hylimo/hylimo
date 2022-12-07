@@ -40,16 +40,28 @@ export class TextLayouter {
         const elements: Text[] = [];
         let lineEmpty = true;
         let textOffset = 0;
+        let currentTextElements: Text[] = [];
+        let fontAscent = 0;
+        let fontDescent = 0;
         const doBreak = () => {
             offsetX = 0;
+            offsetY += currentAscent;
+            for (const elementToAdd of currentTextElements) {
+                elementToAdd.y = offsetY;
+                elements.push(elementToAdd);
+            }
+            currentTextElements = [];
             offsetY += currentDescent;
             lineEmpty = true;
             currentAscent = 0;
             currentDescent = 0;
+            textOffset = 0;
         };
         const addTextElement = (text: string, styles: any) => {
-            offsetY += currentAscent;
-            elements.push({
+            usedMaxWidth = Math.max(usedMaxWidth, offsetX);
+            currentAscent = Math.max(currentAscent, fontAscent);
+            currentDescent = Math.max(currentDescent, fontDescent);
+            currentTextElements.push({
                 type: "text",
                 text,
                 fill: styles.fill,
@@ -64,12 +76,13 @@ export class TextLayouter {
                 height: 0,
                 children: []
             });
+            lineEmpty = false;
+            textOffset = offsetX;
         };
         for (const span of text.contents as LayoutElement[]) {
             const styles = span.styles;
             const textContent = styles.text as string;
-            const breaks: Break[] = [];
-            const lineBreaker = new LineBreaker(textContent);
+            const lineBreaker = new LineBreaker(textContent + " ");
             let lineBreak: Break | null = lineBreaker.nextBreak();
             const fontFamily = fonts.get(styles.fontFamily)!;
             let font: Font;
@@ -87,26 +100,30 @@ export class TextLayouter {
                 }
             }
             const scalingFactor = styles.fontSize / font.unitsPerEm;
-            const fontAscent = scalingFactor * (font.ascent + font.lineGap / 2);
-            const fontDescent = scalingFactor * (-font.descent + font.lineGap / 2);
+            fontAscent = scalingFactor * (font.ascent + font.lineGap / 2);
+            fontDescent = scalingFactor * (-font.descent + font.lineGap / 2);
             const glyphRun = font.layout(textContent);
             let textContentStart = 0;
             let textContentOffset = 0;
-            let lastBreakOpportunityTextContentOffset = -1;
+            let lastBreakOpportunityTextContentOffset = 0;
             let lastBreakOpportunity = -1;
             let lastBreakOpportunityOffsetX = 0;
             for (let i = 0; i < glyphRun.glyphs.length; i++) {
                 const glyph = glyphRun.glyphs[i];
-                const advanceWidth = glyph.advanceWidth * scalingFactor;
+                let advanceWidth: number;
+                if (textContent[textContentOffset] === "\n") {
+                    advanceWidth = 0;
+                } else {
+                    advanceWidth = glyph.advanceWidth * scalingFactor;
+                }
                 if (offsetX + advanceWidth > maxWidth) {
                     if (!lineEmpty) {
-                        if (lastBreakOpportunityTextContentOffset >= 0) {
-                            usedMaxWidth = Math.max(usedMaxWidth, lastBreakOpportunityOffsetX);
+                        if (lastBreakOpportunityTextContentOffset > 0) {
                             addTextElement(
-                                textContent.substring(textContentStart, lastBreakOpportunityTextContentOffset + 1),
+                                textContent.substring(textContentStart, lastBreakOpportunityTextContentOffset),
                                 styles
                             );
-                            textContentStart = lastBreakOpportunityTextContentOffset + 1;
+                            textContentStart = lastBreakOpportunityTextContentOffset;
                         }
                         doBreak();
                         i = lastBreakOpportunity;
@@ -116,9 +133,6 @@ export class TextLayouter {
                         if (i == 0) {
                             // first character, do not break
                         } else {
-                            currentAscent = Math.max(currentAscent, fontAscent);
-                            currentDescent = Math.max(currentDescent, fontDescent);
-                            usedMaxWidth = Math.max(usedMaxWidth, offsetX);
                             addTextElement(textContent.substring(textContentStart, i), styles);
                             doBreak();
                             textContentStart = i;
@@ -130,12 +144,9 @@ export class TextLayouter {
                 if (textContentOffset == lineBreak?.position) {
                     lineEmpty = false;
                     lastBreakOpportunity = i;
-                    lastBreakOpportunityTextContentOffset = textOffset;
+                    lastBreakOpportunityTextContentOffset = textContentOffset;
                     lastBreakOpportunityOffsetX = offsetX;
-                    currentAscent = Math.max(currentAscent, fontAscent);
-                    currentDescent = Math.max(currentDescent, fontDescent);
-                    if (lineBreak.required || i == glyphRun.glyphs.length - 1) {
-                        usedMaxWidth = Math.max(usedMaxWidth, offsetX);
+                    if (lineBreak.required) {
                         addTextElement(textContent.substring(textContentStart, i + 1), styles);
                         textContentStart = i + 1;
                     }
@@ -144,6 +155,10 @@ export class TextLayouter {
                     }
                     lineBreak = lineBreaker.nextBreak();
                 }
+            }
+            addTextElement(textContent.substring(textContentStart, textContent.length), styles);
+            if (lineBreak && lineBreak.required) {
+                doBreak();
             }
         }
         doBreak();
