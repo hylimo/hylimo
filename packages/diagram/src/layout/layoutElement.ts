@@ -1,5 +1,4 @@
 import { FieldEntry, FullObject } from "@hylimo/core";
-import { Dimension, Point } from "sprotty-protocol";
 import { Element } from "../model/base";
 import { Root } from "../model/root";
 import { Layout } from "./layoutEngine";
@@ -7,7 +6,15 @@ import { Layout } from "./layoutEngine";
 /**
  * Simple size interface with a width and a height
  */
-export type Size = Dimension;
+export interface Size {
+    width: number;
+    height: number;
+}
+
+export interface Point {
+    x: number;
+    y: number;
+}
 
 /**
  * Size constraints from min to max size

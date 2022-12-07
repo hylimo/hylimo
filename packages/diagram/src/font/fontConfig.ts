@@ -14,15 +14,15 @@ export interface FontFamilyConfig {
     /**
      * Italic font style, if not present, normal is used
      */
-    italic?: FontConfig;
+    italic: FontConfig;
     /**
      * Bold font style, if not present, normal is used
      */
-    bold?: FontConfig;
+    bold: FontConfig;
     /**
      * Bold italic font style, if not present, italic is used
      */
-    boldItalic?: FontConfig;
+    boldItalic: FontConfig;
 }
 
 /**

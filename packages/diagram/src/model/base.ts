@@ -1,5 +1,5 @@
-import { BoundsAware, Point, SModelElement } from "sprotty-protocol";
-import { Size } from "../layout/layoutElement";
+import { SModelElement } from "sprotty-protocol";
+import { Point, Size } from "../layout/layoutElement";
 
 /**
  * Base class for all elements

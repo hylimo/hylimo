@@ -49,7 +49,7 @@ export interface Text extends Element {
     /**
      * The color of the text
      */
-    foreground: string;
+    fill: string;
     /**
      * The font family to use
      */

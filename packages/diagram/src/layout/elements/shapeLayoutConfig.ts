@@ -63,8 +63,20 @@ export abstract class ShapeLayoutConfig extends BaseElementLayoutConfig {
             stroke: styles.stroke
         };
         if (res.stroke) {
-            (res.strokeOpacity = styles.strokeOpacity), (res.strokeWidth = styles.strokeWidth ?? 1);
+            res.strokeOpacity = styles.strokeOpacity;
+            res.strokeWidth = styles.strokeWidth;
         }
         return res;
+    }
+
+    /**
+     * Sets the stroke width to 0 if stroke is not defined,
+     * if stroke defined, strokeWidth defaults to 1
+     *
+     * @param element provides the styles map
+     */
+    normalizeStrokeWidth(element: LayoutElement): void {
+        const styles = element.styles;
+        styles.strokeWidth = styles.stroke ? styles.strokeWidth ?? 1 : 0;
     }
 }

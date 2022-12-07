@@ -14,7 +14,8 @@ export class RectLayoutConfig extends ShapeLayoutConfig {
     }
 
     override measure(layout: Layout, element: LayoutElement, constraints: SizeConstraints): Size {
-        const strokeWidth = element.styles.strokeWidth ?? 0;
+        this.normalizeStrokeWidth(element);
+        const strokeWidth = element.styles.strokeWidth;
         const content = element.element.getLocalFieldOrUndefined("content")?.value as FullObject | undefined;
         if (content) {
             const contentElement = layout.measure(

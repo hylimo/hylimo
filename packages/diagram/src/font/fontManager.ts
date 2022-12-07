@@ -24,20 +24,13 @@ export class FontManager {
      * @returns the created font family
      */
     async getFontFamily(config: FontFamilyConfig): Promise<FontFamily> {
-        const res: FontFamily = {
+        return {
             config,
-            normal: await this.getFont(config.normal)
+            normal: await this.getFont(config.normal),
+            italic: await this.getFont(config.italic),
+            bold: await this.getFont(config.bold),
+            boldItalic: await this.getFont(config.boldItalic)
         };
-        if (config.bold) {
-            res.bold = await this.getFont(config.bold);
-        }
-        if (config.italic) {
-            res.italic = await this.getFont(config.italic);
-        }
-        if (config.boldItalic) {
-            res.boldItalic = await this.getFont(config.boldItalic);
-        }
-        return res;
     }
 
     /**
@@ -52,8 +45,12 @@ export class FontManager {
             return this.fontCache.get(cacheKey)!;
         }
         let fetchResult = this.fetchCache.get(config.url);
-        if (fetchResult) {
-            const buffer = await (await axios.get(config.url, { responseType: "arraybuffer" })).data;
+        if (!fetchResult) {
+            let buffer = await (await axios.get(config.url, { responseType: "arraybuffer" })).data;
+            // workaround as axios returns Buffer on nodejs and ArrayBuffer on browser
+            buffer = buffer.buffer ?? buffer;
+            // workaround as restructure still wants a Buffer and not an ArrayBuffer
+            buffer.buffer = buffer;
             fetchResult = create(buffer);
             this.fetchCache.set(config.url, fetchResult);
         }

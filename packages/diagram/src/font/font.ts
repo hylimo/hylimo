@@ -14,15 +14,15 @@ export interface FontFamily {
      */
     normal: Font;
     /**
-     * If defined, the italic font
+     * The italic font
      */
-    italic?: Font;
+    italic: Font;
     /**
-     * If defined, the bold font
+     * The bold font
      */
-    bold?: Font;
+    bold: Font;
     /**
-     * If defined, the bold italic font
+     * The bold italic font
      */
-    boldItalic?: Font;
+    boldItalic: Font;
 }

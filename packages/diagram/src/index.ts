@@ -4,6 +4,7 @@ export * from "./model/root";
 export * from "./font/font";
 export * from "./font/fontConfig";
 export * from "./font/fontManager";
+export * from "./font/textLayouter";
 export * from "./module/diagramModule";
 export * from "./layout/layoutElement";
 export * from "./layout/layoutEngine";

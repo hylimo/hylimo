@@ -9,6 +9,6 @@
             "path": "../core"
         }
     ],
-    "include": ["src/**/*.ts"],
+    "include": ["src/**/*.ts", "src/**/*.d.ts", "types/*.d.ts"],
     "exclude": ["lib", "node_modules"]
 }

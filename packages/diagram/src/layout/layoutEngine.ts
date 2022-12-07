@@ -3,6 +3,7 @@ import { assertString } from "@hylimo/core";
 import { FontFamily } from "../font/font";
 import { FontFamilyConfig } from "../font/fontConfig";
 import { FontManager } from "../font/fontManager";
+import { TextLayouter } from "../font/textLayouter";
 import { Element } from "../model/base";
 import { generateStyles, Selector, SelectorType, Style, StyleList } from "../styles";
 import { LayoutedDiagram } from "./layoutedDiagram";
@@ -35,6 +36,11 @@ export class LayoutEngine {
     readonly fontManager = new FontManager();
 
     /**
+     * Text layout engine
+     */
+    readonly textLayouter = new TextLayouter();
+
+    /**
      * Creates a new layout engine
      */
     constructor() {
@@ -52,14 +58,19 @@ export class LayoutEngine {
         const nativeFonts = diagram.getLocalFieldOrUndefined("fonts")?.value?.toNative();
         const fontMap = new Map<string, FontFamily>();
         const fontFamilyConfigs: FontFamilyConfig[] = [];
-        for (const config of nativeToList(nativeFonts)) {
-            fontMap.set(config.fontFamily, await this.fontManager.getFontFamily(config));
-            fontFamilyConfigs.push(config.fontFamily);
+        const fontFamilies = await Promise.all(
+            nativeToList(nativeFonts).map(async (config) => this.fontManager.getFontFamily(config))
+        );
+        for (const fontFamily of fontFamilies) {
+            const config = fontFamily.config;
+            fontMap.set(config.fontFamily, fontFamily);
+            fontFamilyConfigs.push(config);
         }
         const layout = new Layout(
             this,
             generateStyles(diagram.getLocalFieldOrUndefined("styles")?.value as FullObject),
-            fontMap
+            fontMap,
+            fontFamilies[0]
         );
         const layoutElement = layout.measure(
             diagram.getLocalFieldOrUndefined("element")?.value as FullObject,
@@ -103,8 +114,14 @@ export class Layout {
      * @param engine the engine which provides fonts
      * @param styles styles to possibly apply to elements
      * @param fonts fonts to use
+     * @param defaultFont the default font to use
      */
-    constructor(readonly engine: LayoutEngine, readonly styles: StyleList, readonly fonts: Map<string, FontFamily>) {}
+    constructor(
+        readonly engine: LayoutEngine,
+        readonly styles: StyleList,
+        readonly fonts: Map<string, FontFamily>,
+        readonly defaultFont: FontFamily
+    ) {}
 
     /**
      * Checks if an element matches a selector

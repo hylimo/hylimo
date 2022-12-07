@@ -109,7 +109,7 @@ export const diagramModule: InterpreterModule = {
                     Creates a new Span
                     Params:
                         - "text": The text to display
-                        - "foreground": optional text color, must be a valid color string
+                        - "fill": optional text color, must be a valid color string
                         - "fontFamily": optional font family to use, must be registered font family name string
                         - "fontSize": optional font size to use
                         - "fontWeight": optional font weight, if given must be either "normal" or "bold"
@@ -359,9 +359,9 @@ export const diagramModule: InterpreterModule = {
                         Params:
                             - 0: the name of the font family
                             - "normal": the normal font, should be a font
-                            - "italic": optional italic font
-                            - "bold": optional bold font
-                            - "boldItalic": optional bold italic font
+                            - "italic": italic font
+                            - "bold": bold font
+                            - "boldItalic": bold italic font
                         Returns:
                             the created font family object
                     `
@@ -388,6 +388,18 @@ export const diagramModule: InterpreterModule = {
                     `
                 }
             )
+        ),
+        assign(
+            "robotoFontFamily",
+            fun(`
+                fontFamily(
+                    "roboto",
+                    normal = font("https://cdn.jsdelivr.net/gh/google/fonts@HEAD/apache/roboto/static/Roboto-Regular.ttf"),
+                    italic = font("https://cdn.jsdelivr.net/gh/google/fonts@HEAD/apache/roboto/static/Roboto-Italic.ttf"),
+                    bold = font("https://cdn.jsdelivr.net/gh/google/fonts@HEAD/apache/roboto/static/Roboto-Bold.ttf"),
+                    boldItalic = font("https://cdn.jsdelivr.net/gh/google/fonts@HEAD/apache/roboto/static/Roboto-BoldItalic.ttf")
+                )
+            `).call()
         ),
         assign(
             "diagram",
