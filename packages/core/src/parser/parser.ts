@@ -15,6 +15,7 @@ import {
     OpenCurlyBracket,
     OpenRoundBracket,
     OpenSquareBracket,
+    SignMinus,
     String
 } from "./lexer";
 
@@ -92,7 +93,15 @@ export class Parser extends CstParser {
      * Literal rule, matches String and Number Tokens
      */
     private literal = this.RULE(Rules.LITERAL, () => {
-        this.OR([{ ALT: () => this.CONSUME(String) }, { ALT: () => this.CONSUME(Number) }]);
+        this.OR([
+            { ALT: () => this.CONSUME(String) },
+            {
+                ALT: () => {
+                    this.OPTION(() => this.CONSUME(SignMinus));
+                    this.CONSUME(Number);
+                }
+            }
+        ]);
     });
 
     /**
@@ -248,7 +257,7 @@ export class Parser extends CstParser {
     private simpleFieldAccessExpression = this.RULE(Rules.SIMPLE_FIELD_ACCESS_EXPRESSION, () => {
         this.AT_LEAST_ONE_SEP({
             SEP: Dot,
-            DEF: () => this.CONSUME(Identifier)
+            DEF: () => this.OR([{ ALT: () => this.CONSUME(Identifier) }, { ALT: () => this.CONSUME(SignMinus) }])
         });
     });
 

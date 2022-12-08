@@ -99,7 +99,15 @@ export function generateVisitor(parser: Parser): ICstVisitor<never, any> {
                 return new StringLiteralExpression(parseString(token.image), optionalPosition(token));
             } else {
                 const token = ctx.Number[0];
-                return new NumberLiteralExpression(parseNumber(token.image), optionalPosition(token));
+                let value = parseNumber(token.image);
+                let optionalPos: ASTExpressionPosition | undefined;
+                if (ctx.SignMinus) {
+                    value = -value;
+                    optionalPos = generateOptionalPosition(ctx.SignMinus[0], token);
+                } else {
+                    optionalPos = optionalPosition(token);
+                }
+                return new NumberLiteralExpression(value, optionalPos);
             }
         }
 
@@ -320,7 +328,10 @@ export function generateVisitor(parser: Parser): ICstVisitor<never, any> {
          * @returns the resulting expression
          */
         private simpleFieldAccessExpression(ctx: any): Expression {
-            const identifiers: IToken[] = ctx.Identifier;
+            const identifiers: IToken[] = ctx.Identifier ?? [];
+            if (ctx.SignMinus) {
+                identifiers.push(...ctx.SignMinus);
+            }
             let expression: Expression | undefined = undefined;
             for (const identifier of identifiers) {
                 if (expression) {

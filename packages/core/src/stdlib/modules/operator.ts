@@ -1,10 +1,10 @@
 import { ConstExpression } from "../../parser/ast";
-import { assign, fun, id, jsFun, native } from "../../parser/astHelper";
+import { arg, assign, fun, id, jsFun, native } from "../../parser/astHelper";
 import { InterpreterModule } from "../../runtime/interpreter";
 import { RuntimeError } from "../../runtime/runtimeError";
 import { SemanticFieldNames } from "../../runtime/semanticFieldNames";
 import { DefaultModuleNames } from "../defaultModuleNames";
-import { isString } from "../typeHelpers";
+import { assertNumber, isString } from "../typeHelpers";
 import { toBoolean } from "./boolean";
 
 /**
@@ -16,7 +16,7 @@ export const operatorModule: InterpreterModule = {
     dependencies: [],
     runtimeDependencies: [DefaultModuleNames.BOOLEAN],
     expressions: [
-        ...["-", "*", "/", "%", "&&", "||", ">", ">=", "<", "<=", ">>", "<<"].map((operator) =>
+        ...["*", "/", "%", "&&", "||", ">", ">=", "<", "<=", ">>", "<<"].map((operator) =>
             assign(
                 operator,
                 native(
@@ -161,6 +161,46 @@ export const operatorModule: InterpreterModule = {
                             - 1: the second argument, returned if the first is null
                         Returns:
                             The second argument if the first is null, otherwise the first
+                    `
+                }
+            )
+        ),
+        assign(
+            "-",
+            native(
+                (args, context) => {
+                    args.pop();
+                    if (
+                        args.length > 2 ||
+                        args.length < 1 ||
+                        args[0].name !== undefined ||
+                        args[1]?.name !== undefined
+                    ) {
+                        throw new RuntimeError(`Expected exactly one or two positional arguments for -`);
+                    }
+                    const target = args[0].value.evaluateWithSource(context);
+                    if (args.length == 2) {
+                        return target.value
+                            .getField("-", context)
+                            .invoke(
+                                [args[1], { name: SemanticFieldNames.SELF, value: new ConstExpression(target) }],
+                                context
+                            );
+                    } else {
+                        const value = assertNumber(target.value, "first and only argument of -");
+                        return { value: context.newNumber(-value) };
+                    }
+                },
+                {
+                    docs: `
+                        The - operator / function, expects one two arguments.
+                        If two are given, calls - on the first argument with the second argument.
+                        If one is given, negates the argument.
+                        Params:
+                            - 0: the target where - is invoked or if one argument the value to negate
+                            - 1: optional value passed to the - function
+                        Returns:
+                            The result of the invokation of - on the first argument or the negation result
                     `
                 }
             )

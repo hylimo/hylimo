@@ -91,7 +91,11 @@ function generateFormatVisitor(parser: Parser): ICstVisitor<never, Doc> {
                 return token.image;
             } else {
                 const token = ctx.Number[0];
-                return token.image;
+                if (ctx.SignMinus) {
+                    return "-" + token.image;
+                } else {
+                    return token.image;
+                }
             }
         }
 
@@ -261,9 +265,13 @@ function generateFormatVisitor(parser: Parser): ICstVisitor<never, Doc> {
          * @returns the formatted expression
          */
         private simpleFieldAccessExpression(ctx: any): Doc {
+            const identifiers: IToken[] = ctx.Identifier ?? [];
+            if (ctx.SignMinus) {
+                identifiers.push(...ctx.SignMinus);
+            }
             return join(
                 ".",
-                ctx.Identifier.map((id: IToken) => id.image)
+                identifiers.map((id: IToken) => id.image)
             );
         }
 

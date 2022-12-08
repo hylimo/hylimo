@@ -135,6 +135,18 @@ export const Identifier = createToken({
 });
 
 /**
+ * Sign minus.
+ * This is a sign minus followed by
+ * - a digit
+ * - a dot followed by a digit
+ */
+export const SignMinus = createToken({
+    name: "SignMinus",
+    pattern: /-(?=\.?[0-9])/,
+    longer_alt: Identifier
+});
+
+/**
  * Equal sign token
  */
 export const Equal = createToken({
@@ -182,6 +194,7 @@ const standardTokens = [
     Dot,
     Comma,
     Equal,
+    SignMinus,
     Identifier,
     String,
     Number

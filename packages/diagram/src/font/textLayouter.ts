@@ -119,7 +119,7 @@ export class TextLayouter {
                 if (offsetX + advanceWidth > maxWidth) {
                     if (!lineEmpty) {
                         if (lastBreakOpportunityTextContentOffset > 0) {
-                            offsetX = lastBreakOpportunityOffsetX
+                            offsetX = lastBreakOpportunityOffsetX;
                             addTextElement(
                                 textContent.substring(textContentStart, lastBreakOpportunityTextContentOffset),
                                 styles
