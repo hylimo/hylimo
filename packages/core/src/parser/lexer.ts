@@ -142,7 +142,7 @@ export const Identifier = createToken({
  */
 export const SignMinus = createToken({
     name: "SignMinus",
-    pattern: /-(?=\.?[0-9])/,
+    pattern: /-(?=[^\S\n]*\.?[0-9])/,
     longer_alt: Identifier
 });
 
