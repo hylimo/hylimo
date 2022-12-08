@@ -119,6 +119,7 @@ export class TextLayouter {
                 if (offsetX + advanceWidth > maxWidth) {
                     if (!lineEmpty) {
                         if (lastBreakOpportunityTextContentOffset > 0) {
+                            offsetX = lastBreakOpportunityOffsetX
                             addTextElement(
                                 textContent.substring(textContentStart, lastBreakOpportunityTextContentOffset),
                                 styles
@@ -129,14 +130,10 @@ export class TextLayouter {
                         i = lastBreakOpportunity;
                         textContentOffset = lastBreakOpportunityTextContentOffset;
                         continue;
-                    } else {
-                        if (i == 0) {
-                            // first character, do not break
-                        } else {
-                            addTextElement(textContent.substring(textContentStart, i), styles);
-                            doBreak();
-                            textContentStart = i;
-                        }
+                    } else if (i > 0) {
+                        addTextElement(textContent.substring(textContentStart, i), styles);
+                        doBreak();
+                        textContentStart = i;
                     }
                 }
                 textContentOffset += glyph.codePoints.length;
@@ -149,8 +146,6 @@ export class TextLayouter {
                     if (lineBreak.required) {
                         addTextElement(textContent.substring(textContentStart, i + 1), styles);
                         textContentStart = i + 1;
-                    }
-                    if (lineBreak.required) {
                         doBreak();
                     }
                     lineBreak = lineBreaker.nextBreak();
