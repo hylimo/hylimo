@@ -82,6 +82,10 @@ export default function HylimoEditor(): JSX.Element {
                 <MonacoEditor
                     options={{
                         automaticLayout: true,
+                        fixedOverflowWidgets: true,
+                        hover: {
+                            above: false
+                        }
                     }}
                     theme={colorMode === "dark" ? "custom-dark" : "custom-light"}
                     editorWillMount={(editor) => {
