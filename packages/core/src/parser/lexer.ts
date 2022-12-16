@@ -108,7 +108,7 @@ export const Dot = createToken({
  * Comma token
  */
 export const Comma = createToken({
-    name: "CloseSquareBracket",
+    name: "Comma",
     pattern: /,/
 });
 
