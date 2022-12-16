@@ -6,6 +6,7 @@ import { NumberObject } from "../runtime/objects/number";
 import { StringObject } from "../runtime/objects/string";
 import { RuntimeError } from "../runtime/runtimeError";
 import { SemanticFieldNames } from "../runtime/semanticFieldNames";
+import { Type } from "../types/base";
 
 /**
  * Position of an AST element in the source code
@@ -250,11 +251,13 @@ export class FunctionExpression extends AbstractFunctionExpression {
      * @param expressions the content of the function
      * @param decorator the decorator entries
      * @param position if defined, where in the source code the expression is
+     * @param types argument types to check on invocation
      */
     constructor(
         readonly expressions: Expression[],
         decorator: Map<string, string | undefined>,
-        position?: ASTExpressionPosition
+        position?: ASTExpressionPosition,
+        readonly types?: Map<string | number, Type>
     ) {
         super(decorator, "FunctionExpression", position);
     }

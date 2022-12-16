@@ -2,6 +2,8 @@ import { assign, fun, id, jsFun, str } from "../../parser/astHelper";
 import { InterpreterModule } from "../../runtime/interpreter";
 import { StringObject } from "../../runtime/objects/string";
 import { SemanticFieldNames } from "../../runtime/semanticFieldNames";
+import { Type } from "../../types/base";
+import { stringType } from "../../types/string";
 import { DefaultModuleNames } from "../defaultModuleNames";
 import { assertString } from "../typeHelpers";
 import { toBoolean } from "./boolean";
@@ -47,18 +49,16 @@ export const stringModule: InterpreterModule = {
                             Returns:
                                 true iff both values are the same string
                         `
-                    }
+                    },
+                    new Map([[SemanticFieldNames.SELF, stringType]])
                 )
             ),
             id(stringProto).assignField(
                 "+",
                 jsFun(
                     (args, context) => {
-                        const self = assertString(
-                            args.getField(SemanticFieldNames.SELF, context),
-                            "self argument of +"
-                        );
-                        const other = assertString(args.getField(0, context), "first argument of +");
+                        const self = assertString(args.getField(SemanticFieldNames.SELF, context));
+                        const other = assertString(args.getField(0, context));
                         return context.newString(self + other);
                     },
                     {
@@ -70,7 +70,11 @@ export const stringModule: InterpreterModule = {
                             Returns:
                                 concatenation of the two strings
                         `
-                    }
+                    },
+                    new Map<string | number, Type>([
+                        [0, stringType],
+                        [SemanticFieldNames.SELF, stringType]
+                    ])
                 )
             )
         ]).call()

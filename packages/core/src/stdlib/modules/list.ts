@@ -6,6 +6,9 @@ import { FullObject } from "../../runtime/objects/fullObject";
 import { generateArgs } from "../../runtime/objects/function";
 import { RuntimeError } from "../../runtime/runtimeError";
 import { SemanticFieldNames } from "../../runtime/semanticFieldNames";
+import { Type } from "../../types/base";
+import { functionType } from "../../types/function";
+import { listType } from "../../types/list";
 import { DefaultModuleNames } from "../defaultModuleNames";
 import { assertFunction, assertNumber } from "../typeHelpers";
 
@@ -36,7 +39,7 @@ export const listModule: InterpreterModule = {
                     jsFun(
                         (args, context) => {
                             const self = args.getField(SemanticFieldNames.SELF, context);
-                            const length = assertNumber(self.getField(lengthField, context), "length field of a list");
+                            const length = assertNumber(self.getField(lengthField, context));
                             self.setLocalField(length, args.getFieldEntry(0, context), context);
                             self.setFieldEntry(lengthField, { value: context.newNumber(length + 1) }, context);
                             return context.null;
@@ -50,7 +53,8 @@ export const listModule: InterpreterModule = {
                                 Returns:
                                     null
                             `
-                        }
+                        },
+                        new Map([[SemanticFieldNames.SELF, listType()]])
                     )
                 ),
                 id(listProto).assignField(
@@ -58,7 +62,7 @@ export const listModule: InterpreterModule = {
                     jsFun(
                         (args, context) => {
                             const self = args.getField(SemanticFieldNames.SELF, context);
-                            const length = assertNumber(self.getField(lengthField, context), "length field of a list");
+                            const length = assertNumber(self.getField(lengthField, context));
                             if (length > 0) {
                                 const value = self.getFieldEntry(length - 1, context);
                                 self.setFieldEntry(length - 1, { value: context.null }, context);
@@ -76,7 +80,8 @@ export const listModule: InterpreterModule = {
                                 Returns:
                                     The removed element
                             `
-                        }
+                        },
+                        new Map([[SemanticFieldNames.SELF, listType()]])
                     )
                 ),
                 id(listProto).assignField(
@@ -104,7 +109,11 @@ export const listModule: InterpreterModule = {
                                 Returns:
                                     null
                             `
-                        }
+                        },
+                        new Map<string | number, Type>([
+                            [SemanticFieldNames.SELF, listType()],
+                            [0, functionType]
+                        ])
                     )
                 ),
                 native(

@@ -5,13 +5,14 @@ import { FullObject } from "../../runtime/objects/fullObject";
 import { LiteralObject } from "../../runtime/objects/literal";
 import { RuntimeError } from "../../runtime/runtimeError";
 import { SemanticFieldNames } from "../../runtime/semanticFieldNames";
+import { booleanType } from "../../types/boolean";
 import { DefaultModuleNames } from "../defaultModuleNames";
 import { assertSelfShortCircuitArguments } from "../typeHelpers";
 
 /**
  * Boolean literal
  */
-class BooleanObject extends LiteralObject<boolean> {}
+export class BooleanObject extends LiteralObject<boolean> {}
 
 /**
  * Helper to check that an object is a BooleanObject, throws an error if not
@@ -20,7 +21,7 @@ class BooleanObject extends LiteralObject<boolean> {}
  * @param description the description of the value, part of the error message
  * @returns the value of the BooleanObject
  */
-export function assertBoolean(value: any, description: string): boolean {
+export function assertBoolean(value: any, description: string = ""): boolean {
     if (!(value instanceof BooleanObject)) {
         throw new RuntimeError(`${description} is not a boolean`);
     }
@@ -127,7 +128,7 @@ export const booleanModule: InterpreterModule = {
             "!",
             jsFun(
                 (args, context) => {
-                    return toBoolean(!assertBoolean(args.getField(0, context), "first argument of not"), context);
+                    return toBoolean(!assertBoolean(args.getField(0, context)), context);
                 },
                 {
                     docs: `
@@ -137,7 +138,8 @@ export const booleanModule: InterpreterModule = {
                         Returns:
                             The negated argument
                     `
-                }
+                },
+                new Map([[0, booleanType]])
             )
         )
     ]

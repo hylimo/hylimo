@@ -2,6 +2,8 @@ import { assign, fun, id, jsFun, num } from "../../parser/astHelper";
 import { InterpreterModule } from "../../runtime/interpreter";
 import { NumberObject } from "../../runtime/objects/number";
 import { SemanticFieldNames } from "../../runtime/semanticFieldNames";
+import { Type } from "../../types/base";
+import { numberType } from "../../types/number";
 import { DefaultModuleNames } from "../defaultModuleNames";
 import { assertNumber } from "../typeHelpers";
 import { toBoolean } from "./boolean";
@@ -10,6 +12,14 @@ import { toBoolean } from "./boolean";
  * Name of the temporary field where the number prototype is assigned
  */
 const numberProto = "numberProto";
+
+/**
+ * Type for number operator functions
+ */
+const numberOperatorFunctionTypes = new Map<string | number, Type>([
+    [0, numberType],
+    [SemanticFieldNames.SELF, numberType]
+]);
 
 /**
  * Number module providing numerical operators (+, -, *, /, %, <, <=, >, >=, ==)
@@ -26,8 +36,8 @@ export const numberModule: InterpreterModule = {
                 jsFun(
                     (args, context) => {
                         return context.newNumber(
-                            assertNumber(args.getField(SemanticFieldNames.SELF, context), "left side of +") +
-                                assertNumber(args.getField(0, context), "right side of +")
+                            assertNumber(args.getField(SemanticFieldNames.SELF, context)) +
+                                assertNumber(args.getField(0, context))
                         );
                     },
                     {
@@ -39,7 +49,8 @@ export const numberModule: InterpreterModule = {
                             Returns:
                                 The sum of the two numbers
                         `
-                    }
+                    },
+                    numberOperatorFunctionTypes
                 )
             ),
             id(numberProto).assignField(
@@ -47,8 +58,8 @@ export const numberModule: InterpreterModule = {
                 jsFun(
                     (args, context) => {
                         return context.newNumber(
-                            assertNumber(args.getField(SemanticFieldNames.SELF, context), "left side of -") -
-                                assertNumber(args.getField(0, context), "right side of -")
+                            assertNumber(args.getField(SemanticFieldNames.SELF, context)) -
+                                assertNumber(args.getField(0, context))
                         );
                     },
                     {
@@ -60,7 +71,8 @@ export const numberModule: InterpreterModule = {
                             Returns:
                                 The difference of the two numbers
                         `
-                    }
+                    },
+                    numberOperatorFunctionTypes
                 )
             ),
             id(numberProto).assignField(
@@ -68,8 +80,8 @@ export const numberModule: InterpreterModule = {
                 jsFun(
                     (args, context) => {
                         return context.newNumber(
-                            assertNumber(args.getField(SemanticFieldNames.SELF, context), "left side of *") *
-                                assertNumber(args.getField(0, context), "right side of *")
+                            assertNumber(args.getField(SemanticFieldNames.SELF, context)) *
+                                assertNumber(args.getField(0, context))
                         );
                     },
                     {
@@ -81,7 +93,8 @@ export const numberModule: InterpreterModule = {
                             Returns:
                                 The product of the two numbers
                         `
-                    }
+                    },
+                    numberOperatorFunctionTypes
                 )
             ),
             id(numberProto).assignField(
@@ -89,8 +102,8 @@ export const numberModule: InterpreterModule = {
                 jsFun(
                     (args, context) => {
                         return context.newNumber(
-                            assertNumber(args.getField(SemanticFieldNames.SELF, context), "left side of /") /
-                                assertNumber(args.getField(0, context), "right side of /")
+                            assertNumber(args.getField(SemanticFieldNames.SELF, context)) /
+                                assertNumber(args.getField(0, context))
                         );
                     },
                     {
@@ -102,7 +115,8 @@ export const numberModule: InterpreterModule = {
                             Returns:
                                 The quotient of the two numbers
                         `
-                    }
+                    },
+                    numberOperatorFunctionTypes
                 )
             ),
             id(numberProto).assignField(
@@ -110,8 +124,8 @@ export const numberModule: InterpreterModule = {
                 jsFun(
                     (args, context) => {
                         return context.newNumber(
-                            assertNumber(args.getField(SemanticFieldNames.SELF, context), "left side of %") %
-                                assertNumber(args.getField(0, context), "right side of %")
+                            assertNumber(args.getField(SemanticFieldNames.SELF, context)) %
+                                assertNumber(args.getField(0, context))
                         );
                     },
                     {
@@ -123,7 +137,8 @@ export const numberModule: InterpreterModule = {
                             Returns:
                                 The modulus of the two numbers
                         `
-                    }
+                    },
+                    numberOperatorFunctionTypes
                 )
             ),
             id(numberProto).assignField(
@@ -131,8 +146,8 @@ export const numberModule: InterpreterModule = {
                 jsFun(
                     (args, context) => {
                         return toBoolean(
-                            assertNumber(args.getField(SemanticFieldNames.SELF, context), "left side of <") <
-                                assertNumber(args.getField(0, context), "right side of <"),
+                            assertNumber(args.getField(SemanticFieldNames.SELF, context)) <
+                                assertNumber(args.getField(0, context)),
                             context
                         );
                     },
@@ -145,7 +160,8 @@ export const numberModule: InterpreterModule = {
                             Returns:
                                 true if the left side is less than the right side
                         `
-                    }
+                    },
+                    numberOperatorFunctionTypes
                 )
             ),
             id(numberProto).assignField(
@@ -153,8 +169,8 @@ export const numberModule: InterpreterModule = {
                 jsFun(
                     (args, context) => {
                         return toBoolean(
-                            assertNumber(args.getField(SemanticFieldNames.SELF, context), "left side of >") >
-                                assertNumber(args.getField(0, context), "right side of >"),
+                            assertNumber(args.getField(SemanticFieldNames.SELF, context)) >
+                                assertNumber(args.getField(0, context)),
                             context
                         );
                     },
@@ -167,7 +183,8 @@ export const numberModule: InterpreterModule = {
                             Returns:
                                 true if the left side is greater than the right side
                         `
-                    }
+                    },
+                    numberOperatorFunctionTypes
                 )
             ),
             id(numberProto).assignField(
@@ -175,8 +192,8 @@ export const numberModule: InterpreterModule = {
                 jsFun(
                     (args, context) => {
                         return toBoolean(
-                            assertNumber(args.getField(SemanticFieldNames.SELF, context), "left side of <=") <
-                                assertNumber(args.getField(0, context), "right side of <="),
+                            assertNumber(args.getField(SemanticFieldNames.SELF, context)) <
+                                assertNumber(args.getField(0, context)),
                             context
                         );
                     },
@@ -189,7 +206,8 @@ export const numberModule: InterpreterModule = {
                             Returns:
                                 true if the left side is less than or equal to the right side
                         `
-                    }
+                    },
+                    numberOperatorFunctionTypes
                 )
             ),
             id(numberProto).assignField(
@@ -197,8 +215,8 @@ export const numberModule: InterpreterModule = {
                 jsFun(
                     (args, context) => {
                         return toBoolean(
-                            assertNumber(args.getField(SemanticFieldNames.SELF, context), "left side of >=") >
-                                assertNumber(args.getField(0, context), "right side of >="),
+                            assertNumber(args.getField(SemanticFieldNames.SELF, context)) >
+                                assertNumber(args.getField(0, context)),
                             context
                         );
                     },
@@ -211,17 +229,15 @@ export const numberModule: InterpreterModule = {
                             Returns:
                                 true if the left side is greater than or equal to the right side
                         `
-                    }
+                    },
+                    numberOperatorFunctionTypes
                 )
             ),
             id(numberProto).assignField(
                 "==",
                 jsFun(
                     (args, context) => {
-                        const self = assertNumber(
-                            args.getField(SemanticFieldNames.SELF, context),
-                            "self argument of =="
-                        );
+                        const self = assertNumber(args.getField(SemanticFieldNames.SELF, context));
                         const other = args.getField(0, context);
                         let res: boolean;
                         if (other instanceof NumberObject) {
@@ -240,7 +256,8 @@ export const numberModule: InterpreterModule = {
                             Returns:
                                 true iff both values are the same number
                         `
-                    }
+                    },
+                    new Map([[SemanticFieldNames.SELF, numberType]])
                 )
             )
         ]).call()

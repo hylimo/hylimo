@@ -2,6 +2,7 @@ import { InterpreterContext } from "../runtime/interpreter";
 import { BaseObject, FieldEntry } from "../runtime/objects/baseObject";
 import { FullObject } from "../runtime/objects/fullObject";
 import { generateArgs } from "../runtime/objects/function";
+import { Type } from "../types/base";
 import {
     AssignmentExpression,
     Expression,
@@ -107,11 +108,13 @@ const parser = new Parser(false);
  *
  * @param expressions body of the function, if a string is provided it is parsed first
  * @param decorators decorators applied to the function
+ * @param types argument types to check
  * @returns the created FunctionExpression
  */
 export function fun(
     expressions: Expression[] | string,
-    decorators: { [index: string]: string | null } = {}
+    decorators: { [index: string]: string | null } = {},
+    types?: Map<string | number, Type>
 ): FunctionExpression {
     let parsedExpressions: Expression[];
     if (typeof expressions === "string") {
@@ -123,7 +126,7 @@ export function fun(
     } else {
         parsedExpressions = expressions;
     }
-    return new FunctionExpression(parsedExpressions, parseDecorators(decorators));
+    return new FunctionExpression(parsedExpressions, parseDecorators(decorators), undefined, types);
 }
 
 /**
@@ -131,14 +134,16 @@ export function fun(
  *
  * @param callback executed to get the result of the function
  * @param decorators decorators applied to the function
+ * @param types argument types to check
  * @returns the created FunctionExpression
  */
 export function jsFun(
     callback: (args: FullObject, context: InterpreterContext) => BaseObject | FieldEntry,
-    decorators: { [index: string]: string | null } = {}
+    decorators: { [index: string]: string | null } = {},
+    types?: Map<string | number, Type>
 ): NativeFunctionExpression {
     return new NativeFunctionExpression((args, context, staticScope) => {
-        const evaluatedArgs = generateArgs(args, context);
+        const evaluatedArgs = generateArgs(args, context, types);
         const oldScope = context.currentScope;
         context.currentScope = staticScope;
         const res = callback(evaluatedArgs, context);

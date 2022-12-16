@@ -2,6 +2,10 @@ import { assign, fun, id, jsFun, str } from "../../parser/astHelper";
 import { InterpreterModule } from "../../runtime/interpreter";
 import { RuntimeError } from "../../runtime/runtimeError";
 import { SemanticFieldNames } from "../../runtime/semanticFieldNames";
+import { booleanType } from "../../types/boolean";
+import { functionType } from "../../types/function";
+import { optional } from "../../types/null";
+import { stringType } from "../../types/string";
 import { DefaultModuleNames } from "../defaultModuleNames";
 import { assertFunction, assertString } from "../typeHelpers";
 import { assertBoolean } from "./boolean";
@@ -20,16 +24,16 @@ export const commonModule: InterpreterModule = {
             "if",
             jsFun(
                 (args, context) => {
-                    if (assertBoolean(args.getField(0, context), "first argument of if")) {
+                    if (assertBoolean(args.getField(0, context))) {
                         const ifBranch = args.getField(1, context);
-                        assertFunction(ifBranch, "second argument of if");
+                        assertFunction(ifBranch);
                         return ifBranch.invoke([], context);
                     } else {
                         const elseBranch = args.getField(2, context);
                         if (elseBranch === context.null) {
                             return context.null;
                         } else {
-                            assertFunction(elseBranch, "third argument of if");
+                            assertFunction(elseBranch);
                             return elseBranch.invoke([], context);
                         }
                     }
@@ -44,7 +48,12 @@ export const commonModule: InterpreterModule = {
                         Returns:
                             If a function was called, the result of the function. Otherwise null
                     `
-                }
+                },
+                new Map([
+                    [0, booleanType],
+                    [1, functionType],
+                    [2, optional(functionType)]
+                ])
             )
         ),
         assign(
@@ -53,8 +62,8 @@ export const commonModule: InterpreterModule = {
                 (args, context) => {
                     const condition = args.getField(0, context);
                     const body = args.getField(1, context);
-                    assertFunction(condition, "first argument of while");
-                    assertFunction(body, "second argument of while");
+                    assertFunction(condition);
+                    assertFunction(body);
                     while (true) {
                         const conditionRes = condition.invoke([], context).value;
                         if (!assertBoolean(conditionRes, "result of the condition function")) {
@@ -73,7 +82,11 @@ export const commonModule: InterpreterModule = {
                         Returns:
                             null
                     `
-                }
+                },
+                new Map([
+                    [0, functionType],
+                    [1, functionType]
+                ])
             )
         ),
         assign(
@@ -103,7 +116,7 @@ export const commonModule: InterpreterModule = {
             "error",
             jsFun(
                 (args, context) => {
-                    throw new RuntimeError(assertString(args.getField(0, context), "first argument of error"));
+                    throw new RuntimeError(assertString(args.getField(0, context)));
                 },
                 {
                     docs: `
@@ -111,7 +124,8 @@ export const commonModule: InterpreterModule = {
                         Params:
                             - 0: the error message, must be a string
                     `
-                }
+                },
+                new Map([[0, stringType]])
             )
         )
     ]

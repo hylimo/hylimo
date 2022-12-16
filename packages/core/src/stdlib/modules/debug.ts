@@ -1,6 +1,7 @@
 import { assign, fun, id, jsFun } from "../../parser/astHelper";
 import { InterpreterModule } from "../../runtime/interpreter";
 import { SemanticFieldNames } from "../../runtime/semanticFieldNames";
+import { stringType } from "../../types/string";
 import { DefaultModuleNames } from "../defaultModuleNames";
 import { assertString } from "../typeHelpers";
 
@@ -18,7 +19,7 @@ export const debugModule: InterpreterModule = {
             jsFun(
                 (args, context) => {
                     const value = args.getField(0, context);
-                    const stringValue = assertString(value, "first argument of rawPrintln");
+                    const stringValue = assertString(value);
                     console.log(stringValue);
                     return context.null;
                 },
@@ -30,7 +31,8 @@ export const debugModule: InterpreterModule = {
                         Returns:
                             null
                     `
-                }
+                },
+                new Map([[0, stringType]])
             )
         ),
         assign(

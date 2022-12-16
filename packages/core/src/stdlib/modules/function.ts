@@ -2,6 +2,9 @@ import { assign, fun, id, jsFun, str } from "../../parser/astHelper";
 import { InterpreterModule } from "../../runtime/interpreter";
 import { FullObject } from "../../runtime/objects/fullObject";
 import { SemanticFieldNames } from "../../runtime/semanticFieldNames";
+import { Type } from "../../types/base";
+import { functionType } from "../../types/function";
+import { objectType } from "../../types/object";
 import { DefaultModuleNames } from "../defaultModuleNames";
 import { assertFunction, assertObject } from "../typeHelpers";
 
@@ -26,8 +29,8 @@ export const functionModule: InterpreterModule = {
                     (args, context) => {
                         const self = args.getField(SemanticFieldNames.SELF, context);
                         const scope = args.getField(0, context);
-                        assertFunction(self, "self argument of callWithScope");
-                        assertObject(scope, "first positional argument of callWithScope");
+                        assertFunction(self);
+                        assertObject(scope);
                         scope.setLocalField(SemanticFieldNames.PROTO, { value: self.parentScope }, context);
                         const res = self.invoke([], context, scope);
                         scope.setLocalField(SemanticFieldNames.ARGS, { value: context.null }, context);
@@ -46,7 +49,11 @@ export const functionModule: InterpreterModule = {
                             Returns:
                                 the result of the call
                         `
-                    }
+                    },
+                    new Map<string | number, Type>([
+                        [0, objectType()],
+                        [SemanticFieldNames.SELF, functionType]
+                    ])
                 )
             )
         ]).call()

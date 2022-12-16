@@ -1,15 +1,21 @@
 import { DefaultModuleNames } from "../defaultModuleNames";
 import { InterpreterModule } from "../../runtime/interpreter";
-import { arg, assign, fun, id, jsFun, native, num, str } from "../../parser/astHelper";
+import { assign, fun, id, jsFun, native, num, str } from "../../parser/astHelper";
 import { SemanticFieldNames } from "../../runtime/semanticFieldNames";
 import { assertFunction, assertObject } from "../typeHelpers";
 import { BaseObject } from "../../runtime/objects/baseObject";
 import { StringObject } from "../../runtime/objects/string";
 import { NumberObject } from "../../runtime/objects/number";
 import { RuntimeError } from "../../runtime/runtimeError";
-import { ConstExpression, NumberLiteralExpression, StringLiteralExpression } from "../../parser/ast";
+import { ConstExpression } from "../../parser/ast";
 import { toBoolean } from "./boolean";
 import { generateArgs } from "../../runtime/objects/function";
+import { or } from "../../types/or";
+import { stringType } from "../../types/string";
+import { numberType } from "../../types/number";
+import { objectType } from "../../types/object";
+import { Type } from "../../types/base";
+import { functionType } from "../../types/function";
 
 /**
  * Name of the temporary field where the object prototype is assigned
@@ -78,7 +84,8 @@ export const objectModule: InterpreterModule = {
                             Returns:
                                 The found value
                         `
-                    }
+                    },
+                    new Map([[0, or(stringType, numberType)]])
                 )
             ),
             id(objectProto).assignField(
@@ -86,7 +93,7 @@ export const objectModule: InterpreterModule = {
                 jsFun(
                     (args, context) => {
                         const self = args.getField(SemanticFieldNames.SELF, context);
-                        assertObject(self, "self argument of rawGet");
+                        assertObject(self);
                         return self.getLocalField(assertIndex(args.getField(0, context)), context);
                     },
                     {
@@ -99,7 +106,11 @@ export const objectModule: InterpreterModule = {
                             Returns:
                                 The found value
                         `
-                    }
+                    },
+                    new Map<string | number, Type>([
+                        [0, or(stringType, numberType)],
+                        [SemanticFieldNames.SELF, objectType()]
+                    ])
                 )
             ),
             id(objectProto).assignField(
@@ -107,7 +118,7 @@ export const objectModule: InterpreterModule = {
                 jsFun(
                     (args, context) => {
                         const self = args.getField(SemanticFieldNames.SELF, context);
-                        assertObject(self, "self argument of set");
+                        assertObject(self);
                         const value = args.getFieldEntry(1, context);
                         self.setLocalField(assertIndex(args.getField(0, context)), value, context);
                         return value;
@@ -123,7 +134,11 @@ export const objectModule: InterpreterModule = {
                             Returns:
                                 The assigned value
                         `
-                    }
+                    },
+                    new Map<string | number, Type>([
+                        [0, or(stringType, numberType)],
+                        [SemanticFieldNames.SELF, objectType()]
+                    ])
                 )
             ),
             id(objectProto).assignField(
@@ -151,7 +166,11 @@ export const objectModule: InterpreterModule = {
                             Returns:
                                 null
                         `
-                    }
+                    },
+                    new Map<string | number, Type>([
+                        [0, functionType],
+                        [SemanticFieldNames.SELF, objectType()]
+                    ])
                 )
             ),
             id(objectProto).assignField(
