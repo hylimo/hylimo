@@ -54,7 +54,7 @@ export const listModule: InterpreterModule = {
                                     null
                             `
                         },
-                        new Map([[SemanticFieldNames.SELF, listType()]])
+                        [[SemanticFieldNames.SELF, listType()]]
                     )
                 ),
                 id(listProto).assignField(
@@ -81,7 +81,7 @@ export const listModule: InterpreterModule = {
                                     The removed element
                             `
                         },
-                        new Map([[SemanticFieldNames.SELF, listType()]])
+                        [[SemanticFieldNames.SELF, listType()]]
                     )
                 ),
                 id(listProto).assignField(
@@ -110,10 +110,10 @@ export const listModule: InterpreterModule = {
                                     null
                             `
                         },
-                        new Map<string | number, Type>([
+                        [
                             [SemanticFieldNames.SELF, listType()],
                             [0, functionType]
-                        ])
+                        ]
                     )
                 ),
                 native(

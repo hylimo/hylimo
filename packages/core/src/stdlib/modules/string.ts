@@ -50,7 +50,7 @@ export const stringModule: InterpreterModule = {
                                 true iff both values are the same string
                         `
                     },
-                    new Map([[SemanticFieldNames.SELF, stringType]])
+                    [[SemanticFieldNames.SELF, stringType]]
                 )
             ),
             id(stringProto).assignField(
@@ -71,10 +71,10 @@ export const stringModule: InterpreterModule = {
                                 concatenation of the two strings
                         `
                     },
-                    new Map<string | number, Type>([
+                    [
                         [0, stringType],
                         [SemanticFieldNames.SELF, stringType]
-                    ])
+                    ]
                 )
             )
         ]).call()

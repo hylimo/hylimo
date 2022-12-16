@@ -139,7 +139,7 @@ export const booleanModule: InterpreterModule = {
                             The negated argument
                     `
                 },
-                new Map([[0, booleanType]])
+                [[0, booleanType]]
             )
         )
     ]

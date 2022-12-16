@@ -32,7 +32,7 @@ export const debugModule: InterpreterModule = {
                             null
                     `
                 },
-                new Map([[0, stringType]])
+                [[0, stringType]]
             )
         ),
         assign(

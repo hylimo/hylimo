@@ -49,11 +49,11 @@ export const commonModule: InterpreterModule = {
                             If a function was called, the result of the function. Otherwise null
                     `
                 },
-                new Map([
+                [
                     [0, booleanType],
                     [1, functionType],
                     [2, optional(functionType)]
-                ])
+                ]
             )
         ),
         assign(
@@ -83,10 +83,10 @@ export const commonModule: InterpreterModule = {
                             null
                     `
                 },
-                new Map([
+                [
                     [0, functionType],
                     [1, functionType]
-                ])
+                ]
             )
         ),
         assign(
@@ -125,7 +125,7 @@ export const commonModule: InterpreterModule = {
                             - 0: the error message, must be a string
                     `
                 },
-                new Map([[0, stringType]])
+                [[0, stringType]]
             )
         )
     ]

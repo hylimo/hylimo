@@ -85,7 +85,7 @@ export const objectModule: InterpreterModule = {
                                 The found value
                         `
                     },
-                    new Map([[0, or(stringType, numberType)]])
+                    [[0, or(stringType, numberType)]]
                 )
             ),
             id(objectProto).assignField(
@@ -107,10 +107,10 @@ export const objectModule: InterpreterModule = {
                                 The found value
                         `
                     },
-                    new Map<string | number, Type>([
+                    [
                         [0, or(stringType, numberType)],
                         [SemanticFieldNames.SELF, objectType()]
-                    ])
+                    ]
                 )
             ),
             id(objectProto).assignField(
@@ -135,10 +135,10 @@ export const objectModule: InterpreterModule = {
                                 The assigned value
                         `
                     },
-                    new Map<string | number, Type>([
+                    [
                         [0, or(stringType, numberType)],
                         [SemanticFieldNames.SELF, objectType()]
-                    ])
+                    ]
                 )
             ),
             id(objectProto).assignField(
@@ -167,10 +167,10 @@ export const objectModule: InterpreterModule = {
                                 null
                         `
                     },
-                    new Map<string | number, Type>([
+                    [
                         [0, functionType],
                         [SemanticFieldNames.SELF, objectType()]
-                    ])
+                    ]
                 )
             ),
             id(objectProto).assignField(

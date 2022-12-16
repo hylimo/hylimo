@@ -114,7 +114,7 @@ const parser = new Parser(false);
 export function fun(
     expressions: Expression[] | string,
     decorators: { [index: string]: string | null } = {},
-    types?: Map<string | number, Type>
+    types?: [string | number, Type][]
 ): FunctionExpression {
     let parsedExpressions: Expression[];
     if (typeof expressions === "string") {
@@ -126,7 +126,7 @@ export function fun(
     } else {
         parsedExpressions = expressions;
     }
-    return new FunctionExpression(parsedExpressions, parseDecorators(decorators), undefined, types);
+    return new FunctionExpression(parsedExpressions, parseDecorators(decorators), undefined, new Map(types));
 }
 
 /**
@@ -140,10 +140,10 @@ export function fun(
 export function jsFun(
     callback: (args: FullObject, context: InterpreterContext) => BaseObject | FieldEntry,
     decorators: { [index: string]: string | null } = {},
-    types?: Map<string | number, Type>
+    types?: [string | number, Type][]
 ): NativeFunctionExpression {
     return new NativeFunctionExpression((args, context, staticScope) => {
-        const evaluatedArgs = generateArgs(args, context, types);
+        const evaluatedArgs = generateArgs(args, context, new Map(types));
         const oldScope = context.currentScope;
         context.currentScope = staticScope;
         const res = callback(evaluatedArgs, context);

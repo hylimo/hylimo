@@ -16,10 +16,10 @@ const numberProto = "numberProto";
 /**
  * Type for number operator functions
  */
-const numberOperatorFunctionTypes = new Map<string | number, Type>([
+const numberOperatorFunctionTypes: [string | number, Type][] = [
     [0, numberType],
     [SemanticFieldNames.SELF, numberType]
-]);
+];
 
 /**
  * Number module providing numerical operators (+, -, *, /, %, <, <=, >, >=, ==)
@@ -257,7 +257,7 @@ export const numberModule: InterpreterModule = {
                                 true iff both values are the same number
                         `
                     },
-                    new Map([[SemanticFieldNames.SELF, numberType]])
+                    [[SemanticFieldNames.SELF, numberType]]
                 )
             )
         ]).call()

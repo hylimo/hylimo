@@ -50,10 +50,10 @@ export const functionModule: InterpreterModule = {
                                 the result of the call
                         `
                     },
-                    new Map<string | number, Type>([
+                    [
                         [0, objectType()],
                         [SemanticFieldNames.SELF, functionType]
-                    ])
+                    ]
                 )
             )
         ]).call()
