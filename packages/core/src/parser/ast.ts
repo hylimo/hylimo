@@ -341,8 +341,8 @@ export class InvocationExpression extends AbstractInvocationExpression {
         const targetValue = this.target.evaluate(context).value;
         return targetValue.invoke(
             [
-                ...this.argumentExpressions,
-                { value: new ConstExpression({ value: context.currentScope }), name: SemanticFieldNames.SELF }
+                { value: new ConstExpression({ value: context.currentScope }), name: SemanticFieldNames.SELF },
+                ...this.argumentExpressions
             ],
             context
         );
@@ -376,7 +376,7 @@ export class SelfInvocationExpression extends AbstractInvocationExpression {
         const targetValue = this.target.evaluateWithSource(context);
         const fieldValue = targetValue.value.getField(this.name, context);
         return fieldValue.invoke(
-            [...this.argumentExpressions, { value: new ConstExpression(targetValue), name: SemanticFieldNames.SELF }],
+            [{ value: new ConstExpression(targetValue), name: SemanticFieldNames.SELF }, ...this.argumentExpressions],
             context
         );
     }

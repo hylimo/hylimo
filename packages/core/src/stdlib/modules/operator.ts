@@ -21,7 +21,7 @@ export const operatorModule: InterpreterModule = {
                 operator,
                 native(
                     (args, context) => {
-                        args.pop();
+                        args.shift();
                         if (args.length != 2 || args[0].name !== undefined || args[1].name !== undefined) {
                             throw new RuntimeError(`Expected exactly two positional arguments for ${operator}`);
                         }
@@ -140,7 +140,7 @@ export const operatorModule: InterpreterModule = {
             "??",
             native(
                 (args, context) => {
-                    args.pop();
+                    args.shift();
                     if (args.length != 2 || args[0].name !== undefined || args[1].name !== undefined) {
                         throw new RuntimeError(`Expected exactly two positional arguments for ??}`);
                     }
@@ -169,7 +169,7 @@ export const operatorModule: InterpreterModule = {
             "-",
             native(
                 (args, context) => {
-                    args.pop();
+                    args.shift();
                     if (
                         args.length > 2 ||
                         args.length < 1 ||

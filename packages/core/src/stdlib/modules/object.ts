@@ -198,7 +198,7 @@ export const objectModule: InterpreterModule = {
             "object",
             native(
                 (args, context) => {
-                    args.pop();
+                    args.shift();
                     const evaluatedArgs = generateArgs(args, context);
                     return { value: evaluatedArgs };
                 },
