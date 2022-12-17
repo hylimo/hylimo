@@ -1,85 +1,90 @@
 import {
     assign,
     DefaultModuleNames,
-    FullObject,
+    Expression,
     fun,
     id,
-    InterpreterContext,
     InterpreterModule,
     jsFun,
-    SemanticFieldNames
+    literal,
+    namedType,
+    nullType,
+    objectType,
+    or,
+    SemanticFieldNames,
+    str,
+    Type
 } from "@hylimo/core";
+import { AttributeConfig, LayoutElementConfig } from "../layout/layoutElement";
 import { layouts } from "../layout/layouts";
-
-/**
- * Documentation for everything which can have style fields
- */
-const baseElementDoc = `
-    - "class": classes, can be used for styling
-`;
-
-/**
- * Documentation for Element fields
- */
-const elementDoc =
-    baseElementDoc +
-    `
-    - "width": optional width of the element, must be a number
-    - "height": optional height of the element, must be a number
-    - "minWidth": optional minimal width of the element, must be a number
-    - "minHeight": optional minimal height of the element, must be a number
-    - "maxWidth": optional maximal width of the element, must be a number
-    - "maxHeight": optional maximal height of the element, must be a number
-    - "marginTop": optional top margin of the element, must be a number
-    - "marginRight": optional right margin of the element, must be a number
-    - "marginBottom": optional bottom margin of the element, must be a number
-    - "marginLeft": optional left margin of the element, must be a number
-    - "margin": optional margin of the element, must be a number
-    - "hAlign": optional horizontal alignment, must be one of "left", "right" or "center"
-    - "vAlign": optional vertical alignment, must be one of "top", "bottom" or "center"
-`;
-
-/**
- * Documentation for shape Element fields
- */
-const shapeDoc =
-    elementDoc +
-    `
-    - "fill": optional fill of the shape, must be a valid color string
-    - "fillOpacity": optional fill opacity , must be a number between 0 and 1
-    - "stroke": optional stroke, must be a valid color string
-    - "strokeOpacity": optional stroke opacity, must be a number between 0 and 1
-    - "strokeWidth": optional width of the stroke
-    - "strokeDash": optional stroke dash, must be a StrokeDash
-`;
-
-/**
- * Creates an identity function which also assigns the type to the args before it returns it
- *
- * @param type the type of the UI element
- * @returns the function which assigns the type
- */
-function assignTypeFunction(type: string): (args: FullObject, context: InterpreterContext) => FullObject {
-    return (args, context) => {
-        args.setLocalField(SemanticFieldNames.SELF, { value: context.null }, context);
-        args.setLocalField("type", { value: context.newString(type) }, context);
-        return args;
-    };
-}
 
 /**
  * Gets a list of all known style attributes
  *
  * @returns the list of style attributes
  */
-function computeAllStyleAttributes(): string[] {
-    return [...new Set(layouts.flatMap((layout) => layout.styleAttributes))];
+function computeAllStyleAttributes(): AttributeConfig[] {
+    const styleAttributes = new Map<string, AttributeConfig>();
+    for (const layout of layouts) {
+        for (const styleAttribute of layout.styleAttributes) {
+            styleAttributes.set(styleAttribute.name, styleAttribute);
+        }
+    }
+    return [...styleAttributes.values()];
+}
+
+/**
+ * Type for unset, default style values
+ */
+const styleValueType = namedType(objectType(new Map([["_type", literal("styleValue")]])), "unset | default");
+
+/**
+ * Creates the function to create a specific element
+ *
+ * @param element config of the element
+ * @returns the function to create the element
+ */
+function createElementFunction(element: LayoutElementConfig): Expression {
+    const allAttributes = [...element.attributes, ...element.styleAttributes];
+    return jsFun(
+        (args, context) => {
+            args.setLocalField(SemanticFieldNames.SELF, { value: context.null }, context);
+            args.setLocalField("type", { value: context.newString(element.type) }, context);
+            args.setLocalField(
+                SemanticFieldNames.PROTO,
+                context.currentScope.getLocalField(elementProto, context),
+                context
+            );
+            return args;
+        },
+        {
+            docs: `
+                Creates a new ${element.type} element
+                Params:
+                    ${allAttributes.map((attribute) => `-"${attribute.name}": ${attribute.description}`).join("\n")}
+                Returns:
+                    The created element
+            `
+        },
+        [
+            ...element.attributes.map<[string, Type]>((attr) => [attr.name, attr.type]),
+            ...element.styleAttributes.map<[string, Type]>((attr) => [
+                attr.name,
+                or(nullType, attr.type, styleValueType)
+            ])
+        ]
+    );
 }
 
 /**
  * The name of the field containing the selector prototype
  */
 const selectorProto = "selectorProto";
+
+/**
+ * The name of the field containing the element prototype
+ */
+const elementProto = "elementProto";
 
 /**
  * Diagram module providing standard diagram UI elements
@@ -89,160 +94,15 @@ export const diagramModule: InterpreterModule = {
     dependencies: [DefaultModuleNames.OBJECT],
     runtimeDependencies: [DefaultModuleNames.LIST, DefaultModuleNames.FUNCTION],
     expressions: [
-        assign(
-            "text",
-            jsFun(assignTypeFunction("text"), {
-                docs: `
-                    Creates a new Text element with the specified Spans
-                    Params:
-                        - "contents": A list of Spans to display
-                        ${elementDoc}
-                    Returns:
-                        The created Text element
-                `
-            })
-        ),
-        assign(
-            "span",
-            jsFun(assignTypeFunction("span"), {
-                docs: `
-                    Creates a new Span
-                    Params:
-                        - "text": The text to display
-                        - "fill": optional text color, must be a valid color string
-                        - "fontFamily": optional font family to use, must be registered font family name string
-                        - "fontSize": optional font size to use
-                        - "fontWeight": optional font weight, if given must be either "normal" or "bold"
-                        - "fontStyle": optional font style, if given must be either "normal" or "italic"
-                        ${baseElementDoc}
-                    Returns:
-                        The created Span element
-                `
-            })
-        ),
-        assign(
-            "rect",
-            jsFun(assignTypeFunction("rect"), {
-                docs: `
-                    Creates a new Rect element with a content
-                    Params:
-                        - "content": The content of the Rect
-                        ${shapeDoc}
-                    Returns:
-                        The created Rect element
-                `
-            })
-        ),
-        assign(
-            "ellipse",
-            jsFun(assignTypeFunction("ellipse"), {
-                docs: `
-                    Creates a new Ellipse element with a content
-                    Params:
-                        - "content": The content of the Ellipse
-                        ${shapeDoc}
-                    Returns:
-                        The created Ellipse element
-                `
-            })
-        ),
-        assign(
-            "circle",
-            jsFun(assignTypeFunction("circle"), {
-                docs: `
-                    Creates a new Circle element with a content
-                    Params:
-                        - "content": The content of the Circle
-                        ${shapeDoc}
-                    Returns:
-                        The created Circle element
-                `
-            })
-        ),
-        assign(
-            "path",
-            jsFun(assignTypeFunction("path"), {
-                docs: `
-                    Creates a new Rect element with a content
-                    Params:
-                        - "path": the SVG path string to display
-                        ${shapeDoc}
-                    Returns:
-                        The created Rect element
-                `
-            })
-        ),
-        assign(
-            "hbox",
-            jsFun(assignTypeFunction("hbox"), {
-                docs: `
-                    Creates a new HBox element with a content.
-                    Stacks contents from left to right.
-                    Params:
-                        - "contents": the inner elements, stacked from left to right
-                        ${elementDoc}
-                    Returns:
-                        The created HBox element
-                `
-            })
-        ),
-        assign(
-            "vbox",
-            jsFun(assignTypeFunction("vbox"), {
-                docs: `
-                    Creates a new VBox element with a content.
-                    Stacks contents from top to bottom
-                    Params:
-                        - "contents": the inner elements. stacked from top to bottom
-                        ${elementDoc}
-                    Returns:
-                        The created VBox element
-                `
-            })
-        ),
-        assign(
-            "stack",
-            jsFun(assignTypeFunction("stack"), {
-                docs: `
-                    Creates a new Stack element with a content.
-                    Stacks contents from top to bottom
-                    Params:
-                        - "contents": the inner elements
-                        ${elementDoc}
-                    Returns:
-                        The created VBox element
-                `
-            })
-        ),
-        assign(
-            "canvas",
-            jsFun(assignTypeFunction("canvas"), {
-                docs: `
-                    Creates a new Canvas element with contents.
-                    Contents should be positioned which provide a position and an element
-                    Params:
-                        - "contents": the inner elements
-                        ${elementDoc}
-                    Returns:
-                        The created Canvas element
-                `
-            })
-        ),
-        assign(
-            "positioned",
-            jsFun(assignTypeFunction("positioned"), {
-                docs: `
-                    Creates a new CanvasContent element with a content.
-                    Should be used inside a Canvas.
-                    Params:
-                        - "content": the inner element
-                        - "position": the absolute or relative position of the element
-                        ${elementDoc}
-                    Returns:
-                        The created Canvas element
-                `
-            })
-        ),
+        fun([
+            id(SemanticFieldNames.THIS).assignField(
+                elementProto,
+                id("object").call({ name: "_type", value: str("element") })
+            ),
+            ...layouts.map((config) =>
+                id(SemanticFieldNames.IT).assignField(config.type, createElementFunction(config))
+            )
+        ]).call(id(SemanticFieldNames.THIS)),
         assign(
             "point",
             fun(
@@ -285,8 +145,8 @@ export const diagramModule: InterpreterModule = {
         assign(
             "styles",
             fun([
-                assign(selectorProto, id("object").call()),
-                assign("default", id("object").call()),
+                assign(selectorProto, id("object").call({ name: "_type", value: str("selectorProto") })),
+                assign("default", id("object").call({ name: "_type", value: str("styleValue") })),
                 assign(
                     "selector",
                     fun(
@@ -299,7 +159,7 @@ export const diagramModule: InterpreterModule = {
                                     selectorValue = value,
                                     styles = list(),
                                     ${computeAllStyleAttributes()
-                                        .map((attr) => `${attr} = default`)
+                                        .map((attr) => `${attr.name} = default`)
                                         .join(",")}
                                 )
                                 args.self.styles.add(selector)
@@ -325,7 +185,7 @@ export const diagramModule: InterpreterModule = {
                         res = object(styles = list())
                         res.type = selector("type")
                         res.class = selector("class")
-                        res.unset = object()
+                        res.unset = object(_type = "styleValue")
                         res.default = default
                         callback.callWithScope(res)
                         res

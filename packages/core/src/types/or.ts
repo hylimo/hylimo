@@ -7,7 +7,7 @@ import { Type } from "./base";
  * @returns the generated type
  */
 export function or(...types: Type[]): Type {
-    const name = types.join(" | ");
+    const name = types.map((type) => type.name).join(" | ");
     return {
         name,
         matches(value, context) {

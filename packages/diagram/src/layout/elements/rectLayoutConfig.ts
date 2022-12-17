@@ -3,14 +3,14 @@ import { Element } from "../../model/base";
 import { Rect } from "../../model/model";
 import { LayoutElement, SizeConstraints, Size, Position, addToConstraints, addToSize } from "../layoutElement";
 import { Layout } from "../layoutEngine";
-import { ShapeLayoutConfig } from "./shapeLayoutConfig";
+import { ContentShapeLayoutConfig } from "./contentShapeLayoutConfig";
 
 /**
  * Layout config for rect
  */
-export class RectLayoutConfig extends ShapeLayoutConfig {
+export class RectLayoutConfig extends ContentShapeLayoutConfig {
     constructor() {
-        super("rect", []);
+        super("rect", [], []);
     }
 
     override measure(layout: Layout, element: LayoutElement, constraints: SizeConstraints): Size {

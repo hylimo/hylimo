@@ -179,7 +179,8 @@ export class Layout {
             }
         }
         matchingStyles.reverse();
-        for (const attribute of styleAttributes) {
+        for (const attributeConfig of styleAttributes) {
+            const attribute = attributeConfig.name;
             for (const style of matchingStyles) {
                 const entry = style.getLocalFieldOrUndefined(attribute);
                 if (entry && entry.value != this.styles.default) {

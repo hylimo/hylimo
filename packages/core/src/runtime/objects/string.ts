@@ -1,25 +1,22 @@
 import { SimpleObject } from "./baseObject";
 import { FullObject } from "./fullObject";
+import { LiteralObject } from "./literal";
 
 /**
  * Represents a String
  */
-export class StringObject extends SimpleObject {
+export class StringObject extends LiteralObject<string> {
     /**
      * Creates a new String
      *
      * @param value the js string this the created object represents
      * @param proto the prototype of the String
      */
-    constructor(readonly value: string, proto: FullObject) {
-        super(proto);
+    constructor(value: string, proto: FullObject) {
+        super(value, proto);
     }
 
     override toString(): string {
         return `"${this.value}"`;
-    }
-
-    override toNative(): any {
-        return this.value;
     }
 }

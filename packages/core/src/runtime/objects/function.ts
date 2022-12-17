@@ -55,7 +55,7 @@ export function generateArgs(
             } else {
                 reasonMessagePart = typeCheckRes.reason;
             }
-            const message = `Invalid parameter ${key}: ${reasonMessagePart}`;
+            const message = `Invalid value for parameter ${key}: ${reasonMessagePart}`;
             let source: Expression | undefined = undefined;
             if (typeof key === "number" && args[key] && args[key].name === undefined) {
                 source = args[key].value;

@@ -1,4 +1,4 @@
-import { FieldEntry, FullObject } from "@hylimo/core";
+import { FieldEntry, FullObject, Type } from "@hylimo/core";
 import { Element } from "../model/base";
 import { Root } from "../model/root";
 import { Layout } from "./layoutEngine";
@@ -163,6 +163,24 @@ export interface LayoutElement {
 }
 
 /**
+ * Defines a style attribute
+ */
+export interface AttributeConfig {
+    /**
+     * The name of the attribute
+     */
+    name: string;
+    /**
+     * The type the attribute must have (unset is always allowed)
+     */
+    type: Type;
+    /**
+     * Documentation of the attribute
+     */
+    description: string;
+}
+
+/**
  * Interface defining how to layout a UI element
  */
 export interface LayoutElementConfig {
@@ -173,7 +191,11 @@ export interface LayoutElementConfig {
     /**
      * List of style attributes it supports
      */
-    styleAttributes: string[];
+    styleAttributes: AttributeConfig[];
+    /**
+     * Non-style attributes it supports
+     */
+    attributes: AttributeConfig[];
     /**
      * Called to determine the size the element requires
      *

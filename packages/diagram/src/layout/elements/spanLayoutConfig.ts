@@ -1,14 +1,42 @@
+import { literal, numberType, or, stringType } from "@hylimo/core";
 import { Element } from "../../model/base";
-import { LayoutElement, LayoutElementConfig, Position, Size, SizeConstraints } from "../layoutElement";
+import { LayoutElement, LayoutElementConfig, Position, Size, SizeConstraints, AttributeConfig } from "../layoutElement";
 import { Layout } from "../layoutEngine";
+import { BaseElementLayoutConfig } from "./baseElementLayoutConfig";
 
 /**
  * Layout config for span, does not handle actual layouting and measuring
  */
-export class SpanLayoutConfig implements LayoutElementConfig {
-    readonly styleAttributes: string[] = ["text", "fill", "fontFamily", "fontSize", "fontWeight", "fontStyle"];
-
-    readonly type = "span";
+export class SpanLayoutConfig extends BaseElementLayoutConfig {
+    /**
+     * Creates a new SpanLayoutConfig
+     */
+    constructor() {
+        super(
+            "span",
+            [],
+            [
+                { name: "text", description: "the text to display", type: stringType },
+                { name: "fill", description: "optional text color, must be a valid color string", type: stringType },
+                {
+                    name: "fontFamily",
+                    description: "optional font family to use, must be registered font family name string",
+                    type: stringType
+                },
+                { name: "fontSize", description: "optional font size to use", type: numberType },
+                {
+                    name: "fontWeight",
+                    description: 'optional font weight, if given must be either "normal" or "bold"',
+                    type: or(literal("normal"), literal("bold"))
+                },
+                {
+                    name: "fontStyle",
+                    description: 'optional font style, if given must be either "normal" or "italic"',
+                    type: or(literal("normal"), literal("bold"))
+                }
+            ]
+        );
+    }
 
     /**
      * Called to determine the size the element requires

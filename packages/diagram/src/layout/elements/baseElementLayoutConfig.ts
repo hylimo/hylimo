@@ -1,35 +1,36 @@
+import { listType, optional, stringType } from "@hylimo/core";
 import { Element } from "../../model/base";
-import { LayoutElement, LayoutElementConfig, Position, Size, SizeConstraints } from "../layoutElement";
+import { LayoutElement, LayoutElementConfig, Position, Size, SizeConstraints, AttributeConfig } from "../layoutElement";
 import { Layout } from "../layoutEngine";
 
 /**
  * Base class for all layout element configs
  */
 export abstract class BaseElementLayoutConfig implements LayoutElementConfig {
-    readonly styleAttributes: string[] = [
-        "width",
-        "height",
-        "minWidth",
-        "minHeight",
-        "maxWidth",
-        "maxHeight",
-        "marginTop",
-        "marginRight",
-        "marginBottom",
-        "marginLeft",
-        "margin",
-        "hAlign",
-        "vAlign"
+    /**
+     * Supported non-style attributes
+     */
+    readonly attributes: AttributeConfig[] = [
+        {
+            name: "class",
+            description: "classes, can be used for styling",
+            type: optional(listType(stringType))
+        }
     ];
 
     /**
      * Assigns type and styleAttributes
      *
      * @param type the supported type
-     * @param additionalStyleAttributes the supported style attributes
+     * @param additionalAttributes additional non-style attributes
+     * @param styleAttributes the supported style attributes
      */
-    constructor(readonly type: string, additionalStyleAttributes: string[]) {
-        this.styleAttributes.push(...additionalStyleAttributes);
+    constructor(
+        readonly type: string,
+        additionalAttributes: AttributeConfig[],
+        readonly styleAttributes: AttributeConfig[]
+    ) {
+        this.attributes.push(...additionalAttributes);
     }
 
     /**

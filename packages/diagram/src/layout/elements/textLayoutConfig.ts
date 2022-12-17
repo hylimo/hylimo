@@ -1,17 +1,34 @@
-import { FullObject, objectToList } from "@hylimo/core";
+import { FullObject, listType, literal, objectToList, objectType, SemanticFieldNames } from "@hylimo/core";
 import { Point } from "sprotty-protocol";
 import { Element } from "../../model/base";
 import { Text } from "../../model/model";
 import { LayoutElement, Size, SizeConstraints } from "../layoutElement";
 import { Layout } from "../layoutEngine";
-import { BaseElementLayoutConfig } from "./baseElementLayoutConfig";
+import { StyledElementLayoutConfig } from "./styledElementLayoutConfig";
 
 /**
  * Layout config for text
  */
-export class TextLayoutConfig extends BaseElementLayoutConfig {
+export class TextLayoutConfig extends StyledElementLayoutConfig {
     constructor() {
-        super("text", []);
+        super(
+            "text",
+            [
+                {
+                    name: "contents",
+                    description: "a list of spans to display",
+                    type: listType(
+                        objectType(
+                            new Map([
+                                [SemanticFieldNames.PROTO, objectType(new Map([["_type", literal("element")]]))],
+                                ["type", literal("span")]
+                            ])
+                        )
+                    )
+                }
+            ],
+            []
+        );
     }
 
     override measure(layout: Layout, element: LayoutElement, constraints: SizeConstraints): Size {

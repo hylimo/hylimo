@@ -35,3 +35,6 @@ export * from "./types/number";
 export * from "./types/object";
 export * from "./types/or";
 export * from "./types/string";
+export * from "./types/enum";
+export * from "./types/literal";
+export * from "./types/named";

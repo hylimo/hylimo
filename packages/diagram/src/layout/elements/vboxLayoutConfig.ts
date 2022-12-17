@@ -8,7 +8,7 @@ import { PanelLayoutConfig } from "./panelLayoutConfig";
  */
 export class VBoxLayoutConfig extends PanelLayoutConfig {
     constructor() {
-        super("vbox", []);
+        super("vbox", [], []);
     }
 
     override measure(layout: Layout, element: LayoutElement, constraints: SizeConstraints): Size {
