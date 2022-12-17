@@ -5,13 +5,13 @@ import { or } from "./or";
  * Null type matching only null
  */
 export const nullType: Type = {
-    name: "null",
+    name: () => "null",
     matches(value, context) {
         if (value === context.null) {
             return true;
         } else {
             return {
-                reason: "expected: null",
+                expected: this,
                 path: []
             };
         }

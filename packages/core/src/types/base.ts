@@ -8,7 +8,7 @@ export type MatchesResult =
     | true
     | {
           path: string[];
-          reason: string;
+          expected: Type;
       };
 
 /**
@@ -18,7 +18,7 @@ export interface Type {
     /**
      * The name of the type
      */
-    name: string;
+    name(): string;
     /**
      * Checks if a value matches the type
      *

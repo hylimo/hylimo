@@ -5,13 +5,13 @@ import { Type } from "./base";
  * Function type matching only functions (both normal and native)
  */
 export const functionType: Type = {
-    name: "function",
+    name: () => "function",
     matches(value, context) {
         if (value instanceof AbstractFunctionObject) {
             return true;
         } else {
             return {
-                reason: "expected: function",
+                expected: this,
                 path: []
             };
         }

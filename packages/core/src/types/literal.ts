@@ -8,18 +8,18 @@ import { Type } from "./base";
  * @returns a type checking for a specific literal
  */
 export function literal(value: any): Type {
-    let name: string;
-    if (typeof value === "string") {
-        name = `"${value}"`;
-    } else {
-        name = value.toString();
-    }
     return {
-        name,
+        name() {
+            if (typeof value === "string") {
+                return `"${value}"`;
+            } else {
+                return value.toString();
+            }
+        },
         matches(providedValue, context) {
             if (!(providedValue instanceof LiteralObject) || providedValue.value !== value) {
                 return {
-                    reason: `expected: ${name}`,
+                    expected: this,
                     path: []
                 };
             }

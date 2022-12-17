@@ -7,9 +7,8 @@ import { Type } from "./base";
  * @returns the generated type
  */
 export function or(...types: Type[]): Type {
-    const name = types.map((type) => type.name).join(" | ");
     return {
-        name,
+        name: () => types.map((type) => type.name()).join(" | "),
         matches(value, context) {
             for (const type of types) {
                 const res = type.matches(value, context);
@@ -18,7 +17,7 @@ export function or(...types: Type[]): Type {
                 }
             }
             return {
-                reason: `expected: ${name}`,
+                expected: this,
                 path: []
             };
         }

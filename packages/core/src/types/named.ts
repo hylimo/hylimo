@@ -10,14 +10,14 @@ import { Type } from "./base";
  */
 export function namedType(type: Type, newName: string): Type {
     return {
-        name: newName,
+        name: () => newName,
         matches(value, context) {
             const res = type.matches(value, context);
             if (res === true) {
                 return true;
             } else {
                 return {
-                    reason: `expected: ${this.name}`,
+                    expected: this,
                     path: []
                 };
             }

@@ -5,13 +5,13 @@ import { Type } from "./base";
  * Boolean type matching only booleans
  */
 export const booleanType: Type = {
-    name: "boolean",
+    name: () => "boolean",
     matches(value, context) {
         if (value instanceof BooleanObject) {
             return true;
         } else {
             return {
-                reason: "expected: boolean",
+                expected: this,
                 path: []
             };
         }

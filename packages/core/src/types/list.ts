@@ -11,13 +11,12 @@ import { numberType } from "./number";
  * @returns the generated type
  */
 export function listType(type?: Type): Type {
-    const name = `${type}[]`;
     return {
-        name,
+        name: () => `${type}[]`,
         matches(value, context) {
             if (!(value instanceof FullObject)) {
                 return {
-                    reason: `expected: ${name}`,
+                    expected: this,
                     path: []
                 };
             }

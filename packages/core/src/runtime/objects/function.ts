@@ -49,11 +49,12 @@ export function generateArgs(
         const argValue = argsObject.getLocalField(key, context).value;
         const typeCheckRes = type.matches(argValue, context);
         if (typeCheckRes !== true) {
+            const reason = `expected: ${typeCheckRes.expected.name()}`;
             let reasonMessagePart: string;
             if (typeCheckRes.path.length > 0) {
-                reasonMessagePart = `at .${typeCheckRes.path.join(".")}: ${typeCheckRes.reason}`;
+                reasonMessagePart = `at .${typeCheckRes.path.join(".")}: ${reason}`;
             } else {
-                reasonMessagePart = typeCheckRes.reason;
+                reasonMessagePart = reason;
             }
             const message = `Invalid value for parameter ${key}: ${reasonMessagePart}`;
             let source: Expression | undefined = undefined;

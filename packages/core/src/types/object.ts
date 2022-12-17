@@ -8,13 +8,14 @@ import { Type } from "./base";
  * @returns the generated type
  */
 export function objectType(types: Map<string | number, Type> = new Map()): Type {
-    const name = `{ ${[...types.entries()].map(([key, type]) => `${key}: ${type.name}`).join(", ")} }`;
     return {
-        name,
+        name() {
+            return `{ ${[...types.entries()].map(([key, type]) => `${key}: ${type.name()}`).join(", ")} }`;
+        },
         matches(value, context) {
             if (!(value instanceof FullObject)) {
                 return {
-                    reason: `expected: object`,
+                    expected: this,
                     path: []
                 };
             }
