@@ -32,7 +32,7 @@ export class SpanLayoutConfig extends BaseElementLayoutConfig {
                 {
                     name: "fontStyle",
                     description: 'optional font style, if given must be either "normal" or "italic"',
-                    type: or(literal("normal"), literal("bold"))
+                    type: or(literal("normal"), literal("italic"))
                 }
             ]
         );

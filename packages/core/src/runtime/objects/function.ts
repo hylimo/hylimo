@@ -1,7 +1,12 @@
-import { Expression, FunctionExpression, InvocationArgument, NativeFunctionExpression } from "../../parser/ast";
+import {
+    AbstractFunctionExpression,
+    FunctionExpression,
+    InvocationArgument,
+    NativeFunctionExpression
+} from "../../parser/ast";
 import { Type } from "../../types/base";
+import { validate } from "../../types/validate";
 import { InterpreterContext } from "../interpreter";
-import { RuntimeError } from "../runtimeError";
 import { SemanticFieldNames } from "../semanticFieldNames";
 import { BaseObject, FieldEntry, SimpleObject } from "./baseObject";
 import { FullObject } from "./fullObject";
@@ -9,14 +14,14 @@ import { FullObject } from "./fullObject";
 /**
  * Base class for js functions and normal functions
  */
-export abstract class AbstractFunctionObject extends SimpleObject {
+export abstract class AbstractFunctionObject<T extends AbstractFunctionExpression> extends SimpleObject {
     /**
      * Defines parentScope
      *
      * @param parentScope the parent scope, on exec a new scope with this as parent is created
      * @param proto the prototype of this object
      */
-    constructor(readonly parentScope: FullObject, proto: FullObject) {
+    constructor(readonly definition: T, readonly parentScope: FullObject, proto: FullObject) {
         super(proto);
     }
 
@@ -47,28 +52,14 @@ export function generateArgs(
     }
     for (const [key, type] of types?.entries() ?? []) {
         const argValue = argsObject.getLocalField(key, context).value;
-        const typeCheckRes = type.matches(argValue, context);
-        if (typeCheckRes !== true) {
-            const reason = `expected: ${typeCheckRes.expected.name()}`;
-            let reasonMessagePart: string;
-            if (typeCheckRes.path.length > 0) {
-                reasonMessagePart = `at .${typeCheckRes.path.join(".")}: ${reason}`;
-            } else {
-                reasonMessagePart = reason;
-            }
-            const message = `Invalid value for parameter ${key}: ${reasonMessagePart}`;
-            let source: Expression | undefined = undefined;
+        validate(type, `Invalid value for paramter ${key}`, argValue, context, () => {
             if (typeof key === "number" && args[key] && args[key].name === undefined) {
-                source = args[key].value;
+                return args[key].value;
             } else if (typeof key === "string") {
-                source = [...args].reverse().find((arg) => arg.name === key)?.value;
+                return [...args].reverse().find((arg) => arg.name === key)?.value;
             }
-            const error = new RuntimeError(message);
-            if (source) {
-                error.interpretationStack.push(source);
-            }
-            throw error;
-        }
+            return undefined;
+        });
     }
     return argsObject;
 }
@@ -76,7 +67,7 @@ export function generateArgs(
 /**
  * Function based on a DSL function
  */
-export class FunctionObject extends AbstractFunctionObject {
+export class FunctionObject extends AbstractFunctionObject<FunctionExpression> {
     /**
      * Creates a new DSL function
      *
@@ -84,8 +75,8 @@ export class FunctionObject extends AbstractFunctionObject {
      * @param parentScope the parent scope, on exec a new scope with this as parent is created
      * @param proto the prototype of this object
      */
-    constructor(readonly definition: FunctionExpression, parentScope: FullObject, proto: FullObject) {
-        super(parentScope, proto);
+    constructor(definition: FunctionExpression, parentScope: FullObject, proto: FullObject) {
+        super(definition, parentScope, proto);
     }
 
     override invoke(args: InvocationArgument[], context: InterpreterContext, scope?: FullObject): FieldEntry {
@@ -117,7 +108,7 @@ export class FunctionObject extends AbstractFunctionObject {
  * Function based on a native js function
  * Does NOT create a new scope on invoke, but provides the parent scope
  */
-export class NativeFunctionObject extends AbstractFunctionObject {
+export class NativeFunctionObject extends AbstractFunctionObject<NativeFunctionExpression> {
     /**
      * Creates a new native js function
      *
@@ -125,8 +116,8 @@ export class NativeFunctionObject extends AbstractFunctionObject {
      * @param parentScope the parent scope, on exec a new scope with this as parent is created
      * @param proto the prototype of this object
      */
-    constructor(readonly definition: NativeFunctionExpression, parentScope: FullObject, proto: FullObject) {
-        super(parentScope, proto);
+    constructor(definition: NativeFunctionExpression, parentScope: FullObject, proto: FullObject) {
+        super(definition, parentScope, proto);
     }
 
     override invoke(args: InvocationArgument[], context: InterpreterContext): FieldEntry {

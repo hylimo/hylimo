@@ -104,10 +104,38 @@ export const listModule: InterpreterModule = {
                             docs: `
                                 Iterates over all entries of self in order and calls the callback with the value and index of the entry.
                                 Params:
-                                    - "self": the object on which all fields are iterated
+                                    - "self": the list on which all fields are iterated
                                     - 0: the callback, called with two positional parameters (value and index)
                                 Returns:
                                     null
+                            `
+                        },
+                        [
+                            [SemanticFieldNames.SELF, listType()],
+                            [0, functionType]
+                        ]
+                    )
+                ),
+                id(listProto).assignField(
+                    "map",
+                    fun(
+                        `
+                            callback = it
+                            res = list()
+                            args.self.forEach {
+                                (value, index) = args
+                                res.add(callback(value, index))
+                            }
+                            res
+                        `,
+                        {
+                            docs: `
+                                Maps a list to a new list, with the order being preserved
+                                Params:
+                                    - "self": the list on which all fields are mapped
+                                    - 0: the callback, called with two positional parameters (value and index)
+                                Returns:
+                                    The resulting new list.
                             `
                         },
                         [

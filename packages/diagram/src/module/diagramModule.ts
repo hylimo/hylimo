@@ -1,4 +1,6 @@
 import {
+    assertFunction,
+    assertObject,
     assign,
     DefaultModuleNames,
     Expression,
@@ -10,13 +12,21 @@ import {
     namedType,
     nullType,
     objectType,
+    optional,
     or,
     SemanticFieldNames,
     str,
-    Type
+    stringType,
+    Type,
+    validate
 } from "@hylimo/core";
 import { AttributeConfig, LayoutElementConfig } from "../layout/layoutElement";
 import { layouts } from "../layout/layouts";
+
+/**
+ * Type for unset, default style values
+ */
+const styleValueType = namedType(objectType(new Map([["_type", literal("styleValue")]])), "unset | default");
 
 /**
  * Gets a list of all known style attributes
@@ -27,16 +37,20 @@ function computeAllStyleAttributes(): AttributeConfig[] {
     const styleAttributes = new Map<string, AttributeConfig>();
     for (const layout of layouts) {
         for (const styleAttribute of layout.styleAttributes) {
-            styleAttributes.set(styleAttribute.name, styleAttribute);
+            styleAttributes.set(styleAttribute.name, {
+                name: styleAttribute.name,
+                description: styleAttribute.description,
+                type: or(nullType, styleAttribute.type, styleValueType)
+            });
         }
     }
     return [...styleAttributes.values()];
 }
 
 /**
- * Type for unset, default style values
+ * All style atributes
  */
-const styleValueType = namedType(objectType(new Map([["_type", literal("styleValue")]])), "unset | default");
+const allStyleAttributes = computeAllStyleAttributes();
 
 /**
  * Creates the function to create a specific element
@@ -87,6 +101,17 @@ const selectorProto = "selectorProto";
 const elementProto = "elementProto";
 
 /**
+ * Type for a font object
+ */
+const fontType = objectType(
+    new Map([
+        ["url", stringType],
+        ["name", optional(stringType)],
+        ["variationSettings", optional(objectType())]
+    ])
+);
+
+/**
  * Diagram module providing standard diagram UI elements
  */
 export const diagramModule: InterpreterModule = {
@@ -95,10 +120,7 @@ export const diagramModule: InterpreterModule = {
     runtimeDependencies: [DefaultModuleNames.LIST, DefaultModuleNames.FUNCTION],
     expressions: [
         fun([
-            id(SemanticFieldNames.THIS).assignField(
-                elementProto,
-                id("object").call({ name: "_type", value: str("element") })
-            ),
+            assign(elementProto, id("object").call({ name: "_type", value: str("element") })),
             ...layouts.map((config) =>
                 id(SemanticFieldNames.IT).assignField(config.type, createElementFunction(config))
             )
@@ -148,6 +170,26 @@ export const diagramModule: InterpreterModule = {
                 assign(selectorProto, id("object").call({ name: "_type", value: str("selectorProto") })),
                 assign("default", id("object").call({ name: "_type", value: str("styleValue") })),
                 assign(
+                    "validateSelector",
+                    jsFun((args, context) => {
+                        const value = args.getField(0, context);
+                        const createFunction = args.getField(1, context);
+                        assertObject(value);
+                        assertFunction(createFunction);
+                        for (const attribute of allStyleAttributes) {
+                            const attributeValue = value.getLocalField(attribute.name, context).value;
+                            validate(
+                                attribute.type,
+                                `Invalid value for ${attribute.name}`,
+                                attributeValue,
+                                context,
+                                () => createFunction.definition
+                            );
+                        }
+                        return context.null;
+                    })
+                ),
+                assign(
                     "selector",
                     fun(
                         `
@@ -158,13 +200,12 @@ export const diagramModule: InterpreterModule = {
                                     selectorType = type,
                                     selectorValue = value,
                                     styles = list(),
-                                    ${computeAllStyleAttributes()
-                                        .map((attr) => `${attr.name} = default`)
-                                        .join(",")}
+                                    ${allStyleAttributes.map((attr) => `${attr.name} = default`).join(",")}
                                 )
                                 args.self.styles.add(selector)
                                 selector.proto = ${selectorProto}
                                 callback.callWithScope(selector)
+                                validateSelector(selector, callback)
                                 selector
                             }
                         `,
@@ -225,7 +266,14 @@ export const diagramModule: InterpreterModule = {
                         Returns:
                             the created font family object
                     `
-                }
+                },
+                [
+                    [0, stringType],
+                    ["normal", fontType],
+                    ["italic", fontType],
+                    ["bold", fontType],
+                    ["boldItalic", fontType]
+                ]
             )
         ),
         assign(
@@ -246,7 +294,12 @@ export const diagramModule: InterpreterModule = {
                         Returns:
                             the created font object
                     `
-                }
+                },
+                [
+                    [0, stringType],
+                    [1, optional(stringType)],
+                    [2, optional(objectType())]
+                ]
             )
         ),
         assign(

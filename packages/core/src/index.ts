@@ -38,3 +38,4 @@ export * from "./types/string";
 export * from "./types/enum";
 export * from "./types/literal";
 export * from "./types/named";
+export * from "./types/validate";

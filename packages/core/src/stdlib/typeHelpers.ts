@@ -61,7 +61,10 @@ export function isNumber(value: BaseObject): boolean {
  * @param value the value to check
  * @param description the description of the value, part of the error message
  */
-export function assertFunction(value: BaseObject, description: string = ""): asserts value is AbstractFunctionObject {
+export function assertFunction(
+    value: BaseObject,
+    description: string = ""
+): asserts value is AbstractFunctionObject<any> {
     if (!(value instanceof AbstractFunctionObject)) {
         throw new RuntimeError(`${description} is not a function`);
     }

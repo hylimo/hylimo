@@ -42,8 +42,8 @@ export abstract class Expression {
     evaluate(context: InterpreterContext): FieldEntry {
         try {
             return this.evaluateInternal(context);
-        } catch (e) {
-            if (e instanceof RuntimeError) {
+        } catch (e: any) {
+            if (Array.isArray(e.interpretationStack)) {
                 e.interpretationStack.push(this);
             }
             throw e;

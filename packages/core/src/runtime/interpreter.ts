@@ -322,8 +322,8 @@ export class Interpreter {
                 lastRes = expression.evaluate(context).value;
             }
             return { result: lastRes, globalScope: context.currentScope };
-        } catch (e) {
-            if (e instanceof RuntimeError) {
+        } catch (e: any) {
+            if (Array.isArray(e.interpretationStack)) {
                 return { error: e };
             } else {
                 throw e;

@@ -1,3 +1,4 @@
+import { Expression } from "../../parser/ast";
 import { assign, fun, id, jsFun, str } from "../../parser/astHelper";
 import { InterpreterModule } from "../../runtime/interpreter";
 import { RuntimeError } from "../../runtime/runtimeError";
@@ -5,9 +6,10 @@ import { SemanticFieldNames } from "../../runtime/semanticFieldNames";
 import { booleanType } from "../../types/boolean";
 import { functionType } from "../../types/function";
 import { optional } from "../../types/null";
+import { numberType } from "../../types/number";
 import { stringType } from "../../types/string";
 import { DefaultModuleNames } from "../defaultModuleNames";
-import { assertFunction, assertString } from "../typeHelpers";
+import { assertFunction, assertNumber, assertString } from "../typeHelpers";
 import { assertBoolean } from "./boolean";
 
 /**
@@ -17,7 +19,7 @@ import { assertBoolean } from "./boolean";
 export const commonModule: InterpreterModule = {
     name: DefaultModuleNames.COMMON,
     dependencies: [],
-    runtimeDependencies: [DefaultModuleNames.BOOLEAN, DefaultModuleNames.OPERATOR],
+    runtimeDependencies: [DefaultModuleNames.BOOLEAN, DefaultModuleNames.OPERATOR, DefaultModuleNames.LIST],
     expressions: [
         assign("null", jsFun((_, context) => context.null).call()),
         assign(
@@ -93,7 +95,7 @@ export const commonModule: InterpreterModule = {
             "toStr",
             fun(
                 [
-                    id(SemanticFieldNames.THIS).assignField("_value", id(SemanticFieldNames.ARGS).field(0)),
+                    assign("_value", id(SemanticFieldNames.ARGS).field(0)),
                     id("if").call(
                         id("==").call(id("null"), id("_value")),
                         fun([str("null")]),
@@ -126,6 +128,37 @@ export const commonModule: InterpreterModule = {
                     `
                 },
                 [[0, stringType]]
+            )
+        ),
+        assign(
+            "range",
+            fun(
+                `
+                    (n, step) = args
+                    step = step ?? 1
+                    res = list()
+                    i = 0
+                    while { i < n } {
+                        res.add(i)
+                        i = i + step
+                    }
+                    res
+                `,
+                {
+                    docs: `
+                        Generates a list with a range of numbers from 0 up to
+                        n with n < the first parameter.
+                        Params:
+                            - 0: the max value
+                            - 1: optional step size, defaults to 1
+                        Returns:
+                            A list with the generated numbers
+                    `
+                },
+                [
+                    [0, numberType],
+                    [1, optional(numberType)]
+                ]
             )
         )
     ]
