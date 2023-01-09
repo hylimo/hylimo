@@ -4,7 +4,7 @@
         "rootDir": "src",
         "outDir": "lib"
     },
-    "references": [    ],
+    "references": [],
     "include": ["src/**/*.ts", "src/**/*.d.ts"],
     "exclude": ["lib", "node_modules"]
 }
