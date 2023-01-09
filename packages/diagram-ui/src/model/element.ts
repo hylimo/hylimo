@@ -1,6 +1,5 @@
 import { SChildElement } from "sprotty";
-import { Point } from "sprotty-protocol";
-import { Size } from "@hylimo/diagram";
+import { Size, Point } from "@hylimo/diagram-common";
 
 /**
  * Base class for all elements

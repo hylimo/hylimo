@@ -9,6 +9,9 @@
             "path": "packages/language-server"
         },
         {
+            "path": "packages/diagram-common"
+        },
+        {
             "path": "packages/diagram"
         },
         {

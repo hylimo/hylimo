@@ -1,4 +1,4 @@
-import { FontConfig, FontFamilyConfig } from "@hylimo/diagram";
+import { FontConfig, FontFamilyConfig } from "@hylimo/diagram-common";
 import { ModelIndexImpl, ViewportRootElement } from "sprotty";
 
 /**
