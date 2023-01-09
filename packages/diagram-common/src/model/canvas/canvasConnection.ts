@@ -4,7 +4,9 @@ import { Element } from "../element";
  * Connection on a Canvas with an arbitrary amount of segments
  * Must only have CanvasConnectionSegment
  */
-export interface CanvasConnection extends Element {}
+export interface CanvasConnection extends Element {
+    type: "canvasConnection";
+}
 
 /**
  * Connection line segment
@@ -13,7 +15,7 @@ export interface CanvasConnectionSegment extends Element {
     /**
      * The type of the segment
      */
-    type: "line" | "bezier";
+    type: "canvasLineSegment" | "canvasBezierSegment";
     /**
      * The id of the start point
      */
@@ -28,14 +30,14 @@ export interface CanvasConnectionSegment extends Element {
  * Direct line connection segment
  */
 export interface CanvasLineSegment extends CanvasConnectionSegment {
-    type: "line";
+    type: "canvasLineSegment";
 }
 
 /**
  * Cubic bezier connection segment
  */
 export interface CanvasBezierSegment extends CanvasConnectionSegment {
-    type: "bezier";
+    type: "canvasBezierSegment";
     /**
      * The id of the start control point
      */

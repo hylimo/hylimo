@@ -23,7 +23,7 @@ export interface RelativePoint extends CanvasPoint {
     /**
      * The id of the point this is relative of
      */
-    dependency: string;
+    target: string;
     /**
      * The offset in x direction
      */

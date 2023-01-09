@@ -1,3 +1,8 @@
+import { CanvasBezierSegmentLayoutConfig } from "./elements/canvas/canvasBezierSegmentLayoutConfig";
+import { CanvasConnectionLayoutConfig } from "./elements/canvas/canvasConnectionLayoutConfig";
+import { CanvasElementLayoutConfig } from "./elements/canvas/canvasElementLayoutConfig";
+import { CanvasLayoutConfig } from "./elements/canvas/canvasLayoutConfig";
+import { CanvasLineSegmentLayoutConfig } from "./elements/canvas/canvasLineSegmentLayoutConfig";
 import { HBoxLayoutConfig } from "./elements/hboxLayoutConfig";
 import { RectLayoutConfig } from "./elements/rectLayoutConfig";
 import { SpanLayoutConfig } from "./elements/spanLayoutConfig";
@@ -13,5 +18,10 @@ export const layouts: LayoutElementConfig[] = [
     new VBoxLayoutConfig(),
     new HBoxLayoutConfig(),
     new TextLayoutConfig(),
-    new SpanLayoutConfig()
+    new SpanLayoutConfig(),
+    new CanvasLayoutConfig(),
+    new CanvasElementLayoutConfig(),
+    new CanvasConnectionLayoutConfig(),
+    new CanvasLineSegmentLayoutConfig(),
+    new CanvasBezierSegmentLayoutConfig()
 ];

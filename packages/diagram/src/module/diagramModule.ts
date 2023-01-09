@@ -11,6 +11,7 @@ import {
     literal,
     namedType,
     nullType,
+    numberType,
     objectType,
     optional,
     or,
@@ -112,6 +113,13 @@ const fontType = objectType(
 );
 
 /**
+ * Type for any type of point
+ */
+export const canvasPointType = objectType(
+    new Map([[SemanticFieldNames.PROTO, objectType(new Map([["_type", literal("point")]]))]])
+);
+
+/**
  * Diagram module providing standard diagram UI elements
  */
 export const diagramModule: InterpreterModule = {
@@ -125,45 +133,87 @@ export const diagramModule: InterpreterModule = {
                 id(SemanticFieldNames.IT).assignField(config.type, createElementFunction(config))
             )
         ]).call(id(SemanticFieldNames.THIS)),
-        assign(
-            "point",
-            fun(
-                `
-                    (x, y) = args
-                    object(x = x, y = y)
-                `,
-                {
-                    docs: `
-                        Creates a new absolute point
-                        Params:
-                            - 0: the x coordinate
-                            - 1: the y coordinate
-                        Returns:
-                            The created point (x,y)
+        fun([
+            assign("pointProto", id("object").call({ name: "_type", value: str("point") })),
+            id(SemanticFieldNames.IT).assignField(
+                "point",
+                fun(
                     `
-                }
-            )
-        ),
-        assign(
-            "relative",
-            fun(
-                `
-                    (target, x, y) = args
-                    object(target = target, x = x, y = y)
-                `,
-                {
-                    docs: `
-                        Creates a new relative point
-                        Params:
-                            - 0: the target point of which the relative point is based
-                            - 1: the x offset
-                            - 2: the y offset
-                        Returns:
-                            The created point (targex,x,y)
+                        (x, y) = args
+                        object(x = x, y = y, type = "absolutePoint", proto = pointProto)
+                    `,
+                    {
+                        docs: `
+                            Creates a new absolute point
+                            Params:
+                                - 0: the x coordinate
+                                - 1: the y coordinate
+                            Returns:
+                                The created point (x,y)
+                        `
+                    },
+                    [
+                        [0, numberType],
+                        [1, numberType]
+                    ]
+                )
+            ),
+            id(SemanticFieldNames.IT).assignField(
+                "relativePoint",
+                fun(
                     `
-                }
+                        (target, offsetX, offsetY) = args
+                        object(target = target, offsetX = offsetX, offsetY = offsetY, type = "relativePoint", proto = pointProto)
+                    `,
+                    {
+                        docs: `
+                            Creates a new relative point
+                            Params:
+                                - 0: the target point of which the relative point is based
+                                - 1: the x offset
+                                - 2: the y offset
+                            Returns:
+                                The created relative point
+                        `
+                    },
+                    [
+                        [0, canvasPointType],
+                        [1, numberType],
+                        [2, numberType]
+                    ]
+                )
+            ),
+            id(SemanticFieldNames.IT).assignField(
+                "linePoint",
+                fun(
+                    `
+                        (lineProvider, position) = args
+                        object(lineProvider = lineProvider, position = position, type = "linePoint", proto = pointProto)
+                    `,
+                    {
+                        docs: `
+                            Creates a new relative point
+                            Params:
+                                - 0: the target point of which the relative point is based
+                                - 1: the relative offset on the line, must be between 0 and 1 (inclusive)
+                            Returns:
+                                The created line point
+                        `
+                    },
+                    [
+                        [
+                            0,
+                            objectType(
+                                new Map([
+                                    [SemanticFieldNames.PROTO, objectType(new Map([["_type", literal("element")]]))]
+                                ])
+                            )
+                        ],
+                        [1, numberType]
+                    ]
+                )
             )
-        ),
+        ]).call(id(SemanticFieldNames.THIS)),
         assign(
             "styles",
             fun([
