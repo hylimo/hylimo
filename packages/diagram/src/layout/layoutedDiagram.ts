@@ -1,4 +1,4 @@
-import { Root } from "../model/root";
+import { Root } from "@hylimo/diagram-common";
 import { LayoutElement } from "./layoutElement";
 
 /**

@@ -1,5 +1,5 @@
 import { FontConfig, FontFamilyConfig } from "@hylimo/diagram";
-import { ModelIndexImpl, SGraphIndex, ViewportRootElement } from "sprotty";
+import { ModelIndexImpl, ViewportRootElement } from "sprotty";
 
 /**
  * Root element.

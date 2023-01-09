@@ -1,7 +1,6 @@
 import { FullObject } from "@hylimo/core";
-import { Element } from "../../model/base";
-import { Rect } from "../../model/model";
-import { LayoutElement, SizeConstraints, Size, Position, addToConstraints, addToSize } from "../layoutElement";
+import { Element, Size, Rect, Point } from "@hylimo/diagram-common";
+import { LayoutElement, SizeConstraints, addToConstraints, addToSize } from "../layoutElement";
 import { Layout } from "../layoutEngine";
 import { ContentShapeLayoutConfig } from "./contentShapeLayoutConfig";
 
@@ -31,7 +30,7 @@ export class RectLayoutConfig extends ContentShapeLayoutConfig {
         }
     }
 
-    override layout(layout: Layout, element: LayoutElement, position: Position, size: Size, id: string): Element[] {
+    override layout(layout: Layout, element: LayoutElement, position: Point, size: Size, id: string): Element[] {
         const result: Rect = {
             type: "rect",
             id,

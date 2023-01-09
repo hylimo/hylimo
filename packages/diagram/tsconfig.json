@@ -7,8 +7,10 @@
     "references": [
         {
             "path": "../core"
+        }, {
+            "path": "../diagram-common"
         }
     ],
-    "include": ["src/**/*.ts", "src/**/*.d.ts", "types/*.d.ts"],
+    "include": ["src/**/*.ts", "src/**/*.d.ts", "types/*.d.ts", "../diagram-common/src/font/font.ts"],
     "exclude": ["lib", "node_modules"]
 }

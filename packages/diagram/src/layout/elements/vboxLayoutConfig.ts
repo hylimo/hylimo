@@ -1,5 +1,5 @@
-import { Element } from "../../model/base";
-import { LayoutElement, Position, Size, SizeConstraints } from "../layoutElement";
+import { Element, Point, Size } from "@hylimo/diagram-common";
+import { LayoutElement, SizeConstraints } from "../layoutElement";
 import { Layout } from "../layoutEngine";
 import { PanelLayoutConfig } from "./panelLayoutConfig";
 
@@ -38,7 +38,7 @@ export class VBoxLayoutConfig extends PanelLayoutConfig {
         }
     }
 
-    override layout(layout: Layout, element: LayoutElement, position: Position, size: Size, id: string): Element[] {
+    override layout(layout: Layout, element: LayoutElement, position: Point, size: Size, id: string): Element[] {
         const elements: Element[] = [];
         const contents = element.contents as LayoutElement[];
         let y = position.y;

@@ -1,20 +1,6 @@
 import { FieldEntry, FullObject, Type } from "@hylimo/core";
-import { Element } from "../model/base";
-import { Root } from "../model/root";
+import { Element, Point, Size } from "@hylimo/diagram-common";
 import { Layout } from "./layoutEngine";
-
-/**
- * Simple size interface with a width and a height
- */
-export interface Size {
-    width: number;
-    height: number;
-}
-
-export interface Point {
-    x: number;
-    y: number;
-}
 
 /**
  * Size constraints from min to max size
@@ -70,11 +56,6 @@ export function matchToConstraints(size: Size, constraints: SizeConstraints): Si
         height: Math.min(Math.max(constraints.min.height, size.height), constraints.max.height)
     };
 }
-
-/**
- * Simple position interface consisting of an x and y coordinate
- */
-export type Position = Point;
 
 /**
  * Controls the horizontal alignment of an element
@@ -215,5 +196,5 @@ export interface LayoutElementConfig {
      * @param id the id of the element
      * @returns the rendered element
      */
-    layout(layout: Layout, element: LayoutElement, position: Position, size: Size, id: string): Element[];
+    layout(layout: Layout, element: LayoutElement, position: Point, size: Size, id: string): Element[];
 }

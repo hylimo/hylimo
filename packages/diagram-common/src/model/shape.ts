@@ -1,15 +1,4 @@
-import { SModelElement } from "sprotty-protocol";
-import { Point, Size } from "../layout/layoutElement";
-
-/**
- * Base class for all elements
- */
-export interface Element extends SModelElement, Point, Size {
-    /**
-     * Child elementes
-     */
-    children: Element[];
-}
+import { Element } from "./element";
 
 /**
  * An element which displays some graphics

@@ -1,5 +1,5 @@
-import { FontFamily } from "./font";
-import { FontFamilyConfig, FontConfig } from "./fontConfig";
+import { FontFamily } from "../../../diagram-common/src/font/font";
+import { FontFamilyConfig, FontConfig } from "@hylimo/diagram-common";
 import { Font, create } from "fontkit";
 import axios from "axios";
 

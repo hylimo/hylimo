@@ -1,6 +1,6 @@
 import { listType, optional, stringType } from "@hylimo/core";
-import { Element } from "../../model/base";
-import { LayoutElement, LayoutElementConfig, Position, Size, SizeConstraints, AttributeConfig } from "../layoutElement";
+import { Element, Point, Size } from "@hylimo/diagram-common";
+import { LayoutElement, LayoutElementConfig, SizeConstraints, AttributeConfig } from "../layoutElement";
 import { Layout } from "../layoutEngine";
 
 /**
@@ -53,5 +53,5 @@ export abstract class BaseElementLayoutConfig implements LayoutElementConfig {
      * @param id the id of the element
      * @returns the rendered element
      */
-    abstract layout(layout: Layout, element: LayoutElement, position: Position, size: Size, id: string): Element[];
+    abstract layout(layout: Layout, element: LayoutElement, position: Point, size: Size, id: string): Element[];
 }

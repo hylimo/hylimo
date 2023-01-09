@@ -1,8 +1,6 @@
 import { FullObject, listType, literal, objectToList, objectType, SemanticFieldNames } from "@hylimo/core";
-import { Point } from "sprotty-protocol";
-import { Element } from "../../model/base";
-import { Text } from "../../model/model";
-import { LayoutElement, Size, SizeConstraints } from "../layoutElement";
+import { Element, Size, Point, Text } from "@hylimo/diagram-common";
+import { LayoutElement, SizeConstraints } from "../layoutElement";
 import { Layout } from "../layoutEngine";
 import { StyledElementLayoutConfig } from "./styledElementLayoutConfig";
 

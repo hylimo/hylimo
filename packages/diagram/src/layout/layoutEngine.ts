@@ -1,10 +1,9 @@
 import { FullObject, nativeToList } from "@hylimo/core";
 import { assertString } from "@hylimo/core";
-import { FontFamily } from "../font/font";
-import { FontFamilyConfig } from "../font/fontConfig";
+import { FontFamily } from "../../../diagram-common/src/font/font";
+import { FontFamilyConfig, Element, Size, Point } from "@hylimo/diagram-common";
 import { FontManager } from "../font/fontManager";
 import { TextLayouter } from "../font/textLayouter";
-import { Element } from "../model/base";
 import { generateStyles, Selector, SelectorType, Style, StyleList } from "../styles";
 import { LayoutedDiagram } from "./layoutedDiagram";
 import {
@@ -14,8 +13,6 @@ import {
     LayoutElementConfig,
     LayoutInformation,
     matchToConstraints,
-    Position,
-    Size,
     SizeConstraints,
     VerticalAlignment
 } from "./layoutElement";
@@ -272,7 +269,7 @@ export class Layout {
      * @param id the id of the element
      * @returns the layouted element
      */
-    layout(element: LayoutElement, position: Position, size: Size, id: string): Element[] {
+    layout(element: LayoutElement, position: Point, size: Size, id: string): Element[] {
         const styles = element.styles;
         const horizontalAlignment = styles.hAlign;
         const verticalAlignment = styles.vAlign;
