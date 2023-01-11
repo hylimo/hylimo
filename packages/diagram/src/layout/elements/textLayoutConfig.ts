@@ -10,7 +10,7 @@ import { StyledElementLayoutConfig } from "./styledElementLayoutConfig";
 export class TextLayoutConfig extends StyledElementLayoutConfig {
     constructor() {
         super(
-            "text",
+            Text.TYPE,
             [
                 {
                     name: "contents",

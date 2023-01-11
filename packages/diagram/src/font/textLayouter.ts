@@ -62,7 +62,7 @@ export class TextLayouter {
             currentAscent = Math.max(currentAscent, fontAscent);
             currentDescent = Math.max(currentDescent, fontDescent);
             currentTextElements.push({
-                type: "text",
+                type: Text.TYPE,
                 text,
                 fill: styles.fill,
                 fontFamily: styles.fontFamily,

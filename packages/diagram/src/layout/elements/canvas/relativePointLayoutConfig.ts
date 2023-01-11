@@ -11,7 +11,7 @@ import { CanvasPointLayoutConfig } from "./canvasPointLayoutConfig";
 export class RelativePointLayoutConfig extends CanvasPointLayoutConfig {
     constructor() {
         super(
-            "relativePoint",
+            RelativePoint.TYPE,
             [
                 {
                     name: "xOffset",
@@ -43,7 +43,7 @@ export class RelativePointLayoutConfig extends CanvasPointLayoutConfig {
             element.element.getLocalFieldOrUndefined("target")!.value as FullObject
         );
         const result: RelativePoint = {
-            type: "relativePoint",
+            type: RelativePoint.TYPE,
             id,
             offsetX: xOffsetFieldEntry?.value?.toNative(),
             offsetY: yOffsetFieldEntry?.value.toNative(),

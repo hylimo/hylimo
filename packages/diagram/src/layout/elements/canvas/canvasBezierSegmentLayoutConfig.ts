@@ -10,7 +10,7 @@ import { CanvasConnectionSegmentLayoutConfig } from "./canvasConnectionSegmentLa
 export class CanvasBezierSegmentLayoutConfig extends CanvasConnectionSegmentLayoutConfig {
     constructor() {
         super(
-            "canvasLineSegment",
+            CanvasBezierSegment.TYPE,
             [
                 {
                     name: "startControlPoint",
@@ -30,7 +30,7 @@ export class CanvasBezierSegmentLayoutConfig extends CanvasConnectionSegmentLayo
     override layout(layout: Layout, element: LayoutElement, position: Point, size: Size, id: string): Element[] {
         const result: CanvasBezierSegment = {
             id,
-            type: "canvasBezierSegment",
+            type: CanvasBezierSegment.TYPE,
             children: [],
             start: this.getPoint(element, "start"),
             end: this.getPoint(element, "end"),

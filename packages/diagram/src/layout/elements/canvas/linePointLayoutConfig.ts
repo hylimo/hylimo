@@ -11,7 +11,7 @@ import { CanvasPointLayoutConfig } from "./canvasPointLayoutConfig";
 export class LinePointLayoutConfig extends CanvasPointLayoutConfig {
     constructor() {
         super(
-            "absolutePoint",
+            LinePoint.TYPE,
             [
                 {
                     name: "position",
@@ -37,7 +37,7 @@ export class LinePointLayoutConfig extends CanvasPointLayoutConfig {
             element.element.getLocalFieldOrUndefined("lineProvider")!.value as FullObject
         );
         const result: LinePoint = {
-            type: "linePoint",
+            type: LinePoint.TYPE,
             id,
             position: positionFieldEntry?.value?.toNative(),
             lineProvider,

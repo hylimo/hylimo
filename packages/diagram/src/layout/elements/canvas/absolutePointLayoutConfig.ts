@@ -11,7 +11,7 @@ import { CanvasPointLayoutConfig } from "./canvasPointLayoutConfig";
 export class AbsolutePointLayoutConfig extends CanvasPointLayoutConfig {
     constructor() {
         super(
-            "absolutePoint",
+            AbsolutePoint.TYPE,
             [
                 {
                     name: "x",
@@ -32,7 +32,7 @@ export class AbsolutePointLayoutConfig extends CanvasPointLayoutConfig {
         const xFieldEntry = element.element.getLocalFieldOrUndefined("x");
         const yFieldEntry = element.element.getLocalFieldOrUndefined("y");
         const result: AbsolutePoint = {
-            type: "absolutePoint",
+            type: AbsolutePoint.TYPE,
             id,
             x: xFieldEntry?.value?.toNative(),
             y: yFieldEntry?.value.toNative(),

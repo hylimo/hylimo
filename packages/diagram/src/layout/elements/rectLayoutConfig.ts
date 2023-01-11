@@ -9,7 +9,7 @@ import { ContentShapeLayoutConfig } from "./contentShapeLayoutConfig";
  */
 export class RectLayoutConfig extends ContentShapeLayoutConfig {
     constructor() {
-        super("rect", [], []);
+        super(Rect.TYPE, [], []);
     }
 
     override measure(layout: Layout, element: LayoutElement, constraints: SizeConstraints): Size {
@@ -32,7 +32,7 @@ export class RectLayoutConfig extends ContentShapeLayoutConfig {
 
     override layout(layout: Layout, element: LayoutElement, position: Point, size: Size, id: string): Element[] {
         const result: Rect = {
-            type: "rect",
+            type: Rect.TYPE,
             id,
             ...position,
             ...size,

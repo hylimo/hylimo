@@ -5,7 +5,23 @@ import { Element } from "../base/element";
  * Must only have CanvasConnectionSegment
  */
 export interface CanvasConnection extends Element {
-    type: "canvasConnection";
+    type: typeof CanvasConnection.TYPE;
+}
+
+export namespace CanvasConnection {
+    /**
+     * Type associated with CanvasConnection
+     */
+    export const TYPE = "canvasConnection";
+
+    /**
+     * Checks if an element is a CanvasConnection
+     * @param value
+     * @returns
+     */
+    export function isCanvasConnection(value: Element): value is CanvasConnection {
+        return value.type === TYPE;
+    }
 }
 
 /**
@@ -15,7 +31,7 @@ export interface CanvasConnectionSegment extends Element {
     /**
      * The type of the segment
      */
-    type: "canvasLineSegment" | "canvasBezierSegment";
+    type: typeof CanvasLineSegment.TYPE | typeof CanvasBezierSegment.TYPE;
     /**
      * The id of the start point
      */
@@ -30,14 +46,30 @@ export interface CanvasConnectionSegment extends Element {
  * Direct line connection segment
  */
 export interface CanvasLineSegment extends CanvasConnectionSegment {
-    type: "canvasLineSegment";
+    type: typeof CanvasLineSegment.TYPE;
+}
+
+export namespace CanvasLineSegment {
+    /**
+     * Type associated with CanvasLineSegment
+     */
+    export const TYPE = "canvasLineSegment";
+
+    /**
+     * Checks if an element is a CanvasLineSegment
+     * @param value
+     * @returns
+     */
+    export function isCanvasLineSegment(value: Element): value is CanvasLineSegment {
+        return value.type === TYPE;
+    }
 }
 
 /**
  * Cubic bezier connection segment
  */
 export interface CanvasBezierSegment extends CanvasConnectionSegment {
-    type: "canvasBezierSegment";
+    type: typeof CanvasBezierSegment.TYPE;
     /**
      * The id of the start control point
      */
@@ -46,4 +78,20 @@ export interface CanvasBezierSegment extends CanvasConnectionSegment {
      * The id of the end control point
      */
     endControlPoint: string;
+}
+
+export namespace CanvasBezierSegment {
+    /**
+     * Type associated with CanvasBezierSegment
+     */
+    export const TYPE = "canvasBezierSegment";
+
+    /**
+     * Checks if an element is a CanvasBezierSegment
+     * @param value
+     * @returns
+     */
+    export function isCanvasBezierSegment(value: Element): value is CanvasBezierSegment {
+        return value.type === TYPE;
+    }
 }

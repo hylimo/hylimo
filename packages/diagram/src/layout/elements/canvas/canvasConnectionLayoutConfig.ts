@@ -8,7 +8,7 @@ import { CanvasContentLayoutConfig } from "./canvasContentLayoutConfig";
 export class CanvasConnectionLayoutConfig extends CanvasContentLayoutConfig {
     constructor() {
         super(
-            "canvasConnection",
+            CanvasConnection.TYPE,
             [
                 {
                     name: "contents",
@@ -36,7 +36,7 @@ export class CanvasConnectionLayoutConfig extends CanvasContentLayoutConfig {
         const contents = element.contents as LayoutElement[];
         const result: CanvasConnection = {
             id,
-            type: "canvasConnection",
+            type: CanvasConnection.TYPE,
             children: contents.flatMap((content, i) =>
                 layout.layout(content, position, content.measuredSize!, `${id}_${i}`)
             )

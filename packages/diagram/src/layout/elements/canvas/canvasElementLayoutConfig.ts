@@ -10,7 +10,7 @@ import { CanvasContentLayoutConfig } from "./canvasContentLayoutConfig";
 export class CanvasElementLayoutConfig extends CanvasContentLayoutConfig {
     constructor() {
         super(
-            "canvasElement",
+            CanvasElement.TYPE,
             [
                 {
                     name: "content",
@@ -35,7 +35,7 @@ export class CanvasElementLayoutConfig extends CanvasContentLayoutConfig {
         const content = element.content as LayoutElement;
         const result: CanvasElement = {
             id,
-            type: "canvasElement",
+            type: CanvasElement.TYPE,
             ...size,
             children: layout.layout(content, { x: 0, y: 0 }, size, `${id}_0`),
             position: this.getContentId(

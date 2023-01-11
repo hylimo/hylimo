@@ -1,3 +1,4 @@
+import { Element } from "../base/element";
 import { LayoutedElement } from "../base/layoutedElement";
 
 /**
@@ -5,5 +6,21 @@ import { LayoutedElement } from "../base/layoutedElement";
  * Must have only CanvasElement and CanvasConnection as children
  */
 export interface Canvas extends LayoutedElement {
-    type: "canvas";
+    type: typeof Canvas.TYPE;
+}
+
+export namespace Canvas {
+    /**
+     * Type associated with Canvas
+     */
+    export const TYPE = "canvas";
+
+    /**
+     * Checks if an element is a Canvas
+     * @param value
+     * @returns
+     */
+    export function isCanvas(value: Element): value is Canvas {
+        return value.type === TYPE;
+    }
 }

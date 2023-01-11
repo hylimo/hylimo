@@ -8,13 +8,13 @@ import { CanvasConnectionSegmentLayoutConfig } from "./canvasConnectionSegmentLa
  */
 export class CanvasLineSegmentLayoutConfig extends CanvasConnectionSegmentLayoutConfig {
     constructor() {
-        super("canvasLineSegment", [], []);
+        super(CanvasLineSegment.TYPE, [], []);
     }
 
     override layout(layout: Layout, element: LayoutElement, position: Point, size: Size, id: string): Element[] {
         const result: CanvasLineSegment = {
             id,
-            type: "canvasLineSegment",
+            type: CanvasLineSegment.TYPE,
             children: [],
             start: this.getPoint(element, "start"),
             end: this.getPoint(element, "end")

@@ -1,3 +1,4 @@
+import { Element } from "./base/element";
 import { LayoutedElement } from "./base/layoutedElement";
 
 /**
@@ -5,7 +6,7 @@ import { LayoutedElement } from "./base/layoutedElement";
  * Always rendered in a single line
  */
 export interface Text extends LayoutedElement {
-    type: "text";
+    type: typeof Text.TYPE;
     /**
      * The text to display
      */
@@ -30,4 +31,20 @@ export interface Text extends LayoutedElement {
      * normal or italic style
      */
     fontStyle: "normal" | "italic";
+}
+
+export namespace Text {
+    /**
+     * Type associated with Text
+     */
+    export const TYPE = "text";
+
+    /**
+     * Checks if an element is a Text
+     * @param value
+     * @returns
+     */
+    export function isText(value: Element): value is Text {
+        return value.type === TYPE;
+    }
 }

@@ -18,7 +18,7 @@ import { StyledElementLayoutConfig } from "../styledElementLayoutConfig";
 export class CanvasLayoutConfig extends StyledElementLayoutConfig {
     constructor() {
         super(
-            "canvas",
+            Canvas.TYPE,
             [
                 {
                     name: "contents",
@@ -51,7 +51,7 @@ export class CanvasLayoutConfig extends StyledElementLayoutConfig {
         }
         element.contentIdLookup = contentIdLookup;
         const result: Canvas = {
-            type: "canvas",
+            type: Canvas.TYPE,
             id,
             ...position,
             ...size,
