@@ -30,4 +30,13 @@ export namespace CanvasElement {
     export function isCanvasElement(value: Element): value is CanvasElement {
         return value.type === TYPE;
     }
+
+    /**
+     * Gets the dependencies required for layouting
+     * @param element the element to get the dependencies of
+     * @returns the list of dependencies, may contain duplicates
+     */
+    export function getDependencies(element: CanvasElement): string[] {
+        return [element.position];
+    }
 }

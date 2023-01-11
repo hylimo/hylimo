@@ -22,6 +22,23 @@ export namespace CanvasConnection {
     export function isCanvasConnection(value: Element): value is CanvasConnection {
         return value.type === TYPE;
     }
+
+    /**
+     * Gets the dependencies required for layouting
+     * @param element the element to get the dependencies of
+     * @returns the list of dependencies, may contain duplicates
+     */
+    export function getDependencies(element: CanvasConnection): string[] {
+        return element.children.flatMap((segment) => {
+            if (CanvasLineSegment.isCanvasLineSegment(segment)) {
+                return CanvasLineSegment.getDependencies(segment);
+            } else if (CanvasBezierSegment.isCanvasBezierSegment(segment)) {
+                return CanvasBezierSegment.getDependencies(segment);
+            } else {
+                throw new Error(`Unknown CanvasConnectionSegment: ${segment.type}`);
+            }
+        });
+    }
 }
 
 /**
@@ -63,6 +80,15 @@ export namespace CanvasLineSegment {
     export function isCanvasLineSegment(value: Element): value is CanvasLineSegment {
         return value.type === TYPE;
     }
+
+    /**
+     * Gets the dependencies required for layouting
+     * @param element the element to get the dependencies of
+     * @returns the list of dependencies, may contain duplicates
+     */
+    export function getDependencies(element: CanvasLineSegment): string[] {
+        return [element.start, element.end];
+    }
 }
 
 /**
@@ -93,5 +119,14 @@ export namespace CanvasBezierSegment {
      */
     export function isCanvasBezierSegment(value: Element): value is CanvasBezierSegment {
         return value.type === TYPE;
+    }
+
+    /**
+     * Gets the dependencies required for layouting
+     * @param element the element to get the dependencies of
+     * @returns the list of dependencies, may contain duplicates
+     */
+    export function getDependencies(element: CanvasBezierSegment): string[] {
+        return [element.start, element.end, element.startControlPoint, element.endControlPoint];
     }
 }

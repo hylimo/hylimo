@@ -32,6 +32,15 @@ export namespace AbsolutePoint {
     export function isAbsolutePoint(value: Element): value is AbsolutePoint {
         return value.type === TYPE;
     }
+
+    /**
+     * Gets the dependencies required for layouting
+     * @param element the element to get the dependencies of
+     * @returns the list of dependencies, may contain duplicates
+     */
+    export function getDependencies(element: AbsolutePoint): string[] {
+        return [];
+    }
 }
 
 /**
@@ -67,6 +76,15 @@ export namespace RelativePoint {
     export function isRelativePoint(value: Element): value is RelativePoint {
         return value.type === TYPE;
     }
+
+    /**
+     * Gets the dependencies required for layouting
+     * @param element the element to get the dependencies of
+     * @returns the list of dependencies, may contain duplicates
+     */
+    export function getDependencies(element: RelativePoint): string[] {
+        return [element.target];
+    }
 }
 
 /**
@@ -97,5 +115,14 @@ export namespace LinePoint {
      */
     export function isLinePoint(value: Element): value is LinePoint {
         return value.type === TYPE;
+    }
+
+    /**
+     * Gets the dependencies required for layouting
+     * @param element the element to get the dependencies of
+     * @returns the list of dependencies, may contain duplicates
+     */
+    export function getDependencies(element: LinePoint): string[] {
+        return [element.lineProvider];
     }
 }
