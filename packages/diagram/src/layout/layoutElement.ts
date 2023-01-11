@@ -136,7 +136,7 @@ export interface LayoutElement {
     /**
      * Helper for layouting
      */
-    layoutConfig: LayoutElementConfig;
+    layoutConfig: LayoutConfig;
     /**
      * Set of classes
      */
@@ -164,7 +164,7 @@ export interface AttributeConfig {
 /**
  * Interface defining how to layout a UI element
  */
-export interface LayoutElementConfig {
+export interface LayoutConfig {
     /**
      * What type of element is supported
      */

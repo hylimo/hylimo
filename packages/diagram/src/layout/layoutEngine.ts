@@ -10,7 +10,7 @@ import {
     addToSize,
     HorizontalAlignment,
     LayoutElement,
-    LayoutElementConfig,
+    LayoutConfig,
     LayoutInformation,
     matchToConstraints,
     SizeConstraints,
@@ -25,7 +25,7 @@ export class LayoutEngine {
     /**
      * Lookup for layout configs
      */
-    readonly layoutConfigs: Map<string, LayoutElementConfig> = new Map();
+    readonly layoutConfigs: Map<string, LayoutConfig> = new Map();
 
     /**
      * Used to get fonts

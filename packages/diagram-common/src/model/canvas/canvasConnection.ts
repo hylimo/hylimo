@@ -1,4 +1,4 @@
-import { Element } from "../element";
+import { Element } from "../base/element";
 
 /**
  * Connection on a Canvas with an arbitrary amount of segments

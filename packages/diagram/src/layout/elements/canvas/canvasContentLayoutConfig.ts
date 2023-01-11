@@ -1,27 +1,27 @@
 import { FullObject, RuntimeError } from "@hylimo/core";
 import { LayoutElement } from "../../layoutElement";
-import { StyledElementLayoutConfig } from "../styledElementLayoutConfig";
+import { ElementLayoutConfig } from "../elementLayoutConfig";
 
 /**
  * Base class for CanvasElementLayoutConfig and CanvasConnectionLayoutConfig
  */
-export abstract class CanvasContentLayoutConfig extends StyledElementLayoutConfig {
+export abstract class CanvasContentLayoutConfig extends ElementLayoutConfig {
     /**
-     * Gets the id of a point registered on the canvas
+     * Gets the id of a content element of the canvas
      *
      * @param element the current element, its parent must be a point provider (e.g. Canvas)
-     * @param point the point to get the id of
-     * @returns the id of the point
+     * @param contentElement the content element to get the id of
+     * @returns the id of the content element
      */
-    getPoint(element: LayoutElement, point: FullObject): string {
+    getContentId(element: LayoutElement, contentElement: FullObject): string {
         const parent = element.parent;
         if (!parent || !parent.points) {
             throw new RuntimeError("CanvasConnections and CanvasElements can only be used as contents of a Canvas");
         }
-        const pointId = (parent.points as Map<FullObject, string>).get(point);
-        if (!pointId) {
+        const elementId = (parent.contentIdLookup as Map<FullObject, string>).get(contentElement);
+        if (!elementId) {
             throw new RuntimeError("Point not found");
         }
-        return pointId;
+        return elementId;
     }
 }

@@ -37,8 +37,6 @@ export class CanvasConnectionLayoutConfig extends CanvasContentLayoutConfig {
         const result: CanvasConnection = {
             id,
             type: "canvasConnection",
-            ...position,
-            ...size,
             children: contents.flatMap((content, i) =>
                 layout.layout(content, position, content.measuredSize!, `${id}_${i}`)
             )

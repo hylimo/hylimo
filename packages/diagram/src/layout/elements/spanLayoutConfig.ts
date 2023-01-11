@@ -2,12 +2,12 @@ import { literal, numberType, or, stringType } from "@hylimo/core";
 import { Element, Point, Size } from "@hylimo/diagram-common";
 import { LayoutElement, SizeConstraints } from "../layoutElement";
 import { Layout } from "../layoutEngine";
-import { BaseElementLayoutConfig } from "./baseElementLayoutConfig";
+import { ElementLayoutConfig } from "./elementLayoutConfig";
 
 /**
  * Layout config for span, does not handle actual layouting and measuring
  */
-export class SpanLayoutConfig extends BaseElementLayoutConfig {
+export class SpanLayoutConfig extends ElementLayoutConfig {
     /**
      * Creates a new SpanLayoutConfig
      */

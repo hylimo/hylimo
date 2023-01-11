@@ -1,10 +1,10 @@
-import { Element } from "./element";
+import { LayoutedElement } from "./base/layoutedElement";
 
 /**
  * Text element
  * Always rendered in a single line
  */
-export interface Text extends Element {
+export interface Text extends LayoutedElement {
     type: "text";
     /**
      * The text to display

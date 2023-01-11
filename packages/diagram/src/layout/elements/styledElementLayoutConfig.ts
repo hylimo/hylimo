@@ -1,11 +1,11 @@
 import { enumType, numberType } from "@hylimo/core";
 import { HorizontalAlignment, AttributeConfig, VerticalAlignment } from "../layoutElement";
-import { BaseElementLayoutConfig } from "./baseElementLayoutConfig";
+import { ElementLayoutConfig } from "./elementLayoutConfig";
 
 /**
- * Default style attributes
+ * Style attributes related to size
  */
-const defaultStyleAttributes = [
+export const sizeStyleAttributes = [
     { name: "width", description: "optional width of the element, must be a number", type: numberType },
     { name: "height", description: "optional height of the element, must be a number", type: numberType },
     { name: "minWidth", description: "optional minimal width of the element, must be a number", type: numberType },
@@ -19,7 +19,14 @@ const defaultStyleAttributes = [
         name: "maxHeight",
         description: "optional maximal height of the element, must be a number",
         type: numberType
-    },
+    }
+];
+
+/**
+ * Default style attributes
+ */
+const defaultStyleAttributes = [
+    ...sizeStyleAttributes,
     { name: "marginTop", description: "optional top margin of the element, must be a number", type: numberType },
     {
         name: "marginRight",
@@ -48,7 +55,7 @@ const defaultStyleAttributes = [
 /**
  * Layout config for elements with default styles (width, height, ...)
  */
-export abstract class StyledElementLayoutConfig extends BaseElementLayoutConfig {
+export abstract class StyledElementLayoutConfig extends ElementLayoutConfig {
     /**
      * Creates a new StyledElementLayoutConfig
      *

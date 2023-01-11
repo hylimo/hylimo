@@ -3,12 +3,12 @@ import { Size } from "@hylimo/diagram-common";
 import { canvasPointType } from "../../../module/diagramModule";
 import { AttributeConfig, LayoutElement, SizeConstraints } from "../../layoutElement";
 import { Layout } from "../../layoutEngine";
-import { BaseElementLayoutConfig } from "../baseElementLayoutConfig";
+import { ElementLayoutConfig } from "../elementLayoutConfig";
 
 /**
  * Base class for all canvas connection segment layout configs
  */
-export abstract class CanvasConnectionSegmentLayoutConfig extends BaseElementLayoutConfig {
+export abstract class CanvasConnectionSegmentLayoutConfig extends ElementLayoutConfig {
     /**
      * Creates a new CanvasConnectionSegmentLayoutConfig
      *

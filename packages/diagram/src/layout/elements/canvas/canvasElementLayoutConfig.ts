@@ -36,10 +36,12 @@ export class CanvasElementLayoutConfig extends CanvasContentLayoutConfig {
         const result: CanvasElement = {
             id,
             type: "canvasElement",
-            ...position,
             ...size,
             children: layout.layout(content, { x: 0, y: 0 }, size, `${id}_0`),
-            position: this.getPoint(element, element.element.getLocalFieldOrUndefined("position")?.value as FullObject),
+            position: this.getContentId(
+                element,
+                element.element.getLocalFieldOrUndefined("position")?.value as FullObject
+            ),
             resizable: true //TODO fix
         };
         return [result];

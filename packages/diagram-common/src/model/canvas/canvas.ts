@@ -1,13 +1,9 @@
-import { Element } from "../element";
-import { CanvasPoint } from "./canvasPoint";
+import { LayoutedElement } from "../base/layoutedElement";
 
 /**
  * Canvas consisting of points, elements and connections.
  * Must have only CanvasElement and CanvasConnection as children
  */
-export interface Canvas extends Element {
-    /**
-     * Named points used by its children
-     */
-    points: CanvasPoint[];
+export interface Canvas extends LayoutedElement {
+    type: "canvas";
 }

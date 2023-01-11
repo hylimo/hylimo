@@ -1,9 +1,9 @@
-import { Element } from "./element";
+import { LayoutedElement } from "./base/layoutedElement";
 
 /**
  * An element which displays some graphics
  */
-export interface Shape extends Element {
+export interface Shape extends LayoutedElement {
     /**
      * The color of the fill of the shape
      */

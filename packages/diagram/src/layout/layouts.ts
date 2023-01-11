@@ -8,12 +8,12 @@ import { RectLayoutConfig } from "./elements/rectLayoutConfig";
 import { SpanLayoutConfig } from "./elements/spanLayoutConfig";
 import { TextLayoutConfig } from "./elements/textLayoutConfig";
 import { VBoxLayoutConfig } from "./elements/vboxLayoutConfig";
-import { LayoutElementConfig } from "./layoutElement";
+import { LayoutConfig } from "./layoutElement";
 
 /**
  * Known layouts
  */
-export const layouts: LayoutElementConfig[] = [
+export const layouts: LayoutConfig[] = [
     new RectLayoutConfig(),
     new VBoxLayoutConfig(),
     new HBoxLayoutConfig(),

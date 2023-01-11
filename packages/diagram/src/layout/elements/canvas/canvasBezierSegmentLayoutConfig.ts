@@ -31,8 +31,6 @@ export class CanvasBezierSegmentLayoutConfig extends CanvasConnectionSegmentLayo
         const result: CanvasBezierSegment = {
             id,
             type: "canvasBezierSegment",
-            ...position,
-            ...size,
             children: [],
             start: this.getPoint(element, "start"),
             end: this.getPoint(element, "end"),

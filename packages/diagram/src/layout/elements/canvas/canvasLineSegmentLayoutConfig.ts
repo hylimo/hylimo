@@ -15,8 +15,6 @@ export class CanvasLineSegmentLayoutConfig extends CanvasConnectionSegmentLayout
         const result: CanvasLineSegment = {
             id,
             type: "canvasLineSegment",
-            ...position,
-            ...size,
             children: [],
             start: this.getPoint(element, "start"),
             end: this.getPoint(element, "end")

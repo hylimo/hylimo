@@ -1,12 +1,12 @@
 import { listType, optional, stringType } from "@hylimo/core";
 import { Element, Point, Size } from "@hylimo/diagram-common";
-import { LayoutElement, LayoutElementConfig, SizeConstraints, AttributeConfig } from "../layoutElement";
+import { LayoutElement, LayoutConfig, SizeConstraints, AttributeConfig } from "../layoutElement";
 import { Layout } from "../layoutEngine";
 
 /**
  * Base class for all layout element configs
  */
-export abstract class BaseElementLayoutConfig implements LayoutElementConfig {
+export abstract class ElementLayoutConfig implements LayoutConfig {
     /**
      * Supported non-style attributes
      */
