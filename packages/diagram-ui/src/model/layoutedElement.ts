@@ -4,7 +4,7 @@ import { Size, Point } from "@hylimo/diagram-common";
 /**
  * Base class for all elements
  */
-export abstract class SElement extends SChildElement implements Point, Size {
+export abstract class SLayoutedElement extends SChildElement implements Point, Size {
     /**
      * The width of the element
      */
@@ -21,4 +21,11 @@ export abstract class SElement extends SChildElement implements Point, Size {
      * The absolute y coordinate of the element
      */
     y!: number;
+}
+
+export namespace SLayoutedElement {
+    /**
+     * Default animated fields
+     */
+    export const defaultAnimatedFields = ["width", "height", "x", "y"];
 }

@@ -1,4 +1,4 @@
-import { SElement } from "../model/element";
+import { SLayoutedElement } from "../model/layoutedElement";
 import { SShape } from "../model/shape";
 
 /**
@@ -7,7 +7,12 @@ import { SShape } from "../model/shape";
  * @param model the model which provides the attributes
  * @returns the extracted attribzutes
  */
-export function extractLayoutAttributes(model: SElement): { x: number; y: number; width: number; height: number } {
+export function extractLayoutAttributes(model: SLayoutedElement): {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+} {
     return {
         x: model.x,
         y: model.y,

@@ -1,9 +1,16 @@
-import { SElement } from "./element";
+import { LinearAnimatable } from "../features/animation/model";
+import { SLayoutedElement } from "./layoutedElement";
+
+/**
+ * Animated fields for SText
+ */
+const textAnimatedFields = new Set(SLayoutedElement.defaultAnimatedFields);
 
 /**
  * Text model element
  */
-export class SText extends SElement {
+export class SText extends SLayoutedElement implements LinearAnimatable {
+    readonly animatedFields = textAnimatedFields;
     /**
      * The text to display
      */

@@ -1,9 +1,9 @@
-import { SElement } from "./element";
+import { SLayoutedElement } from "./layoutedElement";
 
 /**
  * Base class for all shapes
  */
-export abstract class SShape extends SElement {
+export abstract class SShape extends SLayoutedElement {
     /**
      * The color of the fill of the shape
      */
@@ -24,4 +24,16 @@ export abstract class SShape extends SElement {
      * The width of the stroke
      */
     strokeWidth!: number;
+}
+
+export namespace SShape {
+    /**
+     * Default animated fields
+     */
+    export const defaultAnimatedFields = [
+        ...SLayoutedElement.defaultAnimatedFields,
+        "strokeWidth",
+        "strokeOpacity",
+        "fillOpacity"
+    ];
 }
