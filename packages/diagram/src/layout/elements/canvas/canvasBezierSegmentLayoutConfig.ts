@@ -32,10 +32,10 @@ export class CanvasBezierSegmentLayoutConfig extends CanvasConnectionSegmentLayo
             id,
             type: CanvasBezierSegment.TYPE,
             children: [],
-            start: this.getPoint(element, "start"),
-            end: this.getPoint(element, "end"),
-            startControlPoint: this.getPoint(element, "startControlPoint"),
-            endControlPoint: this.getPoint(element, "endControlPoint")
+            start: this.getContentId(element, "start"),
+            end: this.getContentId(element, "end"),
+            startControlPoint: this.getContentId(element, "startControlPoint"),
+            endControlPoint: this.getContentId(element, "endControlPoint")
         };
         return [result];
     }

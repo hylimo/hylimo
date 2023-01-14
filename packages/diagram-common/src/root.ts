@@ -9,7 +9,7 @@ export interface Root extends SModelRoot {
     /**
      * Type of the element
      */
-    type: "root";
+    type: typeof Root.TYPE;
     /**
      * Child elementes
      */
@@ -18,4 +18,8 @@ export interface Root extends SModelRoot {
      * Defined font families
      */
     fonts: FontFamilyConfig[];
+}
+
+export namespace Root {
+    export const TYPE = "root";
 }

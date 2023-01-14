@@ -9,7 +9,7 @@ export interface CanvasElement extends SizedElement {
     /**
      * The id of the CanvasPoint which is used as start
      */
-    position: string;
+    pos: string;
     /**
      * If true, this is resizable
      */
@@ -37,6 +37,6 @@ export namespace CanvasElement {
      * @returns the list of dependencies, may contain duplicates
      */
     export function getDependencies(element: CanvasElement): string[] {
-        return [element.position];
+        return [element.pos];
     }
 }

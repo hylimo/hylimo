@@ -15,7 +15,7 @@ export abstract class CanvasContentLayoutConfig extends ElementLayoutConfig {
      */
     getContentId(element: LayoutElement, contentElement: FullObject): string {
         const parent = element.parent;
-        if (!parent || !parent.points) {
+        if (!parent || !parent.contentIdLookup) {
             throw new RuntimeError("CanvasConnections and CanvasElements can only be used as contents of a Canvas");
         }
         const elementId = (parent.contentIdLookup as Map<FullObject, string>).get(contentElement);

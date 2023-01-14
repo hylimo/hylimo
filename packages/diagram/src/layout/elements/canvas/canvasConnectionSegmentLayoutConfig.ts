@@ -1,4 +1,4 @@
-import { FullObject, RuntimeError } from "@hylimo/core";
+import { FullObject, numberType, RuntimeError, stringType } from "@hylimo/core";
 import { Size } from "@hylimo/diagram-common";
 import { canvasPointType } from "../../../module/diagramModule";
 import { AttributeConfig, LayoutElement, SizeConstraints } from "../../layoutElement";
@@ -32,7 +32,16 @@ export abstract class CanvasConnectionSegmentLayoutConfig extends ElementLayoutC
                 },
                 ...additionalAttributes
             ],
-            additionalStyleAttributes
+            [
+                { name: "stroke", description: "optional stroke, must be a valid color string", type: stringType },
+                {
+                    name: "stokeOpacity",
+                    description: "optional stroke opacity, must be a number between 0 and 1",
+                    type: numberType
+                },
+                { name: "strokeWidth", description: "optional width of the stroke", type: numberType },
+                ...additionalStyleAttributes
+            ]
         );
     }
 
@@ -47,12 +56,12 @@ export abstract class CanvasConnectionSegmentLayoutConfig extends ElementLayoutC
      * @param pointField the name of the field containing the point
      * @returns the id of the point
      */
-    getPoint(element: LayoutElement, pointField: string): string {
+    getContentId(element: LayoutElement, pointField: string): string {
         const parent = element.parent;
-        if (!parent || !parent.getPoint) {
+        if (!parent || !parent.getContentId) {
             throw new RuntimeError("CanvasConnections and CanvasElements can only be used as contents of a Canvas");
         }
         const point = element.element.getLocalFieldOrUndefined(pointField)?.value;
-        return parent.getPoint(element, point);
+        return parent.getContentId(element, point);
     }
 }

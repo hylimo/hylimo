@@ -18,6 +18,13 @@ export class CanvasElementLayoutConfig extends CanvasContentLayoutConfig {
                     type: objectType(
                         new Map([[SemanticFieldNames.PROTO, objectType(new Map([["_type", literal("element")]]))]])
                     )
+                },
+                {
+                    name: "pos",
+                    description: "the position of the canvasElement",
+                    type: objectType(
+                        new Map([[SemanticFieldNames.PROTO, objectType(new Map([["_type", literal("element")]]))]])
+                    )
                 }
             ],
             []
@@ -38,10 +45,7 @@ export class CanvasElementLayoutConfig extends CanvasContentLayoutConfig {
             type: CanvasElement.TYPE,
             ...size,
             children: layout.layout(content, { x: 0, y: 0 }, size, `${id}_0`),
-            position: this.getContentId(
-                element,
-                element.element.getLocalFieldOrUndefined("position")?.value as FullObject
-            ),
+            pos: this.getContentId(element, element.element.getLocalFieldOrUndefined("pos")?.value as FullObject),
             resizable: true //TODO fix
         };
         return [result];

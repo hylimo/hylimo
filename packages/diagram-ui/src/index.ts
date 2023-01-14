@@ -16,3 +16,5 @@ export * from "./views/attributeHelpers";
 export * from "./features/animation/linearInterpolationAnimation";
 export * from "./features/animation/model";
 export * from "./features/update/update-model";
+export * from "./features/layout/lineProvider";
+export * from "./features/layout/positionProvider";
