@@ -30,29 +30,6 @@ export class SRoot extends ViewportRootElement {
         g {
             --diagram-zoom: ${this.zoom};
         }
-        .selected-rect {
-            fill: var(--diagram-layout-color-overlay);
-            stroke: var(--diagram-layout-color-selected);
-            stroke-width: calc(5px / var(--diagram-zoom));
-            stroke-dasharray: calc(16px / var(--diagram-zoom));
-        }
-          
-        .canvas-point {
-            stroke-linecap: round;
-            stroke-width: calc(16px / var(--diagram-zoom));
-            stroke: var(--diagram-layout-color);
-        }
-          
-        .canvas-point.selected {
-            stroke: var(--diagram-layout-color-selected);
-        }
-          
-        .canvas-dependency-line {
-            stroke: var(--diagram-layout-color);
-            stroke-width: calc(2px / var(--diagram-zoom));
-            stroke-dasharray: calc(16px / var(--diagram-zoom));
-            fill: none;
-        }
         `;
         return (
             this.fonts
