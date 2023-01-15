@@ -7,10 +7,11 @@ import {
     RuntimeError,
     SemanticFieldNames
 } from "@hylimo/core";
-import { Size, Point, Element, Canvas } from "@hylimo/diagram-common";
+import { Size, Point, Element, Canvas, AbsolutePoint, RelativePoint, LinePoint } from "@hylimo/diagram-common";
 import { LayoutElement, SizeConstraints } from "../../layoutElement";
 import { Layout } from "../../layoutEngine";
 import { StyledElementLayoutConfig } from "../styledElementLayoutConfig";
+import { CanvasContentLayoutConfig } from "./canvasContentLayoutConfig";
 
 /**
  * Layout config for the canvas
@@ -50,14 +51,25 @@ export class CanvasLayoutConfig extends StyledElementLayoutConfig {
             contentIdLookup.set(contents[i].element, `${id}_${i}`);
         }
         element.contentIdLookup = contentIdLookup;
+        const children: Element[] = [];
+        const layoutChildren: Element[] = [];
+        for (const content of contents) {
+            if ((content.layoutConfig as CanvasContentLayoutConfig).isLayoutContent) {
+                layoutChildren.push(
+                    ...layout.layout(content, position, content.measuredSize!, contentIdLookup.get(content.element)!)
+                );
+            } else {
+                children.push(
+                    ...layout.layout(content, position, content.measuredSize!, contentIdLookup.get(content.element)!)
+                );
+            }
+        }
         const result: Canvas = {
             type: Canvas.TYPE,
             id,
             ...position,
             ...size,
-            children: contents.flatMap((content) =>
-                layout.layout(content, position, content.measuredSize!, contentIdLookup.get(content.element)!)
-            )
+            children: [...children, ...layoutChildren]
         };
         return [result];
     }

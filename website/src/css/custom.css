@@ -15,6 +15,10 @@
   --ifm-color-primary-lightest: #3cad6e;
   --ifm-code-font-size: 95%;
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+
+  --diagram-layout-color: var(--ifm-color-emphasis-700);
+  --diagram-layout-color-selected: #00c6f2;
+  --diagram-layout-color-overlay: #88888855;
 }
 
 /* For readability concerns, you should choose a lighter palette in dark mode. */
@@ -49,4 +53,30 @@
   flex: 1;
   border-style: none;
   border-width: 0px;
+}
+
+/* Custom layout styles */
+
+.selected-rect {
+  fill: var(--diagram-layout-color-overlay);
+  stroke: var(--diagram-layout-color-selected);
+  stroke-width: calc(5px / var(--diagram-zoom));
+  stroke-dasharray: calc(16px / var(--diagram-zoom));
+}
+
+.canvas-point {
+  stroke-linecap: round;
+  stroke-width: calc(16px / var(--diagram-zoom));
+  stroke: var(--diagram-layout-color);
+}
+
+.canvas-point.selected {
+  stroke: var(--diagram-layout-color-selected);
+}
+
+.canvas-dependency-line {
+  stroke: var(--diagram-layout-color);
+  stroke-width: calc(2px / var(--diagram-zoom));
+  stroke-dasharray: calc(16px / var(--diagram-zoom));
+  fill: none;
 }

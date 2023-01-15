@@ -7,6 +7,8 @@ import { CanvasContentLayoutConfig } from "./canvasContentLayoutConfig";
  * Base class for all point layout configs
  */
 export abstract class CanvasPointLayoutConfig extends CanvasContentLayoutConfig {
+    override isLayoutContent = true;
+
     override measure(layout: Layout, element: LayoutElement, constraints: SizeConstraints): Size {
         return constraints.min;
     }

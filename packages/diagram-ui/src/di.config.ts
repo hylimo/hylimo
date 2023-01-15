@@ -4,9 +4,13 @@ import {
     configureModelElement,
     loadDefaultModules,
     overrideViewerOptions,
-    updateModule as sprottyUpdateModule
+    selectFeature,
+    updateModule as sprottyUpdateModule,
+    moveModule as sprottyMoveModule,
+    zorderModule as sprottyZOrderModule
 } from "sprotty";
 import updateModule from "./features/update/di.config";
+import zorderModule from "./features/zorder/di.config";
 import { SAbsolutePoint } from "./model/canvas/absolutePoint";
 import { SCanvas } from "./model/canvas/canvas";
 import { SCanvasElement } from "./model/canvas/canvasElement";
@@ -32,9 +36,15 @@ const diagramModule = new ContainerModule((bind, unbind, isBound, rebind) => {
     configureModelElement(context, Rect.TYPE, SRect, RectView);
     configureModelElement(context, Text.TYPE, SText, TextView);
     configureModelElement(context, Canvas.TYPE, SCanvas, CanvasView);
-    configureModelElement(context, CanvasElement.TYPE, SCanvasElement, CanvasElementView);
-    configureModelElement(context, AbsolutePoint.TYPE, SAbsolutePoint, AbsolutePointView);
-    configureModelElement(context, RelativePoint.TYPE, SRelativePoint, RelativePointView);
+    configureModelElement(context, CanvasElement.TYPE, SCanvasElement, CanvasElementView, {
+        enable: [selectFeature]
+    });
+    configureModelElement(context, AbsolutePoint.TYPE, SAbsolutePoint, AbsolutePointView, {
+        enable: [selectFeature]
+    });
+    configureModelElement(context, RelativePoint.TYPE, SRelativePoint, RelativePointView, {
+        enable: [selectFeature]
+    });
 });
 
 /**
@@ -46,9 +56,9 @@ const diagramModule = new ContainerModule((bind, unbind, isBound, rebind) => {
 export function createContainer(widgetId: string): Container {
     const container = new Container();
     loadDefaultModules(container, {
-        exclude: [sprottyUpdateModule]
+        exclude: [sprottyUpdateModule, sprottyMoveModule, sprottyZOrderModule]
     });
-    container.load(updateModule);
+    container.load(updateModule, zorderModule);
     container.load(diagramModule);
 
     overrideViewerOptions(container, {

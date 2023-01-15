@@ -9,7 +9,11 @@ import { CanvasPointView } from "./canvasPoint";
  */
 @injectable()
 export class AbsolutePointView extends CanvasPointView<SAbsolutePoint> {
-    render(model: Readonly<SAbsolutePoint>, context: RenderingContext, args?: {} | undefined): VNode | undefined {
-        return this.renderPoint(model, context);
+    renderInternal(
+        model: Readonly<SAbsolutePoint>,
+        context: RenderingContext,
+        args?: {} | undefined
+    ): VNode | undefined {
+        return this.renderPoint(model, context, model.position);
     }
 }

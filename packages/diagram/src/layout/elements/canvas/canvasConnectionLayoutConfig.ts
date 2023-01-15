@@ -6,6 +6,8 @@ import { Layout } from "../../layoutEngine";
 import { CanvasContentLayoutConfig } from "./canvasContentLayoutConfig";
 
 export class CanvasConnectionLayoutConfig extends CanvasContentLayoutConfig {
+    override isLayoutContent = false;
+
     constructor() {
         super(
             CanvasConnection.TYPE,

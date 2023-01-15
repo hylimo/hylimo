@@ -7,6 +7,10 @@ import { ElementLayoutConfig } from "../elementLayoutConfig";
  */
 export abstract class CanvasContentLayoutConfig extends ElementLayoutConfig {
     /**
+     * True if is a layout element which should not be included in the final diagram
+     */
+    abstract isLayoutContent: boolean;
+    /**
      * Gets the id of a content element of the canvas
      *
      * @param element the current element, its parent must be a point provider (e.g. Canvas)

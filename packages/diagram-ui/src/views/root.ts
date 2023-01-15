@@ -19,6 +19,9 @@ export class SRootView implements IView {
                 {
                     attrs: {
                         transform
+                    },
+                    class: {
+                        "sprotty-root": true
                     }
                 },
                 ...context.renderChildren(model, undefined)

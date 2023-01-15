@@ -1,19 +1,27 @@
 import { Point } from "@hylimo/diagram-common";
+import { Selectable } from "sprotty";
 import { LinearAnimatable } from "../../features/animation/model";
 import { isPositionProvider, PositionProvider } from "../../features/layout/positionProvider";
-import { SSizedElement } from "../sizedElement";
 import { SCanvas } from "./canvas";
+import { SCanvasContent } from "./canvasContent";
 
 /**
  * Anbimated fields for SCanvasElement
  */
-const canvasElementAnimatedFields = new Set(SSizedElement.defaultAnimatedFields);
+const canvasElementAnimatedFields = new Set(["width", "height"]);
 
 /**
  * Model for CanvasElement
  */
-export class SCanvasElement extends SSizedElement implements PositionProvider, LinearAnimatable {
-    override parent!: SCanvas;
+export class SCanvasElement extends SCanvasContent implements PositionProvider, LinearAnimatable, Selectable {
+    /**
+     * The width of the element
+     */
+    width!: number;
+    /**
+     * The height of the element
+     */
+    height!: number;
     readonly animatedFields = canvasElementAnimatedFields;
     /**
      * The id of the CanvasPoint which is used as start

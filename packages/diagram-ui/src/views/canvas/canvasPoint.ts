@@ -1,6 +1,7 @@
+import { Point } from "@hylimo/diagram-common";
 import { injectable } from "inversify";
 import { VNode } from "snabbdom";
-import { IView, RenderingContext } from "sprotty";
+import { IView, RenderingContext, svg } from "sprotty";
 import { SCanvasPoint } from "../../model/canvas/canvasPoint";
 
 /**
@@ -8,7 +9,24 @@ import { SCanvasPoint } from "../../model/canvas/canvasPoint";
  */
 @injectable()
 export abstract class CanvasPointView<T extends SCanvasPoint> implements IView {
-    abstract render(model: Readonly<T>, context: RenderingContext, args?: {} | undefined): VNode | undefined;
+    render(model: Readonly<T>, context: RenderingContext, args?: {} | undefined): VNode | undefined {
+        if (model.isVisible) {
+            return this.renderInternal(model, context, args);
+        } else {
+            return undefined;
+        }
+    }
+
+    /**
+     * Renders the point, should be overwritten instead of render.
+     * Only called if the point is visible
+     *
+     * @param model the point to render
+     * @param context rendering context
+     * @param args rendering args
+     * @returns the rendered point
+     */
+    abstract renderInternal(model: Readonly<T>, context: RenderingContext, args?: {} | undefined): VNode | undefined;
 
     /**
      * Can be used to render the point itself.
@@ -18,7 +36,15 @@ export abstract class CanvasPointView<T extends SCanvasPoint> implements IView {
      * @param context rendering context
      * @returns the rendered point
      */
-    protected renderPoint(model: Readonly<T>, context: RenderingContext): VNode | undefined {
-        return undefined;
+    protected renderPoint(model: Readonly<T>, context: RenderingContext, position: Point): VNode | undefined {
+        return svg("line", {
+            attrs: {
+                transform: `translate(${position.x}, ${position.y})`
+            },
+            class: {
+                "canvas-point": true,
+                selected: model.selected
+            }
+        });
     }
 }

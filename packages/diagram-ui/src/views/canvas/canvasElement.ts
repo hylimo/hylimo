@@ -9,8 +9,32 @@ import { SCanvasElement } from "../../model/canvas/canvasElement";
 @injectable()
 export class CanvasElementView implements IView {
     render(model: Readonly<SCanvasElement>, context: RenderingContext, args?: {} | undefined): VNode | undefined {
-        //TODO selected handling
         const position = model.position;
-        return svg("g", { transform: `translate(${position.x}, ${position.y})` }, ...context.renderChildren(model));
+        const children = context.renderChildren(model);
+        if (model.selected) {
+            children.push(
+                svg("rect", {
+                    class: {
+                        "selected-rect": true
+                    },
+                    attrs: {
+                        width: model.width,
+                        height: model.height
+                    }
+                })
+            );
+        }
+        return svg(
+            "g",
+            {
+                attrs: {
+                    transform: `translate(${position.x}, ${position.y})`
+                },
+                class: {
+                    "canvas-element": true
+                }
+            },
+            ...children
+        );
     }
 }

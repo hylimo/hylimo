@@ -8,6 +8,8 @@ import { CanvasContentLayoutConfig } from "./canvasContentLayoutConfig";
  * Layout config for canvas element
  */
 export class CanvasElementLayoutConfig extends CanvasContentLayoutConfig {
+    override isLayoutContent = false;
+
     constructor() {
         super(
             CanvasElement.TYPE,
