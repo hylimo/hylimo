@@ -1,4 +1,4 @@
-import { listType, optional, stringType } from "@hylimo/core";
+import { Expression, listType, optional, stringType } from "@hylimo/core";
 import { Element, Point, Size } from "@hylimo/diagram-common";
 import { LayoutElement, LayoutConfig, SizeConstraints, AttributeConfig } from "../layoutElement";
 import { Layout } from "../layoutEngine";
@@ -54,4 +54,23 @@ export abstract class ElementLayoutConfig implements LayoutConfig {
      * @returns the rendered element
      */
     abstract layout(layout: Layout, element: LayoutElement, position: Point, size: Size, id: string): Element[];
+
+    /**
+     * Converts the expressions to the list of their start offsets
+     * Returns undefined if any expression is undefined, or its position, or if there are duplicate start offsets.
+     *
+     * @param expressions the list of expressions
+     * @returns the start offsets or undefined if edit is not supported
+     */
+    protected generateEditableNumbers(...expressions: (Expression | undefined)[]): number[] | undefined {
+        if (expressions.some((expression) => expression?.position == undefined)) {
+            return undefined;
+        }
+        const positions = expressions.map((expression) => expression!.position!.startOffset);
+        if (new Set(positions).size < positions.length) {
+            return undefined;
+        } else {
+            return positions;
+        }
+    }
 }

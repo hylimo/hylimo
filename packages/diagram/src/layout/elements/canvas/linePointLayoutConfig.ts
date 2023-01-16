@@ -14,7 +14,7 @@ export class LinePointLayoutConfig extends CanvasPointLayoutConfig {
             LinePoint.TYPE,
             [
                 {
-                    name: "position",
+                    name: "pos",
                     description: "the relative offset on the line, must be between 0 and 1 (inclusive)",
                     type: numberType
                 },
@@ -31,7 +31,7 @@ export class LinePointLayoutConfig extends CanvasPointLayoutConfig {
     }
 
     override layout(layout: Layout, element: LayoutElement, position: Point, size: Size, id: string): Element[] {
-        const positionFieldEntry = element.element.getLocalFieldOrUndefined("position");
+        const positionFieldEntry = element.element.getLocalFieldOrUndefined("pos");
         const lineProvider = this.getContentId(
             element,
             element.element.getLocalFieldOrUndefined("lineProvider")!.value as FullObject
@@ -39,9 +39,9 @@ export class LinePointLayoutConfig extends CanvasPointLayoutConfig {
         const result: LinePoint = {
             type: LinePoint.TYPE,
             id,
-            position: positionFieldEntry?.value?.toNative(),
+            pos: positionFieldEntry?.value?.toNative(),
             lineProvider,
-            editable: !!positionFieldEntry?.source,
+            editable: this.generateEditableNumbers(positionFieldEntry?.source),
             children: []
         };
         return [result];

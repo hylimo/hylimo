@@ -17,3 +17,6 @@ export * from "./model/canvas/canvas";
 export * from "./model/canvas/canvasConnection";
 export * from "./model/canvas/canvasElement";
 export * from "./model/canvas/canvasPoint";
+export * from "./protocol/transactionalAction";
+export * from "./protocol/translationMoveAction";
+export * from "./protocol/lineMoveAction";

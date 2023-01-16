@@ -48,7 +48,7 @@ export class CanvasElementLayoutConfig extends CanvasContentLayoutConfig {
             ...size,
             children: layout.layout(content, { x: 0, y: 0 }, size, `${id}_0`),
             pos: this.getContentId(element, element.element.getLocalFieldOrUndefined("pos")?.value as FullObject),
-            resizable: true //TODO fix
+            resizable: undefined //TODO fix
         };
         return [result];
     }

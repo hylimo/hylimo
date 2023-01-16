@@ -11,9 +11,9 @@ export interface CanvasElement extends SizedElement {
      */
     pos: string;
     /**
-     * If true, this is resizable
+     * Resizable if present
      */
-    resizable: boolean;
+    resizable?: number[];
 }
 
 export namespace CanvasElement {

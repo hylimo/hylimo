@@ -1,4 +1,5 @@
 import { Point } from "@hylimo/diagram-common";
+import { SModelElement } from "sprotty";
 import { LinearAnimatable } from "../../features/animation/model";
 import { isPositionProvider } from "../../features/layout/positionProvider";
 import { SCanvasPoint } from "./canvasPoint";
@@ -27,7 +28,7 @@ export class SRelativePoint extends SCanvasPoint implements LinearAnimatable {
     target!: string;
 
     override get position(): PointWithTarget {
-        const target = this.parent.getChildById(this.target);
+        const target = this.root.index.getById(this.target) as SModelElement;
         if (isPositionProvider(target)) {
             const targetPosition = target.position;
             return {

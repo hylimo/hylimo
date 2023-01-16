@@ -79,4 +79,5 @@
   stroke-width: calc(2px / var(--diagram-zoom));
   stroke-dasharray: calc(16px / var(--diagram-zoom));
   fill: none;
+  pointer-events: none;
 }

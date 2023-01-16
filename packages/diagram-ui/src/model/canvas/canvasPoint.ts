@@ -1,4 +1,4 @@
-import { Point } from "@hylimo/diagram-common";
+import { Point, RelativePoint } from "@hylimo/diagram-common";
 import { PositionProvider } from "../../features/layout/positionProvider";
 import { SCanvasContent } from "./canvasContent";
 
@@ -10,6 +10,10 @@ export abstract class SCanvasPoint extends SCanvasContent implements PositionPro
      * The provided position
      */
     abstract position: Point;
+    /**
+     * If present, this point is manipulatable
+     */
+    editable?: number[];
 
     /**
      * Evaluates if this point is visible

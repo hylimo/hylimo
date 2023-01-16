@@ -1,5 +1,5 @@
 import { Point } from "@hylimo/diagram-common";
-import { Selectable } from "sprotty";
+import { Selectable, SModelElement } from "sprotty";
 import { LinearAnimatable } from "../../features/animation/model";
 import { isPositionProvider, PositionProvider } from "../../features/layout/positionProvider";
 import { SCanvas } from "./canvas";
@@ -33,7 +33,7 @@ export class SCanvasElement extends SCanvasContent implements PositionProvider, 
     resizable!: boolean;
 
     get position(): Point {
-        const target = this.parent.getChildById(this.pos);
+        const target = this.root.index.getById(this.pos) as SModelElement;
         if (isPositionProvider(target)) {
             const targetPosition = target.position;
             return targetPosition;

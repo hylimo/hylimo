@@ -7,8 +7,11 @@ import {
     selectFeature,
     updateModule as sprottyUpdateModule,
     moveModule as sprottyMoveModule,
-    zorderModule as sprottyZOrderModule
+    zorderModule as sprottyZOrderModule,
+    moveFeature
 } from "sprotty";
+import moveModule from "./features/move/di.config";
+import transactionModule from "./features/transaction/di.config";
 import updateModule from "./features/update/di.config";
 import zorderModule from "./features/zorder/di.config";
 import { SAbsolutePoint } from "./model/canvas/absolutePoint";
@@ -37,13 +40,13 @@ const diagramModule = new ContainerModule((bind, unbind, isBound, rebind) => {
     configureModelElement(context, Text.TYPE, SText, TextView);
     configureModelElement(context, Canvas.TYPE, SCanvas, CanvasView);
     configureModelElement(context, CanvasElement.TYPE, SCanvasElement, CanvasElementView, {
-        enable: [selectFeature]
+        enable: [selectFeature, moveFeature]
     });
     configureModelElement(context, AbsolutePoint.TYPE, SAbsolutePoint, AbsolutePointView, {
-        enable: [selectFeature]
+        enable: [selectFeature, moveFeature]
     });
     configureModelElement(context, RelativePoint.TYPE, SRelativePoint, RelativePointView, {
-        enable: [selectFeature]
+        enable: [selectFeature, moveFeature]
     });
 });
 
@@ -58,7 +61,7 @@ export function createContainer(widgetId: string): Container {
     loadDefaultModules(container, {
         exclude: [sprottyUpdateModule, sprottyMoveModule, sprottyZOrderModule]
     });
-    container.load(updateModule, zorderModule);
+    container.load(updateModule, zorderModule, transactionModule, moveModule);
     container.load(diagramModule);
 
     overrideViewerOptions(container, {

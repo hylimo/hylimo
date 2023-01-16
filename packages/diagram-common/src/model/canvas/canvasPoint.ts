@@ -6,9 +6,9 @@ import { PositionedElement } from "../base/positionedElement";
  */
 export interface CanvasPoint extends Element {
     /**
-     * If true, this point can be manipulated
+     * If present, this point is manipulatable
      */
-    editable: boolean;
+    editable?: number[];
 }
 
 /**
@@ -99,7 +99,7 @@ export interface LinePoint extends CanvasPoint {
     /**
      * The position where on the line the point is located, between 0 and 1
      */
-    position: number;
+    pos: number;
 }
 
 export namespace LinePoint {

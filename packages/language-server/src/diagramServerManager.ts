@@ -1,7 +1,7 @@
 import { ActionMessage, DiagramServer, GeneratorArguments, SModelRoot } from "sprotty-protocol";
 import { Connection } from "vscode-languageserver";
 import { Diagram } from "./diagram";
-import { DiagramActionNotification, DiagramCloseNotification } from "./diagramNotificationTypes";
+import { DiagramActionNotification } from "./diagramNotificationTypes";
 
 /**
  * Manages DiagramServer instances and associates them with TextDocuments
