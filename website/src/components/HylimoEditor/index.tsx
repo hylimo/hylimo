@@ -16,9 +16,10 @@ import { StandaloneServices } from "vscode/services";
 import MonacoEditor from "react-monaco-editor";
 import { useLocalStorage } from "@rehooks/local-storage";
 import { createContainer } from "@hylimo/diagram-ui";
-import { ActionHandlerRegistry, DiagramServerProxy, IActionDispatcher, LocalModelSource, TYPES } from "sprotty";
+import { ActionHandlerRegistry, IActionDispatcher, TYPES } from "sprotty";
 import { RequestModelAction, ActionMessage } from "sprotty-protocol";
 import { DiagramActionNotification, DiagramOpenNotification } from "@hylimo/language-server";
+import { DiagramServerProxy } from "@hylimo/diagram-ui";
 
 /**
  * Name of the language

@@ -117,7 +117,7 @@ export class MoveMouseListener extends MouseListener {
 
     /**
      * Creats the handler for the current move based on the selected elements
-     * 
+     *
      * @param target the element which was clicked
      * @returns the move handler if move is supported, otherwise undefined
      */

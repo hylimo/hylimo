@@ -5,8 +5,6 @@ import { UpdateModelCommand } from "./update-model";
 /**
  * Module which configers the UpdateModelCommand
  */
-const updateModule = new ContainerModule((bind, _unbind, isBound) => {
+export const updateModule = new ContainerModule((bind, _unbind, isBound) => {
     configureCommand({ bind, isBound }, UpdateModelCommand);
 });
-
-export default updateModule;

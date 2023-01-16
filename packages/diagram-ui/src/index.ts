@@ -1,7 +1,3 @@
-import updateModule from "./features/update/di.config";
-
-export { updateModule };
-
 export * from "./views/rect";
 export * from "./views/attributeHelpers";
 export * from "./views/rect";
@@ -18,3 +14,4 @@ export * from "./features/animation/model";
 export * from "./features/update/update-model";
 export * from "./features/layout/lineProvider";
 export * from "./features/layout/positionProvider";
+export * from "./model-source/diagramServerProxy";

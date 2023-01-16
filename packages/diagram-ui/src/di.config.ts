@@ -10,10 +10,10 @@ import {
     zorderModule as sprottyZOrderModule,
     moveFeature
 } from "sprotty";
-import moveModule from "./features/move/di.config";
-import transactionModule from "./features/transaction/di.config";
-import updateModule from "./features/update/di.config";
-import zorderModule from "./features/zorder/di.config";
+import { moveModule } from "./features/move/di.config";
+import { transactionModule } from "./features/transaction/di.config";
+import { updateModule } from "./features/update/di.config";
+import { zorderModule } from "./features/zorder/di.config";
 import { SAbsolutePoint } from "./model/canvas/absolutePoint";
 import { SCanvas } from "./model/canvas/canvas";
 import { SCanvasElement } from "./model/canvas/canvasElement";

@@ -5,9 +5,7 @@ import { TransactionIdProvider } from "./transactionIdProvider";
 /**
  * Transaction module
  */
-const transactionModule = new ContainerModule((bind, _unbind, isBound) => {
+export const transactionModule = new ContainerModule((bind, _unbind, isBound) => {
     bind(TransactionIdProvider).toSelf().inSingletonScope();
     bind(TYPES.TransactionIdProvider).toService(TransactionIdProvider);
 });
-
-export default transactionModule;
