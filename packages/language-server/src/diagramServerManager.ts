@@ -1,7 +1,8 @@
-import { ActionMessage, DiagramServer, GeneratorArguments, SModelRoot } from "sprotty-protocol";
+import { ActionMessage, GeneratorArguments, SModelRoot } from "sprotty-protocol";
 import { Connection } from "vscode-languageserver";
 import { Diagram } from "./diagram";
 import { DiagramActionNotification } from "./diagramNotificationTypes";
+import { DiagramServer } from "./edit/diagramServer";
 
 /**
  * Manages DiagramServer instances and associates them with TextDocuments
@@ -58,7 +59,8 @@ export class DiagramServerManager {
                         return args.state.currentRoot;
                     }
                 }
-            }
+            },
+            diagram
         );
 
         this.diagramServers.set(clientId, diagramServer);

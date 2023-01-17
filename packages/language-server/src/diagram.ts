@@ -3,6 +3,8 @@ import { CstResult, FullObject } from "@hylimo/core";
 import { LayoutedDiagram } from "@hylimo/diagram";
 import { SharedDiagramUtils } from "./sharedDiagramUtils";
 import { Diagnostic, DiagnosticSeverity, Range, uinteger } from "vscode-languageserver";
+import { TransactionManager } from "./edit/transactionManager";
+import { TransactionalAction } from "@hylimo/diagram-common";
 
 /**
  * Holds the state for a specific diagram
@@ -16,6 +18,14 @@ export class Diagram {
      * The layouted diagram
      */
     layoutedDiagram?: LayoutedDiagram;
+    /**
+     * Handles TransactionActions
+     */
+    private transactionManager = new TransactionManager(this);
+    /**
+     * Marker that the model has been updated
+     */
+    private hasUpdatedModel = true;
 
     /**
      * Creates a new diagram
@@ -57,6 +67,7 @@ export class Diagram {
                 this.utils.diagramServerManager.updatedDiagram(this);
             }
         }
+        this.hasUpdatedModel = true;
         this.utils.connection.sendDiagnostics({
             uri: this.document.uri,
             diagnostics: diagnostics
@@ -99,5 +110,21 @@ export class Diagram {
             );
         });
         return diagnostics;
+    }
+
+    /**
+     * Handles a transactional action
+     *
+     * @param action the action to handle
+     */
+    async handleTransactionalAction(action: TransactionalAction): Promise<void> {
+        if (!this.hasUpdatedModel && !action.commited) {
+            return;
+        }
+        this.hasUpdatedModel = false;
+        const edit = this.transactionManager.handleAction(action);
+        await this.utils.connection.workspace.applyEdit({
+            documentChanges: [edit]
+        });
     }
 }

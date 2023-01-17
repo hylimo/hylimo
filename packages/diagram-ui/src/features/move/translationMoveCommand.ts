@@ -48,12 +48,12 @@ export class TranslationMoveCommand extends Command {
             throw new Error("Command not executed yet");
         }
         for (const point of this.resolvedAction.absolutePoints) {
-            point.x -= this.action.offsetX;
-            point.y -= this.action.offsetY;
+            point.x -= this.action.deltaOffsetX;
+            point.y -= this.action.deltaOffsetY;
         }
         for (const point of this.resolvedAction.relativePoints) {
-            point.offsetX -= this.action.offsetX;
-            point.offsetY -= this.action.offsetY;
+            point.offsetX -= this.action.deltaOffsetX;
+            point.offsetY -= this.action.deltaOffsetY;
         }
         return context.root;
     }
@@ -63,12 +63,12 @@ export class TranslationMoveCommand extends Command {
             throw new Error("Command not executed yet");
         }
         for (const point of this.resolvedAction.absolutePoints) {
-            point.x += this.action.offsetX;
-            point.y += this.action.offsetY;
+            point.x += this.action.deltaOffsetX;
+            point.y += this.action.deltaOffsetY;
         }
         for (const point of this.resolvedAction.relativePoints) {
-            point.offsetX += this.action.offsetX;
-            point.offsetY += this.action.offsetY;
+            point.offsetX += this.action.deltaOffsetX;
+            point.offsetY += this.action.deltaOffsetY;
         }
         return context.root;
     }

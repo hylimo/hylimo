@@ -2,6 +2,7 @@ import { injectable } from "inversify";
 import {
     Animation,
     CommandExecutionContext,
+    CommandReturn,
     CompoundAnimation,
     forEachMatch,
     isSelectable,
@@ -47,6 +48,8 @@ export class UpdateModelCommand extends BaseUpdateModelCommand {
         if (fadeAnimation instanceof Animation) {
             animations.push(fadeAnimation);
         }
+        //TODO remove
+        return newRoot;
         if (animations.length > 1) {
             return new CompoundAnimation(newRoot, context, animations);
         } else if (animations.length === 1) {

@@ -27,8 +27,10 @@ export class TranslationMoveHandler implements MoveHandler {
             kind: TranslationMoveAction.KIND,
             transactionId: this.transactionId,
             points: this.points,
-            offsetX: dx - this.lastDx,
-            offsetY: dy - this.lastDy,
+            offsetX: dx,
+            offsetY: dy,
+            deltaOffsetX: dx - this.lastDx,
+            deltaOffsetY: dy - this.lastDy,
             commited
         };
         this.lastDx = dx;

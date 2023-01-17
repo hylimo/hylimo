@@ -57,7 +57,7 @@ export class MoveMouseListener extends MouseListener {
             }
             if (this.moveHandler != undefined) {
                 const translation = this.calculateTranslation(target, event);
-                const result = this.moveHandler.generateAction(translation.x, translation.y, true);
+                const result = this.moveHandler.generateAction(translation.x, translation.y, false);
                 return [result];
             }
         }
