@@ -73,13 +73,11 @@ export class TransactionManager {
      * @param layoutedDiagram the layouted diagram
      */
     updateLayoutedDiagram(layoutedDiagram: LayoutedDiagram): void {
-        if (
-            this.lastKnownAction != undefined &&
-            this.lastAppliedAction != undefined &&
-            this.lastKnownAction != this.lastAppliedAction &&
-            this.edit != undefined
-        ) {
-            this.edit.predictActionDiff(layoutedDiagram, this.lastAppliedAction, this.lastKnownAction);
+        if (this.lastKnownAction != undefined && this.lastAppliedAction != undefined && this.edit != undefined) {
+            layoutedDiagram.rootElement.noAnimation = true;
+            if (this.lastKnownAction != this.lastAppliedAction) {
+                this.edit.predictActionDiff(layoutedDiagram, this.lastAppliedAction, this.lastKnownAction);
+            }
         }
     }
 

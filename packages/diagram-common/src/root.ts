@@ -18,6 +18,10 @@ export interface Root extends SModelRoot {
      * Defined font families
      */
     fonts: FontFamilyConfig[];
+    /**
+     * Overwrites the animated from the update-model action
+     */
+    noAnimation?: boolean;
 }
 
 export namespace Root {

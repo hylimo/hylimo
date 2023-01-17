@@ -8,8 +8,10 @@ import {
     updateModule as sprottyUpdateModule,
     moveModule as sprottyMoveModule,
     zorderModule as sprottyZOrderModule,
-    moveFeature
+    moveFeature,
+    TYPES
 } from "sprotty";
+import { CommandStack } from "./base/commandStack";
 import { moveModule } from "./features/move/di.config";
 import { transactionModule } from "./features/transaction/di.config";
 import { updateModule } from "./features/update/di.config";
@@ -34,6 +36,8 @@ import { TextView } from "./views/text";
  */
 const diagramModule = new ContainerModule((bind, unbind, isBound, rebind) => {
     const context = { bind, unbind, isBound, rebind };
+
+    rebind(TYPES.ICommandStack).to(CommandStack).inSingletonScope();
 
     configureModelElement(context, Root.TYPE, SRoot, SRootView);
     configureModelElement(context, Rect.TYPE, SRect, RectView);
