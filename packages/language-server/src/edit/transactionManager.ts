@@ -1,3 +1,4 @@
+import { LayoutedDiagram } from "@hylimo/diagram";
 import { TransactionalAction, TranslationMoveAction } from "@hylimo/diagram-common";
 import { TextDocumentEdit } from "vscode-languageserver";
 import { Diagram } from "../diagram";
@@ -16,6 +17,14 @@ export class TransactionManager {
      * Current edit handling actions of the same transaction
      */
     private edit?: TransactionalEdit<any>;
+    /**
+     * Last action which was handled
+     */
+    private lastAppliedAction?: TransactionalAction;
+    /**
+     * Last action which was handled or skipped
+     */
+    private lastKnownAction?: TransactionalAction;
 
     /**
      * Creates a new TransactionManager which handles edits to the specified textDocument
@@ -34,6 +43,7 @@ export class TransactionManager {
         if (this.currentTransactionId != undefined && this.currentTransactionId != action.transactionId) {
             throw new Error("Concurrent transactions are currently not supported");
         }
+        this.lastAppliedAction = action;
         this.currentTransactionId = action.transactionId;
         if (this.edit == undefined) {
             this.edit = this.generateTransactionalEdit(action);
@@ -42,8 +52,35 @@ export class TransactionManager {
         if (action.commited) {
             this.currentTransactionId = undefined;
             this.edit = undefined;
+            this.lastKnownAction = undefined;
+            this.lastAppliedAction = undefined;
         }
         return result;
+    }
+
+    /**
+     * Updates the last knwon action
+     *
+     * @param action the last known action
+     */
+    setNewestAction(action: TransactionalAction): void {
+        this.lastKnownAction = action;
+    }
+
+    /**
+     * Updates a LayoutedDiagram based on the lastKnownAction.
+     *
+     * @param layoutedDiagram the layouted diagram
+     */
+    updateLayoutedDiagram(layoutedDiagram: LayoutedDiagram): void {
+        if (
+            this.lastKnownAction != undefined &&
+            this.lastAppliedAction != undefined &&
+            this.lastKnownAction != this.lastAppliedAction &&
+            this.edit != undefined
+        ) {
+            this.edit.predictActionDiff(layoutedDiagram, this.lastAppliedAction, this.lastKnownAction);
+        }
     }
 
     /**

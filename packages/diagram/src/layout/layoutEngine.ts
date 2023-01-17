@@ -91,6 +91,7 @@ export class LayoutEngine {
                 children: elements,
                 fonts: fontFamilyConfigs
             },
+            elementLookup: layout.elementLookup,
             layoutElementLookup: layout.layoutElementLookup
         };
     }
@@ -104,6 +105,10 @@ export class Layout {
      * Lookup for layout elements
      */
     readonly layoutElementLookup = new Map<string, LayoutElement>();
+    /**
+     * Lookup for layouted elements
+     */
+    readonly elementLookup = new Map<string, Element>();
 
     /**
      * Creates a new layout
@@ -322,12 +327,14 @@ export class Layout {
 
         this.layoutElementLookup.set(id, element);
 
-        return element.layoutConfig.layout(
+        const results = element.layoutConfig.layout(
             this,
             element,
             { x: posX, y: posY },
             { width: realWidth, height: realHeight },
             id
         );
+        results.forEach((result) => this.elementLookup.set(result.id, result));
+        return results;
     }
 }

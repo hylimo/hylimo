@@ -63,6 +63,7 @@ export class Diagram {
             }
             if (interpretationResult.result) {
                 const layoutedDiagram = await this.utils.layoutEngine.layout(interpretationResult.result as FullObject);
+                this.transactionManager.updateLayoutedDiagram(layoutedDiagram);
                 this.layoutedDiagram = layoutedDiagram;
                 this.utils.diagramServerManager.updatedDiagram(this);
             }
@@ -118,6 +119,7 @@ export class Diagram {
      * @param action the action to handle
      */
     async handleTransactionalAction(action: TransactionalAction): Promise<void> {
+        this.transactionManager.setNewestAction(action);
         if (!this.hasUpdatedModel && !action.commited) {
             return;
         }

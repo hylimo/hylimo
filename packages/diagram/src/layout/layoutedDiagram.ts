@@ -1,4 +1,4 @@
-import { Root } from "@hylimo/diagram-common";
+import { Element, Root } from "@hylimo/diagram-common";
 import { LayoutElement } from "./layoutElement";
 
 /**
@@ -9,6 +9,12 @@ export interface LayoutedDiagram {
      * The root element of the diagram
      */
     rootElement: Root;
+    /**
+     * Lookup of id to layouted Element.
+     * Contains all elements in rootElement.
+     * Useful for prediction.
+     */
+    elementLookup: Map<string, Element>;
     /**
      * Lookup of id to the LayoutElement containing required tracing information
      */

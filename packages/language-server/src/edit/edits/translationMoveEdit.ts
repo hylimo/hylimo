@@ -1,4 +1,4 @@
-import { LayoutElement } from "@hylimo/diagram";
+import { LayoutedDiagram, LayoutElement } from "@hylimo/diagram";
 import { AbsolutePoint, RelativePoint, TranslationMoveAction } from "@hylimo/diagram-common";
 import { Diagram } from "../../diagram";
 import { EditGeneratorEntry } from "../editGeneratorEntry";
@@ -61,6 +61,27 @@ export class TranslationMoveEdit extends TransactionalEdit<TranslationMoveAction
             return generator.generateEdit(action.offsetY);
         } else {
             throw new Error(`Unknown meta information for TranslationMoveEdit: ${meta}`);
+        }
+    }
+
+    predictActionDiff(
+        layoutedDiagram: LayoutedDiagram,
+        lastApplied: TranslationMoveAction,
+        newest: TranslationMoveAction
+    ): void {
+        const deltaX = newest.offsetX - lastApplied.offsetX;
+        const deltaY = newest.offsetY - lastApplied.offsetY;
+        for (const pointId of newest.points) {
+            const point = layoutedDiagram.elementLookup.get(pointId);
+            if (point != undefined) {
+                if (AbsolutePoint.isAbsolutePoint(point)) {
+                    point.x += deltaX;
+                    point.y += deltaY;
+                } else if (RelativePoint.isRelativePoint(point)) {
+                    point.offsetX += deltaX;
+                    point.offsetY += deltaY;
+                }
+            }
         }
     }
 }

@@ -21,7 +21,7 @@ export class DiagramServer extends SprottyDiagramServer {
         super(dispatch, services);
     }
 
-    protected override handleAction(action: Action): Promise<void> {
+    protected override async handleAction(action: Action): Promise<void> {
         if (TransactionalAction.isTransactionalAction(action)) {
             return this.diagram.handleTransactionalAction(action);
         } else {

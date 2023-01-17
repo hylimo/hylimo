@@ -1,3 +1,4 @@
+import { LayoutedDiagram } from "@hylimo/diagram";
 import { Action } from "sprotty-protocol";
 import { Range, TextDocumentEdit, VersionedTextDocumentIdentifier } from "vscode-languageserver";
 import { TextDocument, TextEdit } from "vscode-languageserver-textdocument";
@@ -40,6 +41,15 @@ export abstract class TransactionalEdit<T extends Action> {
      * @returns the new string
      */
     abstract applyActionToGenerator(action: T, generator: EditGenerator<never>, meta: any): string;
+
+    /**
+     * Predicts the effect of newest on layoutedDiagram assuming lastApplied was last applied
+     *
+     * @param layoutedDiagram the layouted diagram
+     * @param lastApplied the last command applied to layoutedDiagram
+     * @param newest the newest known command
+     */
+    abstract predictActionDiff(layoutedDiagram: LayoutedDiagram, lastApplied: T, newest: T): void;
 
     /**
      * Applies an action to all generators and creates a corresponding edit
