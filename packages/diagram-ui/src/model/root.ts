@@ -27,8 +27,11 @@ export class SRoot extends ViewportRootElement {
         .canvas-element {
             pointer-events: visible;
         }
-        g {
+        svg {
             --diagram-zoom: ${this.zoom};
+            --diagram-zoom-normalized: ${this.zoom / Math.pow(2, Math.round(Math.log2(this.zoom) / 2) * 2)};
+            --diagram-scroll-x: ${this.scroll.x}px;
+            --diagram-scroll-y: ${this.scroll.y}px;
         }
         `;
         return (

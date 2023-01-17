@@ -19,6 +19,8 @@
   --diagram-layout-color: var(--ifm-color-emphasis-700);
   --diagram-layout-color-selected: #00c6f2;
   --diagram-layout-color-overlay: #88888855;
+  --diagram-background: #fffffe;
+  --diagram-grid: #bbb;
 }
 
 /* For readability concerns, you should choose a lighter palette in dark mode. */
@@ -31,6 +33,9 @@
   --ifm-color-primary-lighter: #32d8b4;
   --ifm-color-primary-lightest: #4fddbf;
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+
+  --diagram-background: #1e1e1e;
+  --diagram-grid: #444;
 }
 
 
@@ -80,4 +85,12 @@
   stroke-dasharray: calc(16px / var(--diagram-zoom));
   fill: none;
   pointer-events: none;
+}
+
+.sprotty svg {
+  background:
+    conic-gradient(from 90deg at 1px 1px, var(--diagram-background) 90deg, var(--diagram-grid) 0) 
+    calc(var(--diagram-scroll-x) * -1 * var(--diagram-zoom))
+    calc(var(--diagram-scroll-y) * -1 * var(--diagram-zoom)) /
+    calc(100px * var(--diagram-zoom-normalized)) calc(100px * var(--diagram-zoom-normalized));
 }
