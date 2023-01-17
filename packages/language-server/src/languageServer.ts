@@ -23,6 +23,7 @@ import {
     DiagramOpenNotification,
     OpenDiagramMessage
 } from "./diagramNotificationTypes";
+import { SharedDiagramUtils } from "./sharedDiagramUtils";
 
 /**
  * Config for creating a new language server
@@ -57,19 +58,9 @@ export class LanguageServer {
     private readonly textDocuments = new TextDocuments(TextDocument);
 
     /**
-     * Interpreter used to run the code
-     */
-    private readonly interpreter;
-
-    /**
-     * Parser used to parse the document
-     */
-    private readonly parser = new Parser(true);
-
-    /**
      * Formatter to use for formatting requests
      */
-    private readonly formatter = new Formatter(this.parser);
+    private readonly formatter: Formatter;
 
     /**
      * Lookup of all known diagrams
@@ -82,9 +73,9 @@ export class LanguageServer {
     private readonly diagramServerManager: DiagramServerManager;
 
     /**
-     * Performs layouting of diagrams
+     * Shared utils for diagrams
      */
-    private readonly layoutEngine = new LayoutEngine();
+    private readonly diagramUtils: SharedDiagramUtils;
 
     /**
      * Creates a new language server
@@ -97,7 +88,15 @@ export class LanguageServer {
         this.diagramServerManager = new DiagramServerManager(this.connection);
         this.textDocuments.listen(this.connection);
         const interpreterModules = [...defaultModules, diagramModule, ...config.additionalInterpreterModules];
-        this.interpreter = new Interpreter(interpreterModules);
+        this.diagramUtils = {
+            connection: this.connection,
+            interpreter: new Interpreter(interpreterModules),
+            parser: new Parser(true),
+            layoutEngine: new LayoutEngine(),
+            maxExecutionSteps: config.maxExecutionSteps,
+            diagramServerManager: this.diagramServerManager
+        };
+        this.formatter = new Formatter(this.diagramUtils.parser);
         this.textDocuments.onDidOpen(this.onDidOpenTextDocument.bind(this));
         this.textDocuments.onDidClose(this.onDidCloseTextDocument.bind(this));
         this.textDocuments.onDidChangeContent(this.onDidChangeContentTextDocument.bind(this));
@@ -137,7 +136,7 @@ export class LanguageServer {
      * @param e the provided event
      */
     private onDidOpenTextDocument(e: TextDocumentChangeEvent<TextDocument>): void {
-        this.diagrams.set(e.document.uri, new Diagram(e.document));
+        this.diagrams.set(e.document.uri, new Diagram(e.document, this.diagramUtils));
     }
 
     /**
@@ -156,76 +155,7 @@ export class LanguageServer {
      */
     private async onDidChangeContentTextDocument(e: TextDocumentChangeEvent<TextDocument>): Promise<void> {
         const diagram = this.diagrams.get(e.document.uri)!;
-        const parserResult = this.parser.parse(e.document.getText());
-        diagram.lastParserResult = parserResult;
-        const diagnostics: Diagnostic[] = [];
-        diagnostics.push(...this.getParserResultDiagnostics(e.document, parserResult));
-        if (parserResult.ast) {
-            const interpretationResult = this.interpreter.run(parserResult.ast, this.config.maxExecutionSteps);
-            const error = interpretationResult.error;
-            if (error) {
-                const pos = error.findFirstPosition();
-                if (pos) {
-                    diagnostics.push(
-                        Diagnostic.create(
-                            Range.create(pos.startLine - 1, pos.startColumn - 1, pos.endLine - 1, pos.endColumn),
-                            error.message || "[no message provided]",
-                            DiagnosticSeverity.Error
-                        )
-                    );
-                }
-                console.error(error);
-                console.error(error.interpretationStack);
-                //TODO do sth else with error
-            }
-            if (interpretationResult.result) {
-                const layoutedDiagram = await this.layoutEngine.layout(interpretationResult.result as FullObject);
-                diagram.layoutedDiagram = layoutedDiagram;
-                this.diagramServerManager.updatedDiagram(diagram);
-            }
-        }
-        this.connection.sendDiagnostics({
-            uri: e.document.uri,
-            diagnostics: diagnostics
-        });
-    }
-
-    /**
-     * Creates diagnostics from lexical and parsing errors
-     *
-     * @param document the document which was parsed
-     * @param parserResult the parsing result
-     * @returns the found diagnostics
-     */
-    private getParserResultDiagnostics(document: TextDocument, parserResult: CstResult): Diagnostic[] {
-        const diagnostics: Diagnostic[] = [];
-        parserResult.lexingErrors.forEach((error) => {
-            diagnostics.push(
-                Diagnostic.create(
-                    Range.create(error.line! - 1, error.column! - 1, error.line! - 1, error.column! + error.length),
-                    error.message || "unknown lexical error",
-                    DiagnosticSeverity.Error
-                )
-            );
-        });
-        parserResult.parserErrors.forEach((error) => {
-            const token = error.token;
-            let location: Range;
-            if (!Number.isNaN(error.token.startLine)) {
-                location = Range.create(
-                    token.startLine! - 1,
-                    token.startColumn! - 1,
-                    token.endLine! - 1,
-                    token.endColumn!
-                );
-            } else {
-                location = Range.create(document.lineCount, uinteger.MAX_VALUE, document.lineCount, uinteger.MAX_VALUE);
-            }
-            diagnostics.push(
-                Diagnostic.create(location, error.message || "unknown syntax error", DiagnosticSeverity.Error)
-            );
-        });
-        return diagnostics;
+        await diagram.onDidChangeContent();
     }
 
     /**
