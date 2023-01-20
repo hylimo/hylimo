@@ -29,7 +29,7 @@ const language = "syncscript";
 /**
  * The uri of the TextDocument
  */
-const uri = "inmemory://model/1"
+const uri = "inmemory://model/1";
 
 /**
  * Editor Component
@@ -52,29 +52,30 @@ export default function HylimoEditor(): JSX.Element {
                 clientId: uri,
                 diagramUri: uri
             });
-    
+
             class LspDiagramServerProxy extends DiagramServerProxy {
-                override clientId = uri
-            
+                override clientId = uri;
+
                 override initialize(registry: ActionHandlerRegistry): void {
                     super.initialize(registry);
-                    languageClient.onNotification(DiagramActionNotification.type, message => {
+                    languageClient.onNotification(DiagramActionNotification.type, (message) => {
                         this.messageReceived(message);
-                    })
+                    });
                 }
-            
+
                 protected override sendMessage(message: ActionMessage): void {
-                    languageClient.sendNotification(DiagramActionNotification.type, message)
+                    languageClient.sendNotification(DiagramActionNotification.type, message);
                 }
             }
-    
+
             const container = createContainer("sprotty-container");
-            container.bind(TYPES.ModelSource).to(LspDiagramServerProxy);
+            container.bind(LspDiagramServerProxy).toSelf().inSingletonScope();
+            container.bind(TYPES.ModelSource).toService(LspDiagramServerProxy);
             const actionDispatcher = container.get<IActionDispatcher>(TYPES.IActionDispatcher);
-            actionDispatcher.request(RequestModelAction.create()).then(response => {
+            actionDispatcher.request(RequestModelAction.create()).then((response) => {
                 actionDispatcher.dispatch(response);
             });
-        })
+        });
     }, []);
 
     return (
