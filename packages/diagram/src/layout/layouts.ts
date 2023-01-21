@@ -4,6 +4,7 @@ import { CanvasConnectionLayoutConfig } from "./elements/canvas/canvasConnection
 import { CanvasElementLayoutConfig } from "./elements/canvas/canvasElementLayoutConfig";
 import { CanvasLayoutConfig } from "./elements/canvas/canvasLayoutConfig";
 import { CanvasLineSegmentLayoutConfig } from "./elements/canvas/canvasLineSegmentLayoutConfig";
+import { MarkerLayoutConfig } from "./elements/canvas/markerLayoutConfig";
 import { RelativePointLayoutConfig } from "./elements/canvas/relativePointLayoutConfig";
 import { HBoxLayoutConfig } from "./elements/hboxLayoutConfig";
 import { RectLayoutConfig } from "./elements/rectLayoutConfig";
@@ -27,5 +28,6 @@ export const layouts: LayoutConfig[] = [
     new CanvasLineSegmentLayoutConfig(),
     new CanvasBezierSegmentLayoutConfig(),
     new AbsolutePointLayoutConfig(),
-    new RelativePointLayoutConfig()
+    new RelativePointLayoutConfig(),
+    new MarkerLayoutConfig()
 ];

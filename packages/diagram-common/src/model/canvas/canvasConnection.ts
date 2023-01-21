@@ -1,4 +1,6 @@
 import { Element } from "../base/element";
+import { LayoutedElement } from "../base/layoutedElement";
+import { SizedElement } from "../base/sizedElement";
 
 /**
  * Connection on a Canvas with an arbitrary amount of segments
@@ -6,6 +8,14 @@ import { Element } from "../base/element";
  */
 export interface CanvasConnection extends Element {
     type: typeof CanvasConnection.TYPE;
+    /**
+     * The marker at the start of the connection
+     */
+    startMarker?: Marker;
+    /**
+     * The marker at the end of the connection
+     */
+    endMarker?: Marker;
 }
 
 export namespace CanvasConnection {
@@ -38,6 +48,32 @@ export namespace CanvasConnection {
                 throw new Error(`Unknown CanvasConnectionSegment: ${segment.type}`);
             }
         });
+    }
+}
+
+/**
+ * Marker which can be placed at the start or end of a CanvasConnection
+ */
+export interface Marker extends SizedElement {
+    /**
+     * The position on the vertical center line where the line actually starts
+     */
+    lineStartOffset: number;
+}
+
+export namespace Marker {
+    /**
+     * Type associated with Marker
+     */
+    export const TYPE = "marker";
+
+    /**
+     * Checks if an element is a Marker
+     * @param value
+     * @returns
+     */
+    export function isMarker(value: Element): value is Marker {
+        return value.type === TYPE;
     }
 }
 

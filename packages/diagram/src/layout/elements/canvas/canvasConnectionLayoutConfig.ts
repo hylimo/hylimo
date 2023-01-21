@@ -1,10 +1,25 @@
-import { FullObject, literal, objectToList, objectType, or, SemanticFieldNames } from "@hylimo/core";
+import { FullObject, literal, objectToList, objectType, optional, or, SemanticFieldNames } from "@hylimo/core";
 import { listType } from "@hylimo/core/src/types/list";
-import { Size, Point, Element, CanvasConnection } from "@hylimo/diagram-common";
+import { Size, Point, Element, CanvasConnection, Marker } from "@hylimo/diagram-common";
 import { LayoutElement, SizeConstraints } from "../../layoutElement";
 import { Layout } from "../../layoutEngine";
 import { CanvasContentLayoutConfig } from "./canvasContentLayoutConfig";
 
+/**
+ * Type for start and end marker
+ */
+const markerType = optional(
+    objectType(
+        new Map([
+            [SemanticFieldNames.PROTO, objectType(new Map([["_type", literal("element")]]))],
+            ["type", literal(Marker.TYPE)]
+        ])
+    )
+);
+
+/**
+ * Layout config or CanvasConnection
+ */
 export class CanvasConnectionLayoutConfig extends CanvasContentLayoutConfig {
     override isLayoutContent = false;
 
@@ -17,12 +32,19 @@ export class CanvasConnectionLayoutConfig extends CanvasContentLayoutConfig {
                     description: "the inner elements",
                     type: listType(
                         objectType(
-                            new Map([
-                                [SemanticFieldNames.PROTO, objectType(new Map([["_type", literal("element")]]))],
-                                ["type", or(literal("canvasConnection"), literal("canvasElement"))]
-                            ])
+                            new Map([[SemanticFieldNames.PROTO, objectType(new Map([["_type", literal("element")]]))]])
                         )
                     )
+                },
+                {
+                    name: "startMarker",
+                    description: "the marker at the start of the connection",
+                    type: markerType
+                },
+                {
+                    name: "endMarker",
+                    description: "the marker at the end of the connection",
+                    type: markerType
                 }
             ],
             []
@@ -32,6 +54,14 @@ export class CanvasConnectionLayoutConfig extends CanvasContentLayoutConfig {
         // TODO (maybe) better size calculation
         const contents = this.getContents(element);
         element.contents = contents.map((content) => layout.measure(content, element, constraints));
+        const startMarker = element.element.getLocalFieldOrUndefined("startMarker")?.value;
+        if (startMarker != undefined) {
+            element.startMarker = layout.measure(startMarker as FullObject, element, constraints);
+        }
+        const endMarker = element.element.getLocalFieldOrUndefined("endMarker")?.value;
+        if (endMarker != undefined) {
+            element.endMarker = layout.measure(endMarker as FullObject, element, constraints);
+        }
         return constraints.min;
     }
     override layout(layout: Layout, element: LayoutElement, position: Point, size: Size, id: string): Element[] {
@@ -43,6 +73,14 @@ export class CanvasConnectionLayoutConfig extends CanvasContentLayoutConfig {
                 layout.layout(content, position, content.measuredSize!, `${id}_${i}`)
             )
         };
+        const startMarker = element.startMarker;
+        if (element.startMarker != undefined) {
+            result.startMarker = layout.layout(startMarker, position, startMarker.measureSize, `${id}_s`)[0] as Marker;
+        }
+        const endMarker = element.endMarker;
+        if (element.endMarker != undefined) {
+            result.endMarker = layout.layout(endMarker, position, endMarker.measureSize, `${id}_e`)[0] as Marker;
+        }
         return [result];
     }
 
