@@ -261,7 +261,7 @@ export class Layout {
         const computedSize = addToSize(requestedSize, marginX, marginY);
         const realSize = matchToConstraints(computedSize, constraints);
         layoutElement.measuredSize = realSize;
-        layoutElement.requestesSize = requestedSize;
+        layoutElement.requestedSize = requestedSize;
         return layoutElement;
     }
 
@@ -281,11 +281,11 @@ export class Layout {
         const layoutInformation = element.layoutInformation!;
         const marginX = layoutInformation.marginLeft + layoutInformation.marginRight;
         const marginY = layoutInformation.marginTop + layoutInformation.marginBottom;
-        let realWidth = element.requestesSize!.width;
+        let realWidth = element.requestedSize!.width;
         if (!horizontalAlignment) {
             realWidth = Math.max(realWidth, size.width - marginX);
         }
-        let realHeight = element.requestesSize!.height;
+        let realHeight = element.requestedSize!.height;
         if (!verticalAlignment) {
             realHeight = Math.max(realHeight, size.height - marginY);
         }

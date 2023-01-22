@@ -124,7 +124,7 @@ export interface LayoutElement {
     /**
      * The size the element requested
      */
-    requestesSize?: Size;
+    requestedSize?: Size;
     /**
      * Other required layout data
      */

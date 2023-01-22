@@ -89,12 +89,12 @@ export class CanvasConnectionLayoutConfig extends CanvasContentLayoutConfig {
         };
         const startMarker = element.startMarker;
         if (element.startMarker != undefined) {
-            const marker = layout.layout(startMarker, position, startMarker.measureSize, `${id}_s`)[0] as Marker;
+            const marker = layout.layout(startMarker, position, startMarker.measuredSize, `${id}_s`)[0] as Marker;
             result.children.push(marker);
         }
         const endMarker = element.endMarker;
         if (element.endMarker != undefined) {
-            const marker = layout.layout(endMarker, position, endMarker.measureSize, `${id}_e`)[0] as Marker;
+            const marker = layout.layout(endMarker, position, endMarker.measuredSize, `${id}_e`)[0] as Marker;
             result.children.push(marker);
         }
         return [result];

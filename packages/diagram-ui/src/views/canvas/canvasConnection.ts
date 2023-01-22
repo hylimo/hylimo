@@ -89,13 +89,13 @@ export class CanvasConnectionView implements IView {
         position: Point,
         context: RenderingContext
     ): VNode {
+        const translation = `translate(${position.x - marker.width},${position.y - marker.height / 2})`;
+        const rotation = `rotate(${renderInformation.rotation},${marker.width},${marker.height / 2})`;
         return svg(
             "g",
             {
                 attrs: {
-                    transform: `translate(${-marker.width / 2},0) rotate(${renderInformation.rotation}) translate(${
-                        position.x
-                    },${position.y})`
+                    transform: translation + rotation
                 }
             },
             context.renderElement(marker)

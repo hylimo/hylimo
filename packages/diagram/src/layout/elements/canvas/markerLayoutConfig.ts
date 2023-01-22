@@ -22,7 +22,7 @@ export class MarkerLayoutConfig extends StyledElementLayoutConfig {
             ],
             [
                 {
-                    name: "lineStartOffset",
+                    name: "lineStart",
                     description: "The relative (0..1) offset where the line starts in the marker",
                     type: numberType
                 }
@@ -44,7 +44,7 @@ export class MarkerLayoutConfig extends StyledElementLayoutConfig {
             type: Marker.TYPE,
             id,
             ...size,
-            lineStartOffset: element.styles.lineStartOffset,
+            lineStart: element.styles.lineStart ?? 0,
             children: layout.layout(content, { x: 0, y: 0 }, size, `${id}_0`),
             pos: element.position
         };

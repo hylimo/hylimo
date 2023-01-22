@@ -19,5 +19,5 @@ export class SMarker extends SChildElement {
     /**
      * The position on the vertical center line where the line actually starts
      */
-    lineStartOffset!: number;
+    lineStart!: number;
 }

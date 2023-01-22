@@ -55,7 +55,7 @@ export interface BaseMarker extends Size {
     /**
      * The position on the vertical center line where the line actually starts
      */
-    lineStartOffset: number;
+    lineStart: number;
 }
 
 /**
@@ -120,16 +120,16 @@ export interface CanvasConnectionSegment extends Element {
  * @param helperPos helper point to help direct the marker
  * @param marker the marker to render
  */
-export function calculateMarkerRenderInformation(
+function calculateMarkerRenderInformationInternal(
     pos: Point,
     helperPos: Point,
     marker: BaseMarker
 ): MarkerRenderInformation {
-    const markerHeight = marker.height * marker.lineStartOffset;
-    const rotation = (Math.atan2(helperPos.y - pos.y, helperPos.x - pos.x) * 180) / Math.PI;
+    const markerWidth = marker.width * marker.lineStart;
+    const rotation = (Math.atan2(pos.y - helperPos.y, pos.x - helperPos.x) * 180) / Math.PI;
     return {
         rotation,
-        newPoint: SprottyPoint.shiftTowards(pos, helperPos, markerHeight)
+        newPoint: SprottyPoint.shiftTowards(pos, helperPos, markerWidth)
     };
 }
 
@@ -176,7 +176,7 @@ export namespace CanvasLineSegment {
         otherEnd: Point,
         marker: BaseMarker
     ): MarkerRenderInformation {
-        return calculateMarkerRenderInformation(pos, otherEnd, marker);
+        return calculateMarkerRenderInformationInternal(pos, otherEnd, marker);
     }
 }
 
@@ -231,6 +231,6 @@ export namespace CanvasBezierSegment {
         controlPoint: Point,
         marker: BaseMarker
     ): MarkerRenderInformation {
-        return calculateMarkerRenderInformation(pos, controlPoint, marker);
+        return calculateMarkerRenderInformationInternal(pos, controlPoint, marker);
     }
 }
