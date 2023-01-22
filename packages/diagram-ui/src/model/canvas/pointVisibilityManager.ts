@@ -1,8 +1,7 @@
 import { SCanvas } from "./canvas";
+import { SCanvasConnection } from "./canvasConnection";
 import { SCanvasContent } from "./canvasContent";
-import { SCanvasElement } from "./canvasElement";
 import { SCanvasPoint } from "./canvasPoint";
-import { SRelativePoint } from "./relativePoint";
 
 /**
  * Manages a lookup for visible points
@@ -14,14 +13,20 @@ export class PointVisibilityManager {
      */
     private visiblePoints = new Map<string, VisibilityReason>();
     /**
-     * Dependants lookup (contains only dependent CanvasElements and RelativePoints)
+     * Dependants lookup
      */
     private dependents = new Map<string, string[]>();
 
     /**
-     * Dependencies lookup for RelativePoints and CanvasElements
+     * Dependencies lookup
      */
     private dependencies = new Map<string, string[]>();
+
+    /**
+     * Dependencies lookup for dependencies which should be made visible as dependend
+     * ONLY if the element is directly visible (not transitive)
+     */
+    private peerDependencies = new Map<string, string[]>();
 
     /**
      * Creates a new PointVisiblilityManager
@@ -37,6 +42,11 @@ export class PointVisibilityManager {
                     this.getDependantsList(dependency).push(id);
                 }
                 this.getDependenciesList(id).push(...dependencies);
+                if (child instanceof SCanvasConnection) {
+                    for (const dependency of dependencies) {
+                        this.getPeerDependenciesList(dependency).push(id);
+                    }
+                }
             }
         }
     }
@@ -67,6 +77,20 @@ export class PointVisibilityManager {
             this.dependencies.set(id, []);
         }
         return this.dependencies.get(id)!;
+    }
+
+    /**
+     * Helper to access a list in peerDependencies
+     * Creates new list if required
+     *
+     * @param id the id of the element
+     * @returns the found list or the new created one
+     */
+    private getPeerDependenciesList(id: string): string[] {
+        if (!this.peerDependencies.has(id)) {
+            this.peerDependencies.set(id, []);
+        }
+        return this.peerDependencies.get(id)!;
     }
 
     /**
@@ -104,6 +128,7 @@ export class PointVisibilityManager {
             visibilityReason.self = true;
             this.makeDependenciesVisible(element.id);
             this.makeDependentsVisible(element.id);
+            this.makePeerDependenciesVisible(element.id);
         } else {
             this.makeDependenciesVisible(element.id);
         }
@@ -119,6 +144,7 @@ export class PointVisibilityManager {
             const visibilityReason = this.visiblePoints.get(element.id);
             if (visibilityReason !== undefined) {
                 visibilityReason.self = false;
+                this.updatePeerDependencies(element.id);
                 if (!VisibilityReason.isVisible(visibilityReason)) {
                     this.visiblePoints.delete(element.id);
                 }
@@ -142,11 +168,34 @@ export class PointVisibilityManager {
      */
     private makeDependenciesVisible(id: string): void {
         for (const dependency of this.getDependenciesList(id)) {
-            const visibilityReason = this.getOrCreateVisibilityReason(dependency);
-            visibilityReason.visibleDependants.add(id);
-            if (visibilityReason.visibleDependants.size === 1 && !visibilityReason.self) {
-                this.makeDependenciesVisible(dependency);
-            }
+            this.makeDependencyVisible(id, dependency);
+        }
+    }
+
+    /**
+     * Makes the dependency recursively visible
+     * Updates recursively.
+     * Helper for makeDependenciesVisible and makePeerDependenciesVisible
+     *
+     * @param id the id of the point or element of which to make the dependencies visible
+     * @param dependency the id of the dependency to update
+     */
+    private makeDependencyVisible(id: string, dependency: string): void {
+        const visibilityReason = this.getOrCreateVisibilityReason(dependency);
+        visibilityReason.visibleDependants.add(id);
+        if (visibilityReason.visibleDependants.size === 1 && !visibilityReason.self) {
+            this.makeDependenciesVisible(dependency);
+        }
+    }
+
+    /**
+     * Makes dependencies recursively visible of peer dependencies
+     *
+     * @param id the id of the point or element of which to make the dependencies visible
+     */
+    private makePeerDependenciesVisible(id: string): void {
+        for (const dependency of this.getPeerDependenciesList(id)) {
+            this.makeDependencyVisible(id, dependency);
         }
     }
 
@@ -210,16 +259,38 @@ export class PointVisibilityManager {
      */
     private updateDependencies(id: string): void {
         for (const dependency of this.getDependenciesList(id)) {
-            const visibilityReason = this.visiblePoints.get(dependency);
-            if (visibilityReason !== undefined) {
-                visibilityReason.visibleDependants.delete(id);
-                if (!VisibilityReason.isVisible(visibilityReason)) {
-                    this.visiblePoints.delete(dependency);
-                }
-                if (!visibilityReason.self && visibilityReason.visibleDependants.size === 0) {
-                    this.updateDependencies(dependency);
-                }
+            this.updateDependency(id, dependency);
+        }
+    }
+
+    /**
+     * Recursively removes visible dependencies if necessary
+     * Helper for updateDependencies and updatePeerDependencies
+     *
+     * @param id the id of the visible point / element to remove
+     * @param dependency the id of the dependency to update
+     */
+    private updateDependency(id: string, dependency: string): void {
+        const visibilityReason = this.visiblePoints.get(dependency);
+        if (visibilityReason !== undefined) {
+            visibilityReason.visibleDependants.delete(id);
+            if (!VisibilityReason.isVisible(visibilityReason)) {
+                this.visiblePoints.delete(dependency);
             }
+            if (!visibilityReason.self && visibilityReason.visibleDependants.size === 0) {
+                this.updateDependencies(dependency);
+            }
+        }
+    }
+
+    /**
+     * Recursively removes visible peer dependencies if necessary
+     *
+     * @param id the id of the visible point / element to remove
+     */
+    private updatePeerDependencies(id: string): void {
+        for (const dependency of this.getPeerDependenciesList(id)) {
+            this.updateDependency(id, dependency);
         }
     }
 }
