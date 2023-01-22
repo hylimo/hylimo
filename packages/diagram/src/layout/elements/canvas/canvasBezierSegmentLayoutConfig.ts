@@ -1,5 +1,5 @@
 import { Size, Point, Element, CanvasBezierSegment } from "@hylimo/diagram-common";
-import { canvasPointType } from "../../../module/diagramModule";
+import { canvasPointType } from "../../../module/types";
 import { LayoutElement } from "../../layoutElement";
 import { Layout } from "../../layoutEngine";
 import { CanvasConnectionSegmentLayoutConfig } from "./canvasConnectionSegmentLayoutConfig";
@@ -32,7 +32,6 @@ export class CanvasBezierSegmentLayoutConfig extends CanvasConnectionSegmentLayo
             id,
             type: CanvasBezierSegment.TYPE,
             children: [],
-            start: this.getContentId(element, "start"),
             end: this.getContentId(element, "end"),
             startControlPoint: this.getContentId(element, "startControlPoint"),
             endControlPoint: this.getContentId(element, "endControlPoint")

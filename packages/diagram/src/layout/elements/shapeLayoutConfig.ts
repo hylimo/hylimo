@@ -29,6 +29,19 @@ export interface ShapeProperties {
 }
 
 /**
+ * Stroke-related style attributes
+ */
+export const strokeStyleAttributes = [
+    { name: "stroke", description: "optional stroke, must be a valid color string", type: stringType },
+    {
+        name: "stokeOpacity",
+        description: "optional stroke opacity, must be a number between 0 and 1",
+        type: numberType
+    },
+    { name: "strokeWidth", description: "optional width of the stroke", type: numberType }
+];
+
+/**
  * Base class for all shape layout configs
  */
 export abstract class ShapeLayoutConfig extends StyledElementLayoutConfig {
@@ -41,19 +54,13 @@ export abstract class ShapeLayoutConfig extends StyledElementLayoutConfig {
      */
     constructor(type: string, additionalAttributes: AttributeConfig[], additionalStyleAttributes: AttributeConfig[]) {
         super(type, additionalAttributes, [
-            { name: "fill", description: "optional fill of the shape, must be a valid color string", type: stringType },
             {
                 name: "fillOpacity",
                 description: "optional fill opacity , must be a number between 0 and 1",
                 type: numberType
             },
-            { name: "stroke", description: "optional stroke, must be a valid color string", type: stringType },
-            {
-                name: "stokeOpacity",
-                description: "optional stroke opacity, must be a number between 0 and 1",
-                type: numberType
-            },
-            { name: "strokeWidth", description: "optional width of the stroke", type: numberType },
+            { name: "fill", description: "optional fill of the shape, must be a valid color string", type: stringType },
+            ...strokeStyleAttributes,
             ...additionalStyleAttributes
         ]);
     }

@@ -30,12 +30,13 @@ export class PointVisibilityManager {
      */
     constructor(canvas: SCanvas) {
         for (const child of canvas.children) {
-            if (child instanceof SRelativePoint) {
-                this.getDependantsList((child as SRelativePoint).target).push(child.id);
-                this.getDependenciesList(child.id).push((child as SRelativePoint).target);
-            } else if (child instanceof SCanvasElement) {
-                this.getDependantsList((child as SCanvasElement).pos).push(child.id);
-                this.getDependenciesList(child.id).push((child as SCanvasElement).pos);
+            if (child instanceof SCanvasContent) {
+                const id = child.id;
+                const dependencies = child.dependencies;
+                for (const dependency of dependencies) {
+                    this.getDependantsList(dependency).push(id);
+                }
+                this.getDependenciesList(id).push(...dependencies);
             }
         }
     }

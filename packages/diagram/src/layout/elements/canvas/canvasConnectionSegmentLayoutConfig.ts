@@ -1,9 +1,10 @@
 import { FullObject, numberType, RuntimeError, stringType } from "@hylimo/core";
 import { Size } from "@hylimo/diagram-common";
-import { canvasPointType } from "../../../module/diagramModule";
+import { canvasPointType } from "../../../module/types";
 import { AttributeConfig, LayoutElement, SizeConstraints } from "../../layoutElement";
 import { Layout } from "../../layoutEngine";
 import { ElementLayoutConfig } from "../elementLayoutConfig";
+import { CanvasContentLayoutConfig } from "./canvasContentLayoutConfig";
 
 /**
  * Base class for all canvas connection segment layout configs
@@ -20,11 +21,6 @@ export abstract class CanvasConnectionSegmentLayoutConfig extends ElementLayoutC
         super(
             type,
             [
-                {
-                    name: "start",
-                    description: "The start point",
-                    type: canvasPointType
-                },
                 {
                     name: "end",
                     description: "The end point",
@@ -58,10 +54,10 @@ export abstract class CanvasConnectionSegmentLayoutConfig extends ElementLayoutC
      */
     getContentId(element: LayoutElement, pointField: string): string {
         const parent = element.parent;
-        if (!parent || !parent.getContentId) {
-            throw new RuntimeError("CanvasConnections and CanvasElements can only be used as contents of a Canvas");
+        if (!parent || !(parent.layoutConfig as CanvasContentLayoutConfig).getContentId) {
+            throw new RuntimeError("CanvasConnectionSegments can only be used as contents of a CanvasConnection");
         }
         const point = element.element.getLocalFieldOrUndefined(pointField)?.value;
-        return parent.getContentId(element, point);
+        return (parent.layoutConfig as CanvasContentLayoutConfig).getContentId(element.parent!, point as FullObject);
     }
 }

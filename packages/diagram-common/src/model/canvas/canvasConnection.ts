@@ -1,21 +1,21 @@
+import { Point } from "../../common/point";
+import { Size } from "../../common/size";
 import { Element } from "../base/element";
 import { LayoutedElement } from "../base/layoutedElement";
 import { SizedElement } from "../base/sizedElement";
+import { Point as SprottyPoint } from "sprotty-protocol";
+import { StrokedElement } from "../base/strokedElement";
 
 /**
  * Connection on a Canvas with an arbitrary amount of segments
  * Must only have CanvasConnectionSegment
  */
-export interface CanvasConnection extends Element {
+export interface CanvasConnection extends StrokedElement {
     type: typeof CanvasConnection.TYPE;
     /**
-     * The marker at the start of the connection
+     * The id of the start point
      */
-    startMarker?: Marker;
-    /**
-     * The marker at the end of the connection
-     */
-    endMarker?: Marker;
+    start: string;
 }
 
 export namespace CanvasConnection {
@@ -51,14 +51,21 @@ export namespace CanvasConnection {
     }
 }
 
-/**
- * Marker which can be placed at the start or end of a CanvasConnection
- */
-export interface Marker extends SizedElement {
+export interface BaseMarker extends Size {
     /**
      * The position on the vertical center line where the line actually starts
      */
     lineStartOffset: number;
+}
+
+/**
+ * Marker which can be placed at the start or end of a CanvasConnection
+ */
+export interface Marker extends SizedElement, BaseMarker {
+    /**
+     * Is it a start or end marker?
+     */
+    pos: "start" | "end";
 }
 
 export namespace Marker {
@@ -78,6 +85,20 @@ export namespace Marker {
 }
 
 /**
+ * Information required to rendre a CanvasConnectionSegment with a marker
+ */
+export interface MarkerRenderInformation {
+    /**
+     * The new point to render the CanvasConnectionSegment
+     */
+    newPoint: Point;
+    /**
+     * The rotation in degrees (0-360)
+     */
+    rotation: number;
+}
+
+/**
  * Connection line segment
  */
 export interface CanvasConnectionSegment extends Element {
@@ -86,13 +107,30 @@ export interface CanvasConnectionSegment extends Element {
      */
     type: typeof CanvasLineSegment.TYPE | typeof CanvasBezierSegment.TYPE;
     /**
-     * The id of the start point
-     */
-    start: string;
-    /**
      * The id of the end point
      */
     end: string;
+}
+
+/**
+ * Calculates the MarkerRenderInformation based on the two points of the line and the size of the marker
+ * Translates the line
+ *
+ * @param pos the position of the end with the marker
+ * @param helperPos helper point to help direct the marker
+ * @param marker the marker to render
+ */
+export function calculateMarkerRenderInformation(
+    pos: Point,
+    helperPos: Point,
+    marker: BaseMarker
+): MarkerRenderInformation {
+    const markerHeight = marker.height * marker.lineStartOffset;
+    const rotation = (Math.atan2(helperPos.y - pos.y, helperPos.x - pos.x) * 180) / Math.PI;
+    return {
+        rotation,
+        newPoint: SprottyPoint.shiftTowards(pos, helperPos, markerHeight)
+    };
 }
 
 /**
@@ -123,7 +161,22 @@ export namespace CanvasLineSegment {
      * @returns the list of dependencies, may contain duplicates
      */
     export function getDependencies(element: CanvasLineSegment): string[] {
-        return [element.start, element.end];
+        return [element.end];
+    }
+
+    /**
+     * Calculates the MarkerRenderInformation based on the two points of the line and the size of the marker
+     *
+     * @param pos the position of the end with the marker
+     * @param otherEnd the position of the other end
+     * @param marker the marker to render
+     */
+    export function calculateMarkerRenderInformation(
+        pos: Point,
+        otherEnd: Point,
+        marker: BaseMarker
+    ): MarkerRenderInformation {
+        return calculateMarkerRenderInformation(pos, otherEnd, marker);
     }
 }
 
@@ -163,6 +216,21 @@ export namespace CanvasBezierSegment {
      * @returns the list of dependencies, may contain duplicates
      */
     export function getDependencies(element: CanvasBezierSegment): string[] {
-        return [element.start, element.end, element.startControlPoint, element.endControlPoint];
+        return [element.end, element.startControlPoint, element.endControlPoint];
+    }
+
+    /**
+     * Calculates the MarkerRenderInformation based on the two points of the line and the size of the marker
+     *
+     * @param pos the position of the end with the marker
+     * @param controlPoint the control point of the end
+     * @param marker the marker to render
+     */
+    export function calculateMarkerRenderInformation(
+        pos: Point,
+        controlPoint: Point,
+        marker: BaseMarker
+    ): MarkerRenderInformation {
+        return calculateMarkerRenderInformation(pos, controlPoint, marker);
     }
 }

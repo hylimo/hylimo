@@ -1,8 +1,9 @@
-import { FullObject, literal, objectToList, objectType, optional, or, SemanticFieldNames } from "@hylimo/core";
-import { listType } from "@hylimo/core/src/types/list";
+import { FullObject, literal, objectToList, objectType, optional, listType, SemanticFieldNames } from "@hylimo/core";
 import { Size, Point, Element, CanvasConnection, Marker } from "@hylimo/diagram-common";
+import { canvasPointType } from "../../../module/types";
 import { LayoutElement, SizeConstraints } from "../../layoutElement";
 import { Layout } from "../../layoutEngine";
+import { strokeStyleAttributes } from "../shapeLayoutConfig";
 import { CanvasContentLayoutConfig } from "./canvasContentLayoutConfig";
 
 /**
@@ -45,11 +46,17 @@ export class CanvasConnectionLayoutConfig extends CanvasContentLayoutConfig {
                     name: "endMarker",
                     description: "the marker at the end of the connection",
                     type: markerType
+                },
+                {
+                    name: "start",
+                    description: "The start point",
+                    type: canvasPointType
                 }
             ],
-            []
+            [...strokeStyleAttributes]
         );
     }
+
     override measure(layout: Layout, element: LayoutElement, constraints: SizeConstraints): Size {
         // TODO (maybe) better size calculation
         const contents = this.getContents(element);
@@ -57,29 +64,38 @@ export class CanvasConnectionLayoutConfig extends CanvasContentLayoutConfig {
         const startMarker = element.element.getLocalFieldOrUndefined("startMarker")?.value;
         if (startMarker != undefined) {
             element.startMarker = layout.measure(startMarker as FullObject, element, constraints);
+            element.startMarker.position = "start";
         }
         const endMarker = element.element.getLocalFieldOrUndefined("endMarker")?.value;
         if (endMarker != undefined) {
             element.endMarker = layout.measure(endMarker as FullObject, element, constraints);
+            element.endMarker.position = "end";
         }
         return constraints.min;
     }
+
     override layout(layout: Layout, element: LayoutElement, position: Point, size: Size, id: string): Element[] {
         const contents = element.contents as LayoutElement[];
         const result: CanvasConnection = {
             id,
             type: CanvasConnection.TYPE,
+            start: this.getContentId(element, element.element.getLocalFieldOrUndefined("start")!.value as FullObject),
             children: contents.flatMap((content, i) =>
                 layout.layout(content, position, content.measuredSize!, `${id}_${i}`)
-            )
+            ),
+            stroke: element.styles.stroke,
+            strokeOpacity: element.styles.strokeOpacity,
+            strokeWidth: element.styles.strokeWidth
         };
         const startMarker = element.startMarker;
         if (element.startMarker != undefined) {
-            result.startMarker = layout.layout(startMarker, position, startMarker.measureSize, `${id}_s`)[0] as Marker;
+            const marker = layout.layout(startMarker, position, startMarker.measureSize, `${id}_s`)[0] as Marker;
+            result.children.push(marker);
         }
         const endMarker = element.endMarker;
         if (element.endMarker != undefined) {
-            result.endMarker = layout.layout(endMarker, position, endMarker.measureSize, `${id}_e`)[0] as Marker;
+            const marker = layout.layout(endMarker, position, endMarker.measureSize, `${id}_e`)[0] as Marker;
+            result.children.push(marker);
         }
         return [result];
     }

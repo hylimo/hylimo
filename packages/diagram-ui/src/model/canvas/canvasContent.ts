@@ -16,4 +16,9 @@ export abstract class SCanvasContent extends SChildElement implements Selectable
         this._selected = value;
         this.parent.pointVisibilityManager.setSelectionState(this, value);
     }
+
+    /**
+     * List of dependencies of this CanvasContent
+     */
+    abstract get dependencies(): string[];
 }

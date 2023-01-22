@@ -1,6 +1,7 @@
 import { FullObject, literal, numberType, objectType, SemanticFieldNames } from "@hylimo/core";
 import { Size, Element, RelativePoint } from "@hylimo/diagram-common";
 import { Point } from "sprotty-protocol";
+import { canvasPointType } from "../../../module/types";
 import { LayoutElement } from "../../layoutElement";
 import { Layout } from "../../layoutEngine";
 import { CanvasPointLayoutConfig } from "./canvasPointLayoutConfig";
@@ -26,9 +27,7 @@ export class RelativePointLayoutConfig extends CanvasPointLayoutConfig {
                 {
                     name: "target",
                     description: "the target point ofh which the relative point is based",
-                    type: objectType(
-                        new Map([[SemanticFieldNames.PROTO, objectType(new Map([["_type", literal("element")]]))]])
-                    )
+                    type: canvasPointType
                 }
             ],
             []

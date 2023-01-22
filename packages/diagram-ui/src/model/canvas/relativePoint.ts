@@ -40,6 +40,10 @@ export class SRelativePoint extends SCanvasPoint implements LinearAnimatable {
             return { x: this.offsetX, y: this.offsetY, target: { x: 0, y: 0 } };
         }
     }
+
+    override get dependencies(): string[] {
+        return [this.target];
+    }
 }
 
 /**

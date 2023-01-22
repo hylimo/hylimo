@@ -11,7 +11,6 @@ import {
     literal,
     namedType,
     nullType,
-    numberType,
     objectType,
     optional,
     or,
@@ -110,13 +109,6 @@ const fontType = objectType(
         ["name", optional(stringType)],
         ["variationSettings", optional(objectType())]
     ])
-);
-
-/**
- * Type for any type of point
- */
-export const canvasPointType = objectType(
-    new Map([[SemanticFieldNames.PROTO, objectType(new Map([["_type", literal("point")]]))]])
 );
 
 /**

@@ -21,4 +21,9 @@ export class SLinePoint extends SCanvasPoint implements LinearAnimatable {
     override get position(): Point {
         throw new Error("TODO");
     }
+
+    override get dependencies(): string[] {
+        // maybe TODO
+        return [];
+    }
 }

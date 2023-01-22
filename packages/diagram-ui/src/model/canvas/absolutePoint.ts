@@ -24,4 +24,8 @@ export class SAbsolutePoint extends SCanvasPoint implements Point, LinearAnimata
     override get position(): Point {
         return { x: this.x, y: this.y };
     }
+
+    override get dependencies(): string[] {
+        return [];
+    }
 }

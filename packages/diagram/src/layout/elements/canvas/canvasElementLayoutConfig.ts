@@ -1,5 +1,6 @@
 import { objectType, SemanticFieldNames, literal, FullObject } from "@hylimo/core";
 import { Size, Point, Element, CanvasElement } from "@hylimo/diagram-common";
+import { canvasPointType } from "../../../module/types";
 import { LayoutElement, SizeConstraints } from "../../layoutElement";
 import { Layout } from "../../layoutEngine";
 import { CanvasContentLayoutConfig } from "./canvasContentLayoutConfig";
@@ -24,9 +25,7 @@ export class CanvasElementLayoutConfig extends CanvasContentLayoutConfig {
                 {
                     name: "pos",
                     description: "the position of the canvasElement",
-                    type: objectType(
-                        new Map([[SemanticFieldNames.PROTO, objectType(new Map([["_type", literal("element")]]))]])
-                    )
+                    type: canvasPointType
                 }
             ],
             []

@@ -12,7 +12,13 @@ import { numberType } from "./number";
  */
 export function listType(type?: Type): Type {
     return {
-        name: () => `${type}[]`,
+        name: () => {
+            if (type != undefined) {
+                return `${type?.name()}[]`;
+            } else {
+                return "list";
+            }
+        },
         matches(value, context) {
             if (!(value instanceof FullObject)) {
                 return {

@@ -142,6 +142,13 @@ export function jsFun(
     decorators: { [index: string]: string | null } = {},
     types?: [string | number, Type][]
 ): NativeFunctionExpression {
+    if (types) {
+        for (const [key, type] of types) {
+            if (type == undefined) {
+                throw new Error(`Undefined type provided for key ${key}`);
+            }
+        }
+    }
     return new NativeFunctionExpression((args, context, staticScope) => {
         const evaluatedArgs = generateArgs(args, context, new Map(types));
         const oldScope = context.currentScope;
