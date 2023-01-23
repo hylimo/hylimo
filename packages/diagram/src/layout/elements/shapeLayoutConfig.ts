@@ -1,5 +1,6 @@
 import { numberType, stringType } from "@hylimo/core";
 import { LayoutElement, AttributeConfig } from "../layoutElement";
+import { shapeStyleAttributes, strokeStyleAttributes } from "./attributes";
 import { StyledElementLayoutConfig } from "./styledElementLayoutConfig";
 
 /**
@@ -29,19 +30,6 @@ export interface ShapeProperties {
 }
 
 /**
- * Stroke-related style attributes
- */
-export const strokeStyleAttributes = [
-    { name: "stroke", description: "optional stroke, must be a valid color string", type: stringType },
-    {
-        name: "stokeOpacity",
-        description: "optional stroke opacity, must be a number between 0 and 1",
-        type: numberType
-    },
-    { name: "strokeWidth", description: "optional width of the stroke", type: numberType }
-];
-
-/**
  * Base class for all shape layout configs
  */
 export abstract class ShapeLayoutConfig extends StyledElementLayoutConfig {
@@ -53,16 +41,7 @@ export abstract class ShapeLayoutConfig extends StyledElementLayoutConfig {
      * @param additionalStyleAttributes the supported additional style attributes
      */
     constructor(type: string, additionalAttributes: AttributeConfig[], additionalStyleAttributes: AttributeConfig[]) {
-        super(type, additionalAttributes, [
-            {
-                name: "fillOpacity",
-                description: "optional fill opacity , must be a number between 0 and 1",
-                type: numberType
-            },
-            { name: "fill", description: "optional fill of the shape, must be a valid color string", type: stringType },
-            ...strokeStyleAttributes,
-            ...additionalStyleAttributes
-        ]);
+        super(type, additionalAttributes, [...shapeStyleAttributes, ...additionalStyleAttributes]);
     }
 
     /**

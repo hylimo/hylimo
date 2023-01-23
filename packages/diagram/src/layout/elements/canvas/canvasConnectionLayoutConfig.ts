@@ -3,7 +3,7 @@ import { Size, Point, Element, CanvasConnection, Marker } from "@hylimo/diagram-
 import { canvasPointType } from "../../../module/types";
 import { LayoutElement, SizeConstraints } from "../../layoutElement";
 import { Layout } from "../../layoutEngine";
-import { strokeStyleAttributes } from "../shapeLayoutConfig";
+import { strokeStyleAttributes } from "../attributes";
 import { CanvasContentLayoutConfig } from "./canvasContentLayoutConfig";
 
 /**
