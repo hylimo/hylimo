@@ -32,6 +32,13 @@ export class SCanvasConnection extends SCanvasContent {
         return target.position;
     }
 
+    /**
+     * Checks if control elements (like bezier control point handles) should be rendered
+     */
+    get showControlElements(): boolean {
+        return this.parent.pointVisibilityManager.isVisible(this.id);
+    }
+
     override get dependencies(): string[] {
         const childDependencies = this.children.flatMap((child) => (child as SCanvasConnectionSegment).dependencies);
         return [this.start, ...childDependencies];

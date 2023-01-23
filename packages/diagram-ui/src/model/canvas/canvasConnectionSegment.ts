@@ -3,6 +3,7 @@ import { SChildElement } from "sprotty";
 import { SCanvasConnection } from "./canvasConnection";
 import { SCanvasPoint } from "./canvasPoint";
 import { SMarker } from "./marker";
+import { VNode } from "snabbdom";
 
 /**
  * Base model for all CanvasConnectionSegments
@@ -42,4 +43,13 @@ export abstract class SCanvasConnectionSegment extends SChildElement {
      * @param end the end point
      */
     abstract generatePathString(end: Point): string;
+
+    /**
+     * Generates the control elements rendered when the connection is selected
+     *
+     * @param start the original start point (independent of marker)
+     * @param end the original end point (independent of marker)
+     * @returns the generated nodes
+     */
+    abstract generateControlViewElements(start: Point, end: Point): VNode[];
 }

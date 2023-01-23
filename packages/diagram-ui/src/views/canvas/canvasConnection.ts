@@ -20,7 +20,7 @@ export class CanvasConnectionView implements IView {
         const endMarker = markers.find((marker) => marker.pos == "end");
         let startPos = model.startPosition;
         let endPos = segments.at(-1)!.endPosition;
-        const children: VNode[] = [];
+        const childControlElements: VNode[] = [];
         const childMarkers: VNode[] = [];
         if (endMarker != undefined) {
             let endStartPosition: Point;
@@ -46,16 +46,23 @@ export class CanvasConnectionView implements IView {
             startPos = renderInformation.newPoint;
         }
 
+        const showControlElements = model.showControlElements;
         const pathSegments: string[] = [`M ${startPos.x} ${startPos.y}`];
+        let originalStart = model.startPosition;
         for (let i = 0; i < segments.length; i++) {
             const segment = segments[i];
             let newEnd: Point;
+            const originalEnd = segment.endPosition;
             if (i == segments.length - 1) {
                 newEnd = endPos;
             } else {
-                newEnd = segment.endPosition;
+                newEnd = originalEnd;
             }
             pathSegments.push(segment.generatePathString(newEnd));
+            if (showControlElements) {
+                childControlElements.push(...segment.generateControlViewElements(originalStart, originalEnd));
+            }
+            originalStart = originalEnd;
         }
 
         return svg(
@@ -70,7 +77,8 @@ export class CanvasConnectionView implements IView {
                     fill: "none"
                 }
             }),
-            ...childMarkers
+            ...childMarkers,
+            ...childControlElements
         );
     }
 

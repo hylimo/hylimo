@@ -9,9 +9,9 @@ import { SCanvasPoint } from "./canvasPoint";
  */
 export class PointVisibilityManager {
     /**
-     * Currently visible points
+     * Currently visible CanvasContents
      */
-    private visiblePoints = new Map<string, VisibilityReason>();
+    private visibleContents = new Map<string, VisibilityReason>();
     /**
      * Dependants lookup
      */
@@ -100,7 +100,7 @@ export class PointVisibilityManager {
      * @returns true if the point should be visible
      */
     isVisible(id: string): boolean {
-        return this.visiblePoints.has(id);
+        return this.visibleContents.has(id);
     }
 
     /**
@@ -123,15 +123,11 @@ export class PointVisibilityManager {
      * @param element the now selected element
      */
     private setSelected(element: SCanvasContent): void {
-        if (element instanceof SCanvasPoint) {
-            const visibilityReason = this.getOrCreateVisibilityReason(element.id);
-            visibilityReason.self = true;
-            this.makeDependenciesVisible(element.id);
-            this.makeDependentsVisible(element.id);
-            this.makePeerDependenciesVisible(element.id);
-        } else {
-            this.makeDependenciesVisible(element.id);
-        }
+        const visibilityReason = this.getOrCreateVisibilityReason(element.id);
+        visibilityReason.self = true;
+        this.makeDependenciesVisible(element.id);
+        this.makeDependentsVisible(element.id);
+        this.makePeerDependenciesVisible(element.id);
     }
 
     /**
@@ -140,23 +136,19 @@ export class PointVisibilityManager {
      * @param element the now unselected element
      */
     private setUnselected(element: SCanvasContent): void {
-        if (element instanceof SCanvasPoint) {
-            const visibilityReason = this.visiblePoints.get(element.id);
-            if (visibilityReason !== undefined) {
-                visibilityReason.self = false;
-                this.updatePeerDependencies(element.id);
-                if (!VisibilityReason.isVisible(visibilityReason)) {
-                    this.visiblePoints.delete(element.id);
-                }
-                if (visibilityReason.visibleDependencies.size === 0) {
-                    this.updateDependants(element.id);
-                }
-                if (visibilityReason.visibleDependants.size === 0) {
-                    this.updateDependencies(element.id);
-                }
+        const visibilityReason = this.visibleContents.get(element.id);
+        if (visibilityReason !== undefined) {
+            visibilityReason.self = false;
+            this.updatePeerDependencies(element.id);
+            if (!VisibilityReason.isVisible(visibilityReason)) {
+                this.visibleContents.delete(element.id);
             }
-        } else {
-            this.updateDependencies(element.id);
+            if (visibilityReason.visibleDependencies.size === 0) {
+                this.updateDependants(element.id);
+            }
+            if (visibilityReason.visibleDependants.size === 0) {
+                this.updateDependencies(element.id);
+            }
         }
     }
 
@@ -222,14 +214,14 @@ export class PointVisibilityManager {
      * @returns the found or created VisibilityReason
      */
     private getOrCreateVisibilityReason(id: string): VisibilityReason {
-        if (!this.visiblePoints.has(id)) {
-            this.visiblePoints.set(id, {
+        if (!this.visibleContents.has(id)) {
+            this.visibleContents.set(id, {
                 visibleDependants: new Set(),
                 visibleDependencies: new Set(),
                 self: false
             });
         }
-        return this.visiblePoints.get(id)!;
+        return this.visibleContents.get(id)!;
     }
 
     /**
@@ -239,11 +231,11 @@ export class PointVisibilityManager {
      */
     private updateDependants(id: string): void {
         for (const dependant of this.getDependantsList(id)) {
-            const visibilityReason = this.visiblePoints.get(dependant);
+            const visibilityReason = this.visibleContents.get(dependant);
             if (visibilityReason !== undefined) {
                 visibilityReason.visibleDependencies.delete(id);
                 if (!VisibilityReason.isVisible(visibilityReason)) {
-                    this.visiblePoints.delete(dependant);
+                    this.visibleContents.delete(dependant);
                 }
                 if (!visibilityReason.self && visibilityReason.visibleDependencies.size === 0) {
                     this.updateDependants(dependant);
@@ -271,11 +263,11 @@ export class PointVisibilityManager {
      * @param dependency the id of the dependency to update
      */
     private updateDependency(id: string, dependency: string): void {
-        const visibilityReason = this.visiblePoints.get(dependency);
+        const visibilityReason = this.visibleContents.get(dependency);
         if (visibilityReason !== undefined) {
             visibilityReason.visibleDependants.delete(id);
             if (!VisibilityReason.isVisible(visibilityReason)) {
-                this.visiblePoints.delete(dependency);
+                this.visibleContents.delete(dependency);
             }
             if (!visibilityReason.self && visibilityReason.visibleDependants.size === 0) {
                 this.updateDependencies(dependency);

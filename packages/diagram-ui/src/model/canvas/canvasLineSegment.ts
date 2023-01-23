@@ -1,6 +1,7 @@
 import { CanvasLineSegment, MarkerRenderInformation, Point } from "@hylimo/diagram-common";
 import { SCanvasConnectionSegment } from "./canvasConnectionSegment";
 import { SMarker } from "./marker";
+import { VNode } from "snabbdom";
 
 /**
  * Model for CanvasLineSegment
@@ -20,5 +21,9 @@ export class SCanvasLineSegment extends SCanvasConnectionSegment {
 
     override generatePathString(end: Point): string {
         return `L ${end.x} ${end.y}`;
+    }
+
+    override generateControlViewElements(start: Point, end: Point): VNode[] {
+        return [];
     }
 }

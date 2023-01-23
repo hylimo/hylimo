@@ -1,4 +1,6 @@
 import { CanvasBezierSegment, MarkerRenderInformation, Point } from "@hylimo/diagram-common";
+import { VNode } from "snabbdom";
+import { svg } from "sprotty";
 import { SCanvasConnectionSegment } from "./canvasConnectionSegment";
 import { SCanvasPoint } from "./canvasPoint";
 import { SMarker } from "./marker";
@@ -48,5 +50,35 @@ export class SCanvasBezierSegment extends SCanvasConnectionSegment {
         const c1 = this.startControlPointPosition;
         const c2 = this.endControlPointPosition;
         return `C ${c1.x} ${c1.y} ${c2.x} ${c2.y} ${end.x} ${end.y}`;
+    }
+
+    override generateControlViewElements(start: Point, end: Point): VNode[] {
+        const c1 = this.startControlPointPosition;
+        const c2 = this.endControlPointPosition;
+        const className = "bezier-handle-line";
+        return [
+            svg("line", {
+                attrs: {
+                    x1: start.x,
+                    x2: c1.x,
+                    y1: start.y,
+                    y2: c1.y
+                },
+                class: {
+                    [className]: true
+                }
+            }),
+            svg("line", {
+                attrs: {
+                    x1: end.x,
+                    x2: c2.x,
+                    y1: end.y,
+                    y2: c2.y
+                },
+                class: {
+                    [className]: true
+                }
+            })
+        ];
     }
 }
