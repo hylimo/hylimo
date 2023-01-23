@@ -16,7 +16,7 @@ export const operatorModule: InterpreterModule = {
     dependencies: [],
     runtimeDependencies: [DefaultModuleNames.BOOLEAN],
     expressions: [
-        ...["*", "/", "%", "&&", "||", ">", ">=", "<", "<=", ">>", "<<"].map((operator) =>
+        ...["*", "/", "%", "&&", "||", ">", ">=", "<", "<=", ">>", "<<", "+="].map((operator) =>
             assign(
                 operator,
                 native(

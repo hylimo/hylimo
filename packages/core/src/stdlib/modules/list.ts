@@ -58,6 +58,53 @@ export const listModule: InterpreterModule = {
                     )
                 ),
                 id(listProto).assignField(
+                    "addAll",
+                    fun(
+                        `
+                            targetList = args.self
+                            it.forEach {
+                                targetList.add(it)
+                            }
+                        `,
+                        {
+                            docs: `
+                                Adds all elements in the provided list to the list.
+                                Params:
+                                    - "self": the list where to add the elements
+                                    - 0: the list of elements to add
+                                Returns:
+                                    null
+                            `
+                        },
+                        [[SemanticFieldNames.SELF, listType()], [0, listType()]]
+                    )
+                ),
+                id(listProto).assignField("+=", id(listProto).field("add")),
+                id(listProto).assignField(
+                    "+",
+                    fun(
+                        `
+                            list1 = args.self
+                            (list2) = args
+                            result = list()
+                            result.addAll(list1)
+                            result.addAll(list2)
+                            result
+                        `,
+                        {
+                            docs: `
+                                Merges to lists and createas a new list.
+                                Params
+                                    - "self": the first list
+                                    - 0: the second list
+                                Returns:
+                                    A new list with the elements of both parameters
+                            `
+                        },
+                        [[SemanticFieldNames.SELF, listType()], [0, listType()]]
+                    )
+                ),
+                id(listProto).assignField(
                     "remove",
                     jsFun(
                         (args, context) => {
