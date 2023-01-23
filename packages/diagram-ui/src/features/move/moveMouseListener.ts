@@ -10,12 +10,12 @@ import {
     SModelRoot
 } from "sprotty";
 import { Action } from "sprotty-protocol";
-import { SAbsolutePoint } from "../../model/canvas/absolutePoint";
-import { SCanvas } from "../../model/canvas/canvas";
-import { SCanvasElement } from "../../model/canvas/canvasElement";
-import { SCanvasPoint } from "../../model/canvas/canvasPoint";
-import { SLinePoint } from "../../model/canvas/linePoint";
-import { SRelativePoint } from "../../model/canvas/relativePoint";
+import { SAbsolutePoint } from "../../model/canvas/sAbsolutePoint";
+import { SCanvas } from "../../model/canvas/sCanvas";
+import { SCanvasElement } from "../../model/canvas/sCanvasElement";
+import { SCanvasPoint } from "../../model/canvas/sCanvasPoint";
+import { SLinePoint } from "../../model/canvas/sLinePoint";
+import { SRelativePoint } from "../../model/canvas/sRelativePoint";
 import { MoveHandler } from "./moveHandler";
 import { TYPES } from "../types";
 import { TransactionIdProvider } from "../transaction/transactionIdProvider";

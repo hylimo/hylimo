@@ -1,5 +1,5 @@
 import { LinearAnimatable } from "../features/animation/model";
-import { SShape } from "./shape";
+import { SShape } from "./sShape";
 
 /**
  * Animated fields for SRect

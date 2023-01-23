@@ -1,5 +1,5 @@
 import { SChildElement } from "sprotty";
-import { SLayoutedElement } from "../layoutedElement";
+import { SLayoutedElement } from "../sLayoutedElement";
 import { PointVisibilityManager } from "./pointVisibilityManager";
 
 /**

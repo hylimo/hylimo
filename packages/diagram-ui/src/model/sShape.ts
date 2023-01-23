@@ -1,4 +1,4 @@
-import { SLayoutedElement } from "./layoutedElement";
+import { SLayoutedElement } from "./sLayoutedElement";
 
 /**
  * Base class for all shapes

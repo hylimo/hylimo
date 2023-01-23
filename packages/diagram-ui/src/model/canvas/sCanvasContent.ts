@@ -1,5 +1,5 @@
 import { SChildElement, Selectable } from "sprotty";
-import { SCanvas } from "./canvas";
+import { SCanvas } from "./sCanvas";
 
 /**
  * Base class for all canvas contents

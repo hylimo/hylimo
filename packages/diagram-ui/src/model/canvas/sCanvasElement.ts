@@ -2,8 +2,8 @@ import { Point } from "@hylimo/diagram-common";
 import { SModelElement } from "sprotty";
 import { LinearAnimatable } from "../../features/animation/model";
 import { PositionProvider } from "../../features/layout/positionProvider";
-import { SCanvasContent } from "./canvasContent";
-import { SCanvasPoint } from "./canvasPoint";
+import { SCanvasContent } from "./sCanvasContent";
+import { SCanvasPoint } from "./sCanvasPoint";
 
 /**
  * Anbimated fields for SCanvasElement

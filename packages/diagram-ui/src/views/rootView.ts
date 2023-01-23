@@ -1,7 +1,7 @@
 import { IView, IViewArgs, RenderingContext, svg } from "sprotty";
 import { injectable } from "inversify";
 import { VNode } from "snabbdom";
-import { SRoot } from "../model/root";
+import { SRoot } from "../model/sRoot";
 
 /**
  * IView that is the parent which handles

@@ -1,9 +1,9 @@
 import { CanvasBezierSegment, MarkerRenderInformation, Point } from "@hylimo/diagram-common";
 import { VNode } from "snabbdom";
 import { svg } from "sprotty";
-import { SCanvasConnectionSegment } from "./canvasConnectionSegment";
-import { SCanvasPoint } from "./canvasPoint";
-import { SMarker } from "./marker";
+import { SCanvasConnectionSegment } from "./sCanvasConnectionSegment";
+import { SCanvasPoint } from "./sCanvasPoint";
+import { SMarker } from "./sMarker";
 
 /**
  * Model for CanvasBezierSegment

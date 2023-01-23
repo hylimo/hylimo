@@ -1,8 +1,8 @@
 import { TranslationMoveAction } from "@hylimo/diagram-common";
 import { injectable, inject } from "inversify";
 import { Command, CommandExecutionContext, CommandReturn, TYPES } from "sprotty";
-import { SAbsolutePoint } from "../../model/canvas/absolutePoint";
-import { SRelativePoint } from "../../model/canvas/relativePoint";
+import { SAbsolutePoint } from "../../model/canvas/sAbsolutePoint";
+import { SRelativePoint } from "../../model/canvas/sRelativePoint";
 
 /**
  * Resolved version of TranslationMoveAction

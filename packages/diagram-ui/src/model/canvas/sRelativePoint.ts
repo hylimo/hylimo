@@ -2,7 +2,7 @@ import { Point } from "@hylimo/diagram-common";
 import { SModelElement } from "sprotty";
 import { LinearAnimatable } from "../../features/animation/model";
 import { isPositionProvider } from "../../features/layout/positionProvider";
-import { SCanvasPoint } from "./canvasPoint";
+import { SCanvasPoint } from "./sCanvasPoint";
 
 /**
  * Animated fields for SRelativePoint

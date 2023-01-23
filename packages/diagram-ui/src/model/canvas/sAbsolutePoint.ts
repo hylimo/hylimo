@@ -1,6 +1,6 @@
 import { Point } from "@hylimo/diagram-common";
 import { LinearAnimatable } from "../../features/animation/model";
-import { SCanvasPoint } from "./canvasPoint";
+import { SCanvasPoint } from "./sCanvasPoint";
 
 /**
  * Animated fields for SAbsolutePoint

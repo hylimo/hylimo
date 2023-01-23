@@ -1,7 +1,7 @@
 import { injectable } from "inversify";
 import { VNode } from "snabbdom";
 import { IViewArgs, RenderingContext, IView, svg } from "sprotty";
-import { SRect } from "../model/rect";
+import { SRect } from "../model/sRect";
 import { extractShapeAttributes } from "./attributeHelpers";
 
 /**

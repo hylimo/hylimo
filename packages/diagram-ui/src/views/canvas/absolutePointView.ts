@@ -1,8 +1,8 @@
 import { injectable } from "inversify";
 import { VNode } from "snabbdom";
 import { RenderingContext } from "sprotty";
-import { SAbsolutePoint } from "../../model/canvas/absolutePoint";
-import { CanvasPointView } from "./canvasPoint";
+import { SAbsolutePoint } from "../../model/canvas/sAbsolutePoint";
+import { CanvasPointView } from "./canvasPointView";
 
 /**
  * IView that represents an AbsolutePoint

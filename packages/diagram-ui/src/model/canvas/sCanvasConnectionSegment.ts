@@ -1,8 +1,8 @@
 import { MarkerRenderInformation, Point } from "@hylimo/diagram-common";
 import { SChildElement } from "sprotty";
-import { SCanvasConnection } from "./canvasConnection";
-import { SCanvasPoint } from "./canvasPoint";
-import { SMarker } from "./marker";
+import { SCanvasConnection } from "./sCanvasConnection";
+import { SCanvasPoint } from "./sCanvasPoint";
+import { SMarker } from "./sMarker";
 import { VNode } from "snabbdom";
 
 /**

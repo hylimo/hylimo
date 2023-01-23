@@ -1,7 +1,7 @@
-import { SCanvas } from "./canvas";
-import { SCanvasConnection } from "./canvasConnection";
-import { SCanvasContent } from "./canvasContent";
-import { SCanvasPoint } from "./canvasPoint";
+import { SCanvas } from "./sCanvas";
+import { SCanvasConnection } from "./sCanvasConnection";
+import { SCanvasContent } from "./sCanvasContent";
+import { SCanvasPoint } from "./sCanvasPoint";
 
 /**
  * Manages a lookup for visible points

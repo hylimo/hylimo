@@ -1,6 +1,6 @@
 import { CanvasLineSegment, MarkerRenderInformation, Point } from "@hylimo/diagram-common";
-import { SCanvasConnectionSegment } from "./canvasConnectionSegment";
-import { SMarker } from "./marker";
+import { SCanvasConnectionSegment } from "./sCanvasConnectionSegment";
+import { SMarker } from "./sMarker";
 import { VNode } from "snabbdom";
 
 /**

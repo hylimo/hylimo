@@ -1,8 +1,8 @@
 import { injectable } from "inversify";
 import { VNode } from "snabbdom";
 import { RenderingContext, svg } from "sprotty";
-import { SRelativePoint } from "../../model/canvas/relativePoint";
-import { CanvasPointView } from "./canvasPoint";
+import { SRelativePoint } from "../../model/canvas/sRelativePoint";
+import { CanvasPointView } from "./canvasPointView";
 
 /**
  * IView that represents an RelativePoint

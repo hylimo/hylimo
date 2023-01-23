@@ -1,5 +1,5 @@
-import { SLayoutedElement } from "../model/layoutedElement";
-import { SShape } from "../model/shape";
+import { SLayoutedElement } from "../model/sLayoutedElement";
+import { SShape } from "../model/sShape";
 
 /**
  * Extracts layout attributes

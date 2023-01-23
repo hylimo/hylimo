@@ -1,7 +1,7 @@
 import { Point } from "@hylimo/diagram-common";
-import { SCanvasConnectionSegment } from "./canvasConnectionSegment";
-import { SCanvasContent } from "./canvasContent";
-import { SCanvasPoint } from "./canvasPoint";
+import { SCanvasConnectionSegment } from "./sCanvasConnectionSegment";
+import { SCanvasContent } from "./sCanvasContent";
+import { SCanvasPoint } from "./sCanvasPoint";
 
 /**
  * Model for CanvasConnection

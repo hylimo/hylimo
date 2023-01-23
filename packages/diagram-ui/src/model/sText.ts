@@ -1,5 +1,5 @@
 import { LinearAnimatable } from "../features/animation/model";
-import { SLayoutedElement } from "./layoutedElement";
+import { SLayoutedElement } from "./sLayoutedElement";
 
 /**
  * Animated fields for SText
