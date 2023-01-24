@@ -16,8 +16,8 @@ export class RuntimeError extends Error {
      */
     findFirstPosition(): ASTExpressionPosition | undefined {
         for (const stackEntry of this.interpretationStack) {
-            if (stackEntry.position) {
-                return stackEntry.position;
+            if (stackEntry.metadata.position) {
+                return stackEntry.metadata.position;
             }
         }
         return undefined;

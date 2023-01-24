@@ -4,7 +4,6 @@ import { FullObject } from "../runtime/objects/fullObject";
 import { FunctionObject, NativeFunctionObject } from "../runtime/objects/function";
 import { NumberObject } from "../runtime/objects/number";
 import { StringObject } from "../runtime/objects/string";
-import { RuntimeError } from "../runtime/runtimeError";
 import { SemanticFieldNames } from "../runtime/semanticFieldNames";
 import { Type } from "../types/base";
 
@@ -21,16 +20,48 @@ export interface ASTExpressionPosition {
 }
 
 /**
+ * Metadata for Expressions
+ * Provides the optional position, and an isEditable flag
+ */
+export interface ExpressionMetadata {
+    /**
+     * The position of the expression
+     */
+    readonly position?: ASTExpressionPosition;
+    /**
+     * If false, the expression should not be edited
+     */
+    readonly isEditable: boolean;
+}
+
+export namespace ExpressionMetadata {
+    /**
+     * Constant noEdit no position metadata
+     */
+    export const NO_EDIT: ExpressionMetadata = Object.freeze({ isEditable: false });
+
+    /**
+     * Checks if a ExpressionMetadata is editable
+     *
+     * @param metadata the metadata to check
+     * @returns true if metadata is undefined, its position is undefined and isEditable is true
+     */
+    export function isEditable(metadata?: ExpressionMetadata): boolean {
+        return metadata?.isEditable === true && metadata?.position != undefined;
+    }
+}
+
+/**
  * Base class for all AST elements.
  * Subclasses must be treated as immutable.
  */
 export abstract class Expression {
     /**
      * Base constructor for all Expressions
-     * @param position if defined, where in the source code the expression is
+     * @param metadata metadata for the expression
      * @param type used for serialization and debugging
      */
-    constructor(readonly type: string, readonly position?: ASTExpressionPosition) {}
+    constructor(readonly type: string, readonly metadata: ExpressionMetadata) {}
 
     /**
      * Evaluates this expression by calling evaluateInternal
@@ -79,7 +110,7 @@ export abstract class Expression {
      * @returns the created FieldAccessExpression
      */
     field(name: string | number): FieldAccessExpression {
-        return new FieldAccessExpression(name, this);
+        return new FieldAccessExpression(name, this, ExpressionMetadata.NO_EDIT);
     }
 
     /**
@@ -97,7 +128,7 @@ export abstract class Expression {
                 return arg;
             }
         });
-        return new InvocationExpression(this, escapedArgs);
+        return new InvocationExpression(this, escapedArgs, ExpressionMetadata.NO_EDIT);
     }
 
     /**
@@ -116,7 +147,7 @@ export abstract class Expression {
                 return arg;
             }
         });
-        return new SelfInvocationExpression(name, this, escapedArgs);
+        return new SelfInvocationExpression(name, this, escapedArgs, ExpressionMetadata.NO_EDIT);
     }
 
     /**
@@ -128,7 +159,7 @@ export abstract class Expression {
      * @returns the created AssignmentExpression
      */
     assignField(field: string, value: Expression): AssignmentExpression {
-        return new AssignmentExpression(field, this, value);
+        return new AssignmentExpression(field, this, value, ExpressionMetadata.NO_EDIT);
     }
 
     /**
@@ -159,7 +190,7 @@ export class ConstExpression extends Expression {
      * @param value the value which is wrapped
      */
     constructor(readonly value: FieldEntry) {
-        super("ConstExpression");
+        super("ConstExpression", ExpressionMetadata.NO_EDIT);
     }
 
     override evaluateInternal(_context: InterpreterContext): FieldEntry {
@@ -177,11 +208,11 @@ export abstract class LiteralExpression<T> extends Expression {
      * Creates a new LiteralExpression consisting out of a constant literal of T
      *
      * @param value the constant literal
-     * @param position if defined, where in the source code the expression is
+     * @param metadata metadata for the expression
      * @param type used for serialization and debugging
      */
-    constructor(readonly value: T, type: string, position?: ASTExpressionPosition) {
-        super(type, position);
+    constructor(readonly value: T, type: string, metadata: ExpressionMetadata) {
+        super(type, metadata);
     }
 }
 
@@ -193,10 +224,10 @@ export class StringLiteralExpression extends LiteralExpression<string> {
      * Creates a new StringLiteralExpression consisting out of a constant string
      *
      * @param value the constant literal
-     * @param position if defined, where in the source code the expression is
+     * @param metadata metadata for the expression
      */
-    constructor(value: string, position?: ASTExpressionPosition) {
-        super(value, "StringLiteralExpression", position);
+    constructor(value: string, metadata: ExpressionMetadata) {
+        super(value, "StringLiteralExpression", metadata);
     }
 
     override evaluateInternal(context: InterpreterContext): FieldEntry {
@@ -212,10 +243,10 @@ export class NumberLiteralExpression extends LiteralExpression<number> {
      * Creates a new NumberLiteralExpression consisting out of a constant number
      *
      * @param value the constant literal
-     * @param position if defined, where in the source code the expression is
+     * @param metadata metadata for the expression
      */
-    constructor(value: number, position?: ASTExpressionPosition) {
-        super(value, "NumberLiteralExpression", position);
+    constructor(value: number, metadata: ExpressionMetadata) {
+        super(value, "NumberLiteralExpression", metadata);
     }
 
     override evaluateInternal(context: InterpreterContext): FieldEntry {
@@ -232,11 +263,11 @@ export abstract class AbstractFunctionExpression extends Expression {
      * Creates a new AbstractFunctionExpression having a set of decorator entries
      *
      * @param decorator the decorator entries
-     * @param position if defined, where in the source code the expression is
+     * @param metadata metadata for the expression
      * @param type used for serialization and debugging
      */
-    constructor(readonly decorator: Map<string, string | undefined>, type: string, position?: ASTExpressionPosition) {
-        super(type, position);
+    constructor(readonly decorator: Map<string, string | undefined>, type: string, metadata: ExpressionMetadata) {
+        super(type, metadata);
     }
 }
 
@@ -250,16 +281,16 @@ export class FunctionExpression extends AbstractFunctionExpression {
      *
      * @param expressions the content of the function
      * @param decorator the decorator entries
-     * @param position if defined, where in the source code the expression is
+     * @param metadata metadata for the expression
      * @param types argument types to check on invocation
      */
     constructor(
         readonly expressions: Expression[],
         decorator: Map<string, string | undefined>,
-        position?: ASTExpressionPosition,
+        metadata: ExpressionMetadata,
         readonly types?: Map<string | number, Type>
     ) {
-        super(decorator, "FunctionExpression", position);
+        super(decorator, "FunctionExpression", metadata);
     }
 
     override evaluateInternal(context: InterpreterContext): FieldEntry {
@@ -287,14 +318,14 @@ export class NativeFunctionExpression extends AbstractFunctionExpression {
      *
      * @param callback executed to get the result of the function
      * @param decorator the decorator entries
-     * @param position if defined, where in the source code the expression is
+     * @param metadata metadata for the expression
      */
     constructor(
         readonly callback: NativeFunctionType,
         decorator: Map<string, string | undefined>,
-        position?: ASTExpressionPosition
+        metadata: ExpressionMetadata
     ) {
-        super(decorator, "NativeFunctionExpression", position);
+        super(decorator, "NativeFunctionExpression", metadata);
     }
 
     override evaluateInternal(context: InterpreterContext): FieldEntry {
@@ -308,11 +339,11 @@ export class NativeFunctionExpression extends AbstractFunctionExpression {
 export abstract class AbstractInvocationExpression extends Expression {
     /**
      * Base constructor for all AbstractInvocationExpressions
-     * @param position if defined, where in the source code the expression is
+     * @param metadata metadata for the expression
      * @param type used for serialization and debugging
      */
-    constructor(readonly argumentExpressions: InvocationArgument[], type: string, position?: ASTExpressionPosition) {
-        super(type, position);
+    constructor(readonly argumentExpressions: InvocationArgument[], type: string, metadata: ExpressionMetadata) {
+        super(type, metadata);
     }
 }
 
@@ -327,14 +358,10 @@ export class InvocationExpression extends AbstractInvocationExpression {
      *
      * @param target evaluated to provide the function to invoke
      * @param argumentExpressions evaluated to provide arguments
-     * @param position if defined, where in the source code the expression is
+     * @param metadata metadata for the expression
      */
-    constructor(
-        readonly target: Expression,
-        argumentExpressions: InvocationArgument[],
-        position?: ASTExpressionPosition
-    ) {
-        super(argumentExpressions, "InvokationExpression", position);
+    constructor(readonly target: Expression, argumentExpressions: InvocationArgument[], metadata: ExpressionMetadata) {
+        super(argumentExpressions, "InvokationExpression", metadata);
     }
 
     override evaluateInternal(context: InterpreterContext): FieldEntry {
@@ -361,15 +388,15 @@ export class SelfInvocationExpression extends AbstractInvocationExpression {
      * @param target evaluated to provide the function to invoke
      * @param name the name or index to access on target
      * @param argumentExpressions evaluated to provide arguments
-     * @param position if defined, where in the source code the expression is
+     * @param metadata metadata for the expression
      */
     constructor(
         readonly name: string | number,
         readonly target: Expression,
         argumentExpressions: InvocationArgument[],
-        position?: ASTExpressionPosition
+        metadata: ExpressionMetadata
     ) {
-        super(argumentExpressions, "InvokationExpression", position);
+        super(argumentExpressions, "InvokationExpression", metadata);
     }
 
     override evaluateInternal(context: InterpreterContext): FieldEntry {
@@ -392,10 +419,10 @@ export class FieldAccessExpression extends Expression {
      *
      * @param target evaluated to provide the target of the field access
      * @param name name or index of the field to access
-     * @param position if defined, where in the source code the expression is
+     * @param metadata metadata for the expression
      */
-    constructor(readonly name: string | number, readonly target: Expression, position?: ASTExpressionPosition) {
-        super("FieldAccessExpression", position);
+    constructor(readonly name: string | number, readonly target: Expression, metadata: ExpressionMetadata) {
+        super("FieldAccessExpression", metadata);
     }
 
     override evaluateInternal(context: InterpreterContext): FieldEntry {
@@ -412,10 +439,10 @@ export class IdentifierExpression extends Expression {
     /**
      * Creates a new IdentifierExpression consisting of an identifier
      * @param identifier the name of the identifier
-     * @param position if defined, where in the source code the expression is
+     * @param metadata metadata for the expression
      */
-    constructor(readonly identifier: string, position?: ASTExpressionPosition) {
-        super("IdentifierExpression", position);
+    constructor(readonly identifier: string, metadata: ExpressionMetadata) {
+        super("IdentifierExpression", metadata);
     }
 
     override evaluateInternal(context: InterpreterContext): FieldEntry {
@@ -435,15 +462,15 @@ export class AssignmentExpression extends Expression {
      * @param name name of the assigned field
      * @param target evaluates to the object where the field is located on, if not present, the scope is used
      * @param value evaluates to the assigned value
-     * @param position if defined, where in the source code the expression is
+     * @param metadata metadata for the expression
      */
     constructor(
         readonly name: string,
         readonly target: Expression | undefined,
         readonly value: Expression,
-        position?: ASTExpressionPosition
+        metadata: ExpressionMetadata
     ) {
-        super("AssignmentExpression", position);
+        super("AssignmentExpression", metadata);
     }
 
     override evaluateInternal(context: InterpreterContext): FieldEntry {
@@ -473,10 +500,10 @@ export class DestructuringExpression extends Expression {
      *
      * @param names the names of the field on the current context to assign
      * @param value the right hand side, provides the values
-     * @param position if defined, where in the source code the expression is
+     * @param metadata metadata for the expression
      */
-    constructor(readonly names: string[], readonly value: Expression, position?: ASTExpressionPosition) {
-        super("DestructuringExpression", position);
+    constructor(readonly names: string[], readonly value: Expression, metadata: ExpressionMetadata) {
+        super("DestructuringExpression", metadata);
     }
 
     override evaluateInternal(context: InterpreterContext): FieldEntry {

@@ -1,4 +1,4 @@
-import { Expression, listType, optional, stringType } from "@hylimo/core";
+import { Expression, ExpressionMetadata, listType, optional, stringType } from "@hylimo/core";
 import { Element, Point, Size } from "@hylimo/diagram-common";
 import { LayoutElement, LayoutConfig, SizeConstraints, AttributeConfig } from "../layoutElement";
 import { Layout } from "../layoutEngine";
@@ -63,10 +63,10 @@ export abstract class ElementLayoutConfig implements LayoutConfig {
      * @returns the start offsets or undefined if edit is not supported
      */
     protected generateEditableNumbers(...expressions: (Expression | undefined)[]): number[] | undefined {
-        if (expressions.some((expression) => expression?.position == undefined)) {
+        if (expressions.some((expression) => !ExpressionMetadata.isEditable(expression?.metadata))) {
             return undefined;
         }
-        const positions = expressions.map((expression) => expression!.position!.startOffset);
+        const positions = expressions.map((expression) => expression!.metadata.position!.startOffset);
         if (new Set(positions).size < positions.length) {
             return undefined;
         } else {

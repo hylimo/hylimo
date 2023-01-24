@@ -4,6 +4,7 @@ import {
     ASTExpressionPosition,
     DestructuringExpression,
     Expression,
+    ExpressionMetadata,
     FieldAccessExpression,
     FunctionExpression,
     IdentifierExpression,
@@ -22,9 +23,9 @@ import { Parser } from "./parser";
 type CallBracketsDefinition = [InvocationArgument[], ASTExpressionPosition];
 
 /**
- *
+ * Defines an access with multiple possible call brackets
  */
-type AccessDefinition = {
+interface AccessDefinition {
     /**
      * The accessed fields
      */
@@ -37,15 +38,19 @@ type AccessDefinition = {
      * Defines applied function invocations (0..n)
      */
     callBrackets: CallBracketsDefinition[];
-};
+}
 
 /**
- * Generates the visitor which can transform the CST to an AST
- *
- * @param parser the parser for which the visitor is generated
- * @returns an instance of the visitor
+ * Parameters defining if the current visited expression is editable
  */
-export function generateVisitor(parser: Parser): ICstVisitor<never, any> {
+export interface CstVisitorParameters {
+    /**
+     * If true, the expression is editable
+     */
+    editable: boolean;
+}
+
+export function generateVisitor(parser: Parser): ICstVisitor<CstVisitorParameters, any> {
     /**
      * Helper to discard position information if parser does not allow tracking
      *
@@ -61,53 +66,78 @@ export function generateVisitor(parser: Parser): ICstVisitor<never, any> {
     }
 
     /**
-     * Helper which wraps generatePosition in optionalPosition.
+     * Helper to generate metadata based on the parameters and a position
+     *
+     * @param position the position for the metadata
+     * @param params the parameters required for generating the Metadata
+     * @returns the generated metadata
+     */
+    function metadata(position: ASTExpressionPosition | undefined, params: CstVisitorParameters): ExpressionMetadata {
+        return {
+            position,
+            isEditable: params.editable && position != undefined
+        };
+    }
+
+    /**
+     * Helper which wraps generatePosition in metadata and optionalPosition.
+     * Takes the
      * Also returns undefined if start or end is undefined.
      *
      * @param start the start position
      * @param end the end position
+     * @param params the parameters required for generating the Metadata
      * @returns the combined start and end position or undefined
      */
-    function generateOptionalPosition(
+    function generateMetadata(
         start: ASTExpressionPosition,
-        end: ASTExpressionPosition
-    ): ASTExpressionPosition | undefined {
+        end: ASTExpressionPosition,
+        params: CstVisitorParameters
+    ): ExpressionMetadata {
         if (start == undefined || end == undefined) {
-            return undefined;
+            return metadata(undefined, params);
         }
-        return optionalPosition(generatePosition(start, end));
+        return metadata(optionalPosition(generatePosition(start, end)), params);
     }
 
     /**
      * Visitor which visists each node and generates the AST based on it
      */
-    class GenerateASTVisitor extends parser.getBaseCstVisitorConstructor<never, any>() {
+    class GenerateASTVisitor extends parser.getBaseCstVisitorConstructor<CstVisitorParameters, any>() {
         constructor() {
             super();
             this.validateVisitor();
+        }
+
+        override visit(cstNode: CstNode | CstNode[], param?: CstVisitorParameters | undefined) {
+            if (param == undefined) {
+                throw new Error("Parameters are required");
+            }
+            return super.visit(cstNode, param);
         }
 
         /**
          * Maps a literal
          *
          * @param ctx the children of the current CST node
+         * @param params parameter context which must be passed at visit
          * @returns the created literal expression
          */
-        private literal(ctx: any): LiteralExpression<any> {
+        private literal(ctx: any, params: CstVisitorParameters): LiteralExpression<any> {
             if (ctx.String) {
                 const token = ctx.String[0];
-                return new StringLiteralExpression(parseString(token.image), optionalPosition(token));
+                return new StringLiteralExpression(parseString(token.image), metadata(optionalPosition(token), params));
             } else {
                 const token = ctx.Number[0];
                 let value = parseNumber(token.image);
-                let optionalPos: ASTExpressionPosition | undefined;
+                let meta: ExpressionMetadata;
                 if (ctx.SignMinus) {
                     value = -value;
-                    optionalPos = generateOptionalPosition(ctx.SignMinus[0], token);
+                    meta = generateMetadata(ctx.SignMinus[0], token, params);
                 } else {
-                    optionalPos = optionalPosition(token);
+                    meta = metadata(optionalPosition(token), params);
                 }
-                return new NumberLiteralExpression(value, optionalPos);
+                return new NumberLiteralExpression(value, meta);
             }
         }
 
@@ -115,10 +145,14 @@ export function generateVisitor(parser: Parser): ICstVisitor<never, any> {
          * Maps a function decorator
          *
          * @param ctx the children of the current CST node
+         * @param params parameter context which must be passed at visit
          * @returns a map with all decorator entries and the start position of the decorator
          */
-        private decorator(ctx: any): [Map<string, string | undefined>, ASTExpressionPosition] {
-            const entries = (ctx.decoratorEntry ?? []).map((entry: CstNode) => this.visit(entry));
+        private decorator(
+            ctx: any,
+            params: CstVisitorParameters
+        ): [Map<string, string | undefined>, ASTExpressionPosition] {
+            const entries = (ctx.decoratorEntry ?? []).map((entry: CstNode) => this.visit(entry, params));
             return [
                 entries.reduce((map: Map<string, string | undefined>, entry: any) => {
                     map.set(entry.name, entry.value);
@@ -132,6 +166,7 @@ export function generateVisitor(parser: Parser): ICstVisitor<never, any> {
          * Maps a decorator entry
          *
          * @param ctx the children of the current CST node
+         * @param params parameter context which must be passed at visit
          * @returns the created decorator entry consisting of name and value
          */
         private decoratorEntry(ctx: any): { name: string; value?: string } {
@@ -149,23 +184,24 @@ export function generateVisitor(parser: Parser): ICstVisitor<never, any> {
          * Maps a function expression
          *
          * @param ctx the children of the current CST node
+         * @param params parameter context which must be passed at visit
          * @returns the created function expression
          */
-        private function(ctx: any): FunctionExpression {
+        private function(ctx: any, params: CstVisitorParameters): FunctionExpression {
             let decorator: Map<string, string | undefined>;
             let startPos: ASTExpressionPosition;
             if (ctx.decorator) {
-                const decoratorRes = this.visit(ctx.decorator) as [any, ASTExpressionPosition];
+                const decoratorRes = this.visit(ctx.decorator, params) as [any, ASTExpressionPosition];
                 [decorator, startPos] = decoratorRes;
             } else {
                 decorator = new Map();
                 startPos = ctx.OpenCurlyBracket[0];
             }
-            const expressions = this.visit(ctx.expressions);
+            const expressions = this.visit(ctx.expressions, { editable: params.editable && !decorator.has("noedit") });
             return new FunctionExpression(
                 expressions,
                 decorator,
-                generateOptionalPosition(startPos, ctx.CloseCurlyBracket[0])
+                generateMetadata(startPos, ctx.CloseCurlyBracket[0], params)
             );
         }
 
@@ -173,26 +209,28 @@ export function generateVisitor(parser: Parser): ICstVisitor<never, any> {
          * Maps a list of expressions
          *
          * @param ctx the children of the current CST node
+         * @param params parameter context which must be passed at visit
          * @returns an array of created expressions
          */
-        private expressions(ctx: any): Expression[] {
-            return (ctx.expression ?? []).map((exp: CstNode) => this.visit(exp));
+        private expressions(ctx: any, params: CstVisitorParameters): Expression[] {
+            return (ctx.expression ?? []).map((exp: CstNode) => this.visit(exp, params));
         }
 
         /**
          * Maps a call argument
          *
          * @param ctx the children of the current CST node
+         * @param params parameter context which must be passed at visit
          * @returns the mapped InvocationArgument
          */
-        private callArgument(ctx: any): InvocationArgument {
+        private callArgument(ctx: any, params: CstVisitorParameters): InvocationArgument {
             let name = undefined;
             if (ctx.Identifier) {
                 name = ctx.Identifier[0].image;
             }
             return {
                 name,
-                value: this.visit(ctx.operatorExpression)
+                value: this.visit(ctx.operatorExpression, params)
             };
         }
 
@@ -200,12 +238,13 @@ export function generateVisitor(parser: Parser): ICstVisitor<never, any> {
          * Maps the brackets part of a function invokation
          *
          * @param ctx the children of the current CST node
+         * @param params parameter context which must be passed at visit
          * @returns all invokation arguments and the end position of the call expression
          */
-        private callBrackets(ctx: any): CallBracketsDefinition {
-            const normalArguments = (ctx.callArgument ?? []).map((argument: CstNode) => this.visit(argument));
+        private callBrackets(ctx: any, params: CstVisitorParameters): CallBracketsDefinition {
+            const normalArguments = (ctx.callArgument ?? []).map((argument: CstNode) => this.visit(argument, params));
             const functions = (ctx.function ?? []).map((func: CstNode) => ({
-                value: this.visit(func)
+                value: this.visit(func, params)
             }));
             let endPosition;
             if (functions.length > 0) {
@@ -220,24 +259,26 @@ export function generateVisitor(parser: Parser): ICstVisitor<never, any> {
          * Maps a call expression to an Expression
          *
          * @param ctx the children of the current CST node
+         * @param params parameter context which must be passed at visit
          * @returns the generated expression
          */
-        private callExpression(ctx: any): Expression {
+        private callExpression(ctx: any, params: CstVisitorParameters): Expression {
             let baseExpression;
             if (ctx.Identifier) {
                 const token = ctx.Identifier[0];
-                baseExpression = new IdentifierExpression(token.image, optionalPosition(token));
+                baseExpression = new IdentifierExpression(token.image, metadata(optionalPosition(token), params));
             } else if (ctx.literal) {
-                baseExpression = this.visit(ctx.literal);
+                baseExpression = this.visit(ctx.literal, params);
             } else if (ctx.function) {
-                baseExpression = this.visit(ctx.function);
+                baseExpression = this.visit(ctx.function, params);
             } else {
-                baseExpression = this.visit(ctx.bracketExpression);
+                baseExpression = this.visit(ctx.bracketExpression, params);
             }
             if (ctx.callBrackets) {
                 baseExpression = this.applyCallBrackets(
                     baseExpression,
-                    ctx.callBrackets.map((brackets: CstNode) => this.visit(brackets))
+                    ctx.callBrackets.map((brackets: CstNode) => this.visit(brackets, params)),
+                    params
                 );
             }
             return baseExpression;
@@ -248,14 +289,19 @@ export function generateVisitor(parser: Parser): ICstVisitor<never, any> {
          *
          * @param baseExpression the initial expression
          * @param callBrackets the list of call brackets to apply
+         * @param params parameter context which must be passed at visit
          * @returns the resulting Expression
          */
-        private applyCallBrackets(baseExpression: Expression, callBrackets: CallBracketsDefinition[]): Expression {
+        private applyCallBrackets(
+            baseExpression: Expression,
+            callBrackets: CallBracketsDefinition[],
+            params: CstVisitorParameters
+        ): Expression {
             let expression = baseExpression;
-            const startPos = baseExpression.position!;
+            const startPos = baseExpression.metadata.position!;
             for (let i = 0; i < callBrackets.length; i++) {
                 const [args, endPos] = callBrackets[i];
-                expression = new InvocationExpression(expression, args, generateOptionalPosition(startPos, endPos));
+                expression = new InvocationExpression(expression, args, generateMetadata(startPos, endPos, params));
             }
             return expression;
         }
@@ -264,14 +310,15 @@ export function generateVisitor(parser: Parser): ICstVisitor<never, any> {
          * Maps a call expression to an Expression
          *
          * @param ctx the children of the current CST node
+         * @param params parameter context which must be passed at visit
          * @returns a definition of the field access
          */
-        private simpleCallExpression(ctx: any): AccessDefinition {
+        private simpleCallExpression(ctx: any, params: CstVisitorParameters): AccessDefinition {
             const token = ctx.Identifier[0];
             return {
                 identifier: token.image,
                 identifierPosition: token,
-                callBrackets: (ctx.callBrackets ?? []).map((brackets: CstNode) => this.visit(brackets))
+                callBrackets: (ctx.callBrackets ?? []).map((brackets: CstNode) => this.visit(brackets, params))
             };
         }
 
@@ -279,24 +326,26 @@ export function generateVisitor(parser: Parser): ICstVisitor<never, any> {
          * Maps a bracket expression
          *
          * @param ctx the children of the current CST node
+         * @param params parameter context which must be passed at visit
          * @returns the inner expression
          */
-        private bracketExpression(ctx: any) {
-            return this.visit(ctx.expression);
+        private bracketExpression(ctx: any, params: CstVisitorParameters) {
+            return this.visit(ctx.expression, params);
         }
 
         /**
          * Maps field accesses including call operators
          *
          * @param ctx the children of the current CST node
+         * @param params parameter context which must be passed at visit
          * @returns the resulting expression
          */
-        private fieldAccessExpression(ctx: any): Expression {
-            let baseExpression = this.visit(ctx.callExpression);
+        private fieldAccessExpression(ctx: any, params: CstVisitorParameters): Expression {
+            let baseExpression = this.visit(ctx.callExpression, params);
             const startPos = baseExpression.position!;
             if (ctx.simpleCallExpression) {
                 const accessDefininitions: AccessDefinition[] = ctx.simpleCallExpression.map((exp: CstNode) =>
-                    this.visit(exp)
+                    this.visit(exp, params)
                 );
                 for (const accessDefinition of accessDefininitions) {
                     if (accessDefinition.callBrackets.length > 0) {
@@ -306,14 +355,14 @@ export function generateVisitor(parser: Parser): ICstVisitor<never, any> {
                             accessDefinition.identifier,
                             baseExpression,
                             args,
-                            generateOptionalPosition(startPos, endPos)
+                            generateMetadata(startPos, endPos, params)
                         );
-                        baseExpression = this.applyCallBrackets(baseExpression, remaining);
+                        baseExpression = this.applyCallBrackets(baseExpression, remaining, params);
                     } else {
                         baseExpression = new FieldAccessExpression(
                             accessDefinition.identifier,
                             baseExpression,
-                            generateOptionalPosition(startPos, accessDefinition.identifierPosition)
+                            generateMetadata(startPos, accessDefinition.identifierPosition, params)
                         );
                     }
                 }
@@ -325,9 +374,10 @@ export function generateVisitor(parser: Parser): ICstVisitor<never, any> {
          * Maps a simple field access to an expression
          *
          * @param ctx the children of the current CST node
+         * @param params parameter context which must be passed at visit
          * @returns the resulting expression
          */
-        private simpleFieldAccessExpression(ctx: any): Expression {
+        private simpleFieldAccessExpression(ctx: any, params: CstVisitorParameters): Expression {
             const identifiers: IToken[] = ctx.Identifier ?? [];
             if (ctx.SignMinus) {
                 identifiers.push(...ctx.SignMinus);
@@ -338,12 +388,12 @@ export function generateVisitor(parser: Parser): ICstVisitor<never, any> {
                     expression = new FieldAccessExpression(
                         identifier.image,
                         expression,
-                        generateOptionalPosition(expression.position!, identifier as ASTExpressionPosition)
+                        generateMetadata(expression.metadata.position!, identifier as ASTExpressionPosition, params)
                     );
                 } else {
                     expression = new IdentifierExpression(
                         identifier.image,
-                        optionalPosition(identifier as ASTExpressionPosition)
+                        metadata(optionalPosition(identifier as ASTExpressionPosition), params)
                     );
                 }
             }
@@ -354,19 +404,22 @@ export function generateVisitor(parser: Parser): ICstVisitor<never, any> {
          * Maps an operator expression
          *
          * @param ctx the children of the current CST node
+         * @param params parameter context which must be passed at visit
          * @returns the resulting expression
          */
-        private operatorExpression(ctx: any): Expression {
-            const expressions = ctx.fieldAccessExpression.map((exp: CstNode) => this.visit(exp));
+        private operatorExpression(ctx: any, params: CstVisitorParameters): Expression {
+            const expressions = ctx.fieldAccessExpression.map((exp: CstNode) => this.visit(exp, params));
             let expression = expressions[0];
             const startPos = expression.position;
-            const operators = (ctx.simpleFieldAccessExpression ?? []).map((operator: CstNode) => this.visit(operator));
+            const operators = (ctx.simpleFieldAccessExpression ?? []).map((operator: CstNode) =>
+                this.visit(operator, params)
+            );
             for (let i = 0; i < operators.length; i++) {
                 const rightHandSide = expressions[i + 1];
                 expression = new InvocationExpression(
                     operators[i],
                     [{ value: expression }, { value: rightHandSide }],
-                    generateOptionalPosition(startPos, rightHandSide.position)
+                    generateMetadata(startPos, rightHandSide.position, params)
                 );
             }
             return expression;
@@ -376,14 +429,15 @@ export function generateVisitor(parser: Parser): ICstVisitor<never, any> {
          * Maps a destructuring expression
          *
          * @param ctx the children of the current CST node
+         * @param params parameter context which must be passed at visit
          * @returns the resulting expression
          */
-        private destructuringExpression(ctx: any): Expression {
-            const expression = this.visit(ctx.operatorExpression);
+        private destructuringExpression(ctx: any, params: CstVisitorParameters): Expression {
+            const expression = this.visit(ctx.operatorExpression, params);
             return new DestructuringExpression(
                 ctx.Identifier.map((identifier: IToken) => identifier.image),
                 expression,
-                generateOptionalPosition(ctx.OpenRoundBracket[0], expression.position)
+                generateMetadata(ctx.OpenRoundBracket[0], expression.position, params)
             );
         }
 
@@ -391,21 +445,22 @@ export function generateVisitor(parser: Parser): ICstVisitor<never, any> {
          * Maps an expression
          *
          * @param ctx the children of the current CST node
+         * @param params parameter context which must be passed at visit
          * @returns the resulting expression
          */
-        private expression(ctx: any): Expression {
+        private expression(ctx: any, params: CstVisitorParameters): Expression {
             if (ctx.destructuringExpression) {
-                return this.visit(ctx.destructuringExpression);
+                return this.visit(ctx.destructuringExpression, params);
             } else {
-                const expressions = ctx.operatorExpression.map((exp: CstNode) => this.visit(exp));
+                const expressions = ctx.operatorExpression.map((exp: CstNode) => this.visit(exp, params));
                 if (expressions.length > 1) {
                     const target = expressions[0];
                     const value = expressions[1];
-                    const position = generateOptionalPosition(target.position, value.position);
+                    const meta = generateMetadata(target.position, value.position, params);
                     if (target instanceof IdentifierExpression) {
-                        return new AssignmentExpression(target.identifier, undefined, value, position);
+                        return new AssignmentExpression(target.identifier, undefined, value, meta);
                     } else if (target instanceof FieldAccessExpression) {
-                        return new AssignmentExpression(target.name as string, target.target, value, position);
+                        return new AssignmentExpression(target.name as string, target.target, value, meta);
                     } else {
                         throw Error("invalid assignment target");
                     }

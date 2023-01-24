@@ -21,13 +21,14 @@ import { DeltaReplacementNumberGenerator } from "../generators/deltaReplacementN
  */
 export function generateDeltaNumberGenerator(entry: FieldEntry, meta: any): EditGeneratorEntry {
     const source = entry.source;
+    const position = source?.metadata.position;
     if (source == undefined) {
         throw new Error("entry and its source must not be undefined");
     }
     if (source instanceof NumberLiteralExpression) {
         return {
-            start: source.position!.startOffset,
-            end: source.position!.endOffset + 1,
+            start: position!.startOffset,
+            end: position!.endOffset + 1,
             generator: new DeltaReplacementNumberGenerator(source.value),
             meta
         };
@@ -39,8 +40,8 @@ export function generateDeltaNumberGenerator(entry: FieldEntry, meta: any): Edit
         }
     }
     return {
-        start: source.position!.endOffset + 1,
-        end: source.position!.endOffset + 1,
+        start: position!.endOffset + 1,
+        end: position!.endOffset + 1,
         generator: new DeltaAdditiveNumberGenerator(0),
         meta
     };
@@ -74,16 +75,17 @@ function generateDeltaAdditiveNumberGeneratorIfPossible(
     if (!(rightSide instanceof NumberLiteralExpression)) {
         return undefined;
     }
-    if (!target.position || !rightSide.position) {
+    if (!target.metadata.position || !rightSide.metadata.position) {
         return undefined;
     }
-    const leftSideEndOffset = expression.argumentExpressions[0].value.position?.endOffset ?? Number.POSITIVE_INFINITY;
-    if (target.position.startOffset < leftSideEndOffset) {
+    const leftSideEndOffset =
+        expression.argumentExpressions[0].value.metadata.position?.endOffset ?? Number.POSITIVE_INFINITY;
+    if (target.metadata.position.startOffset < leftSideEndOffset) {
         return undefined;
     }
     return {
         start: leftSideEndOffset + 1,
-        end: expression.position!.endOffset + 1,
+        end: expression.metadata.position!.endOffset + 1,
         generator: new DeltaAdditiveNumberGenerator(rightSide.value * sign),
         meta
     };

@@ -6,6 +6,7 @@ import { Type } from "../types/base";
 import {
     AssignmentExpression,
     Expression,
+    ExpressionMetadata,
     FunctionExpression,
     IdentifierExpression,
     InvocationArgument,
@@ -23,7 +24,7 @@ import { Parser } from "./parser";
  * @returns the created IdentifierExpression
  */
 export function id(identifier: string): IdentifierExpression {
-    return new IdentifierExpression(identifier);
+    return new IdentifierExpression(identifier, ExpressionMetadata.NO_EDIT);
 }
 
 /**
@@ -33,7 +34,7 @@ export function id(identifier: string): IdentifierExpression {
  * @returns the created literal expression
  */
 export function str(value: string): StringLiteralExpression {
-    return new StringLiteralExpression(value);
+    return new StringLiteralExpression(value, ExpressionMetadata.NO_EDIT);
 }
 
 /**
@@ -43,7 +44,7 @@ export function str(value: string): StringLiteralExpression {
  * @returns the created literal expression
  */
 export function num(value: number): NumberLiteralExpression {
-    return new NumberLiteralExpression(value);
+    return new NumberLiteralExpression(value, ExpressionMetadata.NO_EDIT);
 }
 
 /**
@@ -55,7 +56,7 @@ export function num(value: number): NumberLiteralExpression {
  * @returns the created AssignmentExpression
  */
 export function assign(field: string, value: Expression): AssignmentExpression {
-    return new AssignmentExpression(field, undefined, value);
+    return new AssignmentExpression(field, undefined, value, ExpressionMetadata.NO_EDIT);
 }
 
 /**
@@ -126,7 +127,12 @@ export function fun(
     } else {
         parsedExpressions = expressions;
     }
-    return new FunctionExpression(parsedExpressions, parseDecorators(decorators), undefined, new Map(types));
+    return new FunctionExpression(
+        parsedExpressions,
+        parseDecorators(decorators),
+        ExpressionMetadata.NO_EDIT,
+        new Map(types)
+    );
 }
 
 /**
@@ -149,18 +155,22 @@ export function jsFun(
             }
         }
     }
-    return new NativeFunctionExpression((args, context, staticScope) => {
-        const evaluatedArgs = generateArgs(args, context, new Map(types));
-        const oldScope = context.currentScope;
-        context.currentScope = staticScope;
-        const res = callback(evaluatedArgs, context);
-        context.currentScope = oldScope;
-        if (res instanceof BaseObject) {
-            return { value: res };
-        } else {
-            return res;
-        }
-    }, parseDecorators(decorators));
+    return new NativeFunctionExpression(
+        (args, context, staticScope) => {
+            const evaluatedArgs = generateArgs(args, context, new Map(types));
+            const oldScope = context.currentScope;
+            context.currentScope = staticScope;
+            const res = callback(evaluatedArgs, context);
+            context.currentScope = oldScope;
+            if (res instanceof BaseObject) {
+                return { value: res };
+            } else {
+                return res;
+            }
+        },
+        parseDecorators(decorators),
+        ExpressionMetadata.NO_EDIT
+    );
 }
 
 /**
@@ -174,5 +184,5 @@ export function native(
     callback: NativeFunctionType,
     decorators: { [index: string]: string | null } = {}
 ): NativeFunctionExpression {
-    return new NativeFunctionExpression(callback, parseDecorators(decorators));
+    return new NativeFunctionExpression(callback, parseDecorators(decorators), ExpressionMetadata.NO_EDIT);
 }

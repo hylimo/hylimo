@@ -1,6 +1,6 @@
 import { CstNode, CstParser, ICstVisitor, ILexingError, IRecognitionException, Lexer } from "chevrotain";
 import { Expression } from "./ast";
-import { generateVisitor } from "./cstVsitor";
+import { CstVisitorParameters, generateVisitor } from "./cstVsitor";
 import {
     CloseCurlyBracket,
     CloseRoundBracket,
@@ -74,7 +74,7 @@ export class Parser extends CstParser {
     /**
      * Visitor to be used to generate the AST
      */
-    private readonly visitor: ICstVisitor<never, any>;
+    private readonly visitor: ICstVisitor<CstVisitorParameters, any>;
 
     /**
      * Creates a new parser
@@ -320,7 +320,7 @@ export class Parser extends CstParser {
      * @returns the generated AST
      */
     private generateAST(cst: CstNode): Expression[] {
-        return this.visitor.visit(cst) as Expression[];
+        return this.visitor.visit(cst, { editable: true }) as Expression[];
     }
 
     /**
