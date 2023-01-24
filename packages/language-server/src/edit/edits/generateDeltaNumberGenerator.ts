@@ -39,7 +39,7 @@ export function generateDeltaNumberGenerator(entry: FieldEntry, meta: any): Edit
         }
     }
     return {
-        start: source.position!.endOffset,
+        start: source.position!.endOffset + 1,
         end: source.position!.endOffset + 1,
         generator: new DeltaAdditiveNumberGenerator(0),
         meta

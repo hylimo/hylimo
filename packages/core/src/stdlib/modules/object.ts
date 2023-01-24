@@ -72,7 +72,7 @@ export const objectModule: InterpreterModule = {
                 jsFun(
                     (args, context) => {
                         const self = args.getField(SemanticFieldNames.SELF, context);
-                        return self.getField(assertIndex(args.getField(0, context)), context);
+                        return self.getFieldEntry(assertIndex(args.getField(0, context)), context);
                     },
                     {
                         docs: `
