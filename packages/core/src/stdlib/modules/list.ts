@@ -76,7 +76,10 @@ export const listModule: InterpreterModule = {
                                     null
                             `
                         },
-                        [[SemanticFieldNames.SELF, listType()], [0, listType()]]
+                        [
+                            [SemanticFieldNames.SELF, listType()],
+                            [0, listType()]
+                        ]
                     )
                 ),
                 id(listProto).assignField("+=", id(listProto).field("add")),
@@ -101,7 +104,10 @@ export const listModule: InterpreterModule = {
                                     A new list with the elements of both parameters
                             `
                         },
-                        [[SemanticFieldNames.SELF, listType()], [0, listType()]]
+                        [
+                            [SemanticFieldNames.SELF, listType()],
+                            [0, listType()]
+                        ]
                     )
                 ),
                 id(listProto).assignField(
