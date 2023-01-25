@@ -66,7 +66,7 @@ export abstract class ElementLayoutConfig implements LayoutConfig {
         if (expressions.some((expression) => !ExpressionMetadata.isEditable(expression?.metadata))) {
             return undefined;
         }
-        const positions = expressions.map((expression) => expression!.metadata.position!.startOffset);
+        const positions = expressions.map((expression) => expression!.position!.startOffset);
         if (new Set(positions).size < positions.length) {
             return undefined;
         } else {

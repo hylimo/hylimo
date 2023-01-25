@@ -298,7 +298,7 @@ export function generateVisitor(parser: Parser): ICstVisitor<CstVisitorParameter
             params: CstVisitorParameters
         ): Expression {
             let expression = baseExpression;
-            const startPos = baseExpression.metadata.position!;
+            const startPos = baseExpression.position!;
             for (let i = 0; i < callBrackets.length; i++) {
                 const [args, endPos] = callBrackets[i];
                 expression = new InvocationExpression(expression, args, generateMetadata(startPos, endPos, params));
@@ -388,7 +388,7 @@ export function generateVisitor(parser: Parser): ICstVisitor<CstVisitorParameter
                     expression = new FieldAccessExpression(
                         identifier.image,
                         expression,
-                        generateMetadata(expression.metadata.position!, identifier as ASTExpressionPosition, params)
+                        generateMetadata(expression.position!, identifier as ASTExpressionPosition, params)
                     );
                 } else {
                     expression = new IdentifierExpression(

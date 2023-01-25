@@ -57,6 +57,13 @@ export namespace ExpressionMetadata {
  */
 export abstract class Expression {
     /**
+     * Getter for the position from the metadata
+     */
+    get position(): ASTExpressionPosition | undefined {
+        return this.metadata.position;
+    }
+
+    /**
      * Base constructor for all Expressions
      * @param metadata metadata for the expression
      * @param type used for serialization and debugging

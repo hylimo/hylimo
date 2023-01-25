@@ -21,7 +21,7 @@ import { DeltaReplacementNumberGenerator } from "../generators/deltaReplacementN
  */
 export function generateDeltaNumberGenerator(entry: FieldEntry, meta: any): EditGeneratorEntry {
     const source = entry.source;
-    const position = source?.metadata.position;
+    const position = source?.position;
     if (source == undefined) {
         throw new Error("entry and its source must not be undefined");
     }
@@ -75,17 +75,16 @@ function generateDeltaAdditiveNumberGeneratorIfPossible(
     if (!(rightSide instanceof NumberLiteralExpression)) {
         return undefined;
     }
-    if (!target.metadata.position || !rightSide.metadata.position) {
+    if (!target.position || !rightSide.position) {
         return undefined;
     }
-    const leftSideEndOffset =
-        expression.argumentExpressions[0].value.metadata.position?.endOffset ?? Number.POSITIVE_INFINITY;
-    if (target.metadata.position.startOffset < leftSideEndOffset) {
+    const leftSideEndOffset = expression.argumentExpressions[0].value.position?.endOffset ?? Number.POSITIVE_INFINITY;
+    if (target.position!.startOffset < leftSideEndOffset) {
         return undefined;
     }
     return {
         start: leftSideEndOffset + 1,
-        end: expression.metadata.position!.endOffset + 1,
+        end: expression.position!.endOffset + 1,
         generator: new DeltaAdditiveNumberGenerator(rightSide.value * sign),
         meta
     };
