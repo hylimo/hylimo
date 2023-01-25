@@ -304,9 +304,15 @@ export const diagramModule: InterpreterModule = {
                     {
                         callback = it
                         scope = object(_styles = styles({ }), fonts = list(), contents = list())
-                        scope.pos = {
+                        scope.apos = {
                             (x, y) = args
                             point = absolutePoint(x = x, y = y)
+                            scope.contents += point
+                            point
+                        }
+                        scope.rpos = {
+                            (target, offsetX, offsetY) = args
+                            point = relativePoint(target = target, offsetX = offsetX, offsetY = offsetY)
                             scope.contents += point
                             point
                         }
