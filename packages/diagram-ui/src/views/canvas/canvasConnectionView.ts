@@ -29,6 +29,14 @@ export class CanvasConnectionView implements IView {
                     fill: "none"
                 }
             }),
+            svg("path", {
+                attrs: {
+                    d: path
+                },
+                class: {
+                    "select-canvas-connection": true
+                }
+            }),
             ...childMarkers,
             ...childControlElements
         );
