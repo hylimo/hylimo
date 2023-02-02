@@ -1,11 +1,11 @@
-import { Point, RelativePoint } from "@hylimo/diagram-common";
+import { CanvasPoint, Point, RelativePoint } from "@hylimo/diagram-common";
 import { PositionProvider } from "../../features/layout/positionProvider";
 import { SCanvasContent } from "./sCanvasContent";
 
 /**
  * Base model for all canvas points
  */
-export abstract class SCanvasPoint extends SCanvasContent implements PositionProvider {
+export abstract class SCanvasPoint extends SCanvasContent implements CanvasPoint, PositionProvider {
     /**
      * The provided position
      */

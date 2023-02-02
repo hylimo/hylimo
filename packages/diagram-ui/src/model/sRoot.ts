@@ -10,6 +10,12 @@ export class SRoot extends ViewportRootElement {
      */
     fonts!: FontFamilyConfig[];
 
+    /**
+     * The revision number increasing with each change.
+     * Required for caching of computed properties
+     */
+    changeRevision = 0;
+
     constructor(index = new ModelIndexImpl()) {
         super(index);
     }

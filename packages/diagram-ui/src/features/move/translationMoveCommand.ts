@@ -3,6 +3,7 @@ import { injectable, inject } from "inversify";
 import { Command, CommandExecutionContext, CommandReturn, TYPES } from "sprotty";
 import { SAbsolutePoint } from "../../model/canvas/sAbsolutePoint";
 import { SRelativePoint } from "../../model/canvas/sRelativePoint";
+import { SRoot } from "../../model/sRoot";
 
 /**
  * Resolved version of TranslationMoveAction
@@ -35,6 +36,7 @@ export class TranslationMoveCommand extends Command {
     }
 
     execute(context: CommandExecutionContext): CommandReturn {
+        (context.root as SRoot).changeRevision++;
         const points = this.action.points.map((point) => context.root.index.getById(point));
         this.resolvedAction = {
             absolutePoints: points.filter((point) => point instanceof SAbsolutePoint) as SAbsolutePoint[],
@@ -47,6 +49,7 @@ export class TranslationMoveCommand extends Command {
         if (this.resolvedAction == undefined) {
             throw new Error("Command not executed yet");
         }
+        (context.root as SRoot).changeRevision++;
         for (const point of this.resolvedAction.absolutePoints) {
             point.x -= this.action.deltaOffsetX;
             point.y -= this.action.deltaOffsetY;
@@ -62,6 +65,7 @@ export class TranslationMoveCommand extends Command {
         if (this.resolvedAction == undefined) {
             throw new Error("Command not executed yet");
         }
+        (context.root as SRoot).changeRevision++;
         for (const point of this.resolvedAction.absolutePoints) {
             point.x += this.action.deltaOffsetX;
             point.y += this.action.deltaOffsetY;

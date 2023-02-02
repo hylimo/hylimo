@@ -1,10 +1,10 @@
-import { SChildElement } from "sprotty";
-import { Size, Point } from "@hylimo/diagram-common";
+import { LayoutedElement } from "@hylimo/diagram-common";
+import { SElement } from "./sElement";
 
 /**
  * Base class for all elements
  */
-export abstract class SLayoutedElement extends SChildElement implements Point, Size {
+export abstract class SLayoutedElement extends SElement implements LayoutedElement {
     /**
      * The width of the element
      */

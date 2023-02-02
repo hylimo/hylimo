@@ -14,6 +14,7 @@ export interface BaseMarker extends Size {
  */
 
 export interface Marker extends SizedElement, BaseMarker {
+    type: typeof Marker.TYPE;
     /**
      * Is it a start or end marker?
      */

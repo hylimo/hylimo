@@ -8,7 +8,8 @@ import { SMarker } from "./sMarker";
 /**
  * Model for CanvasBezierSegment
  */
-export class SCanvasBezierSegment extends SCanvasConnectionSegment {
+export class SCanvasBezierSegment extends SCanvasConnectionSegment implements CanvasBezierSegment {
+    override type!: typeof CanvasBezierSegment.TYPE;
     /**
      * The id of the start control point
      */

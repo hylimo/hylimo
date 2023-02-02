@@ -1,9 +1,11 @@
-import { SChildElement } from "sprotty";
+import { Marker } from "@hylimo/diagram-common";
+import { SElement } from "../sElement";
 
 /**
  * Model for Marker
  */
-export class SMarker extends SChildElement {
+export class SMarker extends SElement implements Marker {
+    override type!: typeof Marker.TYPE;
     /**
      * The width of the element
      */

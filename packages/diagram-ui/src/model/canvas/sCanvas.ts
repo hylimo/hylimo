@@ -1,3 +1,4 @@
+import { Canvas } from "@hylimo/diagram-common";
 import { SChildElement } from "sprotty";
 import { SLayoutedElement } from "../sLayoutedElement";
 import { PointVisibilityManager } from "./pointVisibilityManager";
@@ -5,7 +6,8 @@ import { PointVisibilityManager } from "./pointVisibilityManager";
 /**
  * Canvas model element
  */
-export class SCanvas extends SLayoutedElement {
+export class SCanvas extends SLayoutedElement implements Canvas {
+    override type!: typeof Canvas.TYPE;
     /**
      * Lookup of children by id
      */

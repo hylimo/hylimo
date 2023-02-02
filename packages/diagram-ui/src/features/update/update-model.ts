@@ -12,6 +12,7 @@ import {
     UpdateModelCommand as BaseUpdateModelCommand,
     ViewportRootElement
 } from "sprotty";
+import { SRoot } from "../../model/sRoot";
 import {
     ElmentLinearInterpolationAnimation,
     LinearInterpolationAnimation
@@ -92,5 +93,14 @@ export class UpdateModelCommand extends BaseUpdateModelCommand {
             }
         }
         return undefined;
+    }
+
+    protected override performUpdate(
+        oldRoot: SModelRoot,
+        newRoot: SModelRoot,
+        context: CommandExecutionContext
+    ): CommandReturn {
+        (newRoot as SRoot).changeRevision = (oldRoot as SRoot).changeRevision + 1;
+        return super.performUpdate(oldRoot, newRoot, context);
     }
 }

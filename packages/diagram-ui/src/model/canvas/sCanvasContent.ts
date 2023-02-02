@@ -1,10 +1,11 @@
-import { SChildElement, Selectable } from "sprotty";
+import { Selectable } from "sprotty";
+import { SElement } from "../sElement";
 import { SCanvas } from "./sCanvas";
 
 /**
  * Base class for all canvas contents
  */
-export abstract class SCanvasContent extends SChildElement implements Selectable {
+export abstract class SCanvasContent extends SElement implements Selectable {
     override parent!: SCanvas;
     private _selected = false;
 

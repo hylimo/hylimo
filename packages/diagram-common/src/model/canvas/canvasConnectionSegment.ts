@@ -2,18 +2,12 @@ import { Point } from "../../common/point";
 import { Element } from "../base/element";
 import { Point as SprottyPoint } from "sprotty-protocol";
 import { BaseMarker, MarkerRenderInformation } from "./marker";
-import { CanvasBezierSegment } from "./canvasBezierSegment";
-import { CanvasLineSegment } from "./canvasLineSegment";
 
 /**
  * Connection line segment
  */
 
 export interface CanvasConnectionSegment extends Element {
-    /**
-     * The type of the segment
-     */
-    type: typeof CanvasLineSegment.TYPE | typeof CanvasBezierSegment.TYPE;
     /**
      * The id of the end point
      */

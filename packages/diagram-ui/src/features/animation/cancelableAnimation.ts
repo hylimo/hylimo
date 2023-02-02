@@ -1,4 +1,5 @@
 import { Animation, CommandExecutionContext, SModelRoot } from "sprotty";
+import { SRoot } from "../../model/sRoot";
 import { CancelableCommandExecutionContext } from "./cancelableCommandExecutionContext";
 
 /**
@@ -10,6 +11,7 @@ export abstract class CancelableAnimation extends Animation {
         if (CancelableCommandExecutionContext.isCanceled(context)) {
             return context.root;
         } else {
+            (context.root as SRoot).changeRevision++;
             return this.tweenInternal(t, context);
         }
     }

@@ -1,9 +1,10 @@
+import { Shape } from "@hylimo/diagram-common";
 import { SLayoutedElement } from "./sLayoutedElement";
 
 /**
  * Base class for all shapes
  */
-export abstract class SShape extends SLayoutedElement {
+export abstract class SShape extends SLayoutedElement implements Shape {
     /**
      * The color of the fill of the shape
      */

@@ -1,4 +1,4 @@
-import { Point } from "@hylimo/diagram-common";
+import { CanvasElement, Point } from "@hylimo/diagram-common";
 import { SModelElement } from "sprotty";
 import { LinearAnimatable } from "../../features/animation/model";
 import { PositionProvider } from "../../features/layout/positionProvider";
@@ -13,7 +13,8 @@ const canvasElementAnimatedFields = new Set(["width", "height"]);
 /**
  * Model for CanvasElement
  */
-export class SCanvasElement extends SCanvasContent implements PositionProvider, LinearAnimatable {
+export class SCanvasElement extends SCanvasContent implements CanvasElement, PositionProvider, LinearAnimatable {
+    override type!: typeof CanvasElement.TYPE;
     /**
      * The width of the element
      */
@@ -28,9 +29,9 @@ export class SCanvasElement extends SCanvasContent implements PositionProvider, 
      */
     pos!: string;
     /**
-     * If true, this is resizable
+     * Resizable if present
      */
-    resizable!: boolean;
+    resizable!: number[];
 
     get position(): Point {
         const target = this.root.index.getById(this.pos) as SCanvasPoint;

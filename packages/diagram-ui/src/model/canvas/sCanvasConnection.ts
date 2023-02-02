@@ -1,4 +1,4 @@
-import { Point } from "@hylimo/diagram-common";
+import { CanvasConnection, Point } from "@hylimo/diagram-common";
 import { LinearAnimatable } from "../../features/animation/model";
 import { SCanvasConnectionSegment } from "./sCanvasConnectionSegment";
 import { SCanvasContent } from "./sCanvasContent";
@@ -12,7 +12,8 @@ const canvasConnectionAnimatedFields = new Set(["strokeWidth", "strokeOpacity"])
 /**
  * Model for CanvasConnection
  */
-export class SCanvasConnection extends SCanvasContent implements LinearAnimatable {
+export class SCanvasConnection extends SCanvasContent implements CanvasConnection, LinearAnimatable {
+    override type!: typeof CanvasConnection.TYPE;
     animatedFields = canvasConnectionAnimatedFields;
     /**
      * The id of the start point

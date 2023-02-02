@@ -6,7 +6,8 @@ import { VNode } from "snabbdom";
 /**
  * Model for CanvasLineSegment
  */
-export class SCanvasLineSegment extends SCanvasConnectionSegment {
+export class SCanvasLineSegment extends SCanvasConnectionSegment implements CanvasLineSegment {
+    override type!: typeof CanvasLineSegment.TYPE;
     override get dependencies(): string[] {
         return [this.end];
     }

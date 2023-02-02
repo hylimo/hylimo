@@ -1,4 +1,4 @@
-import { Point } from "@hylimo/diagram-common";
+import { Point, RelativePoint } from "@hylimo/diagram-common";
 import { SModelElement } from "sprotty";
 import { LinearAnimatable } from "../../features/animation/model";
 import { isPositionProvider } from "../../features/layout/positionProvider";
@@ -12,7 +12,8 @@ const relativePointAnimatedFields = new Set(["offsetX", "offsetY"]);
 /**
  * Model for RelativePoint
  */
-export class SRelativePoint extends SCanvasPoint implements LinearAnimatable {
+export class SRelativePoint extends SCanvasPoint implements RelativePoint, LinearAnimatable {
+    override type!: typeof RelativePoint.TYPE;
     readonly animatedFields = relativePointAnimatedFields;
     /**
      * The relative x coordinate of the element

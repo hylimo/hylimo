@@ -1,14 +1,14 @@
 import { MarkerRenderInformation, Point } from "@hylimo/diagram-common";
-import { SChildElement } from "sprotty";
 import { SCanvasConnection } from "./sCanvasConnection";
 import { SCanvasPoint } from "./sCanvasPoint";
 import { SMarker } from "./sMarker";
 import { VNode } from "snabbdom";
+import { SElement } from "../sElement";
 
 /**
  * Base model for all CanvasConnectionSegments
  */
-export abstract class SCanvasConnectionSegment extends SChildElement {
+export abstract class SCanvasConnectionSegment extends SElement {
     override parent!: SCanvasConnection;
     /**
      * The id of the end point

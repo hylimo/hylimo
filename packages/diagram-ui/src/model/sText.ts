@@ -1,3 +1,4 @@
+import { Text } from "@hylimo/diagram-common";
 import { LinearAnimatable } from "../features/animation/model";
 import { SLayoutedElement } from "./sLayoutedElement";
 
@@ -9,7 +10,8 @@ const textAnimatedFields = new Set(SLayoutedElement.defaultAnimatedFields);
 /**
  * Text model element
  */
-export class SText extends SLayoutedElement implements LinearAnimatable {
+export class SText extends SLayoutedElement implements Text, LinearAnimatable {
+    override type!: typeof Text.TYPE;
     readonly animatedFields = textAnimatedFields;
     /**
      * The text to display
