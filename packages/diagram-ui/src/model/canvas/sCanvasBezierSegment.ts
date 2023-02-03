@@ -1,4 +1,4 @@
-import { CanvasBezierSegment, MarkerRenderInformation, Point } from "@hylimo/diagram-common";
+import { BezierSegment, CanvasBezierSegment, MarkerRenderInformation, Point } from "@hylimo/diagram-common";
 import { VNode } from "snabbdom";
 import { svg } from "sprotty";
 import { SCanvasConnectionSegment } from "./sCanvasConnectionSegment";
@@ -46,23 +46,29 @@ export class SCanvasBezierSegment extends SCanvasConnectionSegment implements Ca
         return [this.end, this.startControlPoint, this.endControlPoint];
     }
 
-    override calculateMarkerRenderInformation(marker: SMarker, start: Point, end: Point): MarkerRenderInformation {
+    override calculateMarkerRenderInformation(marker: SMarker, start: Point): MarkerRenderInformation {
         if (marker.pos == "start") {
             return CanvasBezierSegment.calculateMarkerRenderInformation(start, this.startControlPointPosition, marker);
         } else {
-            return CanvasBezierSegment.calculateMarkerRenderInformation(end, this.endControlPointPosition, marker);
+            return CanvasBezierSegment.calculateMarkerRenderInformation(
+                this.endPosition,
+                this.endControlPointPosition,
+                marker
+            );
         }
     }
 
-    override generatePathString(end: Point): string {
+    override generatePathString(): string {
         const c1 = this.startControlPointPosition;
         const c2 = this.endControlPointPosition;
+        const end = this.endPosition;
         return `C ${c1.x} ${c1.y} ${c2.x} ${c2.y} ${end.x} ${end.y}`;
     }
 
-    override generateControlViewElements(start: Point, end: Point): VNode[] {
+    override generateControlViewElements(start: Point): VNode[] {
         const c1 = this.startControlPointPosition;
         const c2 = this.endControlPointPosition;
+        const end = this.endPosition;
         const className = "bezier-handle-line";
         return [
             svg("line", {
@@ -87,6 +93,17 @@ export class SCanvasBezierSegment extends SCanvasConnectionSegment implements Ca
                     [className]: true
                 }
             })
+        ];
+    }
+
+    override generateSegments(start: Point): BezierSegment[] {
+        return [
+            {
+                type: BezierSegment.TYPE,
+                end: this.endPosition,
+                startControlPoint: this.startControlPointPosition,
+                endControlPoint: this.endControlPointPosition
+            }
         ];
     }
 }

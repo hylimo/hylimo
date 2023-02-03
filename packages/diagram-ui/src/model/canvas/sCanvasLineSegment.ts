@@ -1,4 +1,4 @@
-import { CanvasLineSegment, MarkerRenderInformation, Point } from "@hylimo/diagram-common";
+import { CanvasLineSegment, LineSegment, MarkerRenderInformation, Point } from "@hylimo/diagram-common";
 import { SCanvasConnectionSegment } from "./sCanvasConnectionSegment";
 import { SMarker } from "./sMarker";
 import { VNode } from "snabbdom";
@@ -12,7 +12,8 @@ export class SCanvasLineSegment extends SCanvasConnectionSegment implements Canv
         return [this.end];
     }
 
-    override calculateMarkerRenderInformation(marker: SMarker, start: Point, end: Point): MarkerRenderInformation {
+    override calculateMarkerRenderInformation(marker: SMarker, start: Point): MarkerRenderInformation {
+        const end = this.endPosition;
         if (marker.pos == "start") {
             return CanvasLineSegment.calculateMarkerRenderInformation(start, end, marker);
         } else {
@@ -20,11 +21,21 @@ export class SCanvasLineSegment extends SCanvasConnectionSegment implements Canv
         }
     }
 
-    override generatePathString(end: Point): string {
+    override generatePathString(): string {
+        const end = this.endPosition;
         return `L ${end.x} ${end.y}`;
     }
 
-    override generateControlViewElements(start: Point, end: Point): VNode[] {
+    override generateControlViewElements(start: Point): VNode[] {
         return [];
+    }
+
+    override generateSegments(): LineSegment[] {
+        return [
+            {
+                type: LineSegment.TYPE,
+                end: this.endPosition
+            }
+        ];
     }
 }

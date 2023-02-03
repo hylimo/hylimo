@@ -1,5 +1,6 @@
-import { CanvasConnection, Point } from "@hylimo/diagram-common";
+import { CanvasConnection, Point, TransformedLine } from "@hylimo/diagram-common";
 import { LinearAnimatable } from "../../features/animation/model";
+import { LineProvider } from "../../features/layout/lineProvider";
 import { SCanvasConnectionSegment } from "./sCanvasConnectionSegment";
 import { SCanvasContent } from "./sCanvasContent";
 import { SCanvasPoint } from "./sCanvasPoint";
@@ -12,7 +13,7 @@ const canvasConnectionAnimatedFields = new Set(["strokeWidth", "strokeOpacity"])
 /**
  * Model for CanvasConnection
  */
-export class SCanvasConnection extends SCanvasContent implements CanvasConnection, LinearAnimatable {
+export class SCanvasConnection extends SCanvasContent implements CanvasConnection, LineProvider, LinearAnimatable {
     override type!: typeof CanvasConnection.TYPE;
     animatedFields = canvasConnectionAnimatedFields;
     /**
@@ -31,13 +32,39 @@ export class SCanvasConnection extends SCanvasContent implements CanvasConnectio
      * The width of the stroke
      */
     strokeWidth?: number;
-
     /**
      * Getter for the position associated with start
      */
-    get startPosition(): Point {
-        const target = this.root.index.getById(this.start) as SCanvasPoint;
-        return target.position;
+    startPosition!: Point;
+    /**
+     * The provided line
+     */
+    line!: TransformedLine;
+
+    constructor() {
+        super();
+
+        this.cachedProperty<Point>("startPosition", () => {
+            const target = this.root.index.getById(this.start) as SCanvasPoint;
+            return target.position;
+        });
+        this.cachedProperty<TransformedLine>("line", () => {
+            let start = this.startPosition;
+            const segments = (this.children as SCanvasConnectionSegment[]).flatMap((segment) => {
+                const result = segment.generateSegments(start);
+                start = segment.endPosition;
+                return result;
+            });
+            return {
+                transform: {
+                    translation: Point.ORIGIN
+                },
+                line: {
+                    start: this.startPosition,
+                    segments
+                }
+            };
+        });
     }
 
     /**

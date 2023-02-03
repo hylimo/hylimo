@@ -70,9 +70,9 @@ export class CanvasConnectionView implements IView {
             } else {
                 newEnd = originalEnd;
             }
-            pathSegments.push(segment.generatePathString(newEnd));
+            pathSegments.push(segment.generatePathString());
             if (showControlElements) {
-                childControlElements.push(...segment.generateControlViewElements(originalStart, originalEnd));
+                childControlElements.push(...segment.generateControlViewElements(originalStart));
             }
             originalStart = originalEnd;
         }
@@ -105,19 +105,13 @@ export class CanvasConnectionView implements IView {
             } else {
                 endStartPosition = segments.at(-2)!.endPosition;
             }
-            const renderInformation = segments
-                .at(-1)!
-                .calculateMarkerRenderInformation(endMarker, endStartPosition, endPos);
+            const renderInformation = segments.at(-1)!.calculateMarkerRenderInformation(endMarker, endStartPosition);
             childMarkers.push(this.renderMarker(endMarker, renderInformation, endPos, context));
             endPos = renderInformation.newPoint;
         }
         if (startMarker != undefined) {
             const startSegment = segments[0];
-            const renderInformation = startSegment.calculateMarkerRenderInformation(
-                startMarker,
-                startPos,
-                startSegment.endPosition
-            );
+            const renderInformation = startSegment.calculateMarkerRenderInformation(startMarker, startPos);
             childMarkers.push(this.renderMarker(startMarker, renderInformation, startPos, context));
             startPos = renderInformation.newPoint;
         }

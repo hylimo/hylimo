@@ -1,4 +1,4 @@
-import { MarkerRenderInformation, Point } from "@hylimo/diagram-common";
+import { MarkerRenderInformation, Point, Segment } from "@hylimo/diagram-common";
 import { SCanvasConnection } from "./sCanvasConnection";
 import { SCanvasPoint } from "./sCanvasPoint";
 import { SMarker } from "./sMarker";
@@ -38,23 +38,28 @@ export abstract class SCanvasConnectionSegment extends SElement {
      *
      * @param marker the marker
      * @param start the start of this segment
-     * @param end the end of this segment
      */
-    abstract calculateMarkerRenderInformation(marker: SMarker, start: Point, end: Point): MarkerRenderInformation;
+    abstract calculateMarkerRenderInformation(marker: SMarker, start: Point): MarkerRenderInformation;
 
     /**
      * Generates an svg path string with absolute positions for this segment
      *
-     * @param end the end point
+     * @return the generated path string
      */
-    abstract generatePathString(end: Point): string;
+    abstract generatePathString(): string;
 
     /**
      * Generates the control elements rendered when the connection is selected
      *
      * @param start the original start point (independent of marker)
-     * @param end the original end point (independent of marker)
      * @returns the generated nodes
      */
-    abstract generateControlViewElements(start: Point, end: Point): VNode[];
+    abstract generateControlViewElements(start: Point): VNode[];
+
+    /**
+     * Generates the line segments for path points
+     * @param start the start point
+     * @return the generated line segments
+     */
+    abstract generateSegments(start: Point): Segment[];
 }
