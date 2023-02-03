@@ -39,7 +39,7 @@ export class LinePointLayoutConfig extends CanvasPointLayoutConfig {
         const result: LinePoint = {
             type: LinePoint.TYPE,
             id,
-            pos: positionFieldEntry?.value?.toNative(),
+            pos: Math.max(Math.min(positionFieldEntry?.value?.toNative(), 1), 0),
             lineProvider,
             editable: this.generateEditableNumbers(positionFieldEntry?.source),
             children: []
