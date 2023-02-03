@@ -45,9 +45,15 @@ export class CanvasElementLayoutConfig extends CanvasContentLayoutConfig {
             id,
             type: CanvasElement.TYPE,
             ...size,
-            children: layout.layout(content, { x: 0, y: 0 }, size, `${id}_0`),
+            children: layout.layout(content, Point.ORIGIN, size, `${id}_0`),
             pos: this.getContentId(element, element.element.getLocalFieldOrUndefined("pos")?.value as FullObject),
-            resizable: undefined //TODO fix
+            resizable: undefined, //TODO fix
+            outline: content.layoutConfig.outline(
+                layout,
+                content,
+                content.layoutBounds!.position,
+                content.layoutBounds!.size
+            )
         };
         return [result];
     }

@@ -54,7 +54,11 @@ export class TranslationMoveEdit extends TransactionalEdit<TranslationMoveAction
         super(generatorEntries, diagram.document);
     }
 
-    applyActionToGenerator(action: TranslationMoveAction, generator: EditGenerator<number>, meta: any): string {
+    override applyActionToGenerator(
+        action: TranslationMoveAction,
+        generator: EditGenerator<number>,
+        meta: any
+    ): string {
         if (meta === "x") {
             return generator.generateEdit(action.offsetX);
         } else if (meta === "y") {
@@ -64,7 +68,7 @@ export class TranslationMoveEdit extends TransactionalEdit<TranslationMoveAction
         }
     }
 
-    predictActionDiff(
+    override predictActionDiff(
         layoutedDiagram: LayoutedDiagram,
         lastApplied: TranslationMoveAction,
         newest: TranslationMoveAction

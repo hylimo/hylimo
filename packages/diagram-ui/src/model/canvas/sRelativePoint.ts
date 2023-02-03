@@ -32,7 +32,7 @@ export class SRelativePoint extends SCanvasPoint implements RelativePoint, Linea
     constructor() {
         super();
 
-        this.cachedProperty("position", () => {
+        this.cachedProperty<Point>("position", () => {
             const target = this.root.index.getById(this.target) as SModelElement;
             if (isPositionProvider(target)) {
                 const targetPosition = target.position;
@@ -42,7 +42,7 @@ export class SRelativePoint extends SCanvasPoint implements RelativePoint, Linea
                     target: targetPosition
                 };
             } else {
-                return { x: this.offsetX, y: this.offsetY, target: { x: 0, y: 0 } };
+                return { x: this.offsetX, y: this.offsetY, target: Point.ORIGIN };
             }
         });
     }

@@ -1,7 +1,8 @@
 import { LayoutedDiagram } from "@hylimo/diagram";
-import { TransactionalAction, TranslationMoveAction } from "@hylimo/diagram-common";
+import { LineMoveAction, TransactionalAction, TranslationMoveAction } from "@hylimo/diagram-common";
 import { TextDocumentEdit } from "vscode-languageserver";
 import { Diagram } from "../diagram";
+import { LineMoveEdit } from "./edits/lineMoveEdit";
 import { TranslationMoveEdit } from "./edits/translationMoveEdit";
 import { TransactionalEdit } from "./transactionalEdit";
 
@@ -91,6 +92,8 @@ export class TransactionManager {
     private generateTransactionalEdit(action: TransactionalAction): TransactionalEdit<any> {
         if (TranslationMoveAction.is(action)) {
             return new TranslationMoveEdit(action, this.diagram);
+        } else if (LineMoveAction.is(action)) {
+            return new LineMoveEdit(action, this.diagram);
         } else {
             throw new Error(`Unknown transaction action: ${action.kind}`);
         }

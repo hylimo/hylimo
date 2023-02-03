@@ -1,5 +1,5 @@
 import { Expression, ExpressionMetadata, listType, optional, stringType } from "@hylimo/core";
-import { Element, Point, Size } from "@hylimo/diagram-common";
+import { Element, Line, LineSegment, Point, Size } from "@hylimo/diagram-common";
 import { LayoutElement, LayoutConfig, SizeConstraints, AttributeConfig } from "../layoutElement";
 import { Layout } from "../layoutEngine";
 
@@ -72,5 +72,49 @@ export abstract class ElementLayoutConfig implements LayoutConfig {
         } else {
             return positions;
         }
+    }
+
+    /**
+     * Called to create the outline of an element.
+     * Default implementation just returns the bounding box rect, starting at the top left position
+     *
+     * @param layout performs the layout
+     * @param element the element to get the outline of
+     * @param position offset in current context
+     * @param size the size of the element
+     * @returns the outline of the element
+     */
+    outline(layout: Layout, element: LayoutElement, position: Point, size: Size): Line {
+        const segments: LineSegment[] = [
+            {
+                type: LineSegment.TYPE,
+                end: {
+                    x: position.x + size.width,
+                    y: position.y
+                }
+            },
+            {
+                type: LineSegment.TYPE,
+                end: {
+                    x: position.x + size.width,
+                    y: position.y + size.height
+                }
+            },
+            {
+                type: LineSegment.TYPE,
+                end: {
+                    x: position.x,
+                    y: position.y + size.height
+                }
+            },
+            {
+                type: LineSegment.TYPE,
+                end: position
+            }
+        ];
+        return {
+            start: position,
+            segments
+        };
     }
 }

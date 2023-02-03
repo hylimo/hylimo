@@ -316,6 +316,12 @@ export const diagramModule: InterpreterModule = {
                             scope.contents += point
                             point
                         }
+                        scope.lpos = {
+                            (lineProvider, pos) = args
+                            point = linePoint(lineProvider = lineProvider, pos = pos)
+                            scope.contents += point
+                            point
+                        }
                         scope.styles = {
                             resultStyles = styles(it)
                             scope._styles.styles.addAll(resultStyles.styles)

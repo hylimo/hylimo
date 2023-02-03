@@ -10,7 +10,7 @@ import { DeltaAdditiveNumberGenerator } from "../generators/deltaAdditiveNumberG
 import { DeltaReplacementNumberGenerator } from "../generators/deltaReplacementNumberGenerator";
 
 /**
- * Generates a new EditGeneratorEntry based on the provided FieldEntry to modify
+ * Generates a new EditGeneratorEntry based on the provided FieldEntry to modify.
  * If the entry is a literal number, modifies it.
  * If it is an additive expression (expression +/- literal number) modifies the operator and the literal.
  * Otherwise adds an additive expression to the end

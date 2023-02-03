@@ -20,4 +20,14 @@ export namespace LineMoveAction {
      * Kind of LineMoveActions
      */
     export const KIND = "lineMoveAction";
+
+    /**
+     * Checks if the action is a LineMoveAction
+     *
+     * @param action the action to check
+     * @returns true if it is a LineMoveAction
+     */
+    export function is(action: TransactionalAction): action is LineMoveAction {
+        return action.kind === KIND;
+    }
 }

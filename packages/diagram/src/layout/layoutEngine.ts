@@ -83,7 +83,7 @@ export class LayoutEngine {
                 }
             }
         );
-        const elements = layout.layout(layoutElement, { x: 0, y: 0 }, layoutElement.measuredSize!, "0");
+        const elements = layout.layout(layoutElement, Point.ORIGIN, layoutElement.measuredSize!, "0");
         return {
             rootElement: {
                 type: "root",
@@ -327,13 +327,12 @@ export class Layout {
 
         this.layoutElementLookup.set(id, element);
 
-        const results = element.layoutConfig.layout(
-            this,
-            element,
-            { x: posX, y: posY },
-            { width: realWidth, height: realHeight },
-            id
-        );
+        const bounds = {
+            position: { x: posX, y: posY },
+            size: { width: realWidth, height: realHeight }
+        };
+        element.layoutBounds = bounds;
+        const results = element.layoutConfig.layout(this, element, bounds.position, bounds.size, id);
         results.forEach((result) => this.elementLookup.set(result.id, result));
         return results;
     }

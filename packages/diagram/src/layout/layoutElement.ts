@@ -1,5 +1,5 @@
 import { FieldEntry, FullObject, Type } from "@hylimo/core";
-import { Element, Point, Size } from "@hylimo/diagram-common";
+import { Element, Line, Point, Size } from "@hylimo/diagram-common";
 import { Layout } from "./layoutEngine";
 
 /**
@@ -8,6 +8,14 @@ import { Layout } from "./layoutEngine";
 export interface SizeConstraints {
     min: Size;
     max: Size;
+}
+
+/**
+ * Bounds for layouting
+ */
+export interface Bounds {
+    position: Point;
+    size: Size;
 }
 
 /**
@@ -126,6 +134,10 @@ export interface LayoutElement {
      */
     requestedSize?: Size;
     /**
+     * Bounds provided at layout
+     */
+    layoutBounds?: Bounds;
+    /**
      * Other required layout data
      */
     [key: string]: any;
@@ -197,4 +209,14 @@ export interface LayoutConfig {
      * @returns the rendered element
      */
     layout(layout: Layout, element: LayoutElement, position: Point, size: Size, id: string): Element[];
+    /**
+     * Called to create the outline of an element
+     *
+     * @param layout performs the layout
+     * @param element the element to get the outline of
+     * @param position offset in current context
+     * @param size the size of the element
+     * @returns the outline of the element
+     */
+    outline(layout: Layout, element: LayoutElement, position: Point, size: Size): Line;
 }

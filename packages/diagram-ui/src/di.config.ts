@@ -5,6 +5,7 @@ import {
     CanvasConnection,
     CanvasElement,
     CanvasLineSegment,
+    LinePoint,
     Marker,
     Rect,
     RelativePoint,
@@ -50,6 +51,8 @@ import { RelativePointView } from "./views/canvas/relativePointView";
 import { RectView } from "./views/rectView";
 import { SRootView } from "./views/rootView";
 import { TextView } from "./views/textView";
+import { SLinePoint } from "./model/canvas/sLinePoint";
+import { LinePointView } from "./views/canvas/linePointView";
 
 /**
  * The module used
@@ -70,6 +73,9 @@ const diagramModule = new ContainerModule((bind, unbind, isBound, rebind) => {
         enable: [selectFeature, moveFeature]
     });
     configureModelElement(context, RelativePoint.TYPE, SRelativePoint, RelativePointView, {
+        enable: [selectFeature, moveFeature]
+    });
+    configureModelElement(context, LinePoint.TYPE, SLinePoint, LinePointView, {
         enable: [selectFeature, moveFeature]
     });
     configureModelElement(context, CanvasConnection.TYPE, SCanvasConnection, CanvasConnectionView, {

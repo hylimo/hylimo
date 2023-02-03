@@ -11,6 +11,10 @@
         "build": "tsc"
     },
     "dependencies": {
+        "bezier-js": "^6.1.0",
         "sprotty-protocol": "^0.12.0"
+    },
+    "devDependencies": {
+        "@types/bezier-js": "^4.1.0"
     }
 }

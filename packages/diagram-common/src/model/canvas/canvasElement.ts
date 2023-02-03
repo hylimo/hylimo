@@ -1,3 +1,4 @@
+import { Line } from "../../line/model/line";
 import { Element } from "../base/element";
 import { SizedElement } from "../base/sizedElement";
 
@@ -14,6 +15,10 @@ export interface CanvasElement extends SizedElement {
      * Resizable if present
      */
     resizable?: number[];
+    /**
+     * The outline of the CanvasElement
+     */
+    outline: Line;
 }
 
 export namespace CanvasElement {

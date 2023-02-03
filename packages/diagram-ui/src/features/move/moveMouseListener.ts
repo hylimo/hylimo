@@ -204,7 +204,13 @@ export class MoveMouseListener extends MouseListener {
             if (pointsToMove.length !== 1) {
                 return null;
             }
-            return new LineMoveHandler(pointsToMove[0].id, this.transactionIdProvider.generateId());
+            const linePoint = pointsToMove[0] as SLinePoint;
+            return new LineMoveHandler(
+                linePoint.id,
+                this.transactionIdProvider.generateId(),
+                linePoint.position,
+                linePoint.line
+            );
         } else {
             throw new Error("This should not be reachable");
         }
