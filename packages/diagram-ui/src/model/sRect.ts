@@ -13,4 +13,9 @@ const rectAnimatedFields = new Set(SShape.defaultAnimatedFields);
 export class SRect extends SShape implements Rect, LinearAnimatable {
     override type!: typeof Rect.TYPE;
     readonly animatedFields = rectAnimatedFields;
+
+    /**
+     * The radius of the corners
+     */
+    cornerRadius?: number;
 }

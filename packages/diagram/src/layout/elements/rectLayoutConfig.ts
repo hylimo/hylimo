@@ -1,4 +1,4 @@
-import { FullObject } from "@hylimo/core";
+import { FullObject, numberType } from "@hylimo/core";
 import { Element, Size, Rect, Point } from "@hylimo/diagram-common";
 import { LayoutElement, SizeConstraints, addToConstraints, addToSize } from "../layoutElement";
 import { Layout } from "../layoutEngine";
@@ -9,7 +9,17 @@ import { ContentShapeLayoutConfig } from "./contentShapeLayoutConfig";
  */
 export class RectLayoutConfig extends ContentShapeLayoutConfig {
     constructor() {
-        super(Rect.TYPE, [], []);
+        super(
+            Rect.TYPE,
+            [],
+            [
+                {
+                    name: "cornerRadius",
+                    description: "optional corner radius for all for corner in both x and y direction",
+                    type: numberType
+                }
+            ]
+        );
     }
 
     override measure(layout: Layout, element: LayoutElement, constraints: SizeConstraints): Size {
@@ -37,6 +47,7 @@ export class RectLayoutConfig extends ContentShapeLayoutConfig {
             ...position,
             ...size,
             ...this.extractShapeProperties(element),
+            cornerRadius: element.styles.cornerRadius,
             children: []
         };
         if (element.content) {
