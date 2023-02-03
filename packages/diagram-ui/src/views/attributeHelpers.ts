@@ -7,7 +7,7 @@ import { SShape } from "../model/sShape";
  * @param model the model which provides the attributes
  * @returns the extracted attribzutes
  */
-export function extractLayoutAttributes(model: SLayoutedElement): {
+export function extractLayoutAttributes(model: Readonly<SLayoutedElement>): {
     x: number;
     y: number;
     width: number;
@@ -27,7 +27,7 @@ export function extractLayoutAttributes(model: SLayoutedElement): {
  * @param model the model which provides the attributes
  * @returns the extracted attributes
  */
-export function extractShapeAttributes(model: SShape): object {
+export function extractShapeAttributes(model: Readonly<SShape>): object {
     const res = {
         ...extractLayoutAttributes(model),
         fill: model.fill ?? "none",

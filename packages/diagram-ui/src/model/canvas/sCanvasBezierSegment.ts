@@ -22,17 +22,24 @@ export class SCanvasBezierSegment extends SCanvasConnectionSegment implements Ca
     /**
      * Getter for the position associated with startControlPoint
      */
-    get startControlPointPosition(): Point {
-        const target = this.root.index.getById(this.startControlPoint) as SCanvasPoint;
-        return target.position;
-    }
+    readonly startControlPointPosition!: Point;
 
     /**
      * Getter for the position associated with endControlPoint
      */
-    get endControlPointPosition(): Point {
-        const target = this.root.index.getById(this.endControlPoint) as SCanvasPoint;
-        return target.position;
+    readonly endControlPointPosition!: Point;
+
+    constructor() {
+        super();
+
+        this.cachedProperty("startControlPointPosition", () => {
+            const target = this.root.index.getById(this.startControlPoint) as SCanvasPoint;
+            return target.position;
+        });
+        this.cachedProperty("endControlPointPosition", () => {
+            const target = this.root.index.getById(this.endControlPoint) as SCanvasPoint;
+            return target.position;
+        });
     }
 
     override get dependencies(): string[] {

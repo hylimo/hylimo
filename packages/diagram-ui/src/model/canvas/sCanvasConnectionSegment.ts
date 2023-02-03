@@ -18,9 +18,14 @@ export abstract class SCanvasConnectionSegment extends SElement {
     /**
      * Getter for the position associated with end
      */
-    get endPosition(): Point {
-        const target = this.root.index.getById(this.end) as SCanvasPoint;
-        return target.position;
+    readonly endPosition!: Point;
+
+    constructor() {
+        super();
+        this.cachedProperty("endPosition", () => {
+            const target = this.root.index.getById(this.end) as SCanvasPoint;
+            return target.position;
+        });
     }
 
     /**
