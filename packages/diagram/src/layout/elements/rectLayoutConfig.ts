@@ -43,7 +43,7 @@ export class RectLayoutConfig extends ContentShapeLayoutConfig {
     override layout(layout: Layout, element: LayoutElement, position: Point, size: Size, id: string): Element[] {
         let cornerRadius: number | undefined = undefined;
         if (element.styles.cornerRadius) {
-            cornerRadius = Math.min(element.styles.cornerRadius, size.width / 2, size.height / 2);
+            cornerRadius = Math.max(0, Math.min(element.styles.cornerRadius, size.width / 2, size.height / 2));
         }
         element.cornerRadius = cornerRadius;
         const result: Rect = {
