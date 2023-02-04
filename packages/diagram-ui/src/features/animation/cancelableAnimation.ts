@@ -7,12 +7,23 @@ import { CancelableCommandExecutionContext } from "./cancelableCommandExecutionC
  * A canceled animation immediately stops animation and does NOT animate to the final state.
  */
 export abstract class CancelableAnimation extends Animation {
+    /**
+     * Creates a new CancelableAnimation
+     *
+     * @param newModel the new model which is returned on cancel
+     * @param context the context to pass to super
+     */
+    constructor(protected readonly newModel: SModelRoot, context: CommandExecutionContext) {
+        super(context);
+    }
+
     tween(t: number, context: CommandExecutionContext): SModelRoot {
         if (CancelableCommandExecutionContext.isCanceled(context)) {
-            return context.root;
+            return this.newModel;
         } else {
-            (context.root as SRoot).changeRevision++;
-            return this.tweenInternal(t, context);
+            const newRoot = this.tweenInternal(t, context);
+            (newRoot as SRoot).changeRevision++;
+            return newRoot;
         }
     }
 

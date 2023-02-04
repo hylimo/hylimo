@@ -1,5 +1,5 @@
 import { FullObject, numberType } from "@hylimo/core";
-import { Element, Size, Rect, Point } from "@hylimo/diagram-common";
+import { Element, Size, Rect, Point, Line, ArcSegment, LineSegment } from "@hylimo/diagram-common";
 import { LayoutElement, SizeConstraints, addToConstraints, addToSize } from "../layoutElement";
 import { Layout } from "../layoutEngine";
 import { ContentShapeLayoutConfig } from "./contentShapeLayoutConfig";
@@ -45,6 +45,7 @@ export class RectLayoutConfig extends ContentShapeLayoutConfig {
         if (element.styles.cornerRadius) {
             cornerRadius = Math.min(element.styles.cornerRadius, size.width / 2, size.height / 2);
         }
+        element.cornerRadius = cornerRadius;
         const result: Rect = {
             type: Rect.TYPE,
             id,
@@ -65,4 +66,75 @@ export class RectLayoutConfig extends ContentShapeLayoutConfig {
         }
         return [result];
     }
+
+    override outline(layout: Layout, element: LayoutElement, position: Point, size: Size): Line {
+        if (element.cornerRadius) {
+            const radius: number = element.cornerRadius;
+            const { x, y } = position;
+            const { width, height } = size;
+            const segments: (LineSegment | ArcSegment)[] = [
+                lineSegment(x + width - radius, y),
+                arcSegment(x + width - radius, y + radius, x + width, y + radius, radius),
+                lineSegment(x + width, y + height - radius),
+                arcSegment(x + width - radius, y + height - radius, x + width - radius, y + height, radius),
+                lineSegment(x + radius, y + height),
+                arcSegment(x + radius, y + height - radius, x, y + height - radius, radius),
+                lineSegment(x, y + radius),
+                arcSegment(x + radius, y + radius, x + radius, y, radius)
+            ];
+            return {
+                start: {
+                    x: x + radius,
+                    y
+                },
+                segments
+            };
+        } else {
+            return super.outline(layout, element, position, size);
+        }
+    }
+}
+
+/**
+ * Helper to create a line segment
+ *
+ * @param x the end x coordinate
+ * @param y the end y coordiate
+ * @returns the generated line segment
+ */
+function lineSegment(x: number, y: number): LineSegment {
+    return {
+        type: LineSegment.TYPE,
+        end: {
+            x,
+            y
+        }
+    };
+}
+
+/**
+ * Helper to create a clockwise arc segment
+ *
+ * @param cx x coordinate of the center
+ * @param cy y coordinate of the center
+ * @param endX x coordinate of the end
+ * @param endY y coordinate of the end
+ * @param radius both x and y radius
+ * @returns the created arc segment
+ */
+function arcSegment(cx: number, cy: number, endX: number, endY: number, radius: number): ArcSegment {
+    return {
+        type: ArcSegment.TYPE,
+        clockwise: true,
+        end: {
+            x: endX,
+            y: endY
+        },
+        center: {
+            x: cx,
+            y: cy
+        },
+        rx: radius,
+        ry: radius
+    };
 }

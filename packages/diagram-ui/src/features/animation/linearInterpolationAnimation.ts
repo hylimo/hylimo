@@ -9,16 +9,16 @@ export class LinearInterpolationAnimation extends CancelableAnimation {
     /**
      * Creates a new LinearInterpolationAnimation
      *
-     * @param model the model which is returned, all elementAnimations must be part of this model
+     * @param newModel the model which is returned, all elementAnimations must be part of this model
      * @param elementAnimations element animations
      * @param context required context
      */
     constructor(
-        protected readonly model: SModelRoot,
+        newModel: SModelRoot,
         public readonly elementAnimations: ElmentLinearInterpolationAnimation[],
         context: CommandExecutionContext
     ) {
-        super(context);
+        super(newModel, context);
     }
 
     override tweenInternal(t: number, _context: CommandExecutionContext): SModelRoot {
@@ -31,7 +31,7 @@ export class LinearInterpolationAnimation extends CancelableAnimation {
                 (animation.element as any)[field] = newValue;
             });
         }
-        return this.model;
+        return this.newModel;
     }
 }
 

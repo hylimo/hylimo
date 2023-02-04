@@ -84,7 +84,11 @@ export class UpdateModelCommand extends BaseUpdateModelCommand {
             if (commonFields.length > 0) {
                 const interpolations = new Map<string, [number, number]>();
                 for (const field of commonFields) {
-                    interpolations.set(field, [(left as any)[field] as number, (right as any)[field] as number]);
+                    const leftValue = (left as any)[field] as number;
+                    const rightValue = (right as any)[field] as number;
+                    if (leftValue != rightValue) {
+                        interpolations.set(field, [leftValue, rightValue]);
+                    }
                 }
                 return {
                     element: right,

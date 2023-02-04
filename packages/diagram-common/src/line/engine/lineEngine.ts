@@ -1,8 +1,10 @@
 import { Point } from "../../common/point";
+import { ArcSegment } from "../model/arcSegment";
 import { BezierSegment } from "../model/bezierSegment";
 import { LineTransform, TransformedLine } from "../model/line";
 import { LineSegment } from "../model/lineSegment";
 import { Segment } from "../model/segment";
+import { ArcSegmentEngine } from "./arcSegmentEngine";
 import { BezierSegmentEngine } from "./bezierSegmentEngine";
 import { LineSegmentEngine } from "./lineSegmentEngine";
 import { SegmentEngine } from "./segmentEngine";
@@ -21,7 +23,8 @@ export class LineEngine {
      */
     private engines = new Map<string, SegmentEngine<any>>([
         [LineSegment.TYPE, new LineSegmentEngine()],
-        [BezierSegment.TYPE, new BezierSegmentEngine()]
+        [BezierSegment.TYPE, new BezierSegmentEngine()],
+        [ArcSegment.TYPE, new ArcSegmentEngine()]
     ]);
 
     /**

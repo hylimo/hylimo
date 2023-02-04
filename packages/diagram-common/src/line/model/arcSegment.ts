@@ -1,3 +1,4 @@
+import { Point } from "../../common/point";
 import { Segment } from "./segment";
 
 /**
@@ -7,25 +8,21 @@ export interface ArcSegment extends Segment {
     type: typeof ArcSegment.TYPE;
 
     /**
-     * The x radius of the ellipse
+     * The center point
+     */
+    center: Point;
+    /**
+     * The x radius
      */
     rx: number;
     /**
-     * The y radius of the ellipse
+     * The y radius
      */
     ry: number;
     /**
-     * The rotationof the ellipse
+     * Clockwise or counter-clockwise arc?
      */
-    rotation: number;
-    /**
-     * Of the 4 possible arcs, use a large or a small one
-     */
-    largeArc: boolean;
-    /**
-     * Of the 4 possible arcs, use one going clockwise or counter-clockwise
-     */
-    sweep: boolean;
+    clockwise: boolean;
 }
 
 export namespace ArcSegment {
