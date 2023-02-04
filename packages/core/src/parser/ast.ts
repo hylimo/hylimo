@@ -487,7 +487,7 @@ export class AssignmentExpression extends Expression {
         } else {
             targetValue = context.currentScope;
         }
-        let valueValue = this.value.evaluateWithSource(context);
+        const valueValue = this.value.evaluateWithSource(context);
         if (this.target) {
             targetValue.setLocalField(this.name, valueValue, context);
         } else {

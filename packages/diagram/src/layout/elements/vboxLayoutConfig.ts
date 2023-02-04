@@ -16,7 +16,7 @@ export class VBoxLayoutConfig extends PanelLayoutConfig {
         if (contents.length > 0) {
             let height = 0;
             let width = constraints.min.width;
-            let contentElements: LayoutElement[] = [];
+            const contentElements: LayoutElement[] = [];
             const contentConstraints: SizeConstraints = {
                 min: {
                     width: constraints.min.width,

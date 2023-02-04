@@ -142,7 +142,7 @@ function generateFormatVisitor(parser: Parser): ICstVisitor<never, Doc> {
             if (!expressionsChildren.expression) {
                 return "{ }";
             } else {
-                const newLine = !!expressionsChildren.StartNewLine ? hardline : line;
+                const newLine = expressionsChildren.StartNewLine ? hardline : line;
                 return [decorator, group(["{", indent([newLine, expressions]), newLine, "}"])];
             }
         }

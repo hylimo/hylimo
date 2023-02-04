@@ -40,7 +40,7 @@ export class InterpreterContext {
      * Should never get larger than maxExecutionSteps.
      * Each action which can lead to infinite loops should (e.g. jumps) should increase this counter
      */
-    currentExecutionSteps: number = 0;
+    currentExecutionSteps = 0;
     /**
      * Current execution scope.
      * Code modifying this is responsible for recreating the correct scope afterwards.
@@ -249,7 +249,7 @@ export class Interpreter {
      */
     constructor(modules: InterpreterModule[]) {
         const markedModules = modules.map((module) => ({ module, mark: false, temporaryMark: false }));
-        const moduleLookup = new Map<string, typeof markedModules[0]>();
+        const moduleLookup = new Map<string, (typeof markedModules)[0]>();
         for (const module of markedModules) {
             if (moduleLookup.has(module.module.name)) {
                 throw new Error(`Duplicate module ${module.module.name}`);

@@ -14,7 +14,7 @@ import { SemanticFieldNames } from "../runtime/semanticFieldNames";
  * @param description the description of the value, part of the error message
  * @returns the value of the StringObject
  */
-export function assertString(value: BaseObject, description: string = ""): string {
+export function assertString(value: BaseObject, description = ""): string {
     if (!(value instanceof StringObject)) {
         throw new RuntimeError(`${description} is not a string`);
     }
@@ -38,7 +38,7 @@ export function isString(value: BaseObject): boolean {
  * @param description the description of the value, part of the error message
  * @returns the value of the NumberObject
  */
-export function assertNumber(value: BaseObject, description: string = ""): number {
+export function assertNumber(value: BaseObject, description = ""): number {
     if (!(value instanceof NumberObject)) {
         throw new RuntimeError(`${description} is not a number`);
     }
@@ -61,10 +61,7 @@ export function isNumber(value: BaseObject): boolean {
  * @param value the value to check
  * @param description the description of the value, part of the error message
  */
-export function assertFunction(
-    value: BaseObject,
-    description: string = ""
-): asserts value is AbstractFunctionObject<any> {
+export function assertFunction(value: BaseObject, description = ""): asserts value is AbstractFunctionObject<any> {
     if (!(value instanceof AbstractFunctionObject)) {
         throw new RuntimeError(`${description} is not a function`);
     }
@@ -76,7 +73,7 @@ export function assertFunction(
  * @param value the value to check
  * @param description the description of the value, part of the error message
  */
-export function assertObject(value: BaseObject, description: string = ""): asserts value is FullObject {
+export function assertObject(value: BaseObject, description = ""): asserts value is FullObject {
     if (!(value instanceof FullObject)) {
         throw new RuntimeError(`${description} is not an object`);
     }

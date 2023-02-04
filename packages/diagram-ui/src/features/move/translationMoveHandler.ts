@@ -8,11 +8,11 @@ export class TranslationMoveHandler implements MoveHandler {
     /**
      * last x offset
      */
-    private lastDx: number = 0;
+    private lastDx = 0;
     /**
      * last y offset
      */
-    private lastDy: number = 0;
+    private lastDy = 0;
 
     /**
      * Creats a new TranslateMovehandler

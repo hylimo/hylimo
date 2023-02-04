@@ -15,7 +15,7 @@ export class CanvasConnectionView implements IView {
         const segments = model.children.filter(
             (child) => child instanceof SCanvasConnectionSegment
         ) as SCanvasConnectionSegment[];
-        let { startPos, endPos, childMarkers } = this.renderMarkers(model, segments, context);
+        const { startPos, endPos, childMarkers } = this.renderMarkers(model, segments, context);
         const { path, childControlElements } = this.renderPathAndControlElements(model, startPos, segments, endPos);
         return svg(
             "g",

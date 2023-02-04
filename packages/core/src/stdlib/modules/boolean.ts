@@ -21,7 +21,7 @@ export class BooleanObject extends LiteralObject<boolean> {}
  * @param description the description of the value, part of the error message
  * @returns the value of the BooleanObject
  */
-export function assertBoolean(value: any, description: string = ""): boolean {
+export function assertBoolean(value: any, description = ""): boolean {
     if (!(value instanceof BooleanObject)) {
         throw new RuntimeError(`${description} is not a boolean`);
     }

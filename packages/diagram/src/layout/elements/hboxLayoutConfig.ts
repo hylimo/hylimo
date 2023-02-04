@@ -16,7 +16,7 @@ export class HBoxLayoutConfig extends PanelLayoutConfig {
         if (contents.length > 0) {
             let width = 0;
             let height = constraints.min.height;
-            let contentElements: LayoutElement[] = [];
+            const contentElements: LayoutElement[] = [];
             const contentConstraints: SizeConstraints = {
                 min: {
                     width: 0,
