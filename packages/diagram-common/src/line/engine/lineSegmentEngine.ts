@@ -7,7 +7,7 @@ import { Point as SprottyPoint } from "sprotty-protocol";
  * Segment engine for LineSegment
  */
 export class LineSegmentEngine extends SegmentEngine<LineSegment> {
-    override getNearestPoint(point: Point, segment: LineSegment, segmentStartPoint: Point): NearestPointResult {
+    override projectPoint(point: Point, segment: LineSegment, segmentStartPoint: Point): NearestPointResult {
         const x1 = segmentStartPoint;
         const x2 = segment.end;
 

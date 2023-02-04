@@ -39,8 +39,12 @@
 }
 
 
-.main-wrapper {
+main {
   display: flex;
+}
+
+main .split-view {
+  height: unset;
 }
 
 /* Sprotty */

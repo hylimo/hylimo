@@ -25,7 +25,7 @@ export class LineMoveHandler implements MoveHandler {
             x: this.initialPosition.x + dx,
             y: this.initialPosition.y + dy
         };
-        const nearest = LineEngine.DEFAULT.getNearestPoint(newPosition, this.line);
+        const nearest = LineEngine.DEFAULT.projectPoint(newPosition, this.line);
         return {
             kind: LineMoveAction.KIND,
             point: this.point,

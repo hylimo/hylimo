@@ -13,26 +13,26 @@
         "write-heading-ids": "docusaurus write-heading-ids"
     },
     "dependencies": {
-        "@docusaurus/core": "2.2.0",
-        "@docusaurus/preset-classic": "2.2.0",
+        "@docusaurus/core": "2.3.1",
+        "@docusaurus/preset-classic": "2.3.1",
         "@hylimo/core": "^0.0.1",
         "@hylimo/diagram-ui": "^0.0.1",
         "@hylimo/language-server": "^0.0.1",
         "@mdx-js/react": "^1.6.22",
         "@rehooks/local-storage": "^2.4.4",
-        "allotment": "^1.17.0",
+        "allotment": "^1.18.0",
         "clsx": "^1.2.1",
         "monaco-editor-workers": "^0.34.2",
-        "monaco-languageclient": "^4.0.1",
+        "monaco-languageclient": "^4.0.3",
         "prism-react-renderer": "^1.3.5",
         "react": "^17.0.2",
         "react-dom": "^17.0.2",
         "react-monaco-editor": "^0.50.1",
         "reflect-metadata": "^0.1.13",
-        "sprotty": "^0.12.0"
+        "sprotty": "^0.13.0"
     },
     "devDependencies": {
-        "@docusaurus/module-type-aliases": "2.2.0",
+        "@docusaurus/module-type-aliases": "2.3.1",
         "@tsconfig/docusaurus": "^1.0.6",
         "monaco-editor-webpack-plugin": "^7.0.1"
     },

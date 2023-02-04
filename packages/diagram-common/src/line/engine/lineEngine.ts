@@ -31,7 +31,7 @@ export class LineEngine {
      * @param transformedLine line with associated transform
      * @returns the position of the closest point on the line
      */
-    getNearestPoint(point: Point, transformedLine: TransformedLine): number {
+    projectPoint(point: Point, transformedLine: TransformedLine): number {
         const { line, transform } = transformedLine;
         if (line.segments.length == 0) {
             return 0;
@@ -44,7 +44,7 @@ export class LineEngine {
         for (let i = 0; i < line.segments.length; i++) {
             const segment = line.segments[i];
             const engine = this.getEngine(segment);
-            const candidate = engine.getNearestPoint(localPoint, segment, startPosition);
+            const candidate = engine.projectPoint(localPoint, segment, startPosition);
             if (candidate.distance < minDistance) {
                 minDistance = candidate.distance;
                 position = lengthPerSegment * (i + candidate.position);

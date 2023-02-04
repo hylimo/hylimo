@@ -15,7 +15,7 @@ export abstract class SegmentEngine<T extends Segment> {
      * @param segmentStartPoint the start position of the segment
      * @returns a definition of the nearest point and its distance
      */
-    abstract getNearestPoint(point: Point, segment: T, segmentStartPoint: Point): NearestPointResult;
+    abstract projectPoint(point: Point, segment: T, segmentStartPoint: Point): NearestPointResult;
 
     /**
      * Gets a point on a segment
