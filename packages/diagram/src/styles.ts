@@ -12,7 +12,11 @@ export enum SelectorType {
     /**
      * Type selector, matches type
      */
-    TYPE = "type"
+    TYPE = "type",
+    /**
+     * Any selector, maches any element
+     */
+    ANY = "any"
 }
 
 /**

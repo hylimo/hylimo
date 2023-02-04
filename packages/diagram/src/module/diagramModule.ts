@@ -188,6 +188,10 @@ export const diagramModule: InterpreterModule = {
                         res = object(styles = list())
                         res.type = selector("type")
                         res.class = selector("class")
+                        anySelector = selector("any")
+                        res.any = { 
+                            anySelector("", it, self = args.self)
+                        }
                         res.unset = object(_type = "styleValue")
                         res.default = default
                         callback.callWithScope(res)
