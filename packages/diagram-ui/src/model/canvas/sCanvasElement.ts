@@ -1,5 +1,4 @@
 import { CanvasElement, Line, Point, TransformedLine } from "@hylimo/diagram-common";
-import { SModelElement } from "sprotty";
 import { LinearAnimatable } from "../../features/animation/model";
 import { LineProvider } from "../../features/layout/lineProvider";
 import { PositionProvider } from "../../features/layout/positionProvider";

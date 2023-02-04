@@ -1,4 +1,3 @@
-import { Expression } from "../../parser/ast";
 import { assign, fun, id, jsFun, str } from "../../parser/astHelper";
 import { InterpreterModule } from "../../runtime/interpreter";
 import { RuntimeError } from "../../runtime/runtimeError";
@@ -9,7 +8,7 @@ import { optional } from "../../types/null";
 import { numberType } from "../../types/number";
 import { stringType } from "../../types/string";
 import { DefaultModuleNames } from "../defaultModuleNames";
-import { assertFunction, assertNumber, assertString } from "../typeHelpers";
+import { assertFunction, assertString } from "../typeHelpers";
 import { assertBoolean } from "./boolean";
 
 /**
@@ -66,6 +65,7 @@ export const commonModule: InterpreterModule = {
                     const body = args.getField(1, context);
                     assertFunction(condition);
                     assertFunction(body);
+                    // eslint-disable-next-line no-constant-condition
                     while (true) {
                         const conditionRes = condition.invoke([], context).value;
                         if (!assertBoolean(conditionRes, "result of the condition function")) {

@@ -5,7 +5,7 @@ import { Type } from "./base";
  */
 export const anyType: Type = {
     name: () => "any",
-    matches(value, context) {
+    matches(_value, _context) {
         return true;
     }
 };

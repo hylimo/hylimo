@@ -57,7 +57,7 @@ export abstract class BaseObject {
      * @param context context in which this is performed
      * @param scope if provided, the scope to use
      */
-    invoke(args: InvocationArgument[], context: InterpreterContext, scope?: FullObject): FieldEntry {
+    invoke(_args: InvocationArgument[], _context: InterpreterContext, _scope?: FullObject): FieldEntry {
         throw new RuntimeError("Invoke not supported");
     }
 
@@ -103,7 +103,7 @@ export abstract class SimpleObject extends BaseObject {
         }
     }
 
-    override setLocalField(key: string | number, value: FieldEntry, context: InterpreterContext) {
+    override setLocalField(_key: string | number, _value: FieldEntry, _context: InterpreterContext) {
         throw new RuntimeError("Cannot set field directly of a non-Object");
     }
 }

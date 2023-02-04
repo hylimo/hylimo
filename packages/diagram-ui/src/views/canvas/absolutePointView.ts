@@ -1,6 +1,6 @@
 import { injectable } from "inversify";
 import { VNode } from "snabbdom";
-import { RenderingContext } from "sprotty";
+import { IViewArgs, RenderingContext } from "sprotty";
 import { SAbsolutePoint } from "../../model/canvas/sAbsolutePoint";
 import { CanvasPointView } from "./canvasPointView";
 
@@ -12,7 +12,7 @@ export class AbsolutePointView extends CanvasPointView<SAbsolutePoint> {
     renderInternal(
         model: Readonly<SAbsolutePoint>,
         context: RenderingContext,
-        args?: {} | undefined
+        _args?: IViewArgs | undefined
     ): VNode | undefined {
         return this.renderPoint(model, context, model.position);
     }

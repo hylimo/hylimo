@@ -6,7 +6,7 @@ import { Type } from "./base";
  */
 export const numberType: Type = {
     name: () => "number",
-    matches(value, context) {
+    matches(value, _context) {
         if (value instanceof NumberObject) {
             return true;
         } else {

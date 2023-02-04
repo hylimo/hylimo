@@ -1,6 +1,6 @@
 import { injectable } from "inversify";
 import { VNode } from "snabbdom";
-import { IView, RenderingContext, svg } from "sprotty";
+import { IView, IViewArgs, RenderingContext, svg } from "sprotty";
 import { SCanvasElement } from "../../model/canvas/sCanvasElement";
 
 /**
@@ -8,7 +8,11 @@ import { SCanvasElement } from "../../model/canvas/sCanvasElement";
  */
 @injectable()
 export class CanvasElementView implements IView {
-    render(model: Readonly<SCanvasElement>, context: RenderingContext, args?: {} | undefined): VNode | undefined {
+    render(
+        model: Readonly<SCanvasElement>,
+        context: RenderingContext,
+        _args?: IViewArgs | undefined
+    ): VNode | undefined {
         const position = model.position;
         const children = context.renderChildren(model);
         if (model.selected) {

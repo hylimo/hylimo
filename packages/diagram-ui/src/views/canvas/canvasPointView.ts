@@ -1,7 +1,7 @@
 import { Point } from "@hylimo/diagram-common";
 import { injectable } from "inversify";
 import { VNode } from "snabbdom";
-import { IView, RenderingContext, svg } from "sprotty";
+import { IView, IViewArgs, RenderingContext, svg } from "sprotty";
 import { SCanvasPoint } from "../../model/canvas/sCanvasPoint";
 
 /**
@@ -9,7 +9,7 @@ import { SCanvasPoint } from "../../model/canvas/sCanvasPoint";
  */
 @injectable()
 export abstract class CanvasPointView<T extends SCanvasPoint> implements IView {
-    render(model: Readonly<T>, context: RenderingContext, args?: {} | undefined): VNode | undefined {
+    render(model: Readonly<T>, context: RenderingContext, args?: IViewArgs | undefined): VNode | undefined {
         if (model.isVisible) {
             return this.renderInternal(model, context, args);
         } else {
@@ -26,7 +26,11 @@ export abstract class CanvasPointView<T extends SCanvasPoint> implements IView {
      * @param args rendering args
      * @returns the rendered point
      */
-    abstract renderInternal(model: Readonly<T>, context: RenderingContext, args?: {} | undefined): VNode | undefined;
+    abstract renderInternal(
+        model: Readonly<T>,
+        context: RenderingContext,
+        args?: IViewArgs | undefined
+    ): VNode | undefined;
 
     /**
      * Can be used to render the point itself.
@@ -36,7 +40,7 @@ export abstract class CanvasPointView<T extends SCanvasPoint> implements IView {
      * @param context rendering context
      * @returns the rendered point
      */
-    protected renderPoint(model: Readonly<T>, context: RenderingContext, position: Point): VNode | undefined {
+    protected renderPoint(model: Readonly<T>, _context: RenderingContext, position: Point): VNode | undefined {
         return svg("line", {
             attrs: {
                 transform: `translate(${position.x}, ${position.y})`

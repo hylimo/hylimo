@@ -6,7 +6,7 @@ import { Type } from "./base";
  */
 export const functionType: Type = {
     name: () => "function",
-    matches(value, context) {
+    matches(value, _context) {
         if (value instanceof AbstractFunctionObject) {
             return true;
         } else {

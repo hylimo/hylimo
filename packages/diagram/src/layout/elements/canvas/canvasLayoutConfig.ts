@@ -1,13 +1,5 @@
-import {
-    FullObject,
-    listType,
-    literal,
-    objectToList,
-    objectType,
-    RuntimeError,
-    SemanticFieldNames
-} from "@hylimo/core";
-import { Size, Point, Element, Canvas, AbsolutePoint, RelativePoint, LinePoint } from "@hylimo/diagram-common";
+import { FullObject, listType, literal, objectToList, objectType, SemanticFieldNames } from "@hylimo/core";
+import { Size, Point, Element, Canvas } from "@hylimo/diagram-common";
 import { LayoutElement, SizeConstraints } from "../../layoutElement";
 import { Layout } from "../../layoutEngine";
 import { StyledElementLayoutConfig } from "../styledElementLayoutConfig";

@@ -223,7 +223,7 @@ export class Layout {
      * @returns the generated LayoutElement
      */
     measure(element: FullObject, parent: LayoutElement | undefined, constraints: SizeConstraints): LayoutElement {
-        const type = assertString(element.getLocalFieldOrUndefined("type")?.value!, "type");
+        const type = assertString(element.getLocalFieldOrUndefined("type")!.value, "type");
         const cls = nativeToList(element.getLocalFieldOrUndefined("class")?.value?.toNative() ?? {});
         const layoutElement: LayoutElement = {
             element,

@@ -8,7 +8,7 @@ import { SRoot } from "../model/sRoot";
  */
 @injectable()
 export class SRootView implements IView {
-    render(model: Readonly<SRoot>, context: RenderingContext, args?: IViewArgs | undefined): VNode {
+    render(model: Readonly<SRoot>, context: RenderingContext, _args?: IViewArgs | undefined): VNode {
         const transform = `scale(${model.zoom}) translate(${-model.scroll.x},${-model.scroll.y})`;
         return svg(
             "svg",

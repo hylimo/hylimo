@@ -6,7 +6,7 @@ import { Type } from "./base";
  */
 export const stringType: Type = {
     name: () => "string",
-    matches(value, context) {
+    matches(value, _context) {
         if (value instanceof StringObject) {
             return true;
         } else {

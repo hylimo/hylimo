@@ -1,10 +1,4 @@
-import {
-    Expression,
-    FieldEntry,
-    IdentifierExpression,
-    InvocationExpression,
-    NumberLiteralExpression
-} from "@hylimo/core";
+import { FieldEntry, IdentifierExpression, InvocationExpression, NumberLiteralExpression } from "@hylimo/core";
 import { EditGeneratorEntry } from "../editGeneratorEntry";
 import { DeltaAdditiveNumberGenerator } from "../generators/deltaAdditiveNumberGenerator";
 import { DeltaReplacementNumberGenerator } from "../generators/deltaReplacementNumberGenerator";

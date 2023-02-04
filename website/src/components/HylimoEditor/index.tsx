@@ -97,7 +97,6 @@ export default function HylimoEditor(): JSX.Element {
                         editor.editor.defineTheme("custom-dark", customDarkTheme as any);
                         editor.editor.defineTheme("custom-light", customLightTheme as any);
                     }}
-                    editorWillUnmount={(editor) => {}}
                     language={language}
                     value={code}
                     onChange={setCode}

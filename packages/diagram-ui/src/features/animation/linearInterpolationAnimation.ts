@@ -21,7 +21,7 @@ export class LinearInterpolationAnimation extends CancelableAnimation {
         super(context);
     }
 
-    override tweenInternal(t: number, context: CommandExecutionContext): SModelRoot {
+    override tweenInternal(t: number, _context: CommandExecutionContext): SModelRoot {
         for (const animation of this.elementAnimations) {
             animation.interpolations.forEach(([from, to], field) => {
                 let newValue = to;

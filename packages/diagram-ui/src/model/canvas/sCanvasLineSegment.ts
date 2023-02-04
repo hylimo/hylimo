@@ -26,7 +26,7 @@ export class SCanvasLineSegment extends SCanvasConnectionSegment implements Canv
         return `L ${end.x} ${end.y}`;
     }
 
-    override generateControlViewElements(start: Point): VNode[] {
+    override generateControlViewElements(_start: Point): VNode[] {
         return [];
     }
 

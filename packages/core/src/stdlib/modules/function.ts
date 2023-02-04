@@ -1,8 +1,6 @@
-import { assign, fun, id, jsFun, str } from "../../parser/astHelper";
+import { assign, fun, id, jsFun } from "../../parser/astHelper";
 import { InterpreterModule } from "../../runtime/interpreter";
-import { FullObject } from "../../runtime/objects/fullObject";
 import { SemanticFieldNames } from "../../runtime/semanticFieldNames";
-import { Type } from "../../types/base";
 import { functionType } from "../../types/function";
 import { objectType } from "../../types/object";
 import { DefaultModuleNames } from "../defaultModuleNames";

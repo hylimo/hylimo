@@ -16,7 +16,7 @@ export function literal(value: any): Type {
                 return value.toString();
             }
         },
-        matches(providedValue, context) {
+        matches(providedValue, _context) {
             if (!(providedValue instanceof LiteralObject) || providedValue.value !== value) {
                 return {
                     expected: this,

@@ -38,15 +38,7 @@ export class SpanLayoutConfig extends ElementLayoutConfig {
         );
     }
 
-    /**
-     * Called to determine the size the element requires
-     *
-     * @param layout performs the layout
-     * @param element the element to measure
-     * @param constraints defines min and max size
-     * @returns the calculated size
-     */
-    measure(layout: Layout, element: LayoutElement, constraints: SizeConstraints): Size {
+    override measure(layout: Layout, element: LayoutElement, _constraints: SizeConstraints): Size {
         const styles = element.styles;
         styles.text = styles.text ?? "";
         styles.fontFamily = styles.fontFamily ?? layout.defaultFont.config.fontFamily;
@@ -54,17 +46,7 @@ export class SpanLayoutConfig extends ElementLayoutConfig {
         return { width: 0, height: 0 };
     }
 
-    /**
-     * Called to render the element
-     *
-     * @param layout performs the layout
-     * @param element the element to render
-     * @param position offset in current context
-     * @param size the size of the element
-     * @param id the id of the element
-     * @returns the rendered element
-     */
-    layout(layout: Layout, element: LayoutElement, position: Point, size: Size, id: string): Element[] {
+    override layout(_layout: Layout, _element: LayoutElement, _position: Point, _size: Size, _id: string): Element[] {
         throw new Error("not implemented");
     }
 }

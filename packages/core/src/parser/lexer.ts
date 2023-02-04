@@ -131,7 +131,7 @@ export const Comma = createToken({
  */
 export const Identifier = createToken({
     name: "Identifier",
-    pattern: /(([!#%&'*+\-\/:;<=>?@\\^`|~]|([_$](?![_$]*[a-z0-9])))+)|([a-z_$][a-z0-9_$]*)/i
+    pattern: /(([!#%&'*+\-/:;<=>?@\\^`|~]|([_$](?![_$]*[a-z0-9])))+)|([a-z_$][a-z0-9_$]*)/i
 });
 
 /**
@@ -167,7 +167,7 @@ export const Equal = createToken({
  */
 export const String = createToken({
     name: "String",
-    pattern: /"((\\[\\"nt])|([a-zA-Z0-9!#$%&'()*+,\-.\/:;<=>?@[\]^_`{|}~ ]))*"/
+    pattern: /"((\\[\\"nt])|([a-zA-Z0-9!#$%&'()*+,\-./:;<=>?@[\]^_`{|}~ ]))*"/
 });
 
 /**

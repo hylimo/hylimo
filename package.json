@@ -7,7 +7,7 @@
     "scripts": {
         "build": "tsc -b tsconfig.build.json",
         "format": "prettier --write \"**/*.{ts,json,js,tsx,jsx}\"",
-        "lint": "eslint --ext .js,.ts,.tsx,.jsx --fix \"{website,packages/*}/src/**\""
+        "lint": "eslint --fix \"{website,packages/*}/src/**/*.{ts,js,tsx,jsx}\""
     },
     "devDependencies": {
         "@typescript-eslint/eslint-plugin": "^5.50.0",
@@ -42,7 +42,14 @@
         "rules": {
             "prettier/prettier": "error",
             "@typescript-eslint/no-explicit-any": "off",
-            "@typescript-eslint/no-non-null-assertion": "off"
+            "@typescript-eslint/no-non-null-assertion": "off",
+            "@typescript-eslint/no-namespace": "off",
+            "@typescript-eslint/no-unused-vars": [
+                "error",
+                {
+                    "argsIgnorePattern": "^_"
+                }
+            ]
         }
     }
 }

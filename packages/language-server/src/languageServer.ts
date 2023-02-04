@@ -1,8 +1,6 @@
-import { InterpreterModule, Interpreter, Parser, CstResult, defaultModules, FullObject } from "@hylimo/core";
+import { InterpreterModule, Interpreter, Parser, defaultModules } from "@hylimo/core";
 import {
     Connection,
-    Diagnostic,
-    DiagnosticSeverity,
     DocumentFormattingParams,
     InitializeResult,
     Range,

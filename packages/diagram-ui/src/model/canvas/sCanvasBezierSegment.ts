@@ -96,7 +96,7 @@ export class SCanvasBezierSegment extends SCanvasConnectionSegment implements Ca
         ];
     }
 
-    override generateSegments(start: Point): BezierSegment[] {
+    override generateSegments(_start: Point): BezierSegment[] {
         return [
             {
                 type: BezierSegment.TYPE,

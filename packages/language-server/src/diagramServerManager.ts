@@ -112,7 +112,7 @@ export class DiagramServerManager {
         const uri = this.documentLookup.get(clientId);
         if (uri != undefined) {
             this.documentLookup.delete(clientId);
-            const clients = this.diagramServersByDocument.set(
+            this.diagramServersByDocument.set(
                 uri,
                 this.diagramServersByDocument.get(uri)?.filter((client) => client != clientId) ?? []
             );

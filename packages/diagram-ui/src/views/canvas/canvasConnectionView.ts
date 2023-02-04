@@ -1,7 +1,7 @@
 import { MarkerRenderInformation, Point } from "@hylimo/diagram-common";
 import { injectable } from "inversify";
 import { VNode } from "snabbdom";
-import { IView, RenderingContext, svg } from "sprotty";
+import { IView, IViewArgs, RenderingContext, svg } from "sprotty";
 import { SCanvasConnection } from "../../model/canvas/sCanvasConnection";
 import { SCanvasConnectionSegment } from "../../model/canvas/sCanvasConnectionSegment";
 import { SMarker } from "../../model/canvas/sMarker";
@@ -11,12 +11,16 @@ import { SMarker } from "../../model/canvas/sMarker";
  */
 @injectable()
 export class CanvasConnectionView implements IView {
-    render(model: Readonly<SCanvasConnection>, context: RenderingContext, args?: {} | undefined): VNode | undefined {
+    render(
+        model: Readonly<SCanvasConnection>,
+        context: RenderingContext,
+        _args?: IViewArgs | undefined
+    ): VNode | undefined {
         const segments = model.children.filter(
             (child) => child instanceof SCanvasConnectionSegment
         ) as SCanvasConnectionSegment[];
-        const { startPos, endPos, childMarkers } = this.renderMarkers(model, segments, context);
-        const { path, childControlElements } = this.renderPathAndControlElements(model, startPos, segments, endPos);
+        const { startPos, childMarkers } = this.renderMarkers(model, segments, context);
+        const { path, childControlElements } = this.renderPathAndControlElements(model, startPos, segments);
         return svg(
             "g",
             null,
@@ -54,8 +58,7 @@ export class CanvasConnectionView implements IView {
     private renderPathAndControlElements(
         model: Readonly<SCanvasConnection>,
         startPos: Point,
-        segments: SCanvasConnectionSegment[],
-        endPos: Point
+        segments: SCanvasConnectionSegment[]
     ) {
         const childControlElements: VNode[] = [];
         const showControlElements = model.showControlElements;
@@ -63,13 +66,7 @@ export class CanvasConnectionView implements IView {
         let originalStart = model.startPosition;
         for (let i = 0; i < segments.length; i++) {
             const segment = segments[i];
-            let newEnd: Point;
             const originalEnd = segment.endPosition;
-            if (i == segments.length - 1) {
-                newEnd = endPos;
-            } else {
-                newEnd = originalEnd;
-            }
             pathSegments.push(segment.generatePathString());
             if (showControlElements) {
                 childControlElements.push(...segment.generateControlViewElements(originalStart));
@@ -96,7 +93,6 @@ export class CanvasConnectionView implements IView {
         const startMarker = markers.find((marker) => marker.pos == "start");
         const endMarker = markers.find((marker) => marker.pos == "end");
         let startPos = model.startPosition;
-        let endPos = segments.at(-1)!.endPosition;
         const childMarkers: VNode[] = [];
         if (endMarker != undefined) {
             let endStartPosition: Point;
@@ -106,8 +102,7 @@ export class CanvasConnectionView implements IView {
                 endStartPosition = segments.at(-2)!.endPosition;
             }
             const renderInformation = segments.at(-1)!.calculateMarkerRenderInformation(endMarker, endStartPosition);
-            childMarkers.push(this.renderMarker(endMarker, renderInformation, endPos, context));
-            endPos = renderInformation.newPoint;
+            childMarkers.push(this.renderMarker(endMarker, renderInformation, segments.at(-1)!.endPosition, context));
         }
         if (startMarker != undefined) {
             const startSegment = segments[0];
@@ -115,7 +110,7 @@ export class CanvasConnectionView implements IView {
             childMarkers.push(this.renderMarker(startMarker, renderInformation, startPos, context));
             startPos = renderInformation.newPoint;
         }
-        return { startPos, endPos, childMarkers };
+        return { startPos, childMarkers };
     }
 
     /**

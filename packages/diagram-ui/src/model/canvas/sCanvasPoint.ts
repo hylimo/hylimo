@@ -1,4 +1,4 @@
-import { CanvasPoint, Point, RelativePoint } from "@hylimo/diagram-common";
+import { CanvasPoint, Point } from "@hylimo/diagram-common";
 import { PositionProvider } from "../../features/layout/positionProvider";
 import { SCanvasContent } from "./sCanvasContent";
 

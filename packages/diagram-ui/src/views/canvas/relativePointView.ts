@@ -1,6 +1,6 @@
 import { injectable } from "inversify";
 import { VNode } from "snabbdom";
-import { RenderingContext, svg } from "sprotty";
+import { IViewArgs, RenderingContext, svg } from "sprotty";
 import { SRelativePoint } from "../../model/canvas/sRelativePoint";
 import { CanvasPointView } from "./canvasPointView";
 
@@ -9,10 +9,10 @@ import { CanvasPointView } from "./canvasPointView";
  */
 @injectable()
 export class RelativePointView extends CanvasPointView<SRelativePoint> {
-    renderInternal(
+    override renderInternal(
         model: Readonly<SRelativePoint>,
         context: RenderingContext,
-        args?: {} | undefined
+        _args?: IViewArgs | undefined
     ): VNode | undefined {
         const position = model.position;
         return svg(

@@ -112,6 +112,7 @@ export class FullObject extends BaseObject {
      * Throws an error if a loop is detected.
      */
     private validateProto(): void {
+        // eslint-disable-next-line @typescript-eslint/no-this-alias
         let current: FullObject | undefined = this;
         while (current) {
             current = current.getProto();

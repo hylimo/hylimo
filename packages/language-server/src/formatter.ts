@@ -1,7 +1,7 @@
 import { Parser } from "@hylimo/core";
 import { Plugin, doc, Doc } from "prettier";
 import { format } from "prettier/standalone";
-import { TextDocument, TextEdit } from "vscode-languageserver-textdocument";
+import { TextDocument } from "vscode-languageserver-textdocument";
 import { CstNode, ICstVisitor, IToken } from "chevrotain";
 import { uinteger } from "vscode-languageserver";
 
@@ -31,7 +31,7 @@ export class Formatter {
     readonly plugin: Plugin<CstNode> = {
         parsers: {
             syncscript: {
-                parse: (text, options) => this.parser.parse(text).cst!,
+                parse: (text, _options) => this.parser.parse(text).cst!,
                 astFormat: "syncscript",
                 locStart: (node) => node.location!.startOffset,
                 locEnd: (node) => node.location!.endOffset!
@@ -39,7 +39,7 @@ export class Formatter {
         },
         printers: {
             syncscript: {
-                print: (path, options, print) => {
+                print: (path, _options, _print) => {
                     const node = path.getValue();
                     return this.formatVisitor.visit(node);
                 }

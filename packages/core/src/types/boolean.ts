@@ -6,7 +6,7 @@ import { Type } from "./base";
  */
 export const booleanType: Type = {
     name: () => "boolean",
-    matches(value, context) {
+    matches(value, _context) {
         if (value instanceof BooleanObject) {
             return true;
         } else {

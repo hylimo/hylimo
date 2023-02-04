@@ -14,7 +14,6 @@ import { or } from "../../types/or";
 import { stringType } from "../../types/string";
 import { numberType } from "../../types/number";
 import { objectType } from "../../types/object";
-import { Type } from "../../types/base";
 import { functionType } from "../../types/function";
 
 /**

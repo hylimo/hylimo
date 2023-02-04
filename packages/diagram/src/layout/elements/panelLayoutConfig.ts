@@ -28,7 +28,7 @@ export abstract class PanelLayoutConfig extends StyledElementLayoutConfig {
                 },
                 ...additionalAttributes
             ],
-            additionalAttributes
+            additionalStyleAttributes
         );
     }
 

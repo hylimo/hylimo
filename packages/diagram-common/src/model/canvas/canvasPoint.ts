@@ -38,7 +38,7 @@ export namespace AbsolutePoint {
      * @param element the element to get the dependencies of
      * @returns the list of dependencies, may contain duplicates
      */
-    export function getDependencies(element: AbsolutePoint): string[] {
+    export function getDependencies(_element: AbsolutePoint): string[] {
         return [];
     }
 }

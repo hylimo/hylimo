@@ -1,6 +1,5 @@
-import { numberType, stringType } from "@hylimo/core";
 import { LayoutElement, AttributeConfig } from "../layoutElement";
-import { shapeStyleAttributes, strokeStyleAttributes } from "./attributes";
+import { shapeStyleAttributes } from "./attributes";
 import { StyledElementLayoutConfig } from "./styledElementLayoutConfig";
 
 /**

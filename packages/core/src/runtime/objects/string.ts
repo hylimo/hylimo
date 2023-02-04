@@ -1,4 +1,3 @@
-import { SimpleObject } from "./baseObject";
 import { FullObject } from "./fullObject";
 import { LiteralObject } from "./literal";
 

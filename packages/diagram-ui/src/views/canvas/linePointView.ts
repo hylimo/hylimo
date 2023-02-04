@@ -1,6 +1,6 @@
 import { injectable } from "inversify";
 import { VNode } from "snabbdom";
-import { RenderingContext } from "sprotty";
+import { IViewArgs, RenderingContext } from "sprotty";
 import { SLinePoint } from "../../model/canvas/sLinePoint";
 import { CanvasPointView } from "./canvasPointView";
 
@@ -9,7 +9,11 @@ import { CanvasPointView } from "./canvasPointView";
  */
 @injectable()
 export class LinePointView extends CanvasPointView<SLinePoint> {
-    renderInternal(model: Readonly<SLinePoint>, context: RenderingContext, args?: {} | undefined): VNode | undefined {
+    renderInternal(
+        model: Readonly<SLinePoint>,
+        context: RenderingContext,
+        _args?: IViewArgs | undefined
+    ): VNode | undefined {
         return this.renderPoint(model, context, model.position);
     }
 }

@@ -1,4 +1,4 @@
-import { FullObject, literal, numberType, objectType, SemanticFieldNames } from "@hylimo/core";
+import { FullObject, numberType } from "@hylimo/core";
 import { Size, Element, RelativePoint } from "@hylimo/diagram-common";
 import { Point } from "sprotty-protocol";
 import { canvasPointType } from "../../../module/types";

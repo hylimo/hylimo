@@ -1,5 +1,5 @@
 import { ConstExpression } from "../../parser/ast";
-import { arg, assign, fun, id, jsFun, native } from "../../parser/astHelper";
+import { assign, fun, id, jsFun, native } from "../../parser/astHelper";
 import { InterpreterModule } from "../../runtime/interpreter";
 import { RuntimeError } from "../../runtime/runtimeError";
 import { SemanticFieldNames } from "../../runtime/semanticFieldNames";

@@ -9,7 +9,7 @@ import { extractLayoutAttributes } from "./attributeHelpers";
  */
 @injectable()
 export class TextView implements IView {
-    render(model: Readonly<SText>, context: RenderingContext, args?: IViewArgs | undefined): VNode | undefined {
+    render(model: Readonly<SText>, _context: RenderingContext, _args?: IViewArgs | undefined): VNode | undefined {
         return svg(
             "text",
             {

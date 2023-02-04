@@ -9,7 +9,7 @@ import { extractShapeAttributes } from "./attributeHelpers";
  */
 @injectable()
 export class RectView implements IView {
-    render(model: Readonly<SRect>, context: RenderingContext, args?: IViewArgs | undefined): VNode | undefined {
+    render(model: Readonly<SRect>, context: RenderingContext, _args?: IViewArgs | undefined): VNode | undefined {
         const attrs: Attrs = {
             ...extractShapeAttributes(model)
         };

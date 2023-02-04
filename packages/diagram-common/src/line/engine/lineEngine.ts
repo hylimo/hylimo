@@ -1,6 +1,6 @@
 import { Point } from "../../common/point";
 import { BezierSegment } from "../model/bezierSegment";
-import { Line, LineTransform, TransformedLine } from "../model/line";
+import { LineTransform, TransformedLine } from "../model/line";
 import { LineSegment } from "../model/lineSegment";
 import { Segment } from "../model/segment";
 import { BezierSegmentEngine } from "./bezierSegmentEngine";

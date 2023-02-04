@@ -17,11 +17,10 @@ export abstract class SElement extends SChildElement implements Element {
     protected cachedProperty<T>(name: string, initializer: () => NonNullable<T>): void {
         let currentVersion = Number.NaN;
         let currentValue: T | undefined = undefined;
-        const that = this;
         Object.defineProperty(this, name, {
             enumerable: true,
-            get(): T {
-                const revision = (that.root as SRoot).changeRevision;
+            get: () => {
+                const revision = (this.root as SRoot).changeRevision;
                 if (currentValue === undefined || revision != currentVersion) {
                     currentVersion = revision;
                     currentValue = initializer();

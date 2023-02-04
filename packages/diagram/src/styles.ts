@@ -99,10 +99,10 @@ function generateStylesRecursive(selectorChain: Selector[], currentObject: FullO
         ...selectorChain,
         {
             type: assertString(
-                currentObject.getLocalFieldOrUndefined("selectorType")?.value!,
+                currentObject.getLocalFieldOrUndefined("selectorType")!.value,
                 "selectorType"
             ) as SelectorType,
-            value: assertString(currentObject.getLocalFieldOrUndefined("selectorValue")?.value!, "selectorValue")
+            value: assertString(currentObject.getLocalFieldOrUndefined("selectorValue")!.value, "selectorValue")
         }
     ];
     const styles: Style[] = [];
