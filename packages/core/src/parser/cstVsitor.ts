@@ -2,6 +2,7 @@ import { CstNode, ICstVisitor, IToken } from "chevrotain";
 import {
     AssignmentExpression,
     ASTExpressionPosition,
+    BracketExpression,
     DestructuringExpression,
     Expression,
     ExpressionMetadata,
@@ -330,7 +331,11 @@ export function generateVisitor(parser: Parser): ICstVisitor<CstVisitorParameter
          * @returns the inner expression
          */
         private bracketExpression(ctx: any, params: CstVisitorParameters) {
-            return this.visit(ctx.expression, params);
+            const innerExpression = this.visit(ctx.expression, params);
+            return new BracketExpression(
+                innerExpression,
+                generateMetadata(ctx.OpenRoundBracket[0], ctx.CloseRoundBracket[0], params)
+            );
         }
 
         /**

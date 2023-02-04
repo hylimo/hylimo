@@ -523,6 +523,29 @@ export class DestructuringExpression extends Expression {
 }
 
 /**
+ * Expression which evaluates and returns an inner expression
+ */
+export class BracketExpression extends Expression {
+    /**
+     * Creates a new BracketExpression consisting of an inner expression
+     *
+     * @param expression the inner expression
+     * @param metadata metadata for the expression
+     */
+    constructor(readonly expression: Expression, metadata: ExpressionMetadata) {
+        super("BracketExpression", metadata);
+    }
+
+    override evaluateInternal(context: InterpreterContext): FieldEntry {
+        return this.expression.evaluate(context);
+    }
+
+    override evaluateWithSource(context: InterpreterContext): FieldEntry {
+        return this.expression.evaluateWithSource(context);
+    }
+}
+
+/**
  * Argument for a function invocation
  */
 export interface InvocationArgument {
