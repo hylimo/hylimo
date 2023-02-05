@@ -24,7 +24,8 @@ import {
     moveFeature,
     TYPES,
     decorationModule,
-    registerModelElement
+    registerModelElement,
+    undoRedoModule
 } from "sprotty";
 import { CommandStack } from "./base/commandStack";
 import { moveModule } from "./features/move/di.config";
@@ -95,7 +96,7 @@ const diagramModule = new ContainerModule((bind, unbind, isBound, rebind) => {
 export function createContainer(widgetId: string): Container {
     const container = new Container();
     loadDefaultModules(container, {
-        exclude: [sprottyUpdateModule, sprottyMoveModule, sprottyZOrderModule, decorationModule]
+        exclude: [sprottyUpdateModule, sprottyMoveModule, sprottyZOrderModule, decorationModule, undoRedoModule]
     });
     container.load(updateModule, zorderModule, transactionModule, moveModule);
     container.load(diagramModule);
