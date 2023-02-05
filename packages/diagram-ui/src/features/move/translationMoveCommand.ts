@@ -6,74 +6,37 @@ import { SRelativePoint } from "../../model/canvas/sRelativePoint";
 import { SRoot } from "../../model/sRoot";
 
 /**
- * Resolved version of TranslationMoveAction
- */
-interface ResolvedTranslationMoveAction {
-    /**
-     * Absolute points in points
-     */
-    absolutePoints: SAbsolutePoint[];
-    /**
-     * Relative points in points
-     */
-    relativePoints: SRelativePoint[];
-}
-
-/**
  * Command for TranslationMoveAction
  */
 @injectable()
 export class TranslationMoveCommand extends Command {
     static readonly KIND = TranslationMoveAction.KIND;
 
-    /**
-     * Cached resolved action
-     */
-    resolvedAction?: ResolvedTranslationMoveAction;
-
     constructor(@inject(TYPES.Action) private readonly action: TranslationMoveAction) {
         super();
     }
 
-    execute(context: CommandExecutionContext): CommandReturn {
+    override execute(context: CommandExecutionContext): CommandReturn {
         (context.root as SRoot).changeRevision++;
         const points = this.action.points.map((point) => context.root.index.getById(point));
-        this.resolvedAction = {
-            absolutePoints: points.filter((point) => point instanceof SAbsolutePoint) as SAbsolutePoint[],
-            relativePoints: points.filter((point) => point instanceof SRelativePoint) as SRelativePoint[]
-        };
-        return this.redo(context);
-    }
-
-    undo(context: CommandExecutionContext): CommandReturn {
-        if (this.resolvedAction == undefined) {
-            throw new Error("Command not executed yet");
-        }
-        (context.root as SRoot).changeRevision++;
-        for (const point of this.resolvedAction.absolutePoints) {
-            point.x -= this.action.deltaOffsetX;
-            point.y -= this.action.deltaOffsetY;
-        }
-        for (const point of this.resolvedAction.relativePoints) {
-            point.offsetX -= this.action.deltaOffsetX;
-            point.offsetY -= this.action.deltaOffsetY;
-        }
-        return context.root;
-    }
-
-    redo(context: CommandExecutionContext): CommandReturn {
-        if (this.resolvedAction == undefined) {
-            throw new Error("Command not executed yet");
-        }
-        (context.root as SRoot).changeRevision++;
-        for (const point of this.resolvedAction.absolutePoints) {
+        const absolutePoints = points.filter((point) => point instanceof SAbsolutePoint) as SAbsolutePoint[];
+        const relativePoints = points.filter((point) => point instanceof SRelativePoint) as SRelativePoint[];
+        for (const point of absolutePoints) {
             point.x += this.action.deltaOffsetX;
             point.y += this.action.deltaOffsetY;
         }
-        for (const point of this.resolvedAction.relativePoints) {
+        for (const point of relativePoints) {
             point.offsetX += this.action.deltaOffsetX;
             point.offsetY += this.action.deltaOffsetY;
         }
         return context.root;
+    }
+
+    override undo(_context: CommandExecutionContext): CommandReturn {
+        throw new Error("undo is not supported");
+    }
+
+    override redo(_context: CommandExecutionContext): CommandReturn {
+        throw new Error("redo is not supported");
     }
 }
