@@ -3,7 +3,6 @@ import { Size, Point, Element, CanvasElement } from "@hylimo/diagram-common";
 import { canvasPointType } from "../../../module/types";
 import { LayoutElement, SizeConstraints } from "../../layoutElement";
 import { Layout } from "../../layoutEngine";
-import { CanvasContentLayoutConfig } from "./canvasContentLayoutConfig";
 import { EditableCanvasContentLayoutConfig } from "./editableCanvasContentLayoutConfig";
 
 /**

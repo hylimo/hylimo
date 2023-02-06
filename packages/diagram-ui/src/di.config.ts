@@ -7,6 +7,7 @@ import {
     CanvasLineSegment,
     LinePoint,
     Marker,
+    Path,
     Rect,
     RelativePoint,
     Root,
@@ -54,6 +55,8 @@ import { SRootView } from "./views/rootView";
 import { TextView } from "./views/textView";
 import { SLinePoint } from "./model/canvas/sLinePoint";
 import { LinePointView } from "./views/canvas/linePointView";
+import { SPath } from "./model/sPath";
+import { PathView } from "./views/pathView";
 
 /**
  * The module used
@@ -65,6 +68,7 @@ const diagramModule = new ContainerModule((bind, unbind, isBound, rebind) => {
 
     configureModelElement(context, Root.TYPE, SRoot, SRootView);
     configureModelElement(context, Rect.TYPE, SRect, RectView);
+    configureModelElement(context, Path.TYPE, SPath, PathView);
     configureModelElement(context, Text.TYPE, SText, TextView);
     configureModelElement(context, Canvas.TYPE, SCanvas, CanvasView);
     configureModelElement(context, CanvasElement.TYPE, SCanvasElement, CanvasElementView, {

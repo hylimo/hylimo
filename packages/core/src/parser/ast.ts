@@ -415,7 +415,7 @@ export class SelfInvocationExpression extends AbstractInvocationExpression {
         return fieldValue.invoke(
             [{ value: new ConstExpression(targetValue), name: SemanticFieldNames.SELF }, ...this.argumentExpressions],
             context,
-            undefined, 
+            undefined,
             this
         );
     }
