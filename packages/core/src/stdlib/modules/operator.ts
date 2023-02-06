@@ -1,5 +1,5 @@
 import { ConstExpression } from "../../parser/ast";
-import { assign, fun, id, jsFun, native } from "../../parser/astHelper";
+import { fun, id, jsFun, native } from "../../parser/astHelper";
 import { InterpreterModule } from "../../runtime/interpreter";
 import { RuntimeError } from "../../runtime/runtimeError";
 import { SemanticFieldNames } from "../../runtime/semanticFieldNames";
@@ -17,7 +17,7 @@ export const operatorModule: InterpreterModule = {
     runtimeDependencies: [DefaultModuleNames.BOOLEAN],
     expressions: [
         ...["*", "/", "%", "&&", "||", ">", ">=", "<", "<=", ">>", "<<", "+="].map((operator) =>
-            assign(
+            id(SemanticFieldNames.THIS).assignField(
                 operator,
                 native(
                     (args, context) => {
@@ -47,7 +47,7 @@ export const operatorModule: InterpreterModule = {
                 )
             )
         ),
-        assign(
+        id(SemanticFieldNames.THIS).assignField(
             "==",
             jsFun(
                 (args, context) => {
@@ -81,7 +81,7 @@ export const operatorModule: InterpreterModule = {
                 }
             )
         ),
-        assign(
+        id(SemanticFieldNames.THIS).assignField(
             "!=",
             fun(
                 [
@@ -101,7 +101,7 @@ export const operatorModule: InterpreterModule = {
                 }
             )
         ),
-        assign(
+        id(SemanticFieldNames.THIS).assignField(
             "+",
             jsFun(
                 (args, context) => {
@@ -136,7 +136,7 @@ export const operatorModule: InterpreterModule = {
                 }
             )
         ),
-        assign(
+        id(SemanticFieldNames.THIS).assignField(
             "??",
             native(
                 (args, context) => {
@@ -165,7 +165,7 @@ export const operatorModule: InterpreterModule = {
                 }
             )
         ),
-        assign(
+        id(SemanticFieldNames.THIS).assignField(
             "-",
             native(
                 (args, context) => {

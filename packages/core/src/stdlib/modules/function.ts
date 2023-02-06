@@ -5,6 +5,7 @@ import { functionType } from "../../types/function";
 import { objectType } from "../../types/object";
 import { DefaultModuleNames } from "../defaultModuleNames";
 import { assertFunction, assertObject } from "../typeHelpers";
+import { toBoolean } from "./boolean";
 
 /**
  * Name of the temporary field where the function prototype is assigned
@@ -52,6 +53,26 @@ export const functionModule: InterpreterModule = {
                         [0, objectType()],
                         [SemanticFieldNames.SELF, functionType]
                     ]
+                )
+            ),
+            id(functionProto).assignField(
+                "==",
+                jsFun(
+                    (args, context) => {
+                        const self = args.getField(SemanticFieldNames.SELF, context);
+                        const other = args.getField(0, context);
+                        return toBoolean(self === other, context);
+                    },
+                    {
+                        docs: `
+                            Compares self to another value, returns true if they are the same.
+                            Params:
+                                - "self": one value for the comparison
+                                - 0: other value for the comparison
+                            Returns:
+                                true iff both values are the same
+                        `
+                    }
                 )
             )
         ]).call()

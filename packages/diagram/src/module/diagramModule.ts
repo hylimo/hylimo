@@ -307,7 +307,7 @@ export const diagramModule: InterpreterModule = {
                     scopeEnhancer = it ?? { }
                     {
                         callback = it
-                        scope = object(_styles = styles({ }), fonts = list(), contents = list())
+                        scope = object(_styles = styles({ }), fonts = list(), contents = list(), _classCounter = 0)
                         scope.apos = {
                             (x, y) = args
                             point = absolutePoint(x = x, y = y)
@@ -327,8 +327,43 @@ export const diagramModule: InterpreterModule = {
                             point
                         }
                         scope.styles = {
-                            resultStyles = styles(it)
-                            scope._styles.styles.addAll(resultStyles.styles)
+                            (first, second) = args
+                            if(second != null) {
+                                className = "canvas-element-" + scope._classCounter
+                                scope._classCounter = scope._classCounter + 1
+                                if (first.class == null) {
+                                    first.class = list(className)
+                                } {
+                                    first.class += className
+                                }
+                                first.scopes.styles = second
+                                stylesToAdd = styles(second).styles
+                                scope.styles {
+                                    class(className) {
+                                        styles.addAll(stylesToAdd)
+                                    }
+                                }
+                                first
+                            } {
+                                resultStyles = styles(first)
+                                scope._styles.styles.addAll(resultStyles.styles)
+                            }
+                        }
+                        scope.layout = {
+                            (self, callback) = args
+                            self.scopes.layout = callback
+                            result = object()
+                            callback.callWithScope(result)
+                            if (result.pos != null) {
+                                self.pos = result.pos
+                            }
+                            if (result.width != null) {
+                                self.width = result.width
+                            }
+                            if (result.height != null) {
+                                self.height = result.height
+                            }
+                            self
                         }
                         scopeEnhancer(scope)
                         callback.callWithScope(scope)
@@ -342,6 +377,8 @@ export const diagramModule: InterpreterModule = {
                         The function takes a callback, which is invoked with a custom scope.
                         By default, in this scope exist
                             - styles: function to add more styles, can be called multiple times
+                                      can also be used as operator after an element
+                            - layout: function which takes a CanvasElement and applies pos, width and height to it
                             - contents: list of elements used as contents of the canvas
                             - pos: takes two positional parameters and creates a new absolutePoint
                             - fonts: list of fonts
