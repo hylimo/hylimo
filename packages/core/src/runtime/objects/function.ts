@@ -1,5 +1,6 @@
 import {
     AbstractFunctionExpression,
+    AbstractInvocationExpression,
     FunctionExpression,
     InvocationArgument,
     NativeFunctionExpression
@@ -120,9 +121,14 @@ export class NativeFunctionObject extends AbstractFunctionObject<NativeFunctionE
         super(definition, parentScope, proto);
     }
 
-    override invoke(args: InvocationArgument[], context: InterpreterContext): FieldEntry {
+    override invoke(
+        args: InvocationArgument[],
+        context: InterpreterContext,
+        _scope?: FullObject,
+        callExpression?: AbstractInvocationExpression
+    ): FieldEntry {
         context.nextStep();
-        const res = this.definition.callback(args, context, this.parentScope);
+        const res = this.definition.callback(args, context, this.parentScope, callExpression);
         return res;
     }
 

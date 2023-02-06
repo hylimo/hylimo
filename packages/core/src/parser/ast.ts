@@ -311,7 +311,8 @@ export class FunctionExpression extends AbstractFunctionExpression {
 export type NativeFunctionType = (
     args: InvocationArgument[],
     context: InterpreterContext,
-    staticScope: FullObject
+    staticScope: FullObject,
+    callExpression: AbstractInvocationExpression | undefined
 ) => FieldEntry;
 
 /**
@@ -378,7 +379,9 @@ export class InvocationExpression extends AbstractInvocationExpression {
                 { value: new ConstExpression({ value: context.currentScope }), name: SemanticFieldNames.SELF },
                 ...this.argumentExpressions
             ],
-            context
+            context,
+            undefined,
+            this
         );
     }
 }
@@ -411,7 +414,9 @@ export class SelfInvocationExpression extends AbstractInvocationExpression {
         const fieldValue = targetValue.value.getField(this.name, context);
         return fieldValue.invoke(
             [{ value: new ConstExpression(targetValue), name: SemanticFieldNames.SELF }, ...this.argumentExpressions],
-            context
+            context,
+            undefined, 
+            this
         );
     }
 }

@@ -4,11 +4,12 @@ import { canvasPointType } from "../../../module/types";
 import { LayoutElement, SizeConstraints } from "../../layoutElement";
 import { Layout } from "../../layoutEngine";
 import { CanvasContentLayoutConfig } from "./canvasContentLayoutConfig";
+import { EditableCanvasContentLayoutConfig } from "./editableCanvasContentLayoutConfig";
 
 /**
  * Layout config for canvas element
  */
-export class CanvasElementLayoutConfig extends CanvasContentLayoutConfig {
+export class CanvasElementLayoutConfig extends EditableCanvasContentLayoutConfig {
     override isLayoutContent = false;
 
     constructor() {

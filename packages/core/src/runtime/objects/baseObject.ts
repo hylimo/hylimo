@@ -1,4 +1,4 @@
-import { Expression, InvocationArgument } from "../../parser/ast";
+import { AbstractInvocationExpression, Expression, InvocationArgument } from "../../parser/ast";
 import { InterpreterContext } from "../interpreter";
 import { RuntimeError } from "../runtimeError";
 import { SemanticFieldNames } from "../semanticFieldNames";
@@ -56,8 +56,14 @@ export abstract class BaseObject {
      * @param args Arguments of the function, not yet evaluated
      * @param context context in which this is performed
      * @param scope if provided, the scope to use
+     * @param callExpression the expression which causes the call and returns the results
      */
-    invoke(_args: InvocationArgument[], _context: InterpreterContext, _scope?: FullObject): FieldEntry {
+    invoke(
+        _args: InvocationArgument[],
+        _context: InterpreterContext,
+        _scope?: FullObject,
+        _callExpression?: AbstractInvocationExpression
+    ): FieldEntry {
         throw new RuntimeError("Invoke not supported");
     }
 

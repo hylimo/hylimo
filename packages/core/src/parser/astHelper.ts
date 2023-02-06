@@ -4,6 +4,7 @@ import { FullObject } from "../runtime/objects/fullObject";
 import { generateArgs } from "../runtime/objects/function";
 import { Type } from "../types/base";
 import {
+    AbstractInvocationExpression,
     AssignmentExpression,
     Expression,
     ExpressionMetadata,
@@ -144,7 +145,11 @@ export function fun(
  * @returns the created FunctionExpression
  */
 export function jsFun(
-    callback: (args: FullObject, context: InterpreterContext) => BaseObject | FieldEntry,
+    callback: (
+        args: FullObject,
+        context: InterpreterContext,
+        callExpression: AbstractInvocationExpression | undefined
+    ) => BaseObject | FieldEntry,
     decorators: { [index: string]: string | null } = {},
     types?: [string | number, Type][]
 ): NativeFunctionExpression {
@@ -156,11 +161,11 @@ export function jsFun(
         }
     }
     return new NativeFunctionExpression(
-        (args, context, staticScope) => {
+        (args, context, staticScope, callExpression) => {
             const evaluatedArgs = generateArgs(args, context, new Map(types));
             const oldScope = context.currentScope;
             context.currentScope = staticScope;
-            const res = callback(evaluatedArgs, context);
+            const res = callback(evaluatedArgs, context, callExpression);
             context.currentScope = oldScope;
             if (res instanceof BaseObject) {
                 return { value: res };

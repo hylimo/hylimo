@@ -4,7 +4,7 @@ import { canvasPointType } from "../../../module/types";
 import { LayoutElement, SizeConstraints } from "../../layoutElement";
 import { Layout } from "../../layoutEngine";
 import { strokeStyleAttributes } from "../attributes";
-import { CanvasContentLayoutConfig } from "./canvasContentLayoutConfig";
+import { EditableCanvasContentLayoutConfig } from "./editableCanvasContentLayoutConfig";
 
 /**
  * Type for start and end marker
@@ -21,7 +21,7 @@ const markerType = optional(
 /**
  * Layout config or CanvasConnection
  */
-export class CanvasConnectionLayoutConfig extends CanvasContentLayoutConfig {
+export class CanvasConnectionLayoutConfig extends EditableCanvasContentLayoutConfig {
     override isLayoutContent = false;
 
     constructor() {
