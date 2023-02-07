@@ -53,7 +53,7 @@ export function generateArgs(
     }
     for (const [key, type] of types?.entries() ?? []) {
         const argValue = argsObject.getLocalField(key, context).value;
-        validate(type, `Invalid value for paramter ${key}`, argValue, context, () => {
+        validate(type, `Invalid value for parameter ${key}`, argValue, context, () => {
             if (typeof key === "number" && args[key] && args[key].name === undefined) {
                 return args[key].value;
             } else if (typeof key === "string") {
