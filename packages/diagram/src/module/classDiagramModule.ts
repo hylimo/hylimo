@@ -81,7 +81,7 @@ export const classDiagramModule: InterpreterModule = {
                     fun(
                         `
                             primary = "white"
-                            lineWidth = 5
+                            lineWidth = 2
                             scope.styles {
                                 type("span") {
                                     fill = primary
