@@ -14,6 +14,11 @@ import { toBoolean } from "./boolean";
 const numberProto = "numberProto";
 
 /**
+ * Identifier for the math object
+ */
+const mathObject = "Math";
+
+/**
  * Type for number operator functions
  */
 const numberOperatorFunctionTypes: [string | number, Type][] = [
@@ -260,6 +265,67 @@ export const numberModule: InterpreterModule = {
                     [[SemanticFieldNames.SELF, numberType]]
                 )
             )
-        ]).call()
+        ]).call(),
+        assign(
+            mathObject,
+            fun([
+                id(SemanticFieldNames.THIS).assignField(mathObject, id("object").call()),
+                id(mathObject).assignField(
+                    "floor",
+                    jsFun(
+                        (args, context) => {
+                            return context.newNumber(Math.floor(assertNumber(args.getField(0, context))));
+                        },
+                        {
+                            docs: `
+                                Rounds a number down to the largester integer less than or equal to the provided value.
+                                Params:
+                                    - 0: the number to round down
+                                Returns:
+                                    The floored number
+                            `
+                        },
+                        [[0, numberType]]
+                    )
+                ),
+                id(mathObject).assignField(
+                    "ceil",
+                    jsFun(
+                        (args, context) => {
+                            return context.newNumber(Math.ceil(assertNumber(args.getField(0, context))));
+                        },
+                        {
+                            docs: `
+                                Rounds a number uü to the smallest integer greater than or equal to the provided value.
+                                Params:
+                                    - 0: the number to round up
+                                Returns:
+                                    The ceiled number
+                            `
+                        },
+                        [[0, numberType]]
+                    )
+                ),
+                id(mathObject).assignField(
+                    "round",
+                    jsFun(
+                        (args, context) => {
+                            return context.newNumber(Math.round(assertNumber(args.getField(0, context))));
+                        },
+                        {
+                            docs: `
+                                Rounds a number to the nearest integer.
+                                Params:
+                                    - 0: the number to round
+                                Returns:
+                                    The rounded number
+                            `
+                        },
+                        [[0, numberType]]
+                    )
+                ),
+                id(mathObject)
+            ]).call()
+        )
     ]
 };
