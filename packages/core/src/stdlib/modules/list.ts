@@ -8,6 +8,7 @@ import { RuntimeError } from "../../runtime/runtimeError";
 import { SemanticFieldNames } from "../../runtime/semanticFieldNames";
 import { functionType } from "../../types/function";
 import { listType } from "../../types/list";
+import { objectType } from "../../types/object";
 import { DefaultModuleNames } from "../defaultModuleNames";
 import { assertFunction, assertNumber } from "../typeHelpers";
 
@@ -29,173 +30,173 @@ export const listModule: InterpreterModule = {
     dependencies: [DefaultModuleNames.OBJECT],
     runtimeDependencies: [DefaultModuleNames.COMMON],
     expressions: [
-        assign(
-            "list",
-            fun([
-                assign(listProto, id("object").call()),
-                id(listProto).assignField(
-                    "add",
-                    jsFun(
-                        (args, context) => {
-                            const self = args.getField(SemanticFieldNames.SELF, context);
-                            const length = assertNumber(self.getField(lengthField, context));
-                            self.setLocalField(length, args.getFieldEntry(0, context), context);
-                            self.setFieldEntry(lengthField, { value: context.newNumber(length + 1) }, context);
-                            return context.null;
-                        },
-                        {
-                            docs: `
-                                Adds an element to the list.
-                                Params:
-                                    - "self": the list where to add the element
-                                    - 0: the element to add
-                                Returns:
-                                    null
-                            `
-                        },
-                        [[SemanticFieldNames.SELF, listType()]]
-                    )
-                ),
-                id(listProto).assignField(
-                    "addAll",
-                    fun(
+        fun([
+            assign(listProto, id("object").call()),
+            id(listProto).assignField(
+                "add",
+                jsFun(
+                    (args, context) => {
+                        const self = args.getField(SemanticFieldNames.SELF, context);
+                        const length = assertNumber(self.getField(lengthField, context));
+                        self.setLocalField(length, args.getFieldEntry(0, context), context);
+                        self.setFieldEntry(lengthField, { value: context.newNumber(length + 1) }, context);
+                        return context.null;
+                    },
+                    {
+                        docs: `
+                            Adds an element to the list.
+                            Params:
+                                - "self": the list where to add the element
+                                - 0: the element to add
+                            Returns:
+                                null
                         `
-                            targetList = args.self
-                            it.forEach {
-                                targetList.add(it)
-                            }
-                        `,
-                        {
-                            docs: `
-                                Adds all elements in the provided list to the list.
-                                Params:
-                                    - "self": the list where to add the elements
-                                    - 0: the list of elements to add
-                                Returns:
-                                    null
-                            `
-                        },
-                        [
-                            [SemanticFieldNames.SELF, listType()],
-                            [0, listType()]
-                        ]
-                    )
-                ),
-                id(listProto).assignField("+=", id(listProto).field("add")),
-                id(listProto).assignField(
-                    "+",
-                    fun(
+                    },
+                    [[SemanticFieldNames.SELF, listType()]]
+                )
+            ),
+            id(listProto).assignField(
+                "addAll",
+                fun(
+                    `
+                        targetList = args.self
+                        it.forEach {
+                            targetList.add(it)
+                        }
+                    `,
+                    {
+                        docs: `
+                            Adds all elements in the provided list to the list.
+                            Params:
+                                - "self": the list where to add the elements
+                                - 0: the list of elements to add
+                            Returns:
+                                null
                         `
-                            list1 = args.self
-                            (list2) = args
-                            result = list()
-                            result.addAll(list1)
-                            result.addAll(list2)
-                            result
-                        `,
-                        {
-                            docs: `
-                                Merges to lists and createas a new list.
-                                Params
-                                    - "self": the first list
-                                    - 0: the second list
-                                Returns:
-                                    A new list with the elements of both parameters
-                            `
-                        },
-                        [
-                            [SemanticFieldNames.SELF, listType()],
-                            [0, listType()]
-                        ]
-                    )
-                ),
-                id(listProto).assignField(
-                    "remove",
-                    jsFun(
-                        (args, context) => {
-                            const self = args.getField(SemanticFieldNames.SELF, context);
-                            const length = assertNumber(self.getField(lengthField, context));
-                            if (length > 0) {
-                                const value = self.getFieldEntry(length - 1, context);
-                                self.setFieldEntry(length - 1, { value: context.null }, context);
-                                self.setFieldEntry(lengthField, { value: context.newNumber(length - 1) }, context);
-                                return value;
-                            } else {
-                                throw new RuntimeError("List empty, nothing to remove");
-                            }
-                        },
-                        {
-                            docs: `
-                                Removes the last element from the list, throws an error if the list is empty.
-                                Params:
-                                    - "self": the list from which to remove the last element
-                                Returns:
-                                    The removed element
-                            `
-                        },
-                        [[SemanticFieldNames.SELF, listType()]]
-                    )
-                ),
-                id(listProto).assignField(
-                    "forEach",
-                    jsFun(
-                        (args, context) => {
-                            const self = args.getField(SemanticFieldNames.SELF, context);
-                            const callback = args.getField(0, context);
-                            assertFunction(callback, "first positional argument of forEach");
-                            const length = assertNumber(self.getField(lengthField, context), "length field of a list");
-                            for (let i = 0; i < length; i++) {
-                                callback.invoke(
-                                    [{ value: new ConstExpression(self.getFieldEntry(i, context)) }, { value: num(i) }],
-                                    context
-                                );
-                            }
-                            return context.null;
-                        },
-                        {
-                            docs: `
-                                Iterates over all entries of self in order and calls the callback with the value and index of the entry.
-                                Params:
-                                    - "self": the list on which all fields are iterated
-                                    - 0: the callback, called with two positional parameters (value and index)
-                                Returns:
-                                    null
-                            `
-                        },
-                        [
-                            [SemanticFieldNames.SELF, listType()],
-                            [0, functionType]
-                        ]
-                    )
-                ),
-                id(listProto).assignField(
-                    "map",
-                    fun(
+                    },
+                    [
+                        [SemanticFieldNames.SELF, listType()],
+                        [0, listType()]
+                    ]
+                )
+            ),
+            id(listProto).assignField("+=", id(listProto).field("add")),
+            id(listProto).assignField(
+                "+",
+                fun(
+                    `
+                        list1 = args.self
+                        (list2) = args
+                        result = list()
+                        result.addAll(list1)
+                        result.addAll(list2)
+                        result
+                    `,
+                    {
+                        docs: `
+                            Merges to lists and createas a new list.
+                            Params
+                                - "self": the first list
+                                - 0: the second list
+                            Returns:
+                                A new list with the elements of both parameters
                         `
-                            callback = it
-                            res = list()
-                            args.self.forEach {
-                                (value, index) = args
-                                res.add(callback(value, index))
-                            }
-                            res
-                        `,
-                        {
-                            docs: `
-                                Maps a list to a new list, with the order being preserved
-                                Params:
-                                    - "self": the list on which all fields are mapped
-                                    - 0: the callback, called with two positional parameters (value and index)
-                                Returns:
-                                    The resulting new list.
-                            `
-                        },
-                        [
-                            [SemanticFieldNames.SELF, listType()],
-                            [0, functionType]
-                        ]
-                    )
-                ),
+                    },
+                    [
+                        [SemanticFieldNames.SELF, listType()],
+                        [0, listType()]
+                    ]
+                )
+            ),
+            id(listProto).assignField(
+                "remove",
+                jsFun(
+                    (args, context) => {
+                        const self = args.getField(SemanticFieldNames.SELF, context);
+                        const length = assertNumber(self.getField(lengthField, context));
+                        if (length > 0) {
+                            const value = self.getFieldEntry(length - 1, context);
+                            self.setFieldEntry(length - 1, { value: context.null }, context);
+                            self.setFieldEntry(lengthField, { value: context.newNumber(length - 1) }, context);
+                            return value;
+                        } else {
+                            throw new RuntimeError("List empty, nothing to remove");
+                        }
+                    },
+                    {
+                        docs: `
+                            Removes the last element from the list, throws an error if the list is empty.
+                            Params:
+                                - "self": the list from which to remove the last element
+                            Returns:
+                                The removed element
+                        `
+                    },
+                    [[SemanticFieldNames.SELF, listType()]]
+                )
+            ),
+            id(listProto).assignField(
+                "forEach",
+                jsFun(
+                    (args, context) => {
+                        const self = args.getField(SemanticFieldNames.SELF, context);
+                        const callback = args.getField(0, context);
+                        assertFunction(callback, "first positional argument of forEach");
+                        const length = assertNumber(self.getField(lengthField, context), "length field of a list");
+                        for (let i = 0; i < length; i++) {
+                            callback.invoke(
+                                [{ value: new ConstExpression(self.getFieldEntry(i, context)) }, { value: num(i) }],
+                                context
+                            );
+                        }
+                        return context.null;
+                    },
+                    {
+                        docs: `
+                            Iterates over all entries of self in order and calls the callback with the value and index of the entry.
+                            Params:
+                                - "self": the list on which all fields are iterated
+                                - 0: the callback, called with two positional parameters (value and index)
+                            Returns:
+                                null
+                        `
+                    },
+                    [
+                        [SemanticFieldNames.SELF, listType()],
+                        [0, functionType]
+                    ]
+                )
+            ),
+            id(listProto).assignField(
+                "map",
+                fun(
+                    `
+                        callback = it
+                        res = list()
+                        args.self.forEach {
+                            (value, index) = args
+                            res.add(callback(value, index))
+                        }
+                        res
+                    `,
+                    {
+                        docs: `
+                            Maps a list to a new list, with the order being preserved
+                            Params:
+                                - "self": the list on which all fields are mapped
+                                - 0: the callback, called with two positional parameters (value and index)
+                            Returns:
+                                The resulting new list.
+                        `
+                    },
+                    [
+                        [SemanticFieldNames.SELF, listType()],
+                        [0, functionType]
+                    ]
+                )
+            ),
+            id(SemanticFieldNames.IT).assignField(
+                "list",
                 native(
                     (args, context, staticScope) => {
                         const indexOnlyArgs = args.filter((value) => !value.name);
@@ -210,16 +211,47 @@ export const listModule: InterpreterModule = {
                     },
                     {
                         docs: `
-                        Creates a new list with the defined elements
-                        Params:
-                            - 0..*: the elements to add
-                        Returns:
-                            The created empty list
-                    `
+                            Creates a new list with the defined elements
+                            Params:
+                                - 0..*: the elements to add
+                            Returns:
+                                The created list
+                        `
                     }
                 )
-            ]).call()
-        )
+            ),
+            id(SemanticFieldNames.IT).assignField(
+                "toList",
+                jsFun(
+                    (args, context) => {
+                        const objectEntry = args.getFieldEntry(0, context);
+                        const object = objectEntry.value as FullObject;
+                        object.setLocalField(
+                            SemanticFieldNames.PROTO,
+                            context.currentScope.getFieldEntry(listProto, context),
+                            context
+                        );
+                        const maxKey =
+                            Math.max(
+                                -1,
+                                ...([...object.fields.keys()].filter((key) => typeof key === "number") as number[])
+                            ) + 1;
+                        object.setLocalField(lengthField, { value: context.newNumber(maxKey) }, context);
+                        return objectEntry;
+                    },
+                    {
+                        docs: `
+                            Modifies the provided object so that it is a list
+                            Params:
+                                - 0: the object to modify
+                            Returns:
+                                The modified provided object
+                        `
+                    },
+                    [[0, objectType()]]
+                )
+            )
+        ]).call(id(SemanticFieldNames.THIS))
     ]
 };
 

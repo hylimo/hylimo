@@ -48,7 +48,7 @@ function computeAllStyleAttributes(): AttributeConfig[] {
     return [...styleAttributes.values()];
 }
 
-/**
+/**const
  * All style atributes
  */
 const allStyleAttributes = computeAllStyleAttributes();
@@ -118,7 +118,7 @@ const fontType = objectType(
 export const diagramModule: InterpreterModule = {
     name: "diagram",
     dependencies: [DefaultModuleNames.OBJECT],
-    runtimeDependencies: [DefaultModuleNames.LIST, DefaultModuleNames.FUNCTION],
+    runtimeDependencies: [DefaultModuleNames.LIST, DefaultModuleNames.FUNCTION, DefaultModuleNames.BOOLEAN],
     expressions: [
         fun([
             assign(elementProto, id("object").call({ name: "_type", value: str("element") })),
