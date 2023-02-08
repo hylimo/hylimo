@@ -1,4 +1,4 @@
-import { ConstExpression } from "../../parser/ast";
+import { ConstExpression, InvocationArgument } from "../../parser/ast";
 import { assign, fun, id, jsFun, native, num } from "../../parser/astHelper";
 import { InterpreterModule } from "../../runtime/interpreter";
 import { BaseObject } from "../../runtime/objects/baseObject";
@@ -229,8 +229,12 @@ export const listModule: InterpreterModule = {
                             const listFunction = staticScope.getField("list", context);
                             const list = listFunction.invoke(args, context);
                             const callback = staticScope.getField("callback", context);
-                            callback.invoke([{ value: new ConstExpression(list) }], context);
-                            return list;
+                            const invokeArguments: InvocationArgument[] = [{ value: new ConstExpression(list) }];
+                            const selfArgument = args.find((arg) => arg.name === SemanticFieldNames.SELF);
+                            if (selfArgument != undefined) {
+                                invokeArguments.push(selfArgument);
+                            }
+                            return callback.invoke(invokeArguments, context);
                         })
                     ],
                     {

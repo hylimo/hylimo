@@ -369,7 +369,7 @@ export class InvocationExpression extends AbstractInvocationExpression {
      * @param metadata metadata for the expression
      */
     constructor(readonly target: Expression, argumentExpressions: InvocationArgument[], metadata: ExpressionMetadata) {
-        super(argumentExpressions, "InvokationExpression", metadata);
+        super(argumentExpressions, "InvocationExpression", metadata);
     }
 
     override evaluateInternal(context: InterpreterContext): FieldEntry {
@@ -406,7 +406,7 @@ export class SelfInvocationExpression extends AbstractInvocationExpression {
         argumentExpressions: InvocationArgument[],
         metadata: ExpressionMetadata
     ) {
-        super(argumentExpressions, "InvokationExpression", metadata);
+        super(argumentExpressions, "InvocationExpression", metadata);
     }
 
     override evaluateInternal(context: InterpreterContext): FieldEntry {

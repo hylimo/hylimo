@@ -1,4 +1,16 @@
-import { assign, DefaultModuleNames, fun, functionType, id, InterpreterModule, optional, parse } from "@hylimo/core";
+import {
+    AbstractFunctionObject,
+    assign,
+    ConstExpression,
+    DefaultModuleNames,
+    fun,
+    functionType,
+    id,
+    InterpreterModule,
+    native,
+    optional,
+    parse
+} from "@hylimo/core";
 
 /**
  * Identifier for the scope variable
@@ -101,7 +113,7 @@ export const dslModule: InterpreterModule = {
                                 `
                                     (first, second) = args
                                     if(second != null) {
-                                        className = "canvas-element-" + scope._classCounter
+                                        className = "canvas-content-" + scope._classCounter
                                         scope._classCounter = scope._classCounter + 1
                                         if (first.class == null) {
                                             first.class = list(className)
@@ -109,10 +121,14 @@ export const dslModule: InterpreterModule = {
                                             first.class += className
                                         }
                                         first.scopes.styles = second
-                                        stylesToAdd = styles(second).styles
                                         scope.styles {
                                             class(className) {
-                                                styles.addAll(stylesToAdd)
+                                                this.any = any
+                                                this.class = class
+                                                this.type = type
+                                                this.unset = unset
+                                                this.default = default
+                                                second.callWithScope(this)
                                             }
                                         }
                                         first
@@ -141,16 +157,70 @@ export const dslModule: InterpreterModule = {
                                     (self, callback) = args
                                     result = object()
                                     callback.callWithScope(result)
-                                    if (result.pos != null) {
+                                    if(result.pos != null) {
                                         self.pos = result.pos
                                     }
-                                    if (result.width != null) {
+                                    if(result.width != null) {
                                         self.width = result.width
                                     }
-                                    if (result.height != null) {
+                                    if(result.height != null) {
                                         self.height = result.height
                                     }
+                                `,
+                                {
+                                    docs: `
+                                        Helper for which applies a layout operator to a CanvasElement.
+                                        Handles pos, width and height.
+                                        Params:
+                                            - 0: the CanvasElement to which to apply the layout
+                                            - 1: the callback providing pos, width and height
+                                        Returns:
+                                            undefined
+                                    `
+                                }
+                            )
+                        ),
+                        ...parse(
+                            `
+                                lineBuilderProto = object()
+                                lineBuilderProto.line = listWrapper {
+                                    segments = args.self.segments
+                                    it.forEach {
+                                        segments += canvasLineSegment(end = it)
+                                    }
+                                    args.self
+                                }
+                            `
+                        ),
+                        assign(
+                            "canvasConnectionLayout",
+                            fun(
                                 `
+                                    (self, callback) = args
+                                    result = object(
+                                        end = self.endProvider,
+                                        start = {
+                                            pos = self.startProvider(it)
+                                            object(proto = lineBuilderProto, segments = list(), start = pos)
+                                        }
+                                    )
+                                    callback.callWithScope(result)
+                                    if(result.over != null) {
+                                        self.start = result.over.start
+                                        self.contents = result.over.segments
+                                    }
+                                `,
+                                {
+                                    docs: `
+                                        Helper for which applies a layout operator to a CanvasConnection.
+                                        Handles the routing points.
+                                        Params:
+                                            - 0: the CanvasConnection to which to apply the layout
+                                            - 1: the callback providing the new route via the field over
+                                        Returns:
+                                            undefined
+                                    `
+                                }
                             )
                         ),
                         id(scope).assignField(
@@ -163,7 +233,7 @@ export const dslModule: InterpreterModule = {
                                         canvasElementLayout(self, callback)
                                     } {
                                         if (self.type == "canvasConnection") {
-
+                                            canvasConnectionLayout(self, callback)
                                         } {
                                             error("cannot apply layout to " + self.type)
                                         }
@@ -178,6 +248,82 @@ export const dslModule: InterpreterModule = {
                                             - 1: callback which provides the layout definition
                                         Returns:
                                             The provided element
+                                    `
+                                }
+                            )
+                        ),
+                        assign(
+                            "_createConnection",
+                            fun(
+                                `
+                                    (start, end) = args
+                                    startPoint = start
+                                    startProvider = if((start.type == "canvasElement") || (start.type == "canvasConnection")) {
+                                        startPoint = scope.lpos(start, 0)
+                                        { scope.lpos(start, it) }
+                                    } {
+                                        { start }
+                                    }
+                                    endPoint = end
+                                    endProvider = if ((end.type == "canvasElement") || (end.type == "canvasConnection")) {
+                                        endPoint = scope.lpos(end, 0)
+                                        { scope.lpos(end, it) }
+                                    } {
+                                        { end }
+                                    }
+                                    connection = canvasConnection(
+                                        start = startPoint,
+                                        contents = list(
+                                            canvasLineSegment(end = endPoint)
+                                        ),
+                                        startMarker = args.startMarker,
+                                        endMarker = args.endMarker,
+                                        scopes = object()
+                                    )
+                                    connection.startProvider = startProvider
+                                    connection.endProvider = endProvider
+                                    scope.contents += connection
+                                    connection
+                                `
+                            )
+                        ),
+                        id(scope).assignField(
+                            "createConnectionOperator",
+                            fun(
+                                [
+                                    ...parse("(startMarker, endMarker) = args"),
+                                    native((args, context, staticScope, callExpression) => {
+                                        const createConnection = staticScope.getField(
+                                            "_createConnection",
+                                            context
+                                        ) as AbstractFunctionObject<any>;
+                                        const invocationArgs = [
+                                            ...args,
+                                            ...["startMarker", "endMarker"].map((field) => ({
+                                                name: field,
+                                                value: new ConstExpression(staticScope.getFieldEntry(field, context))
+                                            }))
+                                        ];
+                                        const connection = createConnection.invoke(invocationArgs, context);
+                                        connection.value.setLocalField(
+                                            "source",
+                                            {
+                                                value: connection.value,
+                                                source: callExpression
+                                            },
+                                            context
+                                        );
+                                        return connection;
+                                    })
+                                ],
+                                {
+                                    docs: `
+                                        Creates new connection operator function which can be used create new connections.
+                                        Params:
+                                            - 0: optional start marker
+                                            - 1: optional end marker
+                                        Returns:
+                                            The generated eonnection operator function
                                     `
                                 }
                             )

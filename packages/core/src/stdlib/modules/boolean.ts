@@ -21,7 +21,7 @@ export class BooleanObject extends LiteralObject<boolean> {}
  * @param description the description of the value, part of the error message
  * @returns the value of the BooleanObject
  */
-export function assertBoolean(value: any, description = ""): boolean {
+export function assertBoolean(value: BaseObject, description = ""): boolean {
     if (!(value instanceof BooleanObject)) {
         throw new RuntimeError(`${description} is not a boolean`);
     }
@@ -78,8 +78,8 @@ export const booleanModule: InterpreterModule = {
                         const [first, second] = assertSelfShortCircuitArguments(args, "&&");
                         return {
                             value: toBoolean(
-                                assertBoolean(first.evaluate(context), "left side of &&") &&
-                                    assertBoolean(second.evaluate(context), "right side of &&"),
+                                assertBoolean(first.evaluate(context).value, "left side of &&") &&
+                                    assertBoolean(second.evaluate(context).value, "right side of &&"),
                                 context
                             )
                         };
@@ -104,8 +104,8 @@ export const booleanModule: InterpreterModule = {
                         const [first, second] = assertSelfShortCircuitArguments(args, "||");
                         return {
                             value: toBoolean(
-                                assertBoolean(first.evaluate(context), "left side of ||") ||
-                                    assertBoolean(second.evaluate(context), "right side of ||"),
+                                assertBoolean(first.evaluate(context).value, "left side of ||") ||
+                                    assertBoolean(second.evaluate(context).value, "right side of ||"),
                                 context
                             )
                         };

@@ -41,7 +41,7 @@ export const operatorModule: InterpreterModule = {
                                 - 0: the target where ${operator} is invoked
                                 - 1: the value passed to the ${operator} function
                             Returns:
-                                The result of the invokation of ${operator} on the first argument
+                                The result of the invocation of ${operator} on the first argument
                         `
                     }
                 )
@@ -131,7 +131,7 @@ export const operatorModule: InterpreterModule = {
                             - 0: the target where + is invoked
                             - 1: the value passed to the + function
                         Returns:
-                            The result of the invokation of + on the first argument
+                            The result of the invocation of + on the first argument
                     `
                 }
             )
@@ -200,7 +200,7 @@ export const operatorModule: InterpreterModule = {
                             - 0: the target where - is invoked or if one argument the value to negate
                             - 1: optional value passed to the - function
                         Returns:
-                            The result of the invokation of - on the first argument or the negation result
+                            The result of the invocation of - on the first argument or the negation result
                     `
                 }
             )

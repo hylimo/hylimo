@@ -5,6 +5,7 @@ import {
     id,
     InterpreterModule,
     native,
+    parse,
     SemanticFieldNames
 } from "@hylimo/core";
 
@@ -13,6 +14,9 @@ import {
  */
 const scope = "scope";
 
+/**
+ * Module for class diagrams
+ */
 export const classDiagramModule: InterpreterModule = {
     name: "class-diagram",
     dependencies: ["diagram", "dsl"],
@@ -76,6 +80,11 @@ export const classDiagramModule: InterpreterModule = {
                             return generatedClass;
                         })
                     ),
+                    ...parse(
+                        `
+                            scope.-- = scope.createConnectionOperator()
+                        `
+                    ),
                     fun(
                         `
                             primary = "white"
@@ -105,6 +114,10 @@ export const classDiagramModule: InterpreterModule = {
                                     marginRight = -5
                                     strokeWidth = lineWidth
                                     stroke = primary
+                                }
+                                type("canvasConnection") {
+                                    stroke = primary
+                                    strokeWidth = lineWidth
                                 }
                             }
                             scope.fonts += robotoFontFamily

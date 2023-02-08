@@ -236,11 +236,11 @@ export function generateVisitor(parser: Parser): ICstVisitor<CstVisitorParameter
         }
 
         /**
-         * Maps the brackets part of a function invokation
+         * Maps the brackets part of a function invocation
          *
          * @param ctx the children of the current CST node
          * @param params parameter context which must be passed at visit
-         * @returns all invokation arguments and the end position of the call expression
+         * @returns all invocation arguments and the end position of the call expression
          */
         private callBrackets(ctx: any, params: CstVisitorParameters): CallBracketsDefinition {
             const normalArguments = (ctx.callArgument ?? []).map((argument: CstNode) => this.visit(argument, params));

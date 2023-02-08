@@ -181,7 +181,7 @@ function generateFormatVisitor(parser: Parser): ICstVisitor<never, Doc> {
         }
 
         /**
-         * Formats the brackets part of a function invokation
+         * Formats the brackets part of a function invocation
          *
          * @param ctx the children of the current CST node
          * @returns the formatted call brackets
