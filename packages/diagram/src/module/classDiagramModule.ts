@@ -1,7 +1,6 @@
 import {
     AbstractFunctionObject,
     assign,
-    ConstExpression,
     fun,
     id,
     InterpreterModule,
@@ -25,25 +24,12 @@ export const classDiagramModule: InterpreterModule = {
                 fun([
                     assign(scope, id(SemanticFieldNames.IT)),
                     assign(
-                        "_listWrapper",
-                        fun([
-                            id(SemanticFieldNames.THIS).assignField("callback", id(SemanticFieldNames.IT)),
-                            native((args, context, staticScope) => {
-                                const listFunction = staticScope.getField("list", context);
-                                const list = listFunction.invoke(args, context);
-                                const callback = staticScope.getField("callback", context);
-                                callback.invoke([{ value: new ConstExpression(list) }], context);
-                                return list;
-                            })
-                        ])
-                    ),
-                    assign(
                         "_class",
                         fun(
                             `
                                 (name, callback) = args
                                 result = object(sections = list())
-                                result.section = _listWrapper {
+                                result.section = listWrapper {
                                     result.sections += it
                                 }
                                 callback.callWithScope(result)

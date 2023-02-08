@@ -221,6 +221,30 @@ export const listModule: InterpreterModule = {
                 )
             ),
             id(SemanticFieldNames.IT).assignField(
+                "listWrapper",
+                fun(
+                    [
+                        id(SemanticFieldNames.THIS).assignField("callback", id(SemanticFieldNames.IT)),
+                        native((args, context, staticScope) => {
+                            const listFunction = staticScope.getField("list", context);
+                            const list = listFunction.invoke(args, context);
+                            const callback = staticScope.getField("callback", context);
+                            callback.invoke([{ value: new ConstExpression(list) }], context);
+                            return list;
+                        })
+                    ],
+                    {
+                        docs: `
+                            Creates a function which puts all parameters in a list, and then calls callback with that list
+                            Params:
+                                - 0: the callback to use
+                            Returns:
+                                The created function
+                        `
+                    }
+                )
+            ),
+            id(SemanticFieldNames.IT).assignField(
                 "toList",
                 jsFun(
                     (args, context) => {
