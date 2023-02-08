@@ -32,5 +32,6 @@ export * from "./layout/layoutedDiagram";
 export * from "./layout/layouts";
 export * from "./module/classDiagramModule";
 export * from "./module/diagramModule";
+export * from "./module/dslModule";
 export * from "./module/types";
 export * from "./styles";

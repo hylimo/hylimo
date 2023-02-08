@@ -13,7 +13,7 @@ import {
 import { TextDocument } from "vscode-languageserver-textdocument";
 import { Diagram } from "./diagram";
 import { Formatter } from "./formatter";
-import { diagramModule, LayoutEngine } from "@hylimo/diagram";
+import { diagramModule, dslModule, LayoutEngine } from "@hylimo/diagram";
 import { DiagramServerManager } from "./diagramServerManager";
 import {
     DiagramActionNotification,
@@ -85,7 +85,12 @@ export class LanguageServer {
         this.connection.onInitialize(this.onInitialize.bind(this));
         this.diagramServerManager = new DiagramServerManager(this.connection);
         this.textDocuments.listen(this.connection);
-        const interpreterModules = [...defaultModules, diagramModule, ...config.additionalInterpreterModules];
+        const interpreterModules = [
+            ...defaultModules,
+            diagramModule,
+            dslModule,
+            ...config.additionalInterpreterModules
+        ];
         this.diagramUtils = {
             connection: this.connection,
             interpreter: new Interpreter(interpreterModules),

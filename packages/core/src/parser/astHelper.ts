@@ -106,6 +106,20 @@ function parseDecorators(decorators: { [index: string]: string | null }): Map<st
 const parser = new Parser(false);
 
 /**
+ * Helper to parse some expressions
+ *
+ * @param expressions the expressions to parse
+ * @returns the parsed expressions
+ */
+export function parse(expressions: string): Expression[] {
+    const parserResult = parser.parse(expressions);
+    if (parserResult.lexingErrors.length > 0 || parserResult.parserErrors.length > 0) {
+        throw new Error("Invalid fun to parse");
+    }
+    return parserResult.ast!;
+}
+
+/**
  * Helper to create a FunctionExpression
  *
  * @param expressions body of the function, if a string is provided it is parsed first
@@ -120,11 +134,7 @@ export function fun(
 ): FunctionExpression {
     let parsedExpressions: Expression[];
     if (typeof expressions === "string") {
-        const parserResult = parser.parse(expressions);
-        if (parserResult.lexingErrors.length > 0 || parserResult.parserErrors.length > 0) {
-            throw new Error("Invalid fun to parse");
-        }
-        parsedExpressions = parserResult.ast!;
+        parsedExpressions = parse(expressions);
     } else {
         parsedExpressions = expressions;
     }

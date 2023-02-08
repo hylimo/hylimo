@@ -16,7 +16,7 @@ const scope = "scope";
 
 export const classDiagramModule: InterpreterModule = {
     name: "class-diagram",
-    dependencies: ["diagram"],
+    dependencies: ["diagram", "dsl"],
     runtimeDependencies: [],
     expressions: [
         assign(
