@@ -85,8 +85,9 @@ export class MoveMouseListener extends MouseListener {
      * @returns the generated actions
      */
     private commitMove(target: SModelElement, event: MouseEvent): Action[] {
-        if (this.moveHandler == undefined) {
+        if (this.moveHandler === undefined || this.moveHandler === null) {
             this.startPosition = undefined;
+            this.moveHandler = undefined;
             return [];
         }
         const translation = this.calculateTranslation(target, event);
