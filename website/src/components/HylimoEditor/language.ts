@@ -21,7 +21,7 @@ export const monarchTokenProvider = {
             ],
 
             // number
-            [/[0-9]+(\.[0-9]+)?/, { token: "constant.numerical", switchTo: "@expression.after" }],
+            [/[0-9]+(\.[0-9]+)?([eE]-?[0-9]+)?/, { token: "constant.numerical", switchTo: "@expression.after" }],
 
             // strings
             [/"([^"\\]|\\.)*$/, "string.invalid"], // non-teminated string

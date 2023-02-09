@@ -177,7 +177,7 @@ export const String = createToken({
  */
 export const Number = createToken({
     name: "Number",
-    pattern: /[0-9]+(\.[0-9]+)?/
+    pattern: /[0-9]+(\.[0-9]+)?([eE]-?[0-9]+)?/
 });
 
 /**
