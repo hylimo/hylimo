@@ -175,6 +175,51 @@ const scopeExpressions: Expression[] = [
                 }
                 args.self
             }
+            lineBuilderProto.bezier = listWrapper {
+                self = args.self
+                segments = self.segments
+                positions = it
+                segmentCount = (positions.length - 2) / 3
+                startPoint = if(segments.length > 0) {
+                    segments.get(segments.length - 1).end
+                } {
+                    self.start
+                }
+
+                range(segmentCount - 1).forEach {
+                    endPoint = positions.get(3 * it + 2)
+                    segments += canvasBezierSegment(
+                        startControlPoint = scope.rpos(
+                            startPoint,
+                            positions.get(3 * it),
+                            positions.get(3 * it + 1)
+                        ),
+                        endControlPoint = scope.rpos(
+                            endPoint,
+                            -(positions.get(3 * it + 3)),
+                            -(positions.get(3 * it + 4))
+                        ),
+                        end = endPoint
+                    )
+                    startPoint = endPoint
+                }
+
+                endPoint = positions.get(3 * segmentCount - 1)
+                segments += canvasBezierSegment(
+                    startControlPoint = scope.rpos(
+                        startPoint,
+                        positions.get(3 * segmentCount - 3),
+                        positions.get(3 * segmentCount - 2)
+                    ),
+                    endControlPoint = scope.rpos(
+                        endPoint,
+                        positions.get(3 * segmentCount),
+                        positions.get(3 * segmentCount + 1)
+                    ),
+                    end = endPoint
+                )
+                self
+            }
         `
     ),
     assign(
