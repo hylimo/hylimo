@@ -1,5 +1,5 @@
 import { TextDocument } from "vscode-languageserver-textdocument";
-import { CstResult, FullObject } from "@hylimo/core";
+import { CstResult, Expression, FullObject, InterpretationResult } from "@hylimo/core";
 import { LayoutedDiagram } from "@hylimo/diagram";
 import { SharedDiagramUtils } from "./sharedDiagramUtils";
 import { Diagnostic, DiagnosticSeverity, Range, uinteger } from "vscode-languageserver";
@@ -26,6 +26,10 @@ export class Diagram {
      * Marker that the model has been updated
      */
     private hasUpdatedModel = true;
+    /**
+     * Action which was commited, but has not been executed yet
+     */
+    private delayedCommitedAction?: TransactionalAction;
 
     /**
      * Creates a new diagram
@@ -39,28 +43,30 @@ export class Diagram {
      * Called when the content of the associated document changes
      */
     async onDidChangeContent(): Promise<void> {
+        const diagnostics: Diagnostic[] = await this.updateDiagram();
+        this.hasUpdatedModel = true;
+        if (this.delayedCommitedAction != undefined) {
+            await this.handleTransactionalAction(this.delayedCommitedAction);
+            this.delayedCommitedAction = undefined;
+        }
+        this.utils.connection.sendDiagnostics({
+            uri: this.document.uri,
+            diagnostics: diagnostics
+        });
+    }
+
+    /**
+     * Updates the Diagram based on an updated document
+     *
+     * @returns diagnostic entries containing errors
+     */
+    private async updateDiagram(): Promise<Diagnostic[]> {
         const parserResult = this.utils.parser.parse(this.document.getText());
         this.lastParserResult = parserResult;
         const diagnostics: Diagnostic[] = [];
         diagnostics.push(...this.getParserResultDiagnostics(this.document, parserResult));
         if (parserResult.ast) {
-            const interpretationResult = this.utils.interpreter.run(parserResult.ast, this.utils.maxExecutionSteps);
-            const error = interpretationResult.error;
-            if (error) {
-                const pos = error.findFirstPosition();
-                if (pos) {
-                    diagnostics.push(
-                        Diagnostic.create(
-                            Range.create(pos.startLine - 1, pos.startColumn - 1, pos.endLine - 1, pos.endColumn),
-                            error.message || "[no message provided]",
-                            DiagnosticSeverity.Error
-                        )
-                    );
-                }
-                console.error(error);
-                console.error(error.interpretationStack);
-                //TODO do sth else with error
-            }
+            const interpretationResult = this.runInterpreterAndConvertErrors(parserResult.ast, diagnostics);
             if (interpretationResult.result) {
                 const layoutedDiagram = await this.utils.layoutEngine.layout(interpretationResult.result as FullObject);
                 this.transactionManager.updateLayoutedDiagram(layoutedDiagram);
@@ -68,11 +74,35 @@ export class Diagram {
                 this.utils.diagramServerManager.updatedDiagram(this);
             }
         }
-        this.hasUpdatedModel = true;
-        this.utils.connection.sendDiagnostics({
-            uri: this.document.uri,
-            diagnostics: diagnostics
-        });
+        return diagnostics;
+    }
+
+    /**
+     * Runs the interpreter on the parserResult
+     *
+     * @param expressions the expressions to execute
+     * @param diagnostics the diagnostics array where to push a potential error
+     * @returns the result of the interpreter run
+     */
+    private runInterpreterAndConvertErrors(expressions: Expression[], diagnostics: Diagnostic[]): InterpretationResult {
+        const interpretationResult = this.utils.interpreter.run(expressions, this.utils.maxExecutionSteps);
+        const error = interpretationResult.error;
+        if (error) {
+            const pos = error.findFirstPosition();
+            if (pos) {
+                diagnostics.push(
+                    Diagnostic.create(
+                        Range.create(pos.startLine - 1, pos.startColumn - 1, pos.endLine - 1, pos.endColumn),
+                        error.message || "[no message provided]",
+                        DiagnosticSeverity.Error
+                    )
+                );
+            }
+            console.error(error);
+            console.error(error.interpretationStack);
+            //TODO do sth else with error
+        }
+        return interpretationResult;
     }
 
     /**
@@ -120,7 +150,10 @@ export class Diagram {
      */
     async handleTransactionalAction(action: TransactionalAction): Promise<void> {
         this.transactionManager.setNewestAction(action);
-        if (!this.hasUpdatedModel && !action.commited) {
+        if (!this.hasUpdatedModel) {
+            if (action.commited) {
+                this.delayedCommitedAction = action;
+            }
             return;
         }
         this.hasUpdatedModel = false;
