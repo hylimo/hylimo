@@ -3,6 +3,7 @@ import {
     assign,
     ConstExpression,
     DefaultModuleNames,
+    Expression,
     fun,
     functionType,
     id,
@@ -16,6 +17,311 @@ import {
  * Identifier for the scope variable
  */
 const scope = "scope";
+
+/**
+ * Expressions which create the initial scope which is passed to the callback of all diagram DSL functions
+ */
+const scopeExpressions: Expression[] = [
+    ...parse(
+        `
+            callback = it
+            ${scope} = object(_styles = styles({ }), fonts = list(), contents = list(), _classCounter = 0)
+        `
+    ),
+    id(scope).assignField(
+        "apos",
+        fun(
+            `
+                (x, y) = args
+                point = absolutePoint(x = x, y = y)
+                scope.contents += point
+                point
+            `,
+            {
+                docs: `
+                    Create a absolute point
+                    Params:
+                        - 0: the x coordinate
+                        - 1: the y coordinate
+                    Returns:
+                        The created absolute point
+                `
+            }
+        )
+    ),
+    id(scope).assignField(
+        "rpos",
+        fun(
+            `
+                (target, offsetX, offsetY) = args
+                point = relativePoint(target = target, offsetX = offsetX, offsetY = offsetY)
+                scope.contents += point
+                point
+            `,
+            {
+                docs: `
+                    Create a relative point
+                    Params:
+                        - 0: the target to which the point is relative
+                        - 1: the x coordinate
+                        - 2: the y coordinate
+                    Returns:
+                        The created relative point
+                `
+            }
+        )
+    ),
+    id(scope).assignField(
+        "lpos",
+        fun(
+            `
+                (lineProvider, pos) = args
+                point = linePoint(lineProvider = lineProvider, pos = pos)
+                scope.contents += point
+                point
+            `,
+            {
+                docs: `
+                    Create a line point
+                    Params:
+                        - 0: the line provider
+                        - 1: the relative position on the line, number between 0 and 1
+                    Returns:
+                        The created line point
+                `
+            }
+        )
+    ),
+    id(scope).assignField(
+        "styles",
+        fun(
+            `
+                (first, second) = args
+                if(second != null) {
+                    className = "canvas-content-" + scope._classCounter
+                    scope._classCounter = scope._classCounter + 1
+                    if (first.class == null) {
+                        first.class = list(className)
+                    } {
+                        first.class += className
+                    }
+                    first.scopes.styles = second
+                    scope.styles {
+                        class(className) {
+                            this.any = any
+                            this.class = class
+                            this.type = type
+                            this.unset = unset
+                            this.default = default
+                            second.callWithScope(this)
+                        }
+                    }
+                    first
+                } {
+                    resultStyles = styles(first)
+                    scope._styles.styles.addAll(resultStyles.styles)
+                }
+            `,
+            {
+                docs: `
+                    Style function which can either be used globally with one parameter
+                    or applied as operator to some (graphical) element
+                    Params:
+                        - 0: either the element or the callback which contains the style definition
+                        - 1: if an element was provided for 0, the callback
+                    Returns:
+                        The provided object if or null if none was provided
+                `
+            }
+        )
+    ),
+    assign(
+        "canvasElementLayout",
+        fun(
+            `
+                (self, callback) = args
+                result = object()
+                callback.callWithScope(result)
+                if(result.pos != null) {
+                    self.pos = result.pos
+                }
+                if(result.width != null) {
+                    self.width = result.width
+                }
+                if(result.height != null) {
+                    self.height = result.height
+                }
+            `,
+            {
+                docs: `
+                    Helper for which applies a layout operator to a CanvasElement.
+                    Handles pos, width and height.
+                    Params:
+                        - 0: the CanvasElement to which to apply the layout
+                        - 1: the callback providing pos, width and height
+                    Returns:
+                        undefined
+                `
+            }
+        )
+    ),
+    ...parse(
+        `
+            lineBuilderProto = object()
+            lineBuilderProto.line = listWrapper {
+                segments = args.self.segments
+                it.forEach {
+                    segments += canvasLineSegment(end = it)
+                }
+                args.self
+            }
+        `
+    ),
+    assign(
+        "canvasConnectionLayout",
+        fun(
+            `
+                (self, callback) = args
+                result = object(
+                    end = self.endProvider,
+                    start = {
+                        pos = self.startProvider(it)
+                        object(proto = lineBuilderProto, segments = list(), start = pos)
+                    }
+                )
+                callback.callWithScope(result)
+                if(result.over != null) {
+                    self.start = result.over.start
+                    self.contents = result.over.segments
+                }
+            `,
+            {
+                docs: `
+                    Helper for which applies a layout operator to a CanvasConnection.
+                    Handles the routing points.
+                    Params:
+                        - 0: the CanvasConnection to which to apply the layout
+                        - 1: the callback providing the new route via the field over
+                    Returns:
+                        undefined
+                `
+            }
+        )
+    ),
+    id(scope).assignField(
+        "layout",
+        fun(
+            `
+                (self, callback) = args
+                self.scopes.layout = callback
+                if (self.type == "canvasElement") {
+                    canvasElementLayout(self, callback)
+                } {
+                    if (self.type == "canvasConnection") {
+                        canvasConnectionLayout(self, callback)
+                    } {
+                        error("cannot apply layout to " + self.type)
+                    }
+                }
+                self
+            `,
+            {
+                docs: `
+                    Layout operator which can be applied either to a CanvasElement or a CanvasConnection
+                    Params:
+                        - 0: the CanvasElement or CanvasConnection to ally the layout to
+                        - 1: callback which provides the layout definition
+                    Returns:
+                        The provided element
+                `
+            }
+        )
+    ),
+    assign(
+        "_createConnection",
+        fun(
+            `
+                (start, end) = args
+                startPoint = start
+                startProvider = if((start.type == "canvasElement") || (start.type == "canvasConnection")) {
+                    startPoint = scope.lpos(start, 0)
+                    { scope.lpos(start, it) }
+                } {
+                    { start }
+                }
+                endPoint = end
+                endProvider = if ((end.type == "canvasElement") || (end.type == "canvasConnection")) {
+                    endPoint = scope.lpos(end, 0)
+                    { scope.lpos(end, it) }
+                } {
+                    { end }
+                }
+                connection = canvasConnection(
+                    start = startPoint,
+                    contents = list(
+                        canvasLineSegment(end = endPoint)
+                    ),
+                    startMarker = args.startMarker,
+                    endMarker = args.endMarker,
+                    scopes = object()
+                )
+                connection.startProvider = startProvider
+                connection.endProvider = endProvider
+                scope.contents += connection
+                connection
+            `
+        )
+    ),
+    id(scope).assignField(
+        "createConnectionOperator",
+        fun(
+            [
+                ...parse("(startMarker, endMarker) = args"),
+                native((args, context, staticScope, callExpression) => {
+                    const createConnection = staticScope.getField(
+                        "_createConnection",
+                        context
+                    ) as AbstractFunctionObject<any>;
+                    const invocationArgs = [
+                        ...args,
+                        ...["startMarker", "endMarker"].map((field) => ({
+                            name: field,
+                            value: new ConstExpression(staticScope.getFieldEntry(field, context))
+                        }))
+                    ];
+                    const connection = createConnection.invoke(invocationArgs, context);
+                    connection.value.setLocalField(
+                        "source",
+                        {
+                            value: connection.value,
+                            source: callExpression
+                        },
+                        context
+                    );
+                    return connection;
+                })
+            ],
+            {
+                docs: `
+                    Creates new connection operator function which can be used create new connections.
+                    Params:
+                        - 0: optional start marker
+                        - 1: optional end marker
+                    Returns:
+                        The generated eonnection operator function
+                `
+            }
+        )
+    ),
+    ...parse(
+        `
+            scopeEnhancer(scope)
+            callback.callWithScope(scope)
+            diagramCanvas = canvas(contents = scope.contents)
+            diagram(diagramCanvas, scope._styles, scope.fonts)
+        `
+    )
+];
 
 /**
  * Module which provides common DSL functionality
@@ -34,310 +340,7 @@ export const dslModule: InterpreterModule = {
         assign(
             "generateDiagramEnvironment",
             fun(
-                [
-                    ...parse("scopeEnhancer = it ?? { }"),
-                    fun([
-                        ...parse(
-                            `
-                                callback = it
-                                ${scope} = object(_styles = styles({ }), fonts = list(), contents = list(), _classCounter = 0)
-                            `
-                        ),
-                        id(scope).assignField(
-                            "apos",
-                            fun(
-                                `
-                                    (x, y) = args
-                                    point = absolutePoint(x = x, y = y)
-                                    scope.contents += point
-                                    point
-                                `,
-                                {
-                                    docs: `
-                                        Create a absolute point
-                                        Params:
-                                            - 0: the x coordinate
-                                            - 1: the y coordinate
-                                        Returns:
-                                            The created absolute point
-                                    `
-                                }
-                            )
-                        ),
-                        id(scope).assignField(
-                            "rpos",
-                            fun(
-                                `
-                                    (target, offsetX, offsetY) = args
-                                    point = relativePoint(target = target, offsetX = offsetX, offsetY = offsetY)
-                                    scope.contents += point
-                                    point
-                                `,
-                                {
-                                    docs: `
-                                        Create a relative point
-                                        Params:
-                                            - 0: the target to which the point is relative
-                                            - 1: the x coordinate
-                                            - 2: the y coordinate
-                                        Returns:
-                                            The created relative point
-                                    `
-                                }
-                            )
-                        ),
-                        id(scope).assignField(
-                            "lpos",
-                            fun(
-                                `
-                                    (lineProvider, pos) = args
-                                    point = linePoint(lineProvider = lineProvider, pos = pos)
-                                    scope.contents += point
-                                    point
-                                `,
-                                {
-                                    docs: `
-                                        Create a line point
-                                        Params:
-                                            - 0: the line provider
-                                            - 1: the relative position on the line, number between 0 and 1
-                                        Returns:
-                                            The created line point
-                                    `
-                                }
-                            )
-                        ),
-                        id(scope).assignField(
-                            "styles",
-                            fun(
-                                `
-                                    (first, second) = args
-                                    if(second != null) {
-                                        className = "canvas-content-" + scope._classCounter
-                                        scope._classCounter = scope._classCounter + 1
-                                        if (first.class == null) {
-                                            first.class = list(className)
-                                        } {
-                                            first.class += className
-                                        }
-                                        first.scopes.styles = second
-                                        scope.styles {
-                                            class(className) {
-                                                this.any = any
-                                                this.class = class
-                                                this.type = type
-                                                this.unset = unset
-                                                this.default = default
-                                                second.callWithScope(this)
-                                            }
-                                        }
-                                        first
-                                    } {
-                                        resultStyles = styles(first)
-                                        scope._styles.styles.addAll(resultStyles.styles)
-                                    }
-                                `,
-                                {
-                                    docs: `
-                                        Style function which can either be used globally with one parameter
-                                        or applied as operator to some (graphical) element
-                                        Params:
-                                            - 0: either the element or the callback which contains the style definition
-                                            - 1: if an element was provided for 0, the callback
-                                        Returns:
-                                            The provided object if or null if none was provided
-                                    `
-                                }
-                            )
-                        ),
-                        assign(
-                            "canvasElementLayout",
-                            fun(
-                                `
-                                    (self, callback) = args
-                                    result = object()
-                                    callback.callWithScope(result)
-                                    if(result.pos != null) {
-                                        self.pos = result.pos
-                                    }
-                                    if(result.width != null) {
-                                        self.width = result.width
-                                    }
-                                    if(result.height != null) {
-                                        self.height = result.height
-                                    }
-                                `,
-                                {
-                                    docs: `
-                                        Helper for which applies a layout operator to a CanvasElement.
-                                        Handles pos, width and height.
-                                        Params:
-                                            - 0: the CanvasElement to which to apply the layout
-                                            - 1: the callback providing pos, width and height
-                                        Returns:
-                                            undefined
-                                    `
-                                }
-                            )
-                        ),
-                        ...parse(
-                            `
-                                lineBuilderProto = object()
-                                lineBuilderProto.line = listWrapper {
-                                    segments = args.self.segments
-                                    it.forEach {
-                                        segments += canvasLineSegment(end = it)
-                                    }
-                                    args.self
-                                }
-                            `
-                        ),
-                        assign(
-                            "canvasConnectionLayout",
-                            fun(
-                                `
-                                    (self, callback) = args
-                                    result = object(
-                                        end = self.endProvider,
-                                        start = {
-                                            pos = self.startProvider(it)
-                                            object(proto = lineBuilderProto, segments = list(), start = pos)
-                                        }
-                                    )
-                                    callback.callWithScope(result)
-                                    if(result.over != null) {
-                                        self.start = result.over.start
-                                        self.contents = result.over.segments
-                                    }
-                                `,
-                                {
-                                    docs: `
-                                        Helper for which applies a layout operator to a CanvasConnection.
-                                        Handles the routing points.
-                                        Params:
-                                            - 0: the CanvasConnection to which to apply the layout
-                                            - 1: the callback providing the new route via the field over
-                                        Returns:
-                                            undefined
-                                    `
-                                }
-                            )
-                        ),
-                        id(scope).assignField(
-                            "layout",
-                            fun(
-                                `
-                                    (self, callback) = args
-                                    self.scopes.layout = callback
-                                    if (self.type == "canvasElement") {
-                                        canvasElementLayout(self, callback)
-                                    } {
-                                        if (self.type == "canvasConnection") {
-                                            canvasConnectionLayout(self, callback)
-                                        } {
-                                            error("cannot apply layout to " + self.type)
-                                        }
-                                    }
-                                    self
-                                `,
-                                {
-                                    docs: `
-                                        Layout operator which can be applied either to a CanvasElement or a CanvasConnection
-                                        Params:
-                                            - 0: the CanvasElement or CanvasConnection to ally the layout to
-                                            - 1: callback which provides the layout definition
-                                        Returns:
-                                            The provided element
-                                    `
-                                }
-                            )
-                        ),
-                        assign(
-                            "_createConnection",
-                            fun(
-                                `
-                                    (start, end) = args
-                                    startPoint = start
-                                    startProvider = if((start.type == "canvasElement") || (start.type == "canvasConnection")) {
-                                        startPoint = scope.lpos(start, 0)
-                                        { scope.lpos(start, it) }
-                                    } {
-                                        { start }
-                                    }
-                                    endPoint = end
-                                    endProvider = if ((end.type == "canvasElement") || (end.type == "canvasConnection")) {
-                                        endPoint = scope.lpos(end, 0)
-                                        { scope.lpos(end, it) }
-                                    } {
-                                        { end }
-                                    }
-                                    connection = canvasConnection(
-                                        start = startPoint,
-                                        contents = list(
-                                            canvasLineSegment(end = endPoint)
-                                        ),
-                                        startMarker = args.startMarker,
-                                        endMarker = args.endMarker,
-                                        scopes = object()
-                                    )
-                                    connection.startProvider = startProvider
-                                    connection.endProvider = endProvider
-                                    scope.contents += connection
-                                    connection
-                                `
-                            )
-                        ),
-                        id(scope).assignField(
-                            "createConnectionOperator",
-                            fun(
-                                [
-                                    ...parse("(startMarker, endMarker) = args"),
-                                    native((args, context, staticScope, callExpression) => {
-                                        const createConnection = staticScope.getField(
-                                            "_createConnection",
-                                            context
-                                        ) as AbstractFunctionObject<any>;
-                                        const invocationArgs = [
-                                            ...args,
-                                            ...["startMarker", "endMarker"].map((field) => ({
-                                                name: field,
-                                                value: new ConstExpression(staticScope.getFieldEntry(field, context))
-                                            }))
-                                        ];
-                                        const connection = createConnection.invoke(invocationArgs, context);
-                                        connection.value.setLocalField(
-                                            "source",
-                                            {
-                                                value: connection.value,
-                                                source: callExpression
-                                            },
-                                            context
-                                        );
-                                        return connection;
-                                    })
-                                ],
-                                {
-                                    docs: `
-                                        Creates new connection operator function which can be used create new connections.
-                                        Params:
-                                            - 0: optional start marker
-                                            - 1: optional end marker
-                                        Returns:
-                                            The generated eonnection operator function
-                                    `
-                                }
-                            )
-                        ),
-                        ...parse(
-                            `
-                                scopeEnhancer(scope)
-                                callback.callWithScope(scope)
-                                diagramCanvas = canvas(contents = scope.contents)
-                                diagram(diagramCanvas, scope._styles, scope.fonts)
-                            `
-                        )
-                    ])
-                ],
+                [...parse("scopeEnhancer = it ?? { }"), fun(scopeExpressions)],
                 {
                     docs: `
                         Creates a function which can be then used as a DSL function to create a diagram.
