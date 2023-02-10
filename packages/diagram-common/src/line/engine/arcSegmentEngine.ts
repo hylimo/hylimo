@@ -15,9 +15,8 @@ export class ArcSegmentEngine extends SegmentEngine<ArcSegment> {
             y: segment.center.y + segment.radius * Math.sin(x)
         });
         const dist = (x: number) => {
-            const dx = point.x - (segment.center.x + segment.radius * Math.cos(x));
-            const dy = point.y - (segment.center.y + segment.radius * Math.sin(x));
-            return Math.sqrt(dx * dx + dy * dy);
+            const delta = SprottyPoint.subtract(point, position(x));
+            return SprottyPoint.magnitude(delta);
         };
         const angle = angleOfPoint(SprottyPoint.subtract(point, segment.center));
         let deltaPointAngle = angle - startAngle;
