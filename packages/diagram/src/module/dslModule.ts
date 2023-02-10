@@ -1,7 +1,6 @@
 import {
     AbstractFunctionObject,
     assign,
-    ConstExpression,
     DefaultModuleNames,
     Expression,
     fun,
@@ -318,34 +317,34 @@ const scopeExpressions: Expression[] = [
         )
     ),
     id(scope).assignField(
+        "withRegisterSource",
+        fun([
+            ...parse("this.callback = it"),
+            native((args, context, staticScope, callExpression) => {
+                const callback = staticScope.getField("callback", context) as AbstractFunctionObject<any>;
+                const result = callback.invoke(args, context);
+                result.value.setLocalField(
+                    "source",
+                    {
+                        value: result.value,
+                        source: callExpression
+                    },
+                    context
+                );
+                return result;
+            })
+        ])
+    ),
+    id(scope).assignField(
         "createConnectionOperator",
         fun(
-            [
-                ...parse("(startMarker, endMarker) = args"),
-                native((args, context, staticScope, callExpression) => {
-                    const createConnection = staticScope.getField(
-                        "_createConnection",
-                        context
-                    ) as AbstractFunctionObject<any>;
-                    const invocationArgs = [
-                        ...args,
-                        ...["startMarker", "endMarker"].map((field) => ({
-                            name: field,
-                            value: new ConstExpression(staticScope.getFieldEntry(field, context))
-                        }))
-                    ];
-                    const connection = createConnection.invoke(invocationArgs, context);
-                    connection.value.setLocalField(
-                        "source",
-                        {
-                            value: connection.value,
-                            source: callExpression
-                        },
-                        context
-                    );
-                    return connection;
-                })
-            ],
+            `
+                (startMarker, endMarker) = args
+                scope.withRegisterSource {
+                    (start, end) = args
+                    _createConnection(start, end, startMarker = startMarker, endMarker = endMarker)
+                }
+            `,
             {
                 docs: `
                     Creates new connection operator function which can be used create new connections.

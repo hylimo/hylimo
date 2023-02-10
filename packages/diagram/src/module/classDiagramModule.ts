@@ -1,13 +1,4 @@
-import {
-    AbstractFunctionObject,
-    assign,
-    fun,
-    id,
-    InterpreterModule,
-    native,
-    parse,
-    SemanticFieldNames
-} from "@hylimo/core";
+import { assign, fun, id, InterpreterModule, parse, SemanticFieldNames } from "@hylimo/core";
 
 /**
  * Identifier for temporary variable used to safe scope
@@ -61,27 +52,12 @@ export const classDiagramModule: InterpreterModule = {
                             `
                         )
                     ),
-                    id(scope).assignField(
-                        "class",
-                        native((args, context, staticScope, callExpression) => {
-                            const classFunction = staticScope.getField(
-                                "_class",
-                                context
-                            ) as AbstractFunctionObject<any>;
-                            const generatedClass = classFunction.invoke(args, context);
-                            generatedClass.value.setLocalField(
-                                "source",
-                                {
-                                    value: generatedClass.value,
-                                    source: callExpression
-                                },
-                                context
-                            );
-                            return generatedClass;
-                        })
-                    ),
                     ...parse(
                         `
+                            scope.class = scope.withRegisterSource {
+                                (name, callback) = args
+                                _class(name, callback)
+                            }
                             scope.-- = scope.createConnectionOperator()
                         `
                     ),
