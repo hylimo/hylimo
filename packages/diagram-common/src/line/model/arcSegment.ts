@@ -2,7 +2,7 @@ import { Point } from "../../common/point";
 import { Segment } from "./segment";
 
 /**
- * Defines an elliptical arc line
+ * Defines an circular arc line
  */
 export interface ArcSegment extends Segment {
     type: typeof ArcSegment.TYPE;
@@ -12,13 +12,9 @@ export interface ArcSegment extends Segment {
      */
     center: Point;
     /**
-     * The x radius
+     * The radius
      */
-    rx: number;
-    /**
-     * The y radius
-     */
-    ry: number;
+    radius: number;
     /**
      * Clockwise or counter-clockwise arc?
      */

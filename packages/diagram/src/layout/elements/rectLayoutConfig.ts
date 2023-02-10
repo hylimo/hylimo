@@ -134,7 +134,6 @@ function arcSegment(cx: number, cy: number, endX: number, endY: number, radius: 
             x: cx,
             y: cy
         },
-        rx: radius,
-        ry: radius
+        radius
     };
 }

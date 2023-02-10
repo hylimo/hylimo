@@ -11,8 +11,8 @@ export class ArcSegmentEngine extends SegmentEngine<ArcSegment> {
         const { startAngle, deltaAngle } = this.getArcData(segmentStartPoint, segment);
         const endAngle = startAngle + deltaAngle;
         const dist = (x: number) => {
-            const dx = point.x - (segment.center.x + segment.rx * Math.cos(x));
-            const dy = point.y - (segment.center.y + segment.ry * Math.sin(x));
+            const dx = point.x - (segment.center.x + segment.radius * Math.cos(x));
+            const dy = point.y - (segment.center.y + segment.radius * Math.sin(x));
             return Math.sqrt(dx * dx + dy * dy);
         };
         const angle = angleOfPoint(SprottyPoint.subtract(point, segment.center));
@@ -49,8 +49,8 @@ export class ArcSegmentEngine extends SegmentEngine<ArcSegment> {
         const finalAngle = startAngle + position * deltaAngle;
         const center = segment.center;
         return {
-            x: center.x + segment.rx * Math.cos(finalAngle),
-            y: center.y + segment.ry * Math.sin(finalAngle)
+            x: center.x + segment.radius * Math.cos(finalAngle),
+            y: center.y + segment.radius * Math.sin(finalAngle)
         };
     }
 
