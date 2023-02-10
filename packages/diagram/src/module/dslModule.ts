@@ -231,6 +231,19 @@ const scopeExpressions: Expression[] = [
                     start = {
                         pos = self.startProvider(it)
                         object(proto = lineBuilderProto, segments = list(), start = pos)
+                    },
+                    label = {
+                        (labelText, pos, distance) = args
+                        labelCanvasElement = canvasElement(
+                            content = text(
+                                contents = list(span(text = labelText)),
+                                class = list("label")
+                            ),
+                            pos = scope.lpos(self, pos, distance),
+                            scopes = object()
+                        )
+                        scope.contents += labelCanvasElement
+                        labelCanvasElement
                     }
                 )
                 callback.callWithScope(result)

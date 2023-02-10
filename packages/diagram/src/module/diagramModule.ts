@@ -47,7 +47,7 @@ function computeAllStyleAttributes(): AttributeConfig[] {
     return [...styleAttributes.values()];
 }
 
-/**const
+/**
  * All style atributes
  */
 const allStyleAttributes = computeAllStyleAttributes();
