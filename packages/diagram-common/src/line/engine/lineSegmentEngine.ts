@@ -31,7 +31,6 @@ export class LineSegmentEngine extends SegmentEngine<LineSegment> {
             };
             position = t;
         }
-
         return {
             position,
             distance: SprottyPoint.euclideanDistance(closest, point),
