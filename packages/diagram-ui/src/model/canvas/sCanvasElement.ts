@@ -2,13 +2,15 @@ import { CanvasElement, Line, Point, TransformedLine } from "@hylimo/diagram-com
 import { LinearAnimatable } from "../../features/animation/model";
 import { LineProvider } from "../../features/layout/lineProvider";
 import { PositionProvider } from "../../features/layout/positionProvider";
+import { SLayoutedElement } from "../sLayoutedElement";
 import { SCanvasContent } from "./sCanvasContent";
 import { SCanvasPoint } from "./sCanvasPoint";
+import { compose, translate, rotateDEG } from "transformation-matrix";
 
 /**
  * Anbimated fields for SCanvasElement
  */
-const canvasElementAnimatedFields = new Set(["width", "height"]);
+const canvasElementAnimatedFields = new Set(SLayoutedElement.defaultAnimatedFields);
 
 /**
  * Model for CanvasElement
@@ -26,11 +28,23 @@ export class SCanvasElement
      * The height of the element
      */
     height!: number;
+    /**
+     * The x offset
+     */
+    x!: number;
+    /**
+     * The y offset
+     */
+    y!: number;
     readonly animatedFields = canvasElementAnimatedFields;
     /**
      * The id of the CanvasPoint which is used as start
      */
     pos!: string;
+    /**
+     * The rotation in degrees
+     */
+    rotation!: number;
     /**
      * Resizable if present
      */
@@ -56,11 +70,14 @@ export class SCanvasElement
             return target.position;
         });
         this.cachedProperty<TransformedLine>("line", () => {
+            const position = this.position;
             return {
                 line: this.outline,
-                transform: {
-                    translation: this.position
-                }
+                transform: compose(
+                    translate(position.x, position.y),
+                    rotateDEG(this.rotation),
+                    translate(this.x, this.y)
+                )
             };
         });
     }

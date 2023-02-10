@@ -45,7 +45,8 @@ export const classDiagramModule: InterpreterModule = {
                                 classElement = canvasElement(
                                     pos = scope.apos(0, 0),
                                     content = renderedClass,
-                                    scopes = object(default = callback)
+                                    scopes = object(default = callback),
+                                    class = list("class-element")
                                 )
                                 scope.contents += classElement
                                 classElement

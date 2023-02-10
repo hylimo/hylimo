@@ -4,6 +4,7 @@ import { LineProvider } from "../../features/layout/lineProvider";
 import { SCanvasConnectionSegment } from "./sCanvasConnectionSegment";
 import { SCanvasContent } from "./sCanvasContent";
 import { SCanvasPoint } from "./sCanvasPoint";
+import { identity } from "transformation-matrix";
 
 /**
  * Animated fields for CanvasConnection
@@ -56,9 +57,7 @@ export class SCanvasConnection extends SCanvasContent implements CanvasConnectio
                 return result;
             });
             return {
-                transform: {
-                    translation: Point.ORIGIN
-                },
+                transform: identity(),
                 line: {
                     start: this.startPosition,
                     segments

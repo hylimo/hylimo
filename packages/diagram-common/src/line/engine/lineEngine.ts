@@ -1,7 +1,8 @@
+import { applyToPoint, inverse } from "transformation-matrix";
 import { Point } from "../../common/point";
 import { ArcSegment } from "../model/arcSegment";
 import { BezierSegment } from "../model/bezierSegment";
-import { LineTransform, TransformedLine } from "../model/line";
+import { TransformedLine } from "../model/line";
 import { LineSegment } from "../model/lineSegment";
 import { Segment } from "../model/segment";
 import { ArcSegmentEngine } from "./arcSegmentEngine";
@@ -42,7 +43,7 @@ export class LineEngine {
                 distance: 0
             };
         }
-        const localPoint = LineTransform.inverseTransform(transform, point);
+        const localPoint = applyToPoint(inverse(transform), point);
         const lengthPerSegment = 1 / line.segments.length;
         let minDistance = Number.POSITIVE_INFINITY;
         let position = 0;
@@ -90,7 +91,7 @@ export class LineEngine {
             segment,
             segmentStartPos
         );
-        return LineTransform.transform(transform, localPoint);
+        return applyToPoint(transform, localPoint);
     }
 
     /**

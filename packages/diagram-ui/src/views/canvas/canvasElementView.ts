@@ -32,7 +32,7 @@ export class CanvasElementView implements IView {
             "g",
             {
                 attrs: {
-                    transform: `translate(${position.x}, ${position.y})`
+                    transform: `translate(${position.x}, ${position.y}) rotate(${model.rotation}) translate(${model.x}, ${model.y})`
                 },
                 class: {
                     "canvas-element": true

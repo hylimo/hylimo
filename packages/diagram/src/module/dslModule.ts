@@ -150,6 +150,9 @@ const scopeExpressions: Expression[] = [
                 if(result.height != null) {
                     self.height = result.height
                 }
+                if(result.rotation != null) {
+                    self.rotation = result.rotation
+                }
             `,
             {
                 docs: `
@@ -233,14 +236,16 @@ const scopeExpressions: Expression[] = [
                         object(proto = lineBuilderProto, segments = list(), start = pos)
                     },
                     label = {
-                        (labelText, pos, distance) = args
+                        (labelText, pos, distance, rotation) = args
                         labelCanvasElement = canvasElement(
                             content = text(
                                 contents = list(span(text = labelText)),
                                 class = list("label")
                             ),
                             pos = scope.lpos(self, pos, distance),
-                            scopes = object()
+                            rotation = rotation,
+                            scopes = object(),
+                            class= list("label-element")
                         )
                         scope.contents += labelCanvasElement
                         labelCanvasElement
@@ -372,6 +377,11 @@ const scopeExpressions: Expression[] = [
     ),
     ...parse(
         `
+            scope.styles {
+                class("label-element") {
+                    hAlign = "center"
+                }
+            }
             scopeEnhancer(scope)
             callback.callWithScope(scope)
             diagramCanvas = canvas(contents = scope.contents)

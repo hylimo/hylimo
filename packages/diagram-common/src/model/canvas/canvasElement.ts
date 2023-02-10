@@ -1,20 +1,28 @@
 import { Line } from "../../line/model/line";
 import { Element } from "../base/element";
-import { SizedElement } from "../base/sizedElement";
+import { LayoutedElement } from "../base/layoutedElement";
 
 /**
  * Moveable and resizeable element in a canvas
  */
-export interface CanvasElement extends SizedElement {
+export interface CanvasElement extends LayoutedElement {
     type: typeof CanvasElement.TYPE;
     /**
      * The id of the CanvasPoint which is used as start
      */
     pos: string;
     /**
+     * The rotation in degrees
+     */
+    rotation: number;
+    /**
      * Resizable if present
      */
     resizable?: number[];
+    /**
+     * Rotateable if present
+     */
+    rotateable?: number[];
     /**
      * The outline of the CanvasElement
      */

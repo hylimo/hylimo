@@ -22,10 +22,27 @@ export const sizeStyleAttributes = [
 ];
 
 /**
+ * Horizontal and vertical alignment style attributes
+ */
+export const alignStyleAttributes = [
+    {
+        name: "hAlign",
+        description: 'optional horizontal alignment, must be one of "left", "right" or "center"',
+        type: enumType(HorizontalAlignment)
+    },
+    {
+        name: "vAlign",
+        description: 'optional vertical alignment, must be one of "top", "bottom" or "center"',
+        type: enumType(VerticalAlignment)
+    }
+];
+
+/**
  * Default style attributes, including margin, alignment, and size attributes
  */
 export const defaultStyleAttributes = [
     ...sizeStyleAttributes,
+    ...alignStyleAttributes,
     { name: "marginTop", description: "optional top margin of the element, must be a number", type: numberType },
     {
         name: "marginRight",
@@ -38,17 +55,7 @@ export const defaultStyleAttributes = [
         type: numberType
     },
     { name: "marginLeft", description: "optional left margin of the element, must be a number", type: numberType },
-    { name: "margin", description: "optional margin of the element, must be a number", type: numberType },
-    {
-        name: "hAlign",
-        description: 'optional horizontal alignment, must be one of "left", "right" or "center"',
-        type: enumType(HorizontalAlignment)
-    },
-    {
-        name: "vAlign",
-        description: 'optional vertical alignment, must be one of "top", "bottom" or "center"',
-        type: enumType(VerticalAlignment)
-    }
+    { name: "margin", description: "optional margin of the element, must be a number", type: numberType }
 ];
 
 /**

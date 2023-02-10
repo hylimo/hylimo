@@ -176,12 +176,13 @@ export class Layout {
      */
     private applyStyles(layoutElement: LayoutElement): void {
         const styleAttributes = layoutElement.layoutConfig.styleAttributes;
-        const matchingStyles = [layoutElement.element];
+        const matchingStyles = [];
         for (const style of this.styles.styles) {
             if (this.matchesStyle(layoutElement, style)) {
                 matchingStyles.push(style.fields);
             }
         }
+        matchingStyles.push(layoutElement.element);
         matchingStyles.reverse();
         for (const attributeConfig of styleAttributes) {
             const attribute = attributeConfig.name;

@@ -3,6 +3,7 @@ import { SModelElement } from "sprotty";
 import { LinearAnimatable } from "../../features/animation/model";
 import { isLineProvider } from "../../features/layout/lineProvider";
 import { SCanvasPoint } from "./sCanvasPoint";
+import { identity } from "transformation-matrix";
 
 const linePointAnimatedFields = new Set(["pos"]);
 
@@ -50,9 +51,7 @@ export class SLinePoint extends SCanvasPoint implements LinePoint, LinearAnimata
                         start: Point.ORIGIN,
                         segments: []
                     },
-                    transform: {
-                        translation: Point.ORIGIN
-                    }
+                    transform: identity()
                 };
             }
         });
