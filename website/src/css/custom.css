@@ -64,6 +64,16 @@ main .split-view {
   border-width: 0px;
 }
 
+/* Monaco fixes */
+
+.monaco-editor :focus-visible {
+  outline: 1px solid var(--vscode-focusBorder);
+}
+
+.monaco-editor .button {
+  color: inherit;
+}
+
 /* Custom layout styles */
 
 .selected-rect {

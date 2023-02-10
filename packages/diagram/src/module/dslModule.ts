@@ -242,7 +242,7 @@ const scopeExpressions: Expression[] = [
                                 contents = list(span(text = labelText)),
                                 class = list("label")
                             ),
-                            pos = scope.lpos(self, pos, distance),
+                            pos = scope.lpos(self, pos ?? 0, distance),
                             rotation = rotation,
                             scopes = object(),
                             class= list("label-element")
