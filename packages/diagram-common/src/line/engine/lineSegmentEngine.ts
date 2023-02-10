@@ -34,11 +34,23 @@ export class LineSegmentEngine extends SegmentEngine<LineSegment> {
 
         return {
             position,
-            distance: SprottyPoint.euclideanDistance(closest, point)
+            distance: SprottyPoint.euclideanDistance(closest, point),
+            point: closest
         };
     }
 
-    override getPoint(position: number, segment: LineSegment, segmentStartPoint: Point): Point {
-        return SprottyPoint.linear(segmentStartPoint, segment.end, position);
+    override getPoint(position: number, distance: number, segment: LineSegment, segmentStartPoint: Point): Point {
+        const linePoint = SprottyPoint.linear(segmentStartPoint, segment.end, position) as Point;
+        if (distance != 0) {
+            const normalVector = this.getNormalVector(position, segment, segmentStartPoint);
+            linePoint.x += normalVector.x * distance;
+            linePoint.y += normalVector.y * distance;
+        }
+        return linePoint;
+    }
+
+    override getNormalVector(_position: number, segment: LineSegment, segmentStartPoint: Point): Point {
+        const delta = SprottyPoint.subtract(segment.end, segmentStartPoint);
+        return SprottyPoint.normalize({ x: -delta.y, y: delta.x });
     }
 }

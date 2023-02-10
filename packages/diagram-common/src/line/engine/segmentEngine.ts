@@ -21,11 +21,23 @@ export abstract class SegmentEngine<T extends Segment> {
      * Gets a point on a segment
      *
      * @param position the position of the point on the segment, a number between 0 and 1
+     * @param distance the distance of the point to the
      * @param segment the segment on which the point should be
      * @param segmentStartPoint the start position of the segment
      * @returns the point on the segment
      */
-    abstract getPoint(position: number, segment: T, segmentStartPoint: Point): Point;
+    abstract getPoint(position: number, distance: number, segment: T, segmentStartPoint: Point): Point;
+
+    /**
+     * Generates the normal vector for at a specific position
+     *
+     * @param position the position of the point on the segment, a number between 0 and 1
+     * @param distance the distance of the point to the
+     * @param segment the segment on which the point should be
+     * @param segmentStartPoint the start position of the segment
+     * @returns the normal vector
+     */
+    abstract getNormalVector(position: number, segment: T, segmentStartPoint: Point): Point;
 }
 
 /**
@@ -40,4 +52,8 @@ export interface NearestPointResult {
      * The distance to the provided point
      */
     distance: number;
+    /**
+     * The actual point on the line
+     */
+    point: Point;
 }

@@ -11,12 +11,14 @@ export class LineMoveHandler implements MoveHandler {
      * @param point the id of the point to move
      * @param transactionId the id of the transaction
      * @param initialPosition the initial position of the point
+     * @param onLine if true, the point should be moved on the line only, otherwise a relative point to the line is calculated
      * @param line the line on which the point is
      */
     constructor(
         readonly point: string,
         readonly transactionId: string,
         readonly initialPosition: Point,
+        readonly onLine: boolean,
         readonly line: TransformedLine
     ) {}
 
@@ -29,7 +31,8 @@ export class LineMoveHandler implements MoveHandler {
         return {
             kind: LineMoveAction.KIND,
             point: this.point,
-            pos: nearest,
+            pos: nearest.pos,
+            distance: this.onLine ? undefined : nearest.distance,
             transactionId: this.transactionId,
             commited
         };

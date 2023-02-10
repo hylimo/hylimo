@@ -12,12 +12,24 @@ export class BezierSegmentEngine extends SegmentEngine<BezierSegment> {
         const projection = curve.project(point);
         return {
             distance: projection.d!,
-            position: projection.t!
+            position: projection.t!,
+            point: projection
         };
     }
 
-    override getPoint(position: number, segment: BezierSegment, segmentStartPoint: Point): Point {
+    override getPoint(position: number, distance: number, segment: BezierSegment, segmentStartPoint: Point): Point {
         const curve = new Bezier(segmentStartPoint, segment.startControlPoint, segment.endControlPoint, segment.end);
-        return curve.get(position);
+        const linePoint = curve.get(position);
+        if (distance != 0) {
+            const normal = curve.normal(position);
+            linePoint.x += normal.x * distance;
+            linePoint.y += normal.y * distance;
+        }
+        return linePoint;
+    }
+
+    override getNormalVector(position: number, segment: BezierSegment, segmentStartPoint: Point): Point {
+        const curve = new Bezier(segmentStartPoint, segment.startControlPoint, segment.endControlPoint, segment.end);
+        return curve.normal(position);
     }
 }

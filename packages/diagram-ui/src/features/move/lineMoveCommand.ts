@@ -19,6 +19,7 @@ export class LineMoveCommand extends Command {
         (context.root as SRoot).changeRevision++;
         const point = context.root.index.getById(this.action.point);
         (point as SLinePoint).pos = this.action.pos;
+        (point as SLinePoint).distance = this.action.distance;
         return context.root;
     }
 

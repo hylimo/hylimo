@@ -10,6 +10,10 @@ export class ArcSegmentEngine extends SegmentEngine<ArcSegment> {
     override projectPoint(point: Point, segment: ArcSegment, segmentStartPoint: Point): NearestPointResult {
         const { startAngle, deltaAngle } = this.getArcData(segmentStartPoint, segment);
         const endAngle = startAngle + deltaAngle;
+        const position = (x: number) => ({
+            x: segment.center.x + segment.radius * Math.cos(x),
+            y: segment.center.y + segment.radius * Math.sin(x)
+        });
         const dist = (x: number) => {
             const dx = point.x - (segment.center.x + segment.radius * Math.cos(x));
             const dy = point.y - (segment.center.y + segment.radius * Math.sin(x));
@@ -25,7 +29,8 @@ export class ArcSegmentEngine extends SegmentEngine<ArcSegment> {
         if (Math.abs(deltaPointAngle) < Math.abs(deltaAngle)) {
             return {
                 distance: dist(angle),
-                position: deltaPointAngle / deltaAngle
+                position: deltaPointAngle / deltaAngle,
+                point: position(angle)
             };
         } else {
             const startDist = dist(startAngle);
@@ -33,24 +38,35 @@ export class ArcSegmentEngine extends SegmentEngine<ArcSegment> {
             if (startDist < endDist) {
                 return {
                     distance: startDist,
-                    position: 0
+                    position: 0,
+                    point: position(startAngle)
                 };
             } else {
                 return {
                     distance: endDist,
-                    position: 1
+                    position: 1,
+                    point: position(endAngle)
                 };
             }
         }
     }
 
-    override getPoint(position: number, segment: ArcSegment, segmentStartPoint: Point): Point {
+    override getPoint(position: number, distance: number, segment: ArcSegment, segmentStartPoint: Point): Point {
         const { startAngle, deltaAngle } = this.getArcData(segmentStartPoint, segment);
         const finalAngle = startAngle + position * deltaAngle;
         const center = segment.center;
         return {
-            x: center.x + segment.radius * Math.cos(finalAngle),
-            y: center.y + segment.radius * Math.sin(finalAngle)
+            x: center.x + (segment.radius + distance) * Math.cos(finalAngle),
+            y: center.y + (segment.radius + distance) * Math.sin(finalAngle)
+        };
+    }
+
+    override getNormalVector(position: number, segment: ArcSegment, segmentStartPoint: Point): Point {
+        const { startAngle, deltaAngle } = this.getArcData(segmentStartPoint, segment);
+        const finalAngle = startAngle + position * deltaAngle;
+        return {
+            x: Math.cos(finalAngle),
+            y: Math.sin(finalAngle)
         };
     }
 

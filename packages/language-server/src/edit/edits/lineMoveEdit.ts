@@ -28,12 +28,19 @@ export class LineMoveEdit extends TransactionalEdit<LineMoveAction> {
         const generatorEntries = [
             generateReplacementNumberGenerator(point.element.getLocalFieldOrUndefined("pos")!, "pos")
         ];
+        if (action.distance != undefined) {
+            generatorEntries.push(
+                generateReplacementNumberGenerator(point.element.getLocalFieldOrUndefined("distance")!, "distance")
+            );
+        }
         super(generatorEntries, diagram.document);
     }
 
     override applyActionToGenerator(action: LineMoveAction, generator: EditGenerator<number>, meta: any): string {
         if (meta === "pos") {
             return generator.generateEdit(action.pos);
+        } else if (meta === "distance") {
+            return generator.generateEdit(action.distance!);
         } else {
             throw new Error(`Unknown meta information for LineMoveEdit: ${meta}`);
         }

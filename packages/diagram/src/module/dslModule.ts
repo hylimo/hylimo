@@ -75,8 +75,8 @@ const scopeExpressions: Expression[] = [
         "lpos",
         fun(
             `
-                (lineProvider, pos) = args
-                point = linePoint(lineProvider = lineProvider, pos = pos)
+                (lineProvider, pos, distance) = args
+                point = linePoint(lineProvider = lineProvider, pos = pos, distance = distance)
                 scope.contents += point
                 point
             `,

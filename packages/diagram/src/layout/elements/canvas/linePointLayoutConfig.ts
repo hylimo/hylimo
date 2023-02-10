@@ -1,4 +1,4 @@
-import { FullObject, literal, numberType, objectType, SemanticFieldNames } from "@hylimo/core";
+import { FullObject, literal, numberType, objectType, optional, SemanticFieldNames } from "@hylimo/core";
 import { Size, Element, LinePoint } from "@hylimo/diagram-common";
 import { Point } from "sprotty-protocol";
 import { LayoutElement } from "../../layoutElement";
@@ -19,6 +19,11 @@ export class LinePointLayoutConfig extends CanvasPointLayoutConfig {
                     type: numberType
                 },
                 {
+                    name: "distance",
+                    description: "the distance of the point to the line, defaults to 0",
+                    type: optional(numberType)
+                },
+                {
                     name: "lineProvider",
                     description: "the target which provides the line",
                     type: objectType(
@@ -32,16 +37,23 @@ export class LinePointLayoutConfig extends CanvasPointLayoutConfig {
 
     override layout(layout: Layout, element: LayoutElement, position: Point, size: Size, id: string): Element[] {
         const positionFieldEntry = element.element.getLocalFieldOrUndefined("pos");
+        const distanceFieldEntry = element.element.getLocalFieldOrUndefined("distance");
         const lineProvider = this.getContentId(
             element,
             element.element.getLocalFieldOrUndefined("lineProvider")!.value as FullObject
         );
+        const distance = distanceFieldEntry?.value?.toNative();
+        const editableEntries = [positionFieldEntry?.source];
+        if (distance != undefined) {
+            editableEntries.push(distanceFieldEntry?.source);
+        }
         const result: LinePoint = {
             type: LinePoint.TYPE,
             id,
             pos: Math.max(Math.min(positionFieldEntry?.value?.toNative(), 1), 0),
+            distance,
             lineProvider,
-            editable: this.generateEditableNumbers(positionFieldEntry?.source),
+            editable: this.generateEditableNumbers(...editableEntries),
             children: []
         };
         return [result];

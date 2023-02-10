@@ -100,6 +100,10 @@ export interface LinePoint extends CanvasPoint {
      * The position where on the line the point is located, between 0 and 1
      */
     pos: number;
+    /**
+     * The distance of the point to the line
+     */
+    distance?: number;
 }
 
 export namespace LinePoint {

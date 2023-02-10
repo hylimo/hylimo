@@ -34,15 +34,19 @@ export class LineEngine {
      * @param transformedLine line with associated transform
      * @returns the position of the closest point on the line
      */
-    projectPoint(point: Point, transformedLine: TransformedLine): number {
+    projectPoint(point: Point, transformedLine: TransformedLine): ProjectionResult {
         const { line, transform } = transformedLine;
         if (line.segments.length == 0) {
-            return 0;
+            return {
+                pos: 0,
+                distance: 0
+            };
         }
         const localPoint = LineTransform.inverseTransform(transform, point);
         const lengthPerSegment = 1 / line.segments.length;
         let minDistance = Number.POSITIVE_INFINITY;
         let position = 0;
+        let distance = 0;
         let startPosition = line.start;
         for (let i = 0; i < line.segments.length; i++) {
             const segment = line.segments[i];
@@ -51,20 +55,27 @@ export class LineEngine {
             if (candidate.distance < minDistance) {
                 minDistance = candidate.distance;
                 position = lengthPerSegment * (i + candidate.position);
+                const normal = engine.getNormalVector(candidate.position, segment, startPosition);
+                const d2 = normal.x ** 2 + normal.y ** 2;
+                distance = ((point.x - candidate.point.x) * normal.x + (point.y - candidate.point.y) * normal.y) / d2;
             }
             startPosition = segment.end;
         }
-        return position;
+        return {
+            pos: position,
+            distance
+        };
     }
 
     /**
      * Gets a point on a segment
      *
      * @param position the position of the point on the segment, a number between 0 and 1
+     * @param distance the distance to the line at which the point should be located
      * @param transformedLine line with associated transform
      * @returns the point on the line
      */
-    getPoint(position: number, transformedLine: TransformedLine): Point {
+    getPoint(position: number, distance: number, transformedLine: TransformedLine): Point {
         const { line, transform } = transformedLine;
         if (line.segments.length == 0) {
             return line.start;
@@ -73,7 +84,12 @@ export class LineEngine {
         const segmentStartPos = segmentIndex == 0 ? line.start : line.segments[segmentIndex - 1].end;
         const segment = line.segments[segmentIndex];
         const engine = this.getEngine(segment);
-        const localPoint = engine.getPoint(position * line.segments.length - segmentIndex, segment, segmentStartPos);
+        const localPoint = engine.getPoint(
+            position * line.segments.length - segmentIndex,
+            distance,
+            segment,
+            segmentStartPos
+        );
         return LineTransform.transform(transform, localPoint);
     }
 
@@ -91,4 +107,20 @@ export class LineEngine {
             throw new Error(`Unknown segment type: ${segment.type}`);
         }
     }
+}
+
+/**
+ * Result of a point projection
+ */
+export interface ProjectionResult {
+    /**
+     * Position on the line which is closest to the provided point
+     */
+    pos: number;
+    /**
+     * Distance for relative LinePoints.
+     * This is the distance to the line which results in the lowest distance to the point.
+     * This is not the distance to the provided point!
+     */
+    distance: number;
 }
