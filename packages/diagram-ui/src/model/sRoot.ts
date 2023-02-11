@@ -85,6 +85,11 @@ export class SRoot extends ViewportRootElement {
             stroke: transparent;
             pointer-events: visibleStroke;
         }
+
+        .canvas-rotate-icon {
+            fill: var(--diagram-layout-color);
+            pointer-events: bounding-box;
+        }
         `;
         return (
             this.fonts

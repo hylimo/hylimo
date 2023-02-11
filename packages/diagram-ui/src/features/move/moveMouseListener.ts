@@ -1,14 +1,6 @@
 import { inject } from "inversify";
 import { Point } from "@hylimo/diagram-common";
-import {
-    findParentByFeature,
-    isMoveable,
-    isSelectable,
-    isViewport,
-    MouseListener,
-    SModelElement,
-    SModelRoot
-} from "sprotty";
+import { findParentByFeature, isMoveable, isSelectable, MouseListener, SModelElement, SModelRoot } from "sprotty";
 import { Action } from "sprotty-protocol";
 import { SAbsolutePoint } from "../../model/canvas/sAbsolutePoint";
 import { SCanvas } from "../../model/canvas/sCanvas";
@@ -19,8 +11,11 @@ import { SRelativePoint } from "../../model/canvas/sRelativePoint";
 import { MoveHandler } from "./moveHandler";
 import { TYPES } from "../types";
 import { TransactionIdProvider } from "../transaction/transactionIdProvider";
-import { TranslationMoveHandler } from "./translationMoveHandler";
-import { LineMoveHandler } from "./lineMoveHandler";
+import { TranslationMoveHandler } from "./translation/translationMoveHandler";
+import { LineMoveHandler } from "./line/lineMoveHandler";
+import { findViewportZoom } from "../../base/findViewportZoom";
+import { CanvasElementView } from "../../views/canvas/canvasElementView";
+import { RotationHandler } from "./rotation/rotationHandler";
 
 /**
  * Listener for mouse events to create move actions
@@ -33,6 +28,10 @@ export class MoveMouseListener extends MouseListener {
      */
     private startPosition?: Point;
     /**
+     * The target of the initial event
+     */
+    private targetElement?: Element;
+    /**
      * Current moveHandler.
      * If null, creating a handler for the current move is not possible.
      */
@@ -43,8 +42,10 @@ export class MoveMouseListener extends MouseListener {
             const moveableTarget = findParentByFeature(target, isMoveable);
             if (moveableTarget != undefined) {
                 this.startPosition = { x: event.pageX, y: event.pageY };
+                this.targetElement = event.target as Element | undefined;
             } else {
                 this.startPosition = undefined;
+                this.targetElement = undefined;
             }
         }
         return [];
@@ -53,7 +54,7 @@ export class MoveMouseListener extends MouseListener {
     override mouseMove(target: SModelElement, event: MouseEvent): Action[] {
         if (this.startPosition) {
             if (this.moveHandler === undefined) {
-                this.moveHandler = this.createMoveHandler(target);
+                this.moveHandler = this.createHandler(target, this.targetElement!);
             }
             if (this.moveHandler != undefined) {
                 const translation = this.calculateTranslation(target, event);
@@ -108,8 +109,7 @@ export class MoveMouseListener extends MouseListener {
         if (this.startPosition == undefined) {
             throw new Error("Cannot calculate translation without a start position");
         }
-        const viewport = findParentByFeature(target, isViewport);
-        const zoom = viewport ? viewport.zoom : 1;
+        const zoom = findViewportZoom(target);
         return {
             x: (event.pageX - this.startPosition.x) / zoom,
             y: (event.pageY - this.startPosition.y) / zoom
@@ -117,10 +117,50 @@ export class MoveMouseListener extends MouseListener {
     }
 
     /**
-     * Creats the handler for the current move based on the selected elements
+     * Creats the handler for the current move
      *
      * @param target the element which was clicked
-     * @returns the move handler if move is supported, otherwise undefined
+     * @param target the initial mouse down event
+     * @returns the move handler if move is supported, otherwise null
+     */
+    private createHandler(target: SModelElement, targetElement?: Element): MoveHandler | null {
+        if (
+            target instanceof SCanvasElement &&
+            targetElement?.classList?.contains(CanvasElementView.ROTATE_ICON_CLASS)
+        ) {
+            return this.createRotationHandler(target);
+        } else {
+            return this.createMoveHandler(target);
+        }
+    }
+
+    /**
+     * Creates the handler for the current move based on the target.
+     * Handles rotation events, meaning rotating CanvasElements.
+     *
+     * @param target the element to rotate
+     * @returns the move handler if rotation is supported, otherwise null
+     */
+    private createRotationHandler(target: SCanvasElement): MoveHandler | null {
+        if (target.rotateable == undefined) {
+            return null;
+        }
+        const origin = target.position;
+        const distance = CanvasElementView.ROTATE_ICON_DISTANCE;
+        const angleRad = (target.rotation / 360) * 2 * Math.PI;
+        const handlePosition = {
+            x: origin.x + distance * Math.sin(angleRad),
+            y: origin.y - distance * Math.cos(angleRad)
+        };
+        return new RotationHandler(target.id, this.transactionIdProvider.generateId(), origin, handlePosition);
+    }
+
+    /**
+     * Creats the handler for the current move based on the selected elements.
+     * Handles move events, meaning moving points on the canvas.
+     *
+     * @param target the element which was clicked
+     * @returns the move handler if move is supported, otherwise null
      */
     private createMoveHandler(target: SModelElement): MoveHandler | null {
         const index = target.root.index;

@@ -32,6 +32,7 @@ export * from "./model/rect";
 export * from "./model/shape";
 export * from "./model/text";
 export * from "./protocol/lineMoveAction";
+export * from "./protocol/rotationAction";
 export * from "./protocol/transactionalAction";
 export * from "./protocol/translationMoveAction";
 export * from "./root";

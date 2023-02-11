@@ -1,4 +1,4 @@
-import { LineMoveAction, TranslationMoveAction } from "@hylimo/diagram-common";
+import { LineMoveAction, RotationAction, TranslationMoveAction } from "@hylimo/diagram-common";
 import { injectable } from "inversify";
 import { ActionHandlerRegistry, DiagramServerProxy as SprottyDiagramServerProxy } from "sprotty";
 
@@ -12,5 +12,6 @@ export abstract class DiagramServerProxy extends SprottyDiagramServerProxy {
 
         registry.register(TranslationMoveAction.KIND, this);
         registry.register(LineMoveAction.KIND, this);
+        registry.register(RotationAction.KIND, this);
     }
 }

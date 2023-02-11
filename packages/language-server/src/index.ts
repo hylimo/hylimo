@@ -1,6 +1,7 @@
 export * from "./edit/edits/generateDeltaNumberGenerator";
 export * from "./edit/edits/generateReplacementNumberGenerator";
 export * from "./edit/edits/lineMoveEdit";
+export * from "./edit/edits/rotationEdit";
 export * from "./edit/edits/translationMoveEdit";
 export * from "./edit/generators/deltaAdditiveNumberGenerator";
 export * from "./edit/generators/deltaNumberGenerator";

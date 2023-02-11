@@ -73,7 +73,7 @@ export class CanvasElementLayoutConfig extends EditableCanvasContentLayoutConfig
             children: layout.layout(content, Point.ORIGIN, size, `${id}_0`),
             pos: this.getContentId(element, element.element.getLocalFieldOrUndefined("pos")?.value as FullObject),
             resizable: undefined, //TODO fix
-            rotateable: undefined, //TODO fix
+            rotateable: this.generateEditableNumbers(element.styleSources.get("rotation")?.source),
             outline: content.layoutConfig.outline(
                 layout,
                 content,

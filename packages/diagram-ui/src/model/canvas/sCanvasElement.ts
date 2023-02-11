@@ -50,6 +50,10 @@ export class SCanvasElement
      */
     resizable!: number[];
     /**
+     * Rotateable if present
+     */
+    rotateable?: number[];
+    /**
      * The outline of the CanvasElement
      */
     outline!: Line;

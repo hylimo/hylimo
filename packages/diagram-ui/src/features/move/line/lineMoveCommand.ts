@@ -1,8 +1,8 @@
 import { LineMoveAction } from "@hylimo/diagram-common";
 import { injectable, inject } from "inversify";
 import { Command, CommandExecutionContext, CommandReturn, TYPES } from "sprotty";
-import { SLinePoint } from "../../model/canvas/sLinePoint";
-import { SRoot } from "../../model/sRoot";
+import { SLinePoint } from "../../../model/canvas/sLinePoint";
+import { SRoot } from "../../../model/sRoot";
 
 /**
  * Command for LineMoveAction
