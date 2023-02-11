@@ -30,14 +30,60 @@ export class SRoot extends ViewportRootElement {
         text {
             white-space: pre;
         }
+        
         .canvas-element {
             pointer-events: visible;
         }
-        svg {
+        
+        .sprotty svg {
             --diagram-zoom: ${this.zoom};
             --diagram-zoom-normalized: ${this.zoom / Math.pow(2, Math.round(Math.log2(this.zoom) / 2) * 2)};
             --diagram-scroll-x: ${this.scroll.x}px;
             --diagram-scroll-y: ${this.scroll.y}px;
+            background:
+              conic-gradient(from 90deg at 1px 1px, var(--diagram-background) 90deg, var(--diagram-grid) 0) 
+              calc(var(--diagram-scroll-x) * -1 * var(--diagram-zoom))
+              calc(var(--diagram-scroll-y) * -1 * var(--diagram-zoom)) /
+              calc(100px * var(--diagram-zoom-normalized)) calc(100px * var(--diagram-zoom-normalized));
+        }
+
+        .selected-rect {
+            fill: var(--diagram-layout-color-overlay);
+            stroke: var(--diagram-layout-color-selected);
+            stroke-width: calc(5px / var(--diagram-zoom));
+            stroke-dasharray: calc(16px / var(--diagram-zoom));
+        }
+        
+        .canvas-point {
+            stroke-linecap: round;
+            stroke-width: calc(16px / var(--diagram-zoom));
+            stroke: var(--diagram-layout-color);
+        }
+        
+        .canvas-point.selected {
+            stroke: var(--diagram-layout-color-selected);
+        }
+        
+        .canvas-dependency-line {
+            stroke: var(--diagram-layout-color);
+            stroke-width: calc(2px / var(--diagram-zoom));
+            stroke-dasharray: calc(16px / var(--diagram-zoom));
+            fill: none;
+            pointer-events: none;
+        }
+        
+        .bezier-handle-line {
+            stroke: var(--diagram-layout-color);
+            stroke-width: calc(4px / var(--diagram-zoom));
+            fill: none;
+            pointer-events: none;
+        }
+        
+        .select-canvas-connection {
+            stroke-width: calc(12px / var(--diagram-zoom));
+            fill: none;
+            stroke: transparent;
+            pointer-events: visibleStroke;
         }
         `;
         return (
