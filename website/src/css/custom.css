@@ -51,6 +51,10 @@ nav.navbar {
   height: unset;
 }
 
+.sprotty-wrapper {
+  height: 100%;
+}
+
 /* Sprotty */
 .sprotty {
   display: flex;

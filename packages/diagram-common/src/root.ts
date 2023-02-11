@@ -11,6 +11,10 @@ export interface Root extends SModelRoot {
      */
     type: typeof Root.TYPE;
     /**
+     * The id of the element
+     */
+    id: typeof Root.TYPE;
+    /**
      * Child elementes
      */
     children: Element[];

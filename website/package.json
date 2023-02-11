@@ -19,6 +19,7 @@
         "@hylimo/diagram-ui": "^0.0.1",
         "@hylimo/language-server": "^0.0.1",
         "@mdx-js/react": "^1.6.22",
+        "@react-hook/resize-observer": "^1.2.6",
         "@rehooks/local-storage": "^2.4.4",
         "allotment": "^1.18.0",
         "clsx": "^1.2.1",

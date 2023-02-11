@@ -1,6 +1,6 @@
 import "reflect-metadata";
 import { Allotment } from "allotment";
-import React, { useEffect } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useColorMode } from "@docusaurus/theme-common";
 import "allotment/dist/style.css";
 import { customDarkTheme, customLightTheme, languageConfiguration, monarchTokenProvider } from "./language";
@@ -19,7 +19,8 @@ import { createContainer } from "@hylimo/diagram-ui";
 import { ActionHandlerRegistry, IActionDispatcher, TYPES } from "sprotty";
 import { RequestModelAction, ActionMessage } from "sprotty-protocol";
 import { DiagramActionNotification, DiagramOpenNotification } from "@hylimo/language-server";
-import { DiagramServerProxy } from "@hylimo/diagram-ui";
+import { DiagramServerProxy, ResetCanvasBoundsAction } from "@hylimo/diagram-ui";
+import useResizeObserver from "@react-hook/resize-observer";
 
 /**
  * Name of the language
@@ -39,6 +40,8 @@ const uri = "inmemory://model/1";
 export default function HylimoEditor(): JSX.Element {
     const { colorMode } = useColorMode();
     const [code, setCode] = useLocalStorage<string>("code");
+    const sprottyWrapper = useRef(null);
+    const [actionDispatcher, setActionDispatcher] = useState<IActionDispatcher | undefined>();
 
     useEffect(() => {
         StandaloneServices.initialize({});
@@ -75,8 +78,16 @@ export default function HylimoEditor(): JSX.Element {
             actionDispatcher.request(RequestModelAction.create()).then((response) => {
                 actionDispatcher.dispatch(response);
             });
+            setActionDispatcher(actionDispatcher);
         });
     }, []);
+
+    useResizeObserver(sprottyWrapper, () => {
+        const action: ResetCanvasBoundsAction = {
+            kind: ResetCanvasBoundsAction.KIND
+        };
+        actionDispatcher?.dispatch(action);
+    });
 
     return (
         <Allotment>
@@ -103,7 +114,9 @@ export default function HylimoEditor(): JSX.Element {
                 ></MonacoEditor>
             </Allotment.Pane>
             <Allotment.Pane>
-                <div id="sprotty-container"></div>
+                <div ref={sprottyWrapper} className="sprotty-wrapper">
+                    <div id="sprotty-container"></div>
+                </div>
             </Allotment.Pane>
         </Allotment>
     );

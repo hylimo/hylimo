@@ -57,6 +57,7 @@ import { SLinePoint } from "./model/canvas/sLinePoint";
 import { LinePointView } from "./views/canvas/linePointView";
 import { SPath } from "./model/sPath";
 import { PathView } from "./views/pathView";
+import { resetCanvasBoundsModule } from "./features/canvas-bounds/di.config";
 
 /**
  * The module used
@@ -102,7 +103,7 @@ export function createContainer(widgetId: string): Container {
     loadDefaultModules(container, {
         exclude: [sprottyUpdateModule, sprottyMoveModule, sprottyZOrderModule, decorationModule, undoRedoModule]
     });
-    container.load(updateModule, zorderModule, transactionModule, moveModule);
+    container.load(updateModule, zorderModule, transactionModule, moveModule, resetCanvasBoundsModule);
     container.load(diagramModule);
 
     overrideViewerOptions(container, {
