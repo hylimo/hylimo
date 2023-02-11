@@ -146,7 +146,7 @@ export class MoveMouseListener extends MouseListener {
             return null;
         }
         const origin = target.position;
-        const distance = CanvasElementView.ROTATE_ICON_DISTANCE;
+        const distance = CanvasElementView.ROTATE_ICON_DISTANCE / findViewportZoom(target);
         const angleRad = (target.rotation / 360) * 2 * Math.PI;
         const handlePosition = {
             x: origin.x + distance * Math.sin(angleRad),
