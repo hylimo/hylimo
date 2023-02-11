@@ -47,6 +47,10 @@ main .split-view {
   height: unset;
 }
 
+nav.navbar {
+  height: unset;
+}
+
 /* Sprotty */
 .sprotty {
   display: flex;
