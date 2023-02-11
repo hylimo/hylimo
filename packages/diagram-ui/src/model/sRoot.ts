@@ -47,6 +47,10 @@ export class SRoot extends ViewportRootElement {
               calc(100px * var(--diagram-zoom-normalized)) calc(100px * var(--diagram-zoom-normalized));
         }
 
+        .sprotty svg text {
+            user-select: none;
+        }
+
         .selected-rect {
             fill: var(--diagram-layout-color-overlay);
             stroke: var(--diagram-layout-color-selected);
