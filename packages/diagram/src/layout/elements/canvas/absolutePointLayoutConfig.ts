@@ -36,7 +36,7 @@ export class AbsolutePointLayoutConfig extends CanvasPointLayoutConfig {
             id,
             x: xFieldEntry?.value?.toNative(),
             y: yFieldEntry?.value.toNative(),
-            editable: this.generateEditableNumbers(xFieldEntry?.source, yFieldEntry?.source),
+            editable: this.generateModificationSpecification({ x: xFieldEntry?.source, y: yFieldEntry?.source }),
             children: []
         };
         return [result];

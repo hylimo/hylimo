@@ -27,6 +27,7 @@ export * from "./model/canvas/canvasPoint";
 export * from "./model/canvas/marker";
 export * from "./model/circle";
 export * from "./model/ellipse";
+export * from "./model/modificationSpecification";
 export * from "./model/path";
 export * from "./model/rect";
 export * from "./model/shape";

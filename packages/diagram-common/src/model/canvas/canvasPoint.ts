@@ -1,5 +1,6 @@
 import { Element } from "../base/element";
 import { PositionedElement } from "../base/positionedElement";
+import { ModificationSpecification } from "../modificationSpecification";
 
 /**
  * Named point on a canvas
@@ -8,7 +9,7 @@ export interface CanvasPoint extends Element {
     /**
      * If present, this point is manipulatable
      */
-    editable?: number[];
+    editable: ModificationSpecification;
 }
 
 /**
@@ -119,6 +120,17 @@ export namespace LinePoint {
      */
     export function isLinePoint(value: Element): value is LinePoint {
         return value.type === TYPE;
+    }
+
+    /**
+     * Calculates the segment index for a given position
+     *
+     * @param position the position on the line, between 0 and 1
+     * @param segmentCount the number of segments the line has
+     * @returns the index of the segment position is located on
+     */
+    export function calcSegmentIndex(position: number, segmentCount: number): number {
+        return Math.min(Math.max(Math.floor(position * segmentCount), 0), segmentCount - 1);
     }
 
     /**

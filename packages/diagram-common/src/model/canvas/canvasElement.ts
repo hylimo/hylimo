@@ -1,6 +1,7 @@
 import { Line } from "../../line/model/line";
 import { Element } from "../base/element";
 import { LayoutedElement } from "../base/layoutedElement";
+import { ModificationSpecification } from "../modificationSpecification";
 
 /**
  * Moveable and resizeable element in a canvas
@@ -10,7 +11,7 @@ export interface CanvasElement extends LayoutedElement {
     /**
      * The id of the CanvasPoint which is used as start
      */
-    pos: string;
+    pos?: string;
     /**
      * The rotation in degrees
      */
@@ -18,11 +19,15 @@ export interface CanvasElement extends LayoutedElement {
     /**
      * Resizable if present
      */
-    resizable?: number[];
+    resizable: ModificationSpecification;
     /**
      * Rotateable if present
      */
-    rotateable?: number[];
+    rotateable: ModificationSpecification;
+    /**
+     * Moveable if present
+     */
+    moveable: ModificationSpecification;
     /**
      * The outline of the CanvasElement
      */
@@ -50,6 +55,10 @@ export namespace CanvasElement {
      * @returns the list of dependencies, may contain duplicates
      */
     export function getDependencies(element: CanvasElement): string[] {
-        return [element.pos];
+        if (element.pos != undefined) {
+            return [element.pos];
+        } else {
+            return [];
+        }
     }
 }

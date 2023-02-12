@@ -1,5 +1,6 @@
 import { applyToPoint, inverse } from "transformation-matrix";
 import { Point } from "../../common/point";
+import { LinePoint } from "../../model/canvas/canvasPoint";
 import { ArcSegment } from "../model/arcSegment";
 import { BezierSegment } from "../model/bezierSegment";
 import { TransformedLine } from "../model/line";
@@ -81,7 +82,7 @@ export class LineEngine {
         if (line.segments.length == 0) {
             return line.start;
         }
-        const segmentIndex = Math.min(Math.floor(position * line.segments.length), line.segments.length - 1);
+        const segmentIndex = LinePoint.calcSegmentIndex(position, line.segments.length);
         const segmentStartPos = segmentIndex == 0 ? line.start : line.segments[segmentIndex - 1].end;
         const segment = line.segments[segmentIndex];
         const engine = this.getEngine(segment);

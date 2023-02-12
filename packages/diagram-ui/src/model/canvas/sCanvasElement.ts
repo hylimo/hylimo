@@ -1,4 +1,4 @@
-import { CanvasElement, Line, Point, TransformedLine } from "@hylimo/diagram-common";
+import { CanvasElement, Line, ModificationSpecification, Point, TransformedLine } from "@hylimo/diagram-common";
 import { LinearAnimatable } from "../../features/animation/model";
 import { LineProvider } from "../../features/layout/lineProvider";
 import { PositionProvider } from "../../features/layout/positionProvider";
@@ -40,7 +40,7 @@ export class SCanvasElement
     /**
      * The id of the CanvasPoint which is used as start
      */
-    pos!: string;
+    pos?: string;
     /**
      * The rotation in degrees
      */
@@ -48,11 +48,15 @@ export class SCanvasElement
     /**
      * Resizable if present
      */
-    resizable!: number[];
+    resizable!: ModificationSpecification;
     /**
      * Rotateable if present
      */
-    rotateable?: number[];
+    rotateable!: ModificationSpecification;
+    /**
+     * Moveable if present
+     */
+    moveable!: ModificationSpecification;
     /**
      * The outline of the CanvasElement
      */
@@ -70,8 +74,12 @@ export class SCanvasElement
         super();
 
         this.cachedProperty<Point>("position", () => {
-            const target = this.root.index.getById(this.pos) as SCanvasPoint;
-            return target.position;
+            if (this.pos != undefined) {
+                const target = this.root.index.getById(this.pos) as SCanvasPoint;
+                return target.position;
+            } else {
+                return Point.ORIGIN;
+            }
         });
         this.cachedProperty<TransformedLine>("line", () => {
             const position = this.position;
@@ -87,6 +95,10 @@ export class SCanvasElement
     }
 
     override get dependencies(): string[] {
-        return [this.pos];
+        if (this.pos != undefined) {
+            return [this.pos];
+        } else {
+            return [];
+        }
     }
 }

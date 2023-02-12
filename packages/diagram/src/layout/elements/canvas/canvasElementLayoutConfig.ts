@@ -1,5 +1,5 @@
-import { objectType, SemanticFieldNames, literal, FullObject, numberType } from "@hylimo/core";
-import { Size, Point, Element, CanvasElement } from "@hylimo/diagram-common";
+import { objectType, SemanticFieldNames, literal, FullObject, numberType, optional } from "@hylimo/core";
+import { Size, Point, Element, CanvasElement, ModificationSpecification } from "@hylimo/diagram-common";
 import { canvasPointType } from "../../../module/types";
 import { HorizontalAlignment, LayoutElement, SizeConstraints, VerticalAlignment } from "../../layoutElement";
 import { Layout } from "../../layoutEngine";
@@ -26,7 +26,7 @@ export class CanvasElementLayoutConfig extends EditableCanvasContentLayoutConfig
                 {
                     name: "pos",
                     description: "the position of the canvasElement",
-                    type: canvasPointType
+                    type: optional(canvasPointType)
                 }
             ],
             [
@@ -63,6 +63,7 @@ export class CanvasElementLayoutConfig extends EditableCanvasContentLayoutConfig
         } else if (vAlign === VerticalAlignment.CENTER) {
             y = -size.height / 2;
         }
+        const posCanvasPoint = element.element.getLocalFieldOrUndefined("pos")?.value as FullObject | undefined;
         const result: CanvasElement = {
             id,
             type: CanvasElement.TYPE,
@@ -71,9 +72,15 @@ export class CanvasElementLayoutConfig extends EditableCanvasContentLayoutConfig
             y,
             rotation: element.styles.rotation ?? 0,
             children: layout.layout(content, Point.ORIGIN, size, `${id}_0`),
-            pos: this.getContentId(element, element.element.getLocalFieldOrUndefined("pos")?.value as FullObject),
-            resizable: undefined, //TODO fix
-            rotateable: this.generateEditableNumbers(element.styleSources.get("rotation")?.source),
+            pos: posCanvasPoint != undefined ? this.getContentId(element, posCanvasPoint) : undefined,
+            resizable: null, //TODO fix
+            rotateable: this.generateModificationSpecification({
+                rotation: element.styleSources.get("rotation")?.source
+            }),
+            moveable:
+                posCanvasPoint != undefined
+                    ? this.generateModificationSpecificationForScopeField("layout", element)
+                    : null,
             outline: content.layoutConfig.outline(
                 layout,
                 content,
@@ -82,5 +89,30 @@ export class CanvasElementLayoutConfig extends EditableCanvasContentLayoutConfig
             )
         };
         return [result];
+    }
+
+    /**
+     * Generates a modification specification for adding a field by adding it to an already existing scope or creating a new scope
+     *
+     * @param scopeName the name of the scope where the field should be added
+     * @param element the element to which the field should be added
+     * @returns the generated modification specification
+     */
+    private generateModificationSpecificationForScopeField(
+        scopeName: string,
+        element: LayoutElement
+    ): ModificationSpecification {
+        const scopes = element.element.getLocalFieldOrUndefined("scopes")!.value as FullObject;
+        const scope = scopes.getLocalFieldOrUndefined(scopeName)?.source;
+        if (scope != undefined) {
+            return this.generateModificationSpecification({ scope: scope });
+        } else {
+            const source = element.element.getLocalFieldOrUndefined("source")?.source;
+            if (source != undefined) {
+                return this.generateModificationSpecification({ source: source });
+            } else {
+                return null;
+            }
+        }
     }
 }

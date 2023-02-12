@@ -1,5 +1,5 @@
 import { Expression, ExpressionMetadata, listType, optional, stringType } from "@hylimo/core";
-import { Element, Line, LineSegment, Point, Size } from "@hylimo/diagram-common";
+import { Element, Line, LineSegment, ModificationSpecification, Point, Size } from "@hylimo/diagram-common";
 import { LayoutElement, LayoutConfig, SizeConstraints, AttributeConfig } from "../layoutElement";
 import { Layout } from "../layoutEngine";
 
@@ -56,22 +56,23 @@ export abstract class ElementLayoutConfig implements LayoutConfig {
     abstract layout(layout: Layout, element: LayoutElement, position: Point, size: Size, id: string): Element[];
 
     /**
-     * Converts the expressions to the list of their start offsets
-     * Returns undefined if any expression is undefined, or its position, or if there are duplicate start offsets.
+     * Converts the expressions to a ModificationSpecification
      *
-     * @param expressions the list of expressions
-     * @returns the start offsets or undefined if edit is not supported
+     * @param expressions expression with associated key
+     * @returns the generated ModificationSpecification
      */
-    protected generateEditableNumbers(...expressions: (Expression | undefined)[]): number[] | undefined {
-        if (expressions.some((expression) => !ExpressionMetadata.isEditable(expression?.metadata))) {
-            return undefined;
+    protected generateModificationSpecification(expressions: {
+        [key: string]: Expression | undefined;
+    }): ModificationSpecification {
+        const result: { [key: string]: [number, number] } = {};
+        for (const [key, expression] of Object.entries(expressions)) {
+            if (!ExpressionMetadata.isEditable(expression?.metadata)) {
+                return null;
+            }
+            const position = expression!.position!;
+            result[key] = [position.startOffset, position.endOffset];
         }
-        const positions = expressions.map((expression) => expression!.position!.startOffset);
-        if (new Set(positions).size < positions.length) {
-            return undefined;
-        } else {
-            return positions;
-        }
+        return result;
     }
 
     /**

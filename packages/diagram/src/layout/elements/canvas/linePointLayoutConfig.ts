@@ -43,17 +43,16 @@ export class LinePointLayoutConfig extends CanvasPointLayoutConfig {
             element.element.getLocalFieldOrUndefined("lineProvider")!.value as FullObject
         );
         const distance = distanceFieldEntry?.value?.toNative();
-        const editableEntries = [positionFieldEntry?.source];
-        if (distance != undefined) {
-            editableEntries.push(distanceFieldEntry?.source);
-        }
         const result: LinePoint = {
             type: LinePoint.TYPE,
             id,
             pos: Math.max(Math.min(positionFieldEntry?.value?.toNative(), 1), 0),
             distance,
             lineProvider,
-            editable: this.generateEditableNumbers(...editableEntries),
+            editable: this.generateModificationSpecification({
+                pos: positionFieldEntry?.source,
+                distance: distance != undefined ? distanceFieldEntry?.source : undefined
+            }),
             children: []
         };
         return [result];
