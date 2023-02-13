@@ -1,4 +1,4 @@
-import { FullObject, literal, numberType, objectType, optional, SemanticFieldNames } from "@hylimo/core";
+import { Expression, FullObject, literal, numberType, objectType, optional, SemanticFieldNames } from "@hylimo/core";
 import { Size, Element, LinePoint } from "@hylimo/diagram-common";
 import { Point } from "sprotty-protocol";
 import { LayoutElement } from "../../layoutElement";
@@ -43,16 +43,19 @@ export class LinePointLayoutConfig extends CanvasPointLayoutConfig {
             element.element.getLocalFieldOrUndefined("lineProvider")!.value as FullObject
         );
         const distance = distanceFieldEntry?.value?.toNative();
+        const editableExpressions: Record<string, Expression | undefined> = {
+            pos: positionFieldEntry?.source
+        };
+        if (distance != undefined) {
+            editableExpressions.distance = distanceFieldEntry?.source;
+        }
         const result: LinePoint = {
             type: LinePoint.TYPE,
             id,
             pos: Math.max(Math.min(positionFieldEntry?.value?.toNative(), 1), 0),
             distance,
             lineProvider,
-            editable: this.generateModificationSpecification({
-                pos: positionFieldEntry?.source,
-                distance: distance != undefined ? distanceFieldEntry?.source : undefined
-            }),
+            editable: this.generateModificationSpecification(editableExpressions),
             children: []
         };
         return [result];
