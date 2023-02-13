@@ -96,6 +96,10 @@ export const classDiagramModule: InterpreterModule = {
                                     stroke = primary
                                     strokeWidth = lineWidth
                                 }
+                                class("class-element") {
+                                    vAlign = "center"
+                                    hAlign = "center"
+                                }
                             }
                             scope.fonts += robotoFontFamily
                         `
