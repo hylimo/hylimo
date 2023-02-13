@@ -1,6 +1,11 @@
 import { LayoutedDiagram } from "@hylimo/diagram";
 import { Action } from "sprotty-protocol";
-import { Range, TextDocumentEdit, VersionedTextDocumentIdentifier } from "vscode-languageserver";
+import {
+    Range,
+    TextDocumentEdit,
+    VersionedTextDocumentIdentifier,
+    TextDocumentContentChangeEvent
+} from "vscode-languageserver";
 import { TextDocument, TextEdit } from "vscode-languageserver-textdocument";
 import { EditGeneratorEntry } from "./editGeneratorEntry";
 import { EditGenerator } from "./generators/editGenerator";
@@ -56,17 +61,12 @@ export abstract class TransactionalEdit<T extends Action> {
      * @param action
      */
     applyAction(action: T): TextDocumentEdit {
-        let startPosDiff = 0;
         const edits = this.generatorEntries.map((entry) => {
             const newText = this.applyActionToGenerator(action, entry.generator, entry.meta);
-            const localDiff = newText.length - (entry.end - entry.start);
             const result: TextEdit = {
                 range: Range.create(this.textDocument.positionAt(entry.start), this.textDocument.positionAt(entry.end)),
                 newText
             };
-            entry.start += startPosDiff;
-            startPosDiff += localDiff;
-            entry.end += startPosDiff;
             return result;
         });
         const res = {
@@ -75,5 +75,30 @@ export abstract class TransactionalEdit<T extends Action> {
         };
         this.version++;
         return res;
+    }
+
+    /**
+     * Update the current entries based on the changes.
+     * Updates indices.
+     *
+     * @param changes the changes to the text document
+     */
+    updateGeneratorEntries(changes: TextDocumentContentChangeEvent[]): void {
+        for (const change of changes) {
+            if (!TextDocumentContentChangeEvent.isIncremental(change)) {
+                break;
+            }
+            const start = this.textDocument.offsetAt(change.range.start);
+            const end = this.textDocument.offsetAt(change.range.end);
+            const delta = change.text.length - (end - start);
+            for (const entry of this.generatorEntries) {
+                if (entry.start > end) {
+                    entry.start += delta;
+                    entry.end += delta;
+                } else if (entry.start >= start) {
+                    entry.end += delta;
+                }
+            }
+        }
     }
 }

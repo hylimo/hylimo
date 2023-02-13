@@ -1,4 +1,4 @@
-import { TextDocument } from "vscode-languageserver-textdocument";
+import { TextDocument, TextDocumentContentChangeEvent } from "vscode-languageserver-textdocument";
 import { CstResult, Expression, FullObject, InterpretationResult } from "@hylimo/core";
 import { LayoutedDiagram } from "@hylimo/diagram";
 import { SharedDiagramUtils } from "./sharedDiagramUtils";
@@ -53,6 +53,16 @@ export class Diagram {
             uri: this.document.uri,
             diagnostics: diagnostics
         });
+    }
+
+    /**
+     * Updates the current transaction based on changes to the document.
+     * Should update indices to correspond to the new file.
+     *
+     * @param changes changes applied to the document
+     */
+    updateCurrentTransaction(changes: TextDocumentContentChangeEvent[]): void {
+        this.transactionManager.updateGeneratorEntries(changes);
     }
 
     /**

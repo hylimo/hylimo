@@ -43,7 +43,6 @@ export const classDiagramModule: InterpreterModule = {
                                     content = vbox(contents = classContents)
                                 )
                                 classElement = canvasElement(
-                                    pos = scope.apos(0, 0),
                                     content = renderedClass,
                                     scopes = object(default = callback),
                                     class = list("class-element")

@@ -10,7 +10,7 @@ import {
     TextEdit,
     uinteger
 } from "vscode-languageserver";
-import { TextDocument } from "vscode-languageserver-textdocument";
+import { TextDocument, TextDocumentContentChangeEvent } from "vscode-languageserver-textdocument";
 import { Diagram } from "./diagram";
 import { Formatter } from "./formatter";
 import { diagramModule, dslModule, LayoutEngine } from "@hylimo/diagram";
@@ -53,7 +53,10 @@ export class LanguageServer {
     /**
      * Used to sync textdocuments
      */
-    private readonly textDocuments = new TextDocuments(TextDocument);
+    private readonly textDocuments = new TextDocuments({
+        create: TextDocument.create,
+        update: this.updateTextDocument.bind(this)
+    });
 
     /**
      * Formatter to use for formatting requests
@@ -149,6 +152,24 @@ export class LanguageServer {
      */
     private onDidCloseTextDocument(e: TextDocumentChangeEvent<TextDocument>): void {
         this.diagrams.delete(e.document.uri);
+    }
+
+    /**
+     * Updates a TextDocument by modifying its content
+     *
+     * @param document the document to update
+     * @param changes the changes to apply to the document
+     * @param version the new version of the document
+     * @returns the updated document
+     */
+    private updateTextDocument(
+        document: TextDocument,
+        changes: TextDocumentContentChangeEvent[],
+        version: number
+    ): TextDocument {
+        const diagram = this.diagrams.get(document.uri)!;
+        diagram.updateCurrentTransaction(changes);
+        return TextDocument.update(document, changes, version);
     }
 
     /**

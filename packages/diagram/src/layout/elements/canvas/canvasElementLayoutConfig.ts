@@ -86,7 +86,7 @@ export class CanvasElementLayoutConfig extends EditableCanvasContentLayoutConfig
                 rotation: element.styleSources.get("rotation")?.source
             }),
             moveable:
-                posCanvasPoint != undefined
+                posCanvasPoint == undefined
                     ? this.generateModificationSpecificationForScopeField("layout", element)
                     : null,
             outline: content.layoutConfig.outline(

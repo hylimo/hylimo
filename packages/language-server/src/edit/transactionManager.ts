@@ -1,6 +1,7 @@
 import { LayoutedDiagram } from "@hylimo/diagram";
 import { LineMoveAction, RotationAction, TransactionalAction, TranslationMoveAction } from "@hylimo/diagram-common";
 import { TextDocumentEdit } from "vscode-languageserver";
+import { TextDocumentContentChangeEvent } from "vscode-languageserver-textdocument";
 import { Diagram } from "../diagram";
 import { LineMoveEdit } from "./edits/lineMoveEdit";
 import { RotationEdit } from "./edits/rotationEdit";
@@ -80,6 +81,18 @@ export class TransactionManager {
             if (this.lastKnownAction != this.lastAppliedAction) {
                 this.edit.predictActionDiff(layoutedDiagram, this.lastAppliedAction, this.lastKnownAction);
             }
+        }
+    }
+
+    /**
+     * Update the current entries based on the changes.
+     * Updates indices.
+     *
+     * @param changes the changes to the text document
+     */
+    updateGeneratorEntries(changes: TextDocumentContentChangeEvent[]): void {
+        if (this.edit != undefined) {
+            this.edit.updateGeneratorEntries(changes);
         }
     }
 

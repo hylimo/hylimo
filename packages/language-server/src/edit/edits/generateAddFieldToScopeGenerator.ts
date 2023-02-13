@@ -1,5 +1,5 @@
 import { FullObject, FunctionExpression } from "@hylimo/core";
-import { Range } from "vscode-languageserver";
+import { Position, Range, uinteger } from "vscode-languageserver";
 import { TextDocument } from "vscode-languageserver-textdocument";
 import { EditGeneratorEntry } from "../editGeneratorEntry";
 import { FieldEntryGenerator } from "../generators/fieldEntryGenerator";
@@ -31,8 +31,8 @@ export function generateAddFieldToScopeGenerator(
                 Range.create(document.positionAt(position.startOffset + 1), document.positionAt(position.endOffset))
             );
             const innerTextWithoutWhitespace = innerText.replace(/^\s*/, "");
-            const indentation = extractIndentation(document, position.startLine);
-            const innerIndentation = indentation + " ".repeat(4);
+            const indentation = extractIndentation(document, position.startLine - 1);
+            const innerIndentation = increaseIndentation(indentation);
             let prefix: string;
             if (innerTextWithoutWhitespace == "") {
                 prefix = "\n";
@@ -42,15 +42,24 @@ export function generateAddFieldToScopeGenerator(
             return {
                 start: position.startOffset + 1,
                 end: position.endOffset,
-                generator: new FieldEntryGenerator(prefix, `\n${indentation}}`, innerIndentation),
+                generator: new FieldEntryGenerator(prefix, `\n${indentation}`, innerIndentation),
                 meta
             };
         } else {
-            const indentation = extractIndentation(document, position.startLine);
+            const indentation = extractIndentation(document, position.startLine - 1);
+            const innerIndentation = increaseIndentation(indentation);
+            const lineEnd = document.getText(
+                Range.create(
+                    document.positionAt(position.startOffset + 1),
+                    Position.create(position.startLine - 1, uinteger.MAX_VALUE)
+                )
+            );
+            const lineEndContainsOnlyWhitespace = lineEnd.match(/^\s*$/);
+            const suffix = lineEndContainsOnlyWhitespace ? "" : `\n${innerIndentation}`;
             return {
                 start: position.startOffset + 1,
                 end: position.startOffset + 1,
-                generator: new FieldEntryGenerator("\n", "\n", indentation + " ".repeat(4)),
+                generator: new FieldEntryGenerator("\n", suffix, innerIndentation),
                 meta
             };
         }
@@ -59,14 +68,28 @@ export function generateAddFieldToScopeGenerator(
         if (source == undefined) {
             throw new Error("element must have a source");
         }
-        const indentation = extractIndentation(document, source.position!.startLine);
+        const indentation = extractIndentation(document, source.position!.startLine - 1);
         return {
             start: source.position!.endOffset + 1,
             end: source.position!.endOffset + 1,
-            generator: new FieldEntryGenerator(` ${scopeName} {\n`, `\n${indentation}}`, indentation + " ".repeat(4)),
+            generator: new FieldEntryGenerator(
+                ` ${scopeName} {\n`,
+                `\n${indentation}}`,
+                increaseIndentation(indentation)
+            ),
             meta
         };
     }
+}
+
+/**
+ * Increases the indentation of the given string by 4 spaces.
+ *
+ * @param indentation the existing indentation
+ * @returns the new indentation string
+ */
+function increaseIndentation(indentation: string): string {
+    return indentation + " ".repeat(4);
 }
 
 /**
@@ -77,7 +100,7 @@ export function generateAddFieldToScopeGenerator(
  * @returns the extracted indentation
  */
 function extractIndentation(document: TextDocument, line: number): string {
-    const lineText = document.getText(Range.create(line, 0, line, Number.MAX_VALUE));
+    const lineText = document.getText(Range.create(line, 0, line, uinteger.MAX_VALUE));
     const match = lineText.match(/^\s*/);
     if (match == null) {
         return "";

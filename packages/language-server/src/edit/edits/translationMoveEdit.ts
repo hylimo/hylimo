@@ -41,7 +41,7 @@ export class TranslationMoveEdit extends TransactionalEdit<TranslationMoveAction
      * Indicates if the edit creates a new point
      * In this case, no predication should be applied as it may be applied to the wrong point.
      */
-    private hasNewPoint = false;
+    private readonly hasNewPoint: boolean;
 
     /**
      * Creates a new TranslationMoveEdit based on an initial action and the used diagram
@@ -55,17 +55,19 @@ export class TranslationMoveEdit extends TransactionalEdit<TranslationMoveAction
         if (layoutedDiagram == undefined) {
             throw new Error("requires initial LayoutedDiagram");
         }
+        let hasNewPoint = false;
         const generatorEntries = action.elements.flatMap((elementId) => {
             const element = layoutedDiagram.layoutElementLookup.get(elementId);
             if (element == undefined) {
                 throw new Error(`Unknown point: ${elementId}`);
             }
             if (element.layoutConfig.type == CanvasElement.TYPE) {
-                this.hasNewPoint = true;
+                hasNewPoint = true;
             }
             return generatePointGeneratorEntries(element, diagram.document);
         });
         super(generatorEntries, diagram.document);
+        this.hasNewPoint = hasNewPoint;
     }
 
     override applyActionToGenerator(

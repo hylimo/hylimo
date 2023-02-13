@@ -274,8 +274,8 @@ export class MoveMouseListener extends MouseListener {
             return null;
         }
 
-        let hasTranslatablePoint = false;
-        let hasLinePoint = elements.size > 0;
+        let hasTranslatablePoint = elements.size > 0;
+        let hasLinePoint = false;
         for (const point of movedPoints) {
             if (point instanceof SRelativePoint || point instanceof SAbsolutePoint) {
                 hasTranslatablePoint = true;
@@ -288,7 +288,7 @@ export class MoveMouseListener extends MouseListener {
         }
         if (hasTranslatablePoint) {
             return new TranslationMoveHandler(
-                [...movedPoints].map((point) => point.id),
+                [...movedPoints, ...elements].map((point) => point.id),
                 this.transactionIdProvider.generateId()
             );
         } else if (hasLinePoint) {
