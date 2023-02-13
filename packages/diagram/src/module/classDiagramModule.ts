@@ -22,7 +22,8 @@ export const classDiagramModule: InterpreterModule = {
                         "_class",
                         fun(
                             `
-                                (name, callback) = args
+                                (name, optionalCallback) = args
+                                callback = optionalCallback ?? {}
                                 result = object(sections = list())
                                 result.section = listWrapper {
                                     result.sections += it
