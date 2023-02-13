@@ -1,4 +1,12 @@
-import { objectType, SemanticFieldNames, literal, FullObject, numberType, optional } from "@hylimo/core";
+import {
+    objectType,
+    SemanticFieldNames,
+    literal,
+    FullObject,
+    numberType,
+    optional,
+    FunctionExpression
+} from "@hylimo/core";
 import { Size, Point, Element, CanvasElement, ModificationSpecification } from "@hylimo/diagram-common";
 import { canvasPointType } from "../../../module/types";
 import { HorizontalAlignment, LayoutElement, SizeConstraints, VerticalAlignment } from "../../layoutElement";
@@ -105,6 +113,9 @@ export class CanvasElementLayoutConfig extends EditableCanvasContentLayoutConfig
         const scopes = element.element.getLocalFieldOrUndefined("scopes")!.value as FullObject;
         const scope = scopes.getLocalFieldOrUndefined(scopeName)?.source;
         if (scope != undefined) {
+            if (!(scope instanceof FunctionExpression)) {
+                return null;
+            }
             return this.generateModificationSpecification({ scope: scope });
         } else {
             const source = element.element.getLocalFieldOrUndefined("source")?.source;

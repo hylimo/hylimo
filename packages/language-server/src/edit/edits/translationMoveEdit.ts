@@ -1,30 +1,35 @@
 import { LayoutedDiagram, LayoutElement } from "@hylimo/diagram";
-import { AbsolutePoint, RelativePoint, TranslationMoveAction } from "@hylimo/diagram-common";
+import { AbsolutePoint, CanvasElement, RelativePoint, TranslationMoveAction } from "@hylimo/diagram-common";
+import { TextDocument } from "vscode-languageserver-textdocument";
 import { Diagram } from "../../diagram";
 import { EditGeneratorEntry } from "../editGeneratorEntry";
 import { EditGenerator } from "../generators/editGenerator";
 import { TransactionalEdit } from "../transactionalEdit";
+import { generateAddFieldToScopeGenerator } from "./generateAddFieldToScopeGenerator";
 import { generateDeltaNumberGenerator } from "./generateDeltaNumberGenerator";
 
 /**
  * Generates EditGeneratorEntries for absolute and relative points
  *
- * @param point the point to modify
+ * @param element the canvas element or point to modify
+ * @param document the document which contains the element
  * @returns EditGeneratorEntries for "x" and "y"
  */
-function generatePointGeneratorEntries(point: LayoutElement): EditGeneratorEntry[] {
-    if (point.layoutConfig.type === AbsolutePoint.TYPE) {
+function generatePointGeneratorEntries(element: LayoutElement, document: TextDocument): EditGeneratorEntry[] {
+    if (element.layoutConfig.type === AbsolutePoint.TYPE) {
         return [
-            generateDeltaNumberGenerator(point.element.getLocalFieldOrUndefined("x")!, "x"),
-            generateDeltaNumberGenerator(point.element.getLocalFieldOrUndefined("y")!, "y")
+            generateDeltaNumberGenerator(element.element.getLocalFieldOrUndefined("x")!, "x"),
+            generateDeltaNumberGenerator(element.element.getLocalFieldOrUndefined("y")!, "y")
         ];
-    } else if (point.layoutConfig.type === RelativePoint.TYPE) {
+    } else if (element.layoutConfig.type === RelativePoint.TYPE) {
         return [
-            generateDeltaNumberGenerator(point.element.getLocalFieldOrUndefined("offsetX")!, "x"),
-            generateDeltaNumberGenerator(point.element.getLocalFieldOrUndefined("offsetY")!, "y")
+            generateDeltaNumberGenerator(element.element.getLocalFieldOrUndefined("offsetX")!, "x"),
+            generateDeltaNumberGenerator(element.element.getLocalFieldOrUndefined("offsetY")!, "y")
         ];
+    } else if (element.layoutConfig.type === CanvasElement.TYPE) {
+        return [generateAddFieldToScopeGenerator(element.element, "layout", document, "pos")];
     } else {
-        throw new Error(`Unknown point type: ${point.layoutConfig.type}`);
+        throw new Error(`Unknown point type: ${element.layoutConfig.type}`);
     }
 }
 
@@ -32,6 +37,12 @@ function generatePointGeneratorEntries(point: LayoutElement): EditGeneratorEntry
  * TransactionalEdit for TranslationMoveActions
  */
 export class TranslationMoveEdit extends TransactionalEdit<TranslationMoveAction> {
+    /**
+     * Indicates if the edit creates a new point
+     * In this case, no predication should be applied as it may be applied to the wrong point.
+     */
+    private hasNewPoint = false;
+
     /**
      * Creates a new TranslationMoveEdit based on an initial action and the used diagram
      * Requires that the diagram was already layouted
@@ -44,25 +55,30 @@ export class TranslationMoveEdit extends TransactionalEdit<TranslationMoveAction
         if (layoutedDiagram == undefined) {
             throw new Error("requires initial LayoutedDiagram");
         }
-        const generatorEntries = action.points.flatMap((pointId) => {
-            const point = layoutedDiagram.layoutElementLookup.get(pointId);
-            if (point == undefined) {
-                throw new Error(`Unknown point: ${pointId}`);
+        const generatorEntries = action.elements.flatMap((elementId) => {
+            const element = layoutedDiagram.layoutElementLookup.get(elementId);
+            if (element == undefined) {
+                throw new Error(`Unknown point: ${elementId}`);
             }
-            return generatePointGeneratorEntries(point);
+            if (element.layoutConfig.type == CanvasElement.TYPE) {
+                this.hasNewPoint = true;
+            }
+            return generatePointGeneratorEntries(element, diagram.document);
         });
         super(generatorEntries, diagram.document);
     }
 
     override applyActionToGenerator(
         action: TranslationMoveAction,
-        generator: EditGenerator<number>,
+        generator: EditGenerator<number | Record<string, string>>,
         meta: any
     ): string {
         if (meta === "x") {
             return generator.generateEdit(action.offsetX);
         } else if (meta === "y") {
             return generator.generateEdit(action.offsetY);
+        } else if (meta === "pos") {
+            return generator.generateEdit({ pos: `apos(${action.offsetX}, ${action.offsetY})` });
         } else {
             throw new Error(`Unknown meta information for TranslationMoveEdit: ${meta}`);
         }
@@ -73,9 +89,12 @@ export class TranslationMoveEdit extends TransactionalEdit<TranslationMoveAction
         lastApplied: TranslationMoveAction,
         newest: TranslationMoveAction
     ): void {
+        if (this.hasNewPoint) {
+            return;
+        }
         const deltaX = newest.offsetX - lastApplied.offsetX;
         const deltaY = newest.offsetY - lastApplied.offsetY;
-        for (const pointId of newest.points) {
+        for (const pointId of newest.elements) {
             const point = layoutedDiagram.elementLookup.get(pointId);
             if (point != undefined) {
                 if (AbsolutePoint.isAbsolutePoint(point)) {

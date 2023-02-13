@@ -1,3 +1,4 @@
+export * from "./edit/edits/generateAddFieldToScopeGenerator";
 export * from "./edit/edits/generateDeltaNumberGenerator";
 export * from "./edit/edits/generateReplacementNumberGenerator";
 export * from "./edit/edits/lineMoveEdit";
@@ -7,6 +8,7 @@ export * from "./edit/generators/deltaAdditiveNumberGenerator";
 export * from "./edit/generators/deltaNumberGenerator";
 export * from "./edit/generators/deltaReplacementNumberGenerator";
 export * from "./edit/generators/editGenerator";
+export * from "./edit/generators/fieldEntryGenerator";
 export * from "./edit/generators/replacementNumberGenerator";
 export * from "./edit/diagramServer";
 export * from "./edit/editGeneratorEntry";

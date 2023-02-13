@@ -6,9 +6,9 @@ import { TransactionalAction } from "./transactionalAction";
 export interface TranslationMoveAction extends TransactionalAction {
     kind: typeof TranslationMoveAction.KIND;
     /**
-     * Ids of absolute and relative points to translate
+     * Ids of absolute and relative points and canvas elements to translate
      */
-    points: string[];
+    elements: string[];
     /**
      * X part of the offset
      */

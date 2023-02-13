@@ -26,7 +26,7 @@ export class TranslationMoveHandler implements MoveHandler {
         const res: TranslationMoveAction = {
             kind: TranslationMoveAction.KIND,
             transactionId: this.transactionId,
-            points: this.points,
+            elements: this.points,
             offsetX: dx,
             offsetY: dy,
             deltaOffsetX: dx - this.lastDx,

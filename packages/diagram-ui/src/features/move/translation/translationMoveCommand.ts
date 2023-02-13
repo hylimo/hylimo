@@ -18,7 +18,7 @@ export class TranslationMoveCommand extends Command {
 
     override execute(context: CommandExecutionContext): CommandReturn {
         (context.root as SRoot).changeRevision++;
-        const points = this.action.points.map((point) => context.root.index.getById(point));
+        const points = this.action.elements.map((point) => context.root.index.getById(point));
         const absolutePoints = points.filter((point) => point instanceof SAbsolutePoint) as SAbsolutePoint[];
         const relativePoints = points.filter((point) => point instanceof SRelativePoint) as SRelativePoint[];
         for (const point of absolutePoints) {
