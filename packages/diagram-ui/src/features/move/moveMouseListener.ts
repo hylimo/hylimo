@@ -274,55 +274,7 @@ export class MoveMouseListener extends MouseListener {
             currentPoints = newPoints;
         } while (currentPoints.size > 0);
 
-        const pointsToMove: SCanvasPoint[] = this.filterPointsToMove(movedPoints, index, elements);
-        return pointsToMove;
-    }
-
-    /**
-     * Filtzers the provided points to move so that only those remain which are required to move the given points.
-     * Filters out relative points which are moved by their target.
-     * Also filters out line points where the segment they depend on is moved.
-     *
-     * @param movedPoints all points which are moved
-     * @param index used for point lookup
-     * @param elements elements which are moved by creating a new point
-     * @returns the points which are required to move to move the given points
-     */
-    private filterPointsToMove(
-        movedPoints: Set<SCanvasPoint>,
-        index: IModelIndex,
-        elements: Set<SCanvasElement>
-    ): SCanvasPoint[] {
-        return [...movedPoints]
-            .filter((point) => {
-                return !(
-                    point instanceof SRelativePoint &&
-                    (point.editable == null || this.isPointMovedByTarget(point, index, movedPoints))
-                );
-            })
-            .filter((point) => {
-                if (!(point instanceof SLinePoint)) {
-                    return true;
-                }
-                const lineProviderId = point.lineProvider;
-                const lineProvider = index.getById(lineProviderId) as SCanvasContent;
-                if (lineProvider instanceof SCanvasElement) {
-                    return !this.isElementMoved(lineProvider, index, movedPoints, elements);
-                }
-                if (lineProvider instanceof SCanvasConnection) {
-                    const affectedSegment = LinePoint.calcSegmentIndex(point.pos, lineProvider.children.length);
-                    const points = [
-                        lineProvider.start,
-                        ...(lineProvider.children as SCanvasConnectionSegment[]).map((segment) => segment.end)
-                    ];
-                    const relevantPoints = [
-                        index.getById(points[affectedSegment]),
-                        index.getById(points[affectedSegment + 1])
-                    ] as SCanvasPoint[];
-                    return relevantPoints.some((point) => !this.isPointMoved(point, index, movedPoints));
-                }
-                return true;
-            });
+        return [...movedPoints].filter((point) => !this.isPointImplicitelyMoved(point, index, movedPoints, elements));
     }
 
     /**
@@ -361,13 +313,19 @@ export class MoveMouseListener extends MouseListener {
      * @param point the point to check
      * @param index index for element lookup
      * @param movedPoints all points which are moved
+     * @param movedElements elements which are moved without a position
      * @returns true if the point is moved, otherwise false
      */
-    private isPointMoved(point: SCanvasPoint, index: IModelIndex, movedPoints: Set<SCanvasPoint>): boolean {
+    private isPointMoved(
+        point: SCanvasPoint,
+        index: IModelIndex,
+        movedPoints: Set<SCanvasPoint>,
+        movedElements: Set<SCanvasElement>
+    ): boolean {
         if (movedPoints.has(point)) {
             return true;
         } else {
-            return this.isPointMovedByTarget(point, index, movedPoints);
+            return this.isPointImplicitelyMoved(point, index, movedPoints, movedElements);
         }
     }
 
@@ -388,7 +346,7 @@ export class MoveMouseListener extends MouseListener {
         movedElements: Set<SCanvasElement>
     ): boolean {
         if (element.pos != undefined) {
-            return this.isPointMoved(index.getById(element.pos) as SCanvasPoint, index, movedPoints);
+            return this.isPointMoved(index.getById(element.pos) as SCanvasPoint, index, movedPoints, movedElements);
         } else {
             return movedElements.has(element);
         }
@@ -400,14 +358,35 @@ export class MoveMouseListener extends MouseListener {
      * @param point the point to check
      * @param index index for element lookup
      * @param movedPoints all points which are moved
+     * @param movedElements elements which are moved without a position
      * @returns true if the point is a relative point and the target is moved, otherwise false
      */
-    private isPointMovedByTarget(point: SCanvasPoint, index: IModelIndex, movedPoints: Set<SCanvasPoint>): boolean {
-        let targetPoint = point;
-        while (targetPoint instanceof SRelativePoint) {
-            targetPoint = index.getById(targetPoint.target) as SCanvasPoint;
-            if (movedPoints.has(targetPoint)) {
-                return true;
+    private isPointImplicitelyMoved(
+        point: SCanvasPoint,
+        index: IModelIndex,
+        movedPoints: Set<SCanvasPoint>,
+        movedElements: Set<SCanvasElement>
+    ): boolean {
+        if (point instanceof SRelativePoint) {
+            const target = index.getById(point.target) as SCanvasPoint;
+            return this.isPointMoved(target, index, movedPoints, movedElements);
+        } else if (point instanceof SLinePoint) {
+            const lineProviderId = point.lineProvider;
+            const lineProvider = index.getById(lineProviderId) as SCanvasContent;
+            if (lineProvider instanceof SCanvasElement) {
+                return this.isElementMoved(lineProvider, index, movedPoints, movedElements);
+            }
+            if (lineProvider instanceof SCanvasConnection) {
+                const affectedSegment = LinePoint.calcSegmentIndex(point.pos, lineProvider.children.length);
+                const points = [
+                    lineProvider.start,
+                    ...(lineProvider.children as SCanvasConnectionSegment[]).map((segment) => segment.end)
+                ];
+                const relevantPoints = [
+                    index.getById(points[affectedSegment]),
+                    index.getById(points[affectedSegment + 1])
+                ] as SCanvasPoint[];
+                return relevantPoints.every((point) => this.isPointMoved(point, index, movedPoints, movedElements));
             }
         }
         return false;
