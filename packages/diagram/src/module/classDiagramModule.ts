@@ -48,6 +48,10 @@ export const classDiagramModule: InterpreterModule = {
                                     scopes = object(default = callback),
                                     class = list("class-element")
                                 )
+                                targetScope = args.self
+                                if(targetScope.get(name) == null) {
+                                    targetScope.set(name, classElement)
+                                }
                                 scope.contents += classElement
                                 classElement
                             `
@@ -57,7 +61,7 @@ export const classDiagramModule: InterpreterModule = {
                         `
                             scope.class = scope.withRegisterSource {
                                 (name, callback) = args
-                                _class(name, callback)
+                                _class(name, callback, self = args.self)
                             }
                             scope.-- = scope.createConnectionOperator()
                         `
