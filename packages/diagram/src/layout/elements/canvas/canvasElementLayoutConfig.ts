@@ -71,24 +71,17 @@ export class CanvasElementLayoutConfig extends EditableCanvasContentLayoutConfig
         } else if (vAlign === VerticalAlignment.CENTER) {
             y = -size.height / 2;
         }
-        const posCanvasPoint = element.element.getLocalFieldOrUndefined("pos")?.value as FullObject | undefined;
+
         const result: CanvasElement = {
             id,
             type: CanvasElement.TYPE,
             ...size,
             x,
             y,
-            rotation: element.styles.rotation ?? 0,
+            ...this.extractPosAndMoveable(element),
+            ...this.extractRotationAndRotateable(element),
             children: layout.layout(content, Point.ORIGIN, size, `${id}_0`),
-            pos: posCanvasPoint != undefined ? this.getContentId(element, posCanvasPoint) : undefined,
             resizable: null, //TODO fix
-            rotateable: this.generateModificationSpecification({
-                rotation: element.styleSources.get("rotation")?.source
-            }),
-            moveable:
-                posCanvasPoint == undefined
-                    ? this.generateModificationSpecificationForScopeField("layout", element)
-                    : null,
             outline: content.layoutConfig.outline(
                 layout,
                 content,
@@ -97,6 +90,57 @@ export class CanvasElementLayoutConfig extends EditableCanvasContentLayoutConfig
             )
         };
         return [result];
+    }
+
+    /**
+     * Extracts the position and the moveable specification from the element.
+     * If the element has a pos field, the position is extracted and the moveable specification is null.
+     * Otherwise the moveable specification is generated for the layout scope.
+     *
+     * @param element the element from which the position and the moveable specification should be extracted
+     * @returns the extracted position and the moveable specification
+     */
+    private extractPosAndMoveable(element: LayoutElement): { pos?: string; moveable: ModificationSpecification } {
+        const pos = element.element.getLocalFieldOrUndefined("pos")?.value as FullObject | undefined;
+        if (pos == undefined) {
+            return {
+                pos: undefined,
+                moveable: this.generateModificationSpecificationForScopeField("layout", element)
+            };
+        } else {
+            return {
+                pos: this.getContentId(element, pos),
+                moveable: null
+            };
+        }
+    }
+
+    /**
+     * Extracts the rotation and the rotateable specification from the element.
+     * If the element has a rotation field, the rotation is extracted and the rotation specification is generated based on its source.
+     * Otherwise the rotation is 0 and the rotateable specification is generated for the layout scope.
+     *
+     * @param element the element from which the rotation and the rotateable specification should be extracted
+     * @returns the extracted rotation and the rotateable specification
+     */
+    private extractRotationAndRotateable(element: LayoutElement): {
+        rotation: number;
+        rotateable: ModificationSpecification;
+    } {
+        const rotation = element.styles.rotation;
+        if (rotation == undefined) {
+            return {
+                rotation: 0,
+                rotateable: this.generateModificationSpecificationForScopeField("layout", element)
+            };
+        } else {
+            return {
+                rotation: rotation,
+                rotateable: this.generateModificationSpecification({
+                    rotation: element.styleSources.get("rotation")?.source
+                })
+            };
+        }
     }
 
     /**

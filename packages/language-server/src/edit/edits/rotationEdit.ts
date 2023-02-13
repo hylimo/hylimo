@@ -1,8 +1,10 @@
 import { LayoutedDiagram } from "@hylimo/diagram";
 import { CanvasElement, RotationAction } from "@hylimo/diagram-common";
 import { Diagram } from "../../diagram";
+import { EditGeneratorEntry } from "../editGeneratorEntry";
 import { EditGenerator } from "../generators/editGenerator";
 import { TransactionalEdit } from "../transactionalEdit";
+import { generateAddFieldToScopeGenerator } from "./generateAddFieldToScopeGenerator";
 import { generateReplacementNumberGenerator } from "./generateReplacementNumberGenerator";
 
 /**
@@ -25,15 +27,30 @@ export class RotationEdit extends TransactionalEdit<RotationAction> {
         if (canvasElement?.layoutConfig.type !== CanvasElement.TYPE) {
             throw new Error("Only CanvasElements are supported");
         }
-        const generatorEntries = [
-            generateReplacementNumberGenerator(canvasElement.element.getLocalFieldOrUndefined("rotation")!, "rotation")
-        ];
-        super(generatorEntries, diagram.document);
+        const rotationField = canvasElement.element.getLocalFieldOrUndefined("rotation");
+        let generatorEntry: EditGeneratorEntry;
+        if (rotationField != undefined) {
+            generatorEntry = generateReplacementNumberGenerator(rotationField, "rotation");
+        } else {
+            generatorEntry = generateAddFieldToScopeGenerator(
+                canvasElement.element,
+                "layout",
+                diagram.document,
+                "scopeRotation"
+            );
+        }
+        super([generatorEntry], diagram.document);
     }
 
-    override applyActionToGenerator(action: RotationAction, generator: EditGenerator<number>, meta: any): string {
+    override applyActionToGenerator(
+        action: RotationAction,
+        generator: EditGenerator<number | Record<string, string>>,
+        meta: any
+    ): string {
         if (meta === "rotation") {
             return generator.generateEdit(action.rotation);
+        } else if (meta === "scopeRotation") {
+            return generator.generateEdit({ rotation: action.rotation.toString() });
         } else {
             throw new Error(`Unknown meta information for RotationEdit: ${meta}`);
         }
