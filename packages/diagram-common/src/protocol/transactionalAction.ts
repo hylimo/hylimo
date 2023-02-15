@@ -1,9 +1,11 @@
-import { Action } from "sprotty-protocol";
-
 /**
  * Transactional action with a transaction id
  */
-export interface TransactionalAction extends Action {
+export interface TransactionalAction {
+    /**
+     * The kind of the action
+     */
+    kind: string;
     /**
      * The id of the transaction
      */
@@ -22,7 +24,7 @@ export namespace TransactionalAction {
      * @param action the Action to check
      * @returns true if the action is a TransactionalAction
      */
-    export function isTransactionalAction(action: Action): action is TransactionalAction {
+    export function isTransactionalAction(action: any): action is TransactionalAction {
         return "transactionId" in action && "commited" in action;
     }
 }

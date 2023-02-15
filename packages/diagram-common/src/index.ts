@@ -1,3 +1,4 @@
+export * from "./common/math";
 export * from "./common/point";
 export * from "./common/size";
 export * from "./font/font";

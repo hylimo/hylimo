@@ -1,7 +1,7 @@
+import { Math2D } from "../../common/math";
 import { Point } from "../../common/point";
 import { LineSegment } from "../model/lineSegment";
 import { NearestPointResult, SegmentEngine } from "./segmentEngine";
-import { Point as SprottyPoint } from "sprotty-protocol";
 
 /**
  * Segment engine for LineSegment
@@ -33,13 +33,13 @@ export class LineSegmentEngine extends SegmentEngine<LineSegment> {
         }
         return {
             position,
-            distance: SprottyPoint.euclideanDistance(closest, point),
+            distance: Math2D.distance(closest, point),
             point: closest
         };
     }
 
     override getPoint(position: number, distance: number, segment: LineSegment, segmentStartPoint: Point): Point {
-        const linePoint = SprottyPoint.linear(segmentStartPoint, segment.end, position) as Point;
+        const linePoint = Math2D.linearInterpolate(segmentStartPoint, segment.end, position);
         if (distance != 0) {
             const normalVector = this.getNormalVector(position, segment, segmentStartPoint);
             linePoint.x += normalVector.x * distance;
@@ -49,7 +49,7 @@ export class LineSegmentEngine extends SegmentEngine<LineSegment> {
     }
 
     override getNormalVector(_position: number, segment: LineSegment, segmentStartPoint: Point): Point {
-        const delta = SprottyPoint.subtract(segment.end, segmentStartPoint);
-        return SprottyPoint.normalize({ x: -delta.y, y: delta.x });
+        const delta = Math2D.sub(segment.end, segmentStartPoint);
+        return Math2D.normalize({ x: -delta.y, y: delta.x });
     }
 }

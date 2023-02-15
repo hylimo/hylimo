@@ -1,6 +1,5 @@
 import { Expression, FullObject, literal, numberType, objectType, optional, SemanticFieldNames } from "@hylimo/core";
-import { Size, Element, LinePoint } from "@hylimo/diagram-common";
-import { Point } from "sprotty-protocol";
+import { Size, Element, LinePoint, Point } from "@hylimo/diagram-common";
 import { LayoutElement } from "../../layoutElement";
 import { Layout } from "../../layoutEngine";
 import { CanvasPointLayoutConfig } from "./canvasPointLayoutConfig";

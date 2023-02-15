@@ -1,8 +1,8 @@
 import { Bezier } from "bezier-js";
+import { Math2D } from "../../common/math";
 import { Point } from "../../common/point";
 import { BezierSegment } from "../model/bezierSegment";
 import { NearestPointResult, SegmentEngine } from "./segmentEngine";
-import { Point as SprottyPoint } from "sprotty-protocol";
 
 /**
  * Segment engine for BezierSegment
@@ -12,7 +12,7 @@ export class BezierSegmentEngine extends SegmentEngine<BezierSegment> {
         const curve = new Bezier(segmentStartPoint, segment.startControlPoint, segment.endControlPoint, segment.end);
         const projection = curve.project(point);
         return {
-            distance: SprottyPoint.euclideanDistance(projection, point),
+            distance: Math2D.distance(projection, point),
             position: projection.t!,
             point: projection
         };

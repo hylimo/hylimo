@@ -1,7 +1,7 @@
+import { Math2D } from "../../common/math";
 import { Point } from "../../common/point";
 import { ArcSegment } from "../model/arcSegment";
 import { NearestPointResult, SegmentEngine } from "./segmentEngine";
-import { angleOfPoint, Point as SprottyPoint } from "sprotty-protocol";
 
 /**
  * Segment engine for ArcSegment
@@ -15,10 +15,10 @@ export class ArcSegmentEngine extends SegmentEngine<ArcSegment> {
             y: segment.center.y + segment.radius * Math.sin(x)
         });
         const dist = (x: number) => {
-            const delta = SprottyPoint.subtract(point, position(x));
-            return SprottyPoint.magnitude(delta);
+            const delta = Math2D.sub(point, position(x));
+            return Math2D.length(delta);
         };
-        const angle = angleOfPoint(SprottyPoint.subtract(point, segment.center));
+        const angle = Math2D.angle(Math2D.sub(point, segment.center));
         let deltaPointAngle = angle - startAngle;
         if (deltaPointAngle < 0 && deltaAngle > 0) {
             deltaPointAngle += 2 * Math.PI;
@@ -77,10 +77,10 @@ export class ArcSegmentEngine extends SegmentEngine<ArcSegment> {
      * @returns the additional data
      */
     private getArcData(segmentStartPoint: Point, segment: ArcSegment): ArcData {
-        const relativeStart = SprottyPoint.subtract(segmentStartPoint, segment.center);
-        const relativeEnd = SprottyPoint.subtract(segment.end, segment.center);
-        const startAngle = angleOfPoint(relativeStart);
-        const endAngle = angleOfPoint(relativeEnd);
+        const relativeStart = Math2D.sub(segmentStartPoint, segment.center);
+        const relativeEnd = Math2D.sub(segment.end, segment.center);
+        const startAngle = Math2D.angle(relativeStart);
+        const endAngle = Math2D.angle(relativeEnd);
         let deltaAngle: number;
         if (segment.clockwise) {
             deltaAngle = endAngle - startAngle;

@@ -1,7 +1,7 @@
 import { Point } from "../../common/point";
 import { Element } from "../base/element";
-import { Point as SprottyPoint } from "sprotty-protocol";
 import { BaseMarker, MarkerRenderInformation } from "./marker";
+import { Math2D } from "../../common/math";
 
 /**
  * Connection line segment
@@ -28,8 +28,10 @@ export function calculateMarkerRenderInformationInternal(
 ): MarkerRenderInformation {
     const markerWidth = marker.width * marker.lineStart;
     const rotation = (Math.atan2(pos.y - helperPos.y, pos.x - helperPos.x) * 180) / Math.PI;
+    const normalizedDelta = Math2D.normalize(Math2D.sub(helperPos, pos));
+    const newPoint = Math2D.add(pos, Math2D.scale(normalizedDelta, markerWidth));
     return {
         rotation,
-        newPoint: SprottyPoint.shiftTowards(pos, helperPos, markerWidth)
+        newPoint
     };
 }

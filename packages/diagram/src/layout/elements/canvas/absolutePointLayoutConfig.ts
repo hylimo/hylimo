@@ -1,6 +1,5 @@
 import { numberType } from "@hylimo/core";
-import { Size, AbsolutePoint, Element } from "@hylimo/diagram-common";
-import { Point } from "sprotty-protocol";
+import { Size, AbsolutePoint, Element, Point } from "@hylimo/diagram-common";
 import { LayoutElement } from "../../layoutElement";
 import { Layout } from "../../layoutEngine";
 import { CanvasPointLayoutConfig } from "./canvasPointLayoutConfig";

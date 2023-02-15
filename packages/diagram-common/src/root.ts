@@ -1,11 +1,10 @@
-import { SModelRoot } from "sprotty-protocol";
 import { FontFamilyConfig } from "./font/fontConfig";
 import { Element } from "./model/base/element";
 
 /**
  * Root diagram element, defining child elements and fonts
  */
-export interface Root extends SModelRoot {
+export interface Root {
     /**
      * Type of the element
      */
