@@ -10,10 +10,9 @@
     "scripts": {
         "build": "tsc"
     },
-    "devDependencies": {
-        "@hylimo/diagram-common": "^0.0.1"
-    },
     "dependencies": {
-        "sprotty": "^0.13.0"
+        "sprotty": "^0.13.0",
+        "sprotty-protocol": "^0.13.0",
+        "@hylimo/diagram-common": "^0.0.1"
     }
 }
