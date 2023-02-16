@@ -10,8 +10,11 @@
         },
         {
             "path": "../diagram-common"
+        },
+        {
+            "path": "../fonts"
         }
     ],
-    "include": ["src/**/*.ts", "src/**/*.d.ts", "types/*.d.ts", "../diagram-common/src/font/font.ts"],
+    "include": ["src/**/*.ts", "src/**/*.d.ts", "types/*.d.ts"],
     "exclude": ["lib", "node_modules"]
 }

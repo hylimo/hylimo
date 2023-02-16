@@ -7,6 +7,7 @@ import {
     fun,
     id,
     InterpreterModule,
+    InvocationArgument,
     jsFun,
     literal,
     namedType,
@@ -20,6 +21,7 @@ import {
     Type,
     validate
 } from "@hylimo/core";
+import { openSans, roboto, sourceCodePro } from "@hylimo/fonts";
 import { AttributeConfig, LayoutConfig } from "../layout/layoutElement";
 import { layouts } from "../layout/layouts";
 
@@ -110,6 +112,20 @@ const fontType = objectType(
         ["variationSettings", optional(objectType())]
     ])
 );
+
+/**
+ * Helper function to create a font object
+ *
+ * @param name the name of the style of the font
+ * @param url the url of the font
+ * @returns an invocation argument containing the font object
+ */
+function font(name: string, url: string): InvocationArgument {
+    return {
+        name,
+        value: id("font").call(str(url))
+    };
+}
 
 /**
  * Diagram module providing standard diagram UI elements
@@ -268,16 +284,39 @@ export const diagramModule: InterpreterModule = {
             )
         ),
         assign(
-            "robotoFontFamily",
-            fun(`
-                fontFamily(
-                    "roboto",
-                    normal = font("https://cdn.jsdelivr.net/gh/google/fonts@HEAD/apache/roboto/static/Roboto-Regular.ttf"),
-                    italic = font("https://cdn.jsdelivr.net/gh/google/fonts@HEAD/apache/roboto/static/Roboto-Italic.ttf"),
-                    bold = font("https://cdn.jsdelivr.net/gh/google/fonts@HEAD/apache/roboto/static/Roboto-Bold.ttf"),
-                    boldItalic = font("https://cdn.jsdelivr.net/gh/google/fonts@HEAD/apache/roboto/static/Roboto-BoldItalic.ttf")
-                )
-            `).call()
+            "defaultFonts",
+            id("object").call(
+                {
+                    name: "roboto",
+                    value: id("fontFamily").call(
+                        str("Roboto"),
+                        font("normal", roboto.regular),
+                        font("italic", roboto.italic),
+                        font("bold", roboto.bold),
+                        font("boldItalic", roboto.boldItalic)
+                    )
+                },
+                {
+                    name: "openSans",
+                    value: id("fontFamily").call(
+                        str("Open Sans"),
+                        font("normal", openSans.regular),
+                        font("italic", openSans.italic),
+                        font("bold", openSans.bold),
+                        font("boldItalic", openSans.boldItalic)
+                    )
+                },
+                {
+                    name: "sourceCodePro",
+                    value: id("fontFamily").call(
+                        str("Source Code Pro"),
+                        font("normal", sourceCodePro.regular),
+                        font("italic", sourceCodePro.italic),
+                        font("bold", sourceCodePro.bold),
+                        font("boldItalic", sourceCodePro.boldItalic)
+                    )
+                }
+            )
         ),
         assign(
             "diagram",

@@ -24,7 +24,12 @@ const scopeExpressions: Expression[] = [
     ...parse(
         `
             callback = it
-            ${scope} = object(_styles = styles({ }), fonts = list(), contents = list(), _classCounter = 0)
+            ${scope} = object(
+                _styles = styles({ }),
+                fonts = list(defaultFonts.roboto, defaultFonts.openSans, defaultFonts.sourceCodePro),
+                contents = list(),
+                _classCounter = 0
+            )
         `
     ),
     id(scope).assignField(

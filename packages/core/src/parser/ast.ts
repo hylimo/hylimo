@@ -521,7 +521,7 @@ export class DestructuringExpression extends Expression {
     override evaluateInternal(context: InterpreterContext): FieldEntry {
         const valueValue = this.value.evaluate(context);
         for (let i = 0; i < this.names.length; i++) {
-            context.currentScope.setFieldEntry(this.names[i], valueValue.value.getFieldEntry(i, context), context);
+            context.currentScope.setLocalField(this.names[i], valueValue.value.getFieldEntry(i, context), context);
         }
         return valueValue;
     }

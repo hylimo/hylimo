@@ -105,7 +105,6 @@ export const classDiagramModule: InterpreterModule = {
                                     hAlign = "center"
                                 }
                             }
-                            scope.fonts += robotoFontFamily
                         `
                     ).call(id(scope))
                 ])
