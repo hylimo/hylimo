@@ -34,4 +34,5 @@ export * from "./module/classDiagramModule";
 export * from "./module/diagramModule";
 export * from "./module/dslModule";
 export * from "./module/types";
+export * from "./path/svgPathBbox";
 export * from "./styles";

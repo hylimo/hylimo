@@ -43,6 +43,17 @@ export namespace Math2D {
     }
 
     /**
+     * Scale a vector to a given length
+     *
+     * @param a the vector to scale
+     * @param length the length to scale the vector to
+     * @returns the scaled vector
+     */
+    export function scaleTo(a: Vector, length: number): Vector {
+        return scale(normalize(a), length);
+    }
+
+    /**
      * Creates the normal of a vector
      * @param a the vector to create the normal of
      * @returns a vector that is perpendicular to the given vector and has the same length
