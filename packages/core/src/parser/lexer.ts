@@ -101,7 +101,7 @@ export const CloseSquareBracket = createToken({
  */
 export const Dot = createToken({
     name: "Dot",
-    pattern: /\./
+    pattern: /\.(?!\.)/
 });
 
 /**
@@ -121,7 +121,7 @@ export const Comma = createToken({
  *  - must contain at least one alphanumerical character
  * - special characters identifiers
  *  - can contain all special characters EXCEPT
- *    - dot
+ *    - single dot (two or more dots are allowed)
  *    - comma
  *    - equal sign
  *    - round/curly/square brackets
@@ -131,7 +131,7 @@ export const Comma = createToken({
  */
 export const Identifier = createToken({
     name: "Identifier",
-    pattern: /(([!#%&'*+\-/:;<=>?@\\^`|~]|([_$](?![_$]*[a-z0-9])))+)|([a-z_$][a-z0-9_$]*)/i
+    pattern: /(([!#%&'*+\-/:;<=>?@\\^`|~]|\.{2,}|([_$](?![_$]*[a-z0-9])))+)|([a-z_$][a-z0-9_$]*)/i
 });
 
 /**

@@ -10,13 +10,13 @@ export const monarchTokenProvider = {
         expression: [
             //function call
             [
-                /((([!#%&'*+\-/:;<=>?@\\^`|~]|([_$](?![_$]*[a-zA-Z0-9])))+)|([a-zA-Z_$][a-zA-Z0-9_$]*)(?=[^\S\n]*[{(]))/,
+                /((([!#%&'*+\-/:;<=>?@\\^`|~]|\.{2,}|([_$](?![_$]*[a-zA-Z0-9])))+)|([a-zA-Z_$][a-zA-Z0-9_$]*)(?=[^\S\n]*[{(]))/,
                 { token: "entity.name.function", switchTo: "@expression.after" }
             ],
 
             //variable
             [
-                /(([!#%&'*+\-/:;<=>?@\\^`|~]|([_$](?![_$]*[a-zA-Z0-9])))+)|([a-zA-Z_$][a-zA-Z0-9_$]*)/,
+                /(([!#%&'*+\-/:;<=>?@\\^`|~]|\.{2,}|([_$](?![_$]*[a-zA-Z0-9])))+)|([a-zA-Z_$][a-zA-Z0-9_$]*)/,
                 { token: "variable", switchTo: "@expression.after" }
             ],
 
@@ -91,14 +91,14 @@ export const monarchTokenProvider = {
 
         "expression.after": [
             // dot
-            [/\./, { token: "delimiter.dot", switchTo: "@expression.after.access" }],
+            [/\.(?!\.)/, { token: "delimiter.dot", switchTo: "@expression.after.access" }],
 
             // newline
             [/\n/, { token: "white", switchTo: "@expression" }],
 
             // variable
             [
-                /((([!#%&'*+\-/:;<=>?@\\^`|~]|([_$](?![_$]*[a-zA-Z0-9])))+)|([a-zA-Z_$][a-zA-Z0-9_$]*|\.)+)/,
+                /((([!#%&'*+\-/:;<=>?@\\^`|~]|\.{2,}|([_$](?![_$]*[a-zA-Z0-9])))+)|([a-zA-Z_$][a-zA-Z0-9_$]*|\.)+)/,
                 {
                     token: "operator",
                     switchTo: "@expression"
@@ -112,7 +112,7 @@ export const monarchTokenProvider = {
         "expression.after.access": [
             //function call
             [
-                /((([!#%&'*+\-/:;<=>?@\\^`|~]|([_$](?![_$]*[a-zA-Z0-9])))+)|([a-zA-Z_$][a-zA-Z0-9_$]*)(?=[^\S\n]*[{(]))/,
+                /((([!#%&'*+\-/:;<=>?@\\^`|~]|\.{2,}|([_$](?![_$]*[a-zA-Z0-9])))+)|([a-zA-Z_$][a-zA-Z0-9_$]*)(?=[^\S\n]*[{(]))/,
                 {
                     token: "entity.name.function",
                     switchTo: "expression.after"
@@ -121,7 +121,7 @@ export const monarchTokenProvider = {
 
             //variable
             [
-                /(([!#%&'*+\-/:;<=>?@\\^`|~]|([_$](?![_$]*[a-zA-Z0-9])))+)|([a-zA-Z_$][a-zA-Z0-9_$]*)/,
+                /(([!#%&'*+\-/:;<=>?@\\^`|~]|\.{2,}|([_$](?![_$]*[a-zA-Z0-9])))+)|([a-zA-Z_$][a-zA-Z0-9_$]*)/,
                 {
                     token: "variable.property",
                     switchTo: "@expression.after"
