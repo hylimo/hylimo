@@ -95,7 +95,7 @@ export class PathLayoutConfig extends ShapeLayoutConfig {
         maxLength: number
     ): [number, number] {
         if (length === 0) {
-            return [1, 1];
+            return [Number.NEGATIVE_INFINITY, Number.POSITIVE_INFINITY];
         }
         const minScale = (minLength - overflow) / length;
         const maxScale = (maxLength - overflow) / length;
@@ -105,6 +105,7 @@ export class PathLayoutConfig extends ShapeLayoutConfig {
     /**
      * Calculates the scale given scale ranges for x and y.
      * If the ranges overlap, the minimum of the overlapping range is returned.
+     * If this minimum is negative infinity, 1 is returned.
      * Otherwise the maximum of the smaller range is returned.
      *
      * @param minScaleX the minimum scale for x
@@ -116,7 +117,12 @@ export class PathLayoutConfig extends ShapeLayoutConfig {
     private calculateScale(minScaleX: number, minScaleY: number, maxScaleX: number, maxScaleY: number): number {
         const overlap = Math.min(maxScaleX, maxScaleY) - Math.max(minScaleX, minScaleY);
         if (overlap > 0) {
-            return Math.max(minScaleX, minScaleY);
+            const scale = Math.max(minScaleX, minScaleY);
+            if (scale === Number.NEGATIVE_INFINITY) {
+                return 1;
+            } else {
+                return scale;
+            }
         } else {
             return Math.min(maxScaleX, maxScaleY);
         }
@@ -127,9 +133,14 @@ export class PathLayoutConfig extends ShapeLayoutConfig {
         const boundingBox = element.boundsAndProperties.boundingBox as PathBBox;
         const overflowX = boundingBox.overflow.left + boundingBox.overflow.right;
         const overflowY = boundingBox.overflow.top + boundingBox.overflow.bottom;
-        const scaleX = boundingBox.width === 0 ? 1 : (size.width - overflowX) / boundingBox.width;
-        const scaleY = boundingBox.height === 0 ? 1 : (size.height - overflowY) / boundingBox.height;
-        const scale = Math.min(scaleX, scaleY);
+        const scaleX =
+            boundingBox.width === 0 ? Number.POSITIVE_INFINITY : (size.width - overflowX) / boundingBox.width;
+        const scaleY =
+            boundingBox.height === 0 ? Number.POSITIVE_INFINITY : (size.height - overflowY) / boundingBox.height;
+        let scale = Math.min(scaleX, scaleY);
+        if (scale === Number.POSITIVE_INFINITY) {
+            scale = 1;
+        }
         const result: Path = {
             type: Path.TYPE,
             id,
