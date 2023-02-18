@@ -33,7 +33,7 @@ export const classDiagramModule: InterpreterModule = {
                                 classContents += text(contents = list(span(text = name)), class = list("title"))
 
                                 result.sections.forEach {
-                                    classContents += path(path="M0 0 L1 0", class = list("separator"))
+                                    classContents += hline(class = list("separator"))
                                     it.forEach {
                                         classContents += text(contents = list(span(text = it)))
                                     }
@@ -77,7 +77,6 @@ export const classDiagramModule: InterpreterModule = {
                                 class("class") {
                                     stroke = primary
                                     strokeWidth = lineWidth
-                                    width = 300
                                     type("vbox") {
                                         margin = 5
                                     }
@@ -103,6 +102,7 @@ export const classDiagramModule: InterpreterModule = {
                                 class("class-element") {
                                     vAlign = "center"
                                     hAlign = "center"
+                                    minWidth = 300
                                 }
                             }
                         `

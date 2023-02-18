@@ -5,12 +5,59 @@
  */
 
 import svgPath from "svgpath";
-import { Math2D, Point } from "@hylimo/diagram-common";
+import { Math2D, Point, Size } from "@hylimo/diagram-common";
 
 /**
- * Bounding box of a path, represented as [minX, minY, maxX, maxY]
+ * Bounding box of a path
  */
-type BBox = [minX: number, minY: number, maxX: number, maxY: number];
+class BBox {
+    minX: number = Number.POSITIVE_INFINITY;
+    minY: number = Number.POSITIVE_INFINITY;
+    maxX: number = Number.NEGATIVE_INFINITY;
+    maxY: number = Number.NEGATIVE_INFINITY;
+
+    /**
+     * Extends the bounding box to include the given point
+     *
+     * @param point the point to include in the bounds
+     */
+    includePoint(point: Point): void {
+        this.minX = Math.min(this.minX, point.x);
+        this.minY = Math.min(this.minY, point.y);
+        this.maxX = Math.max(this.maxX, point.x);
+        this.maxY = Math.max(this.maxY, point.y);
+    }
+
+    /**
+     * Includes the given bounds in the bounding box
+     *
+     * @param minX the minimum x value
+     * @param minY the minimum y value
+     * @param maxX the maximum x value
+     * @param maxY the maximum y value
+     */
+    includeBounds(minX: number, minY: number, maxX: number, maxY: number): void {
+        this.minX = Math.min(this.minX, minX);
+        this.minY = Math.min(this.minY, minY);
+        this.maxX = Math.max(this.maxX, maxX);
+        this.maxY = Math.max(this.maxY, maxY);
+    }
+}
+
+/**
+ * Bounding box of a path, represented as a point and a size and overflow in all directions
+ */
+export interface PathBBox extends Point, Size {
+    /**
+     * How much the path overflows the bounding box
+     */
+    overflow: {
+        left: number;
+        top: number;
+        right: number;
+        bottom: number;
+    };
+}
 
 /**
  * Subset of SVG path styles that are relevant for bounding box calculation
@@ -66,12 +113,30 @@ class PathBBoxCalculator {
     /**
      * Calculated bounding box
      */
-    readonly bbox: BBox = [
-        Number.POSITIVE_INFINITY,
-        Number.POSITIVE_INFINITY,
-        Number.NEGATIVE_INFINITY,
-        Number.NEGATIVE_INFINITY
-    ];
+    private readonly bbox = new BBox();
+
+    /**
+     * Inner bounding box, assuming stroke has a width of 0
+     */
+    private readonly innerBBox = new BBox();
+
+    /**
+     * Calculates the bounding box of the path
+     */
+    get pathBBox(): PathBBox {
+        return {
+            x: this.innerBBox.minX,
+            y: this.innerBBox.minY,
+            width: this.innerBBox.maxX - this.innerBBox.minX,
+            height: this.innerBBox.maxY - this.innerBBox.minY,
+            overflow: {
+                left: this.innerBBox.minX - this.bbox.minX,
+                top: this.innerBBox.minY - this.bbox.minY,
+                right: this.bbox.maxX - this.innerBBox.maxX,
+                bottom: this.bbox.maxY - this.innerBBox.maxY
+            }
+        };
+    }
 
     /**
      * Creates a new PathBBoxCalculator
@@ -108,7 +173,8 @@ class PathBBoxCalculator {
                     x: segment[1],
                     y: segment[2]
                 };
-                this.applyPoint(globalStart);
+                this.bbox.includePoint(globalStart);
+                this.innerBBox.includePoint(globalStart);
                 globalStartVector = undefined;
                 lastVector = undefined;
             } else if (type === "Z") {
@@ -220,10 +286,13 @@ class PathBBoxCalculator {
      */
     private extendBounds(minMaxX: MinMax, minMaxY: MinMax): void {
         const halfWidth = this.styles.lineWidth / 2;
-        this.bbox[0] = Math.min(this.bbox[0], minMaxX[0] - halfWidth);
-        this.bbox[1] = Math.min(this.bbox[1], minMaxY[0] - halfWidth);
-        this.bbox[2] = Math.max(this.bbox[2], minMaxX[1] + halfWidth);
-        this.bbox[3] = Math.max(this.bbox[3], minMaxY[1] + halfWidth);
+        this.bbox.includeBounds(
+            minMaxX[0] - halfWidth,
+            minMaxY[0] - halfWidth,
+            minMaxX[1] + halfWidth,
+            minMaxY[1] + halfWidth
+        );
+        this.innerBBox.includeBounds(minMaxX[0], minMaxY[0], minMaxX[1], minMaxY[1]);
     }
 
     /**
@@ -235,8 +304,9 @@ class PathBBoxCalculator {
      * @param endVector the vector in the direction of the second line segment
      */
     private applyInnerPoint(point: Point, startVector: Point, endVector: Point): void {
+        this.innerBBox.includePoint(point);
         if (this.styles.lineWidth === 0) {
-            this.applyPoint(point);
+            this.bbox.includePoint(point);
         } else {
             const invertedEndVector = Math2D.scale(endVector, -1);
             switch (this.styles.lineJoin) {
@@ -277,7 +347,7 @@ class PathBBoxCalculator {
         if (miterLength <= this.styles.miterLimit * halfWidth) {
             const miterVector = Math2D.add(normalizedStartVector, normalizedEndVector);
             const miterPoint = Math2D.add(point, Math2D.scaleTo(miterVector, miterLength));
-            this.applyPoint(miterPoint);
+            this.bbox.includePoint(miterPoint);
         } else {
             this.applyBevelJoin(point, startVector, endVector);
         }
@@ -321,16 +391,16 @@ class PathBBoxCalculator {
             normalDeltaAngle = -Math.PI - deltaAngle;
         }
         if (this.isAngleInRange(0, normalStartAngle, normalDeltaAngle)) {
-            this.bbox[2] = Math.max(this.bbox[2], point.x + halfWidth);
+            this.bbox.maxX = Math.max(this.bbox.maxX, point.x + halfWidth);
         }
         if (this.isAngleInRange(Math.PI / 2, normalStartAngle, normalDeltaAngle)) {
-            this.bbox[3] = Math.max(this.bbox[3], point.y + halfWidth);
+            this.bbox.maxY = Math.max(this.bbox.maxY, point.y + halfWidth);
         }
         if (this.isAngleInRange(Math.PI, normalStartAngle, normalDeltaAngle)) {
-            this.bbox[0] = Math.min(this.bbox[0], point.x - halfWidth);
+            this.bbox.minX = Math.min(this.bbox.minX, point.x - halfWidth);
         }
         if (this.isAngleInRange(-Math.PI / 2, normalStartAngle, normalDeltaAngle)) {
-            this.bbox[1] = Math.min(this.bbox[1], point.y - halfWidth);
+            this.bbox.minY = Math.min(this.bbox.minY, point.y - halfWidth);
         }
     }
 
@@ -359,8 +429,9 @@ class PathBBoxCalculator {
      * @param vector the vector of the line
      */
     private applyEndPoint(point: Point, vector: Point): void {
+        this.innerBBox.includePoint(point);
         if (this.styles.lineWidth === 0) {
-            this.applyPoint(point);
+            this.bbox.includePoint(point);
         } else {
             switch (this.styles.lineCap) {
                 case "round":
@@ -386,10 +457,7 @@ class PathBBoxCalculator {
      */
     private applyRoundEnd(point: Point): void {
         const halfWidth = this.styles.lineWidth / 2;
-        this.bbox[0] = Math.min(this.bbox[0], point.x - halfWidth);
-        this.bbox[1] = Math.min(this.bbox[1], point.y - halfWidth);
-        this.bbox[2] = Math.max(this.bbox[2], point.x + halfWidth);
-        this.bbox[3] = Math.max(this.bbox[3], point.y + halfWidth);
+        this.bbox.includeBounds(point.x - halfWidth, point.y - halfWidth, point.x + halfWidth, point.y + halfWidth);
     }
 
     /**
@@ -400,8 +468,8 @@ class PathBBoxCalculator {
      */
     private applyButtEndPoint(point: Point, vector: Point): void {
         const normal = Math2D.normalize(Math2D.normal(vector));
-        this.applyPoint(Math2D.add(point, Math2D.scale(normal, this.styles.lineWidth / 2)));
-        this.applyPoint(Math2D.add(point, Math2D.scale(normal, -this.styles.lineWidth / 2)));
+        this.bbox.includePoint(Math2D.add(point, Math2D.scale(normal, this.styles.lineWidth / 2)));
+        this.bbox.includePoint(Math2D.add(point, Math2D.scale(normal, -this.styles.lineWidth / 2)));
     }
 
     /**
@@ -413,18 +481,6 @@ class PathBBoxCalculator {
     private applySquareEndPoint(point: Point, vector: Point): void {
         const newEndPoint = Math2D.add(point, Math2D.scaleTo(vector, this.styles.lineWidth / 2));
         this.applyButtEndPoint(newEndPoint, vector);
-    }
-
-    /**
-     * Extends the bounding box to include the given point
-     *
-     * @param point the point to apply
-     */
-    private applyPoint(point: Point): void {
-        this.bbox[0] = Math.min(this.bbox[0], point.x);
-        this.bbox[1] = Math.min(this.bbox[1], point.y);
-        this.bbox[2] = Math.max(this.bbox[2], point.x);
-        this.bbox[3] = Math.max(this.bbox[3], point.y);
     }
 
     /**
@@ -519,7 +575,7 @@ class PathBBoxCalculator {
  * @param d SVG path for which their bounding box will be computed.
  * @returns The bounding box of the path.
  */
-export function svgPathBbox(d: string, styles: Styles): BBox {
+export function svgPathBbox(d: string, styles: Styles): PathBBox {
     const calculator = new PathBBoxCalculator(d, styles);
-    return calculator.bbox;
+    return calculator.pathBBox;
 }

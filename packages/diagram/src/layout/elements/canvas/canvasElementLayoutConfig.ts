@@ -11,7 +11,7 @@ import { Size, Point, Element, CanvasElement, ModificationSpecification } from "
 import { canvasPointType } from "../../../module/types";
 import { HorizontalAlignment, LayoutElement, SizeConstraints, VerticalAlignment } from "../../layoutElement";
 import { Layout } from "../../layoutEngine";
-import { alignStyleAttributes } from "../attributes";
+import { alignStyleAttributes, sizeStyleAttributes } from "../attributes";
 import { EditableCanvasContentLayoutConfig } from "./editableCanvasContentLayoutConfig";
 
 /**
@@ -43,7 +43,8 @@ export class CanvasElementLayoutConfig extends EditableCanvasContentLayoutConfig
                     name: "rotation",
                     description: "the rotation in degrees",
                     type: numberType
-                }
+                },
+                ...sizeStyleAttributes
             ]
         );
     }
