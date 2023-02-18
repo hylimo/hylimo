@@ -12,9 +12,8 @@ import { RectLayoutConfig } from "./elements/rectLayoutConfig";
 import { SpanLayoutConfig } from "./elements/spanLayoutConfig";
 import { TextLayoutConfig } from "./elements/textLayoutConfig";
 import { VBoxLayoutConfig } from "./elements/vboxLayoutConfig";
-import { HLineLayoutConfig } from "./elements/hlineLayoutConfig";
 import { LayoutConfig } from "./layoutElement";
-import { VLineLayoutConfig } from "./elements/vlineLayoutConfig";
+import { PathLayoutConfig } from "./elements/pathLayoutConfig";
 
 /**
  * Known layouts
@@ -34,6 +33,5 @@ export const layouts: LayoutConfig[] = [
     new RelativePointLayoutConfig(),
     new LinePointLayoutConfig(),
     new MarkerLayoutConfig(),
-    new HLineLayoutConfig(),
-    new VLineLayoutConfig()
+    new PathLayoutConfig()
 ];

@@ -12,8 +12,11 @@ export class PathView implements IView {
     render(model: Readonly<SPath>, context: RenderingContext, _args?: IViewArgs | undefined): VNode | undefined {
         const attrs: Attrs = {
             ...extractShapeAttributes(model),
+            "stroke-linejoin": model.lineJoin,
+            "stroke-linecap": model.lineCap,
+            "stroke-miterlimit": model.miterLimit,
             d: model.path,
-            transform: `translate(${model.x},${model.y})`
+            transform: `translate(${model.x}, ${model.y})`
         };
         return svg(
             "g",

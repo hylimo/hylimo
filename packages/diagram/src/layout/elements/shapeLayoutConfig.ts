@@ -1,3 +1,4 @@
+import { Shape } from "@hylimo/diagram-common";
 import { LayoutElement, AttributeConfig } from "../layoutElement";
 import { shapeStyleAttributes } from "./attributes";
 import { StyledElementLayoutConfig } from "./styledElementLayoutConfig";
@@ -5,28 +6,7 @@ import { StyledElementLayoutConfig } from "./styledElementLayoutConfig";
 /**
  * Helper interface for shape properties
  */
-export interface ShapeProperties {
-    /**
-     * The fill color
-     */
-    fill?: string;
-    /**
-     * The fill opacity
-     */
-    fillOpacity?: number;
-    /**
-     * The stroke color
-     */
-    stroke?: string;
-    /**
-     * The stroke opacity
-     */
-    strokeOpacity?: number;
-    /**
-     * The stroke width
-     */
-    strokeWidth?: number;
-}
+export type ShapeProperties = Pick<Shape, "fill" | "fillOpacity" | "stroke" | "strokeOpacity" | "strokeWidth">;
 
 /**
  * Base class for all shape layout configs

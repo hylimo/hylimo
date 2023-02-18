@@ -33,7 +33,7 @@ export const classDiagramModule: InterpreterModule = {
                                 classContents += text(contents = list(span(text = name)), class = list("title"))
 
                                 result.sections.forEach {
-                                    classContents += hline(class = list("separator"))
+                                    classContents += path(path="M0 0 L1 0", class = list("separator"))
                                     it.forEach {
                                         classContents += text(contents = list(span(text = it)))
                                     }
