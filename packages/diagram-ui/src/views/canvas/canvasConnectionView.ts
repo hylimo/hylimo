@@ -19,8 +19,8 @@ export class CanvasConnectionView implements IView {
         const segments = model.children.filter(
             (child) => child instanceof SCanvasConnectionSegment
         ) as SCanvasConnectionSegment[];
-        const { startPos, childMarkers } = this.renderMarkers(model, segments, context);
-        const { path, childControlElements } = this.renderPathAndControlElements(model, startPos, segments);
+        const { startPos, endPos, childMarkers } = this.renderMarkers(model, segments, context);
+        const { path, childControlElements } = this.renderPathAndControlElements(model, startPos, endPos, segments);
         return svg(
             "g",
             null,
@@ -58,6 +58,7 @@ export class CanvasConnectionView implements IView {
     private renderPathAndControlElements(
         model: Readonly<SCanvasConnection>,
         startPos: Point,
+        endPos: Point,
         segments: SCanvasConnectionSegment[]
     ) {
         const childControlElements: VNode[] = [];
@@ -67,7 +68,7 @@ export class CanvasConnectionView implements IView {
         for (let i = 0; i < segments.length; i++) {
             const segment = segments[i];
             const originalEnd = segment.endPosition;
-            pathSegments.push(segment.generatePathString());
+            pathSegments.push(segment.generatePathString(i == segments.length - 1 ? endPos : originalEnd));
             if (showControlElements) {
                 childControlElements.push(...segment.generateControlViewElements(originalStart));
             }
@@ -93,6 +94,7 @@ export class CanvasConnectionView implements IView {
         const startMarker = markers.find((marker) => marker.pos == "start");
         const endMarker = markers.find((marker) => marker.pos == "end");
         let startPos = model.startPosition;
+        let endPos = segments.at(-1)!.endPosition;
         const childMarkers: VNode[] = [];
         if (endMarker != undefined) {
             let endStartPosition: Point;
@@ -103,6 +105,7 @@ export class CanvasConnectionView implements IView {
             }
             const renderInformation = segments.at(-1)!.calculateMarkerRenderInformation(endMarker, endStartPosition);
             childMarkers.push(this.renderMarker(endMarker, renderInformation, segments.at(-1)!.endPosition, context));
+            endPos = renderInformation.newPoint;
         }
         if (startMarker != undefined) {
             const startSegment = segments[0];
@@ -110,7 +113,7 @@ export class CanvasConnectionView implements IView {
             childMarkers.push(this.renderMarker(startMarker, renderInformation, startPos, context));
             startPos = renderInformation.newPoint;
         }
-        return { startPos, childMarkers };
+        return { startPos, endPos, childMarkers };
     }
 
     /**

@@ -58,10 +58,9 @@ export class SCanvasBezierSegment extends SCanvasConnectionSegment implements Ca
         }
     }
 
-    override generatePathString(): string {
+    override generatePathString(end: Point): string {
         const c1 = this.startControlPointPosition;
         const c2 = this.endControlPointPosition;
-        const end = this.endPosition;
         return `C ${c1.x} ${c1.y} ${c2.x} ${c2.y} ${end.x} ${end.y}`;
     }
 

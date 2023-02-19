@@ -21,8 +21,7 @@ export class SCanvasLineSegment extends SCanvasConnectionSegment implements Canv
         }
     }
 
-    override generatePathString(): string {
-        const end = this.endPosition;
+    override generatePathString(end: Point): string {
         return `L ${end.x} ${end.y}`;
     }
 

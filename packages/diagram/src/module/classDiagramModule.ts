@@ -75,7 +75,7 @@ const scopeExpressions: Expression[] = [
                 arrow = {
                     marker(
                         content = path(
-                            path = "M 0 0 L 8 6 L 0 12",
+                            path = "M 0 0 L 10 6 L 0 12",
                             class = list("arrow-marker-path", "marker-path")
                         ),
                         class=list("arrow-marker", "marker"),
@@ -83,10 +83,24 @@ const scopeExpressions: Expression[] = [
                     )
                 },
                 cross = {
-
+                    marker(
+                        content = path(
+                            path = "M 0 0 L 12 12 M 12 0 L 0 12",
+                            class = list("cross-marker-path", "marker-path")
+                        ),
+                        class=list("cross-marker", "marker"),
+                        lineStart = 0
+                    )
                 },
                 triangle = {
-
+                    marker(
+                        content = path(
+                            path = "M 0 0 L 10 6 L 0 12 Z",
+                            class = list("triangle-marker-path", "marker-path")
+                        ),
+                        class=list("triangle-marker", "marker"),
+                        lineStart = 1
+                    )
                 }
             )
         `
@@ -94,6 +108,34 @@ const scopeExpressions: Expression[] = [
     ...parse(
         `
             scope.-- = scope.createConnectionOperator()
+            scope.--> = scope.createConnectionOperator(
+                endMarkerFactory = scope.defaultMarkers.arrow
+            )
+            scope.<-- = scope.createConnectionOperator(
+                startMarkerFactory = scope.defaultMarkers.arrow
+            )
+            scope.<--> = scope.createConnectionOperator(
+                startMarkerFactory = scope.defaultMarkers.arrow,
+                endMarkerFactory = scope.defaultMarkers.arrow
+            )
+            scope.!-- = scope.createConnectionOperator(
+                startMarkerFactory = scope.defaultMarkers.cross
+            )
+            scope.--! = scope.createConnectionOperator(
+                endMarkerFactory = scope.defaultMarkers.cross
+            )
+            scope.!--! = scope.createConnectionOperator(
+                startMarkerFactory = scope.defaultMarkers.cross,
+                endMarkerFactory = scope.defaultMarkers.cross
+            )
+            scope.!--> = scope.createConnectionOperator(
+                startMarkerFactory = scope.defaultMarkers.cross,
+                endMarkerFactory = scope.defaultMarkers.arrow
+            )
+            scope.<--! = scope.createConnectionOperator(
+                startMarkerFactory = scope.defaultMarkers.arrow,
+                endMarkerFactory = scope.defaultMarkers.cross
+            )
             scope.<>-- = scope.createConnectionOperator(
                 startMarkerFactory = scope.defaultMarkers.diamond
             )
@@ -121,6 +163,9 @@ const scopeExpressions: Expression[] = [
             scope.<--* = scope.createConnectionOperator(
                 startMarkerFactory = scope.defaultMarkers.arrow,
                 endMarkerFactory = scope.defaultMarkers.filledDiamond
+            )
+            scope.extends = scope.createConnectionOperator(
+                endMarkerFactory = scope.defaultMarkers.triangle
             )
         `
     ),
@@ -171,7 +216,7 @@ const scopeExpressions: Expression[] = [
                     minWidth = 300
                 }
                 class("marker") {
-                    height = 30
+                    height = 25
                 }
                 class("marker-path") {
                     strokeWidth = lineWidth
