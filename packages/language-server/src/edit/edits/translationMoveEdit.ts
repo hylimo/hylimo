@@ -1,12 +1,12 @@
-import { LayoutedDiagram, LayoutElement } from "@hylimo/diagram";
+import { DiagramLayoutResult, LayoutElement } from "@hylimo/diagram";
 import { AbsolutePoint, CanvasElement, RelativePoint, TranslationMoveAction } from "@hylimo/diagram-common";
 import { TextDocument } from "vscode-languageserver-textdocument";
-import { Diagram } from "../../diagram";
-import { EditGeneratorEntry } from "../editGeneratorEntry";
+import { EditGeneratorEntry } from "./editGeneratorEntry";
 import { EditGenerator } from "../generators/editGenerator";
-import { TransactionalEdit } from "../transactionalEdit";
 import { generateAddFieldToScopeGenerator } from "./generateAddFieldToScopeGenerator";
 import { generateDeltaNumberGenerator } from "./generateDeltaNumberGenerator";
+import { TransactionalEdit, TransactionalEditEngine } from "./transactionalEdit";
+import { GeneratorRegistry } from "../generators/generatorRegistry";
 
 /**
  * Generates EditGeneratorEntries for absolute and relative points
@@ -36,62 +36,90 @@ function generatePointGeneratorEntries(element: LayoutElement, document: TextDoc
 /**
  * TransactionalEdit for TranslationMoveActions
  */
-export class TranslationMoveEdit extends TransactionalEdit<TranslationMoveAction> {
+export interface TranslationMoveEdit extends TransactionalEdit {
+    type: typeof TranslationMoveEdit.TYPE;
     /**
      * Indicates if the edit creates a new point
      * In this case, no predication should be applied as it may be applied to the wrong point.
      */
-    private readonly hasNewPoint: boolean;
+    readonly hasNewPoint: boolean;
+}
+
+export namespace TranslationMoveEdit {
+    export const TYPE = "translationMoveEdit";
 
     /**
-     * Creates a new TranslationMoveEdit based on an initial action and the used diagram
-     * Requires that the diagram was already layouted
+     * Creates a TranslationMoveEdit from a TranslationMoveAction and a LayoutedDiagram
      *
-     * @param action the initial TranslationMoveAction
-     * @param diagram the associated diagram
+     * @param action the action which created the edit
+     * @param diagram the diagram the action was applied to
+     * @param document the document the diagram was created from
+     * @returns the created TranslationMoveEdit
      */
-    constructor(action: TranslationMoveAction, diagram: Diagram) {
-        const layoutedDiagram = diagram.layoutedDiagram;
-        if (layoutedDiagram == undefined) {
-            throw new Error("requires initial LayoutedDiagram");
-        }
+    export function create(
+        action: TranslationMoveAction,
+        diagram: DiagramLayoutResult,
+        document: TextDocument
+    ): TranslationMoveEdit {
         let hasNewPoint = false;
         const generatorEntries = action.elements.flatMap((elementId) => {
-            const element = layoutedDiagram.layoutElementLookup.get(elementId);
+            const element = diagram.layoutElementLookup.get(elementId);
             if (element == undefined) {
                 throw new Error(`Unknown point: ${elementId}`);
             }
             if (element.layoutConfig.type == CanvasElement.TYPE) {
                 hasNewPoint = true;
             }
-            return generatePointGeneratorEntries(element, diagram.document);
+            return generatePointGeneratorEntries(element, document);
         });
-        super(generatorEntries, diagram.document);
-        this.hasNewPoint = hasNewPoint;
+        return {
+            type: TranslationMoveEdit.TYPE,
+            generatorEntries,
+            hasNewPoint
+        };
+    }
+}
+
+/**
+ * EditEngine for TranslationMoveEdits
+ */
+export class TranslationMoveEditEngine extends TransactionalEditEngine<TranslationMoveAction, TranslationMoveEdit> {
+    /**
+     * Creates a new TranslationMoveEditEngine
+     *
+     * @param generatorRegistry the generator registry to use
+     */
+    constructor(generatorRegistry: GeneratorRegistry) {
+        super(TranslationMoveEdit.TYPE, TranslationMoveAction.KIND, generatorRegistry);
     }
 
     override applyActionToGenerator(
+        edit: TranslationMoveEdit,
         action: TranslationMoveAction,
-        generator: EditGenerator<number | Record<string, string>>,
+        generator: EditGenerator,
         meta: any
     ): string {
         if (meta === "x") {
-            return generator.generateEdit(action.offsetX);
+            return this.generatorRegistory.generateEdit(action.offsetX, generator);
         } else if (meta === "y") {
-            return generator.generateEdit(action.offsetY);
+            return this.generatorRegistory.generateEdit(action.offsetY, generator);
         } else if (meta === "pos") {
-            return generator.generateEdit({ pos: `apos(${action.offsetX}, ${action.offsetY})` });
+            return this.generatorRegistory.generateEdit(
+                { pos: `apos(${action.offsetX}, ${action.offsetY})` },
+                generator
+            );
         } else {
             throw new Error(`Unknown meta information for TranslationMoveEdit: ${meta}`);
         }
     }
 
     override predictActionDiff(
-        layoutedDiagram: LayoutedDiagram,
+        edit: TranslationMoveEdit,
+        layoutedDiagram: DiagramLayoutResult,
         lastApplied: TranslationMoveAction,
         newest: TranslationMoveAction
     ): void {
-        if (this.hasNewPoint) {
+        if (edit.hasNewPoint) {
             return;
         }
         const deltaX = newest.offsetX - lastApplied.offsetX;

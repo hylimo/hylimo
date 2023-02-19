@@ -1,21 +1,53 @@
-import { EditGenerator } from "./editGenerator";
+import { EditEngine, EditGenerator } from "./editGenerator";
 
 /**
  * EditGenerator which can add multiple fields
  * Also adds a prefix and suffix.
  */
-export class FieldEntryGenerator implements EditGenerator<Record<string, string>> {
+export interface FieldEntryGenerator extends EditGenerator {
+    type: typeof FieldEntryGenerator.TYPE;
     /**
-     * Creates a new ReplacementGenerator
-     *
-     * @param prefix the prefix to add
-     * @param suffix the suffix to add
-     * @param indentation the indentation to use before each line
+     * The prefix to add before the fields
      */
-    constructor(readonly prefix: string, readonly suffix: string, readonly indentation: string) {}
+    readonly prefix: string;
+    /**
+     * The suffix to add after the fields
+     */
+    readonly suffix: string;
+    /**
+     * The indentation to use for each field
+     */
+    readonly indentation: string;
+}
 
-    generateEdit(data: Record<string, string>): string {
-        const entries = Object.entries(data).map(([key, value]) => `${this.indentation}${key} = ${value}`);
-        return `${this.prefix}${entries.join("\n")}${this.suffix}`;
+export namespace FieldEntryGenerator {
+    export const TYPE = "fieldEntryGenerator";
+
+    /**
+     * Creates a new FieldEntryGenerator
+     *
+     * @param prefix the prefix to add before the fields
+     * @param suffix the suffix to add after the fields
+     * @param indentation the indentation to use for each field
+     * @returns the created FieldEntryGenerator
+     */
+    export function create(prefix: string, suffix: string, indentation: string): FieldEntryGenerator {
+        return {
+            type: TYPE,
+            prefix,
+            suffix,
+            indentation
+        };
     }
 }
+
+/**
+ * EditEngine for FieldEntryGenerator
+ */
+export const fieldEntryEngine: EditEngine<Record<string, string>, FieldEntryGenerator> = {
+    type: FieldEntryGenerator.TYPE,
+    generateEdit(data: Record<string, string>, generator: FieldEntryGenerator) {
+        const entries = Object.entries(data).map(([key, value]) => `${generator.indentation}${key} = ${value}`);
+        return `${generator.prefix}${entries.join("\n")}${generator.suffix}`;
+    }
+};

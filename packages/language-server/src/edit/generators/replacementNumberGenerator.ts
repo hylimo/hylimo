@@ -1,10 +1,33 @@
-import { EditGenerator } from "./editGenerator";
+import { EditEngine, EditGenerator } from "./editGenerator";
 
 /**
  * EditGenerator which replaces a number complately
  */
-export class ReplacementNumberGenerator implements EditGenerator<number> {
-    generateEdit(data: number): string {
-        return data.toString();
+export interface ReplacementNumberGenerator extends EditGenerator {
+    type: typeof ReplacementNumberGenerator.TYPE;
+}
+
+export namespace ReplacementNumberGenerator {
+    export const TYPE = "replacementNumberGenerator";
+
+    /**
+     * Creates a new ReplacementNumberGenerator
+     *
+     * @returns the created ReplacementNumberGenerator
+     */
+    export function create(): ReplacementNumberGenerator {
+        return {
+            type: TYPE
+        };
     }
 }
+
+/**
+ * EditEngine for ReplacementNumberGenerator
+ */
+export const replacementNumberEngine: EditEngine<number, ReplacementNumberGenerator> = {
+    type: ReplacementNumberGenerator.TYPE,
+    generateEdit(data: number, _generator: ReplacementNumberGenerator) {
+        return data.toString();
+    }
+};

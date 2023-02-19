@@ -1,8 +1,8 @@
 import { ASTExpressionPosition, FullObject, FunctionExpression } from "@hylimo/core";
 import { Position, Range, uinteger } from "vscode-languageserver";
 import { TextDocument } from "vscode-languageserver-textdocument";
-import { EditGeneratorEntry } from "../editGeneratorEntry";
 import { FieldEntryGenerator } from "../generators/fieldEntryGenerator";
+import { EditGeneratorEntry } from "./editGeneratorEntry";
 
 /**
  * Generates a new EditGeneratorEntry to add fields to a scope (and create the scope if it does not exist yet)
@@ -72,7 +72,11 @@ function generateCreateNewScope(
     return {
         start: source.position!.endOffset + 1,
         end: source.position!.endOffset + 1,
-        generator: new FieldEntryGenerator(` ${scopeName} {\n`, `\n${indentation}}`, increaseIndentation(indentation)),
+        generator: FieldEntryGenerator.create(
+            ` ${scopeName} {\n`,
+            `\n${indentation}}`,
+            increaseIndentation(indentation)
+        ),
         meta
     };
 }
@@ -106,7 +110,7 @@ function generateAddFieldToScopeReplaceInner(
     return {
         start: position.startOffset + 1,
         end: position.endOffset,
-        generator: new FieldEntryGenerator(prefix, `\n${indentation}`, innerIndentation),
+        generator: FieldEntryGenerator.create(prefix, `\n${indentation}`, innerIndentation),
         meta
     };
 }
@@ -137,7 +141,7 @@ function generateAddFieldToScopeInsertAtFirstLine(
     return {
         start: position.startOffset + 1,
         end: position.startOffset + 1,
-        generator: new FieldEntryGenerator("\n", suffix, innerIndentation),
+        generator: FieldEntryGenerator.create("\n", suffix, innerIndentation),
         meta
     };
 }

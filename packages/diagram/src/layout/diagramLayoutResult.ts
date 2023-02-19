@@ -4,7 +4,7 @@ import { LayoutElement } from "./layoutElement";
 /**
  * Defines a rendered diagram with tracing information
  */
-export interface LayoutedDiagram {
+export interface DiagramLayoutResult {
     /**
      * The root element of the diagram
      */

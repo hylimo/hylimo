@@ -1,27 +1,29 @@
-import { LayoutedDiagram } from "@hylimo/diagram";
+import { DiagramLayoutResult } from "@hylimo/diagram";
 import { LineMoveAction, LinePoint } from "@hylimo/diagram-common";
-import { Diagram } from "../../diagram";
 import { EditGenerator } from "../generators/editGenerator";
-import { TransactionalEdit } from "../transactionalEdit";
+import { GeneratorRegistry } from "../generators/generatorRegistry";
 import { generateReplacementNumberGenerator } from "./generateReplacementNumberGenerator";
+import { TransactionalEdit, TransactionalEditEngine } from "./transactionalEdit";
 
 /**
  * TransactionalEdit for LineMoveActions
  */
-export class LineMoveEdit extends TransactionalEdit<LineMoveAction> {
+export interface LineMoveEdit extends TransactionalEdit {
+    type: typeof LineMoveEdit.TYPE;
+}
+
+export namespace LineMoveEdit {
+    export const TYPE = "lineMoveEdit";
+
     /**
-     * Creates a new LineMoveEdit based on an initial action and the used diagram
-     * Requires that the diagram was already layouted
+     * Creates a LineMoveEdit from a LineMoveAction and a LayoutedDiagram
      *
-     * @param action the initial LineMoveAction
-     * @param diagram the associated diagram
+     * @param action the action which created the edit
+     * @param diagram the diagram the action was applied to
+     * @returns the created LineMoveEdit
      */
-    constructor(action: LineMoveAction, diagram: Diagram) {
-        const layoutedDiagram = diagram.layoutedDiagram;
-        if (layoutedDiagram == undefined) {
-            throw new Error("requires initial LayoutedDiagram");
-        }
-        const point = layoutedDiagram.layoutElementLookup.get(action.point);
+    export function create(action: LineMoveAction, diagram: DiagramLayoutResult): LineMoveEdit {
+        const point = diagram.layoutElementLookup.get(action.point);
         if (point?.layoutConfig.type !== LinePoint.TYPE) {
             throw new Error("Only LinePoints are supported");
         }
@@ -33,21 +35,44 @@ export class LineMoveEdit extends TransactionalEdit<LineMoveAction> {
                 generateReplacementNumberGenerator(point.element.getLocalFieldOrUndefined("distance")!, "distance")
             );
         }
-        super(generatorEntries, diagram.document);
+        return {
+            type: LineMoveEdit.TYPE,
+            generatorEntries
+        };
+    }
+}
+
+/**
+ * EditEngine for LineMoveEdits
+ */
+export class LineMoveEditEngine extends TransactionalEditEngine<LineMoveAction, LineMoveEdit> {
+    /**
+     * Creates a new LineMoveEditEngine
+     *
+     * @param generatorRegistry the generator registry to use
+     */
+    constructor(generatorRegistry: GeneratorRegistry) {
+        super(LineMoveEdit.TYPE, LineMoveAction.KIND, generatorRegistry);
     }
 
-    override applyActionToGenerator(action: LineMoveAction, generator: EditGenerator<number>, meta: any): string {
+    override applyActionToGenerator(
+        edit: LineMoveEdit,
+        action: LineMoveAction,
+        generator: EditGenerator,
+        meta: any
+    ): string {
         if (meta === "pos") {
-            return generator.generateEdit(action.pos);
+            return this.generatorRegistory.generateEdit(action.pos, generator);
         } else if (meta === "distance") {
-            return generator.generateEdit(action.distance!);
+            return this.generatorRegistory.generateEdit(action.distance!, generator);
         } else {
             throw new Error(`Unknown meta information for LineMoveEdit: ${meta}`);
         }
     }
 
     override predictActionDiff(
-        layoutedDiagram: LayoutedDiagram,
+        edit: LineMoveEdit,
+        layoutedDiagram: DiagramLayoutResult,
         lastApplied: LineMoveAction,
         newest: LineMoveAction
     ): void {

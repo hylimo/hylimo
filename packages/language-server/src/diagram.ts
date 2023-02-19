@@ -1,35 +1,33 @@
 import { TextDocument, TextDocumentContentChangeEvent } from "vscode-languageserver-textdocument";
-import { CstResult, Expression, FullObject, InterpretationResult } from "@hylimo/core";
-import { LayoutedDiagram } from "@hylimo/diagram";
 import { SharedDiagramUtils } from "./sharedDiagramUtils";
-import { Diagnostic, DiagnosticSeverity, Range, uinteger } from "vscode-languageserver";
+import { Diagnostic } from "vscode-languageserver";
 import { TransactionManager } from "./edit/transactionManager";
 import { TransactionalAction } from "@hylimo/diagram-common";
+import { LayoutedDiagram, LocalLayoutedDiagram } from "./layoutedDiagram";
+import { DiagramLayoutResult } from "@hylimo/diagram";
+import { defaultEditRegistry } from "./edit/edits/transactionalEditRegistry";
 
 /**
  * Holds the state for a specific diagram
  */
 export class Diagram {
     /**
-     * The last parsing result
-     */
-    lastParserResult?: CstResult;
-    /**
      * The layouted diagram
      */
-    layoutedDiagram?: LayoutedDiagram;
+    layoutedDiagram: LayoutedDiagram;
+    /**
+     * The current diagram
+     */
+    currentDiagram?: DiagramLayoutResult;
     /**
      * Handles TransactionActions
      */
-    private transactionManager = new TransactionManager(this);
+    private transactionManager = new TransactionManager(this, defaultEditRegistry);
+
     /**
-     * Marker that the model has been updated
+     * A counter which increases on every change to the document (after layouting)
      */
-    private hasUpdatedModel = true;
-    /**
-     * Action which was commited, but has not been executed yet
-     */
-    private delayedCommitedAction?: TransactionalAction;
+    version = 0;
 
     /**
      * Creates a new diagram
@@ -37,18 +35,16 @@ export class Diagram {
      * @param document the document on which it is based
      * @param utils shared diagram utils
      */
-    constructor(readonly document: TextDocument, readonly utils: SharedDiagramUtils) {}
+    constructor(readonly document: TextDocument, readonly utils: SharedDiagramUtils) {
+        //TODO fix
+        this.layoutedDiagram = new LocalLayoutedDiagram(utils);
+    }
 
     /**
      * Called when the content of the associated document changes
      */
     async onDidChangeContent(): Promise<void> {
         const diagnostics: Diagnostic[] = await this.updateDiagram();
-        this.hasUpdatedModel = true;
-        if (this.delayedCommitedAction != undefined) {
-            await this.handleTransactionalAction(this.delayedCommitedAction);
-            this.delayedCommitedAction = undefined;
-        }
         this.utils.connection.sendDiagnostics({
             uri: this.document.uri,
             diagnostics: diagnostics
@@ -71,86 +67,15 @@ export class Diagram {
      * @returns diagnostic entries containing errors
      */
     private async updateDiagram(): Promise<Diagnostic[]> {
-        const parserResult = this.utils.parser.parse(this.document.getText());
-        this.lastParserResult = parserResult;
-        const diagnostics: Diagnostic[] = [];
-        diagnostics.push(...this.getParserResultDiagnostics(this.document, parserResult));
-        if (parserResult.ast) {
-            const interpretationResult = this.runInterpreterAndConvertErrors(parserResult.ast, diagnostics);
-            if (interpretationResult.result) {
-                const layoutedDiagram = await this.utils.layoutEngine.layout(interpretationResult.result as FullObject);
-                this.transactionManager.updateLayoutedDiagram(layoutedDiagram);
-                this.layoutedDiagram = layoutedDiagram;
-                this.utils.diagramServerManager.updatedDiagram(this);
-            }
+        const result = await this.layoutedDiagram.updateDiagram(this.document.getText());
+        this.version++;
+        const diagram = result.diagram;
+        this.currentDiagram = diagram;
+        if (diagram != undefined) {
+            this.transactionManager.updateLayoutedDiagram(diagram);
+            this.updateDiagramOnServerManager();
         }
-        return diagnostics;
-    }
-
-    /**
-     * Runs the interpreter on the parserResult
-     *
-     * @param expressions the expressions to execute
-     * @param diagnostics the diagnostics array where to push a potential error
-     * @returns the result of the interpreter run
-     */
-    private runInterpreterAndConvertErrors(expressions: Expression[], diagnostics: Diagnostic[]): InterpretationResult {
-        const interpretationResult = this.utils.interpreter.run(expressions, this.utils.maxExecutionSteps);
-        const error = interpretationResult.error;
-        if (error) {
-            const pos = error.findFirstPosition();
-            if (pos) {
-                diagnostics.push(
-                    Diagnostic.create(
-                        Range.create(pos.startLine - 1, pos.startColumn - 1, pos.endLine - 1, pos.endColumn),
-                        error.message || "[no message provided]",
-                        DiagnosticSeverity.Error
-                    )
-                );
-            }
-            console.error(error);
-            console.error(error.interpretationStack);
-            //TODO do sth else with error
-        }
-        return interpretationResult;
-    }
-
-    /**
-     * Creates diagnostics from lexical and parsing errors
-     *
-     * @param document the document which was parsed
-     * @param parserResult the parsing result
-     * @returns the found diagnostics
-     */
-    private getParserResultDiagnostics(document: TextDocument, parserResult: CstResult): Diagnostic[] {
-        const diagnostics: Diagnostic[] = [];
-        parserResult.lexingErrors.forEach((error) => {
-            diagnostics.push(
-                Diagnostic.create(
-                    Range.create(error.line! - 1, error.column! - 1, error.line! - 1, error.column! + error.length),
-                    error.message || "unknown lexical error",
-                    DiagnosticSeverity.Error
-                )
-            );
-        });
-        parserResult.parserErrors.forEach((error) => {
-            const token = error.token;
-            let location: Range;
-            if (!Number.isNaN(error.token.startLine)) {
-                location = Range.create(
-                    token.startLine! - 1,
-                    token.startColumn! - 1,
-                    token.endLine! - 1,
-                    token.endColumn!
-                );
-            } else {
-                location = Range.create(document.lineCount, uinteger.MAX_VALUE, document.lineCount, uinteger.MAX_VALUE);
-            }
-            diagnostics.push(
-                Diagnostic.create(location, error.message || "unknown syntax error", DiagnosticSeverity.Error)
-            );
-        });
-        return diagnostics;
+        return result.diagnostics;
     }
 
     /**
@@ -159,17 +84,22 @@ export class Diagram {
      * @param action the action to handle
      */
     async handleTransactionalAction(action: TransactionalAction): Promise<void> {
-        this.transactionManager.setNewestAction(action);
-        if (!this.hasUpdatedModel) {
-            if (action.commited) {
-                this.delayedCommitedAction = action;
-            }
-            return;
+        const edit = await this.transactionManager.handleAction(action);
+        this.updateDiagramOnServerManager();
+        if (edit != undefined) {
+            this.utils.connection.workspace.applyEdit({
+                documentChanges: [edit]
+            });
         }
-        this.hasUpdatedModel = false;
-        const edit = this.transactionManager.handleAction(action);
-        await this.utils.connection.workspace.applyEdit({
-            documentChanges: [edit]
-        });
+    }
+
+    /**
+     * Updates the diag
+     */
+    private updateDiagramOnServerManager(): void {
+        if (this.currentDiagram != undefined) {
+            this.currentDiagram.rootElement.noAnimation = this.transactionManager.isActive;
+            this.utils.diagramServerManager.updatedDiagram(this);
+        }
     }
 }

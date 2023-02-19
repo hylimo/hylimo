@@ -5,7 +5,7 @@ import { FontFamilyConfig, Element, Size, Point } from "@hylimo/diagram-common";
 import { FontManager } from "../font/fontManager";
 import { TextLayouter } from "../font/textLayouter";
 import { generateStyles, Selector, SelectorType, Style, StyleList } from "../styles";
-import { LayoutedDiagram } from "./layoutedDiagram";
+import { DiagramLayoutResult } from "./diagramLayoutResult";
 import {
     addToSize,
     HorizontalAlignment,
@@ -51,7 +51,7 @@ export class LayoutEngine {
      *
      * @param diagram the diagram to layout
      */
-    async layout(diagram: FullObject): Promise<LayoutedDiagram> {
+    async layout(diagram: FullObject): Promise<DiagramLayoutResult> {
         const nativeFonts = diagram.getLocalFieldOrUndefined("fonts")?.value?.toNative();
         const fontMap = new Map<string, FontFamily>();
         const fontFamilyConfigs: FontFamilyConfig[] = [];

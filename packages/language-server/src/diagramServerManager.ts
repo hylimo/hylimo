@@ -66,8 +66,8 @@ export class DiagramServerManager {
         this.diagramServers.set(clientId, diagramServer);
         this.diagramServersByDocument.get(uri)?.push(clientId);
         this.documentLookup.set(clientId, uri);
-        if (diagram.layoutedDiagram) {
-            diagramServer.state.currentRoot = diagram.layoutedDiagram.rootElement;
+        if (diagram.currentDiagram) {
+            diagramServer.state.currentRoot = diagram.currentDiagram.rootElement;
         }
     }
 
@@ -77,7 +77,7 @@ export class DiagramServerManager {
      * @param diagram the updated diagram
      */
     updatedDiagram(diagram: Diagram): void {
-        const newRoot = diagram.layoutedDiagram?.rootElement;
+        const newRoot = diagram.currentDiagram?.rootElement;
         if (newRoot) {
             (this.diagramServersByDocument.get(diagram.document.uri) ?? [])
                 .map((clientId) => this.diagramServers.get(clientId)!)

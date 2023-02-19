@@ -1,5 +1,5 @@
 import { FieldEntry, IdentifierExpression, InvocationExpression, NumberLiteralExpression } from "@hylimo/core";
-import { EditGeneratorEntry } from "../editGeneratorEntry";
+import { EditGeneratorEntry } from "./editGeneratorEntry";
 import { DeltaAdditiveNumberGenerator } from "../generators/deltaAdditiveNumberGenerator";
 import { DeltaReplacementNumberGenerator } from "../generators/deltaReplacementNumberGenerator";
 
@@ -23,7 +23,7 @@ export function generateDeltaNumberGenerator(entry: FieldEntry, meta: any): Edit
         return {
             start: position!.startOffset,
             end: position!.endOffset + 1,
-            generator: new DeltaReplacementNumberGenerator(source.value),
+            generator: DeltaReplacementNumberGenerator.create(source.value),
             meta
         };
     }
@@ -36,7 +36,7 @@ export function generateDeltaNumberGenerator(entry: FieldEntry, meta: any): Edit
     return {
         start: position!.endOffset + 1,
         end: position!.endOffset + 1,
-        generator: new DeltaAdditiveNumberGenerator(0),
+        generator: DeltaReplacementNumberGenerator.create(0),
         meta
     };
 }
@@ -79,7 +79,7 @@ function generateDeltaAdditiveNumberGeneratorIfPossible(
     return {
         start: leftSideEndOffset + 1,
         end: expression.position!.endOffset + 1,
-        generator: new DeltaAdditiveNumberGenerator(rightSide.value * sign),
+        generator: DeltaAdditiveNumberGenerator.create(rightSide.value * sign),
         meta
     };
 }

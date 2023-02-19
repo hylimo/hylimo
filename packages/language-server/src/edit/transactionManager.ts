@@ -1,12 +1,10 @@
-import { LayoutedDiagram } from "@hylimo/diagram";
-import { LineMoveAction, RotationAction, TransactionalAction, TranslationMoveAction } from "@hylimo/diagram-common";
+import { DiagramLayoutResult } from "@hylimo/diagram";
+import { TransactionalAction } from "@hylimo/diagram-common";
 import { TextDocumentEdit } from "vscode-languageserver";
 import { TextDocumentContentChangeEvent } from "vscode-languageserver-textdocument";
 import { Diagram } from "../diagram";
-import { LineMoveEdit } from "./edits/lineMoveEdit";
-import { RotationEdit } from "./edits/rotationEdit";
-import { TranslationMoveEdit } from "./edits/translationMoveEdit";
-import { TransactionalEdit } from "./transactionalEdit";
+import { TransactionalEdit, Versioned } from "./edits/transactionalEdit";
+import { TransactionalEditRegistory } from "./edits/transactionalEditRegistry";
 
 /**
  * Handles TransactionActions modifying the textdocument
@@ -19,22 +17,38 @@ export class TransactionManager {
     /**
      * Current edit handling actions of the same transaction
      */
-    private edit?: TransactionalEdit<any>;
+    private edit?: Versioned<TransactionalEdit>;
     /**
-     * Last action which was handled
+     * Last action which caused a text update
      */
     private lastAppliedAction?: TransactionalAction;
     /**
      * Last action which was handled or skipped
      */
     private lastKnownAction?: TransactionalAction;
+    /**
+     * The last version on which an action was applied.
+     * The next action can only be applied if the version of the diagram is greater than this value.
+     */
+    private lastVersion = -1;
+    /**
+     * Should be invoked to handle a delayed action
+     */
+    private delayedHandleAction?: () => unknown;
+
+    /**
+     * Returns true if the manager is currently handling a transaction
+     */
+    get isActive(): boolean {
+        return this.currentTransactionId != undefined;
+    }
 
     /**
      * Creates a new TransactionManager which handles edits to the specified textDocument
      *
      * @param diagram the associated Diagram
      */
-    constructor(private readonly diagram: Diagram) {}
+    constructor(private readonly diagram: Diagram, private readonly registry: TransactionalEditRegistory) {}
 
     /**
      * Handles an action. Does currently not support concurrent/interleaved transactions
@@ -42,45 +56,66 @@ export class TransactionManager {
      * @param action the action to handle
      * @returns the created TextDocumentEdit
      */
-    handleAction(action: TransactionalAction): TextDocumentEdit {
+    async handleAction(action: TransactionalAction): Promise<TextDocumentEdit | undefined> {
         if (this.currentTransactionId != undefined && this.currentTransactionId != action.transactionId) {
             throw new Error("Concurrent transactions are currently not supported");
         }
-        this.lastAppliedAction = action;
         this.currentTransactionId = action.transactionId;
         if (this.edit == undefined) {
-            this.edit = this.generateTransactionalEdit(action);
+            this.edit = {
+                ...(await this.diagram.layoutedDiagram.generateTransactionalEdit(action)),
+                version: this.diagram.document.version
+            };
         }
-        const result = this.edit.applyAction(action);
+        const engine = this.registry.getEditEngine(this.edit);
+        let result: TextDocumentEdit | undefined;
+        if (this.lastVersion == this.diagram.version) {
+            if (action.commited) {
+                this.delayedHandleAction = () => this.handleAction(action);
+                result = await new Promise((resolve) => {
+                    this.delayedHandleAction = () => {
+                        this.delayedHandleAction = undefined;
+                        resolve(this.handleAction(action));
+                    };
+                });
+            } else {
+                const currentDiagram = this.diagram.currentDiagram;
+                if (currentDiagram != undefined) {
+                    engine.predictActionDiff(this.edit, this.diagram.currentDiagram!, this.lastAppliedAction, action);
+                }
+                result = undefined;
+            }
+        } else {
+            this.lastVersion = this.diagram.version;
+            this.lastAppliedAction = action;
+            result = engine.applyAction(this.edit, action, this.diagram.document);
+        }
+        this.lastKnownAction = action;
         if (action.commited) {
             this.currentTransactionId = undefined;
             this.edit = undefined;
             this.lastKnownAction = undefined;
             this.lastAppliedAction = undefined;
+            this.delayedHandleAction = undefined;
         }
         return result;
     }
 
     /**
-     * Updates the last knwon action
-     *
-     * @param action the last known action
-     */
-    setNewestAction(action: TransactionalAction): void {
-        this.lastKnownAction = action;
-    }
-
-    /**
      * Updates a LayoutedDiagram based on the lastKnownAction.
+     * Also triggers any outstanding actions.
      *
      * @param layoutedDiagram the layouted diagram
      */
-    updateLayoutedDiagram(layoutedDiagram: LayoutedDiagram): void {
+    updateLayoutedDiagram(layoutedDiagram: DiagramLayoutResult): void {
         if (this.lastKnownAction != undefined && this.lastAppliedAction != undefined && this.edit != undefined) {
-            layoutedDiagram.rootElement.noAnimation = true;
             if (this.lastKnownAction != this.lastAppliedAction) {
-                this.edit.predictActionDiff(layoutedDiagram, this.lastAppliedAction, this.lastKnownAction);
+                const engine = this.registry.getEditEngine(this.edit!);
+                engine.predictActionDiff(this.edit, layoutedDiagram, this.lastAppliedAction, this.lastKnownAction);
             }
+        }
+        if (this.delayedHandleAction) {
+            this.delayedHandleAction();
         }
     }
 
@@ -92,26 +127,7 @@ export class TransactionManager {
      */
     updateGeneratorEntries(changes: TextDocumentContentChangeEvent[]): void {
         if (this.edit != undefined) {
-            this.edit.updateGeneratorEntries(changes);
-        }
-    }
-
-    /**
-     * Generates a TransactionalEdit for the action.
-     * Supports TranslationMoveActions.
-     *
-     * @param action the action to handle
-     * @returns the generated TransactionEdit for further actions of this transaction
-     */
-    private generateTransactionalEdit(action: TransactionalAction): TransactionalEdit<any> {
-        if (TranslationMoveAction.is(action)) {
-            return new TranslationMoveEdit(action, this.diagram);
-        } else if (LineMoveAction.is(action)) {
-            return new LineMoveEdit(action, this.diagram);
-        } else if (RotationAction.is(action)) {
-            return new RotationEdit(action, this.diagram);
-        } else {
-            throw new Error(`Unknown transaction action: ${action.kind}`);
+            TransactionalEdit.updateGeneratorEntries(this.edit, changes, this.diagram.document);
         }
     }
 }

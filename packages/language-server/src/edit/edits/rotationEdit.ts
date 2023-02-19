@@ -1,29 +1,33 @@
-import { LayoutedDiagram } from "@hylimo/diagram";
+import { DiagramLayoutResult } from "@hylimo/diagram";
 import { CanvasElement, RotationAction } from "@hylimo/diagram-common";
-import { Diagram } from "../../diagram";
-import { EditGeneratorEntry } from "../editGeneratorEntry";
+import { EditGeneratorEntry } from "./editGeneratorEntry";
 import { EditGenerator } from "../generators/editGenerator";
-import { TransactionalEdit } from "../transactionalEdit";
 import { generateAddFieldToScopeGenerator } from "./generateAddFieldToScopeGenerator";
 import { generateReplacementNumberGenerator } from "./generateReplacementNumberGenerator";
+import { TransactionalEdit, TransactionalEditEngine } from "./transactionalEdit";
+import { GeneratorRegistry } from "../generators/generatorRegistry";
+import { TextDocument } from "vscode-languageserver-textdocument";
 
 /**
  * Edit for RotationAction
  */
-export class RotationEdit extends TransactionalEdit<RotationAction> {
+export interface RotationEdit extends TransactionalEdit {
+    type: typeof RotationEdit.TYPE;
+}
+
+export namespace RotationEdit {
+    export const TYPE = "rotationEdit";
+
     /**
-     * Creates a new RotationEdit based on initial action and the used diagram
-     * Requires that the diagram was already layouted
+     * Creates a RotationEdit from a RotationAction and a LayoutedDiagram
      *
-     * @param action the initial RotationAction
-     * @param diagram the associated diagram
+     * @param action the action which created the edit
+     * @param diagram the diagram the action was applied to#
+     * @param document the document the diagram was created from
+     * @returns the created RotationEdit
      */
-    constructor(action: RotationAction, diagram: Diagram) {
-        const layoutedDiagram = diagram.layoutedDiagram;
-        if (layoutedDiagram == undefined) {
-            throw new Error("requires initial LayoutedDiagram");
-        }
-        const canvasElement = layoutedDiagram.layoutElementLookup.get(action.element);
+    export function create(action: RotationAction, diagram: DiagramLayoutResult, document: TextDocument): RotationEdit {
+        const canvasElement = diagram.layoutElementLookup.get(action.element);
         if (canvasElement?.layoutConfig.type !== CanvasElement.TYPE) {
             throw new Error("Only CanvasElements are supported");
         }
@@ -35,29 +39,48 @@ export class RotationEdit extends TransactionalEdit<RotationAction> {
             generatorEntry = generateAddFieldToScopeGenerator(
                 canvasElement.element,
                 "layout",
-                diagram.document,
+                document,
                 "scopeRotation"
             );
         }
-        super([generatorEntry], diagram.document);
+        return {
+            type: RotationEdit.TYPE,
+            generatorEntries: [generatorEntry]
+        };
+    }
+}
+
+/**
+ * EditEngine for RotationEdits
+ */
+export class RotationEditEngine extends TransactionalEditEngine<RotationAction, RotationEdit> {
+    /**
+     * Creates a new RotationEditEngine
+     *
+     * @param generatorRegistry the generator registry to use
+     */
+    constructor(generatorRegistry: GeneratorRegistry) {
+        super(RotationEdit.TYPE, RotationAction.KIND, generatorRegistry);
     }
 
     override applyActionToGenerator(
+        edit: RotationEdit,
         action: RotationAction,
-        generator: EditGenerator<number | Record<string, string>>,
+        generator: EditGenerator,
         meta: any
     ): string {
         if (meta === "rotation") {
-            return generator.generateEdit(action.rotation);
+            return this.generatorRegistory.generateEdit(action.rotation, generator);
         } else if (meta === "scopeRotation") {
-            return generator.generateEdit({ rotation: action.rotation.toString() });
+            return this.generatorRegistory.generateEdit({ rotation: action.rotation.toString() }, generator);
         } else {
             throw new Error(`Unknown meta information for RotationEdit: ${meta}`);
         }
     }
 
     override predictActionDiff(
-        layoutedDiagram: LayoutedDiagram,
+        edit: RotationEdit,
+        layoutedDiagram: DiagramLayoutResult,
         lastApplied: RotationAction,
         newest: RotationAction
     ): void {

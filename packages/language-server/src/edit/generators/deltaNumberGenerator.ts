@@ -1,15 +1,11 @@
 import { EditGenerator } from "./editGenerator";
 
 /**
- * Base class for DeltaReplacementNumberGenerator and DeltaAdditiveNumberGeneator
+ * Base interface for DeltaReplacementNumberGenerator and DeltaAdditiveNumberGeneator
  */
-export abstract class DeltaNumberGenerator implements EditGenerator<number> {
+export interface DeltaNumberGenerator extends EditGenerator {
     /**
-     * Creates a new DeltaNumberGenerator based on the original value of the expression
-     *
-     * @param originalValue the original number value of the literal expression
+     * The original value
      */
-    constructor(protected readonly originalValue: number) {}
-
-    abstract generateEdit(delta: number): string;
+    readonly originalValue: number;
 }

@@ -1,5 +1,5 @@
 import { FieldEntry } from "@hylimo/core";
-import { EditGeneratorEntry } from "../editGeneratorEntry";
+import { EditGeneratorEntry } from "./editGeneratorEntry";
 import { ReplacementNumberGenerator } from "../generators/replacementNumberGenerator";
 
 /**
@@ -19,7 +19,7 @@ export function generateReplacementNumberGenerator(entry: FieldEntry, meta: any)
     return {
         start: position!.startOffset,
         end: position!.endOffset + 1,
-        generator: new ReplacementNumberGenerator(),
+        generator: ReplacementNumberGenerator.create(),
         meta
     };
 }
