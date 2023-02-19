@@ -309,6 +309,8 @@ const scopeExpressions: Expression[] = [
         fun(
             `
                 (start, end) = args
+                startMarkerFactory = args.startMarkerFactory
+                endMarkerFactory = args.endMarkerFactory
                 startPoint = start
                 startProvider = if((start.type == "canvasElement") || (start.type == "canvasConnection")) {
                     startPoint = scope.lpos(start, 0)
@@ -328,8 +330,8 @@ const scopeExpressions: Expression[] = [
                     contents = list(
                         canvasLineSegment(end = endPoint)
                     ),
-                    startMarker = args.startMarker,
-                    endMarker = args.endMarker,
+                    startMarker = if(args.startMarkerFactory != null) { startMarkerFactory() },
+                    endMarker = if(args.endMarkerFactory != null) { endMarkerFactory() },
                     scopes = object()
                 )
                 connection.startProvider = startProvider
@@ -362,10 +364,16 @@ const scopeExpressions: Expression[] = [
         "createConnectionOperator",
         fun(
             `
-                (startMarker, endMarker) = args
+                startMarkerFactory = args.startMarkerFactory
+                endMarkerFactory = args.endMarkerFactory
                 scope.withRegisterSource {
                     (start, end) = args
-                    _createConnection(start, end, startMarker = startMarker, endMarker = endMarker)
+                    _createConnection(
+                        start,
+                        end,
+                        startMarkerFactory = startMarkerFactory,
+                        endMarkerFactory = endMarkerFactory
+                    )
                 }
             `,
             {
