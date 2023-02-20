@@ -135,19 +135,23 @@ export class TranslationMoveEditEngine extends TransactionalEditEngine<Translati
             const point = layoutedDiagram.elementLookup[pointId];
             if (point != undefined) {
                 if (AbsolutePoint.isAbsolutePoint(point)) {
+                    point.x += deltaX;
+                    point.y += deltaY;
                     updates.push({
                         target: pointId,
                         changes: {
-                            x: point.x + deltaX,
-                            y: point.y + deltaY
+                            x: point.x,
+                            y: point.y
                         }
                     });
                 } else if (RelativePoint.isRelativePoint(point)) {
+                    point.offsetX += deltaX;
+                    point.offsetY += deltaY;
                     updates.push({
                         target: pointId,
                         changes: {
-                            offsetX: point.offsetX + deltaX,
-                            offsetY: point.offsetY + deltaY
+                            offsetX: point.offsetX,
+                            offsetY: point.offsetY
                         }
                     });
                 }

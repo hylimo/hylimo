@@ -8,7 +8,18 @@ import {
 import { RemoteLayoutedDiagramManager } from "./remoteLayoutedDiagramManager";
 import { ReplyUpdateDiagramMessage, RequestUpdateDiagramMessage } from "./updateDiagramMessage";
 
+/**
+ * Remote implementation of a layouted diagram.
+ * If available, performs the layouted diagram operations on a remote language server.
+ */
 export class RemoteLayoutedDiagram extends LayoutedDiagramImplementation {
+    /**
+     * Creates a new RemoteLayoutedDiagram
+     *
+     * @param layoutedDiagramManager manager by which this is handled
+     * @param remoteId the id of the remote language server
+     * @param id the id of the diagram
+     */
     constructor(
         private readonly layoutedDiagramManager: RemoteLayoutedDiagramManager,
         private readonly remoteId: number,

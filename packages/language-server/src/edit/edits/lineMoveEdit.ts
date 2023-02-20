@@ -78,6 +78,7 @@ export class LineMoveEditEngine extends TransactionalEditEngine<LineMoveAction, 
     ): IncrementalUpdate[] {
         const point = layoutedDiagram.elementLookup[newest.point];
         if (point != undefined && LinePoint.isLinePoint(point)) {
+            point.pos = newest.pos;
             return [
                 {
                     target: point.id,

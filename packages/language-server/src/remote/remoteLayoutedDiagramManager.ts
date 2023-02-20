@@ -6,9 +6,21 @@ import { RemoteLayoutedDiagram } from "./remoteLayoutedDiagram";
 import { LayoutedDiagramManager } from "./layoutedDiagramManager";
 import { RemoteMessagePayload } from "./remoteMessages";
 
+/**
+ * Manages the layouted diagrams. This is the remote implementation.
+ * If no remote language servers are registered, it falls back to the local implementation.
+ */
 export class RemoteLayoutedDiagramManager extends LayoutedDiagramManager {
+    /**
+     * Lookup for available remote language servers.
+     */
     private readonly remoteLanguageServers = new Map<number, RemoteLanguageServerState>();
 
+    /**
+     * Creats a new RemoteLayoutedDiagramManager.
+     *
+     * @param util required to layout diagrams
+     */
     constructor(private readonly utils: SharedDiagramUtils) {
         super(utils.connection, 0);
     }
@@ -63,7 +75,17 @@ export class RemoteLayoutedDiagramManager extends LayoutedDiagramManager {
     }
 }
 
+/**
+ * State of a remote language server.
+ */
 interface RemoteLanguageServerState {
+    /**
+     * The id of the language server.
+     */
     id: number;
+    /**
+     * The number of active requests, this is used to choose the language server with the
+     * lowest number of active requests.
+     */
     activeRequests: number;
 }

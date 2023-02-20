@@ -103,9 +103,17 @@ export class TransactionManager {
             } else {
                 const currentDiagram = this.diagram.currentDiagram;
                 if (currentDiagram != undefined) {
-                    engine.predictActionDiff(this.edit, this.diagram.currentDiagram!, this.lastKnownAction, action);
+                    result = {
+                        incrementalUpdates: engine.predictActionDiff(
+                            this.edit,
+                            this.diagram.currentDiagram!,
+                            this.lastKnownAction,
+                            action
+                        )
+                    };
+                } else {
+                    result = {};
                 }
-                result = {};
             }
         } else {
             this.lastVersion = this.diagram.version;

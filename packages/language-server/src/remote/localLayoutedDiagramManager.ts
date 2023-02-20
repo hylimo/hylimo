@@ -10,9 +10,22 @@ import { RegisterRemoteLanguageServerMessage } from "./registerRemoteLanguageSer
 import { RemoteMessagePayload } from "./remoteMessages";
 import { ReplyUpdateDiagramMessage, RequestUpdateDiagramMessage } from "./updateDiagramMessage";
 
+/**
+ * Manages the layouted diagrams. This is the local implementation.
+ * It does not send any messages to other language servers.
+ */
 export class LocalLayoutedDiagramManager extends LayoutedDiagramManager {
+    /**
+     * Lookup for created layouted diagram implementations
+     */
     private readonly implementations = new Map<string, LayoutedDiagramImplementation>();
 
+    /**
+     * Creates a new LocalLayoutedDiagramManager.
+     *
+     * @param utils required to layout diagrams
+     * @param id the id of this language server
+     */
     constructor(private readonly utils: SharedDiagramUtils, id: number) {
         super(utils.connection, id);
         const registerMessage: RegisterRemoteLanguageServerMessage = {

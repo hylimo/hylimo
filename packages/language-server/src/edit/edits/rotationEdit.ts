@@ -86,6 +86,7 @@ export class RotationEditEngine extends TransactionalEditEngine<RotationAction, 
     ): IncrementalUpdate[] {
         const element = layoutedDiagram.elementLookup[newest.element];
         if (element != undefined && CanvasElement.isCanvasElement(element)) {
+            element.rotation = newest.rotation;
             return [
                 {
                     target: element.id,

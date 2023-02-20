@@ -27,6 +27,12 @@ import { RotationHandler } from "./rotation/rotationHandler";
 import { SCanvasConnection } from "../../model/canvas/sCanvasConnection";
 import { SCanvasContent } from "../../model/canvas/sCanvasContent";
 import { SCanvasConnectionSegment } from "../../model/canvas/sCanvasConnectionSegment";
+import { SRoot } from "../../model/sRoot";
+
+/**
+ * The maximum number of updates that can be performed on the same revision.
+ */
+const maxUpdatesPerRevision = 5;
 
 /**
  * Listener for mouse events to create move actions
@@ -47,6 +53,16 @@ export class MoveMouseListener extends MouseListener {
      * If null, creating a handler for the current move is not possible.
      */
     private moveHandler?: MoveHandler | null;
+    /**
+     * The last change revision of the model.
+     */
+    private lastChangeRevision = -1;
+    /**
+     * Number of updates on the last revision.
+     * Updates can only be performed if the revision has not changed,
+     * or this number is less than maxUpdatesPerRevision.
+     */
+    private outstandingUpdates = 0;
 
     override mouseDown(target: SModelElement, event: MouseEvent): Action[] {
         if (event.button === 0) {
@@ -64,10 +80,17 @@ export class MoveMouseListener extends MouseListener {
 
     override mouseMove(target: SModelElement, event: MouseEvent): Action[] {
         if (this.startPosition) {
+            const root = target.root as SRoot;
             if (this.moveHandler === undefined) {
                 this.moveHandler = this.createHandler(target, this.targetElement!);
+                this.lastChangeRevision = root.changeRevision;
             }
-            if (this.moveHandler != undefined) {
+            if (this.lastChangeRevision != root.changeRevision) {
+                this.outstandingUpdates -= root.changeRevision - this.lastChangeRevision;
+                this.lastChangeRevision = root.changeRevision;
+            }
+            if (this.moveHandler != undefined && this.outstandingUpdates < maxUpdatesPerRevision) {
+                this.outstandingUpdates++;
                 const translation = this.calculateTranslation(target, event);
                 const result = this.moveHandler.generateAction(translation.x, translation.y, false);
                 return [result];
@@ -106,6 +129,7 @@ export class MoveMouseListener extends MouseListener {
         const result = this.moveHandler.generateAction(translation.x, translation.y, true);
         this.moveHandler = undefined;
         this.startPosition = undefined;
+        this.outstandingUpdates = 0;
         return [result];
     }
 

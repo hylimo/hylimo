@@ -23,6 +23,11 @@ export class LocalLayoutedDiagram extends LayoutedDiagramImplementation {
      */
     private document?: TextDocument;
 
+    /**
+     * Creates a new local layouted diagram
+     *
+     * @param utils required for parsing, interpreting and layouting of the diagram
+     */
     constructor(private readonly utils: SharedDiagramUtils) {
         super();
     }

@@ -92,7 +92,6 @@ export class Diagram {
      */
     async handleTransactionalAction(action: TransactionalAction): Promise<void> {
         const result = await this.transactionManager.handleAction(action);
-
         if (result.textDocumentEdit != undefined) {
             this.utils.connection.workspace.applyEdit({
                 documentChanges: [result.textDocumentEdit]
