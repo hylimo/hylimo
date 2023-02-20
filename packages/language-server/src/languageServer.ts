@@ -22,11 +22,21 @@ import {
     OpenDiagramMessage
 } from "./diagramNotificationTypes";
 import { SharedDiagramUtils } from "./sharedDiagramUtils";
+import { LocalLayoutedDiagramManager } from "./remote/localLayoutedDiagramManager";
+import { LayoutedDiagramManager } from "./remote/layoutedDiagramManager";
+import { RemoteLayoutedDiagramManager } from "./remote/remoteLayoutedDiagramManager";
 
 /**
  * Config for creating a new language server
  */
 export interface LanguageServerConfig {
+    /**
+     * The if of this language server.
+     * 0 for the primary language server.
+     * > 0 for secondary language servers.
+     * Must be unique among all language servers.
+     */
+    id: number;
     /**
      * The connection to use
      */
@@ -79,6 +89,12 @@ export class LanguageServer {
     private readonly diagramUtils: SharedDiagramUtils;
 
     /**
+     * Manages layouted diagrams.
+     * Can be either a local or remote implementation
+     */
+    private readonly layoutedDiagramManager: LayoutedDiagramManager;
+
+    /**
      * Creates a new language server
      *
      * @param config configures the language server
@@ -102,6 +118,11 @@ export class LanguageServer {
             maxExecutionSteps: config.maxExecutionSteps,
             diagramServerManager: this.diagramServerManager
         };
+        if (config.id === 0) {
+            this.layoutedDiagramManager = new LocalLayoutedDiagramManager(this.diagramUtils, config.id);
+        } else {
+            this.layoutedDiagramManager = new RemoteLayoutedDiagramManager(this.diagramUtils);
+        }
         this.formatter = new Formatter(this.diagramUtils.parser);
         this.textDocuments.onDidOpen(this.onDidOpenTextDocument.bind(this));
         this.textDocuments.onDidClose(this.onDidCloseTextDocument.bind(this));
@@ -142,7 +163,7 @@ export class LanguageServer {
      * @param e the provided event
      */
     private onDidOpenTextDocument(e: TextDocumentChangeEvent<TextDocument>): void {
-        this.diagrams.set(e.document.uri, new Diagram(e.document, this.diagramUtils));
+        this.diagrams.set(e.document.uri, new Diagram(e.document, this.diagramUtils, this.layoutedDiagramManager));
     }
 
     /**

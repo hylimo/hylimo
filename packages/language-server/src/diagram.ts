@@ -3,9 +3,10 @@ import { SharedDiagramUtils } from "./sharedDiagramUtils";
 import { Diagnostic } from "vscode-languageserver";
 import { TransactionManager } from "./edit/transactionManager";
 import { TransactionalAction } from "@hylimo/diagram-common";
-import { LayoutedDiagram, LocalLayoutedDiagram } from "./layoutedDiagram";
+import { LayoutedDiagram } from "./layoutedDiagram";
 import { DiagramLayoutResult } from "@hylimo/diagram";
 import { defaultEditRegistry } from "./edit/edits/transactionalEditRegistry";
+import { LayoutedDiagramManager } from "./remote/layoutedDiagramManager";
 
 /**
  * Holds the state for a specific diagram
@@ -34,10 +35,14 @@ export class Diagram {
      *
      * @param document the document on which it is based
      * @param utils shared diagram utils
+     * @param layoutedDiagramManager the layouted diagram manager provided to the LayoutedDiagram
      */
-    constructor(readonly document: TextDocument, readonly utils: SharedDiagramUtils) {
-        //TODO fix
-        this.layoutedDiagram = new LocalLayoutedDiagram(utils);
+    constructor(
+        readonly document: TextDocument,
+        private readonly utils: SharedDiagramUtils,
+        layoutedDiagramManager: LayoutedDiagramManager
+    ) {
+        this.layoutedDiagram = new LayoutedDiagram(document.uri, layoutedDiagramManager);
     }
 
     /**

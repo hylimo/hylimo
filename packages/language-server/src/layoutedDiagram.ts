@@ -1,131 +1,82 @@
-import { CstResult, Expression, FullObject, InterpretationResult } from "@hylimo/core";
 import { DiagramLayoutResult } from "@hylimo/diagram";
-import { LineMoveAction, RotationAction, TransactionalAction, TranslationMoveAction } from "@hylimo/diagram-common";
-import { Diagnostic, DiagnosticSeverity, Range, uinteger } from "vscode-languageserver";
-import { TextDocument } from "vscode-languageserver-textdocument";
-import { LineMoveEdit } from "./edit/edits/lineMoveEdit";
-import { RotationEdit } from "./edit/edits/rotationEdit";
+import { TransactionalAction } from "@hylimo/diagram-common";
+import { Diagnostic } from "vscode-languageserver";
 import { TransactionalEdit } from "./edit/edits/transactionalEdit";
-import { TranslationMoveEdit } from "./edit/edits/translationMoveEdit";
-import { SharedDiagramUtils } from "./sharedDiagramUtils";
+import { LayoutedDiagramManager } from "./remote/layoutedDiagramManager";
 
-export abstract class LayoutedDiagram {
-    abstract updateDiagram(source: string): Promise<DiagramUpdateResult>;
+/**
+ * Handles a diagram.
+ * The implementation can be either local or on a remote language server
+ */
+export class LayoutedDiagram {
+    /**
+     * The implementation to which all requests are delegated
+     */
+    private implementation?: LayoutedDiagramImplementation;
 
-    abstract generateTransactionalEdit(action: TransactionalAction): Promise<TransactionalEdit>;
+    constructor(private readonly id: string, private readonly layoutedDiagramManager: LayoutedDiagramManager) {}
+
+    /**
+     * Updates the diagram with the given new source
+     *
+     * @param source the source code of the diagram
+     * @returns the result of the update
+     */
+    async updateDiagram(source: string): Promise<DiagramUpdateResult> {
+        this.implementation = this.layoutedDiagramManager.getNewLayoutedDiagramImplementation(
+            this.id,
+            this.implementation
+        );
+        return this.implementation.updateDiagram(source);
+    }
+
+    /**
+     * Generates a transactional edit for the given transactional action.
+     * Throws an error if updateDiagram has not been called yet.
+     *
+     * @param action the action to generate the edit for
+     * @returns the generated transactional edit
+     */
+    async generateTransactionalEdit(action: TransactionalAction): Promise<TransactionalEdit> {
+        if (this.implementation == undefined) {
+            throw new Error("Cannot generate transactional edit without implementation");
+        }
+        return this.implementation.generateTransactionalEdit(action);
+    }
 }
 
+/**
+ * Result of a diagram update
+ */
 export interface DiagramUpdateResult {
+    /**
+     * Created diagnostics for errors and warnings
+     */
     diagnostics: Diagnostic[];
+    /**
+     * The layouted diagram
+     */
     diagram?: DiagramLayoutResult;
 }
 
-export class LocalLayoutedDiagram extends LayoutedDiagram {
-    private layoutResult?: DiagramLayoutResult;
-    private document?: TextDocument;
-
-    constructor(private readonly utils: SharedDiagramUtils) {
-        super();
-    }
-
-    override async updateDiagram(source: string): Promise<DiagramUpdateResult> {
-        this.document = TextDocument.create("", "sys", 0, source);
-        const parserResult = this.utils.parser.parse(source);
-        const diagnostics: Diagnostic[] = [];
-        diagnostics.push(...this.getParserResultDiagnostics(parserResult));
-        if (parserResult.ast) {
-            const interpretationResult = this.runInterpreterAndConvertErrors(parserResult.ast, diagnostics);
-            if (interpretationResult.result) {
-                this.layoutResult = await this.utils.layoutEngine.layout(interpretationResult.result as FullObject);
-                return {
-                    diagnostics,
-                    diagram: this.layoutResult
-                };
-            }
-        }
-        return {
-            diagnostics
-        };
-    }
-
-    override async generateTransactionalEdit(action: TransactionalAction): Promise<TransactionalEdit> {
-        if (this.layoutResult == undefined) {
-            throw new Error("Diagram not yet initialized");
-        }
-
-        if (TranslationMoveAction.is(action)) {
-            return TranslationMoveEdit.create(action, this.layoutResult, this.document!);
-        } else if (RotationAction.is(action)) {
-            return RotationEdit.create(action, this.layoutResult, this.document!);
-        } else if (LineMoveAction.is(action)) {
-            return LineMoveEdit.create(action, this.layoutResult);
-        } else {
-            throw new Error("Unknown action type");
-        }
-    }
+/**
+ * Implementation of a layouted diagram.
+ * Can be either local or remote
+ */
+export abstract class LayoutedDiagramImplementation {
+    /**
+     * Updates the diagram with the given new source
+     *
+     * @param source the source code of the diagram
+     * @returns the result of the update
+     */
+    abstract updateDiagram(source: string): Promise<DiagramUpdateResult>;
 
     /**
-     * Runs the interpreter on the parserResult
+     * Generates a transactional edit for the given transactional action.
      *
-     * @param expressions the expressions to execute
-     * @param diagnostics the diagnostics array where to push a potential error
-     * @returns the result of the interpreter run
+     * @param action the action to generate the edit for
+     * @returns the generated transactional edit
      */
-    private runInterpreterAndConvertErrors(expressions: Expression[], diagnostics: Diagnostic[]): InterpretationResult {
-        const interpretationResult = this.utils.interpreter.run(expressions, this.utils.maxExecutionSteps);
-        const error = interpretationResult.error;
-        if (error) {
-            const pos = error.findFirstPosition();
-            if (pos) {
-                diagnostics.push(
-                    Diagnostic.create(
-                        Range.create(pos.startLine - 1, pos.startColumn - 1, pos.endLine - 1, pos.endColumn),
-                        error.message || "[no message provided]",
-                        DiagnosticSeverity.Error
-                    )
-                );
-            }
-            console.error(error);
-            console.error(error.interpretationStack);
-            //TODO do sth else with error
-        }
-        return interpretationResult;
-    }
-
-    /**
-     * Creates diagnostics from lexical and parsing errors
-     *
-     * @param parserResult the parsing result
-     * @returns the found diagnostics
-     */
-    private getParserResultDiagnostics(parserResult: CstResult): Diagnostic[] {
-        const diagnostics: Diagnostic[] = [];
-        parserResult.lexingErrors.forEach((error) => {
-            diagnostics.push(
-                Diagnostic.create(
-                    Range.create(error.line! - 1, error.column! - 1, error.line! - 1, error.column! + error.length),
-                    error.message || "unknown lexical error",
-                    DiagnosticSeverity.Error
-                )
-            );
-        });
-        parserResult.parserErrors.forEach((error) => {
-            const token = error.token;
-            let location: Range;
-            if (!Number.isNaN(error.token.startLine)) {
-                location = Range.create(
-                    token.startLine! - 1,
-                    token.startColumn! - 1,
-                    token.endLine! - 1,
-                    token.endColumn!
-                );
-            } else {
-                location = Range.create(uinteger.MAX_VALUE, uinteger.MAX_VALUE, uinteger.MAX_VALUE, uinteger.MAX_VALUE);
-            }
-            diagnostics.push(
-                Diagnostic.create(location, error.message || "unknown syntax error", DiagnosticSeverity.Error)
-            );
-        });
-        return diagnostics;
-    }
+    abstract generateTransactionalEdit(action: TransactionalAction): Promise<TransactionalEdit>;
 }
