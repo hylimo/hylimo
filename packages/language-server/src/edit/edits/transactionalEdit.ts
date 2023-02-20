@@ -1,4 +1,5 @@
 import { DiagramLayoutResult } from "@hylimo/diagram";
+import { IncrementalUpdate } from "@hylimo/diagram-common";
 import { Action } from "sprotty-protocol";
 import {
     Range,
@@ -18,10 +19,19 @@ import { EditGeneratorEntry } from "./editGeneratorEntry";
  */
 export interface TransactionalEdit {
     readonly type: string;
+    /**
+     * Generators which are used to generate the text
+     */
     readonly generatorEntries: EditGeneratorEntry[];
 }
 
+/**
+ * A transactional edit with a version
+ */
 export type Versioned<T extends TransactionalEdit> = T & {
+    /**
+     * The version of the edit
+     */
     version: number;
 };
 
@@ -89,8 +99,14 @@ export abstract class TransactionalEditEngine<A extends Action, T extends Transa
      * @param layoutedDiagram the layouted diagram
      * @param lastApplied the last command applied to layoutedDiagram
      * @param newest the newest known command
+     * @returns the incremental updates to apply
      */
-    abstract predictActionDiff(edit: T, layoutedDiagram: DiagramLayoutResult, lastApplied: A, newest: A): void;
+    abstract predictActionDiff(
+        edit: T,
+        layoutedDiagram: DiagramLayoutResult,
+        lastApplied: A,
+        newest: A
+    ): IncrementalUpdate[];
 
     /**
      * Applies an action to all generators and creates a corresponding edit

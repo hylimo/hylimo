@@ -1,3 +1,4 @@
+import { IncrementalUpdate, IncrementalUpdateAction, Root } from "@hylimo/diagram-common";
 import { ActionMessage, GeneratorArguments, SModelRoot } from "sprotty-protocol";
 import { Connection } from "vscode-languageserver";
 import { Diagram } from "./diagram";
@@ -74,19 +75,33 @@ export class DiagramServerManager {
     /**
      * Updates the model of each DiagramServer associated with diagram
      *
-     * @param diagram the updated diagram
+     * @param id the id of the diagram
+     * @param newRoot the new root of the diagram
      */
-    updatedDiagram(diagram: Diagram): void {
-        const newRoot = diagram.currentDiagram?.rootElement;
-        if (newRoot) {
-            (this.diagramServersByDocument.get(diagram.document.uri) ?? [])
-                .map((clientId) => this.diagramServers.get(clientId)!)
-                .forEach((diagramServer) => {
-                    diagramServer.updateModel(newRoot);
-                });
-        } else {
-            // TODO some kind of error notification
-        }
+    updatedDiagram(id: string, newRoot: Root): void {
+        (this.diagramServersByDocument.get(id) ?? [])
+            .map((clientId) => this.diagramServers.get(clientId)!)
+            .forEach((diagramServer) => {
+                diagramServer.updateModel(newRoot);
+            });
+    }
+
+    /**
+     * Incrementally updates the model of each DiagramServer associated with diagram based on the provided updates
+     *
+     * @param id the id of the diagram
+     * @param updates the updates to apply
+     */
+    incrementalUpdateDiagram(id: string, updates: IncrementalUpdate[]): void {
+        const action: IncrementalUpdateAction = {
+            kind: IncrementalUpdateAction.KIND,
+            updates
+        };
+        (this.diagramServersByDocument.get(id) ?? [])
+            .map((clientId) => this.diagramServers.get(clientId)!)
+            .forEach((diagramServer) => {
+                diagramServer.dispatch(action);
+            });
     }
 
     /**

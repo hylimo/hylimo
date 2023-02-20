@@ -1,5 +1,5 @@
 import { DiagramLayoutResult } from "@hylimo/diagram";
-import { LineMoveAction, LinePoint } from "@hylimo/diagram-common";
+import { IncrementalUpdate, LineMoveAction, LinePoint } from "@hylimo/diagram-common";
 import { EditGenerator } from "../generators/editGenerator";
 import { GeneratorRegistry } from "../generators/generatorRegistry";
 import { generateReplacementNumberGenerator } from "./generateReplacementNumberGenerator";
@@ -75,10 +75,19 @@ export class LineMoveEditEngine extends TransactionalEditEngine<LineMoveAction, 
         layoutedDiagram: DiagramLayoutResult,
         lastApplied: LineMoveAction,
         newest: LineMoveAction
-    ): void {
+    ): IncrementalUpdate[] {
         const point = layoutedDiagram.elementLookup.get(newest.point);
         if (point != undefined && LinePoint.isLinePoint(point)) {
-            point.pos = newest.pos;
+            return [
+                {
+                    target: point.id,
+                    changes: {
+                        pos: newest.pos
+                    }
+                }
+            ];
+        } else {
+            return [];
         }
     }
 }

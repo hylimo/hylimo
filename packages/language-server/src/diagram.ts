@@ -73,7 +73,9 @@ export class Diagram {
         this.currentDiagram = diagram;
         if (diagram != undefined) {
             this.transactionManager.updateLayoutedDiagram(diagram);
-            this.updateDiagramOnServerManager();
+            const root = diagram.rootElement;
+            root.noAnimation = true;
+            this.utils.diagramServerManager.updatedDiagram(this.document.uri, root);
         }
         return result.diagnostics;
     }
@@ -84,22 +86,15 @@ export class Diagram {
      * @param action the action to handle
      */
     async handleTransactionalAction(action: TransactionalAction): Promise<void> {
-        const edit = await this.transactionManager.handleAction(action);
-        this.updateDiagramOnServerManager();
-        if (edit != undefined) {
+        const result = await this.transactionManager.handleAction(action);
+
+        if (result.textDocumentEdit != undefined) {
             this.utils.connection.workspace.applyEdit({
-                documentChanges: [edit]
+                documentChanges: [result.textDocumentEdit]
             });
         }
-    }
-
-    /**
-     * Updates the diag
-     */
-    private updateDiagramOnServerManager(): void {
-        if (this.currentDiagram != undefined) {
-            this.currentDiagram.rootElement.noAnimation = this.transactionManager.isActive;
-            this.utils.diagramServerManager.updatedDiagram(this);
+        if (result.incrementalUpdates != undefined) {
+            this.utils.diagramServerManager.incrementalUpdateDiagram(this.document.uri, result.incrementalUpdates);
         }
     }
 }

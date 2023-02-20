@@ -1,5 +1,5 @@
 import { DiagramLayoutResult } from "@hylimo/diagram";
-import { CanvasElement, RotationAction } from "@hylimo/diagram-common";
+import { CanvasElement, IncrementalUpdate, RotationAction } from "@hylimo/diagram-common";
 import { EditGeneratorEntry } from "./editGeneratorEntry";
 import { EditGenerator } from "../generators/editGenerator";
 import { generateAddFieldToScopeGenerator } from "./generateAddFieldToScopeGenerator";
@@ -83,10 +83,19 @@ export class RotationEditEngine extends TransactionalEditEngine<RotationAction, 
         layoutedDiagram: DiagramLayoutResult,
         lastApplied: RotationAction,
         newest: RotationAction
-    ): void {
+    ): IncrementalUpdate[] {
         const element = layoutedDiagram.elementLookup.get(newest.element);
         if (element != undefined && CanvasElement.isCanvasElement(element)) {
-            element.rotation = newest.rotation;
+            return [
+                {
+                    target: element.id,
+                    changes: {
+                        rotation: newest.rotation
+                    }
+                }
+            ];
+        } else {
+            return [];
         }
     }
 }

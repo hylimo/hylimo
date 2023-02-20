@@ -1,5 +1,11 @@
 import { DiagramLayoutResult, LayoutElement } from "@hylimo/diagram";
-import { AbsolutePoint, CanvasElement, RelativePoint, TranslationMoveAction } from "@hylimo/diagram-common";
+import {
+    AbsolutePoint,
+    CanvasElement,
+    IncrementalUpdate,
+    RelativePoint,
+    TranslationMoveAction
+} from "@hylimo/diagram-common";
 import { TextDocument } from "vscode-languageserver-textdocument";
 import { EditGeneratorEntry } from "./editGeneratorEntry";
 import { EditGenerator } from "../generators/editGenerator";
@@ -118,23 +124,35 @@ export class TranslationMoveEditEngine extends TransactionalEditEngine<Translati
         layoutedDiagram: DiagramLayoutResult,
         lastApplied: TranslationMoveAction,
         newest: TranslationMoveAction
-    ): void {
+    ): IncrementalUpdate[] {
         if (edit.hasNewPoint) {
-            return;
+            return [];
         }
         const deltaX = newest.offsetX - lastApplied.offsetX;
         const deltaY = newest.offsetY - lastApplied.offsetY;
+        const updates: IncrementalUpdate[] = [];
         for (const pointId of newest.elements) {
             const point = layoutedDiagram.elementLookup.get(pointId);
             if (point != undefined) {
                 if (AbsolutePoint.isAbsolutePoint(point)) {
-                    point.x += deltaX;
-                    point.y += deltaY;
+                    updates.push({
+                        target: pointId,
+                        changes: {
+                            x: point.x + deltaX,
+                            y: point.y + deltaY
+                        }
+                    });
                 } else if (RelativePoint.isRelativePoint(point)) {
-                    point.offsetX += deltaX;
-                    point.offsetY += deltaY;
+                    updates.push({
+                        target: pointId,
+                        changes: {
+                            offsetX: point.offsetX + deltaX,
+                            offsetY: point.offsetY + deltaY
+                        }
+                    });
                 }
             }
         }
+        return updates;
     }
 }

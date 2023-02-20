@@ -1,9 +1,9 @@
 import { DiagramLayoutResult } from "@hylimo/diagram";
-import { TransactionalAction } from "@hylimo/diagram-common";
+import { IncrementalUpdate, TransactionalAction } from "@hylimo/diagram-common";
 import { TextDocumentEdit } from "vscode-languageserver";
 import { TextDocumentContentChangeEvent } from "vscode-languageserver-textdocument";
 import { Diagram } from "../diagram";
-import { TransactionalEdit, Versioned } from "./edits/transactionalEdit";
+import { TransactionalEdit, TransactionalEditEngine, Versioned } from "./edits/transactionalEdit";
 import { TransactionalEditRegistory } from "./edits/transactionalEditRegistry";
 
 /**
@@ -56,7 +56,7 @@ export class TransactionManager {
      * @param action the action to handle
      * @returns the created TextDocumentEdit
      */
-    async handleAction(action: TransactionalAction): Promise<TextDocumentEdit | undefined> {
+    async handleAction(action: TransactionalAction): Promise<HandleActionResult> {
         if (this.currentTransactionId != undefined && this.currentTransactionId != action.transactionId) {
             throw new Error("Concurrent transactions are currently not supported");
         }
@@ -68,7 +68,29 @@ export class TransactionManager {
             };
         }
         const engine = this.registry.getEditEngine(this.edit);
-        let result: TextDocumentEdit | undefined;
+        const result = await this.createHandleActionResult(action, engine);
+        this.lastKnownAction = action;
+        if (action.commited) {
+            this.currentTransactionId = undefined;
+            this.edit = undefined;
+            this.lastKnownAction = undefined;
+            this.lastAppliedAction = undefined;
+            this.delayedHandleAction = undefined;
+        }
+        return result;
+    }
+
+    /**
+     * Handles an transactional action internally.
+     * Either delays the action, or applies it.
+     * If it is applied, either an incremental update is calculated or a text document modification is created.
+     *
+     * @param action the action to handle
+     * @param engine engine which handles the edit
+     * @returns the computed result of the action
+     */
+    private async createHandleActionResult(action: TransactionalAction, engine: TransactionalEditEngine<any, any>) {
+        let result: HandleActionResult;
         if (this.lastVersion == this.diagram.version) {
             if (action.commited) {
                 this.delayedHandleAction = () => this.handleAction(action);
@@ -81,22 +103,16 @@ export class TransactionManager {
             } else {
                 const currentDiagram = this.diagram.currentDiagram;
                 if (currentDiagram != undefined) {
-                    engine.predictActionDiff(this.edit, this.diagram.currentDiagram!, this.lastAppliedAction, action);
+                    engine.predictActionDiff(this.edit, this.diagram.currentDiagram!, this.lastKnownAction, action);
                 }
-                result = undefined;
+                result = {};
             }
         } else {
             this.lastVersion = this.diagram.version;
             this.lastAppliedAction = action;
-            result = engine.applyAction(this.edit, action, this.diagram.document);
-        }
-        this.lastKnownAction = action;
-        if (action.commited) {
-            this.currentTransactionId = undefined;
-            this.edit = undefined;
-            this.lastKnownAction = undefined;
-            this.lastAppliedAction = undefined;
-            this.delayedHandleAction = undefined;
+            result = {
+                textDocumentEdit: engine.applyAction(this.edit, action, this.diagram.document)
+            };
         }
         return result;
     }
@@ -130,4 +146,18 @@ export class TransactionManager {
             TransactionalEdit.updateGeneratorEntries(this.edit, changes, this.diagram.document);
         }
     }
+}
+
+/**
+ * Result of handleAction
+ */
+interface HandleActionResult {
+    /**
+     * Updation text document edit
+     */
+    textDocumentEdit?: TextDocumentEdit;
+    /**
+     * Optional incremental updates
+     */
+    incrementalUpdates?: IncrementalUpdate[];
 }

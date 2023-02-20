@@ -7,7 +7,7 @@ import {
     SModelRoot
 } from "sprotty";
 import { CancelableCommandExecutionContext } from "../features/animation/cancelableCommandExecutionContext";
-import { UpdateModelCommand } from "../features/update/update-model";
+import { UpdateModelCommand } from "../features/update/updateModel";
 
 /**
  * CommandStack with support for CancelableAnimations.
