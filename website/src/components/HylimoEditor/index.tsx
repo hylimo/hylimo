@@ -11,14 +11,24 @@ import {
     MonacoServices,
     MessageTransports
 } from "monaco-languageclient";
-import { BrowserMessageReader, BrowserMessageWriter } from "vscode-languageserver-protocol/browser.js";
+import {
+    BrowserMessageReader,
+    BrowserMessageWriter,
+    createProtocolConnection
+} from "vscode-languageserver-protocol/browser.js";
 import { StandaloneServices } from "vscode/services";
 import MonacoEditor from "react-monaco-editor";
 import { useLocalStorage } from "@rehooks/local-storage";
 import { createContainer } from "@hylimo/diagram-ui";
 import { ActionHandlerRegistry, IActionDispatcher, TYPES } from "sprotty";
 import { RequestModelAction, ActionMessage } from "sprotty-protocol";
-import { DiagramActionNotification, DiagramOpenNotification } from "@hylimo/language-server";
+import {
+    DiagramActionNotification,
+    DiagramOpenNotification,
+    RemoteNotification,
+    RemoteRequest,
+    SetSecondaryLanguageServerNotification
+} from "@hylimo/language-server";
 import { DiagramServerProxy, ResetCanvasBoundsAction } from "@hylimo/diagram-ui";
 import useResizeObserver from "@react-hook/resize-observer";
 
@@ -47,6 +57,12 @@ export default function HylimoEditor(): JSX.Element {
         StandaloneServices.initialize({});
         MonacoServices.install();
         const worker = new Worker(new URL("./languageServer.ts", import.meta.url));
+        const secondaryWorker = new Worker(new URL("./languageServer.ts", import.meta.url));
+        const secondaryConnection = createProtocolConnection(
+            new BrowserMessageReader(secondaryWorker),
+            new BrowserMessageWriter(secondaryWorker)
+        );
+        secondaryConnection.listen();
         const reader = new BrowserMessageReader(worker);
         const writer = new BrowserMessageWriter(worker);
         const languageClient = createLanguageClient({ reader, writer });
@@ -64,6 +80,19 @@ export default function HylimoEditor(): JSX.Element {
                     languageClient.onNotification(DiagramActionNotification.type, (message) => {
                         this.messageReceived(message);
                     });
+                    languageClient.onNotification(RemoteNotification.type, (message) => {
+                        secondaryConnection.sendNotification(RemoteNotification.type, message);
+                    });
+                    secondaryConnection.onNotification(RemoteNotification.type, (message) => {
+                        languageClient.sendNotification(RemoteNotification.type, message);
+                    });
+                    languageClient.onRequest(RemoteRequest.type, async (request) => {
+                        return secondaryConnection.sendRequest(RemoteRequest.type, request);
+                    });
+                    secondaryConnection.onRequest(RemoteRequest.type, (request) => {
+                        return languageClient.sendRequest(RemoteRequest.type, request);
+                    });
+                    secondaryConnection.sendNotification(SetSecondaryLanguageServerNotification.type, 1);
                 }
 
                 protected override sendMessage(message: ActionMessage): void {

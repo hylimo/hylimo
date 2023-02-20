@@ -6,6 +6,7 @@ import {
 } from "./generateTransactionalEditMessage";
 import { LayoutedDiagramManager } from "./layoutedDiagramManager";
 import { LocalLayoutedDiagram } from "./localLayoutedDiagram";
+import { RegisterRemoteLanguageServerMessage } from "./registerRemoteLanguageServerMessage";
 import { RemoteMessagePayload } from "./remoteMessages";
 import { ReplyUpdateDiagramMessage, RequestUpdateDiagramMessage } from "./updateDiagramMessage";
 
@@ -14,6 +15,10 @@ export class LocalLayoutedDiagramManager extends LayoutedDiagramManager {
 
     constructor(private readonly utils: SharedDiagramUtils, id: number) {
         super(utils.connection, id);
+        const registerMessage: RegisterRemoteLanguageServerMessage = {
+            type: RegisterRemoteLanguageServerMessage.type
+        };
+        this.sendNotification(registerMessage, 0);
     }
 
     protected override async handleNotification(_message: RemoteMessagePayload, _from: number): Promise<void> {
@@ -26,9 +31,17 @@ export class LocalLayoutedDiagramManager extends LayoutedDiagramManager {
     ): Promise<RemoteMessagePayload> {
         if (RequestUpdateDiagramMessage.is(message)) {
             const implementation = this.getNewLayoutedDiagramImplementation(message.id);
+            const updateDiagramResult = await implementation.updateDiagram(message.source);
+            const diagram = updateDiagramResult.diagram;
             const result: ReplyUpdateDiagramMessage = {
                 type: ReplyUpdateDiagramMessage.type,
-                result: await implementation.updateDiagram(message.source)
+                result: {
+                    diagnostics: updateDiagramResult.diagnostics,
+                    diagram: diagram && {
+                        rootElement: diagram.rootElement,
+                        elementLookup: diagram.elementLookup
+                    }
+                }
             };
             return result;
         } else if (RequestGenerateTransactionalEditMessage.is(message)) {

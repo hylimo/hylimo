@@ -108,7 +108,7 @@ export class Layout {
     /**
      * Lookup for layouted elements
      */
-    readonly elementLookup = new Map<string, Element>();
+    readonly elementLookup: Record<string, Element> = {};
 
     /**
      * Creates a new layout
@@ -336,7 +336,7 @@ export class Layout {
         };
         element.layoutBounds = bounds;
         const results = element.layoutConfig.layout(this, element, bounds.position, bounds.size, id);
-        results.forEach((result) => this.elementLookup.set(result.id, result));
+        results.forEach((result) => (this.elementLookup[result.id] = result));
         return results;
     }
 }

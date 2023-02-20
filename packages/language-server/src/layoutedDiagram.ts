@@ -1,4 +1,4 @@
-import { DiagramLayoutResult } from "@hylimo/diagram";
+import { BaseDiagramLayoutResult } from "@hylimo/diagram";
 import { TransactionalAction } from "@hylimo/diagram-common";
 import { Diagnostic } from "vscode-languageserver";
 import { TransactionalEdit } from "./edit/edits/transactionalEdit";
@@ -56,7 +56,7 @@ export interface DiagramUpdateResult {
     /**
      * The layouted diagram
      */
-    diagram?: DiagramLayoutResult;
+    diagram?: BaseDiagramLayoutResult;
 }
 
 /**

@@ -1,4 +1,4 @@
-import { DiagramLayoutResult } from "@hylimo/diagram";
+import { BaseDiagramLayoutResult } from "@hylimo/diagram";
 import { IncrementalUpdate } from "@hylimo/diagram-common";
 import { Action } from "sprotty-protocol";
 import {
@@ -103,7 +103,7 @@ export abstract class TransactionalEditEngine<A extends Action, T extends Transa
      */
     abstract predictActionDiff(
         edit: T,
-        layoutedDiagram: DiagramLayoutResult,
+        layoutedDiagram: BaseDiagramLayoutResult,
         lastApplied: A,
         newest: A
     ): IncrementalUpdate[];

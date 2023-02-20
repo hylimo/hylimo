@@ -25,18 +25,12 @@ import { SharedDiagramUtils } from "./sharedDiagramUtils";
 import { LocalLayoutedDiagramManager } from "./remote/localLayoutedDiagramManager";
 import { LayoutedDiagramManager } from "./remote/layoutedDiagramManager";
 import { RemoteLayoutedDiagramManager } from "./remote/remoteLayoutedDiagramManager";
+import { SetSecondaryLanguageServerNotification } from "./remote/remoteMessages";
 
 /**
  * Config for creating a new language server
  */
 export interface LanguageServerConfig {
-    /**
-     * The if of this language server.
-     * 0 for the primary language server.
-     * > 0 for secondary language servers.
-     * Must be unique among all language servers.
-     */
-    id: number;
     /**
      * The connection to use
      */
@@ -92,7 +86,7 @@ export class LanguageServer {
      * Manages layouted diagrams.
      * Can be either a local or remote implementation
      */
-    private readonly layoutedDiagramManager: LayoutedDiagramManager;
+    private layoutedDiagramManager: LayoutedDiagramManager;
 
     /**
      * Creates a new language server
@@ -118,11 +112,7 @@ export class LanguageServer {
             maxExecutionSteps: config.maxExecutionSteps,
             diagramServerManager: this.diagramServerManager
         };
-        if (config.id === 0) {
-            this.layoutedDiagramManager = new LocalLayoutedDiagramManager(this.diagramUtils, config.id);
-        } else {
-            this.layoutedDiagramManager = new RemoteLayoutedDiagramManager(this.diagramUtils);
-        }
+        this.layoutedDiagramManager = new RemoteLayoutedDiagramManager(this.diagramUtils);
         this.formatter = new Formatter(this.diagramUtils.parser);
         this.textDocuments.onDidOpen(this.onDidOpenTextDocument.bind(this));
         this.textDocuments.onDidClose(this.onDidCloseTextDocument.bind(this));
@@ -135,6 +125,10 @@ export class LanguageServer {
         this.connection.onNotification(DiagramCloseNotification.type, (clientId) => {
             this.diagramServerManager.removeClient(clientId);
         });
+        this.connection.onNotification(
+            SetSecondaryLanguageServerNotification.type,
+            this.onSetSecondaryLanguageServer.bind(this)
+        );
     }
 
     /**
@@ -232,5 +226,16 @@ export class LanguageServer {
             throw new Error(`Unknown diagram: ${params.diagramUri}`);
         }
         this.diagramServerManager.addClient(params.clientId, diagram);
+    }
+
+    /**
+     * Sets this language server to use a secondary language server
+     *
+     * @param id the id of the secondary language server
+     */
+    private onSetSecondaryLanguageServer(id: number): void {
+        if (id > 0) {
+            this.layoutedDiagramManager = new LocalLayoutedDiagramManager(this.diagramUtils, id);
+        }
     }
 }

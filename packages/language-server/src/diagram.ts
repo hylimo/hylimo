@@ -4,7 +4,7 @@ import { Diagnostic } from "vscode-languageserver";
 import { TransactionManager } from "./edit/transactionManager";
 import { TransactionalAction } from "@hylimo/diagram-common";
 import { LayoutedDiagram } from "./layoutedDiagram";
-import { DiagramLayoutResult } from "@hylimo/diagram";
+import { BaseDiagramLayoutResult } from "@hylimo/diagram";
 import { defaultEditRegistry } from "./edit/edits/transactionalEditRegistry";
 import { LayoutedDiagramManager } from "./remote/layoutedDiagramManager";
 
@@ -19,7 +19,7 @@ export class Diagram {
     /**
      * The current diagram
      */
-    currentDiagram?: DiagramLayoutResult;
+    currentDiagram?: BaseDiagramLayoutResult;
     /**
      * Handles TransactionActions
      */

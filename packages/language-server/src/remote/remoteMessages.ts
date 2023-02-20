@@ -17,3 +17,7 @@ export namespace RemoteNotification {
 export namespace RemoteRequest {
     export const type = new RequestType<RemoteMessage, RemoteMessage, any>("remote/request");
 }
+
+export namespace SetSecondaryLanguageServerNotification {
+    export const type = new NotificationType<number>("remote/setSecondaryLanguageServer");
+}

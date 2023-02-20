@@ -132,7 +132,7 @@ export class TranslationMoveEditEngine extends TransactionalEditEngine<Translati
         const deltaY = newest.offsetY - lastApplied.offsetY;
         const updates: IncrementalUpdate[] = [];
         for (const pointId of newest.elements) {
-            const point = layoutedDiagram.elementLookup.get(pointId);
+            const point = layoutedDiagram.elementLookup[pointId];
             if (point != undefined) {
                 if (AbsolutePoint.isAbsolutePoint(point)) {
                     updates.push({
