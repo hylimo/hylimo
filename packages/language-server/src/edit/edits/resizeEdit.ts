@@ -8,16 +8,24 @@ import { generateAddFieldToScopeGenerator } from "./generateAddFieldToScopeGener
 import { generateFactorNumberGenerator } from "./generateFactorNumberGenerator";
 import { TransactionalEdit, TransactionalEditEngine } from "./transactionalEdit";
 
-interface ResizeMetadata {
+/**
+ * Metadata for generateAddFieldToScopeGenerator
+ */
+interface AddToScopeResizeMetadata {
     /**
-     * The type of the resize
+     * The original width
      */
-    type: "width" | "height";
+    originalWidth?: number;
     /**
-     * If given, it is a scope edit and the current size is stored here
+     * The original height
      */
-    originalValue?: number;
+    originalHeight?: number;
 }
+
+/**
+ * Metadata for ResizeEdit
+ */
+type ResizeMetadata = "width" | "height" | AddToScopeResizeMetadata;
 
 /**
  * Generates EditGeneratorEntries for a resize action applied to a canvas element
@@ -37,31 +45,25 @@ function generateResizeGeneratorEntries(
     }
     const result: EditGeneratorEntry[] = [];
     const bounds = element.layoutBounds!.size;
+    const addToScopeMeta: AddToScopeResizeMetadata = {};
     if (action.factorX != undefined) {
         const widthField = element.styleSources.get("width");
         if (widthField?.source == undefined) {
-            result.push(
-                generateAddFieldToScopeGenerator(element.element, "layout", document, {
-                    type: "width",
-                    originalValue: bounds.width
-                })
-            );
+            addToScopeMeta.originalWidth = bounds.width;
         } else {
-            result.push(generateFactorNumberGenerator(widthField, { type: "width" }));
+            result.push(generateFactorNumberGenerator(widthField, "width"));
         }
     }
     if (action.factorY != undefined) {
         const heightField = element.styleSources.get("height");
         if (heightField?.source == undefined) {
-            result.push(
-                generateAddFieldToScopeGenerator(element.element, "layout", document, {
-                    type: "height",
-                    originalValue: bounds.height
-                })
-            );
+            addToScopeMeta.originalHeight = bounds.height;
         } else {
-            result.push(generateFactorNumberGenerator(heightField, { type: "height" }));
+            result.push(generateFactorNumberGenerator(heightField, "height"));
         }
+    }
+    if (Object.keys(addToScopeMeta).length > 0) {
+        result.push(generateAddFieldToScopeGenerator(element.element, "layout", document, addToScopeMeta));
     }
     return result;
 }
@@ -119,11 +121,19 @@ export class ResizeEditEngine extends TransactionalEditEngine<ResizeAction, Resi
         meta: any
     ): string {
         meta as ResizeMetadata;
-        const factor = meta.type === "width" ? action.factorX! : action.factorY!;
-        if (meta.originalValue == undefined) {
-            return this.generatorRegistory.generateEdit(factor, generator);
+        if (meta === "width") {
+            return this.generatorRegistory.generateEdit(action.factorX, generator);
+        } else if (meta === "height") {
+            return this.generatorRegistory.generateEdit(action.factorY, generator);
         } else {
-            return this.generatorRegistory.generateEdit({ [meta.type]: meta.originalValue * factor }, generator);
+            const data: Record<string, number> = {};
+            if (meta.originalWidth != undefined) {
+                data.width = meta.originalWidth * (action.factorX ?? 1);
+            }
+            if (meta.originalHeight != undefined) {
+                data.height = meta.originalHeight * (action.factorY ?? 1);
+            }
+            return this.generatorRegistory.generateEdit(data, generator);
         }
     }
 
