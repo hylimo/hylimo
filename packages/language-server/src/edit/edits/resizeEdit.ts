@@ -151,10 +151,14 @@ export class ResizeEditEngine extends TransactionalEditEngine<ResizeAction, Resi
             if (element != undefined && CanvasElement.isCanvasElement(element)) {
                 const changes: Record<string, number> = {};
                 if (scaleX != 1) {
+                    element.x *= scaleX;
                     element.width *= scaleX;
+                    changes.x = element.x;
                     changes.width = element.width;
                 }
                 if (scaleY != 1) {
+                    element.y *= scaleY;
+                    changes.y = element.y;
                     element.height *= scaleY;
                     changes.height = element.height;
                 }
