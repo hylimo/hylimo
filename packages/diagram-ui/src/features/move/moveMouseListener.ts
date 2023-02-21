@@ -240,7 +240,7 @@ export class MoveMouseListener extends MouseListener {
         const angleRad = (target.rotation / 360) * 2 * Math.PI;
         const handlePosition = {
             x: origin.x + distance * Math.sin(angleRad),
-            y: origin.y - distance * Math.cos(angleRad)
+            y: origin.y + (target.y - distance) * Math.cos(angleRad)
         };
         return new RotationHandler(target.id, this.transactionIdProvider.generateId(), origin, handlePosition);
     }
