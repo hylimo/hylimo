@@ -17,9 +17,13 @@ export interface CanvasElement extends LayoutedElement {
      */
     rotation: number;
     /**
-     * Resizable if present
+     * Resizable in x-direction if present
      */
-    resizable: ModificationSpecification;
+    xResizable: ModificationSpecification;
+    /**
+     * Resizable in y-direction if present
+     */
+    yResizable: ModificationSpecification;
     /**
      * Rotateable if present
      */

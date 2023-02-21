@@ -94,6 +94,31 @@ export class SRoot extends ViewportRootElement {
             fill: var(--diagram-layout-color);
             pointer-events: bounding-box;
         }
+
+        .resize-edge, .resize-corner {
+            stroke-width: calc(12px / var(--diagram-zoom));
+            stroke: transparent;
+        }
+
+        .resize-corner {
+            stroke-linecap: square;
+        }
+
+        .resize-left, .resize-right {
+            cursor: ew-resize;
+        }
+
+        .resize-top, .resize-bottom {
+            cursor: ns-resize;
+        }
+
+        .resize-top-left, .resize-bottom-right {
+            cursor: nesw-resize;
+        }
+
+        .resize-top-right, .resize-bottom-left {
+            cursor: nwse-resize;
+        }
         `;
         return (
             this.fonts

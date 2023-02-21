@@ -1,3 +1,4 @@
+import { Point } from "@hylimo/diagram-common";
 import { injectable } from "inversify";
 import { VNode } from "snabbdom";
 import { IView, IViewArgs, RenderingContext, svg } from "sprotty";
@@ -39,35 +40,11 @@ export class CanvasElementView implements IView {
         const position = model.position;
         const children = context.renderChildren(model);
         if (model.selected) {
-            children.push(
-                svg("rect", {
-                    class: {
-                        "selected-rect": true
-                    },
-                    attrs: {
-                        width: model.width,
-                        height: model.height
-                    }
-                })
-            );
+            children.push(this.generateSelectedRect(model));
             if (model.rotateable != undefined) {
-                const x = -model.x;
-                const zoom = findViewportZoom(model);
-                const y = -CanvasElementView.ROTATE_ICON_DISTANCE / zoom;
-                children.push(
-                    svg("path", {
-                        attrs: {
-                            d: CanvasElementView.ROTATE_PATH,
-                            transform: `translate(${x}, ${y}) scale(${
-                                (1 / zoom / CanvasElementView.ROTATE_PATH_SIZE) * 13
-                            })`
-                        },
-                        class: {
-                            [CanvasElementView.ROTATE_ICON_CLASS]: true
-                        }
-                    })
-                );
+                children.push(this.generateRotationIcon(model));
             }
+            children.push(...this.generateResizeBorder(model));
         }
         return svg(
             "g",
@@ -81,5 +58,115 @@ export class CanvasElementView implements IView {
             },
             ...children
         );
+    }
+
+    /**
+     * Generates a rectangle that is displayed if the element is selected.
+     * Does NOT check if the element is selected.
+     *
+     * @param model The model of the element
+     * @returns The rectangle
+     */
+    private generateSelectedRect(model: Readonly<SCanvasElement>): VNode {
+        return svg("rect", {
+            class: {
+                "selected-rect": true
+            },
+            attrs: {
+                width: model.width,
+                height: model.height
+            }
+        });
+    }
+
+    /**
+     * Generates the rotate icon.
+     * Does not check if the element is selected or rotateable.
+     *
+     * @param model The model of the element
+     * @returns The rotate icon
+     */
+    private generateRotationIcon(model: Readonly<SCanvasElement>): VNode {
+        const x = -model.x;
+        const zoom = findViewportZoom(model);
+        const y = -CanvasElementView.ROTATE_ICON_DISTANCE / zoom;
+        return svg("path", {
+            attrs: {
+                d: CanvasElementView.ROTATE_PATH,
+                transform: `translate(${x}, ${y}) scale(${(1 / zoom / CanvasElementView.ROTATE_PATH_SIZE) * 13})`
+            },
+            class: {
+                [CanvasElementView.ROTATE_ICON_CLASS]: true
+            }
+        });
+    }
+
+    /**
+     * Generates resize lines.
+     * Checks if the element is resizable, but does not check if the element is selected.
+     *
+     * @param model The model of the element
+     * @returns The resize lines
+     */
+    private generateResizeBorder(model: Readonly<SCanvasElement>): VNode[] {
+        const result: VNode[] = [];
+        if (model.xResizable != undefined) {
+            result.push(this.generateResizeLine(model, 1, 2, "resize-right"));
+            result.push(this.generateResizeLine(model, 3, 0, "resize-left"));
+        }
+        if (model.yResizable != undefined) {
+            result.push(this.generateResizeLine(model, 0, 1, "resize-top"));
+            result.push(this.generateResizeLine(model, 2, 3, "resize-bottom"));
+        }
+        if (model.xResizable != undefined && model.yResizable != undefined) {
+            result.push(this.generateResizeLine(model, 0, 0, "resize-top-left"));
+            result.push(this.generateResizeLine(model, 1, 1, "resize-top-right"));
+            result.push(this.generateResizeLine(model, 2, 2, "resize-bottom-right"));
+            result.push(this.generateResizeLine(model, 3, 3, "resize-bottom-left"));
+        }
+        return result;
+    }
+
+    /**
+     * Generates a resize line.
+     * Applies the class resize-edge if the start and end position are different.
+     * Applies the class resize-corner if the start and end position are the same.
+     *
+     * @param model the canvas element to generate the resize line for
+     * @param startPos the start position of the line
+     * @param endPos the end position of the line
+     * @param cls class applied to the line
+     * @returns the generated line
+     */
+    private generateResizeLine(model: Readonly<SCanvasElement>, startPos: number, endPos: number, cls: string): VNode {
+        const start = this.generatePoint(model, startPos);
+        const end = this.generatePoint(model, endPos);
+        return svg("line", {
+            attrs: {
+                x1: start.x,
+                y1: start.y,
+                x2: end.x,
+                y2: end.y
+            },
+            class: {
+                [cls]: true,
+                "resize-edge": startPos !== endPos,
+                "resize-corner": startPos === endPos
+            }
+        });
+    }
+
+    /**
+     * Computes the position of a point on a rectangle.
+     * 0 is the top left corner, 1 is the top right corner, 2 is the bottom right corner and 3 is the bottom left corner.
+     *
+     * @param model the model for which the point should be computed
+     * @param pos the position of the point
+     * @returns the point
+     */
+    private generatePoint(model: Readonly<SCanvasElement>, pos: number): Point {
+        const x = pos === 1 || pos === 2 ? 0 : model.width;
+        const y = pos < 2 ? 0 : model.height;
+        return { x, y };
     }
 }

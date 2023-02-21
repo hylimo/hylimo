@@ -81,8 +81,8 @@ export class CanvasElementLayoutConfig extends EditableCanvasContentLayoutConfig
             y,
             ...this.extractPosAndMoveable(element),
             ...this.extractRotationAndRotateable(element),
+            ...this.extractResizable(element),
             children: layout.layout(content, Point.ORIGIN, size, `${id}_0`),
-            resizable: null, //TODO fix
             outline: content.layoutConfig.outline(
                 layout,
                 content,
@@ -91,6 +91,34 @@ export class CanvasElementLayoutConfig extends EditableCanvasContentLayoutConfig
             )
         };
         return [result];
+    }
+
+    /**
+     * Extracts the size spezification from the element.
+     * For both width and height, if not present, a modification specification is generated for the layout scope.
+     *
+     * @param element the element to extract the size specification from
+     * @returns the size specification, consisting of x and y resizable
+     */
+    private extractResizable(element: LayoutElement): Record<"xResizable" | "yResizable", ModificationSpecification> {
+        let xResizable: ModificationSpecification;
+        let yResizable: ModificationSpecification;
+        if (element.styles.width != undefined) {
+            const widthSource = element.styleSources.get("width")?.source;
+            xResizable = this.generateModificationSpecification({ width: widthSource });
+        } else {
+            xResizable = this.generateModificationSpecificationForScopeField("layout", element);
+        }
+        if (element.styles.height != undefined) {
+            const heightSource = element.styleSources.get("height")?.source;
+            yResizable = this.generateModificationSpecification({ height: heightSource });
+        } else {
+            yResizable = this.generateModificationSpecificationForScopeField("layout", element);
+        }
+        return {
+            xResizable,
+            yResizable
+        };
     }
 
     /**
