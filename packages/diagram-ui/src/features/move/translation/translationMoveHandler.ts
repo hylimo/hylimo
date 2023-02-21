@@ -6,15 +6,6 @@ import { MoveHandler } from "../moveHandler";
  */
 export class TranslationMoveHandler implements MoveHandler {
     /**
-     * last x offset
-     */
-    private lastDx = 0;
-    /**
-     * last y offset
-     */
-    private lastDy = 0;
-
-    /**
      * Creats a new TranslateMovehandler
      *
      * @param points the ids of the points to move
@@ -29,12 +20,8 @@ export class TranslationMoveHandler implements MoveHandler {
             elements: this.points,
             offsetX: dx,
             offsetY: dy,
-            deltaOffsetX: dx - this.lastDx,
-            deltaOffsetY: dy - this.lastDy,
             commited
         };
-        this.lastDx = dx;
-        this.lastDy = dy;
         return res;
     }
 }

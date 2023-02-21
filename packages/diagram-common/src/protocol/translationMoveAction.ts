@@ -17,14 +17,6 @@ export interface TranslationMoveAction extends TransactionalAction {
      * Y part of the offset
      */
     offsetY: number;
-    /**
-     * X part of the offset, relative to the last action
-     */
-    deltaOffsetX: number;
-    /**
-     * Y part of the offset, relative to the last action
-     */
-    deltaOffsetY: number;
 }
 
 export namespace TranslationMoveAction {
