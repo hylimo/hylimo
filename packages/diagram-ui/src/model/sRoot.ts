@@ -15,6 +15,10 @@ export class SRoot extends ViewportRootElement {
      * Required for caching of computed properties
      */
     changeRevision = 0;
+    /**
+     * The last sequence number of a received incremental update.
+     */
+    sequenceNumber = 0;
 
     constructor(index = new ModelIndexImpl()) {
         super(index);

@@ -7,6 +7,10 @@ export interface IncrementalUpdateAction {
      * Updates to apply
      */
     updates: IncrementalUpdate[];
+    /**
+     * The sequence number of the action that created this update
+     */
+    sequenceNumber: number;
 }
 
 /**

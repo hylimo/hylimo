@@ -91,11 +91,13 @@ export class DiagramServerManager {
      *
      * @param id the id of the diagram
      * @param updates the updates to apply
+     * @param sequenceNumber the sequence number of the update
      */
-    incrementalUpdateDiagram(id: string, updates: IncrementalUpdate[]): void {
+    incrementalUpdateDiagram(id: string, updates: IncrementalUpdate[], sequenceNumber: number): void {
         const action: IncrementalUpdateAction = {
             kind: IncrementalUpdateAction.KIND,
-            updates
+            updates,
+            sequenceNumber
         };
         (this.diagramServersByDocument.get(id) ?? [])
             .map((clientId) => this.diagramServers.get(clientId)!)

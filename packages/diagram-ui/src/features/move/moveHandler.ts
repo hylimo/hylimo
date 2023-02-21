@@ -9,8 +9,9 @@ export interface MoveHandler {
      *
      * @param dx the absolute x offset
      * @param dy the absolute y offset
+     * @param sequenceNumber the sequence number of the action
      * @param commited if true, this is the final action of the transaction
      * @returns the generated action
      */
-    generateAction(dx: number, dy: number, commited: boolean): Action;
+    generateAction(dx: number, dy: number, sequenceNumber: number, commited: boolean): Action;
 }

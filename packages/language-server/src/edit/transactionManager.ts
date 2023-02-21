@@ -27,14 +27,10 @@ export class TransactionManager {
      */
     private lastKnownAction?: TransactionalAction;
     /**
-     * The last version on which an action was applied.
-     * The next action can only be applied if the version of the diagram is greater than this value.
+     * If true, the diagram has been updated since the last text update,
+     * meaning a new text update is possible
      */
-    private lastVersion = -1;
-    /**
-     * Should be invoked to handle a delayed action
-     */
-    private delayedHandleAction?: () => unknown;
+    private hasUpdatedDiagram = true;
 
     /**
      * Returns true if the manager is currently handling a transaction
@@ -52,11 +48,13 @@ export class TransactionManager {
 
     /**
      * Handles an action. Does currently not support concurrent/interleaved transactions
+     * Every action causes an incremental update.
+     * Also, a relayout is scheduled if possible.
      *
      * @param action the action to handle
-     * @returns the created TextDocumentEdit
+     * @returns the incremental updates
      */
-    async handleAction(action: TransactionalAction): Promise<HandleActionResult> {
+    async handleAction(action: TransactionalAction): Promise<IncrementalUpdate[]> {
         if (this.currentTransactionId != undefined && this.currentTransactionId != action.transactionId) {
             throw new Error("Concurrent transactions are currently not supported");
         }
@@ -68,16 +66,35 @@ export class TransactionManager {
             };
         }
         const engine = this.registry.getEditEngine(this.edit);
-        const result = await this.createHandleActionResult(action, engine);
+        const result = this.createHandleActionResult(action, engine);
         this.lastKnownAction = action;
-        if (action.commited) {
+        this.updateTextDocumentIfPossible();
+        return result;
+    }
+
+    /**
+     * Updates the text document if possible, meaning if the last known action has not been applied yet.
+     */
+    private async updateTextDocumentIfPossible(): Promise<void> {
+        if (
+            this.edit != undefined &&
+            this.lastKnownAction != undefined &&
+            this.lastKnownAction != this.lastAppliedAction &&
+            this.hasUpdatedDiagram
+        ) {
+            this.hasUpdatedDiagram = false;
+            const engine = this.registry.getEditEngine(this.edit);
+            const textDocumentEdit = engine.applyAction(this.edit, this.lastKnownAction, this.diagram.document);
+            this.lastAppliedAction = this.lastKnownAction;
+            this.diagram.applyEdit(textDocumentEdit);
+            this.lastAppliedAction = this.lastKnownAction;
+        }
+        if (this.lastAppliedAction?.commited) {
             this.currentTransactionId = undefined;
             this.edit = undefined;
             this.lastKnownAction = undefined;
             this.lastAppliedAction = undefined;
-            this.delayedHandleAction = undefined;
         }
-        return result;
     }
 
     /**
@@ -89,40 +106,16 @@ export class TransactionManager {
      * @param engine engine which handles the edit
      * @returns the computed result of the action
      */
-    private async createHandleActionResult(action: TransactionalAction, engine: TransactionalEditEngine<any, any>) {
-        let result: HandleActionResult;
-        if (this.lastVersion == this.diagram.version) {
-            if (action.commited) {
-                this.delayedHandleAction = () => this.handleAction(action);
-                result = await new Promise((resolve) => {
-                    this.delayedHandleAction = () => {
-                        this.delayedHandleAction = undefined;
-                        resolve(this.handleAction(action));
-                    };
-                });
-            } else {
-                const currentDiagram = this.diagram.currentDiagram;
-                if (currentDiagram != undefined) {
-                    result = {
-                        incrementalUpdates: engine.predictActionDiff(
-                            this.edit,
-                            this.diagram.currentDiagram!,
-                            this.lastKnownAction,
-                            action
-                        )
-                    };
-                } else {
-                    result = {};
-                }
-            }
+    private createHandleActionResult(
+        action: TransactionalAction,
+        engine: TransactionalEditEngine<any, any>
+    ): IncrementalUpdate[] {
+        const currentDiagram = this.diagram.currentDiagram;
+        if (currentDiagram != undefined) {
+            return engine.predictActionDiff(this.edit, this.diagram.currentDiagram!, this.lastKnownAction, action);
         } else {
-            this.lastVersion = this.diagram.version;
-            this.lastAppliedAction = action;
-            result = {
-                textDocumentEdit: engine.applyAction(this.edit, action, this.diagram.document)
-            };
+            return [];
         }
-        return result;
     }
 
     /**
@@ -138,9 +131,8 @@ export class TransactionManager {
                 engine.predictActionDiff(this.edit, layoutedDiagram, this.lastAppliedAction, this.lastKnownAction);
             }
         }
-        if (this.delayedHandleAction) {
-            this.delayedHandleAction();
-        }
+        this.hasUpdatedDiagram = true;
+        this.updateTextDocumentIfPossible();
     }
 
     /**
@@ -154,18 +146,4 @@ export class TransactionManager {
             TransactionalEdit.updateGeneratorEntries(this.edit, changes, this.diagram.document);
         }
     }
-}
-
-/**
- * Result of handleAction
- */
-interface HandleActionResult {
-    /**
-     * Updation text document edit
-     */
-    textDocumentEdit?: TextDocumentEdit;
-    /**
-     * Optional incremental updates
-     */
-    incrementalUpdates?: IncrementalUpdate[];
 }

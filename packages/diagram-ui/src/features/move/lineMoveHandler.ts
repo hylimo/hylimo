@@ -22,7 +22,7 @@ export class LineMoveHandler implements MoveHandler {
         readonly line: TransformedLine
     ) {}
 
-    generateAction(dx: number, dy: number, commited: boolean): LineMoveAction {
+    generateAction(dx: number, dy: number, sequenceNumber: number, commited: boolean): LineMoveAction {
         const newPosition: Point = {
             x: this.initialPosition.x + dx,
             y: this.initialPosition.y + dy
@@ -34,7 +34,8 @@ export class LineMoveHandler implements MoveHandler {
             pos: nearest.pos,
             distance: this.onLine ? undefined : nearest.distance,
             transactionId: this.transactionId,
-            commited
+            commited,
+            sequenceNumber
         };
     }
 }

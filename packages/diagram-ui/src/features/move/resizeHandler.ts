@@ -33,7 +33,7 @@ export class ResizeHandler implements MoveHandler {
         this.rotation = rotation * (Math.PI / 180);
     }
 
-    generateAction(dx: number, dy: number, commited: boolean): ResizeAction {
+    generateAction(dx: number, dy: number, sequenceNumber: number, commited: boolean): ResizeAction {
         let factorX: number | undefined = undefined;
         let factorY: number | undefined = undefined;
         const normalizedDelta = Math2D.rotate({ x: dx, y: dy }, -this.rotation);
@@ -50,7 +50,8 @@ export class ResizeHandler implements MoveHandler {
             elements: this.elements,
             factorX,
             factorY,
-            commited
+            commited,
+            sequenceNumber
         };
     }
 }

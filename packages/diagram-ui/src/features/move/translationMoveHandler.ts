@@ -13,15 +13,15 @@ export class TranslationMoveHandler implements MoveHandler {
      */
     constructor(readonly points: string[], readonly transactionId: string) {}
 
-    generateAction(dx: number, dy: number, commited: boolean): TranslationMoveAction {
-        const res: TranslationMoveAction = {
+    generateAction(dx: number, dy: number, sequenceNumber: number, commited: boolean): TranslationMoveAction {
+        return {
             kind: TranslationMoveAction.KIND,
             transactionId: this.transactionId,
             elements: this.points,
             offsetX: dx,
             offsetY: dy,
-            commited
+            commited,
+            sequenceNumber
         };
-        return res;
     }
 }

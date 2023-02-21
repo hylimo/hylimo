@@ -1,6 +1,6 @@
 import { TextDocument, TextDocumentContentChangeEvent } from "vscode-languageserver-textdocument";
 import { SharedDiagramUtils } from "./sharedDiagramUtils";
-import { Diagnostic } from "vscode-languageserver";
+import { Diagnostic, TextDocumentEdit } from "vscode-languageserver";
 import { TransactionManager } from "./edit/transactionManager";
 import { TransactionalAction } from "@hylimo/diagram-common";
 import { LayoutedDiagram } from "./layoutedDiagram";
@@ -91,14 +91,22 @@ export class Diagram {
      * @param action the action to handle
      */
     async handleTransactionalAction(action: TransactionalAction): Promise<void> {
-        const result = await this.transactionManager.handleAction(action);
-        if (result.textDocumentEdit != undefined) {
-            this.utils.connection.workspace.applyEdit({
-                documentChanges: [result.textDocumentEdit]
-            });
-        }
-        if (result.incrementalUpdates != undefined) {
-            this.utils.diagramServerManager.incrementalUpdateDiagram(this.document.uri, result.incrementalUpdates);
-        }
+        const incrementalUpdates = await this.transactionManager.handleAction(action);
+        this.utils.diagramServerManager.incrementalUpdateDiagram(
+            this.document.uri,
+            incrementalUpdates,
+            action.sequenceNumber
+        );
+    }
+
+    /**
+     * Applies an edit to the document
+     *
+     * @param edit the edit to apply
+     */
+    async applyEdit(edit: TextDocumentEdit): Promise<void> {
+        this.utils.connection.workspace.applyEdit({
+            documentChanges: [edit]
+        });
     }
 }

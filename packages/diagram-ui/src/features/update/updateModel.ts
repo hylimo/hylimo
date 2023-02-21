@@ -105,6 +105,7 @@ export class UpdateModelCommand extends BaseUpdateModelCommand {
         context: CommandExecutionContext
     ): CommandReturn {
         (newRoot as SRoot).changeRevision = (oldRoot as SRoot).changeRevision + 1;
+        (newRoot as SRoot).sequenceNumber = (oldRoot as SRoot).sequenceNumber;
         return super.performUpdate(oldRoot, newRoot, context);
     }
 }

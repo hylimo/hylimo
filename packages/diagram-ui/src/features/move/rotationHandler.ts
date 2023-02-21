@@ -20,7 +20,7 @@ export class RotationHandler implements MoveHandler {
         readonly initialPosition: Point
     ) {}
 
-    generateAction(dx: number, dy: number, commited: boolean): RotationAction {
+    generateAction(dx: number, dy: number, sequenceNumber: number, commited: boolean): RotationAction {
         const newPosition: Point = {
             x: this.initialPosition.x + dx,
             y: this.initialPosition.y + dy
@@ -35,7 +35,8 @@ export class RotationHandler implements MoveHandler {
             element: this.element,
             rotation: newRotation,
             transactionId: this.transactionId,
-            commited
+            commited,
+            sequenceNumber
         };
     }
 }

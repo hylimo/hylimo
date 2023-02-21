@@ -11,6 +11,10 @@ export interface TransactionalAction {
      */
     transactionId: string;
     /**
+     * A monotonic increasing sequence number for the transaction
+     */
+    sequenceNumber: number;
+    /**
      * If true, the action commits the transaction
      * and no further actions with the same transactionId are possible.
      */

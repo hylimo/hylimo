@@ -60,15 +60,9 @@ export class MoveMouseListener extends MouseListener {
      */
     private moveHandler?: MoveHandler | null;
     /**
-     * The last change revision of the model.
+     * Sequence number for the next action.
      */
-    private lastChangeRevision = -1;
-    /**
-     * Number of updates on the last revision.
-     * Updates can only be performed if the revision has not changed,
-     * or this number is less than maxUpdatesPerRevision.
-     */
-    private outstandingUpdates = 0;
+    private sequenceNumber = 0;
 
     override mouseDown(target: SModelElement, event: MouseEvent): Action[] {
         if (event.button === 0) {
@@ -89,16 +83,18 @@ export class MoveMouseListener extends MouseListener {
             const root = target.root as SRoot;
             if (this.moveHandler === undefined) {
                 this.moveHandler = this.createHandler(target, this.targetElement!);
-                this.lastChangeRevision = root.changeRevision;
+                root.sequenceNumber = 0;
+                this.sequenceNumber = 0;
             }
-            if (this.lastChangeRevision != root.changeRevision) {
-                this.outstandingUpdates -= root.changeRevision - this.lastChangeRevision;
-                this.lastChangeRevision = root.changeRevision;
-            }
-            if (this.moveHandler != undefined && this.outstandingUpdates < maxUpdatesPerRevision) {
-                this.outstandingUpdates++;
+            const outstandingUpdates = this.sequenceNumber - root.sequenceNumber;
+            if (this.moveHandler != undefined && outstandingUpdates < maxUpdatesPerRevision) {
                 const translation = this.calculateTranslation(target, event);
-                const result = this.moveHandler.generateAction(translation.x, translation.y, false);
+                const result = this.moveHandler.generateAction(
+                    translation.x,
+                    translation.y,
+                    this.sequenceNumber++,
+                    false
+                );
                 return [result];
             }
         }
@@ -132,10 +128,9 @@ export class MoveMouseListener extends MouseListener {
             return [];
         }
         const translation = this.calculateTranslation(target, event);
-        const result = this.moveHandler.generateAction(translation.x, translation.y, true);
+        const result = this.moveHandler.generateAction(translation.x, translation.y, this.sequenceNumber++, true);
         this.moveHandler = undefined;
         this.startPosition = undefined;
-        this.outstandingUpdates = 0;
         return [result];
     }
 

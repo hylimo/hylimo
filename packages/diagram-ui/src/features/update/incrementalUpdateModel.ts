@@ -12,7 +12,9 @@ export class IncrementalUpdateModelCommand extends Command {
     }
 
     override execute(context: CommandExecutionContext): CommandReturn {
-        (context.root as SRoot).changeRevision++;
+        const root = context.root as SRoot;
+        root.changeRevision++;
+        root.sequenceNumber = this.action.sequenceNumber;
         for (const update of this.action.updates) {
             const element = context.root.index.getById(update.target);
             if (element !== undefined) {
