@@ -99,7 +99,7 @@ export class TranslationMoveEditEngine extends TransactionalEditEngine<Translati
         super(TranslationMoveEdit.TYPE, TranslationMoveAction.KIND, generatorRegistry);
     }
 
-    override applyActionToGenerator(
+    protected override applyActionToGenerator(
         edit: TranslationMoveEdit,
         action: TranslationMoveAction,
         generator: EditGenerator,
@@ -122,14 +122,14 @@ export class TranslationMoveEditEngine extends TransactionalEditEngine<Translati
     override predictActionDiff(
         edit: TranslationMoveEdit,
         layoutedDiagram: DiagramLayoutResult,
-        lastApplied: TranslationMoveAction,
+        lastApplied: TranslationMoveAction | undefined,
         newest: TranslationMoveAction
     ): IncrementalUpdate[] {
         if (edit.hasNewPoint) {
             return [];
         }
-        const deltaX = newest.offsetX - lastApplied.offsetX;
-        const deltaY = newest.offsetY - lastApplied.offsetY;
+        const deltaX = newest.offsetX - (lastApplied?.offsetX ?? 0);
+        const deltaY = newest.offsetY - (lastApplied?.offsetY ?? 0);
         const updates: IncrementalUpdate[] = [];
         for (const pointId of newest.elements) {
             const point = layoutedDiagram.elementLookup[pointId];

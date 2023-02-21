@@ -1,10 +1,10 @@
-import { DeltaNumberGenerator } from "./deltaNumberGenerator";
+import { OriginalValueNumberGenerator } from "./originalValueNumberGenerator";
 import { EditEngine } from "./editGenerator";
 
 /**
  * EditGenerator for modifying a number expression with a + - constant based on a delta
  */
-export interface DeltaAdditiveNumberGenerator extends DeltaNumberGenerator {
+export interface DeltaAdditiveNumberGenerator extends OriginalValueNumberGenerator {
     type: typeof DeltaAdditiveNumberGenerator.TYPE;
 }
 

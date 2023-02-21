@@ -28,6 +28,18 @@ export class CanvasElementView implements IView {
      */
     static readonly ROTATE_ICON_CLASS = "canvas-rotate-icon";
     /**
+     * Class assigned to resize lines
+     */
+    static readonly RESIZE_CLASS = "resize";
+    /**
+     * Class assigned to resize borders
+     */
+    static readonly RESIZE_BORDER_CLASS = "resize-border";
+    /**
+     * Class assigned to resize corners
+     */
+    static readonly RESIZE_CORNER_CLASS = "resize-corner";
+    /**
      * Distance of the rotation icon to the center
      */
     static readonly ROTATE_ICON_DISTANCE = 30;
@@ -111,18 +123,18 @@ export class CanvasElementView implements IView {
     private generateResizeBorder(model: Readonly<SCanvasElement>): VNode[] {
         const result: VNode[] = [];
         if (model.xResizable != undefined) {
-            result.push(this.generateResizeLine(model, 1, 2, "resize-right"));
-            result.push(this.generateResizeLine(model, 3, 0, "resize-left"));
+            result.push(this.generateResizeLine(model, 1, 2, ResizePosition.RIGHT));
+            result.push(this.generateResizeLine(model, 3, 0, ResizePosition.LEFT));
         }
         if (model.yResizable != undefined) {
-            result.push(this.generateResizeLine(model, 0, 1, "resize-top"));
-            result.push(this.generateResizeLine(model, 2, 3, "resize-bottom"));
+            result.push(this.generateResizeLine(model, 0, 1, ResizePosition.TOP));
+            result.push(this.generateResizeLine(model, 2, 3, ResizePosition.BOTTOM));
         }
         if (model.xResizable != undefined && model.yResizable != undefined) {
-            result.push(this.generateResizeLine(model, 0, 0, "resize-top-left"));
-            result.push(this.generateResizeLine(model, 1, 1, "resize-top-right"));
-            result.push(this.generateResizeLine(model, 2, 2, "resize-bottom-right"));
-            result.push(this.generateResizeLine(model, 3, 3, "resize-bottom-left"));
+            result.push(this.generateResizeLine(model, 0, 0, ResizePosition.TOP_LEFT));
+            result.push(this.generateResizeLine(model, 1, 1, ResizePosition.TOP_RIGHT));
+            result.push(this.generateResizeLine(model, 2, 2, ResizePosition.BOTTOM_RIGHT));
+            result.push(this.generateResizeLine(model, 3, 3, ResizePosition.BOTTOM_LEFT));
         }
         return result;
     }
@@ -135,10 +147,15 @@ export class CanvasElementView implements IView {
      * @param model the canvas element to generate the resize line for
      * @param startPos the start position of the line
      * @param endPos the end position of the line
-     * @param cls class applied to the line
+     * @param pos class applied to the line
      * @returns the generated line
      */
-    private generateResizeLine(model: Readonly<SCanvasElement>, startPos: number, endPos: number, cls: string): VNode {
+    private generateResizeLine(
+        model: Readonly<SCanvasElement>,
+        startPos: number,
+        endPos: number,
+        pos: ResizePosition
+    ): VNode {
         const start = this.generatePoint(model, startPos);
         const end = this.generatePoint(model, endPos);
         return svg("line", {
@@ -149,9 +166,10 @@ export class CanvasElementView implements IView {
                 y2: end.y
             },
             class: {
-                [cls]: true,
-                "resize-edge": startPos !== endPos,
-                "resize-corner": startPos === endPos
+                [pos]: true,
+                [CanvasElementView.RESIZE_BORDER_CLASS]: startPos !== endPos,
+                [CanvasElementView.RESIZE_CORNER_CLASS]: startPos === endPos,
+                [CanvasElementView.RESIZE_CLASS]: true
             }
         });
     }
@@ -165,8 +183,22 @@ export class CanvasElementView implements IView {
      * @returns the point
      */
     private generatePoint(model: Readonly<SCanvasElement>, pos: number): Point {
-        const x = pos === 1 || pos === 2 ? 0 : model.width;
+        const x = pos === 1 || pos === 2 ? model.width : 0;
         const y = pos < 2 ? 0 : model.height;
         return { x, y };
     }
+}
+
+/**
+ * Different resize line positions
+ */
+export enum ResizePosition {
+    TOP_LEFT = "resize-top-left",
+    TOP_RIGHT = "resize-top-right",
+    BOTTOM_RIGHT = "resize-bottom-right",
+    BOTTOM_LEFT = "resize-bottom-left",
+    TOP = "resize-top",
+    RIGHT = "resize-right",
+    BOTTOM = "resize-bottom",
+    LEFT = "resize-left"
 }

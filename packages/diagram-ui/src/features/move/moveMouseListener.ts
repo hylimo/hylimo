@@ -19,20 +19,26 @@ import { SRelativePoint } from "../../model/canvas/sRelativePoint";
 import { MoveHandler } from "./moveHandler";
 import { TYPES } from "../types";
 import { TransactionIdProvider } from "../transaction/transactionIdProvider";
-import { TranslationMoveHandler } from "./translation/translationMoveHandler";
-import { LineMoveHandler } from "./line/lineMoveHandler";
+import { TranslationMoveHandler } from "./translationMoveHandler";
+import { LineMoveHandler } from "./lineMoveHandler";
 import { findViewportZoom } from "../../base/findViewportZoom";
-import { CanvasElementView } from "../../views/canvas/canvasElementView";
-import { RotationHandler } from "./rotation/rotationHandler";
+import { CanvasElementView, ResizePosition } from "../../views/canvas/canvasElementView";
+import { RotationHandler } from "./rotationHandler";
 import { SCanvasConnection } from "../../model/canvas/sCanvasConnection";
 import { SCanvasContent } from "../../model/canvas/sCanvasContent";
 import { SCanvasConnectionSegment } from "../../model/canvas/sCanvasConnectionSegment";
 import { SRoot } from "../../model/sRoot";
+import { ResizeHandler } from "./resizeHandler";
 
 /**
  * The maximum number of updates that can be performed on the same revision.
  */
 const maxUpdatesPerRevision = 5;
+
+/**
+ * If a resize scale exceeds this value, instead resize with scale 1 in the opposite direction is performed.
+ */
+const maxResizeScale = 10;
 
 /**
  * Listener for mouse events to create move actions
@@ -159,13 +165,62 @@ export class MoveMouseListener extends MouseListener {
      * @returns the move handler if move is supported, otherwise null
      */
     private createHandler(target: SModelElement, targetElement?: Element): MoveHandler | null {
-        if (
-            target instanceof SCanvasElement &&
-            targetElement?.classList?.contains(CanvasElementView.ROTATE_ICON_CLASS)
-        ) {
-            return this.createRotationHandler(target);
+        const classList = targetElement?.classList;
+        if (target instanceof SCanvasElement && classList != undefined) {
+            if (classList.contains(CanvasElementView.ROTATE_ICON_CLASS)) {
+                return this.createRotationHandler(target);
+            } else if (classList.contains(CanvasElementView.RESIZE_CLASS)) {
+                return this.createResizeHandler(target, classList);
+            }
+        }
+        return this.createMoveHandler(target);
+    }
+
+    /**
+     * Creates a move handler for the given target.
+     * Handles resize events meaning resizing all selected canvas elements
+     *
+     * @param target the primary target of the resize
+     * @param classList classes of the svg element on which the resize was triggered
+     * @returns the resize handler if resize is supported, otherwise null
+     */
+    private createResizeHandler(target: SCanvasElement, classList: DOMTokenList): ResizeHandler | null {
+        const resizedElements = this.getSelectedElements(target.root).filter(
+            (element) => element instanceof SCanvasElement
+        ) as SCanvasElement[];
+        let scaleX: number | undefined = undefined;
+        if (resizedElements.every((element) => element.xResizable != undefined)) {
+            if (classList.contains(ResizePosition.LEFT) || classList.contains(ResizePosition.TOP_LEFT)) {
+                scaleX = target.width / target.x;
+            } else if (classList.contains(ResizePosition.RIGHT) || classList.contains(ResizePosition.BOTTOM_RIGHT)) {
+                scaleX = target.width / (target.width + target.x);
+            }
+            if (scaleX != undefined && Math.abs(scaleX) > maxResizeScale) {
+                scaleX = Math.sign(scaleX) * 1;
+            }
+        }
+        let scaleY: number | undefined = undefined;
+        if (resizedElements.every((element) => element.yResizable != undefined)) {
+            if (classList.contains(ResizePosition.TOP) || classList.contains(ResizePosition.TOP_LEFT)) {
+                scaleY = target.height / target.y;
+            } else if (classList.contains(ResizePosition.BOTTOM) || classList.contains(ResizePosition.BOTTOM_RIGHT)) {
+                scaleY = target.height / (target.height + target.y);
+            }
+            if (scaleY != undefined && Math.abs(scaleY) > maxResizeScale) {
+                scaleY = Math.sign(scaleY) * 1;
+            }
+        }
+        if (scaleX != undefined || scaleY != undefined) {
+            return new ResizeHandler(
+                resizedElements.map((element) => element.id),
+                this.transactionIdProvider.generateId(),
+                target.width,
+                target.height,
+                scaleX,
+                scaleY
+            );
         } else {
-            return this.createMoveHandler(target);
+            return null;
         }
     }
 

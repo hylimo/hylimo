@@ -104,7 +104,7 @@ export abstract class TransactionalEditEngine<A extends Action, T extends Transa
     abstract predictActionDiff(
         edit: T,
         layoutedDiagram: BaseDiagramLayoutResult,
-        lastApplied: A,
+        lastApplied: A | undefined,
         newest: A
     ): IncrementalUpdate[];
 

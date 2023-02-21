@@ -35,6 +35,7 @@ export * from "./model/shape";
 export * from "./model/text";
 export * from "./protocol/incrementalUpdateAction";
 export * from "./protocol/lineMoveAction";
+export * from "./protocol/resizeAction";
 export * from "./protocol/rotationAction";
 export * from "./protocol/transactionalAction";
 export * from "./protocol/translationMoveAction";

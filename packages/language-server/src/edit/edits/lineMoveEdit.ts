@@ -73,7 +73,7 @@ export class LineMoveEditEngine extends TransactionalEditEngine<LineMoveAction, 
     override predictActionDiff(
         edit: LineMoveEdit,
         layoutedDiagram: DiagramLayoutResult,
-        lastApplied: LineMoveAction,
+        lastApplied: LineMoveAction | undefined,
         newest: LineMoveAction
     ): IncrementalUpdate[] {
         const point = layoutedDiagram.elementLookup[newest.point];

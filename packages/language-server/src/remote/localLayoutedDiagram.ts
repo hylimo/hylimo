@@ -1,9 +1,16 @@
 import { FullObject, Expression, InterpretationResult, CstResult } from "@hylimo/core";
 import { DiagramLayoutResult } from "@hylimo/diagram";
-import { TransactionalAction, TranslationMoveAction, RotationAction, LineMoveAction } from "@hylimo/diagram-common";
+import {
+    TransactionalAction,
+    TranslationMoveAction,
+    RotationAction,
+    LineMoveAction,
+    ResizeAction
+} from "@hylimo/diagram-common";
 import { Diagnostic, DiagnosticSeverity, uinteger, Range } from "vscode-languageserver";
 import { TextDocument } from "vscode-languageserver-textdocument";
 import { LineMoveEdit } from "../edit/edits/lineMoveEdit";
+import { ResizeEdit } from "../edit/edits/resizeEdit";
 import { RotationEdit } from "../edit/edits/rotationEdit";
 import { TransactionalEdit } from "../edit/edits/transactionalEdit";
 import { TranslationMoveEdit } from "../edit/edits/translationMoveEdit";
@@ -63,6 +70,8 @@ export class LocalLayoutedDiagram extends LayoutedDiagramImplementation {
             return RotationEdit.create(action, this.layoutResult, this.document!);
         } else if (LineMoveAction.is(action)) {
             return LineMoveEdit.create(action, this.layoutResult);
+        } else if (ResizeAction.is(action)) {
+            return ResizeEdit.create(action, this.layoutResult, this.document!);
         } else {
             throw new Error("Unknown action type");
         }

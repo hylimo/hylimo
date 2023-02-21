@@ -1,6 +1,8 @@
 import { deltaAdditiveNumberEngine } from "./deltaAdditiveNumberGenerator";
 import { deltaReplacementNumberEngine } from "./deltaReplacementNumberGenerator";
 import { EditEngine, EditGenerator } from "./editGenerator";
+import { factorMultiplicativeNumberEngine } from "./factorMultiplicativeNumberGenerator";
+import { factorReplacementNumberEngine } from "./factorReplacementNumberGenerator";
 import { fieldEntryEngine } from "./fieldEntryGenerator";
 import { replacementNumberEngine } from "./replacementNumberGenerator";
 
@@ -46,5 +48,7 @@ export const defaultGeneratorRegistry = new GeneratorRegistry([
     deltaAdditiveNumberEngine,
     replacementNumberEngine,
     deltaReplacementNumberEngine,
-    fieldEntryEngine
+    fieldEntryEngine,
+    factorMultiplicativeNumberEngine,
+    factorReplacementNumberEngine
 ]);

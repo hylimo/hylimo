@@ -95,7 +95,7 @@ export class SRoot extends ViewportRootElement {
             pointer-events: bounding-box;
         }
 
-        .resize-edge, .resize-corner {
+        .resize {
             stroke-width: calc(12px / var(--diagram-zoom));
             stroke: transparent;
         }
@@ -113,11 +113,11 @@ export class SRoot extends ViewportRootElement {
         }
 
         .resize-top-left, .resize-bottom-right {
-            cursor: nesw-resize;
+            cursor: nwse-resize;
         }
 
         .resize-top-right, .resize-bottom-left {
-            cursor: nwse-resize;
+            cursor: nesw-resize;
         }
         `;
         return (

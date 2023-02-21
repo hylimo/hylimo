@@ -81,7 +81,7 @@ export class RotationEditEngine extends TransactionalEditEngine<RotationAction, 
     override predictActionDiff(
         edit: RotationEdit,
         layoutedDiagram: DiagramLayoutResult,
-        lastApplied: RotationAction,
+        lastApplied: RotationAction | undefined,
         newest: RotationAction
     ): IncrementalUpdate[] {
         const element = layoutedDiagram.elementLookup[newest.element];

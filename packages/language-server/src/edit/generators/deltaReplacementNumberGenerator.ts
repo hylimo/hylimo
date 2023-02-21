@@ -1,10 +1,10 @@
-import { DeltaNumberGenerator } from "./deltaNumberGenerator";
+import { OriginalValueNumberGenerator } from "./originalValueNumberGenerator";
 import { EditEngine } from "./editGenerator";
 
 /**
  * EditGenerator which adds / removes a specified value from the original value and replaces the whole number
  */
-export interface DeltaReplacementNumberGenerator extends DeltaNumberGenerator {
+export interface DeltaReplacementNumberGenerator extends OriginalValueNumberGenerator {
     type: typeof DeltaReplacementNumberGenerator.TYPE;
 }
 
