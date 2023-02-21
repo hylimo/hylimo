@@ -122,19 +122,20 @@ export class CanvasElementView implements IView {
      */
     private generateResizeBorder(model: Readonly<SCanvasElement>): VNode[] {
         const result: VNode[] = [];
+        const iconOffset = Math.round((model.rotation / 45) % 8);
         if (model.xResizable != undefined) {
-            result.push(this.generateResizeLine(model, 1, 2, ResizePosition.RIGHT));
-            result.push(this.generateResizeLine(model, 3, 0, ResizePosition.LEFT));
+            result.push(this.generateResizeLine(model, 1, 2, iconOffset, ResizePosition.RIGHT));
+            result.push(this.generateResizeLine(model, 3, 4, iconOffset, ResizePosition.LEFT));
         }
         if (model.yResizable != undefined) {
-            result.push(this.generateResizeLine(model, 0, 1, ResizePosition.TOP));
-            result.push(this.generateResizeLine(model, 2, 3, ResizePosition.BOTTOM));
+            result.push(this.generateResizeLine(model, 0, 1, iconOffset, ResizePosition.TOP));
+            result.push(this.generateResizeLine(model, 2, 3, iconOffset, ResizePosition.BOTTOM));
         }
         if (model.xResizable != undefined && model.yResizable != undefined) {
-            result.push(this.generateResizeLine(model, 0, 0, ResizePosition.TOP_LEFT));
-            result.push(this.generateResizeLine(model, 1, 1, ResizePosition.TOP_RIGHT));
-            result.push(this.generateResizeLine(model, 2, 2, ResizePosition.BOTTOM_RIGHT));
-            result.push(this.generateResizeLine(model, 3, 3, ResizePosition.BOTTOM_LEFT));
+            result.push(this.generateResizeLine(model, 0, 0, iconOffset, ResizePosition.TOP, ResizePosition.LEFT));
+            result.push(this.generateResizeLine(model, 1, 1, iconOffset, ResizePosition.TOP, ResizePosition.RIGHT));
+            result.push(this.generateResizeLine(model, 2, 2, iconOffset, ResizePosition.BOTTOM, ResizePosition.RIGHT));
+            result.push(this.generateResizeLine(model, 3, 3, iconOffset, ResizePosition.BOTTOM, ResizePosition.LEFT));
         }
         return result;
     }
@@ -147,14 +148,16 @@ export class CanvasElementView implements IView {
      * @param model the canvas element to generate the resize line for
      * @param startPos the start position of the line
      * @param endPos the end position of the line
-     * @param pos class applied to the line
+     * @param curorIconOffset the numerical offset for the resize icon, will be added to (startPos + endPos)
+     * @param pos classes applied to the line
      * @returns the generated line
      */
     private generateResizeLine(
         model: Readonly<SCanvasElement>,
         startPos: number,
         endPos: number,
-        pos: ResizePosition
+        curorIconOffset: number,
+        ...pos: ResizePosition[]
     ): VNode {
         const start = this.generatePoint(model, startPos);
         const end = this.generatePoint(model, endPos);
@@ -166,10 +169,11 @@ export class CanvasElementView implements IView {
                 y2: end.y
             },
             class: {
-                [pos]: true,
+                ...Object.fromEntries(pos.map((p) => [p, true])),
                 [CanvasElementView.RESIZE_BORDER_CLASS]: startPos !== endPos,
                 [CanvasElementView.RESIZE_CORNER_CLASS]: startPos === endPos,
-                [CanvasElementView.RESIZE_CLASS]: true
+                [CanvasElementView.RESIZE_CLASS]: true,
+                [`resize-cursor-${(startPos + endPos + curorIconOffset) % 8}`]: true
             }
         });
     }
@@ -179,10 +183,11 @@ export class CanvasElementView implements IView {
      * 0 is the top left corner, 1 is the top right corner, 2 is the bottom right corner and 3 is the bottom left corner.
      *
      * @param model the model for which the point should be computed
-     * @param pos the position of the point
+     * @param pos the position of the point, taken modulo 4
      * @returns the point
      */
     private generatePoint(model: Readonly<SCanvasElement>, pos: number): Point {
+        pos = pos % 4;
         const x = pos === 1 || pos === 2 ? model.width : 0;
         const y = pos < 2 ? 0 : model.height;
         return { x, y };
@@ -193,10 +198,6 @@ export class CanvasElementView implements IView {
  * Different resize line positions
  */
 export enum ResizePosition {
-    TOP_LEFT = "resize-top-left",
-    TOP_RIGHT = "resize-top-right",
-    BOTTOM_RIGHT = "resize-bottom-right",
-    BOTTOM_LEFT = "resize-bottom-left",
     TOP = "resize-top",
     RIGHT = "resize-right",
     BOTTOM = "resize-bottom",

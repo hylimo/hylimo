@@ -190,9 +190,9 @@ export class MoveMouseListener extends MouseListener {
         ) as SCanvasElement[];
         let scaleX: number | undefined = undefined;
         if (resizedElements.every((element) => element.xResizable != undefined)) {
-            if (classList.contains(ResizePosition.LEFT) || classList.contains(ResizePosition.TOP_LEFT)) {
+            if (classList.contains(ResizePosition.LEFT)) {
                 scaleX = target.width / target.x;
-            } else if (classList.contains(ResizePosition.RIGHT) || classList.contains(ResizePosition.BOTTOM_RIGHT)) {
+            } else if (classList.contains(ResizePosition.RIGHT)) {
                 scaleX = target.width / (target.width + target.x);
             }
             if (scaleX != undefined && Math.abs(scaleX) > maxResizeScale) {
@@ -201,9 +201,9 @@ export class MoveMouseListener extends MouseListener {
         }
         let scaleY: number | undefined = undefined;
         if (resizedElements.every((element) => element.yResizable != undefined)) {
-            if (classList.contains(ResizePosition.TOP) || classList.contains(ResizePosition.TOP_LEFT)) {
+            if (classList.contains(ResizePosition.TOP)) {
                 scaleY = target.height / target.y;
-            } else if (classList.contains(ResizePosition.BOTTOM) || classList.contains(ResizePosition.BOTTOM_RIGHT)) {
+            } else if (classList.contains(ResizePosition.BOTTOM)) {
                 scaleY = target.height / (target.height + target.y);
             }
             if (scaleY != undefined && Math.abs(scaleY) > maxResizeScale) {

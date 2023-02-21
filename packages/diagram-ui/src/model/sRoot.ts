@@ -104,20 +104,20 @@ export class SRoot extends ViewportRootElement {
             stroke-linecap: square;
         }
 
-        .resize-left, .resize-right {
-            cursor: ew-resize;
-        }
-
-        .resize-top, .resize-bottom {
-            cursor: ns-resize;
-        }
-
-        .resize-top-left, .resize-bottom-right {
+        .resize-cursor-0, .resize-cursor-4 {
             cursor: nwse-resize;
         }
 
-        .resize-top-right, .resize-bottom-left {
+        .resize-cursor-1, .resize-cursor-5 {
+            cursor: ns-resize;
+        }
+
+        .resize-cursor-2, .resize-cursor-6 {
             cursor: nesw-resize;
+        }
+
+        .resize-cursor-3, .resize-cursor-7 {
+            cursor: ew-resize;
         }
         `;
         return (
