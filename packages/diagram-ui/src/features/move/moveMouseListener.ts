@@ -1,5 +1,5 @@
 import { inject } from "inversify";
-import { LinePoint, ModificationSpecification, Point } from "@hylimo/diagram-common";
+import { LinePoint, Math2D, ModificationSpecification, Point } from "@hylimo/diagram-common";
 import {
     findParentByFeature,
     IModelIndex,
@@ -238,11 +238,8 @@ export class MoveMouseListener extends MouseListener {
         }
         const origin = target.position;
         const distance = CanvasElementView.ROTATE_ICON_DISTANCE / findViewportZoom(target);
-        const angleRad = (target.rotation / 360) * 2 * Math.PI;
-        const handlePosition = {
-            x: origin.x + distance * Math.sin(angleRad),
-            y: origin.y + (target.y - distance) * Math.cos(angleRad)
-        };
+        const angleRad = (target.rotation / 180) * Math.PI;
+        const handlePosition = Math2D.add(origin, Math2D.rotate({ x: 0, y: target.y - distance }, angleRad));
         return new RotationHandler(target.id, this.transactionIdProvider.generateId(), origin, handlePosition);
     }
 
