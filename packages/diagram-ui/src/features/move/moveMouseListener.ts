@@ -216,6 +216,7 @@ export class MoveMouseListener extends MouseListener {
                 this.transactionIdProvider.generateId(),
                 target.width,
                 target.height,
+                target.rotation,
                 scaleX,
                 scaleY
             );

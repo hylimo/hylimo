@@ -141,4 +141,20 @@ export namespace Math2D {
             y: a.y + (b.y - a.y) * t
         };
     }
+
+    /**
+     * Rotates a vector by a given angle (in radians)
+     *
+     * @param vector the vector to rotate
+     * @param angle the angle to rotate the vector by
+     * @returns the rotated vector
+     */
+    export function rotate(vector: Vector, angle: number): Vector {
+        const cos = Math.cos(angle);
+        const sin = Math.sin(angle);
+        return {
+            x: vector.x * cos - vector.y * sin,
+            y: vector.x * sin + vector.y * cos
+        };
+    }
 }
