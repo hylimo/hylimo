@@ -42,9 +42,9 @@ export namespace RemoteRequest {
     export const type = new RequestType<RemoteMessage, RemoteMessage, any>("remote/request");
 }
 
-export namespace SetSecondaryLanguageServerNotification {
+export namespace SetLanguageServerIdNotification {
     /**
      * Notification type for marking this language server as a secondary language server
      */
-    export const type = new NotificationType<number>("remote/setSecondaryLanguageServer");
+    export const type = new NotificationType<number>("remote/setId");
 }

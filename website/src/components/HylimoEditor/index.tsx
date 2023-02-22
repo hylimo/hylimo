@@ -27,7 +27,7 @@ import {
     DiagramOpenNotification,
     RemoteNotification,
     RemoteRequest,
-    SetSecondaryLanguageServerNotification
+    SetLanguageServerIdNotification
 } from "@hylimo/language-server";
 import { DiagramServerProxy, ResetCanvasBoundsAction } from "@hylimo/diagram-ui";
 import useResizeObserver from "@react-hook/resize-observer";
@@ -92,7 +92,7 @@ export default function HylimoEditor(): JSX.Element {
                     secondaryConnection.onRequest(RemoteRequest.type, (request) => {
                         return languageClient.sendRequest(RemoteRequest.type, request);
                     });
-                    secondaryConnection.sendNotification(SetSecondaryLanguageServerNotification.type, 1);
+                    secondaryConnection.sendNotification(SetLanguageServerIdNotification.type, 1);
                 }
 
                 protected override sendMessage(message: ActionMessage): void {

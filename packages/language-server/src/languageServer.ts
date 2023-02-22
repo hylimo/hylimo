@@ -25,7 +25,7 @@ import { SharedDiagramUtils } from "./sharedDiagramUtils";
 import { LocalLayoutedDiagramManager } from "./remote/localLayoutedDiagramManager";
 import { LayoutedDiagramManager } from "./remote/layoutedDiagramManager";
 import { RemoteLayoutedDiagramManager } from "./remote/remoteLayoutedDiagramManager";
-import { SetSecondaryLanguageServerNotification } from "./remote/remoteMessages";
+import { SetLanguageServerIdNotification } from "./remote/remoteMessages";
 
 /**
  * Config for creating a new language server
@@ -126,7 +126,7 @@ export class LanguageServer {
             this.diagramServerManager.removeClient(clientId);
         });
         this.connection.onNotification(
-            SetSecondaryLanguageServerNotification.type,
+            SetLanguageServerIdNotification.type,
             this.onSetSecondaryLanguageServer.bind(this)
         );
     }
