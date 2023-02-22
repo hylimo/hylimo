@@ -1,6 +1,5 @@
 import { BaseDiagramLayoutResult } from "@hylimo/diagram";
 import { IncrementalUpdate, TransactionalAction } from "@hylimo/diagram-common";
-import { TextDocumentEdit } from "vscode-languageserver";
 import { TextDocumentContentChangeEvent } from "vscode-languageserver-textdocument";
 import { Diagram } from "../diagram";
 import { TransactionalEdit, TransactionalEditEngine, Versioned } from "./edits/transactionalEdit";

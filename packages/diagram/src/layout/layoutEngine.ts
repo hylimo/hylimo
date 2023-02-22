@@ -242,7 +242,31 @@ export class Layout {
         layoutElement.layoutInformation = layoutInformation;
         const marginX = layoutInformation.marginLeft + layoutInformation.marginRight;
         const marginY = layoutInformation.marginTop + layoutInformation.marginBottom;
-        const computedConstraints: SizeConstraints = {
+        const computedConstraints: SizeConstraints = this.computeSizeConstraints(styles, constraints, marginX, marginY);
+        const requestedSize = layoutElement.layoutConfig.measure(this, layoutElement, computedConstraints);
+        const computedSize = addToSize(requestedSize, marginX, marginY);
+        const realSize = matchToConstraints(computedSize, constraints);
+        layoutElement.measuredSize = realSize;
+        layoutElement.requestedSize = requestedSize;
+        return layoutElement;
+    }
+
+    /**
+     * Computes size constraints for measure based on the provided styles and margin, and the constraints.
+     *
+     * @param styles styles providing min/max width/height
+     * @param constraints constraints to further limit
+     * @param marginX margin in x direction
+     * @param marginY margin in y direction
+     * @returns the computed size constraints
+     */
+    private computeSizeConstraints(
+        styles: Record<string, any>,
+        constraints: SizeConstraints,
+        marginX: number,
+        marginY: number
+    ): SizeConstraints {
+        return {
             min: {
                 width: Math.max(styles.width ?? Math.max(styles.minWidth ?? 0, constraints.min.width - marginX), 0),
                 height: Math.max(styles.height ?? Math.max(styles.minHeight ?? 0, constraints.min.height - marginY), 0)
@@ -260,12 +284,6 @@ export class Layout {
                 )
             }
         };
-        const requestedSize = layoutElement.layoutConfig.measure(this, layoutElement, computedConstraints);
-        const computedSize = addToSize(requestedSize, marginX, marginY);
-        const realSize = matchToConstraints(computedSize, constraints);
-        layoutElement.measuredSize = realSize;
-        layoutElement.requestedSize = requestedSize;
-        return layoutElement;
     }
 
     /**
@@ -279,64 +297,107 @@ export class Layout {
      */
     layout(element: LayoutElement, position: Point, size: Size, id: string): Element[] {
         const styles = element.styles;
-        const horizontalAlignment = styles.hAlign;
-        const verticalAlignment = styles.vAlign;
-        const layoutInformation = element.layoutInformation!;
-        const marginX = layoutInformation.marginLeft + layoutInformation.marginRight;
-        const marginY = layoutInformation.marginTop + layoutInformation.marginBottom;
-        let realWidth = element.requestedSize!.width;
-        if (!horizontalAlignment) {
-            realWidth = Math.max(realWidth, size.width - marginX);
-        }
-        let realHeight = element.requestedSize!.height;
-        if (!verticalAlignment) {
-            realHeight = Math.max(realHeight, size.height - marginY);
-        }
-        let posX = position.x;
-        let posY = position.y;
-        if (styles.minWidth != undefined) {
-            realWidth = Math.max(realWidth, styles.minWidth);
-        }
-        if (styles.maxWidth != undefined) {
-            realWidth = Math.min(realWidth, styles.maxWidth);
-        }
-        if (styles.width != undefined) {
-            realWidth = styles.width;
-        }
-        if (horizontalAlignment === HorizontalAlignment.RIGHT) {
-            posX += size.width - (realWidth + layoutInformation.marginRight);
-        } else if (horizontalAlignment === HorizontalAlignment.CENTER) {
-            posX += (size.width - realWidth) / 2;
-        } else {
-            posX += layoutInformation.marginLeft;
-        }
 
-        if (styles.minHeight != undefined) {
-            realHeight = Math.max(realHeight, styles.minHeight);
-        }
-        if (styles.maxHeight != undefined) {
-            realHeight = Math.min(realHeight, styles.maxHeight);
-        }
-        if (styles.height != undefined) {
-            realHeight = styles.height;
-        }
-        if (verticalAlignment === VerticalAlignment.BOTTOM) {
-            posY += size.height - (realHeight + layoutInformation.marginBottom);
-        } else if (verticalAlignment === VerticalAlignment.CENTER) {
-            posY += (size.height - realHeight) / 2;
-        } else {
-            posY += layoutInformation.marginTop;
-        }
+        const layoutInformation = element.layoutInformation!;
+
+        const { x, width } = this.layoutX(styles, layoutInformation, element, size, position);
+        const { y, height } = this.layoutY(styles, layoutInformation, element, size, position);
 
         this.layoutElementLookup.set(id, element);
 
         const bounds = {
-            position: { x: posX, y: posY },
-            size: { width: realWidth, height: realHeight }
+            position: { x, y },
+            size: { width, height }
         };
         element.layoutBounds = bounds;
         const results = element.layoutConfig.layout(this, element, bounds.position, bounds.size, id);
         results.forEach((result) => (this.elementLookup[result.id] = result));
         return results;
+    }
+
+    /**
+     * Layouts an element in the x direction. Computes the x coordinate and the width of the element.
+     *
+     * @param styles styles providing alignment, min/max width and absolute width
+     * @param layoutInformation layout information providing margin
+     * @param element the element to layout
+     * @param size the size of the element
+     * @param position the position of the element
+     * @returns the computed x coordinate and width
+     */
+    private layoutX(
+        styles: Record<string, any>,
+        layoutInformation: LayoutInformation,
+        element: LayoutElement,
+        size: Size,
+        position: Point
+    ): { x: number; width: number } {
+        const horizontalAlignment = styles.hAlign;
+        const marginX = layoutInformation.marginLeft + layoutInformation.marginRight;
+        let width = element.requestedSize!.width;
+        if (!horizontalAlignment) {
+            width = Math.max(width, size.width - marginX);
+        }
+        let x = position.x;
+        if (styles.minWidth != undefined) {
+            width = Math.max(width, styles.minWidth);
+        }
+        if (styles.maxWidth != undefined) {
+            width = Math.min(width, styles.maxWidth);
+        }
+        if (styles.width != undefined) {
+            width = styles.width;
+        }
+        if (horizontalAlignment === HorizontalAlignment.RIGHT) {
+            x += size.width - (width + layoutInformation.marginRight);
+        } else if (horizontalAlignment === HorizontalAlignment.CENTER) {
+            x += (size.width - width) / 2;
+        } else {
+            x += layoutInformation.marginLeft;
+        }
+        return { x, width };
+    }
+
+    /**
+     * Layouts an element in the y direction. Computes the y coordinate and the height of the element.
+     *
+     * @param styles styles providing alignment, min/max height and absolute height
+     * @param layoutInformation layout information providing margin
+     * @param element the element to layout
+     * @param size the size of the element
+     * @param position the position of the element
+     * @returns the computed y coordinate and height
+     */
+    private layoutY(
+        styles: Record<string, any>,
+        layoutInformation: LayoutInformation,
+        element: LayoutElement,
+        size: Size,
+        position: Point
+    ): { y: number; height: number } {
+        const verticalAlignment = styles.vAlign;
+        const marginY = layoutInformation.marginTop + layoutInformation.marginBottom;
+        let height = element.requestedSize!.height;
+        if (!verticalAlignment) {
+            height = Math.max(height, size.height - marginY);
+        }
+        let y = position.y;
+        if (styles.minHeight != undefined) {
+            height = Math.max(height, styles.minHeight);
+        }
+        if (styles.maxHeight != undefined) {
+            height = Math.min(height, styles.maxHeight);
+        }
+        if (styles.height != undefined) {
+            height = styles.height;
+        }
+        if (verticalAlignment === VerticalAlignment.BOTTOM) {
+            y += size.height - (height + layoutInformation.marginBottom);
+        } else if (verticalAlignment === VerticalAlignment.CENTER) {
+            y += (size.height - height) / 2;
+        } else {
+            y += layoutInformation.marginTop;
+        }
+        return { y, height };
     }
 }

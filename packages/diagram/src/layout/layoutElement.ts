@@ -120,7 +120,7 @@ export interface LayoutElement {
     /**
      * Computed styles
      */
-    styles: { [key: string]: any };
+    styles: Record<string, any>;
     /**
      * Sources of the styles
      */
