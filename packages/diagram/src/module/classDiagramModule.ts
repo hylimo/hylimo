@@ -248,6 +248,9 @@ const scopeExpressions: Expression[] = [
                 class("dashed-connection") {
                     strokeDash = 10
                 }
+                class("cross-marker-path") {
+                    marginRight = 5
+                }
             }
         `
     ).call(id(scope))
