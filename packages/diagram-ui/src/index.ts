@@ -10,6 +10,7 @@ export * from "./features/canvas-bounds/resetCanvasBoundsAction";
 export * from "./features/canvas-bounds/resetCanvasBoundsCommand";
 export * from "./features/layout/lineProvider";
 export * from "./features/layout/positionProvider";
+export * from "./features/move/axisAlignedSegmentEditHandler";
 export * from "./features/move/di.config";
 export * from "./features/move/lineMoveHandler";
 export * from "./features/move/moveHandler";

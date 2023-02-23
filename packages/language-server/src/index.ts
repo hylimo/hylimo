@@ -1,3 +1,4 @@
+export * from "./edit/edits/axisAlignedSegmentEdit";
 export * from "./edit/edits/editGeneratorEntry";
 export * from "./edit/edits/generateAddFieldToScopeGenerator";
 export * from "./edit/edits/generateDeltaNumberGenerator";
