@@ -102,8 +102,10 @@ export class LocalLayoutedDiagram extends LayoutedDiagramImplementation {
                     )
                 );
             }
+            /* eslint-disable no-console */
             console.error(error);
             console.error(error.interpretationStack);
+            /* eslint-enable no-console */
             //TODO do sth else with error
         }
         return interpretationResult;
