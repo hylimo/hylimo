@@ -134,7 +134,7 @@ export const monarchTokenProvider = {
 
         string: [
             [/[a-zA-Z0-9!#$%&'()*+,\-./:;<=>?@[\]^_`{|}~ ]+/, "string"],
-            [/\\[\\"nt]/, "string.escape"],
+            [/\\([\\"nt]|u[0-9a-fA-F]{4})/, "string.escape"],
             [/\\./, "string.escape.invalid"],
             [/"/, { token: "string.quote", bracket: "@close", switchTo: "@expression.after" }]
         ],

@@ -164,10 +164,11 @@ export const Equal = createToken({
  * Other supported escapes:
  * - n (newline)
  * - t (tab)
+ * - u followed by 4 hexadecimal digits (unicode character)
  */
 export const String = createToken({
     name: "String",
-    pattern: /"((\\[\\"nt])|([a-zA-Z0-9!#$%&'()*+,\-./:;<=>?@[\]^_`{|}~ ]))*"/
+    pattern: /"((\\([\\"nt]|u[0-9a-fA-F]{4}))|([a-zA-Z0-9!#$%&'()*+,\-./:;<=>?@[\]^_`{|}~ ]))*"/
 });
 
 /**
