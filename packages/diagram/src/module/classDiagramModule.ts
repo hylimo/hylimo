@@ -171,6 +171,22 @@ const scopeExpressions: Expression[] = [
                 endMarkerFactory = scope.defaultMarkers.triangle,
                 class = list("dashed-connection")
             )
+            scope.set("..", scope.createConnectionOperator(
+                class = list("dashed-connection")
+            ))
+            scope.set("..>", scope.createConnectionOperator(
+                endMarkerFactory = scope.defaultMarkers.arrow,
+                class = list("dashed-connection")
+            ))
+            scope.set("<..", scope.createConnectionOperator(
+                startMarkerFactory = scope.defaultMarkers.arrow,
+                class = list("dashed-connection")
+            ))
+            scope.set("<..>", scope.createConnectionOperator(
+                startMarkerFactory = scope.defaultMarkers.arrow,
+                endMarkerFactory = scope.defaultMarkers.arrow,
+                class = list("dashed-connection")
+            ))
         `
     ),
     ...parse(
