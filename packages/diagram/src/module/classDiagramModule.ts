@@ -167,6 +167,10 @@ const scopeExpressions: Expression[] = [
             scope.extends = scope.createConnectionOperator(
                 endMarkerFactory = scope.defaultMarkers.triangle
             )
+            scope.implements = scope.createConnectionOperator(
+                endMarkerFactory = scope.defaultMarkers.triangle,
+                class = list("dashed-connection")
+            )
         `
     ),
     ...parse(
@@ -224,6 +228,9 @@ const scopeExpressions: Expression[] = [
                 }
                 class("filled-marker-path") {
                     fill = primary
+                }
+                class("dashed-connection") {
+                    strokeDash = 10
                 }
             }
         `

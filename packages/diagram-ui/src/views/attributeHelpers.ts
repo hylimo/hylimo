@@ -1,3 +1,4 @@
+import { StrokedElement } from "@hylimo/diagram-common";
 import { SLayoutedElement } from "../model/sLayoutedElement";
 import { SShape } from "../model/sShape";
 
@@ -40,6 +41,21 @@ export function extractOutlinedShapeAttributes(model: Readonly<SShape>) {
 }
 
 /**
+ * Extracts stroke style attributes
+ *
+ * @param model the model which provides the attributes
+ * @returns the extracted attributes
+ */
+export function extractStrokeAttriabutes(model: Readonly<StrokedElement>) {
+    return {
+        stroke: model.stroke ?? false,
+        "stroke-opacity": model.strokeOpacity ?? false,
+        "stroke-width": model.strokeWidth ?? false,
+        "stroke-dasharray": model.strokeDash != undefined ? `${model.strokeDash} ${model.strokeDashSpace}` : false
+    };
+}
+
+/**
  * Extracts layout and style properties for shapes
  *
  * @param model the model which provides the attributes
@@ -50,9 +66,7 @@ export function extractShapeAttributes(model: Readonly<SShape>) {
         ...extractLayoutAttributes(model),
         fill: model.fill ?? "none",
         "fill-opacity": model.fillOpacity,
-        stroke: model.stroke,
-        "stroke-opacity": model.strokeOpacity,
-        "stroke-width": model.strokeWidth
+        ...extractStrokeAttriabutes(model)
     };
     return res;
 }

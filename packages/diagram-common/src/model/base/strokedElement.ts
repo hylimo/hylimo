@@ -16,4 +16,12 @@ export interface StrokedElement extends Element {
      * The width of the stroke
      */
     strokeWidth?: number;
+    /**
+     * The length of the dashes, stroke is not dashed if not set
+     */
+    strokeDash?: number;
+    /**
+     * The space between dashes, defaults to strokeDash
+     */
+    strokeDashSpace?: number;
 }

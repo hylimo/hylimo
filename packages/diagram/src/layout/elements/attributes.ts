@@ -1,4 +1,5 @@
 import { enumType, numberType, stringType } from "@hylimo/core";
+import { Element, StrokedElement } from "@hylimo/diagram-common";
 import { HorizontalAlignment, VerticalAlignment } from "../layoutElement";
 
 /**
@@ -68,7 +69,17 @@ export const strokeStyleAttributes = [
         description: "optional stroke opacity, must be a number between 0 and 1",
         type: numberType
     },
-    { name: "strokeWidth", description: "optional width of the stroke", type: numberType }
+    { name: "strokeWidth", description: "optional width of the stroke", type: numberType },
+    {
+        name: "strokeDash",
+        description: "optional dash length. If not set, stroke is solid.",
+        type: numberType
+    },
+    {
+        name: "strokeDashSpace",
+        description: "space between dashes, only used if strokeDash is set, defaults to strokeDash",
+        type: numberType
+    }
 ];
 
 /**
@@ -87,3 +98,23 @@ export const fillStyleAtrributes = [
  * Shape style attributes, includes fill and stroke attributes
  */
 export const shapeStyleAttributes = [...strokeStyleAttributes, ...fillStyleAtrributes];
+
+/**
+ * Extracts stroke style properties from a style record
+ *
+ * @param styles all styles
+ * @returns the extracted and normalized style properties
+ */
+export function extractStrokeStyleAttributes(styles: Record<string, any>): Omit<StrokedElement, keyof Element> {
+    if (styles.stroke != undefined) {
+        return {
+            stroke: styles.stroke,
+            strokeOpacity: styles.strokeOpacity,
+            strokeWidth: styles.strokeWidth ?? 1,
+            strokeDash: styles.strokeDash,
+            strokeDashSpace: styles.strokeDashSpace ?? styles.strokeDash
+        };
+    } else {
+        return {};
+    }
+}

@@ -5,6 +5,7 @@ import { IView, IViewArgs, RenderingContext, svg } from "sprotty";
 import { SCanvasConnection } from "../../model/canvas/sCanvasConnection";
 import { SCanvasConnectionSegment, SegmentLayoutInformation } from "../../model/canvas/sCanvasConnectionSegment";
 import { SMarker } from "../../model/canvas/sMarker";
+import { extractStrokeAttriabutes } from "../attributeHelpers";
 
 /**
  * IView that represents a CanvasConnection
@@ -27,9 +28,7 @@ export class CanvasConnectionView implements IView {
             svg("path", {
                 attrs: {
                     d: path,
-                    stroke: model.stroke ?? false,
-                    "stroke-opacity": model.strokeOpacity ?? false,
-                    "stroke-width": model.strokeWidth ?? false,
+                    ...extractStrokeAttriabutes(model),
                     fill: "none"
                 }
             }),

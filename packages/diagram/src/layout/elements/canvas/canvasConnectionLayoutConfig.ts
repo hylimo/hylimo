@@ -3,7 +3,7 @@ import { Size, Point, Element, CanvasConnection, Marker } from "@hylimo/diagram-
 import { canvasPointType } from "../../../module/types";
 import { LayoutElement, SizeConstraints } from "../../layoutElement";
 import { Layout } from "../../layoutEngine";
-import { strokeStyleAttributes } from "../attributes";
+import { extractStrokeStyleAttributes, strokeStyleAttributes } from "../attributes";
 import { EditableCanvasContentLayoutConfig } from "./editableCanvasContentLayoutConfig";
 
 /**
@@ -83,9 +83,7 @@ export class CanvasConnectionLayoutConfig extends EditableCanvasContentLayoutCon
             children: contents.flatMap((content, i) =>
                 layout.layout(content, position, content.measuredSize!, `${id}_${i}`)
             ),
-            stroke: element.styles.stroke,
-            strokeOpacity: element.styles.strokeOpacity,
-            strokeWidth: element.styles.strokeWidth
+            ...extractStrokeStyleAttributes(element.styles)
         };
         const startMarker = element.startMarker;
         if (element.startMarker != undefined) {

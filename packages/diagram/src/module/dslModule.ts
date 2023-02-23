@@ -319,7 +319,7 @@ const scopeExpressions: Expression[] = [
         "_createConnection",
         fun(
             `
-                (start, end) = args
+                (start, end, class) = args
                 startMarkerFactory = args.startMarkerFactory
                 endMarkerFactory = args.endMarkerFactory
                 startPoint = start
@@ -343,7 +343,8 @@ const scopeExpressions: Expression[] = [
                     ),
                     startMarker = if(args.startMarkerFactory != null) { startMarkerFactory() },
                     endMarker = if(args.endMarkerFactory != null) { endMarkerFactory() },
-                    scopes = object()
+                    scopes = object(),
+                    class = class
                 )
                 connection.startProvider = startProvider
                 connection.endProvider = endProvider
@@ -377,11 +378,13 @@ const scopeExpressions: Expression[] = [
             `
                 startMarkerFactory = args.startMarkerFactory
                 endMarkerFactory = args.endMarkerFactory
+                class = args.class
                 scope.withRegisterSource {
                     (start, end) = args
                     _createConnection(
                         start,
                         end,
+                        class,
                         startMarkerFactory = startMarkerFactory,
                         endMarkerFactory = endMarkerFactory
                     )
