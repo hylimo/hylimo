@@ -4,6 +4,7 @@ export * from "./edit/edits/generateDeltaNumberGenerator";
 export * from "./edit/edits/generateFactorNumberGenerator";
 export * from "./edit/edits/generateReplacementNumberGenerator";
 export * from "./edit/edits/lineMoveEdit";
+export * from "./edit/edits/resizeEdit";
 export * from "./edit/edits/rotationEdit";
 export * from "./edit/edits/transactionalEdit";
 export * from "./edit/edits/transactionalEditRegistry";

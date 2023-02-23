@@ -19,8 +19,9 @@ export namespace CanvasLineSegment {
 
     /**
      * Checks if an element is a CanvasLineSegment
-     * @param value
-     * @returns
+     *
+     * @param value the element to check
+     * @returns true if the element is a CanvasLineSegment
      */
     export function isCanvasLineSegment(value: Element): value is CanvasLineSegment {
         return value.type === TYPE;
@@ -28,6 +29,7 @@ export namespace CanvasLineSegment {
 
     /**
      * Gets the dependencies required for layouting
+     *
      * @param element the element to get the dependencies of
      * @returns the list of dependencies, may contain duplicates
      */

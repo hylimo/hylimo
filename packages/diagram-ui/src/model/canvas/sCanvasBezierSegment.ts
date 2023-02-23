@@ -58,7 +58,7 @@ export class SCanvasBezierSegment extends SCanvasConnectionSegment implements Ca
         }
     }
 
-    override generatePathString(end: Point): string {
+    override generatePathString(start: Point, end: Point): string {
         const c1 = this.startControlPointPosition;
         const c2 = this.endControlPointPosition;
         return `C ${c1.x} ${c1.y} ${c2.x} ${c2.y} ${end.x} ${end.y}`;
@@ -95,11 +95,11 @@ export class SCanvasBezierSegment extends SCanvasConnectionSegment implements Ca
         ];
     }
 
-    override generateSegments(_start: Point): BezierSegment[] {
+    override generateSegments(start: Point, end: Point): BezierSegment[] {
         return [
             {
                 type: BezierSegment.TYPE,
-                end: this.endPosition,
+                end,
                 startControlPoint: this.startControlPointPosition,
                 endControlPoint: this.endControlPointPosition
             }

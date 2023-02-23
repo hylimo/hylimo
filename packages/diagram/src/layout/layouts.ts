@@ -14,6 +14,7 @@ import { TextLayoutConfig } from "./elements/textLayoutConfig";
 import { VBoxLayoutConfig } from "./elements/vboxLayoutConfig";
 import { LayoutConfig } from "./layoutElement";
 import { PathLayoutConfig } from "./elements/pathLayoutConfig";
+import { CanvasAxisAlignedSegmentLayoutConfig } from "./elements/canvas/canvasAxisAlignedSegmentLayoutConfig";
 
 /**
  * Known layouts
@@ -29,6 +30,7 @@ export const layouts: LayoutConfig[] = [
     new CanvasConnectionLayoutConfig(),
     new CanvasLineSegmentLayoutConfig(),
     new CanvasBezierSegmentLayoutConfig(),
+    new CanvasAxisAlignedSegmentLayoutConfig(),
     new AbsolutePointLayoutConfig(),
     new RelativePointLayoutConfig(),
     new LinePointLayoutConfig(),

@@ -1,6 +1,7 @@
 import {
     AbsolutePoint,
     Canvas,
+    CanvasAxisAlignedSegment,
     CanvasBezierSegment,
     CanvasConnection,
     CanvasElement,
@@ -58,6 +59,7 @@ import { LinePointView } from "./views/canvas/linePointView";
 import { SPath } from "./model/sPath";
 import { PathView } from "./views/pathView";
 import { resetCanvasBoundsModule } from "./features/canvas-bounds/di.config";
+import { SCanvasAxisAlignedSegment } from "./model/canvas/sCanvasAxisAlignedSegment";
 
 /**
  * The module used
@@ -90,6 +92,7 @@ const diagramModule = new ContainerModule((bind, unbind, isBound, rebind) => {
     configureModelElement(context, Marker.TYPE, SMarker, MarkerView);
     registerModelElement(context, CanvasLineSegment.TYPE, SCanvasLineSegment);
     registerModelElement(context, CanvasBezierSegment.TYPE, SCanvasBezierSegment);
+    registerModelElement(context, CanvasAxisAlignedSegment.TYPE, SCanvasAxisAlignedSegment);
 });
 
 /**

@@ -1,6 +1,7 @@
 export * from "./font/fontManager";
 export * from "./font/textLayouter";
 export * from "./layout/elements/canvas/absolutePointLayoutConfig";
+export * from "./layout/elements/canvas/canvasAxisAlignedSegmentLayoutConfig";
 export * from "./layout/elements/canvas/canvasBezierSegmentLayoutConfig";
 export * from "./layout/elements/canvas/canvasConnectionLayoutConfig";
 export * from "./layout/elements/canvas/canvasConnectionSegmentLayoutConfig";

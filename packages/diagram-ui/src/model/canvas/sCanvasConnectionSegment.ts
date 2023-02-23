@@ -44,10 +44,11 @@ export abstract class SCanvasConnectionSegment extends SElement {
     /**
      * Generates an svg path string with absolute positions for this segment
      *
+     * @param start the start point
      * @param end the end point
      * @return the generated path string
      */
-    abstract generatePathString(end: Point): string;
+    abstract generatePathString(start: Point, end: Point): string;
 
     /**
      * Generates the control elements rendered when the connection is selected
@@ -60,7 +61,8 @@ export abstract class SCanvasConnectionSegment extends SElement {
     /**
      * Generates the line segments for path points
      * @param start the start point
+     * @param end the end point
      * @return the generated line segments
      */
-    abstract generateSegments(start: Point): Segment[];
+    abstract generateSegments(start: Point, end: Point): Segment[];
 }

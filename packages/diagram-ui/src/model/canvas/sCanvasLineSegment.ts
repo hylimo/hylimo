@@ -21,7 +21,7 @@ export class SCanvasLineSegment extends SCanvasConnectionSegment implements Canv
         }
     }
 
-    override generatePathString(end: Point): string {
+    override generatePathString(start: Point, end: Point): string {
         return `L ${end.x} ${end.y}`;
     }
 
@@ -29,11 +29,11 @@ export class SCanvasLineSegment extends SCanvasConnectionSegment implements Canv
         return [];
     }
 
-    override generateSegments(): LineSegment[] {
+    override generateSegments(start: Point, end: Point): LineSegment[] {
         return [
             {
                 type: LineSegment.TYPE,
-                end: this.endPosition
+                end
             }
         ];
     }

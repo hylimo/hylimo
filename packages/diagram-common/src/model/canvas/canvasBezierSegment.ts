@@ -6,7 +6,6 @@ import { CanvasConnectionSegment, calculateMarkerRenderInformationInternal } fro
 /**
  * Cubic bezier connection segment
  */
-
 export interface CanvasBezierSegment extends CanvasConnectionSegment {
     type: typeof CanvasBezierSegment.TYPE;
     /**
@@ -27,8 +26,9 @@ export namespace CanvasBezierSegment {
 
     /**
      * Checks if an element is a CanvasBezierSegment
-     * @param value
-     * @returns
+     *
+     * @param value the element to check
+     * @returns true if the element is a CanvasBezierSegment
      */
     export function isCanvasBezierSegment(value: Element): value is CanvasBezierSegment {
         return value.type === TYPE;
@@ -36,6 +36,7 @@ export namespace CanvasBezierSegment {
 
     /**
      * Gets the dependencies required for layouting
+     *
      * @param element the element to get the dependencies of
      * @returns the list of dependencies, may contain duplicates
      */

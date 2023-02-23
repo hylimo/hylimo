@@ -182,6 +182,17 @@ const scopeExpressions: Expression[] = [
                 }
                 args.self
             }
+            lineBuilderProto.axisAligned = listWrapper {
+                segments = args.self.segments
+                positions = it
+                range(positions.length / 2).forEach {
+                    segments += canvasAxisAlignedSegment(
+                        end = positions.get(2 * it + 1),
+                        verticalPos = positions.get(2 * it)
+                    )
+                }
+                args.self
+            }
             lineBuilderProto.bezier = listWrapper {
                 self = args.self
                 segments = self.segments

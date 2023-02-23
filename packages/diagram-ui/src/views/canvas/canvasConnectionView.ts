@@ -68,11 +68,13 @@ export class CanvasConnectionView implements IView {
         for (let i = 0; i < segments.length; i++) {
             const segment = segments[i];
             const originalEnd = segment.endPosition;
-            pathSegments.push(segment.generatePathString(i == segments.length - 1 ? endPos : originalEnd));
+            const newEnd = i == segments.length - 1 ? endPos : originalEnd;
+            pathSegments.push(segment.generatePathString(startPos, newEnd));
             if (showControlElements) {
                 childControlElements.push(...segment.generateControlViewElements(originalStart));
             }
             originalStart = originalEnd;
+            startPos = newEnd;
         }
         return { path: pathSegments.join(" "), childControlElements };
     }
@@ -90,26 +92,18 @@ export class CanvasConnectionView implements IView {
         segments: SCanvasConnectionSegment[],
         context: RenderingContext
     ) {
-        const markers = model.children.filter((child) => child instanceof SMarker) as SMarker[];
-        const startMarker = markers.find((marker) => marker.pos == "start");
-        const endMarker = markers.find((marker) => marker.pos == "end");
+        const startMarker = model.startMarker;
+        const endMarker = model.endMarker;
         let startPos = model.startPosition;
         let endPos = segments.at(-1)!.endPosition;
         const childMarkers: VNode[] = [];
         if (endMarker != undefined) {
-            let endStartPosition: Point;
-            if (segments.length == 1) {
-                endStartPosition = startPos;
-            } else {
-                endStartPosition = segments.at(-2)!.endPosition;
-            }
-            const renderInformation = segments.at(-1)!.calculateMarkerRenderInformation(endMarker, endStartPosition);
+            const renderInformation = model.endMarkerInformation!;
             childMarkers.push(this.renderMarker(endMarker, renderInformation, segments.at(-1)!.endPosition, context));
             endPos = renderInformation.newPoint;
         }
         if (startMarker != undefined) {
-            const startSegment = segments[0];
-            const renderInformation = startSegment.calculateMarkerRenderInformation(startMarker, startPos);
+            const renderInformation = model.startMarkerInformation!;
             childMarkers.push(this.renderMarker(startMarker, renderInformation, startPos, context));
             startPos = renderInformation.newPoint;
         }

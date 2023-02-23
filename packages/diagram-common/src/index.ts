@@ -19,6 +19,7 @@ export * from "./model/base/positionedElement";
 export * from "./model/base/sizedElement";
 export * from "./model/base/strokedElement";
 export * from "./model/canvas/canvas";
+export * from "./model/canvas/canvasAxisAlignedSegment";
 export * from "./model/canvas/canvasBezierSegment";
 export * from "./model/canvas/canvasConnection";
 export * from "./model/canvas/canvasConnectionSegment";

@@ -14,7 +14,7 @@ export abstract class SElement extends SChildElement implements Element {
      * @param name the name of the property
      * @param initializer initializer for the property
      */
-    protected cachedProperty<T>(name: string, initializer: () => NonNullable<T>): void {
+    protected cachedProperty<T>(name: string, initializer: () => Exclude<T, undefined>): void {
         let currentVersion = Number.NaN;
         let currentValue: T | undefined = undefined;
         Object.defineProperty(this, name, {
