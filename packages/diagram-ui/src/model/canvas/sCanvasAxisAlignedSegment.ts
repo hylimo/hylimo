@@ -6,10 +6,15 @@ import {
     Point
 } from "@hylimo/diagram-common";
 import { VNode } from "snabbdom";
-import { SCanvasConnectionSegment } from "./sCanvasConnectionSegment";
+import { svg } from "sprotty";
+import { SCanvasConnectionSegment, SegmentLayoutInformation } from "./sCanvasConnectionSegment";
 import { SMarker } from "./sMarker";
 
 export class SCanvasAxisAlignedSegment extends SCanvasConnectionSegment implements CanvasAxisAlignedSegment {
+    /**
+     * Class applied to the vertical edit helper line
+     */
+    static readonly SEGMENT_EDIT_CLASS = "axis-aligned-segment-edit";
     override type!: typeof CanvasAxisAlignedSegment.TYPE;
     /**
      * The position on the x-axis where the vertical segment starts
@@ -43,16 +48,40 @@ export class SCanvasAxisAlignedSegment extends SCanvasConnectionSegment implemen
         }
     }
 
-    override generatePathString(start: Point, end: Point): string {
+    override generatePathString(layout: SegmentLayoutInformation): string {
+        const { start, end } = layout;
         const verticalX = start.x + (end.x - start.x) * this.verticalPos;
         return `H ${verticalX} V ${end.y} H ${end.x}`;
     }
 
-    override generateControlViewElements(_start: Point): VNode[] {
-        return [];
+    override generateControlViewElements(layout: SegmentLayoutInformation): VNode[] {
+        if (this.editable != undefined) {
+            const { start, end } = layout;
+            const verticalX = start.x + (end.x - start.x) * this.verticalPos;
+            return [
+                svg("line", {
+                    attrs: {
+                        x1: verticalX,
+                        y1: start.y,
+                        x2: verticalX,
+                        y2: end.y,
+                        "data-start-x": start.x,
+                        "data-end-x": end.x,
+                        "data-id": this.id
+                    },
+                    class: {
+                        resize: true,
+                        [SCanvasAxisAlignedSegment.SEGMENT_EDIT_CLASS]: true
+                    }
+                })
+            ];
+        } else {
+            return [];
+        }
     }
 
-    override generateSegments(start: Point, end: Point): LineSegment[] {
+    override generateSegments(layout: SegmentLayoutInformation): LineSegment[] {
+        const { start, end } = layout;
         const verticalX = start.x + (end.x - start.x) * this.verticalPos;
         return [
             {

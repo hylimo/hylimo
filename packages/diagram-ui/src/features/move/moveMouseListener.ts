@@ -29,6 +29,8 @@ import { SCanvasContent } from "../../model/canvas/sCanvasContent";
 import { SCanvasConnectionSegment } from "../../model/canvas/sCanvasConnectionSegment";
 import { SRoot } from "../../model/sRoot";
 import { ResizeHandler } from "./resizeHandler";
+import { SCanvasAxisAlignedSegment } from "../../model/canvas/sCanvasAxisAlignedSegment";
+import { AxisAligedSegmentEditHandler } from "./axisAlignedSegmentEditHandler";
 
 /**
  * The maximum number of updates that can be performed on the same revision.
@@ -167,8 +169,38 @@ export class MoveMouseListener extends MouseListener {
             } else if (classList.contains(CanvasElementView.RESIZE_CLASS)) {
                 return this.createResizeHandler(target, classList);
             }
+        } else if (target instanceof SCanvasConnection && classList != undefined) {
+            if (classList.contains(SCanvasAxisAlignedSegment.SEGMENT_EDIT_CLASS)) {
+                return this.createAxisAlignedSegmentHandler(target, targetElement as HTMLElement);
+            }
         }
         return this.createMoveHandler(target);
+    }
+
+    /**
+     * Creats a move handler for the given target.
+     * Handles moving the verticalPos of an axis aligned canvas connection segment
+     *
+     * @param target the CanvasConnection of which the segment is part of
+     * @param targetElement the clicked svg element
+     * @returns the move handler if move is supported, otherwise null
+     */
+    private createAxisAlignedSegmentHandler(
+        target: SCanvasConnection,
+        targetElement: HTMLElement
+    ): AxisAligedSegmentEditHandler | null {
+        const dataset = targetElement.dataset;
+        const id = dataset.id!;
+        const segment = target.root.index.getById(id) as SCanvasAxisAlignedSegment;
+        const startX = Number.parseFloat(dataset.startX!);
+        const endX = Number.parseFloat(dataset.endX!);
+        return new AxisAligedSegmentEditHandler(
+            id,
+            this.transactionIdProvider.generateId(),
+            startX + segment.verticalPos * (endX - startX),
+            startX,
+            endX
+        );
     }
 
     /**

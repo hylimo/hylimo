@@ -62,6 +62,10 @@ export class SCanvasConnection extends SCanvasContent implements CanvasConnectio
      * The provided line
      */
     line!: TransformedLine;
+    /**
+     * Required to mark this as moveable
+     */
+    private readonly position = null;
 
     constructor() {
         super();
@@ -109,7 +113,8 @@ export class SCanvasConnection extends SCanvasContent implements CanvasConnectio
             }
         });
         this.cachedProperty<TransformedLine>("line", () => {
-            const start = this.startMarkerInformation?.newPoint ?? this.startPosition;
+            let originalStart = this.startPosition;
+            const start = this.startMarkerInformation?.newPoint ?? originalStart;
             let startPos = start;
             const segments = this.segments;
             const lineSegments = segments.flatMap((segment, i) => {
@@ -119,8 +124,14 @@ export class SCanvasConnection extends SCanvasContent implements CanvasConnectio
                 } else {
                     endPos = segment.endPosition;
                 }
-                const result = segment.generateSegments(startPos, endPos);
-                startPos = segment.endPosition;
+                const result = segment.generateSegments({
+                    start: startPos,
+                    end: endPos,
+                    originalStart,
+                    originalEnd: segment.endPosition
+                });
+                startPos = endPos;
+                originalStart = segment.endPosition;
                 return result;
             });
             return {

@@ -6,7 +6,7 @@ import { MoveHandler } from "./moveHandler";
  */
 export class RotationHandler implements MoveHandler {
     /**
-     * Creats a new RotationHandler
+     * Creates a new RotationHandler
      *
      * @param element the id of the CanvasElement to move
      * @param transactionId the id of the transaction

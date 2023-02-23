@@ -123,6 +123,10 @@ export class SRoot extends ViewportRootElement {
         .resize-cursor-3, .resize-cursor-7 {
             cursor: ew-resize;
         }
+
+        .axis-aligned-segment-edit {
+            cursor: ew-resize;
+        }
         `;
         return (
             this.fonts

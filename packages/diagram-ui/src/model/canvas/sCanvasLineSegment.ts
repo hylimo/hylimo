@@ -1,5 +1,5 @@
 import { CanvasLineSegment, LineSegment, MarkerRenderInformation, Point } from "@hylimo/diagram-common";
-import { SCanvasConnectionSegment } from "./sCanvasConnectionSegment";
+import { SCanvasConnectionSegment, SegmentLayoutInformation } from "./sCanvasConnectionSegment";
 import { SMarker } from "./sMarker";
 import { VNode } from "snabbdom";
 
@@ -21,19 +21,20 @@ export class SCanvasLineSegment extends SCanvasConnectionSegment implements Canv
         }
     }
 
-    override generatePathString(start: Point, end: Point): string {
+    override generatePathString(layout: SegmentLayoutInformation): string {
+        const end = layout.end;
         return `L ${end.x} ${end.y}`;
     }
 
-    override generateControlViewElements(_start: Point): VNode[] {
+    override generateControlViewElements(_layout: SegmentLayoutInformation): VNode[] {
         return [];
     }
 
-    override generateSegments(start: Point, end: Point): LineSegment[] {
+    override generateSegments(layout: SegmentLayoutInformation): LineSegment[] {
         return [
             {
                 type: LineSegment.TYPE,
-                end
+                end: layout.end
             }
         ];
     }

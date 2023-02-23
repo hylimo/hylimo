@@ -44,25 +44,46 @@ export abstract class SCanvasConnectionSegment extends SElement {
     /**
      * Generates an svg path string with absolute positions for this segment
      *
-     * @param start the start point
-     * @param end the end point
+     * @param layout defines the segment start and end points
      * @return the generated path string
      */
-    abstract generatePathString(start: Point, end: Point): string;
+    abstract generatePathString(layout: SegmentLayoutInformation): string;
 
     /**
      * Generates the control elements rendered when the connection is selected
      *
-     * @param start the original start point (independent of marker)
+     * @param layout defines the segment start and end points
      * @returns the generated nodes
      */
-    abstract generateControlViewElements(start: Point): VNode[];
+    abstract generateControlViewElements(layout: SegmentLayoutInformation): VNode[];
 
     /**
      * Generates the line segments for path points
-     * @param start the start point
-     * @param end the end point
+     *
+     * @param layout defines the segment start and end points
      * @return the generated line segments
      */
-    abstract generateSegments(start: Point, end: Point): Segment[];
+    abstract generateSegments(layout: SegmentLayoutInformation): Segment[];
+}
+
+/**
+ * Information required to render a segment
+ */
+export interface SegmentLayoutInformation {
+    /**
+     * The start of the segment with respect to a potential marker
+     */
+    start: Point;
+    /**
+     * The end of the segment with respect to a potential marker
+     */
+    end: Point;
+    /**
+     * The original start of the segment
+     */
+    originalStart: Point;
+    /**
+     * The original end of the segment
+     */
+    originalEnd: Point;
 }

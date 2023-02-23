@@ -1,4 +1,10 @@
-import { LineMoveAction, ResizeAction, RotationAction, TranslationMoveAction } from "@hylimo/diagram-common";
+import {
+    AxisAlignedSegmentEditAction,
+    LineMoveAction,
+    ResizeAction,
+    RotationAction,
+    TranslationMoveAction
+} from "@hylimo/diagram-common";
 import { injectable } from "inversify";
 import { ActionHandlerRegistry, DiagramServerProxy as SprottyDiagramServerProxy } from "sprotty";
 
@@ -14,5 +20,6 @@ export abstract class DiagramServerProxy extends SprottyDiagramServerProxy {
         registry.register(LineMoveAction.KIND, this);
         registry.register(RotationAction.KIND, this);
         registry.register(ResizeAction.KIND, this);
+        registry.register(AxisAlignedSegmentEditAction.KIND, this);
     }
 }

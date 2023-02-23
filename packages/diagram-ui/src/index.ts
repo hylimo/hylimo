@@ -28,6 +28,7 @@ export * from "./features/types";
 export * from "./model/canvas/pointVisibilityManager";
 export * from "./model/canvas/sAbsolutePoint";
 export * from "./model/canvas/sCanvas";
+export * from "./model/canvas/sCanvasAxisAlignedSegment";
 export * from "./model/canvas/sCanvasBezierSegment";
 export * from "./model/canvas/sCanvasConnection";
 export * from "./model/canvas/sCanvasConnectionSegment";

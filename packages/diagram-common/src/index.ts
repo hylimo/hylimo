@@ -34,6 +34,7 @@ export * from "./model/path";
 export * from "./model/rect";
 export * from "./model/shape";
 export * from "./model/text";
+export * from "./protocol/axisAlignedSegmentEditAction";
 export * from "./protocol/incrementalUpdateAction";
 export * from "./protocol/lineMoveAction";
 export * from "./protocol/resizeAction";

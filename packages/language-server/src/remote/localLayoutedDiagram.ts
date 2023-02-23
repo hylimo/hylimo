@@ -5,10 +5,12 @@ import {
     TranslationMoveAction,
     RotationAction,
     LineMoveAction,
-    ResizeAction
+    ResizeAction,
+    AxisAlignedSegmentEditAction
 } from "@hylimo/diagram-common";
 import { Diagnostic, DiagnosticSeverity, uinteger, Range } from "vscode-languageserver";
 import { TextDocument } from "vscode-languageserver-textdocument";
+import { AxisAlignedSegmentEdit } from "../edit/edits/axisAlignedSegmentEdit";
 import { LineMoveEdit } from "../edit/edits/lineMoveEdit";
 import { ResizeEdit } from "../edit/edits/resizeEdit";
 import { RotationEdit } from "../edit/edits/rotationEdit";
@@ -72,6 +74,8 @@ export class LocalLayoutedDiagram extends LayoutedDiagramImplementation {
             return LineMoveEdit.create(action, this.layoutResult);
         } else if (ResizeAction.is(action)) {
             return ResizeEdit.create(action, this.layoutResult, this.document!);
+        } else if (AxisAlignedSegmentEditAction.is(action)) {
+            return AxisAlignedSegmentEdit.create(action, this.layoutResult);
         } else {
             throw new Error("Unknown action type");
         }

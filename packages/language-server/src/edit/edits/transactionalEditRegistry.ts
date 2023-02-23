@@ -1,4 +1,5 @@
 import { defaultGeneratorRegistry } from "../generators/generatorRegistry";
+import { AxisAlignedSegmentEditEngine } from "./axisAlignedSegmentEdit";
 import { LineMoveEditEngine } from "./lineMoveEdit";
 import { ResizeEditEngine } from "./resizeEdit";
 import { RotationEditEngine } from "./rotationEdit";
@@ -46,5 +47,6 @@ export const defaultEditRegistry = new TransactionalEditRegistory([
     new LineMoveEditEngine(defaultGeneratorRegistry),
     new TranslationMoveEditEngine(defaultGeneratorRegistry),
     new RotationEditEngine(defaultGeneratorRegistry),
-    new ResizeEditEngine(defaultGeneratorRegistry)
+    new ResizeEditEngine(defaultGeneratorRegistry),
+    new AxisAlignedSegmentEditEngine(defaultGeneratorRegistry)
 ]);

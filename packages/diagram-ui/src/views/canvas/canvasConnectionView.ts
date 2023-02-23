@@ -3,7 +3,7 @@ import { injectable } from "inversify";
 import { VNode } from "snabbdom";
 import { IView, IViewArgs, RenderingContext, svg } from "sprotty";
 import { SCanvasConnection } from "../../model/canvas/sCanvasConnection";
-import { SCanvasConnectionSegment } from "../../model/canvas/sCanvasConnectionSegment";
+import { SCanvasConnectionSegment, SegmentLayoutInformation } from "../../model/canvas/sCanvasConnectionSegment";
 import { SMarker } from "../../model/canvas/sMarker";
 
 /**
@@ -69,9 +69,15 @@ export class CanvasConnectionView implements IView {
             const segment = segments[i];
             const originalEnd = segment.endPosition;
             const newEnd = i == segments.length - 1 ? endPos : originalEnd;
-            pathSegments.push(segment.generatePathString(startPos, newEnd));
+            const segmentLayout: SegmentLayoutInformation = {
+                originalStart,
+                originalEnd,
+                start: startPos,
+                end: newEnd
+            };
+            pathSegments.push(segment.generatePathString(segmentLayout));
             if (showControlElements) {
-                childControlElements.push(...segment.generateControlViewElements(originalStart));
+                childControlElements.push(...segment.generateControlViewElements(segmentLayout));
             }
             originalStart = originalEnd;
             startPos = newEnd;

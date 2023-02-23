@@ -1,7 +1,7 @@
 import { BezierSegment, CanvasBezierSegment, MarkerRenderInformation, Point } from "@hylimo/diagram-common";
 import { VNode } from "snabbdom";
 import { svg } from "sprotty";
-import { SCanvasConnectionSegment } from "./sCanvasConnectionSegment";
+import { SCanvasConnectionSegment, SegmentLayoutInformation } from "./sCanvasConnectionSegment";
 import { SCanvasPoint } from "./sCanvasPoint";
 import { SMarker } from "./sMarker";
 
@@ -58,17 +58,19 @@ export class SCanvasBezierSegment extends SCanvasConnectionSegment implements Ca
         }
     }
 
-    override generatePathString(start: Point, end: Point): string {
+    override generatePathString(layout: SegmentLayoutInformation): string {
         const c1 = this.startControlPointPosition;
         const c2 = this.endControlPointPosition;
+        const end = layout.end;
         return `C ${c1.x} ${c1.y} ${c2.x} ${c2.y} ${end.x} ${end.y}`;
     }
 
-    override generateControlViewElements(start: Point): VNode[] {
+    override generateControlViewElements(layout: SegmentLayoutInformation): VNode[] {
         const c1 = this.startControlPointPosition;
         const c2 = this.endControlPointPosition;
-        const end = this.endPosition;
         const className = "bezier-handle-line";
+        const start = layout.originalStart;
+        const end = layout.originalEnd;
         return [
             svg("line", {
                 attrs: {
@@ -95,11 +97,11 @@ export class SCanvasBezierSegment extends SCanvasConnectionSegment implements Ca
         ];
     }
 
-    override generateSegments(start: Point, end: Point): BezierSegment[] {
+    override generateSegments(layout: SegmentLayoutInformation): BezierSegment[] {
         return [
             {
                 type: BezierSegment.TYPE,
-                end,
+                end: layout.end,
                 startControlPoint: this.startControlPointPosition,
                 endControlPoint: this.endControlPointPosition
             }
