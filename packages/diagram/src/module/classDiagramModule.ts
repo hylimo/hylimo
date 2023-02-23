@@ -14,7 +14,7 @@ const scopeExpressions: Expression[] = [
         "_class",
         fun(
             `
-                (name, optionalCallback) = args
+                (name, optionalCallback, stereotypes) = args
                 callback = optionalCallback ?? {}
                 result = object(sections = list())
                 result.section = listWrapper {
@@ -22,6 +22,16 @@ const scopeExpressions: Expression[] = [
                 }
                 callback.callWithScope(result)
                 classContents = list()
+
+                if(stereotypes != null) {
+                    stereotypes.forEach {
+                        classContents += text(
+                            contents = list(span(text = "\\u00AB" + it + "\\u00BB")),
+                            class = list("stereotype")
+                        )
+                    }
+                }
+
                 classContents += text(contents = list(span(text = name)), class = list("title"))
 
                 result.sections.forEach {
@@ -193,7 +203,16 @@ const scopeExpressions: Expression[] = [
         `
             scope.class = scope.withRegisterSource {
                 (name, callback) = args
-                _class(name, callback, self = args.self)
+                _class(name, callback, args.stereotypes, self = args.self)
+            }
+            scope.interface = scope.withRegisterSource {
+                (name, callback) = args
+                stereotypes = list("interface")
+                otherStereotypes = args.stereotypes
+                if(otherStereotypes != null) {
+                    stereotypes.addAll(otherStereotypes)
+                }
+                _class(name, callback, stereotypes, self = args.self)
             }
         `
     ),
@@ -217,6 +236,9 @@ const scopeExpressions: Expression[] = [
                     type("span") {
                         fontWeight = "bold"
                     }
+                }
+                class("stereotype") {
+                    hAlign = "center"
                 }
                 class("separator") {
                     marginTop = 5
