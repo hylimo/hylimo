@@ -36,7 +36,7 @@ export function generateDeltaNumberGenerator(entry: FieldEntry, meta: any): Edit
     return {
         start: position!.endOffset + 1,
         end: position!.endOffset + 1,
-        generator: DeltaReplacementNumberGenerator.create(0),
+        generator: DeltaAdditiveNumberGenerator.create(0),
         meta
     };
 }

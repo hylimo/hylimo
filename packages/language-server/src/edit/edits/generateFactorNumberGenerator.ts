@@ -36,7 +36,7 @@ export function generateFactorNumberGenerator(entry: FieldEntry, meta: any): Edi
     return {
         start: position!.endOffset + 1,
         end: position!.endOffset + 1,
-        generator: FactorReplacementNumberGenerator.create(0),
+        generator: FactorMultiplicativeNumberGenerator.create(1),
         meta
     };
 }

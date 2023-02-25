@@ -198,11 +198,12 @@ export function generateVisitor(parser: Parser): ICstVisitor<CstVisitorParameter
                 decorator = new Map();
                 startPos = ctx.OpenCurlyBracket[0];
             }
-            const expressions = this.visit(ctx.expressions, { editable: params.editable && !decorator.has("noedit") });
+            const newParams = { editable: params.editable && !decorator.has("noedit") };
+            const expressions = this.visit(ctx.expressions, newParams);
             return new FunctionExpression(
                 expressions,
                 decorator,
-                generateMetadata(startPos, ctx.CloseCurlyBracket[0], params)
+                generateMetadata(startPos, ctx.CloseCurlyBracket[0], newParams)
             );
         }
 
