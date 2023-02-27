@@ -55,7 +55,12 @@ export class TransactionManager {
      */
     async handleAction(action: TransactionalAction): Promise<IncrementalUpdate[]> {
         if (this.currentTransactionId != undefined && this.currentTransactionId != action.transactionId) {
-            throw new Error("Concurrent transactions are currently not supported");
+            // eslint-disable-next-line no-console
+            console.error("Concurrent transactions are not supported yet");
+            this.resetActionState();
+        }
+        if (this.currentTransactionId == action.transactionId && this.edit == undefined) {
+            return [];
         }
         this.currentTransactionId = action.transactionId;
         if (this.edit == undefined) {
@@ -74,7 +79,7 @@ export class TransactionManager {
     /**
      * Updates the text document if possible, meaning if the last known action has not been applied yet.
      */
-    private async updateTextDocumentIfPossible(): Promise<void> {
+    private updateTextDocumentIfPossible(): void {
         if (
             this.edit != undefined &&
             this.lastKnownAction != undefined &&
@@ -89,11 +94,19 @@ export class TransactionManager {
             this.lastAppliedAction = this.lastKnownAction;
         }
         if (this.lastAppliedAction?.commited) {
-            this.currentTransactionId = undefined;
-            this.edit = undefined;
-            this.lastKnownAction = undefined;
-            this.lastAppliedAction = undefined;
+            this.resetActionState();
         }
+    }
+
+    /**
+     * Resets currentTransactionId, edit, lastKnownAction and lastAppliedAction.
+     * Usually called after an action commits.
+     */
+    private resetActionState(): void {
+        this.currentTransactionId = undefined;
+        this.edit = undefined;
+        this.lastKnownAction = undefined;
+        this.lastAppliedAction = undefined;
     }
 
     /**
