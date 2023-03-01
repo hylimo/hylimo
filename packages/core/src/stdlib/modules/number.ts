@@ -29,11 +29,11 @@ const numberOperatorFunctionTypes: [string | number, Type][] = [
 /**
  * Number module providing numerical operators (+, -, *, /, %, <, <=, >, >=, ==)
  */
-export const numberModule: InterpreterModule = {
-    name: DefaultModuleNames.NUMBER,
-    dependencies: [],
-    runtimeDependencies: [DefaultModuleNames.BOOLEAN],
-    expressions: [
+export const numberModule = InterpreterModule.create(
+    DefaultModuleNames.NUMBER,
+    [],
+    [DefaultModuleNames.BOOLEAN],
+    [
         fun([
             assign(numberProto, num(0).field(SemanticFieldNames.PROTO)),
             id(numberProto).assignField(
@@ -328,4 +328,4 @@ export const numberModule: InterpreterModule = {
             ]).call()
         )
     ]
-};
+);

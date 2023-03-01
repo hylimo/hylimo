@@ -1,4 +1,4 @@
-import { FullObject, Expression, InterpretationResult, CstResult } from "@hylimo/core";
+import { FullObject, Expression, InterpretationResult, CstResult, toExecutable } from "@hylimo/core";
 import { DiagramLayoutResult } from "@hylimo/diagram";
 import {
     TransactionalAction,
@@ -89,7 +89,10 @@ export class LocalLayoutedDiagram extends LayoutedDiagramImplementation {
      * @returns the result of the interpreter run
      */
     private runInterpreterAndConvertErrors(expressions: Expression[], diagnostics: Diagnostic[]): InterpretationResult {
-        const interpretationResult = this.utils.interpreter.run(expressions, this.utils.maxExecutionSteps);
+        const interpretationResult = this.utils.interpreter.run(
+            toExecutable(expressions),
+            this.utils.maxExecutionSteps
+        );
         const error = interpretationResult.error;
         if (error) {
             const pos = error.findFirstPosition();

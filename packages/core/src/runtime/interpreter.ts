@@ -1,4 +1,6 @@
-import { Expression } from "../parser/ast";
+import { Expression } from "../ast/ast";
+import { toExecutable } from "../parser/astHelper";
+import { ExecutableExpression } from "./ast/executableExpression";
 import { BaseObject } from "./objects/baseObject";
 import { FullObject } from "./objects/fullObject";
 import { NullObject } from "./objects/null";
@@ -190,7 +192,32 @@ export interface InterpreterModule {
     /**
      * Expressions to execute to load the module
      */
-    expressions: Expression[];
+    expressions: ExecutableExpression<any>[];
+}
+
+export namespace InterpreterModule {
+    /**
+     * Creates a new InterpreterModule based on the provided name, dependencies and expressions
+     *
+     * @param name the name of the module
+     * @param dependencies dependencies of the module
+     * @param runtimeDependencies runtime dependencies of the module
+     * @param expressions expressions to execute to load the module
+     * @returns the created module
+     */
+    export function create(
+        name: string,
+        dependencies: string[],
+        runtimeDependencies: string[],
+        expressions: Expression[]
+    ): InterpreterModule {
+        return {
+            name,
+            dependencies,
+            runtimeDependencies,
+            expressions: toExecutable(expressions)
+        };
+    }
 }
 
 /**
@@ -306,7 +333,7 @@ export class Interpreter {
      * @param maxExecutionSteps the max amount of execution steps to prevent infinite loops
      * @returns the result of the interpretation, consting of a scope or an error
      */
-    run(expressions: Expression[], maxExecutionSteps: number): InterpretationResult {
+    run(expressions: ExecutableExpression<any>[], maxExecutionSteps: number): InterpretationResult {
         const context = new InterpreterContext(
             maxExecutionSteps,
             this.modules.map((module) => module.name)

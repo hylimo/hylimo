@@ -420,17 +420,17 @@ const scopeExpressions: Expression[] = [
 /**
  * Module which provides common DSL functionality
  */
-export const dslModule: InterpreterModule = {
-    name: "dsl",
-    dependencies: [],
-    runtimeDependencies: [
+export const dslModule = InterpreterModule.create(
+    "dsl",
+    [],
+    [
         DefaultModuleNames.OBJECT,
         DefaultModuleNames.LIST,
         DefaultModuleNames.FUNCTION,
         DefaultModuleNames.BOOLEAN,
         "diagram"
     ],
-    expressions: [
+    [
         assign(
             "generateDiagramEnvironment",
             fun(
@@ -458,4 +458,4 @@ export const dslModule: InterpreterModule = {
             )
         )
     ]
-};
+);

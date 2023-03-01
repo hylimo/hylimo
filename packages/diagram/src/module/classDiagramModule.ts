@@ -281,9 +281,9 @@ const scopeExpressions: Expression[] = [
 /**
  * Module for class diagrams
  */
-export const classDiagramModule: InterpreterModule = {
-    name: "class-diagram",
-    dependencies: ["diagram", "dsl"],
-    runtimeDependencies: [],
-    expressions: [assign("classDiagram", id("generateDiagramEnvironment").call(fun(scopeExpressions)))]
-};
+export const classDiagramModule = InterpreterModule.create(
+    "class-diagram",
+    ["diagram", "dsl"],
+    [],
+    [assign("classDiagram", id("generateDiagramEnvironment").call(fun(scopeExpressions)))]
+);

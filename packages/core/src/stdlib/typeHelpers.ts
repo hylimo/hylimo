@@ -1,4 +1,5 @@
-import { Expression, InvocationArgument } from "../parser/ast";
+import { ExecutableInvocationArgument } from "../runtime/ast/executableAbstractInvocationExpression";
+import { ExecutableExpression } from "../runtime/ast/executableExpression";
 import { BaseObject } from "../runtime/objects/baseObject";
 import { FullObject } from "../runtime/objects/fullObject";
 import { AbstractFunctionObject } from "../runtime/objects/function";
@@ -88,9 +89,9 @@ export function assertObject(value: BaseObject, description = ""): asserts value
  * @returns the expressions of first (self) and second (positional) argument
  */
 export function assertSelfShortCircuitArguments(
-    args: InvocationArgument[],
+    args: ExecutableInvocationArgument[],
     description: string
-): [Expression, Expression] {
+): [ExecutableExpression<any>, ExecutableExpression<any>] {
     if (args.length == 2) {
         if (args[0].name === undefined && args[1].name === SemanticFieldNames.SELF) {
             return [args[1].value, args[0].value];

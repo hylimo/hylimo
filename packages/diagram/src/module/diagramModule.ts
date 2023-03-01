@@ -130,11 +130,11 @@ function font(name: string, url: string): InvocationArgument {
 /**
  * Diagram module providing standard diagram UI elements
  */
-export const diagramModule: InterpreterModule = {
-    name: "diagram",
-    dependencies: [DefaultModuleNames.OBJECT],
-    runtimeDependencies: [DefaultModuleNames.LIST, DefaultModuleNames.FUNCTION, DefaultModuleNames.BOOLEAN],
-    expressions: [
+export const diagramModule = InterpreterModule.create(
+    "diagram",
+    [DefaultModuleNames.OBJECT],
+    [DefaultModuleNames.LIST, DefaultModuleNames.FUNCTION, DefaultModuleNames.BOOLEAN],
+    [
         fun([
             assign(elementProto, id("object").call({ name: "_type", value: str("element") })),
             ...layouts.map((config) =>
@@ -339,4 +339,4 @@ export const diagramModule: InterpreterModule = {
             )
         )
     ]
-};
+);

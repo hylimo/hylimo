@@ -1,21 +1,23 @@
+import {
+    IdentifierExpression,
+    StringLiteralExpression,
+    NumberLiteralExpression,
+    Expression,
+    AssignmentExpression,
+    FunctionExpression,
+    AbstractInvocationExpression,
+    NativeFunctionExpression,
+    NativeFunctionType
+} from "../ast/ast";
+import { ExpressionMetadata } from "../ast/expressionMetadata";
+import { InvocationArgument } from "../ast/invocationArgument";
+import { ExecutableExpression } from "../runtime/ast/executableExpression";
 import { InterpreterContext } from "../runtime/interpreter";
 import { BaseObject, FieldEntry } from "../runtime/objects/baseObject";
 import { FullObject } from "../runtime/objects/fullObject";
 import { generateArgs } from "../runtime/objects/function";
+import { RuntimeAstTransformer } from "../runtime/runtimeAstTransformer";
 import { Type } from "../types/base";
-import {
-    AbstractInvocationExpression,
-    AssignmentExpression,
-    Expression,
-    ExpressionMetadata,
-    FunctionExpression,
-    IdentifierExpression,
-    InvocationArgument,
-    NativeFunctionExpression,
-    NativeFunctionType,
-    NumberLiteralExpression,
-    StringLiteralExpression
-} from "./ast";
 import { Parser } from "./parser";
 
 /**
@@ -200,4 +202,19 @@ export function native(
     decorators: { [index: string]: string | null } = {}
 ): NativeFunctionExpression {
     return new NativeFunctionExpression(callback, parseDecorators(decorators), ExpressionMetadata.NO_EDIT);
+}
+
+/**
+ * Helper to map an AST to an executable AST
+ */
+const runtimeAstTransformer = new RuntimeAstTransformer();
+
+/**
+ * Maps an array of AST expressions to an array of executable expressions
+ *
+ * @param expressions the expressions to map
+ * @returns the mapped expressions
+ */
+export function toExecutable(expressions: Expression[]): ExecutableExpression<any>[] {
+    return expressions.map((expression) => runtimeAstTransformer.visit(expression));
 }

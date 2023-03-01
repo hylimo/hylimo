@@ -1,5 +1,7 @@
-import { ConstExpression, InvocationArgument } from "../../parser/ast";
 import { assign, fun, id, jsFun, native, num } from "../../parser/astHelper";
+import { ExecutableInvocationArgument } from "../../runtime/ast/executableAbstractInvocationExpression";
+import { ExecutableConstExpression } from "../../runtime/ast/executableConstExpression";
+import { ExecutableNumberLiteralExpression } from "../../runtime/ast/executableNumberLiteralExpression";
 import { InterpreterModule } from "../../runtime/interpreter";
 import { BaseObject } from "../../runtime/objects/baseObject";
 import { FullObject } from "../../runtime/objects/fullObject";
@@ -25,11 +27,11 @@ const lengthField = "length";
 /**
  * List module providing a list data structure
  */
-export const listModule: InterpreterModule = {
-    name: DefaultModuleNames.LIST,
-    dependencies: [DefaultModuleNames.OBJECT],
-    runtimeDependencies: [DefaultModuleNames.COMMON],
-    expressions: [
+export const listModule = InterpreterModule.create(
+    DefaultModuleNames.LIST,
+    [DefaultModuleNames.OBJECT],
+    [DefaultModuleNames.COMMON],
+    [
         fun([
             assign(listProto, id("object").call()),
             id(listProto).assignField(
@@ -145,7 +147,10 @@ export const listModule: InterpreterModule = {
                         const length = assertNumber(self.getField(lengthField, context), "length field of a list");
                         for (let i = 0; i < length; i++) {
                             callback.invoke(
-                                [{ value: new ConstExpression(self.getFieldEntry(i, context)) }, { value: num(i) }],
+                                [
+                                    { value: ExecutableConstExpression.of(self.getFieldEntry(i, context)) },
+                                    { value: new ExecutableNumberLiteralExpression(num(i)) }
+                                ],
                                 context
                             );
                         }
@@ -229,7 +234,9 @@ export const listModule: InterpreterModule = {
                             const listFunction = staticScope.getField("list", context);
                             const list = listFunction.invoke(args, context);
                             const callback = staticScope.getField("callback", context);
-                            const invokeArguments: InvocationArgument[] = [{ value: new ConstExpression(list) }];
+                            const invokeArguments: ExecutableInvocationArgument[] = [
+                                { value: ExecutableConstExpression.of(list) }
+                            ];
                             const selfArgument = args.find((arg) => arg.name === SemanticFieldNames.SELF);
                             if (selfArgument != undefined) {
                                 invokeArguments.push(selfArgument);
@@ -281,7 +288,7 @@ export const listModule: InterpreterModule = {
             )
         ]).call(id(SemanticFieldNames.THIS))
     ]
-};
+);
 
 /**
  * Helper to convert a native list object to a native list

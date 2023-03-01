@@ -15,11 +15,11 @@ const stringProto = "stringProto";
 /**
  * String module providing string functionality
  */
-export const stringModule: InterpreterModule = {
-    name: DefaultModuleNames.STRING,
-    dependencies: [],
-    runtimeDependencies: [DefaultModuleNames.BOOLEAN, DefaultModuleNames.COMMON],
-    expressions: [
+export const stringModule = InterpreterModule.create(
+    DefaultModuleNames.STRING,
+    [],
+    [DefaultModuleNames.BOOLEAN, DefaultModuleNames.COMMON],
+    [
         fun([
             assign(stringProto, str("").field(SemanticFieldNames.PROTO)),
             id(stringProto).assignField(
@@ -78,4 +78,4 @@ export const stringModule: InterpreterModule = {
             )
         ]).call()
     ]
-};
+);

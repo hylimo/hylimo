@@ -1,5 +1,5 @@
-import { ConstExpression } from "../../parser/ast";
 import { fun, id, jsFun, native } from "../../parser/astHelper";
+import { ExecutableConstExpression } from "../../runtime/ast/executableConstExpression";
 import { InterpreterModule } from "../../runtime/interpreter";
 import { RuntimeError } from "../../runtime/runtimeError";
 import { SemanticFieldNames } from "../../runtime/semanticFieldNames";
@@ -11,11 +11,11 @@ import { toBoolean } from "./boolean";
  * Operator module
  * Adds operators which delegate the call to the first argument
  */
-export const operatorModule: InterpreterModule = {
-    name: DefaultModuleNames.OPERATOR,
-    dependencies: [],
-    runtimeDependencies: [DefaultModuleNames.BOOLEAN],
-    expressions: [
+export const operatorModule = InterpreterModule.create(
+    DefaultModuleNames.OPERATOR,
+    [],
+    [DefaultModuleNames.BOOLEAN],
+    [
         ...["*", "/", "%", "&&", "||", ">", ">=", "<", "<=", ">>", "<<", "+="].map((operator) =>
             id(SemanticFieldNames.THIS).assignField(
                 operator,
@@ -29,7 +29,10 @@ export const operatorModule: InterpreterModule = {
                         return target.value
                             .getField(operator, context)
                             .invoke(
-                                [args[1], { name: SemanticFieldNames.SELF, value: new ConstExpression(target) }],
+                                [
+                                    args[1],
+                                    { name: SemanticFieldNames.SELF, value: ExecutableConstExpression.of(target) }
+                                ],
                                 context
                             );
                     },
@@ -60,8 +63,8 @@ export const operatorModule: InterpreterModule = {
                             .getField("==", context)
                             .invoke(
                                 [
-                                    { name: SemanticFieldNames.SELF, value: new ConstExpression(first) },
-                                    { value: new ConstExpression(second) }
+                                    { name: SemanticFieldNames.SELF, value: ExecutableConstExpression.of(first) },
+                                    { value: ExecutableConstExpression.of(second) }
                                 ],
                                 context
                             );
@@ -108,16 +111,20 @@ export const operatorModule: InterpreterModule = {
                     let first = args.getFieldEntry(0, context);
                     let second = args.getFieldEntry(1, context);
                     if (isString(first.value) && !isString(second.value)) {
-                        second = context.getField("toStr").invoke([{ value: new ConstExpression(second) }], context);
+                        second = context
+                            .getField("toStr")
+                            .invoke([{ value: ExecutableConstExpression.of(second) }], context);
                     } else if (isString(second.value) && !isString(first.value)) {
-                        first = context.getField("toStr").invoke([{ value: new ConstExpression(first) }], context);
+                        first = context
+                            .getField("toStr")
+                            .invoke([{ value: ExecutableConstExpression.of(first) }], context);
                     }
                     return first.value
                         .getField("+", context)
                         .invoke(
                             [
-                                { name: SemanticFieldNames.SELF, value: new ConstExpression(first) },
-                                { value: new ConstExpression(second) }
+                                { name: SemanticFieldNames.SELF, value: ExecutableConstExpression.of(first) },
+                                { value: ExecutableConstExpression.of(second) }
                             ],
                             context
                         );
@@ -183,7 +190,10 @@ export const operatorModule: InterpreterModule = {
                         return target.value
                             .getField("-", context)
                             .invoke(
-                                [args[1], { name: SemanticFieldNames.SELF, value: new ConstExpression(target) }],
+                                [
+                                    args[1],
+                                    { name: SemanticFieldNames.SELF, value: ExecutableConstExpression.of(target) }
+                                ],
                                 context
                             );
                     } else {
@@ -206,4 +216,4 @@ export const operatorModule: InterpreterModule = {
             )
         )
     ]
-};
+);

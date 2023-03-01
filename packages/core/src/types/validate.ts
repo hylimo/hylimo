@@ -1,4 +1,4 @@
-import { Expression } from "../parser/ast";
+import { Expression } from "../ast/ast";
 import { InterpreterContext } from "../runtime/interpreter";
 import { BaseObject } from "../runtime/objects/baseObject";
 import { RuntimeError } from "../runtime/runtimeError";

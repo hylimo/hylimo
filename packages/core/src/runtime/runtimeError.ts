@@ -1,4 +1,5 @@
-import { ASTExpressionPosition, Expression } from "../parser/ast";
+import { Expression } from "../ast/ast";
+import { ASTExpressionPosition } from "../ast/astExpressionPosition";
 
 /**
  * Error thrown during interpretation of a program

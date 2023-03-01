@@ -1,5 +1,5 @@
 import { CstNode, CstParser, ICstVisitor, ILexingError, IRecognitionException, Lexer } from "chevrotain";
-import { Expression } from "./ast";
+import { Expression } from "../ast/ast";
 import { CstVisitorParameters, generateVisitor } from "./cstVsitor";
 import {
     CloseCurlyBracket,
@@ -79,9 +79,10 @@ export class Parser extends CstParser {
     /**
      * Creates a new parser
      *
-     * @param astPositions iff true, the ast will contain position tracking
+     * @param astPositions whether to generate AST positions
+     * @param faultTolerant whether the parser accepts slightly invalid inputs
      */
-    constructor(readonly astPositions: boolean) {
+    constructor(readonly astPositions: boolean, readonly faultTolerant: boolean = false) {
         super(lexerDefinition, {
             nodeLocationTracking: "full"
         });
@@ -249,6 +250,9 @@ export class Parser extends CstParser {
                 this.SUBRULE2(this.simpleCallExpression);
             }
         });
+        if (this.faultTolerant) {
+            this.OPTION(() => this.CONSUME1(Dot));
+        }
     });
 
     /**
@@ -259,6 +263,9 @@ export class Parser extends CstParser {
             SEP: Dot,
             DEF: () => this.OR([{ ALT: () => this.CONSUME(Identifier) }, { ALT: () => this.CONSUME(SignMinus) }])
         });
+        if (this.faultTolerant) {
+            this.OPTION(() => this.CONSUME2(Dot));
+        }
     });
 
     /**
@@ -271,6 +278,9 @@ export class Parser extends CstParser {
             this.SUBRULE(this.simpleFieldAccessExpression);
             this.SUBRULE2(this.fieldAccessExpression);
         });
+        if (this.faultTolerant) {
+            this.OPTION(() => this.SUBRULE3(this.simpleFieldAccessExpression));
+        }
     });
 
     /**

@@ -52,11 +52,11 @@ const booleanProto = "booleanProto";
  * Boolean module
  * Adds support for booleans
  */
-export const booleanModule: InterpreterModule = {
-    name: DefaultModuleNames.BOOLEAN,
-    dependencies: [DefaultModuleNames.OBJECT],
-    runtimeDependencies: [],
-    expressions: [
+export const booleanModule = InterpreterModule.create(
+    DefaultModuleNames.BOOLEAN,
+    [DefaultModuleNames.OBJECT],
+    [],
+    [
         fun([
             assign(booleanProto, id("object").call()),
             id(SemanticFieldNames.PROTO).assignField(
@@ -143,4 +143,4 @@ export const booleanModule: InterpreterModule = {
             )
         )
     ]
-};
+);

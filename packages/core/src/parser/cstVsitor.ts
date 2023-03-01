@@ -1,21 +1,21 @@
-import { CstNode, ICstVisitor, IToken } from "chevrotain";
+import { ICstVisitor, CstNode, IToken } from "chevrotain";
 import {
-    AssignmentExpression,
-    ASTExpressionPosition,
-    BracketExpression,
-    DestructuringExpression,
-    Expression,
-    ExpressionMetadata,
-    FieldAccessExpression,
-    FunctionExpression,
-    IdentifierExpression,
-    InvocationArgument,
-    InvocationExpression,
     LiteralExpression,
+    StringLiteralExpression,
     NumberLiteralExpression,
+    FunctionExpression,
+    Expression,
+    IdentifierExpression,
+    InvocationExpression,
+    BracketExpression,
     SelfInvocationExpression,
-    StringLiteralExpression
-} from "./ast";
+    FieldAccessExpression,
+    DestructuringExpression,
+    AssignmentExpression
+} from "../ast/ast";
+import { ASTExpressionPosition } from "../ast/astExpressionPosition";
+import { ExpressionMetadata } from "../ast/expressionMetadata";
+import { InvocationArgument } from "../ast/invocationArgument";
 import { Parser } from "./parser";
 
 /**

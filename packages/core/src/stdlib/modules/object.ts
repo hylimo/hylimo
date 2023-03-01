@@ -7,7 +7,6 @@ import { BaseObject } from "../../runtime/objects/baseObject";
 import { StringObject } from "../../runtime/objects/string";
 import { NumberObject } from "../../runtime/objects/number";
 import { RuntimeError } from "../../runtime/runtimeError";
-import { ConstExpression } from "../../parser/ast";
 import { toBoolean } from "./boolean";
 import { generateArgs } from "../../runtime/objects/function";
 import { or } from "../../types/or";
@@ -15,6 +14,9 @@ import { stringType } from "../../types/string";
 import { numberType } from "../../types/number";
 import { objectType } from "../../types/object";
 import { functionType } from "../../types/function";
+import { ExecutableConstExpression } from "../../runtime/ast/executableConstExpression";
+import { ExecutableStringLiteralExpression } from "../../runtime/ast/executableStringLiteralExpression";
+import { ExecutableNumberLiteralExpression } from "../../runtime/ast/executableNumberLiteralExpression";
 
 /**
  * Name of the temporary field where the object prototype is assigned
@@ -41,11 +43,11 @@ function assertIndex(value: BaseObject): string | number {
  * Object module
  * Adds toStr function and functions on object
  */
-export const objectModule: InterpreterModule = {
-    name: DefaultModuleNames.OBJECT,
-    dependencies: [],
-    runtimeDependencies: [DefaultModuleNames.COMMON, DefaultModuleNames.BOOLEAN],
-    expressions: [
+export const objectModule = InterpreterModule.create(
+    DefaultModuleNames.OBJECT,
+    [],
+    [DefaultModuleNames.COMMON, DefaultModuleNames.BOOLEAN],
+    [
         fun([
             assign(objectProto, id(SemanticFieldNames.ARGS).field(SemanticFieldNames.PROTO)),
             id(objectProto).assignField(
@@ -149,8 +151,14 @@ export const objectModule: InterpreterModule = {
                         assertFunction(callback, "first positional argument of forEach");
                         assertObject(self, "self argument of forEach");
                         self.fields.forEach((value, key) => {
-                            const keyExpression = typeof key === "string" ? str(key) : num(key);
-                            callback.invoke([{ value: new ConstExpression(value) }, { value: keyExpression }], context);
+                            const keyExpression =
+                                typeof key === "string"
+                                    ? new ExecutableStringLiteralExpression(str(key))
+                                    : new ExecutableNumberLiteralExpression(num(key));
+                            callback.invoke(
+                                [{ value: ExecutableConstExpression.of(value) }, { value: keyExpression }],
+                                context
+                            );
                         });
                         return context.null;
                     },
@@ -213,4 +221,4 @@ export const objectModule: InterpreterModule = {
             )
         )
     ]
-};
+);

@@ -15,11 +15,11 @@ import { assertBoolean } from "./boolean";
  * Common module
  * Adds support for null, isNull, and common control flow structures (if, while)
  */
-export const commonModule: InterpreterModule = {
-    name: DefaultModuleNames.COMMON,
-    dependencies: [],
-    runtimeDependencies: [DefaultModuleNames.BOOLEAN, DefaultModuleNames.OPERATOR, DefaultModuleNames.LIST],
-    expressions: [
+export const commonModule = InterpreterModule.create(
+    DefaultModuleNames.COMMON,
+    [],
+    [DefaultModuleNames.BOOLEAN, DefaultModuleNames.OPERATOR, DefaultModuleNames.LIST],
+    [
         assign("null", jsFun((_, context) => context.null).call()),
         assign(
             "if",
@@ -162,4 +162,4 @@ export const commonModule: InterpreterModule = {
             )
         )
     ]
-};
+);

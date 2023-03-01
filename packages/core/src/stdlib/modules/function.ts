@@ -15,11 +15,11 @@ const functionProto = "functionProto";
 /**
  * Function module providing callWithScope
  */
-export const functionModule: InterpreterModule = {
-    name: DefaultModuleNames.FUNCTION,
-    dependencies: [],
-    runtimeDependencies: [],
-    expressions: [
+export const functionModule = InterpreterModule.create(
+    DefaultModuleNames.FUNCTION,
+    [],
+    [],
+    [
         fun([
             assign(functionProto, fun([]).field(SemanticFieldNames.PROTO)),
             id(functionProto).assignField(
@@ -77,4 +77,4 @@ export const functionModule: InterpreterModule = {
             )
         ]).call()
     ]
-};
+);

@@ -9,11 +9,11 @@ import { assertString } from "../typeHelpers";
  * Debug module
  * Adds println support which logs to console
  */
-export const debugModule: InterpreterModule = {
-    name: DefaultModuleNames.DEBUG,
-    dependencies: [],
-    runtimeDependencies: [DefaultModuleNames.COMMON],
-    expressions: [
+export const debugModule = InterpreterModule.create(
+    DefaultModuleNames.DEBUG,
+    [],
+    [DefaultModuleNames.COMMON],
+    [
         assign(
             "rawPrintln",
             jsFun(
@@ -49,4 +49,4 @@ export const debugModule: InterpreterModule = {
             })
         )
     ]
-};
+);
