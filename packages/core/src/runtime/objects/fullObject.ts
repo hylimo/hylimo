@@ -53,6 +53,22 @@ export class FullObject extends BaseObject {
     }
 
     /**
+     * Checks if this object has a specific field
+     *
+     * @param key the field to check for
+     * @returns true if this object (or any prototype) has the field
+     */
+    hasField(key: string | number): boolean {
+        this.checkValidKey(key);
+        if (this.fields.has(key)) {
+            return true;
+        } else {
+            const proto = this.getProto();
+            return proto?.hasField(key) ?? false;
+        }
+    }
+
+    /**
      * Gets the value of a field without performing any checks.
      * If the field is not found on this, returns null from the provided context.
      *

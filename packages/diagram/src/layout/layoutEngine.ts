@@ -1,4 +1,4 @@
-import { FullObject, nativeToList } from "@hylimo/core";
+import { BaseObject, FullObject, nativeToList } from "@hylimo/core";
 import { assertString } from "@hylimo/core";
 import { FontFamily } from "../../../diagram-common/src/font/font";
 import { FontFamilyConfig, Element, Size, Point } from "@hylimo/diagram-common";
@@ -51,7 +51,8 @@ export class LayoutEngine {
      *
      * @param diagram the diagram to layout
      */
-    async layout(diagram: FullObject): Promise<DiagramLayoutResult> {
+    async layout(diagram: BaseObject): Promise<DiagramLayoutResult> {
+        this.assertDiagram(diagram);
         const nativeFonts = diagram.getLocalFieldOrUndefined("fonts")?.value?.toNative();
         const fontMap = new Map<string, FontFamily>();
         const fontFamilyConfigs: FontFamilyConfig[] = [];
@@ -94,6 +95,20 @@ export class LayoutEngine {
             elementLookup: layout.elementLookup,
             layoutElementLookup: layout.layoutElementLookup
         };
+    }
+
+    /**
+     * Asserts that the provided diagram is a valid diagram
+     *
+     * @param diagram the diagram to check
+     */
+    private assertDiagram(diagram: BaseObject): asserts diagram is FullObject {
+        if (!(diagram instanceof FullObject)) {
+            throw new Error("A Diagram must be an Object");
+        }
+        if (!diagram.hasField("element") || !diagram.hasField("fonts") || !diagram.hasField("styles")) {
+            throw new Error("A Diagram must have an element, fonts and styles fields");
+        }
     }
 }
 

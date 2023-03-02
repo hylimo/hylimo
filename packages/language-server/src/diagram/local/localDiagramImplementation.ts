@@ -1,11 +1,4 @@
-import {
-    FullObject,
-    Expression,
-    InterpretationResult,
-    CstResult,
-    toExecutable,
-    AutocompletionItemKind
-} from "@hylimo/core";
+import { Expression, InterpretationResult, CstResult, toExecutable, AutocompletionItemKind } from "@hylimo/core";
 import { DiagramLayoutResult } from "@hylimo/diagram";
 import {
     TransactionalAction,
@@ -66,11 +59,19 @@ export class LocalDiagramImplementation extends DiagramImplementation {
         if (parserResult.ast) {
             const interpretationResult = this.runInterpreterAndConvertErrors(parserResult.ast, diagnostics);
             if (interpretationResult.result) {
-                this.layoutResult = await this.utils.layoutEngine.layout(interpretationResult.result as FullObject);
-                return {
-                    diagnostics,
-                    diagram: this.layoutResult
-                };
+                try {
+                    this.layoutResult = await this.utils.layoutEngine.layout(interpretationResult.result);
+                    return {
+                        diagnostics,
+                        diagram: this.layoutResult
+                    };
+                } catch (error: any) {
+                    diagnostics.push({
+                        severity: DiagnosticSeverity.Error,
+                        range: Range.create(0, 0, uinteger.MAX_VALUE, uinteger.MAX_VALUE),
+                        message: `Error during layouting: ${error.message}`
+                    });
+                }
             }
         }
         return {
@@ -235,7 +236,7 @@ export class LocalDiagramImplementation extends DiagramImplementation {
             if (!Number.isNaN(error.token.startLine)) {
                 location = Range.create(pos.startLine!, pos.startColumn!, pos.endLine!, pos.endColumn!);
             } else {
-                location = Range.create(uinteger.MAX_VALUE, uinteger.MAX_VALUE, uinteger.MAX_VALUE, uinteger.MAX_VALUE);
+                location = Range.create(0, 0, uinteger.MAX_VALUE, uinteger.MAX_VALUE);
             }
             diagnostics.push(
                 Diagnostic.create(location, error.message || "unknown syntax error", DiagnosticSeverity.Error)
