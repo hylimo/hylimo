@@ -20,4 +20,34 @@ export interface AutocompletionItem {
      * The range to replace when this item is selected
      */
     replaceRange: ASTExpressionPosition;
+    /**
+     * The kind of this item
+     */
+    kind: AutocompletionItemKind;
+}
+
+/**
+ * Autocompletion item kinds.
+ */
+export enum AutocompletionItemKind {
+    /**
+     * A field on an object
+     */
+    FIELD = "field",
+    /**
+     * A method on an object
+     */
+    METHOD = "method",
+    /**
+     * A variable
+     */
+    VARIABLE = "variable",
+    /**
+     * A function
+     */
+    FUNCTION = "function",
+    /**
+     * Any text not covered by the other types
+     */
+    TEXT = "text"
 }

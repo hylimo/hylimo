@@ -5,7 +5,7 @@ import { InterpreterContext } from "../runtime/interpreter";
 import { BaseObject } from "../runtime/objects/baseObject";
 import { AbstractFunctionObject } from "../runtime/objects/functionObject";
 import { AutocompletionError } from "./autocompletionError";
-import { AutocompletionItem } from "./autocompletionItem";
+import { AutocompletionItem, AutocompletionItemKind } from "./autocompletionItem";
 
 /**
  * An expression which throws an AutocompletionError on evaluation
@@ -46,16 +46,25 @@ export class ExecutableAutocompletionExpression extends ExecutableExpression<
         const items: AutocompletionItem[] = [];
         for (const [key, entry] of Object.entries(context.getFieldEntries())) {
             let docs = "";
+            let isFunction = false;
             const value = entry.value;
             if (value instanceof AbstractFunctionObject) {
                 const functionExpression = value.definition.expression as AbstractFunctionExpression;
                 docs = functionExpression.decorator.get("docs") ?? "";
+                isFunction = true;
+            }
+            let kind: AutocompletionItemKind;
+            if (this.context != undefined) {
+                kind = isFunction ? AutocompletionItemKind.METHOD : AutocompletionItemKind.FIELD;
+            } else {
+                kind = isFunction ? AutocompletionItemKind.FUNCTION : AutocompletionItemKind.VARIABLE;
             }
             items.push({
                 label: key,
                 value: key,
                 documentation: docs,
-                replaceRange: this.expression.metadata.identifierPosition!
+                replaceRange: this.expression.metadata.identifierPosition!,
+                kind
             });
         }
         return items;

@@ -1,4 +1,11 @@
-import { FullObject, Expression, InterpretationResult, CstResult, toExecutable } from "@hylimo/core";
+import {
+    FullObject,
+    Expression,
+    InterpretationResult,
+    CstResult,
+    toExecutable,
+    AutocompletionItemKind
+} from "@hylimo/core";
 import { DiagramLayoutResult } from "@hylimo/diagram";
 import {
     TransactionalAction,
@@ -16,7 +23,8 @@ import {
     CompletionItem,
     Position,
     TextEdit,
-    MarkupContent
+    MarkupContent,
+    CompletionItemKind
 } from "vscode-languageserver";
 import { TextDocument } from "vscode-languageserver-textdocument";
 import { AxisAlignedSegmentEdit } from "../../edit/edits/axisAlignedSegmentEdit";
@@ -110,11 +118,18 @@ export class LocalDiagramImplementation extends DiagramImplementation {
                         Position.create(range.endLine, range.endColumn)
                     ),
                     item.value
-                )
+                ),
+                kind: this.convertCompletionKind(item.kind)
             };
         });
     }
 
+    /**
+     * Preprocesses the documentation string to make it more readable in the editor
+     *
+     * @param documentation the syncscript documentation string, may be undefined
+     * @returns the processed documentation string
+     */
     private preprocessDocumentation(documentation: string | undefined): MarkupContent | undefined {
         if (documentation == undefined) {
             return undefined;
@@ -144,6 +159,27 @@ export class LocalDiagramImplementation extends DiagramImplementation {
             kind: "markdown",
             value: processed
         };
+    }
+
+    /**
+     * Converts a syncscript autocompletion item kind to a lsp completion item kind
+     *
+     * @param kind the syncscript autocompletion item kind to convert
+     * @returns the converted lsp completion item kind
+     */
+    private convertCompletionKind(kind: AutocompletionItemKind): CompletionItemKind {
+        switch (kind) {
+            case AutocompletionItemKind.METHOD:
+                return CompletionItemKind.Method;
+            case AutocompletionItemKind.FUNCTION:
+                return CompletionItemKind.Function;
+            case AutocompletionItemKind.VARIABLE:
+                return CompletionItemKind.Variable;
+            case AutocompletionItemKind.FIELD:
+                return CompletionItemKind.Field;
+            default:
+                return CompletionItemKind.Text;
+        }
     }
 
     /**
