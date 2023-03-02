@@ -3,9 +3,9 @@ import { toExecutable } from "../parser/astHelper";
 import { ExecutableExpression } from "./ast/executableExpression";
 import { BaseObject } from "./objects/baseObject";
 import { FullObject } from "./objects/fullObject";
-import { NullObject } from "./objects/null";
-import { NumberObject } from "./objects/number";
-import { StringObject } from "./objects/string";
+import { NullObject } from "./objects/nullObject";
+import { NumberObject } from "./objects/numberObject";
+import { StringObject } from "./objects/stringObject";
 import { RuntimeError } from "./runtimeError";
 import { SemanticFieldNames } from "./semanticFieldNames";
 

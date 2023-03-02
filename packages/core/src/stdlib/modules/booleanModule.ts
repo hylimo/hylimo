@@ -2,7 +2,7 @@ import { assign, fun, id, jsFun, native } from "../../parser/astHelper";
 import { InterpreterContext, InterpreterModule } from "../../runtime/interpreter";
 import { BaseObject } from "../../runtime/objects/baseObject";
 import { FullObject } from "../../runtime/objects/fullObject";
-import { LiteralObject } from "../../runtime/objects/literal";
+import { LiteralObject } from "../../runtime/objects/literalObject";
 import { RuntimeError } from "../../runtime/runtimeError";
 import { SemanticFieldNames } from "../../runtime/semanticFieldNames";
 import { booleanType } from "../../types/boolean";

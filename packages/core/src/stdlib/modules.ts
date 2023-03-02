@@ -1,12 +1,12 @@
-import { booleanModule } from "./modules/boolean";
-import { commonModule } from "./modules/common";
-import { debugModule } from "./modules/debug";
-import { functionModule } from "./modules/function";
-import { listModule } from "./modules/list";
-import { numberModule } from "./modules/number";
-import { objectModule } from "./modules/object";
-import { operatorModule } from "./modules/operator";
-import { stringModule } from "./modules/string";
+import { booleanModule } from "./modules/booleanModule";
+import { commonModule } from "./modules/commonModule";
+import { debugModule } from "./modules/debugModule";
+import { functionModule } from "./modules/functionModule";
+import { listModule } from "./modules/listModule";
+import { numberModule } from "./modules/numberModule";
+import { objectModule } from "./modules/objectModule";
+import { operatorModule } from "./modules/operatorModule";
+import { stringModule } from "./modules/stringModule";
 
 /**
  * Default baselib modules

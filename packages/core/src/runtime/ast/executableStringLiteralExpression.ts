@@ -1,7 +1,7 @@
 import { StringLiteralExpression } from "../../ast/ast";
 import { InterpreterContext } from "../interpreter";
 import { FieldEntry } from "../objects/baseObject";
-import { StringObject } from "../objects/string";
+import { StringObject } from "../objects/stringObject";
 import { ExecutableExpression } from "./executableExpression";
 
 /**

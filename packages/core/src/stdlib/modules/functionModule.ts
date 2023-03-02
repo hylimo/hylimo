@@ -5,7 +5,7 @@ import { functionType } from "../../types/function";
 import { objectType } from "../../types/object";
 import { DefaultModuleNames } from "../defaultModuleNames";
 import { assertFunction, assertObject } from "../typeHelpers";
-import { toBoolean } from "./boolean";
+import { toBoolean } from "./booleanModule";
 
 /**
  * Name of the temporary field where the function prototype is assigned

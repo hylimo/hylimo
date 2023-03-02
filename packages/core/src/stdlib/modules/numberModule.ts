@@ -1,12 +1,12 @@
 import { assign, fun, id, jsFun, num } from "../../parser/astHelper";
 import { InterpreterModule } from "../../runtime/interpreter";
-import { NumberObject } from "../../runtime/objects/number";
+import { NumberObject } from "../../runtime/objects/numberObject";
 import { SemanticFieldNames } from "../../runtime/semanticFieldNames";
 import { Type } from "../../types/base";
 import { numberType } from "../../types/number";
 import { DefaultModuleNames } from "../defaultModuleNames";
 import { assertNumber } from "../typeHelpers";
-import { toBoolean } from "./boolean";
+import { toBoolean } from "./booleanModule";
 
 /**
  * Name of the temporary field where the number prototype is assigned

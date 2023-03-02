@@ -1,5 +1,5 @@
 import { FullObject } from "./fullObject";
-import { LiteralObject } from "./literal";
+import { LiteralObject } from "./literalObject";
 
 /**
  * Represents a String

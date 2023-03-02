@@ -15,7 +15,7 @@ import { ExecutableExpression } from "../runtime/ast/executableExpression";
 import { InterpreterContext } from "../runtime/interpreter";
 import { BaseObject, FieldEntry } from "../runtime/objects/baseObject";
 import { FullObject } from "../runtime/objects/fullObject";
-import { generateArgs } from "../runtime/objects/function";
+import { generateArgs } from "../runtime/objects/functionObject";
 import { RuntimeAstTransformer } from "../runtime/runtimeAstTransformer";
 import { Type } from "../types/base";
 import { Parser } from "./parser";

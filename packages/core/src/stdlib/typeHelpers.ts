@@ -2,9 +2,9 @@ import { ExecutableInvocationArgument } from "../runtime/ast/executableAbstractI
 import { ExecutableExpression } from "../runtime/ast/executableExpression";
 import { BaseObject } from "../runtime/objects/baseObject";
 import { FullObject } from "../runtime/objects/fullObject";
-import { AbstractFunctionObject } from "../runtime/objects/function";
-import { NumberObject } from "../runtime/objects/number";
-import { StringObject } from "../runtime/objects/string";
+import { AbstractFunctionObject } from "../runtime/objects/functionObject";
+import { NumberObject } from "../runtime/objects/numberObject";
+import { StringObject } from "../runtime/objects/stringObject";
 import { RuntimeError } from "../runtime/runtimeError";
 import { SemanticFieldNames } from "../runtime/semanticFieldNames";
 

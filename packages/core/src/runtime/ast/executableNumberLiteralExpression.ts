@@ -1,7 +1,7 @@
 import { NumberLiteralExpression } from "../../ast/ast";
 import { InterpreterContext } from "../interpreter";
 import { FieldEntry } from "../objects/baseObject";
-import { NumberObject } from "../objects/number";
+import { NumberObject } from "../objects/numberObject";
 import { ExecutableExpression } from "./executableExpression";
 
 /**

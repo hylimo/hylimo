@@ -1,4 +1,4 @@
-import { NumberObject } from "../runtime/objects/number";
+import { NumberObject } from "../runtime/objects/numberObject";
 import { Type } from "./base";
 
 /**

@@ -1,4 +1,4 @@
-import { LiteralObject } from "../runtime/objects/literal";
+import { LiteralObject } from "../runtime/objects/literalObject";
 import { Type } from "./base";
 
 /**

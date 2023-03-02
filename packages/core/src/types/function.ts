@@ -1,4 +1,4 @@
-import { AbstractFunctionObject } from "../runtime/objects/function";
+import { AbstractFunctionObject } from "../runtime/objects/functionObject";
 import { Type } from "./base";
 
 /**

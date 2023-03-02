@@ -4,11 +4,11 @@ import { assign, fun, id, jsFun, native, num, str } from "../../parser/astHelper
 import { SemanticFieldNames } from "../../runtime/semanticFieldNames";
 import { assertFunction, assertObject } from "../typeHelpers";
 import { BaseObject } from "../../runtime/objects/baseObject";
-import { StringObject } from "../../runtime/objects/string";
-import { NumberObject } from "../../runtime/objects/number";
+import { StringObject } from "../../runtime/objects/stringObject";
+import { NumberObject } from "../../runtime/objects/numberObject";
 import { RuntimeError } from "../../runtime/runtimeError";
-import { toBoolean } from "./boolean";
-import { generateArgs } from "../../runtime/objects/function";
+import { toBoolean } from "./booleanModule";
+import { generateArgs } from "../../runtime/objects/functionObject";
 import { or } from "../../types/or";
 import { stringType } from "../../types/string";
 import { numberType } from "../../types/number";

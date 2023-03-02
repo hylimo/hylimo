@@ -1,7 +1,7 @@
 import { FunctionExpression } from "../../ast/ast";
 import { InterpreterContext } from "../interpreter";
 import { FieldEntry } from "../objects/baseObject";
-import { FunctionObject } from "../objects/function";
+import { FunctionObject } from "../objects/functionObject";
 import { ExecutableExpression } from "./executableExpression";
 
 /**

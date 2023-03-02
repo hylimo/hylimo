@@ -1,11 +1,11 @@
 import { assign, fun, id, jsFun, str } from "../../parser/astHelper";
 import { InterpreterModule } from "../../runtime/interpreter";
-import { StringObject } from "../../runtime/objects/string";
+import { StringObject } from "../../runtime/objects/stringObject";
 import { SemanticFieldNames } from "../../runtime/semanticFieldNames";
 import { stringType } from "../../types/string";
 import { DefaultModuleNames } from "../defaultModuleNames";
 import { assertString } from "../typeHelpers";
-import { toBoolean } from "./boolean";
+import { toBoolean } from "./booleanModule";
 
 /**
  * Name of the temporary field where the string prototype is assigned

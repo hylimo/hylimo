@@ -1,7 +1,7 @@
 import { NativeFunctionExpression } from "../../ast/ast";
 import { InterpreterContext } from "../interpreter";
 import { FieldEntry } from "../objects/baseObject";
-import { NativeFunctionObject } from "../objects/function";
+import { NativeFunctionObject } from "../objects/functionObject";
 import { ExecutableAbstractFunctionExpression } from "./executableAbstractFunctionExpression";
 
 /**

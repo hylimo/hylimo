@@ -1,4 +1,4 @@
-import { StringObject } from "../runtime/objects/string";
+import { StringObject } from "../runtime/objects/stringObject";
 import { Type } from "./base";
 
 /**

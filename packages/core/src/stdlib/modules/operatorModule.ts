@@ -5,7 +5,7 @@ import { RuntimeError } from "../../runtime/runtimeError";
 import { SemanticFieldNames } from "../../runtime/semanticFieldNames";
 import { DefaultModuleNames } from "../defaultModuleNames";
 import { assertNumber, isString } from "../typeHelpers";
-import { toBoolean } from "./boolean";
+import { toBoolean } from "./booleanModule";
 
 /**
  * Operator module

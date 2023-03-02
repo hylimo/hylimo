@@ -9,7 +9,7 @@ import { numberType } from "../../types/number";
 import { stringType } from "../../types/string";
 import { DefaultModuleNames } from "../defaultModuleNames";
 import { assertFunction, assertString } from "../typeHelpers";
-import { assertBoolean } from "./boolean";
+import { assertBoolean } from "./booleanModule";
 
 /**
  * Common module

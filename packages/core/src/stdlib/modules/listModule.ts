@@ -5,7 +5,7 @@ import { ExecutableNumberLiteralExpression } from "../../runtime/ast/executableN
 import { InterpreterModule } from "../../runtime/interpreter";
 import { BaseObject } from "../../runtime/objects/baseObject";
 import { FullObject } from "../../runtime/objects/fullObject";
-import { generateArgs } from "../../runtime/objects/function";
+import { generateArgs } from "../../runtime/objects/functionObject";
 import { RuntimeError } from "../../runtime/runtimeError";
 import { SemanticFieldNames } from "../../runtime/semanticFieldNames";
 import { functionType } from "../../types/function";
