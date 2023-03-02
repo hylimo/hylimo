@@ -1,27 +1,32 @@
 import { TransactionalAction } from "@hylimo/diagram-common";
-import { TransactionalEdit } from "../edit/edits/transactionalEdit";
-import { DiagramUpdateResult, LayoutedDiagramImplementation } from "../layoutedDiagram";
+import { CompletionItem, Position } from "vscode-languageserver";
+import { TransactionalEdit } from "../../edit/edits/transactionalEdit";
+import { DiagramImplementation, DiagramUpdateResult } from "../diagramImplementation";
 import {
-    ReplyGenerateTransactionalEditMessage,
-    RequestGenerateTransactionalEditMessage
+    ReplyGenerateCompletionItemMessage,
+    RequestGenerateCompletionItemMessage
+} from "./generateCompletionItemsMessage";
+import {
+    RequestGenerateTransactionalEditMessage,
+    ReplyGenerateTransactionalEditMessage
 } from "./generateTransactionalEditMessage";
-import { RemoteLayoutedDiagramManager } from "./remoteLayoutedDiagramManager";
-import { ReplyUpdateDiagramMessage, RequestUpdateDiagramMessage } from "./updateDiagramMessage";
+import { RemoteDiagramImplementationManager } from "./remoteDiagramImplementationManager";
+import { RequestUpdateDiagramMessage, ReplyUpdateDiagramMessage } from "./updateDiagramMessage";
 
 /**
- * Remote implementation of a layouted diagram.
+ * Remote implementation of a diagram.
  * If available, performs the layouted diagram operations on a remote language server.
  */
-export class RemoteLayoutedDiagram extends LayoutedDiagramImplementation {
+export class RemoteDiagramImplementation extends DiagramImplementation {
     /**
-     * Creates a new RemoteLayoutedDiagram
+     * Creates a new RemoteDiagramImplementation.
      *
      * @param layoutedDiagramManager manager by which this is handled
      * @param remoteId the id of the remote language server
      * @param id the id of the diagram
      */
     constructor(
-        private readonly layoutedDiagramManager: RemoteLayoutedDiagramManager,
+        private readonly layoutedDiagramManager: RemoteDiagramImplementationManager,
         private readonly remoteId: number,
         private readonly id: string
     ) {
@@ -51,6 +56,20 @@ export class RemoteLayoutedDiagram extends LayoutedDiagramImplementation {
         const result = await this.layoutedDiagramManager.sendRequest(request, this.remoteId);
         if (ReplyGenerateTransactionalEditMessage.is(result)) {
             return result.edit;
+        } else {
+            throw new Error("Unexpected message type");
+        }
+    }
+
+    override async generateCompletionItems(position: Position): Promise<CompletionItem[] | undefined> {
+        const request: RequestGenerateCompletionItemMessage = {
+            type: RequestGenerateCompletionItemMessage.type,
+            id: this.id,
+            position
+        };
+        const result = await this.layoutedDiagramManager.sendRequest(request, this.remoteId);
+        if (ReplyGenerateCompletionItemMessage.is(result)) {
+            return result.items;
         } else {
             throw new Error("Unexpected message type");
         }

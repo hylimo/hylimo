@@ -19,6 +19,13 @@ export abstract class BaseObject {
     abstract getFieldEntry(key: string | number, context: InterpreterContext): FieldEntry;
 
     /**
+     * Gets all field entries
+     *
+     * @returns all field entries
+     */
+    abstract getFieldEntries(): Record<string, FieldEntry>;
+
+    /**
      * Wrapper for getFieldEntry which only returns the value
      *
      * @param key the identifier of the field
@@ -100,6 +107,10 @@ export abstract class SimpleObject extends BaseObject {
         } else {
             return this.proto.getFieldEntry(key, context);
         }
+    }
+
+    override getFieldEntries(): Record<string, FieldEntry> {
+        return this.proto.getFieldEntries();
     }
 
     override setFieldEntry(key: string | number, value: FieldEntry, context: InterpreterContext): void {

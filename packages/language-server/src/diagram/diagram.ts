@@ -1,21 +1,18 @@
 import { TextDocument, TextDocumentContentChangeEvent } from "vscode-languageserver-textdocument";
-import { SharedDiagramUtils } from "./sharedDiagramUtils";
-import { Diagnostic, TextDocumentEdit } from "vscode-languageserver";
-import { TransactionManager } from "./edit/transactionManager";
+import { SharedDiagramUtils } from "../sharedDiagramUtils";
+import { CompletionItem, Diagnostic, Position, TextDocumentEdit } from "vscode-languageserver";
+import { TransactionManager } from "../edit/transactionManager";
 import { TransactionalAction } from "@hylimo/diagram-common";
-import { LayoutedDiagram } from "./layoutedDiagram";
+import { DiagramImplementation } from "./diagramImplementation";
 import { BaseDiagramLayoutResult } from "@hylimo/diagram";
-import { defaultEditRegistry } from "./edit/edits/transactionalEditRegistry";
-import { LayoutedDiagramManager } from "./remote/layoutedDiagramManager";
+import { defaultEditRegistry } from "../edit/edits/transactionalEditRegistry";
+import { DiagramImplementationManager } from "./diagramImplementationManager";
+import { TransactionalEdit } from "../edit/edits/transactionalEdit";
 
 /**
  * Holds the state for a specific diagram
  */
 export class Diagram {
-    /**
-     * The layouted diagram
-     */
-    layoutedDiagram: LayoutedDiagram;
     /**
      * The current diagram
      */
@@ -31,19 +28,22 @@ export class Diagram {
     version = 0;
 
     /**
+     * The implementation to which all requests are delegated
+     */
+    private implementation?: DiagramImplementation;
+
+    /**
      * Creates a new diagram
      *
      * @param document the document on which it is based
      * @param utils shared diagram utils
-     * @param layoutedDiagramManager the layouted diagram manager provided to the LayoutedDiagram
+     * @param implementationManager the layouted diagram manager provided to the LayoutedDiagram
      */
     constructor(
         readonly document: TextDocument,
         private readonly utils: SharedDiagramUtils,
-        layoutedDiagramManager: LayoutedDiagramManager
-    ) {
-        this.layoutedDiagram = new LayoutedDiagram(document.uri, layoutedDiagramManager);
-    }
+        private readonly implementationManager: DiagramImplementationManager
+    ) {}
 
     /**
      * Called when the content of the associated document changes
@@ -72,7 +72,11 @@ export class Diagram {
      * @returns diagnostic entries containing errors
      */
     private async updateDiagram(): Promise<Diagnostic[]> {
-        const result = await this.layoutedDiagram.updateDiagram(this.document.getText());
+        this.implementation = this.implementationManager.getNewDiagramImplementation(
+            this.document.uri,
+            this.implementation
+        );
+        const result = await this.implementation.updateDiagram(this.document.getText());
         this.version++;
         const diagram = result.diagram;
         this.currentDiagram = diagram;
@@ -108,5 +112,30 @@ export class Diagram {
         this.utils.connection.workspace.applyEdit({
             documentChanges: [edit]
         });
+    }
+
+    /**
+     * Generates a transactional edit for the given transactional action.
+     * Throws an error if updateDiagram has not been called yet.
+     *
+     * @param action the action to generate the edit for
+     * @returns the generated transactional edit
+     */
+    async generateTransactionalEdit(action: TransactionalAction): Promise<TransactionalEdit> {
+        if (this.implementation == undefined) {
+            throw new Error("Cannot generate transactional edit without implementation");
+        }
+        return this.implementation.generateTransactionalEdit(action);
+    }
+
+    /**
+     * Generates autocompletion items for the given position.
+     *
+     * @param position the position to generate the autocompletion items for
+     * @returns the generated autocompletion items
+     */
+    async generateCompletionItems(position: Position): Promise<CompletionItem[] | undefined> {
+        const implementation = this.implementationManager.getNewDiagramImplementation(this.document.uri);
+        return implementation.generateCompletionItems(position);
     }
 }

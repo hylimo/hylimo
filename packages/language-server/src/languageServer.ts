@@ -1,4 +1,4 @@
-import { InterpreterModule, Interpreter, Parser, defaultModules } from "@hylimo/core";
+import { InterpreterModule, Interpreter, Parser, defaultModules, AutocompletionEngine } from "@hylimo/core";
 import {
     CompletionItem,
     CompletionParams,
@@ -13,7 +13,7 @@ import {
     uinteger
 } from "vscode-languageserver";
 import { TextDocument, TextDocumentContentChangeEvent } from "vscode-languageserver-textdocument";
-import { Diagram } from "./diagram";
+import { Diagram } from "./diagram/diagram";
 import { Formatter } from "./formatter";
 import { diagramModule, dslModule, LayoutEngine } from "@hylimo/diagram";
 import { DiagramServerManager } from "./diagramServerManager";
@@ -24,10 +24,10 @@ import {
     OpenDiagramMessage
 } from "./diagramNotificationTypes";
 import { SharedDiagramUtils } from "./sharedDiagramUtils";
-import { LocalLayoutedDiagramManager } from "./remote/localLayoutedDiagramManager";
-import { LayoutedDiagramManager } from "./remote/layoutedDiagramManager";
-import { RemoteLayoutedDiagramManager } from "./remote/remoteLayoutedDiagramManager";
-import { SetLanguageServerIdNotification } from "./remote/remoteMessages";
+import { LocalDiagramImplementationManager } from "./diagram/local/localDiagramImplementationManager";
+import { DiagramImplementationManager } from "./diagram/diagramImplementationManager";
+import { RemoteDiagramImplementationManager } from "./diagram/remote/remoteDiagramImplementationManager";
+import { SetLanguageServerIdNotification } from "./diagram/remote/remoteMessages";
 
 /**
  * Config for creating a new language server
@@ -88,7 +88,7 @@ export class LanguageServer {
      * Manages layouted diagrams.
      * Can be either a local or remote implementation
      */
-    private layoutedDiagramManager: LayoutedDiagramManager;
+    private layoutedDiagramManager: DiagramImplementationManager;
 
     /**
      * Creates a new language server
@@ -106,15 +106,16 @@ export class LanguageServer {
             dslModule,
             ...config.additionalInterpreterModules
         ];
+        const interpreter = new Interpreter(interpreterModules, config.maxExecutionSteps);
         this.diagramUtils = {
             connection: this.connection,
-            interpreter: new Interpreter(interpreterModules),
+            interpreter,
             parser: new Parser(true),
             layoutEngine: new LayoutEngine(),
-            maxExecutionSteps: config.maxExecutionSteps,
-            diagramServerManager: this.diagramServerManager
+            diagramServerManager: this.diagramServerManager,
+            autocompletionEngine: new AutocompletionEngine(interpreter)
         };
-        this.layoutedDiagramManager = new RemoteLayoutedDiagramManager(this.diagramUtils);
+        this.layoutedDiagramManager = new RemoteDiagramImplementationManager(this.diagramUtils);
         this.formatter = new Formatter(this.diagramUtils.parser);
         this.textDocuments.onDidOpen(this.onDidOpenTextDocument.bind(this));
         this.textDocuments.onDidClose(this.onDidCloseTextDocument.bind(this));
@@ -228,9 +229,9 @@ export class LanguageServer {
      * @param params defines the document and position
      * @returns the completion items
      */
-    private async onCompletion(params: CompletionParams): Promise<CompletionItem[]> {
-        console.log(params.position);
-        return [];
+    private async onCompletion(params: CompletionParams): Promise<CompletionItem[] | undefined> {
+        const diagram = this.diagrams.get(params.textDocument.uri)!;
+        return diagram.generateCompletionItems(params.position);
     }
 
     /**
@@ -253,7 +254,7 @@ export class LanguageServer {
      */
     private onSetSecondaryLanguageServer(id: number): void {
         if (id > 0) {
-            this.layoutedDiagramManager = new LocalLayoutedDiagramManager(this.diagramUtils, id);
+            this.layoutedDiagramManager = new LocalDiagramImplementationManager(this.diagramUtils, id);
         }
     }
 }

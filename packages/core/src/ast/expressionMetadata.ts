@@ -41,4 +41,8 @@ export interface AutocompletionExpressionMetadata extends ExpressionMetadata {
      * E.g. for an FieldAccessExpression, this would be the position of the dot and the field name
      */
     autocompletionPosition?: ASTExpressionPosition;
+    /**
+     * The position of the identifier of the expression (the identifier which should be replaced on autocomplete)
+     */
+    identifierPosition?: ASTExpressionPosition;
 }

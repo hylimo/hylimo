@@ -1,7 +1,7 @@
 import { BaseDiagramLayoutResult } from "@hylimo/diagram";
 import { IncrementalUpdate, TransactionalAction } from "@hylimo/diagram-common";
 import { TextDocumentContentChangeEvent } from "vscode-languageserver-textdocument";
-import { Diagram } from "../diagram";
+import { Diagram } from "../diagram/diagram";
 import { TransactionalEdit, TransactionalEditEngine, Versioned } from "./edits/transactionalEdit";
 import { TransactionalEditRegistory } from "./edits/transactionalEditRegistry";
 
@@ -65,7 +65,7 @@ export class TransactionManager {
         this.currentTransactionId = action.transactionId;
         if (this.edit == undefined) {
             this.edit = {
-                ...(await this.diagram.layoutedDiagram.generateTransactionalEdit(action)),
+                ...(await this.diagram.generateTransactionalEdit(action)),
                 version: this.diagram.document.version
             };
         }

@@ -1,5 +1,5 @@
 import { TransactionalAction } from "@hylimo/diagram-common";
-import { TransactionalEdit } from "../edit/edits/transactionalEdit";
+import { TransactionalEdit } from "../../edit/edits/transactionalEdit";
 import { RemoteDiagramMessage } from "./remoteDiagramMessage";
 import { RemoteMessagePayload } from "./remoteMessages";
 

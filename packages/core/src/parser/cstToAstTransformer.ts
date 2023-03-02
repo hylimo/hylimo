@@ -14,7 +14,7 @@ import {
     AssignmentExpression
 } from "../ast/ast";
 import { ASTExpressionPosition } from "../ast/astExpressionPosition";
-import { ExpressionMetadata } from "../ast/expressionMetadata";
+import { AutocompletionExpressionMetadata, ExpressionMetadata } from "../ast/expressionMetadata";
 import { InvocationArgument } from "../ast/invocationArgument";
 import { Parser } from "./parser";
 
@@ -99,6 +99,28 @@ export function generateCstToAstTransfromer(parser: Parser): ICstVisitor<CstVisi
             return metadata(undefined, params);
         }
         return metadata(optionalPosition(generatePosition(start, end)), params);
+    }
+
+    /**
+     * Calls generateMetadata. Also adds the autocompletionPosition and identifierPosition based on the provided identifier
+     *
+     * @param start the start position
+     * @param end the end position
+     * @param params the parameters required for generating the Metadata
+     * @returns the combined start and end position or undefined
+     */
+    function generateAutocompletionMetadata(
+        start: ASTExpressionPosition | IToken,
+        end: ASTExpressionPosition | IToken,
+        params: CstVisitorParameters,
+        identifierPosition: IToken | ASTExpressionPosition
+    ): AutocompletionExpressionMetadata {
+        const position = generatePosition(identifierPosition, identifierPosition);
+        return {
+            ...generateMetadata(start, end, params),
+            autocompletionPosition: position,
+            identifierPosition: position
+        };
     }
 
     /**
@@ -268,7 +290,10 @@ export function generateCstToAstTransfromer(parser: Parser): ICstVisitor<CstVisi
             let baseExpression;
             if (ctx.Identifier) {
                 const token = ctx.Identifier[0];
-                baseExpression = new IdentifierExpression(token.image, metadata(optionalPosition(token), params));
+                baseExpression = new IdentifierExpression(
+                    token.image,
+                    generateAutocompletionMetadata(token, token, params, token)
+                );
             } else if (ctx.literal) {
                 baseExpression = this.visit(ctx.literal, params);
             } else if (ctx.function) {
@@ -319,7 +344,7 @@ export function generateCstToAstTransfromer(parser: Parser): ICstVisitor<CstVisi
             const token = ctx.Identifier[0];
             return {
                 identifier: token.image,
-                identifierPosition: token,
+                identifierPosition: generatePosition(token, token),
                 callBrackets: (ctx.callBrackets ?? []).map((brackets: CstNode) => this.visit(brackets, params))
             };
         }
@@ -361,24 +386,30 @@ export function generateCstToAstTransfromer(parser: Parser): ICstVisitor<CstVisi
                             accessDefinition.identifier,
                             baseExpression,
                             args,
-                            generateMetadata(startPos, endPos, params)
+                            generateAutocompletionMetadata(
+                                startPos,
+                                endPos,
+                                params,
+                                accessDefinition.identifierPosition
+                            )
                         );
                         baseExpression = this.applyCallBrackets(baseExpression, remaining, params);
                     } else {
                         baseExpression = new FieldAccessExpression(
                             accessDefinition.identifier,
                             baseExpression,
-                            generateMetadata(startPos, accessDefinition.identifierPosition, params)
+                            generateAutocompletionMetadata(
+                                startPos,
+                                accessDefinition.identifierPosition,
+                                params,
+                                accessDefinition.identifierPosition
+                            )
                         );
                     }
                 }
             }
             if (ctx.FaultTolerantToken) {
-                return new FieldAccessExpression(
-                    "",
-                    baseExpression,
-                    generateMetadata(startPos, ctx.FaultTolerantToken[0], params)
-                );
+                return this.generateFieldAccessExpressionForOnlyDot(baseExpression, ctx.FaultTolerantToken[0], params);
             } else {
                 return baseExpression;
             }
@@ -402,24 +433,48 @@ export function generateCstToAstTransfromer(parser: Parser): ICstVisitor<CstVisi
                     expression = new FieldAccessExpression(
                         identifier.image,
                         expression,
-                        generateMetadata(expression.position!, identifier as ASTExpressionPosition, params)
+                        generateAutocompletionMetadata(expression.position!, identifier, params, identifier)
                     );
                 } else {
                     expression = new IdentifierExpression(
                         identifier.image,
-                        metadata(optionalPosition(identifier as ASTExpressionPosition), params)
+                        generateAutocompletionMetadata(identifier, identifier, params, identifier)
                     );
                 }
             }
             if (ctx.FaultTolerantToken) {
-                return new FieldAccessExpression(
-                    "",
-                    expression!,
-                    generateMetadata(expression!.position!, ctx.FaultTolerantToken[0], params)
-                );
+                return this.generateFieldAccessExpressionForOnlyDot(expression!, ctx.FaultTolerantToken[0], params);
             } else {
                 return expression!;
             }
+        }
+
+        /**
+         * Generates a field access expression for a dot without the right side
+         *
+         * @param baseExpression the left side expression
+         * @param dotToken the token of the dot
+         * @param params parameter context which must be passed at visit
+         * @returns the generated FieldAccessExpression
+         */
+        private generateFieldAccessExpressionForOnlyDot(
+            baseExpression: Expression,
+            dotToken: IToken,
+            params: CstVisitorParameters
+        ): Expression {
+            const dotPosition = generatePosition(dotToken, dotToken);
+            return new FieldAccessExpression("", baseExpression, {
+                ...generateMetadata(baseExpression.position!, dotToken, params),
+                autocompletionPosition: dotPosition,
+                identifierPosition: {
+                    startOffset: dotPosition.endOffset,
+                    startLine: dotPosition.endLine,
+                    startColumn: dotPosition.endColumn,
+                    endOffset: dotPosition.endOffset,
+                    endLine: dotPosition.endLine,
+                    endColumn: dotPosition.endColumn
+                }
+            });
         }
 
         /**

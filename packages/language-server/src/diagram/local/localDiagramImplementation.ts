@@ -1,4 +1,4 @@
-import { FullObject, Expression, InterpretationResult, CstResult, toExecutable, parse } from "@hylimo/core";
+import { FullObject, Expression, InterpretationResult, CstResult, toExecutable } from "@hylimo/core";
 import { DiagramLayoutResult } from "@hylimo/diagram";
 import {
     TransactionalAction,
@@ -8,21 +8,29 @@ import {
     ResizeAction,
     AxisAlignedSegmentEditAction
 } from "@hylimo/diagram-common";
-import { Diagnostic, DiagnosticSeverity, uinteger, Range } from "vscode-languageserver";
+import {
+    Diagnostic,
+    DiagnosticSeverity,
+    uinteger,
+    Range,
+    CompletionItem,
+    Position,
+    TextEdit
+} from "vscode-languageserver";
 import { TextDocument } from "vscode-languageserver-textdocument";
-import { AxisAlignedSegmentEdit } from "../edit/edits/axisAlignedSegmentEdit";
-import { LineMoveEdit } from "../edit/edits/lineMoveEdit";
-import { ResizeEdit } from "../edit/edits/resizeEdit";
-import { RotationEdit } from "../edit/edits/rotationEdit";
-import { TransactionalEdit } from "../edit/edits/transactionalEdit";
-import { TranslationMoveEdit } from "../edit/edits/translationMoveEdit";
-import { LayoutedDiagramImplementation, DiagramUpdateResult } from "../layoutedDiagram";
-import { SharedDiagramUtils } from "../sharedDiagramUtils";
+import { AxisAlignedSegmentEdit } from "../../edit/edits/axisAlignedSegmentEdit";
+import { LineMoveEdit } from "../../edit/edits/lineMoveEdit";
+import { ResizeEdit } from "../../edit/edits/resizeEdit";
+import { RotationEdit } from "../../edit/edits/rotationEdit";
+import { TransactionalEdit } from "../../edit/edits/transactionalEdit";
+import { TranslationMoveEdit } from "../../edit/edits/translationMoveEdit";
+import { DiagramImplementation, DiagramUpdateResult } from "../diagramImplementation";
+import { SharedDiagramUtils } from "../../sharedDiagramUtils";
 
 /**
- * Local implementation of a layouted diagram.
+ * Local implementation of a diagram.
  */
-export class LocalLayoutedDiagram extends LayoutedDiagramImplementation {
+export class LocalDiagramImplementation extends DiagramImplementation {
     /**
      * Result of the last call to updateDiagram
      */
@@ -33,7 +41,7 @@ export class LocalLayoutedDiagram extends LayoutedDiagramImplementation {
     private document?: TextDocument;
 
     /**
-     * Creates a new local layouted diagram
+     * Creates a new LocalDiagramImplementation
      *
      * @param utils required for parsing, interpreting and layouting of the diagram
      */
@@ -81,6 +89,31 @@ export class LocalLayoutedDiagram extends LayoutedDiagramImplementation {
         }
     }
 
+    override async generateCompletionItems(position: Position): Promise<CompletionItem[] | undefined> {
+        const items = this.utils.autocompletionEngine.autocomplete(
+            this.document!.getText(),
+            this.document!.offsetAt(position)
+        );
+        if (items == undefined) {
+            return undefined;
+        }
+        return items.map((item) => {
+            const range = item.replaceRange;
+            return {
+                label: item.label,
+                detail: item.label,
+                documentation: item.documentation,
+                textEdit: TextEdit.replace(
+                    Range.create(
+                        Position.create(range.startLine, range.startColumn),
+                        Position.create(range.endLine, range.endColumn)
+                    ),
+                    item.value
+                )
+            };
+        });
+    }
+
     /**
      * Runs the interpreter on the parserResult
      *
@@ -89,10 +122,7 @@ export class LocalLayoutedDiagram extends LayoutedDiagramImplementation {
      * @returns the result of the interpreter run
      */
     private runInterpreterAndConvertErrors(expressions: Expression[], diagnostics: Diagnostic[]): InterpretationResult {
-        const interpretationResult = this.utils.interpreter.run(
-            toExecutable(expressions),
-            this.utils.maxExecutionSteps
-        );
+        const interpretationResult = this.utils.interpreter.run(toExecutable(expressions));
         const error = interpretationResult.error;
         if (error) {
             const pos = error.findFirstPosition();

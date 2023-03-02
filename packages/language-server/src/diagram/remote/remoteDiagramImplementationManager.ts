@@ -1,16 +1,16 @@
-import { LayoutedDiagramImplementation } from "../layoutedDiagram";
-import { SharedDiagramUtils } from "../sharedDiagramUtils";
-import { LocalLayoutedDiagram } from "./localLayoutedDiagram";
+import { DiagramImplementation } from "../diagramImplementation";
+import { SharedDiagramUtils } from "../../sharedDiagramUtils";
+import { DiagramImplementationManager } from "../diagramImplementationManager";
+import { LocalDiagramImplementation } from "../local/localDiagramImplementation";
 import { RegisterRemoteLanguageServerMessage } from "./registerRemoteLanguageServerMessage";
-import { RemoteLayoutedDiagram } from "./remoteLayoutedDiagram";
-import { LayoutedDiagramManager } from "./layoutedDiagramManager";
+import { RemoteDiagramImplementation } from "./remoteDiagramImplementation";
 import { RemoteMessagePayload } from "./remoteMessages";
 
 /**
  * Manages the layouted diagrams. This is the remote implementation.
  * If no remote language servers are registered, it falls back to the local implementation.
  */
-export class RemoteLayoutedDiagramManager extends LayoutedDiagramManager {
+export class RemoteDiagramImplementationManager extends DiagramImplementationManager {
     /**
      * Lookup for available remote language servers.
      */
@@ -25,14 +25,11 @@ export class RemoteLayoutedDiagramManager extends LayoutedDiagramManager {
         super(utils.connection, 0);
     }
 
-    override getNewLayoutedDiagramImplementation(
-        id: string,
-        old?: LayoutedDiagramImplementation
-    ): LayoutedDiagramImplementation {
+    override getNewDiagramImplementation(id: string, old?: DiagramImplementation): DiagramImplementation {
         if (this.remoteLanguageServers.size === 0) {
-            return old ?? new LocalLayoutedDiagram(this.utils);
+            return old ?? new LocalDiagramImplementation(this.utils);
         } else {
-            if (old instanceof RemoteLayoutedDiagram) {
+            if (old instanceof RemoteDiagramImplementation) {
                 return old;
             }
             let minimumActive = Number.POSITIVE_INFINITY;
@@ -43,7 +40,7 @@ export class RemoteLayoutedDiagramManager extends LayoutedDiagramManager {
                     idealRemoteLanguageServer = id;
                 }
             }
-            return new RemoteLayoutedDiagram(this, idealRemoteLanguageServer, id);
+            return new RemoteDiagramImplementation(this, idealRemoteLanguageServer, id);
         }
     }
 

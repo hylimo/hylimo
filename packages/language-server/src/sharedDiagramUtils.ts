@@ -1,4 +1,4 @@
-import { Interpreter, Parser } from "@hylimo/core";
+import { AutocompletionEngine, Interpreter, Parser } from "@hylimo/core";
 import { LayoutEngine } from "@hylimo/diagram";
 import { Connection } from "vscode-languageserver";
 import { DiagramServerManager } from "./diagramServerManager";
@@ -24,11 +24,11 @@ export interface SharedDiagramUtils {
      */
     readonly layoutEngine: LayoutEngine;
     /**
-     * The maximum amount of execution steps a single execution can use
-     */
-    readonly maxExecutionSteps: number;
-    /**
      * Manages diagram servers
      */
     readonly diagramServerManager: DiagramServerManager;
+    /**
+     * Autocompletion engine to use
+     */
+    readonly autocompletionEngine: AutocompletionEngine;
 }

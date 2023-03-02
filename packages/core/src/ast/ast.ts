@@ -91,9 +91,7 @@ export abstract class Expression<M extends ExpressionMetadata = ExpressionMetada
  * Base class for function (normal, native) expressions
  * Evaluates to a bound function instance
  */
-export abstract class AbstractFunctionExpression<
-    M extends ExpressionMetadata = ExpressionMetadata
-> extends Expression<M> {
+export abstract class AbstractFunctionExpression extends Expression {
     /**
      * Creates a new AbstractFunctionExpression having a set of decorator entries
      *
@@ -101,7 +99,7 @@ export abstract class AbstractFunctionExpression<
      * @param metadata metadata for the expression
      * @param type used for serialization and debugging
      */
-    constructor(readonly decorator: Map<string, string | undefined>, type: string, metadata: M) {
+    constructor(readonly decorator: Map<string, string | undefined>, type: string, metadata: ExpressionMetadata) {
         super(type, metadata);
     }
 }
@@ -126,7 +124,7 @@ export abstract class AbstractInvocationExpression<
  * Assignment Expression
  * Evaluates to the assigned value
  */
-export class AssignmentExpression extends Expression {
+export class AssignmentExpression extends Expression<AutocompletionExpressionMetadata> {
     static readonly TYPE = "AssignmentExpression";
     /**
      * Creates a new AssignmentExpression consisting of a value, a field, and an optional target on which the
@@ -141,7 +139,7 @@ export class AssignmentExpression extends Expression {
         readonly name: string,
         readonly target: Expression | undefined,
         readonly value: Expression,
-        metadata: ExpressionMetadata
+        metadata: AutocompletionExpressionMetadata
     ) {
         super(AssignmentExpression.TYPE, metadata);
     }
@@ -220,7 +218,7 @@ export class FieldAccessExpression extends Expression<AutocompletionExpressionMe
 /**
  * Normal function expression
  */
-export class FunctionExpression extends AbstractFunctionExpression<AutocompletionExpressionMetadata> {
+export class FunctionExpression extends AbstractFunctionExpression {
     static readonly TYPE = "FunctionExpression";
     /**
      * Creates a new FunctionExpression consisting of a set of decorator entries and a block
@@ -234,7 +232,7 @@ export class FunctionExpression extends AbstractFunctionExpression<Autocompletio
     constructor(
         readonly expressions: Expression[],
         decorator: Map<string, string | undefined>,
-        metadata: AutocompletionExpressionMetadata,
+        metadata: ExpressionMetadata,
         readonly types?: Map<string | number, Type>
     ) {
         super(decorator, FunctionExpression.TYPE, metadata);

@@ -1,11 +1,11 @@
 import { Connection } from "vscode-languageserver";
-import { LayoutedDiagramImplementation } from "../layoutedDiagram";
-import { RemoteMessagePayload, RemoteNotification, RemoteRequest } from "./remoteMessages";
+import { DiagramImplementation } from "./diagramImplementation";
+import { RemoteMessagePayload, RemoteNotification, RemoteRequest } from "./remote/remoteMessages";
 
 /**
  * Manages the layouted diagrams. Base class for the remote and local implementation.
  */
-export abstract class LayoutedDiagramManager {
+export abstract class DiagramImplementationManager {
     /**
      * Creates a new LayoutedDiagramManager.
      * Listens to remote notifications and requests on the given connection.
@@ -45,17 +45,15 @@ export abstract class LayoutedDiagramManager {
     protected abstract handleRequest(message: RemoteMessagePayload, from: number): Promise<RemoteMessagePayload>;
 
     /**
-     * Gets a layouted diagram implementation for the given id.
+     * Gets a diagram implementation for the given id.
      * May return the same instance as the old parameter.
+     * Must not invalidate existing implementations for the same id.
      *
      * @param id the id of the diagram
-     * @param old the old layouted diagram implementation
-     * @returns the new layouted diagram implementation
+     * @param old the old diagram implementation
+     * @returns the new diagram implementation
      */
-    abstract getNewLayoutedDiagramImplementation(
-        id: string,
-        old?: LayoutedDiagramImplementation
-    ): LayoutedDiagramImplementation;
+    abstract getNewDiagramImplementation(id: string, old?: DiagramImplementation): DiagramImplementation;
 
     /**
      * Sends a remote notification.

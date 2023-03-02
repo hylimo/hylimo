@@ -19,6 +19,15 @@ export class FullObject extends BaseObject {
         return this.getFieldEntryInternal(key, context);
     }
 
+    override getFieldEntries(): Record<string, FieldEntry> {
+        const proto = this.getProto();
+        const entries: Record<string, FieldEntry> = proto?.getFieldEntries() ?? {};
+        for (const [key, value] of this.fields) {
+            entries[key] = value;
+        }
+        return entries;
+    }
+
     /**
      * Gets the value of a field without performing any checks.
      * If the field is not found on this, returns it from the proto field.
@@ -49,7 +58,7 @@ export class FullObject extends BaseObject {
      */
     getLocalField(key: string | number, context: InterpreterContext): FieldEntry {
         const value = this.fields.get(key);
-        if (value) {
+        if (value != undefined) {
             return value;
         } else {
             return { value: context.null };

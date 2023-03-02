@@ -273,8 +273,9 @@ export class Interpreter {
      * An error is thrown if a module has unsatisfied dependencies,
      *
      * @param modules loaded modules
+     * @param maxExecutionSteps the maximum number of steps the interpreter is allowed to execute
      */
-    constructor(modules: InterpreterModule[]) {
+    constructor(modules: InterpreterModule[], private readonly maxExecutionSteps: number) {
         const markedModules = modules.map((module) => ({ module, mark: false, temporaryMark: false }));
         const moduleLookup = new Map<string, (typeof markedModules)[0]>();
         for (const module of markedModules) {
@@ -330,12 +331,11 @@ export class Interpreter {
      * Evalutes a list of expressions with all modules loaded
      *
      * @param expressions the expressions to evaluate
-     * @param maxExecutionSteps the max amount of execution steps to prevent infinite loops
      * @returns the result of the interpretation, consting of a scope or an error
      */
-    run(expressions: ExecutableExpression<any>[], maxExecutionSteps: number): InterpretationResult {
+    run(expressions: ExecutableExpression<any>[]): InterpretationResult {
         const context = new InterpreterContext(
-            maxExecutionSteps,
+            this.maxExecutionSteps,
             this.modules.map((module) => module.name)
         );
         try {

@@ -1,4 +1,4 @@
-import { DiagramUpdateResult } from "../layoutedDiagram";
+import { DiagramUpdateResult } from "../diagramImplementation";
 import { RemoteDiagramMessage } from "./remoteDiagramMessage";
 import { RemoteMessagePayload } from "./remoteMessages";
 

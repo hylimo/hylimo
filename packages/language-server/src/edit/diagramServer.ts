@@ -1,6 +1,6 @@
 import { TransactionalAction } from "@hylimo/diagram-common";
 import { Action, DiagramServer as SprottyDiagramServer, DiagramServices } from "sprotty-protocol";
-import { Diagram } from "../diagram";
+import { Diagram } from "../diagram/diagram";
 
 /**
  * Custom DiagramServer which redirects TransactionalActions to the diagram
