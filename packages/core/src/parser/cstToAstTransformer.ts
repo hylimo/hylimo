@@ -67,20 +67,6 @@ export function generateCstToAstTransfromer(parser: Parser): ICstVisitor<CstVisi
     }
 
     /**
-     * Helper to generate metadata based on the parameters and a position
-     *
-     * @param position the position for the metadata
-     * @param params the parameters required for generating the Metadata
-     * @returns the generated metadata
-     */
-    function metadata(position: ASTExpressionPosition | undefined, params: CstVisitorParameters): ExpressionMetadata {
-        return {
-            position,
-            isEditable: params.editable && position != undefined
-        };
-    }
-
-    /**
      * Helper which wraps generatePosition in metadata and optionalPosition.
      * Takes the
      * Also returns undefined if start or end is undefined.
@@ -95,10 +81,14 @@ export function generateCstToAstTransfromer(parser: Parser): ICstVisitor<CstVisi
         end: ASTExpressionPosition | IToken,
         params: CstVisitorParameters
     ): ExpressionMetadata {
-        if (start == undefined || end == undefined) {
-            return metadata(undefined, params);
+        let position: ASTExpressionPosition | undefined = undefined;
+        if (start != undefined && end != undefined) {
+            position = optionalPosition(generatePosition(start, end));
         }
-        return metadata(optionalPosition(generatePosition(start, end)), params);
+        return {
+            position,
+            isEditable: params.editable && position != undefined
+        };
     }
 
     /**
@@ -149,7 +139,7 @@ export function generateCstToAstTransfromer(parser: Parser): ICstVisitor<CstVisi
         private literal(ctx: any, params: CstVisitorParameters): LiteralExpression<any> {
             if (ctx.String) {
                 const token = ctx.String[0];
-                return new StringLiteralExpression(parseString(token.image), metadata(optionalPosition(token), params));
+                return new StringLiteralExpression(parseString(token.image), generateMetadata(token, token, params));
             } else {
                 const token = ctx.Number[0];
                 let value = parseNumber(token.image);
@@ -158,7 +148,7 @@ export function generateCstToAstTransfromer(parser: Parser): ICstVisitor<CstVisi
                     value = -value;
                     meta = generateMetadata(ctx.SignMinus[0], token, params);
                 } else {
-                    meta = metadata(optionalPosition(token), params);
+                    meta = generateMetadata(token, token, params);
                 }
                 return new NumberLiteralExpression(value, meta);
             }
