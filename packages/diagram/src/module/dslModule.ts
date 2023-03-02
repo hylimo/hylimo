@@ -270,6 +270,10 @@ const scopeExpressions: Expression[] = [
                 )
                 callback.callWithScope(result)
                 if(result.over != null) {
+                    segments = result.over.segments
+                    if((segments == null) || (segments.length == 0)) {
+                        error("over must define at least one segment")
+                    }
                     self.start = result.over.start
                     self.contents = result.over.segments
                 }
