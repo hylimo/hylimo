@@ -10,6 +10,11 @@ import { FullObject } from "./fullObject";
  */
 export abstract class BaseObject {
     /**
+     * Wether this represents null or not
+     */
+    abstract readonly isNull: boolean;
+
+    /**
      * Gets the value of a field
      *
      * @param key the identifier of the field
@@ -48,13 +53,20 @@ export abstract class BaseObject {
 
     /**
      * Sets a field locally
-     * If the value contains the null value, the field is removed, otherwise the value is set
      *
      * @param key the identifier of the field
      * @param value the new value of the field
+     */
+    abstract setLocalField(key: string | number, value: FieldEntry): void;
+
+    /**
+     * Deletes a field.
+     * This is different from simply setting the field to null, as it removes the field from the object.
+     *
+     * @param key the identifier of the field
      * @param context context in which this is performed
      */
-    abstract setLocalField(key: string | number, value: FieldEntry, context: InterpreterContext): void;
+    abstract deleteField(key: string | number, context: InterpreterContext): void;
 
     /**
      * Invokes this obeject.
@@ -95,6 +107,10 @@ export abstract class BaseObject {
  * Object type which only has a proto field and delegates every other access to it
  */
 export abstract class SimpleObject extends BaseObject {
+    override get isNull(): boolean {
+        return false;
+    }
+
     constructor(readonly proto: FullObject) {
         super();
     }
@@ -121,8 +137,12 @@ export abstract class SimpleObject extends BaseObject {
         }
     }
 
-    override setLocalField(_key: string | number, _value: FieldEntry, _context: InterpreterContext) {
+    override setLocalField(_key: string | number, _value: FieldEntry) {
         throw new RuntimeError("Cannot set field directly of a non-Object");
+    }
+
+    override deleteField(_key: string | number, _context: InterpreterContext): void {
+        throw new RuntimeError("Cannot delete field of a non-Object");
     }
 }
 

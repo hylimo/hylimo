@@ -30,11 +30,11 @@ export const functionModule = InterpreterModule.create(
                         const scope = args.getField(0, context);
                         assertFunction(self);
                         assertObject(scope);
-                        scope.setLocalField(SemanticFieldNames.PROTO, { value: self.parentScope }, context);
+                        scope.setLocalField(SemanticFieldNames.PROTO, { value: self.parentScope });
                         const res = self.invoke([], context, scope);
-                        scope.setLocalField(SemanticFieldNames.ARGS, { value: context.null }, context);
-                        scope.setLocalField(SemanticFieldNames.IT, { value: context.null }, context);
-                        scope.setLocalField(SemanticFieldNames.THIS, { value: context.null }, context);
+                        scope.setLocalField(SemanticFieldNames.ARGS, { value: context.null });
+                        scope.setLocalField(SemanticFieldNames.IT, { value: context.null });
+                        scope.setLocalField(SemanticFieldNames.THIS, { value: context.null });
                         return res;
                     },
                     {

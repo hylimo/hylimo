@@ -59,10 +59,6 @@ export interface StyleList {
      * Value representing the unset option
      */
     unset: BaseObject;
-    /**
-     * Default option, should be ignored
-     */
-    default: BaseObject;
 }
 
 /**
@@ -75,8 +71,7 @@ export function generateStyles(styles: FullObject): StyleList {
     const elements = generateStylesForStyles([], styles.getLocalFieldOrUndefined("styles")?.value as FullObject);
     return {
         styles: elements,
-        unset: styles.getLocalFieldOrUndefined("unset")!.value,
-        default: styles.getLocalFieldOrUndefined("default")!.value
+        unset: styles.getLocalFieldOrUndefined("unset")!.value
     };
 }
 

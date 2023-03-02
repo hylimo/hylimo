@@ -6,8 +6,8 @@ import { or } from "./or";
  */
 export const nullType: Type = {
     name: () => "null",
-    matches(value, context) {
-        if (value === context.null) {
+    matches(value) {
+        if (value.isNull) {
             return true;
         } else {
             return {

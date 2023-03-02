@@ -14,6 +14,10 @@ export class FullObject extends BaseObject {
      */
     private nativeObject?: { [key: string]: any };
 
+    override get isNull(): boolean {
+        return false;
+    }
+
     override getFieldEntry(key: string | number, context: InterpreterContext): FieldEntry {
         this.checkValidKey(key);
         return this.getFieldEntryInternal(key, context);
@@ -65,14 +69,26 @@ export class FullObject extends BaseObject {
         }
     }
 
+    /**
+     * Gets the value of a local field without performing any checks.
+     * If the field is not found or contains null, returns undefined.
+     *
+     * @param key the identifier of the field
+     * @returns the value of the field or undefined
+     */
     getLocalFieldOrUndefined(key: string | number): FieldEntry | undefined {
-        return this.fields.get(key);
+        const field = this.fields.get(key);
+        if (field == undefined || field.value.isNull) {
+            return undefined;
+        } else {
+            return field;
+        }
     }
 
     override setFieldEntry(key: string | number, value: FieldEntry, context: InterpreterContext): void {
         this.checkValidKey(key);
         if (!this.setExistingField(key, value, context)) {
-            this.setLocalField(key, value, context);
+            this.setLocalField(key, value);
         }
     }
 
@@ -86,7 +102,7 @@ export class FullObject extends BaseObject {
      */
     private setExistingField(key: string | number, value: FieldEntry, context: InterpreterContext): boolean {
         if (this.fields.has(key)) {
-            this.setLocalField(key, value, context);
+            this.setLocalField(key, value);
             return true;
         } else {
             const proto = this.getProto();
@@ -98,21 +114,22 @@ export class FullObject extends BaseObject {
         }
     }
 
-    override setLocalField(key: string | number, value: FieldEntry, context: InterpreterContext): void {
+    override setLocalField(key: string | number, value: FieldEntry): void {
         const isProto = key === SemanticFieldNames.PROTO;
         if (isProto) {
-            if (value.value !== context.null && !(value.value instanceof FullObject)) {
+            if (!value.value.isNull && !(value.value instanceof FullObject)) {
                 throw new RuntimeError('"proto" must be set to an object or null');
             }
         }
-        if (value.value === context.null) {
-            this.fields.delete(key);
-        } else {
-            this.fields.set(key, value);
-        }
+        this.fields.set(key, value);
         if (isProto) {
             this.validateProto();
         }
+    }
+
+    override deleteField(key: string | number): void {
+        this.checkValidKey(key);
+        this.fields.delete(key);
     }
 
     /**
@@ -123,7 +140,7 @@ export class FullObject extends BaseObject {
     private validateProto(): void {
         // eslint-disable-next-line @typescript-eslint/no-this-alias
         let current: FullObject | undefined = this;
-        while (current) {
+        while (current != undefined) {
             current = current.getProto();
             if (current === this) {
                 throw new RuntimeError("Proto loop detected");
@@ -165,7 +182,7 @@ export class FullObject extends BaseObject {
     }
 
     override toNative(): any {
-        if (!this.nativeObject) {
+        if (this.nativeObject == undefined) {
             const newObject: { [key: string]: any } = {};
             this.nativeObject = newObject;
             this.fields.forEach((value, key) => {

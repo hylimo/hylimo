@@ -31,7 +31,7 @@ export class ExecutableAssignmentExpression extends ExecutableExpression<Assignm
         }
         const valueValue = this.value.evaluateWithSource(context);
         if (this.target) {
-            targetValue.setLocalField(this.expression.name, valueValue, context);
+            targetValue.setLocalField(this.expression.name, valueValue);
         } else {
             targetValue.setFieldEntry(this.expression.name, valueValue, context);
         }

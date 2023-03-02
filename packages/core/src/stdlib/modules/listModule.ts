@@ -40,7 +40,7 @@ export const listModule = InterpreterModule.create(
                     (args, context) => {
                         const self = args.getField(SemanticFieldNames.SELF, context);
                         const length = assertNumber(self.getField(lengthField, context));
-                        self.setLocalField(length, args.getFieldEntry(0, context), context);
+                        self.setLocalField(length, args.getFieldEntry(0, context));
                         self.setFieldEntry(lengthField, { value: context.newNumber(length + 1) }, context);
                         return context.null;
                     },
@@ -206,12 +206,8 @@ export const listModule = InterpreterModule.create(
                     (args, context, staticScope) => {
                         const indexOnlyArgs = args.filter((value) => !value.name);
                         const list = generateArgs(indexOnlyArgs, context);
-                        list.setLocalField(
-                            SemanticFieldNames.PROTO,
-                            staticScope.getFieldEntry(listProto, context),
-                            context
-                        );
-                        list.setLocalField(lengthField, { value: context.newNumber(indexOnlyArgs.length) }, context);
+                        list.setLocalField(SemanticFieldNames.PROTO, staticScope.getFieldEntry(listProto, context));
+                        list.setLocalField(lengthField, { value: context.newNumber(indexOnlyArgs.length) });
                         return { value: list };
                     },
                     {
@@ -263,15 +259,14 @@ export const listModule = InterpreterModule.create(
                         const object = objectEntry.value as FullObject;
                         object.setLocalField(
                             SemanticFieldNames.PROTO,
-                            context.currentScope.getFieldEntry(listProto, context),
-                            context
+                            context.currentScope.getFieldEntry(listProto, context)
                         );
                         const maxKey =
                             Math.max(
                                 -1,
                                 ...([...object.fields.keys()].filter((key) => typeof key === "number") as number[])
                             ) + 1;
-                        object.setLocalField(lengthField, { value: context.newNumber(maxKey) }, context);
+                        object.setLocalField(lengthField, { value: context.newNumber(maxKey) });
                         return objectEntry;
                     },
                     {

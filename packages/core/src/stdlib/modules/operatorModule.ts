@@ -56,8 +56,8 @@ export const operatorModule = InterpreterModule.create(
                 (args, context) => {
                     const first = args.getFieldEntry(0, context);
                     const second = args.getFieldEntry(1, context);
-                    if (first.value === context.null) {
-                        return toBoolean(second.value === context.null, context);
+                    if (first.value.isNull) {
+                        return toBoolean(second.value.isNull, context);
                     } else {
                         return first.value
                             .getField("==", context)
@@ -152,7 +152,7 @@ export const operatorModule = InterpreterModule.create(
                         throw new RuntimeError(`Expected exactly two positional arguments for ??}`);
                     }
                     const leftSide = args[0].value.evaluateWithSource(context);
-                    if (leftSide.value === context.null) {
+                    if (leftSide.value.isNull) {
                         return args[1].value.evaluateWithSource(context);
                     } else {
                         return leftSide;

@@ -115,13 +115,39 @@ export const objectModule = InterpreterModule.create(
                 )
             ),
             id(objectProto).assignField(
+                "delete",
+                jsFun(
+                    (args, context) => {
+                        const self = args.getField(SemanticFieldNames.SELF, context);
+                        assertObject(self);
+                        self.deleteField(assertIndex(args.getField(0, context)));
+                        return context.null;
+                    },
+                    {
+                        docs: `
+                            Deletes the field at the defined index.
+                            Only supported on objects, and does NOT take the proto chain into account.
+                            Params:
+                                - 0: the index to delete, must be a valid index (string or integer >= 0)
+                                - "self": object on which to delete the field
+                            Returns:
+                                null
+                        `
+                    },
+                    [
+                        [0, or(stringType, numberType)],
+                        [SemanticFieldNames.SELF, objectType()]
+                    ]
+                )
+            ),
+            id(objectProto).assignField(
                 "set",
                 jsFun(
                     (args, context) => {
                         const self = args.getField(SemanticFieldNames.SELF, context);
                         assertObject(self);
                         const value = args.getFieldEntry(1, context);
-                        self.setLocalField(assertIndex(args.getField(0, context)), value, context);
+                        self.setLocalField(assertIndex(args.getField(0, context)), value);
                         return value;
                     },
                     {

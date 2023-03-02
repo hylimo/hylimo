@@ -21,7 +21,7 @@ export class ExecutableDestructuringExpression extends ExecutableExpression<Dest
         const valueValue = this.value.evaluate(context);
         const names = this.expression.names;
         for (let i = 0; i < names.length; i++) {
-            context.currentScope.setLocalField(names[i], valueValue.value.getFieldEntry(i, context), context);
+            context.currentScope.setLocalField(names[i], valueValue.value.getFieldEntry(i, context));
         }
         return valueValue;
     }

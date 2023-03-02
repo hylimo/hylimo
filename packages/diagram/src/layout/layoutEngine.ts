@@ -188,7 +188,7 @@ export class Layout {
             const attribute = attributeConfig.name;
             for (const style of matchingStyles) {
                 const entry = style.getLocalFieldOrUndefined(attribute);
-                if (entry && entry.value != this.styles.default) {
+                if (entry != undefined) {
                     if (entry.value != this.styles.unset) {
                         layoutElement.styles[attribute] = entry.value.toNative();
                     } else {

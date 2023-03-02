@@ -64,13 +64,9 @@ function createElementFunction(element: LayoutConfig): Expression {
     const allAttributes = [...element.attributes, ...element.styleAttributes];
     return jsFun(
         (args, context) => {
-            args.setLocalField(SemanticFieldNames.SELF, { value: context.null }, context);
-            args.setLocalField("type", { value: context.newString(element.type) }, context);
-            args.setLocalField(
-                SemanticFieldNames.PROTO,
-                context.currentScope.getLocalField(elementProto, context),
-                context
-            );
+            args.setLocalField(SemanticFieldNames.SELF, { value: context.null });
+            args.setLocalField("type", { value: context.newString(element.type) });
+            args.setLocalField(SemanticFieldNames.PROTO, context.currentScope.getLocalField(elementProto, context));
             return args;
         },
         {
@@ -145,7 +141,6 @@ export const diagramModule = InterpreterModule.create(
             "styles",
             fun([
                 assign(selectorProto, id("object").call({ name: "_type", value: str("selectorProto") })),
-                assign("default", id("object").call({ name: "_type", value: str("styleValue") })),
                 assign(
                     "validateSelector",
                     jsFun((args, context) => {
@@ -177,7 +172,7 @@ export const diagramModule = InterpreterModule.create(
                                     selectorType = type,
                                     selectorValue = value,
                                     styles = list(),
-                                    ${allStyleAttributes.map((attr) => `${attr.name} = default`).join(",")}
+                                    ${allStyleAttributes.map((attr) => `${attr.name} = null`).join(",")}
                                 )
                                 args.self.styles.add(selector)
                                 selector.proto = ${selectorProto}

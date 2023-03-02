@@ -144,7 +144,7 @@ const scopeExpressions: Expression[] = [
         fun(
             `
                 (self, callback) = args
-                result = object()
+                result = object(pos = null, width = null, height = null, rotation = null)
                 callback.callWithScope(result)
                 if(result.pos != null) {
                     self.pos = result.pos
@@ -246,6 +246,7 @@ const scopeExpressions: Expression[] = [
             `
                 (self, callback) = args
                 result = object(
+                    over = null,
                     end = self.endProvider,
                     start = {
                         pos = self.startProvider(it)
@@ -360,14 +361,10 @@ const scopeExpressions: Expression[] = [
             native((args, context, staticScope, callExpression) => {
                 const callback = staticScope.getField("callback", context) as AbstractFunctionObject<any>;
                 const result = callback.invoke(args, context);
-                result.value.setLocalField(
-                    "source",
-                    {
-                        value: result.value,
-                        source: callExpression
-                    },
-                    context
-                );
+                result.value.setLocalField("source", {
+                    value: result.value,
+                    source: callExpression
+                });
                 return result;
             })
         ])

@@ -31,7 +31,7 @@ export const commonModule = InterpreterModule.create(
                         return ifBranch.invoke([], context);
                     } else {
                         const elseBranch = args.getField(2, context);
-                        if (elseBranch === context.null) {
+                        if (elseBranch.isNull) {
                             return context.null;
                         } else {
                             assertFunction(elseBranch);

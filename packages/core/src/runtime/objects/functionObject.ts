@@ -47,7 +47,7 @@ export function generateArgs(
     let indexCounter = 0;
     for (const argumentExpression of args) {
         const value = argumentExpression.value.evaluateWithSource(context);
-        argsObject.setLocalField(argumentExpression.name ?? indexCounter++, value, context);
+        argsObject.setLocalField(argumentExpression.name ?? indexCounter++, value);
     }
     for (const [key, type] of types?.entries() ?? []) {
         const argValue = argsObject.getLocalField(key, context).value;
@@ -83,12 +83,12 @@ export class FunctionObject extends AbstractFunctionObject<ExecutableFunctionExp
         const oldScope = context.currentScope;
         if (!scope) {
             scope = new FullObject();
-            scope.setLocalField(SemanticFieldNames.PROTO, { value: this.parentScope }, context);
+            scope.setLocalField(SemanticFieldNames.PROTO, { value: this.parentScope });
         }
-        scope.setLocalField(SemanticFieldNames.THIS, { value: scope }, context);
+        scope.setLocalField(SemanticFieldNames.THIS, { value: scope });
         const generatedArgs = generateArgs(args, context, this.definition.expression.types);
-        scope.setLocalField(SemanticFieldNames.ARGS, { value: generatedArgs }, context);
-        scope.setLocalField(SemanticFieldNames.IT, generatedArgs.getFieldEntry(0, context), context);
+        scope.setLocalField(SemanticFieldNames.ARGS, { value: generatedArgs });
+        scope.setLocalField(SemanticFieldNames.IT, generatedArgs.getFieldEntry(0, context));
         context.currentScope = scope;
         let lastValue: BaseObject = context.null;
         for (const expression of this.definition.expressions) {
