@@ -70,13 +70,13 @@ function createElementFunction(element: LayoutConfig): Expression {
             return args;
         },
         {
-            docs: `
-                Creates a new ${element.type} element
-                Params:
-                    ${allAttributes.map((attribute) => `-"${attribute.name}": ${attribute.description}`).join("\n")}
-                Returns:
-                    The created element
-            `
+            docs: [
+                `Creates a new ${element.type} element`,
+                `Params:`,
+                ...allAttributes.map((attribute) => `    - "${attribute.name}": ${attribute.description}`),
+                `Returns:`,
+                `    The created element`
+            ].join("\n")
         },
         [
             ...element.attributes.map<[string, Type]>((attr) => [attr.name, attr.type]),

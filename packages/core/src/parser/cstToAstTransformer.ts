@@ -534,7 +534,12 @@ export function generateCstToAstTransfromer(parser: Parser): ICstVisitor<CstVisi
                 if (expressions.length > 1) {
                     const target = expressions[0];
                     const value = expressions[1];
-                    const meta = generateMetadata(target.position, value.position, params);
+                    const targetMeta = target.metadata as AutocompletionExpressionMetadata;
+                    const meta: AutocompletionExpressionMetadata = {
+                        ...generateMetadata(target.position, value.position, params),
+                        autocompletionPosition: targetMeta.autocompletionPosition,
+                        identifierPosition: targetMeta.identifierPosition
+                    };
                     if (target instanceof IdentifierExpression) {
                         return new AssignmentExpression(target.identifier, undefined, value, meta);
                     } else if (target instanceof FieldAccessExpression) {

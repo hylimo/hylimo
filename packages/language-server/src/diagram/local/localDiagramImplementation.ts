@@ -15,7 +15,8 @@ import {
     Range,
     CompletionItem,
     Position,
-    TextEdit
+    TextEdit,
+    MarkupContent
 } from "vscode-languageserver";
 import { TextDocument } from "vscode-languageserver-textdocument";
 import { AxisAlignedSegmentEdit } from "../../edit/edits/axisAlignedSegmentEdit";
@@ -102,7 +103,7 @@ export class LocalDiagramImplementation extends DiagramImplementation {
             return {
                 label: item.label,
                 detail: item.label,
-                documentation: item.documentation,
+                documentation: this.preprocessDocumentation(item.documentation),
                 textEdit: TextEdit.replace(
                     Range.create(
                         Position.create(range.startLine, range.startColumn),
@@ -112,6 +113,37 @@ export class LocalDiagramImplementation extends DiagramImplementation {
                 )
             };
         });
+    }
+
+    private preprocessDocumentation(documentation: string | undefined): MarkupContent | undefined {
+        if (documentation == undefined) {
+            return undefined;
+        }
+        const lines = documentation.split("\n").filter((line) => line.trim() != "");
+        const indentation = lines
+            .map((line) => line.match(/^\s*/)?.[0]?.length ?? 0)
+            .reduce((a, b) => Math.min(a, b), Number.MAX_SAFE_INTEGER);
+        const unendentedLines = lines.map((line) => line.substring(indentation));
+        const processedLines = unendentedLines
+            .map((line) => {
+                const whitespaceLength = line.match(/^\s*/)?.[0]?.length ?? 0;
+                const half = Math.floor(whitespaceLength / 2);
+                return line.substring(half);
+            })
+            .map((line) => {
+                if (line.trim() == "Params:") {
+                    return "\n**Params:**";
+                } else if (line.trim() == "Returns:") {
+                    return "\n**Returns:**\n";
+                } else {
+                    return line;
+                }
+            });
+        const processed = processedLines.join("\n");
+        return {
+            kind: "markdown",
+            value: processed
+        };
     }
 
     /**

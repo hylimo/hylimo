@@ -1,6 +1,4 @@
-import { Expression } from "../ast/ast";
-import { AutocompletionExpressionMetadata } from "../ast/expressionMetadata";
-import { BaseObject } from "../runtime/objects/baseObject";
+import { AutocompletionItem } from "./autocompletionItem";
 
 /**
  * An error which aborts the execution of the program and provides the context for autocompletion
@@ -9,13 +7,9 @@ export class AutocompletionError extends Error {
     /**
      * Creates a new AutoCompletionError
      *
-     * @param autocompletionContext the context used for autocompletion
-     * @param expression the expression where to autocomplete
+     * @param autocompletionItems the items to provide for autocompletion
      */
-    constructor(
-        readonly autocompletionContext: BaseObject,
-        readonly expression: Expression<AutocompletionExpressionMetadata>
-    ) {
+    constructor(readonly autocompletionItems: AutocompletionItem[]) {
         super();
     }
 
@@ -26,6 +20,6 @@ export class AutocompletionError extends Error {
      * @returns true if the error is an AutocompletionError
      */
     static isAutocompletionError(error: any): error is AutocompletionError {
-        return "autocompletionContext" in error && error.autocompletionContext instanceof BaseObject;
+        return "autocompletionItems" in error;
     }
 }

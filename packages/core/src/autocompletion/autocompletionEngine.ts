@@ -1,8 +1,5 @@
-import { Expression } from "../ast/ast";
-import { AutocompletionExpressionMetadata } from "../ast/expressionMetadata";
 import { Parser } from "../parser/parser";
 import { Interpreter } from "../runtime/interpreter";
-import { BaseObject } from "../runtime/objects/baseObject";
 import { AutocompletionAstTransformer } from "./autocompletionAstTransformer";
 import { AutocompletionError } from "./autocompletionError";
 import { AutocompletionItem } from "./autocompletionItem";
@@ -41,34 +38,11 @@ export class AutocompletionEngine {
             this.interpreter.run(executableAst);
         } catch (e: any) {
             if (AutocompletionError.isAutocompletionError(e)) {
-                return this.transformAutocompletionContext(e.autocompletionContext, e.expression);
+                return e.autocompletionItems;
             } else {
                 return undefined;
             }
         }
         return undefined;
-    }
-
-    /**
-     * Transforms the given context into autocompletion items
-     *
-     * @param context the context to transform
-     * @param expression the expression where to autocomplete
-     * @returns the generated autocompletion items
-     */
-    private transformAutocompletionContext(
-        context: BaseObject,
-        expression: Expression<AutocompletionExpressionMetadata>
-    ): AutocompletionItem[] {
-        const items: AutocompletionItem[] = [];
-        for (const [key] of Object.entries(context.getFieldEntries())) {
-            items.push({
-                label: key,
-                value: key,
-                documentation: "",
-                replaceRange: expression.metadata.identifierPosition!
-            });
-        }
-        return items;
     }
 }

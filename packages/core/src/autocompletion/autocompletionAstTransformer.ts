@@ -3,6 +3,7 @@ import {
     Expression,
     FieldAccessExpression,
     IdentifierExpression,
+    NumberLiteralExpression,
     SelfInvocationExpression
 } from "../ast/ast";
 import { AutocompletionExpressionMetadata } from "../ast/expressionMetadata";
@@ -26,14 +27,21 @@ export class AutocompletionAstTransformer extends RuntimeAstTransformer {
 
     override visitAssignmentExpression(expression: AssignmentExpression): ExecutableExpression<any> {
         if (this.isInAutocompletionRange(expression)) {
-            return new ExecutableAutocompletionExpression(expression);
+            if (expression.target != undefined) {
+                return new ExecutableAutocompletionExpression(expression, this.visit(expression.target));
+            } else {
+                return new ExecutableAutocompletionExpression(expression);
+            }
         } else {
             return super.visitAssignmentExpression(expression);
         }
     }
 
     override visitFieldAccessExpression(expression: FieldAccessExpression): ExecutableExpression<any> {
-        if (this.isInAutocompletionRange(expression)) {
+        if (
+            this.isInAutocompletionRange(expression) &&
+            (!(expression.target instanceof NumberLiteralExpression) || expression.name !== "")
+        ) {
             return new ExecutableAutocompletionExpression(expression, this.visit(expression.target));
         } else {
             return super.visitFieldAccessExpression(expression);
