@@ -22,7 +22,7 @@ export function generateFactorNumberGenerator(entry: FieldEntry, meta: any): Edi
     if (source instanceof NumberLiteralExpression) {
         return {
             start: position!.startOffset,
-            end: position!.endOffset + 1,
+            end: position!.endOffset,
             generator: FactorReplacementNumberGenerator.create(source.value),
             meta
         };
@@ -34,8 +34,8 @@ export function generateFactorNumberGenerator(entry: FieldEntry, meta: any): Edi
         }
     }
     return {
-        start: position!.endOffset + 1,
-        end: position!.endOffset + 1,
+        start: position!.endOffset,
+        end: position!.endOffset,
         generator: FactorMultiplicativeNumberGenerator.create(1),
         meta
     };
@@ -77,8 +77,8 @@ function generateFactorMultiplicativeNumberGeneratorIfPossible(
         return undefined;
     }
     return {
-        start: leftSideEndOffset + 1,
-        end: expression.position!.endOffset + 1,
+        start: leftSideEndOffset,
+        end: expression.position!.endOffset,
         generator: FactorMultiplicativeNumberGenerator.create(fraction ? 1 / rightSide.value : rightSide.value),
         meta
     };

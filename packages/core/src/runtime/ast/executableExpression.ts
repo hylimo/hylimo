@@ -27,7 +27,7 @@ export abstract class ExecutableExpression<T extends Expression> {
             return this.evaluateInternal(context);
         } catch (e: any) {
             if (Array.isArray(e.interpretationStack)) {
-                e.interpretationStack.push(this);
+                e.interpretationStack.push(this.expression);
             }
             throw e;
         }

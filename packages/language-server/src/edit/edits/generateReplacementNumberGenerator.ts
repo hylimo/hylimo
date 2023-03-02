@@ -18,7 +18,7 @@ export function generateReplacementNumberGenerator(entry: FieldEntry, meta: any)
     }
     return {
         start: position!.startOffset,
-        end: position!.endOffset + 1,
+        end: position!.endOffset,
         generator: ReplacementNumberGenerator.create(),
         meta
     };

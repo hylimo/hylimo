@@ -1,4 +1,4 @@
-import { FullObject, Expression, InterpretationResult, CstResult, toExecutable } from "@hylimo/core";
+import { FullObject, Expression, InterpretationResult, CstResult, toExecutable, parse } from "@hylimo/core";
 import { DiagramLayoutResult } from "@hylimo/diagram";
 import {
     TransactionalAction,
@@ -99,7 +99,7 @@ export class LocalLayoutedDiagram extends LayoutedDiagramImplementation {
             if (pos) {
                 diagnostics.push(
                     Diagnostic.create(
-                        Range.create(pos.startLine - 1, pos.startColumn - 1, pos.endLine - 1, pos.endColumn),
+                        Range.create(pos.startLine, pos.startColumn, pos.endLine, pos.endColumn),
                         error.message || "[no message provided]",
                         DiagnosticSeverity.Error
                     )
@@ -125,22 +125,17 @@ export class LocalLayoutedDiagram extends LayoutedDiagramImplementation {
         parserResult.lexingErrors.forEach((error) => {
             diagnostics.push(
                 Diagnostic.create(
-                    Range.create(error.line! - 1, error.column! - 1, error.line! - 1, error.column! + error.length),
+                    Range.create(error.line!, error.column!, error.line!, error.column! + error.length),
                     error.message || "unknown lexical error",
                     DiagnosticSeverity.Error
                 )
             );
         });
         parserResult.parserErrors.forEach((error) => {
-            const token = error.token;
+            const pos = error.position;
             let location: Range;
             if (!Number.isNaN(error.token.startLine)) {
-                location = Range.create(
-                    token.startLine! - 1,
-                    token.startColumn! - 1,
-                    token.endLine! - 1,
-                    token.endColumn!
-                );
+                location = Range.create(pos.startLine!, pos.startColumn!, pos.endLine!, pos.endColumn!);
             } else {
                 location = Range.create(uinteger.MAX_VALUE, uinteger.MAX_VALUE, uinteger.MAX_VALUE, uinteger.MAX_VALUE);
             }

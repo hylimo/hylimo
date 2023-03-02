@@ -68,10 +68,10 @@ function generateCreateNewScope(
     if (source == undefined) {
         throw new Error("element must have a source");
     }
-    const indentation = extractIndentation(document, source.position!.startLine - 1);
+    const indentation = extractIndentation(document, source.position!.startLine);
     return {
-        start: source.position!.endOffset + 1,
-        end: source.position!.endOffset + 1,
+        start: source.position!.endOffset,
+        end: source.position!.endOffset,
         generator: FieldEntryGenerator.create(
             ` ${scopeName} {\n`,
             `\n${indentation}}`,
@@ -96,10 +96,10 @@ function generateAddFieldToScopeReplaceInner(
     meta: any
 ): EditGeneratorEntry {
     const innerText = document.getText(
-        Range.create(document.positionAt(position.startOffset + 1), document.positionAt(position.endOffset))
+        Range.create(document.positionAt(position.startOffset + 1), document.positionAt(position.endOffset - 1))
     );
     const innerTextWithoutWhitespace = innerText.replace(/^\s*/, "");
-    const indentation = extractIndentation(document, position.startLine - 1);
+    const indentation = extractIndentation(document, position.startLine);
     const innerIndentation = increaseIndentation(indentation);
     let prefix: string;
     if (innerTextWithoutWhitespace == "") {
@@ -109,7 +109,7 @@ function generateAddFieldToScopeReplaceInner(
     }
     return {
         start: position.startOffset + 1,
-        end: position.endOffset,
+        end: position.endOffset - 1,
         generator: FieldEntryGenerator.create(prefix, `\n${indentation}`, innerIndentation),
         meta
     };
@@ -128,12 +128,12 @@ function generateAddFieldToScopeInsertAtFirstLine(
     document: TextDocument,
     meta: any
 ): EditGeneratorEntry {
-    const indentation = extractIndentation(document, position.startLine - 1);
+    const indentation = extractIndentation(document, position.startLine);
     const innerIndentation = increaseIndentation(indentation);
     const lineEnd = document.getText(
         Range.create(
             document.positionAt(position.startOffset + 1),
-            Position.create(position.startLine - 1, uinteger.MAX_VALUE)
+            Position.create(position.startLine, uinteger.MAX_VALUE)
         )
     );
     const lineEndContainsOnlyWhitespace = lineEnd.match(/^\s*$/);

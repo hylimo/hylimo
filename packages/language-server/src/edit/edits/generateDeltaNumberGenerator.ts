@@ -22,7 +22,7 @@ export function generateDeltaNumberGenerator(entry: FieldEntry, meta: any): Edit
     if (source instanceof NumberLiteralExpression) {
         return {
             start: position!.startOffset,
-            end: position!.endOffset + 1,
+            end: position!.endOffset,
             generator: DeltaReplacementNumberGenerator.create(source.value),
             meta
         };
@@ -34,8 +34,8 @@ export function generateDeltaNumberGenerator(entry: FieldEntry, meta: any): Edit
         }
     }
     return {
-        start: position!.endOffset + 1,
-        end: position!.endOffset + 1,
+        start: position!.endOffset,
+        end: position!.endOffset,
         generator: DeltaAdditiveNumberGenerator.create(0),
         meta
     };
@@ -77,8 +77,8 @@ function generateDeltaAdditiveNumberGeneratorIfPossible(
         return undefined;
     }
     return {
-        start: leftSideEndOffset + 1,
-        end: expression.position!.endOffset + 1,
+        start: leftSideEndOffset,
+        end: expression.position!.endOffset,
         generator: DeltaAdditiveNumberGenerator.create(rightSide.value * sign),
         meta
     };

@@ -34,7 +34,7 @@ export class Formatter {
                 parse: (text, _options) => this.parser.parse(text).cst!,
                 astFormat: "syncscript",
                 locStart: (node) => node.location!.startOffset,
-                locEnd: (node) => node.location!.endOffset!
+                locEnd: (node) => node.location!.endOffset! - 1
             }
         },
         printers: {

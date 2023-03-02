@@ -1,5 +1,7 @@
 import { InterpreterModule, Interpreter, Parser, defaultModules } from "@hylimo/core";
 import {
+    CompletionItem,
+    CompletionParams,
     Connection,
     DocumentFormattingParams,
     InitializeResult,
@@ -118,6 +120,7 @@ export class LanguageServer {
         this.textDocuments.onDidClose(this.onDidCloseTextDocument.bind(this));
         this.textDocuments.onDidChangeContent(this.onDidChangeContentTextDocument.bind(this));
         this.connection.onDocumentFormatting(this.onDocumentFormatting.bind(this));
+        this.connection.onCompletion(this.onCompletion.bind(this));
         this.connection.onNotification(DiagramOpenNotification.type, this.onOpenDiagram.bind(this));
         this.connection.onNotification(DiagramActionNotification.type, (message) => {
             this.diagramServerManager.acceptAction(message);
@@ -146,7 +149,10 @@ export class LanguageServer {
      */
     private onInitialize(): InitializeResult {
         const capabilities: ServerCapabilities = {
-            documentFormattingProvider: true
+            documentFormattingProvider: true,
+            completionProvider: {
+                triggerCharacters: "!#%&'*+-/:;<=>?@\\^`|~.$_".split("")
+            }
         };
         return { capabilities };
     }
@@ -199,6 +205,7 @@ export class LanguageServer {
 
     /**
      * Callback for onDocumentFormatting
+     *
      * @param params defines the document and additional options
      * @returns edits which define how to update the document
      */
@@ -213,6 +220,17 @@ export class LanguageServer {
                 })
             )
         ];
+    }
+
+    /**
+     * Callback for onCompletion
+     *
+     * @param params defines the document and position
+     * @returns the completion items
+     */
+    private async onCompletion(params: CompletionParams): Promise<CompletionItem[]> {
+        console.log(params.position);
+        return [];
     }
 
     /**

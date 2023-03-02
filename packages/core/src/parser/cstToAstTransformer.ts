@@ -51,7 +51,7 @@ export interface CstVisitorParameters {
     editable: boolean;
 }
 
-export function generateVisitor(parser: Parser): ICstVisitor<CstVisitorParameters, any> {
+export function generateCstToAstTransfromer(parser: Parser): ICstVisitor<CstVisitorParameters, any> {
     /**
      * Helper to discard position information if parser does not allow tracking
      *
@@ -91,8 +91,8 @@ export function generateVisitor(parser: Parser): ICstVisitor<CstVisitorParameter
      * @returns the combined start and end position or undefined
      */
     function generateMetadata(
-        start: ASTExpressionPosition,
-        end: ASTExpressionPosition,
+        start: ASTExpressionPosition | IToken,
+        end: ASTExpressionPosition | IToken,
         params: CstVisitorParameters
     ): ExpressionMetadata {
         if (start == undefined || end == undefined) {
@@ -373,7 +373,15 @@ export function generateVisitor(parser: Parser): ICstVisitor<CstVisitorParameter
                     }
                 }
             }
-            return baseExpression;
+            if (ctx.FaultTolerantToken) {
+                return new FieldAccessExpression(
+                    "",
+                    baseExpression,
+                    generateMetadata(startPos, ctx.FaultTolerantToken[0], params)
+                );
+            } else {
+                return baseExpression;
+            }
         }
 
         /**
@@ -403,7 +411,15 @@ export function generateVisitor(parser: Parser): ICstVisitor<CstVisitorParameter
                     );
                 }
             }
-            return expression!;
+            if (ctx.FaultTolerantToken) {
+                return new FieldAccessExpression(
+                    "",
+                    expression!,
+                    generateMetadata(expression!.position!, ctx.FaultTolerantToken[0], params)
+                );
+            } else {
+                return expression!;
+            }
         }
 
         /**
@@ -421,11 +437,12 @@ export function generateVisitor(parser: Parser): ICstVisitor<CstVisitorParameter
                 this.visit(operator, params)
             );
             for (let i = 0; i < operators.length; i++) {
+                const operator = operators[i];
                 const rightHandSide = expressions[i + 1];
                 expression = new InvocationExpression(
-                    operators[i],
-                    [{ value: expression }, { value: rightHandSide }],
-                    generateMetadata(startPos, rightHandSide.position, params)
+                    operator,
+                    [{ value: expression }, { value: rightHandSide }].filter((arg) => arg.value != undefined),
+                    generateMetadata(startPos, rightHandSide?.position ?? operator.position, params)
                 );
             }
             return expression;
@@ -536,13 +553,32 @@ function parseNumber(value: string): number {
  * @param end the end position
  * @returns the combined start and end position
  */
-function generatePosition(start: ASTExpressionPosition, end: ASTExpressionPosition): ASTExpressionPosition {
+function generatePosition(
+    start: ASTExpressionPosition | IToken,
+    end: ASTExpressionPosition | IToken
+): ASTExpressionPosition {
+    let startPos: Pick<ASTExpressionPosition, "startOffset" | "startLine" | "startColumn">;
+    if ("image" in start) {
+        startPos = {
+            startOffset: start.startOffset,
+            startLine: start.startLine! - 1,
+            startColumn: start.startColumn! - 1
+        };
+    } else {
+        startPos = start;
+    }
+    let endPos: Pick<ASTExpressionPosition, "endOffset" | "endLine" | "endColumn">;
+    if ("image" in end) {
+        endPos = {
+            endOffset: end.endOffset! + 1,
+            endLine: end.endLine! - 1,
+            endColumn: end.endColumn!
+        };
+    } else {
+        endPos = end;
+    }
     return {
-        startOffset: start.startOffset,
-        startLine: start.startLine,
-        startColumn: start.startColumn,
-        endOffset: end.endOffset,
-        endLine: end.endLine,
-        endColumn: end.endColumn
+        ...startPos,
+        ...endPos
     };
 }

@@ -4,7 +4,7 @@ export * from "./ast/astVisitor";
 export * from "./ast/expressionMetadata";
 export * from "./ast/invocationArgument";
 export * from "./parser/astHelper";
-export * from "./parser/cstVsitor";
+export * from "./parser/cstToAstTransformer";
 export * from "./parser/lexer";
 export * from "./parser/parser";
 export * from "./runtime/ast/executableAbstractFunctionExpression";

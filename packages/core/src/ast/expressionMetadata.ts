@@ -31,3 +31,14 @@ export namespace ExpressionMetadata {
         return metadata?.isEditable === true && metadata?.position != undefined;
     }
 }
+
+/**
+ * Metadata for Expressions with additional data for autocomplete
+ */
+export interface AutocompletionExpressionMetadata extends ExpressionMetadata {
+    /**
+     * The position of the part of the expression which is affected by autocomplete.
+     * E.g. for an FieldAccessExpression, this would be the position of the dot and the field name
+     */
+    autocompletionPosition?: ASTExpressionPosition;
+}

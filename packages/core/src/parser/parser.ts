@@ -1,6 +1,7 @@
 import { CstNode, CstParser, ICstVisitor, ILexingError, IRecognitionException, Lexer } from "chevrotain";
 import { Expression } from "../ast/ast";
-import { CstVisitorParameters, generateVisitor } from "./cstVsitor";
+import { ASTExpressionPosition } from "../ast/astExpressionPosition";
+import { CstVisitorParameters, generateCstToAstTransfromer } from "./cstToAstTransformer";
 import {
     CloseCurlyBracket,
     CloseRoundBracket,
@@ -51,7 +52,7 @@ export interface CstResult {
     /**
      * Errors during parsing
      */
-    parserErrors: IRecognitionException[];
+    parserErrors: (IRecognitionException & { position: ASTExpressionPosition })[];
     /**
      * Resulting CST
      */
@@ -61,6 +62,11 @@ export interface CstResult {
      */
     ast?: Expression[];
 }
+
+/**
+ * Label associated with a token that is only accepted in fault tolerant mode
+ */
+const faultTolerantToken = "FaultTolerantToken";
 
 /**
  * Parser used to generate a CST or AST
@@ -87,7 +93,7 @@ export class Parser extends CstParser {
             nodeLocationTracking: "full"
         });
         this.performSelfAnalysis();
-        this.visitor = generateVisitor(this);
+        this.visitor = generateCstToAstTransfromer(this);
     }
 
     /**
@@ -251,7 +257,7 @@ export class Parser extends CstParser {
             }
         });
         if (this.faultTolerant) {
-            this.OPTION(() => this.CONSUME1(Dot));
+            this.OPTION(() => this.CONSUME1(Dot, { LABEL: faultTolerantToken }));
         }
     });
 
@@ -264,7 +270,7 @@ export class Parser extends CstParser {
             DEF: () => this.OR([{ ALT: () => this.CONSUME(Identifier) }, { ALT: () => this.CONSUME(SignMinus) }])
         });
         if (this.faultTolerant) {
-            this.OPTION(() => this.CONSUME2(Dot));
+            this.OPTION(() => this.CONSUME2(Dot, { LABEL: faultTolerantToken }));
         }
     });
 
@@ -343,12 +349,26 @@ export class Parser extends CstParser {
         this.input = lexerResult.tokens;
         const result = this.expressions();
         let ast = undefined;
-        if (result && lexerResult.errors.length == 0 && this.errors.length == 0) {
+        if (result != undefined) {
             ast = this.generateAST(result);
+        }
+        for (const error of lexerResult.errors) {
+            error.line! -= 1;
+            error.column! -= 1;
         }
         return {
             lexingErrors: lexerResult.errors,
-            parserErrors: this.errors,
+            parserErrors: this.errors.map((error) => ({
+                ...error,
+                position: {
+                    startOffset: error.token.startOffset,
+                    endOffset: error.token.endOffset! + 1,
+                    startLine: error.token.startLine! - 1,
+                    endLine: error.token.endLine! - 1,
+                    startColumn: error.token.startColumn! - 1,
+                    endColumn: error.token.endColumn!
+                }
+            })),
             cst: result,
             ast: ast
         };
