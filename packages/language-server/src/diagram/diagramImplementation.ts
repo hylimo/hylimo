@@ -1,4 +1,4 @@
-import { BaseDiagramLayoutResult } from "@hylimo/diagram";
+import { BaseLayoutedDiagram } from "@hylimo/diagram";
 import { TransactionalAction } from "@hylimo/diagram-protocol";
 import { CompletionItem, Diagnostic, Position } from "vscode-languageserver";
 import { TransactionalEdit } from "../edit/edits/transactionalEdit";
@@ -14,7 +14,7 @@ export interface DiagramUpdateResult {
     /**
      * The layouted diagram
      */
-    diagram?: BaseDiagramLayoutResult;
+    diagram?: BaseLayoutedDiagram;
 }
 
 /**

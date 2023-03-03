@@ -1,4 +1,4 @@
-import { BaseDiagramLayoutResult, DiagramLayoutResult } from "@hylimo/diagram";
+import { BaseLayoutedDiagram, LayoutedDiagram } from "@hylimo/diagram";
 import { CanvasAxisAlignedSegment } from "@hylimo/diagram-common";
 import { AxisAlignedSegmentEditAction, IncrementalUpdate } from "@hylimo/diagram-protocol";
 import { EditGenerator } from "../generators/editGenerator";
@@ -23,7 +23,7 @@ export namespace AxisAlignedSegmentEdit {
      * @param diagram the diagram the action was applied to
      * @returns the created AxisAlignedSegmentEdit
      */
-    export function create(action: AxisAlignedSegmentEditAction, diagram: DiagramLayoutResult): AxisAlignedSegmentEdit {
+    export function create(action: AxisAlignedSegmentEditAction, diagram: LayoutedDiagram): AxisAlignedSegmentEdit {
         const canvasElement = diagram.layoutElementLookup.get(action.element);
         if (canvasElement?.layoutConfig.type !== CanvasAxisAlignedSegment.TYPE) {
             throw new Error("Only CanvasElements are supported");
@@ -67,7 +67,7 @@ export class AxisAlignedSegmentEditEngine extends TransactionalEditEngine<
 
     override predictActionDiff(
         edit: AxisAlignedSegmentEdit,
-        layoutedDiagram: BaseDiagramLayoutResult,
+        layoutedDiagram: BaseLayoutedDiagram,
         lastApplied: AxisAlignedSegmentEditAction | undefined,
         newest: AxisAlignedSegmentEditAction
     ): IncrementalUpdate[] {

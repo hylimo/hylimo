@@ -1,4 +1,4 @@
-import { BaseDiagramLayoutResult, DiagramLayoutResult, LayoutElement } from "@hylimo/diagram";
+import { BaseLayoutedDiagram, LayoutedDiagram, LayoutElement } from "@hylimo/diagram";
 import { CanvasElement } from "@hylimo/diagram-common";
 import { ResizeAction, IncrementalUpdate } from "@hylimo/diagram-protocol";
 import { TextDocument } from "vscode-languageserver-textdocument";
@@ -87,7 +87,7 @@ export namespace ResizeEdit {
      * @param document the document the diagram was created from
      * @returns the created ResizeEdit
      */
-    export function create(action: ResizeAction, diagram: DiagramLayoutResult, document: TextDocument): ResizeEdit {
+    export function create(action: ResizeAction, diagram: LayoutedDiagram, document: TextDocument): ResizeEdit {
         const generatorEntries = action.elements.flatMap((elementId) => {
             const element = diagram.layoutElementLookup.get(elementId);
             if (element == undefined) {
@@ -140,7 +140,7 @@ export class ResizeEditEngine extends TransactionalEditEngine<ResizeAction, Resi
 
     override predictActionDiff(
         edit: ResizeEdit,
-        layoutedDiagram: BaseDiagramLayoutResult,
+        layoutedDiagram: BaseLayoutedDiagram,
         lastApplied: ResizeAction | undefined,
         newest: ResizeAction
     ): IncrementalUpdate[] {

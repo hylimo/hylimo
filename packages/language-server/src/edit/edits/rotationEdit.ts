@@ -1,4 +1,4 @@
-import { DiagramLayoutResult } from "@hylimo/diagram";
+import { LayoutedDiagram } from "@hylimo/diagram";
 import { CanvasElement } from "@hylimo/diagram-common";
 import { EditGeneratorEntry } from "./editGeneratorEntry";
 import { EditGenerator } from "../generators/editGenerator";
@@ -27,7 +27,7 @@ export namespace RotationEdit {
      * @param document the document the diagram was created from
      * @returns the created RotationEdit
      */
-    export function create(action: RotationAction, diagram: DiagramLayoutResult, document: TextDocument): RotationEdit {
+    export function create(action: RotationAction, diagram: LayoutedDiagram, document: TextDocument): RotationEdit {
         const canvasElement = diagram.layoutElementLookup.get(action.element);
         if (canvasElement?.layoutConfig.type !== CanvasElement.TYPE) {
             throw new Error("Only CanvasElements are supported");
@@ -81,7 +81,7 @@ export class RotationEditEngine extends TransactionalEditEngine<RotationAction, 
 
     override predictActionDiff(
         edit: RotationEdit,
-        layoutedDiagram: DiagramLayoutResult,
+        layoutedDiagram: LayoutedDiagram,
         lastApplied: RotationAction | undefined,
         newest: RotationAction
     ): IncrementalUpdate[] {

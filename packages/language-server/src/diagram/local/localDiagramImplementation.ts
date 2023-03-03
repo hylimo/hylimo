@@ -1,5 +1,5 @@
-import { Expression, InterpretationResult, CstResult, toExecutable, AutocompletionItemKind } from "@hylimo/core";
-import { DiagramLayoutResult } from "@hylimo/diagram";
+import { AutocompletionItemKind } from "@hylimo/core";
+import { LayoutedDiagram, RenderErrors } from "@hylimo/diagram";
 import {
     TransactionalAction,
     TranslationMoveAction,
@@ -36,7 +36,7 @@ export class LocalDiagramImplementation extends DiagramImplementation {
     /**
      * Result of the last call to updateDiagram
      */
-    private layoutResult?: DiagramLayoutResult;
+    private layoutResult?: LayoutedDiagram;
     /**
      * Parsed version of the source provided to updateDiagram
      */
@@ -53,29 +53,90 @@ export class LocalDiagramImplementation extends DiagramImplementation {
 
     override async updateDiagram(source: string): Promise<DiagramUpdateResult> {
         this.document = TextDocument.create("", "sys", 0, source);
-        const parserResult = this.utils.parser.parse(source);
+        const renderResult = await this.utils.diagramEngine.render(source, { theme: "dark" }); // TODO
         const diagnostics: Diagnostic[] = [];
-        diagnostics.push(...this.getParserResultDiagnostics(parserResult));
-        if (parserResult.ast) {
-            const interpretationResult = this.runInterpreterAndConvertErrors(parserResult.ast, diagnostics);
-            if (interpretationResult.result) {
-                try {
-                    this.layoutResult = await this.utils.layoutEngine.layout(interpretationResult.result);
-                    return {
-                        diagnostics,
-                        diagram: this.layoutResult
-                    };
-                } catch (error: any) {
-                    diagnostics.push({
-                        severity: DiagnosticSeverity.Error,
-                        range: Range.create(0, 0, uinteger.MAX_VALUE, uinteger.MAX_VALUE),
-                        message: `Error during layouting: ${error.message}`
-                    });
-                }
-            }
-        }
+        const errors = renderResult.errors;
+        diagnostics.push(...errors.lexingErrors.map(this.convertLexerError.bind(this)));
+        diagnostics.push(...errors.parserErrors.map(this.convertParserError.bind(this)));
+        diagnostics.push(...errors.interpreterErrors.map(this.convertInterpretationError.bind(this)));
+        diagnostics.push(...errors.layoutErrors.map(this.convertLayoutError.bind(this)));
         return {
-            diagnostics
+            diagnostics,
+            diagram: renderResult.layoutedDiagram
+        };
+    }
+
+    /**
+     * Converts a lexer error to a diagnostic item
+     *
+     * @param error the lexer error to convert
+     * @returns the created diagnostic item
+     */
+    private convertLexerError(error: RenderErrors["lexingErrors"][0]): Diagnostic {
+        return Diagnostic.create(
+            Range.create(error.line!, error.column!, error.line!, error.column! + error.length),
+            error.message || "unknown lexical error",
+            DiagnosticSeverity.Error
+        );
+    }
+
+    /**
+     * Converts a parser error to a diagnostic item
+     *
+     * @param error the parser error to convert
+     * @returns the created diagnostic item
+     */
+    private convertParserError(error: RenderErrors["parserErrors"][0]) {
+        const pos = error.position;
+        let location: Range;
+        if (!Number.isNaN(error.token.startLine)) {
+            location = Range.create(pos.startLine!, pos.startColumn!, pos.endLine!, pos.endColumn!);
+        } else {
+            location = Range.create(0, 0, uinteger.MAX_VALUE, uinteger.MAX_VALUE);
+        }
+        return Diagnostic.create(location, error.message || "unknown syntax error", DiagnosticSeverity.Error);
+    }
+
+    /**
+     * Converts an interpretation error to a diagnostic item
+     *
+     * @param error the interpretation error to convert
+     * @returns the created diagnostic item
+     */
+    private convertInterpretationError(error: RenderErrors["interpreterErrors"][0]): Diagnostic {
+        /* eslint-disable no-console */
+        console.error(error);
+        console.error(error.interpretationStack);
+        /* eslint-enable no-console */
+        //TODO do sth else with error
+        const pos = error.findFirstPosition();
+        const message = error.message || "[no message provided]";
+        if (pos != undefined) {
+            return Diagnostic.create(
+                Range.create(pos.startLine, pos.startColumn, pos.endLine, pos.endColumn),
+                message,
+                DiagnosticSeverity.Error
+            );
+        } else {
+            return Diagnostic.create(
+                Range.create(0, 0, uinteger.MAX_VALUE, uinteger.MAX_VALUE),
+                message,
+                DiagnosticSeverity.Error
+            );
+        }
+    }
+
+    /**
+     * Converts a layout error to a diagnostic item
+     *
+     * @param error the layout error to convert
+     * @returns the created diagnostic item
+     */
+    private convertLayoutError(error: RenderErrors["layoutErrors"][0]): Diagnostic {
+        return {
+            severity: DiagnosticSeverity.Error,
+            range: Range.create(0, 0, uinteger.MAX_VALUE, uinteger.MAX_VALUE),
+            message: `Error during layouting: ${error.message}`
         };
     }
 
@@ -181,67 +242,5 @@ export class LocalDiagramImplementation extends DiagramImplementation {
             default:
                 return CompletionItemKind.Text;
         }
-    }
-
-    /**
-     * Runs the interpreter on the parserResult
-     *
-     * @param expressions the expressions to execute
-     * @param diagnostics the diagnostics array where to push a potential error
-     * @returns the result of the interpreter run
-     */
-    private runInterpreterAndConvertErrors(expressions: Expression[], diagnostics: Diagnostic[]): InterpretationResult {
-        const interpretationResult = this.utils.interpreter.run(toExecutable(expressions));
-        const error = interpretationResult.error;
-        if (error) {
-            const pos = error.findFirstPosition();
-            if (pos) {
-                diagnostics.push(
-                    Diagnostic.create(
-                        Range.create(pos.startLine, pos.startColumn, pos.endLine, pos.endColumn),
-                        error.message || "[no message provided]",
-                        DiagnosticSeverity.Error
-                    )
-                );
-            }
-            /* eslint-disable no-console */
-            console.error(error);
-            console.error(error.interpretationStack);
-            /* eslint-enable no-console */
-            //TODO do sth else with error
-        }
-        return interpretationResult;
-    }
-
-    /**
-     * Creates diagnostics from lexical and parsing errors
-     *
-     * @param parserResult the parsing result
-     * @returns the found diagnostics
-     */
-    private getParserResultDiagnostics(parserResult: CstResult): Diagnostic[] {
-        const diagnostics: Diagnostic[] = [];
-        parserResult.lexingErrors.forEach((error) => {
-            diagnostics.push(
-                Diagnostic.create(
-                    Range.create(error.line!, error.column!, error.line!, error.column! + error.length),
-                    error.message || "unknown lexical error",
-                    DiagnosticSeverity.Error
-                )
-            );
-        });
-        parserResult.parserErrors.forEach((error) => {
-            const pos = error.position;
-            let location: Range;
-            if (!Number.isNaN(error.token.startLine)) {
-                location = Range.create(pos.startLine!, pos.startColumn!, pos.endLine!, pos.endColumn!);
-            } else {
-                location = Range.create(0, 0, uinteger.MAX_VALUE, uinteger.MAX_VALUE);
-            }
-            diagnostics.push(
-                Diagnostic.create(location, error.message || "unknown syntax error", DiagnosticSeverity.Error)
-            );
-        });
-        return diagnostics;
     }
 }

@@ -4,7 +4,7 @@ import { CompletionItem, Diagnostic, Position, TextDocumentEdit } from "vscode-l
 import { TransactionManager } from "../edit/transactionManager";
 import { TransactionalAction } from "@hylimo/diagram-protocol";
 import { DiagramImplementation } from "./diagramImplementation";
-import { BaseDiagramLayoutResult } from "@hylimo/diagram";
+import { BaseLayoutedDiagram } from "@hylimo/diagram";
 import { defaultEditRegistry } from "../edit/edits/transactionalEditRegistry";
 import { DiagramImplementationManager } from "./diagramImplementationManager";
 import { TransactionalEdit } from "../edit/edits/transactionalEdit";
@@ -16,7 +16,7 @@ export class Diagram {
     /**
      * The current diagram
      */
-    currentDiagram?: BaseDiagramLayoutResult;
+    currentDiagram?: BaseLayoutedDiagram;
     /**
      * Handles TransactionActions
      */

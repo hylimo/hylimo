@@ -1,4 +1,4 @@
-import { DiagramLayoutResult } from "@hylimo/diagram";
+import { LayoutedDiagram } from "@hylimo/diagram";
 import { LinePoint } from "@hylimo/diagram-common";
 import { LineMoveAction, IncrementalUpdate } from "@hylimo/diagram-protocol";
 import { EditGenerator } from "../generators/editGenerator";
@@ -23,7 +23,7 @@ export namespace LineMoveEdit {
      * @param diagram the diagram the action was applied to
      * @returns the created LineMoveEdit
      */
-    export function create(action: LineMoveAction, diagram: DiagramLayoutResult): LineMoveEdit {
+    export function create(action: LineMoveAction, diagram: LayoutedDiagram): LineMoveEdit {
         const point = diagram.layoutElementLookup.get(action.point);
         if (point?.layoutConfig.type !== LinePoint.TYPE) {
             throw new Error("Only LinePoints are supported");
@@ -73,7 +73,7 @@ export class LineMoveEditEngine extends TransactionalEditEngine<LineMoveAction, 
 
     override predictActionDiff(
         edit: LineMoveEdit,
-        layoutedDiagram: DiagramLayoutResult,
+        layoutedDiagram: LayoutedDiagram,
         lastApplied: LineMoveAction | undefined,
         newest: LineMoveAction
     ): IncrementalUpdate[] {

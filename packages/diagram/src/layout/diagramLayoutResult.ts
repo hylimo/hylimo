@@ -1,7 +1,7 @@
 import { Element, Root } from "@hylimo/diagram-common";
 import { LayoutElement } from "./layoutElement";
 
-export interface BaseDiagramLayoutResult {
+export interface BaseLayoutedDiagram {
     /**
      * The root element of the diagram
      */
@@ -14,8 +14,8 @@ export interface BaseDiagramLayoutResult {
     elementLookup: Record<string, Element>;
 }
 
-export namespace BaseDiagramLayoutResult {
-    export function fromRoot(root: Root): BaseDiagramLayoutResult {
+export namespace BaseLayoutedDiagram {
+    export function fromRoot(root: Root): BaseLayoutedDiagram {
         const elementLookup: Record<string, Element> = {};
         const stack: Element[] = [root];
         while (stack.length > 0) {
@@ -33,7 +33,7 @@ export namespace BaseDiagramLayoutResult {
 /**
  * Defines a rendered diagram with tracing information
  */
-export interface DiagramLayoutResult extends BaseDiagramLayoutResult {
+export interface LayoutedDiagram extends BaseLayoutedDiagram {
     /**
      * Lookup of id to the LayoutElement containing required tracing information
      */

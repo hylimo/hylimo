@@ -1,4 +1,3 @@
-import { BaseDiagramLayoutResult } from "@hylimo/diagram";
 import { IncrementalUpdate } from "@hylimo/diagram-protocol";
 import { Action } from "sprotty-protocol";
 import {
@@ -11,6 +10,7 @@ import { TextDocument, TextEdit } from "vscode-languageserver-textdocument";
 import { EditGenerator } from "../generators/editGenerator";
 import { GeneratorRegistry } from "../generators/generatorRegistry";
 import { EditGeneratorEntry } from "./editGeneratorEntry";
+import { BaseLayoutedDiagram } from "@hylimo/diagram";
 
 /**
  * Handles transaction al edits to a TextDocument
@@ -103,7 +103,7 @@ export abstract class TransactionalEditEngine<A extends Action, T extends Transa
      */
     abstract predictActionDiff(
         edit: T,
-        layoutedDiagram: BaseDiagramLayoutResult,
+        layoutedDiagram: BaseLayoutedDiagram,
         lastApplied: A | undefined,
         newest: A
     ): IncrementalUpdate[];

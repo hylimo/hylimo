@@ -1,4 +1,4 @@
-import { DiagramLayoutResult, LayoutElement } from "@hylimo/diagram";
+import { LayoutedDiagram, LayoutElement } from "@hylimo/diagram";
 import { AbsolutePoint, CanvasElement, RelativePoint } from "@hylimo/diagram-common";
 import { TextDocument } from "vscode-languageserver-textdocument";
 import { EditGeneratorEntry } from "./editGeneratorEntry";
@@ -59,7 +59,7 @@ export namespace TranslationMoveEdit {
      */
     export function create(
         action: TranslationMoveAction,
-        diagram: DiagramLayoutResult,
+        diagram: LayoutedDiagram,
         document: TextDocument
     ): TranslationMoveEdit {
         let hasNewPoint = false;
@@ -116,7 +116,7 @@ export class TranslationMoveEditEngine extends TransactionalEditEngine<Translati
 
     override predictActionDiff(
         edit: TranslationMoveEdit,
-        layoutedDiagram: DiagramLayoutResult,
+        layoutedDiagram: LayoutedDiagram,
         lastApplied: TranslationMoveAction | undefined,
         newest: TranslationMoveAction
     ): IncrementalUpdate[] {

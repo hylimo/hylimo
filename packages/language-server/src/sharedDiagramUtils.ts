@@ -1,5 +1,5 @@
 import { AutocompletionEngine, Interpreter, Parser } from "@hylimo/core";
-import { LayoutEngine } from "@hylimo/diagram";
+import { DiagramEngine } from "@hylimo/diagram";
 import { Connection } from "vscode-languageserver";
 import { DiagramServerManager } from "./diagramServerManager";
 
@@ -20,9 +20,9 @@ export interface SharedDiagramUtils {
      */
     readonly parser: Parser;
     /**
-     * Layout engine to layout diagrams
+     * The engine to render diagrams from source
      */
-    readonly layoutEngine: LayoutEngine;
+    readonly diagramEngine: DiagramEngine;
     /**
      * Manages diagram servers
      */

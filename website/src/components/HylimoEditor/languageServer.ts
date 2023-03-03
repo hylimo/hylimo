@@ -8,7 +8,6 @@ const messageWriter = new BrowserMessageWriter(self);
 const connection = createConnection(messageReader, messageWriter);
 
 const languageServer = new LanguageServer({
-    id: 0,
     connection,
     additionalInterpreterModules: [classDiagramModule],
     maxExecutionSteps: 1000000

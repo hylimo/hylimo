@@ -1,3 +1,4 @@
+export * from "./lsp/config";
 export * from "./lsp/diagramNotificationTypes";
 export * from "./lsp/remoteMessages";
 export * from "./transaction/axisAlignedSegmentEditAction";
