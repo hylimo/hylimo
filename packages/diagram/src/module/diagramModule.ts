@@ -5,6 +5,7 @@ import {
     DefaultModuleNames,
     Expression,
     fun,
+    functionType,
     id,
     InterpreterModule,
     InvocationArgument,
@@ -28,7 +29,7 @@ import { layouts } from "../layout/layouts";
 /**
  * Type for unset, default style values
  */
-const styleValueType = namedType(objectType(new Map([["_type", literal("styleValue")]])), "unset | default");
+const styleValueType = namedType(objectType(new Map([["_type", or(literal("unset"), literal("var"))]])), "unset | var");
 
 /**
  * Gets a list of all known style attributes
@@ -172,6 +173,7 @@ export const diagramModule = InterpreterModule.create(
                                     selectorType = type,
                                     selectorValue = value,
                                     styles = list(),
+                                    variables = object(),
                                     ${allStyleAttributes.map((attr) => `${attr.name} = null`).join(",")}
                                 )
                                 args.self.styles.add(selector)
@@ -192,6 +194,55 @@ export const diagramModule = InterpreterModule.create(
                         }
                     )
                 ),
+                assign(
+                    "vars",
+                    fun(
+                        `
+                            (callback) = args
+                            res = object()
+                            callback.callWithScope(res)
+                            args.self.any {
+                                variables = this.variables
+                                res.forEach {
+                                    (value, key) = args
+                                    variables.set(key, value)
+                                }
+                            }
+                            null
+                        `,
+                        {
+                            docs: `
+                                Invokes the callback provided as first parameter, extracts all variables set in the callback
+                                and sets all of them as variable values in a any selector.
+                                Params:
+                                    - 0: the callback to invoke
+                                    - "self": the styles object
+                                Returns:
+                                    null
+                            `
+                        },
+                        [[0, functionType]]
+                    )
+                ),
+                assign(
+                    "var",
+                    fun(
+                        `
+                            (name) = args
+                            object(name = name, _type = "var")
+                        `,
+                        {
+                            docs: `
+                                Creates a variable reference which can be used everywhere a style value is expected.
+                                Params:
+                                    - 0: the name of the variable
+                                Returns:
+                                    The created variable reference
+                            `
+                        },
+                        [[0, stringType]]
+                    )
+                ),
                 fun(
                     `
                         (callback) = args
@@ -202,8 +253,9 @@ export const diagramModule = InterpreterModule.create(
                         res.any = { 
                             anySelector("", it, self = args.self)
                         }
-                        res.unset = object(_type = "styleValue")
-                        res.default = default
+                        res.unset = object(_type = "unset")
+                        res.vars = vars
+                        res.var = var
                         callback.callWithScope(res)
                         res
                     `,

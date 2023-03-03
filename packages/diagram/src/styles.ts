@@ -1,4 +1,4 @@
-import { BaseObject, FullObject, objectToList } from "@hylimo/core";
+import { FullObject, objectToList } from "@hylimo/core";
 import { assertString } from "@hylimo/core";
 
 /**
@@ -55,10 +55,6 @@ export interface StyleList {
      * The actual list of styles
      */
     styles: Style[];
-    /**
-     * Value representing the unset option
-     */
-    unset: BaseObject;
 }
 
 /**
@@ -70,8 +66,7 @@ export interface StyleList {
 export function generateStyles(styles: FullObject): StyleList {
     const elements = generateStylesForStyles([], styles.getLocalFieldOrUndefined("styles")?.value as FullObject);
     return {
-        styles: elements,
-        unset: styles.getLocalFieldOrUndefined("unset")!.value
+        styles: elements
     };
 }
 

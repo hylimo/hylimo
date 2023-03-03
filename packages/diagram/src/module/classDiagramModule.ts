@@ -218,15 +218,21 @@ const scopeExpressions: Expression[] = [
     ),
     fun(
         `
-            primary = "white"
-            lineWidth = 2
             scope.styles {
+                vars {
+                    primary = if((config ?? object()).theme == "dark") {
+                        "#ffffff"
+                    } {
+                        "#000000"
+                    }
+                    strokeWidth = 2
+                }
                 type("span") {
-                    fill = primary
+                    fill = var("primary")
                 }
                 class("class") {
-                    stroke = primary
-                    strokeWidth = lineWidth
+                    stroke = var("primary")
+                    strokeWidth = var("strokeWidth")
                     type("vbox") {
                         margin = 5
                     }
@@ -245,12 +251,12 @@ const scopeExpressions: Expression[] = [
                     marginBottom = 5
                     marginLeft = -5
                     marginRight = -5
-                    strokeWidth = lineWidth
-                    stroke = primary
+                    strokeWidth = var("strokeWidth")
+                    stroke = var("primary")
                 }
                 type("canvasConnection") {
-                    stroke = primary
-                    strokeWidth = lineWidth
+                    stroke = var("primary")
+                    strokeWidth = var("strokeWidth")
                 }
                 class("class-element") {
                     vAlign = "center"
@@ -261,11 +267,11 @@ const scopeExpressions: Expression[] = [
                     height = 25
                 }
                 class("marker-path") {
-                    strokeWidth = lineWidth
-                    stroke = primary
+                    strokeWidth = var("strokeWidth")
+                    stroke = var("primary")
                 }
                 class("filled-marker-path") {
-                    fill = primary
+                    fill = var("primary")
                 }
                 class("dashed-connection") {
                     strokeDash = 10

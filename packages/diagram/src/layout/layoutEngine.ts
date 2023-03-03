@@ -1,4 +1,4 @@
-import { BaseObject, FullObject, nativeToList } from "@hylimo/core";
+import { BaseObject, FieldEntry, FullObject, nativeToList } from "@hylimo/core";
 import { assertString } from "@hylimo/core";
 import { FontFamily } from "../../../diagram-common/src/font/font";
 import { FontFamilyConfig, Element, Size, Point } from "@hylimo/diagram-common";
@@ -191,7 +191,7 @@ export class Layout {
      */
     private applyStyles(layoutElement: LayoutElement): void {
         const styleAttributes = layoutElement.layoutConfig.styleAttributes;
-        const matchingStyles = [];
+        const matchingStyles: FullObject[] = [];
         for (const style of this.styles.styles) {
             if (this.matchesStyle(layoutElement, style)) {
                 matchingStyles.push(style.fields);
@@ -204,16 +204,60 @@ export class Layout {
             for (const style of matchingStyles) {
                 const entry = style.getLocalFieldOrUndefined(attribute);
                 if (entry != undefined) {
-                    if (entry.value != this.styles.unset) {
-                        layoutElement.styles[attribute] = entry.value.toNative();
+                    const value = entry.value.toNative();
+                    if (typeof value === "object" && typeof value._type === "string") {
+                        if (value._type === "unset") {
+                            layoutElement.styles[attribute] = undefined;
+                            layoutElement.styleSources.set(attribute, entry);
+                        } else if (value._type === "var") {
+                            const [variableValue, variableSource] = this.extractVariableValue(
+                                matchingStyles,
+                                value.name
+                            );
+                            layoutElement.styles[attribute] = variableValue;
+                            layoutElement.styleSources.set(attribute, variableSource ?? entry);
+                        } else {
+                            throw new Error(`Unknown style value: ${value}`);
+                        }
                     } else {
-                        layoutElement.styles[attribute] = undefined;
+                        layoutElement.styles[attribute] = value;
+                        layoutElement.styleSources.set(attribute, entry);
                     }
-                    layoutElement.styleSources.set(attribute, entry);
                     break;
                 }
             }
         }
+    }
+
+    /**
+     * Extracts a variable value from all matching styles
+     *
+     * @param matchingStyles the matching styles
+     * @param name the name of the variable
+     * @returns the value and source of the variable. if not found, undefined is returned for both
+     */
+    private extractVariableValue(matchingStyles: FullObject[], name: string): [any, FieldEntry | undefined] {
+        for (const style of matchingStyles) {
+            const variables = style.getLocalFieldOrUndefined("variables")?.value;
+            if (variables instanceof FullObject) {
+                const entry = variables.getLocalFieldOrUndefined(name);
+                if (entry != undefined) {
+                    const value = entry.value.toNative();
+                    if (typeof value === "object" && typeof value._type === "string") {
+                        if (value._type === "unset") {
+                            return [undefined, entry];
+                        } else if (value._type === "var") {
+                            throw new Error("Variables cannot be set to other variables");
+                        } else {
+                            throw new Error(`Unknown style value: ${value}`);
+                        }
+                    } else {
+                        return [value, entry];
+                    }
+                }
+            }
+        }
+        return [undefined, undefined];
     }
 
     /**

@@ -116,7 +116,8 @@ const scopeExpressions: Expression[] = [
                             this.class = class
                             this.type = type
                             this.unset = unset
-                            this.default = default
+                            this.var = var
+                            this.vars = vars
                             second.callWithScope(this)
                         }
                     }
