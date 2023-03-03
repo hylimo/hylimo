@@ -13,6 +13,7 @@
     "dependencies": {
         "@hylimo/core": "^0.0.1",
         "@hylimo/diagram": "^0.0.1",
+        "@hylimo/diagram-protocol": "^0.0.1",
         "prettier": "^2.7.2",
         "sprotty-protocol": "^0.13.0",
         "vscode-languageserver": "^8.0.2",

@@ -2,7 +2,7 @@ import { TextDocument, TextDocumentContentChangeEvent } from "vscode-languageser
 import { SharedDiagramUtils } from "../sharedDiagramUtils";
 import { CompletionItem, Diagnostic, Position, TextDocumentEdit } from "vscode-languageserver";
 import { TransactionManager } from "../edit/transactionManager";
-import { TransactionalAction } from "@hylimo/diagram-common";
+import { TransactionalAction } from "@hylimo/diagram-protocol";
 import { DiagramImplementation } from "./diagramImplementation";
 import { BaseDiagramLayoutResult } from "@hylimo/diagram";
 import { defaultEditRegistry } from "../edit/edits/transactionalEditRegistry";

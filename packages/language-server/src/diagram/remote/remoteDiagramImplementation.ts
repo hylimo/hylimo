@@ -1,4 +1,4 @@
-import { TransactionalAction } from "@hylimo/diagram-common";
+import { TransactionalAction } from "@hylimo/diagram-protocol";
 import { CompletionItem, Position } from "vscode-languageserver";
 import { TransactionalEdit } from "../../edit/edits/transactionalEdit";
 import { DiagramImplementation, DiagramUpdateResult } from "../diagramImplementation";

@@ -1,5 +1,5 @@
 import { BaseDiagramLayoutResult } from "@hylimo/diagram";
-import { IncrementalUpdate } from "@hylimo/diagram-common";
+import { IncrementalUpdate } from "@hylimo/diagram-protocol";
 import { Action } from "sprotty-protocol";
 import {
     Range,

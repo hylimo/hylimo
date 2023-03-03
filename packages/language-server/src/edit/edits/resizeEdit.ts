@@ -1,5 +1,6 @@
 import { BaseDiagramLayoutResult, DiagramLayoutResult, LayoutElement } from "@hylimo/diagram";
-import { CanvasElement, IncrementalUpdate, ResizeAction } from "@hylimo/diagram-common";
+import { CanvasElement } from "@hylimo/diagram-common";
+import { ResizeAction, IncrementalUpdate } from "@hylimo/diagram-protocol";
 import { TextDocument } from "vscode-languageserver-textdocument";
 import { EditGenerator } from "../generators/editGenerator";
 import { GeneratorRegistry } from "../generators/generatorRegistry";

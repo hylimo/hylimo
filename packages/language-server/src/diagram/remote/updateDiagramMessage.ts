@@ -1,6 +1,6 @@
 import { DiagramUpdateResult } from "../diagramImplementation";
 import { RemoteDiagramMessage } from "./remoteDiagramMessage";
-import { RemoteMessagePayload } from "./remoteMessages";
+import { RemoteMessagePayload } from "../../../../diagram-protocol/src/lsp/remoteMessages";
 
 /**
  * Message to request an update of a diagram

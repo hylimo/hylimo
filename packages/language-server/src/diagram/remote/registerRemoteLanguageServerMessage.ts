@@ -1,4 +1,4 @@
-import { RemoteMessagePayload } from "./remoteMessages";
+import { RemoteMessagePayload } from "../../../../diagram-protocol/src/lsp/remoteMessages";
 
 /**
  * Message to register a remote language server.

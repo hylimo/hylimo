@@ -1,5 +1,5 @@
 import { BaseDiagramLayoutResult } from "@hylimo/diagram";
-import { TransactionalAction } from "@hylimo/diagram-common";
+import { TransactionalAction } from "@hylimo/diagram-protocol";
 import { CompletionItem, Diagnostic, Position } from "vscode-languageserver";
 import { TransactionalEdit } from "../edit/edits/transactionalEdit";
 

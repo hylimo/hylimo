@@ -1,4 +1,5 @@
-import { LineEngine, LineMoveAction, Point, TransformedLine } from "@hylimo/diagram-common";
+import { LineEngine, Point, TransformedLine } from "@hylimo/diagram-common";
+import { LineMoveAction } from "@hylimo/diagram-protocol";
 import { MoveHandler } from "./moveHandler";
 
 /**

@@ -10,6 +10,9 @@
         },
         {
             "path": "../diagram"
+        },
+        {
+            "path": "../diagram-protocol"
         }
     ],
     "include": ["src/**/*.ts"],

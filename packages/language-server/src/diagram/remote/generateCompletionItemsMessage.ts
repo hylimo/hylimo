@@ -1,6 +1,6 @@
 import { CompletionItem, Position } from "vscode-languageserver";
 import { RemoteDiagramMessage } from "./remoteDiagramMessage";
-import { RemoteMessagePayload } from "./remoteMessages";
+import { RemoteMessagePayload } from "../../../../diagram-protocol/src/lsp/remoteMessages";
 
 /**
  * Message to perform generateCompletionItem on a remote language server

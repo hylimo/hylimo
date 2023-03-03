@@ -1,4 +1,5 @@
-import { Math2D, ResizeAction } from "@hylimo/diagram-common";
+import { Math2D } from "@hylimo/diagram-common";
+import { ResizeAction } from "@hylimo/diagram-protocol";
 import { MoveHandler } from "./moveHandler";
 
 /**

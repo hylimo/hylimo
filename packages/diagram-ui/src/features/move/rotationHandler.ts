@@ -1,4 +1,5 @@
-import { Point, RotationAction } from "@hylimo/diagram-common";
+import { Point } from "@hylimo/diagram-common";
+import { RotationAction } from "@hylimo/diagram-protocol";
 import { MoveHandler } from "./moveHandler";
 
 /**

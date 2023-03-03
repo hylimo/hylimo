@@ -4,14 +4,7 @@
         "rootDir": "src",
         "outDir": "lib"
     },
-    "references": [
-        {
-            "path": "../diagram-common"
-        },
-        {
-            "path": "../diagram-protocol"
-        }
-    ],
+    "references": [],
     "include": ["src/**/*.ts"],
     "exclude": ["lib", "node_modules"]
 }

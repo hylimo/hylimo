@@ -4,7 +4,7 @@ import {
     ResizeAction,
     RotationAction,
     TranslationMoveAction
-} from "@hylimo/diagram-common";
+} from "@hylimo/diagram-protocol";
 import { injectable } from "inversify";
 import { ActionHandlerRegistry, DiagramServerProxy as SprottyDiagramServerProxy } from "sprotty";
 

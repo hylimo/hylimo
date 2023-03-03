@@ -1,5 +1,5 @@
 import { DiagramLayoutResult } from "@hylimo/diagram";
-import { CanvasElement, IncrementalUpdate, RotationAction } from "@hylimo/diagram-common";
+import { CanvasElement } from "@hylimo/diagram-common";
 import { EditGeneratorEntry } from "./editGeneratorEntry";
 import { EditGenerator } from "../generators/editGenerator";
 import { generateAddFieldToScopeGenerator } from "./generateAddFieldToScopeGenerator";
@@ -7,6 +7,7 @@ import { generateReplacementNumberGenerator } from "./generateReplacementNumberG
 import { TransactionalEdit, TransactionalEditEngine } from "./transactionalEdit";
 import { GeneratorRegistry } from "../generators/generatorRegistry";
 import { TextDocument } from "vscode-languageserver-textdocument";
+import { RotationAction, IncrementalUpdate } from "@hylimo/diagram-protocol";
 
 /**
  * Edit for RotationAction

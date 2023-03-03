@@ -1,4 +1,4 @@
-import { AxisAlignedSegmentEditAction } from "@hylimo/diagram-common";
+import { AxisAlignedSegmentEditAction } from "@hylimo/diagram-protocol";
 import { MoveHandler } from "./moveHandler";
 
 /**

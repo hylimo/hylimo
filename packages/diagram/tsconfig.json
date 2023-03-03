@@ -15,6 +15,6 @@
             "path": "../fonts"
         }
     ],
-    "include": ["src/**/*.ts", "src/**/*.d.ts", "types/*.d.ts"],
+    "include": ["src/**/*.ts", "types/*.d.ts"],
     "exclude": ["lib", "node_modules"]
 }

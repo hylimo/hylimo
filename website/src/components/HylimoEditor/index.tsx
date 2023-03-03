@@ -28,7 +28,7 @@ import {
     RemoteNotification,
     RemoteRequest,
     SetLanguageServerIdNotification
-} from "@hylimo/language-server";
+} from "@hylimo/diagram-protocol";
 import { DiagramServerProxy, ResetCanvasBoundsAction } from "@hylimo/diagram-ui";
 import useResizeObserver from "@react-hook/resize-observer";
 

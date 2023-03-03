@@ -1,5 +1,6 @@
 import { BaseDiagramLayoutResult, DiagramLayoutResult } from "@hylimo/diagram";
-import { AxisAlignedSegmentEditAction, CanvasAxisAlignedSegment, IncrementalUpdate } from "@hylimo/diagram-common";
+import { CanvasAxisAlignedSegment } from "@hylimo/diagram-common";
+import { AxisAlignedSegmentEditAction, IncrementalUpdate } from "@hylimo/diagram-protocol";
 import { EditGenerator } from "../generators/editGenerator";
 import { GeneratorRegistry } from "../generators/generatorRegistry";
 import { generateReplacementNumberGenerator } from "./generateReplacementNumberGenerator";

@@ -22,12 +22,12 @@ import {
     DiagramCloseNotification,
     DiagramOpenNotification,
     OpenDiagramMessage
-} from "./diagramNotificationTypes";
+} from "../../diagram-protocol/src/lsp/diagramNotificationTypes";
 import { SharedDiagramUtils } from "./sharedDiagramUtils";
 import { LocalDiagramImplementationManager } from "./diagram/local/localDiagramImplementationManager";
 import { DiagramImplementationManager } from "./diagram/diagramImplementationManager";
 import { RemoteDiagramImplementationManager } from "./diagram/remote/remoteDiagramImplementationManager";
-import { SetLanguageServerIdNotification } from "./diagram/remote/remoteMessages";
+import { SetLanguageServerIdNotification } from "../../diagram-protocol/src/lsp/remoteMessages";
 
 /**
  * Config for creating a new language server

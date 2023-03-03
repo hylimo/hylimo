@@ -1,4 +1,4 @@
-import { TranslationMoveAction } from "@hylimo/diagram-common";
+import { TranslationMoveAction } from "@hylimo/diagram-protocol";
 import { MoveHandler } from "./moveHandler";
 
 /**

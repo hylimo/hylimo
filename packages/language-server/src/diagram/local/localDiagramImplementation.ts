@@ -7,7 +7,7 @@ import {
     LineMoveAction,
     ResizeAction,
     AxisAlignedSegmentEditAction
-} from "@hylimo/diagram-common";
+} from "@hylimo/diagram-protocol";
 import {
     Diagnostic,
     DiagnosticSeverity,

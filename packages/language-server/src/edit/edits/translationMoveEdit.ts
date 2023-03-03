@@ -1,11 +1,5 @@
 import { DiagramLayoutResult, LayoutElement } from "@hylimo/diagram";
-import {
-    AbsolutePoint,
-    CanvasElement,
-    IncrementalUpdate,
-    RelativePoint,
-    TranslationMoveAction
-} from "@hylimo/diagram-common";
+import { AbsolutePoint, CanvasElement, RelativePoint } from "@hylimo/diagram-common";
 import { TextDocument } from "vscode-languageserver-textdocument";
 import { EditGeneratorEntry } from "./editGeneratorEntry";
 import { EditGenerator } from "../generators/editGenerator";
@@ -13,6 +7,7 @@ import { generateAddFieldToScopeGenerator } from "./generateAddFieldToScopeGener
 import { generateDeltaNumberGenerator } from "./generateDeltaNumberGenerator";
 import { TransactionalEdit, TransactionalEditEngine } from "./transactionalEdit";
 import { GeneratorRegistry } from "../generators/generatorRegistry";
+import { TranslationMoveAction, IncrementalUpdate } from "@hylimo/diagram-protocol";
 
 /**
  * Generates EditGeneratorEntries for absolute and relative points

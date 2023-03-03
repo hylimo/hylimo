@@ -6,7 +6,7 @@ import {
     ReplyGenerateTransactionalEditMessage
 } from "../remote/generateTransactionalEditMessage";
 import { RegisterRemoteLanguageServerMessage } from "../remote/registerRemoteLanguageServerMessage";
-import { RemoteMessagePayload } from "../remote/remoteMessages";
+import { RemoteMessagePayload } from "../../../../diagram-protocol/src/lsp/remoteMessages";
 import { RequestUpdateDiagramMessage, ReplyUpdateDiagramMessage } from "../remote/updateDiagramMessage";
 import { LocalDiagramImplementation } from "./localDiagramImplementation";
 import {

@@ -1,5 +1,6 @@
 import { DiagramLayoutResult } from "@hylimo/diagram";
-import { IncrementalUpdate, LineMoveAction, LinePoint } from "@hylimo/diagram-common";
+import { LinePoint } from "@hylimo/diagram-common";
+import { LineMoveAction, IncrementalUpdate } from "@hylimo/diagram-protocol";
 import { EditGenerator } from "../generators/editGenerator";
 import { GeneratorRegistry } from "../generators/generatorRegistry";
 import { generateReplacementNumberGenerator } from "./generateReplacementNumberGenerator";

@@ -1,4 +1,4 @@
-import { IncrementalUpdateAction } from "@hylimo/diagram-common";
+import { IncrementalUpdateAction } from "@hylimo/diagram-protocol";
 import { injectable, inject } from "inversify";
 import { Command, CommandExecutionContext, CommandReturn, TYPES } from "sprotty";
 import { SRoot } from "../../model/sRoot";

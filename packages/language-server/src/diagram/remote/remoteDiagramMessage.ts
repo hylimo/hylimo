@@ -1,4 +1,4 @@
-import { RemoteMessagePayload } from "./remoteMessages";
+import { RemoteMessagePayload } from "../../../../diagram-protocol/src/lsp/remoteMessages";
 
 /**
  * Base interface for all messages that are related to a diagram.
