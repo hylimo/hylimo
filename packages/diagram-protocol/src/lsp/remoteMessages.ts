@@ -1,4 +1,4 @@
-import { NotificationType, RequestType } from "vscode-languageserver";
+import { NotificationType, RequestType } from "vscode-languageserver-protocol";
 
 /**
  * Base interface for all messages sent between language servers.

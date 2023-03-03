@@ -34,4 +34,5 @@ export * from "./model/path";
 export * from "./model/rect";
 export * from "./model/shape";
 export * from "./model/text";
+export * from "./config";
 export * from "./root";

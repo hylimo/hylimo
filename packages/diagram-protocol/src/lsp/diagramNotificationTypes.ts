@@ -1,5 +1,5 @@
 import { ActionMessage } from "sprotty-protocol";
-import { NotificationType } from "vscode-languageserver";
+import { NotificationType } from "vscode-languageserver-protocol";
 
 /**
  * Namespace for the open diagram notification
