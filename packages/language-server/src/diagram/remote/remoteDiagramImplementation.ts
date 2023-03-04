@@ -12,6 +12,7 @@ import {
 } from "./generateTransactionalEditMessage";
 import { RemoteDiagramImplementationManager } from "./remoteDiagramImplementationManager";
 import { RequestUpdateDiagramMessage, ReplyUpdateDiagramMessage } from "./updateDiagramMessage";
+import { DiagramConfig } from "@hylimo/diagram-common";
 
 /**
  * Remote implementation of a diagram.
@@ -33,11 +34,12 @@ export class RemoteDiagramImplementation extends DiagramImplementation {
         super();
     }
 
-    override async updateDiagram(source: string): Promise<DiagramUpdateResult> {
+    override async updateDiagram(source: string, config: DiagramConfig): Promise<DiagramUpdateResult> {
         const request: RequestUpdateDiagramMessage = {
             type: RequestUpdateDiagramMessage.type,
             id: this.id,
-            source
+            source,
+            config
         };
         const result = await this.layoutedDiagramManager.sendRequest(request, this.remoteId);
         if (ReplyUpdateDiagramMessage.is(result)) {
@@ -61,11 +63,17 @@ export class RemoteDiagramImplementation extends DiagramImplementation {
         }
     }
 
-    override async generateCompletionItems(position: Position): Promise<CompletionItem[] | undefined> {
+    override async generateCompletionItems(
+        source: string,
+        config: DiagramConfig,
+        position: Position
+    ): Promise<CompletionItem[] | undefined> {
         const request: RequestGenerateCompletionItemMessage = {
             type: RequestGenerateCompletionItemMessage.type,
             id: this.id,
-            position
+            position,
+            source,
+            config
         };
         const result = await this.layoutedDiagramManager.sendRequest(request, this.remoteId);
         if (ReplyGenerateCompletionItemMessage.is(result)) {

@@ -1,6 +1,7 @@
 import { DiagramUpdateResult } from "../diagramImplementation";
 import { RemoteDiagramMessage } from "./remoteDiagramMessage";
 import { RemoteMessagePayload } from "../../../../diagram-protocol/src/lsp/remoteMessages";
+import { DiagramConfig } from "@hylimo/diagram-common";
 
 /**
  * Message to request an update of a diagram
@@ -11,6 +12,10 @@ export interface RequestUpdateDiagramMessage extends RemoteDiagramMessage {
      * The source code of the diagram
      */
     source: string;
+    /**
+     * The config of the diagram
+     */
+    config: DiagramConfig;
 }
 
 export namespace RequestUpdateDiagramMessage {

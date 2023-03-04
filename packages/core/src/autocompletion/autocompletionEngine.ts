@@ -1,4 +1,5 @@
 import { Parser } from "../parser/parser";
+import { ExecutableExpression } from "../runtime/ast/executableExpression";
 import { Interpreter } from "../runtime/interpreter";
 import { AutocompletionAstTransformer } from "./autocompletionAstTransformer";
 import { AutocompletionError } from "./autocompletionError";
@@ -27,7 +28,11 @@ export class AutocompletionEngine {
      * @param position the position of the cursor
      * @returns the generated autocomplete items or undefined if no items could be generated
      */
-    autocomplete(text: string, position: number): AutocompletionItem[] | undefined {
+    autocomplete(
+        text: string,
+        additionalExpressions: ExecutableExpression[],
+        position: number
+    ): AutocompletionItem[] | undefined {
         const parserResult = this.parser.parse(text);
         if (parserResult.ast == undefined) {
             return undefined;
@@ -35,7 +40,7 @@ export class AutocompletionEngine {
         const toExecutableTransformer = new AutocompletionAstTransformer(position);
         const executableAst = parserResult.ast.map((expression) => toExecutableTransformer.visit(expression));
         try {
-            this.interpreter.run(executableAst);
+            this.interpreter.run([...additionalExpressions, ...executableAst]);
         } catch (e: any) {
             if (AutocompletionError.isAutocompletionError(e)) {
                 return e.autocompletionItems;

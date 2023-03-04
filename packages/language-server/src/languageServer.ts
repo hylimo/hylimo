@@ -28,11 +28,16 @@ import { LocalDiagramImplementationManager } from "./diagram/local/localDiagramI
 import { DiagramImplementationManager } from "./diagram/diagramImplementationManager";
 import { RemoteDiagramImplementationManager } from "./diagram/remote/remoteDiagramImplementationManager";
 import { SetLanguageServerIdNotification } from "../../diagram-protocol/src/lsp/remoteMessages";
+import { ConfigNotification, DynamicLanuageServerConfig } from "@hylimo/diagram-protocol";
 
 /**
  * Config for creating a new language server
  */
 export interface LanguageServerConfig {
+    /**
+     * The default config to use
+     */
+    defaultConfig: DynamicLanuageServerConfig;
     /**
      * The connection to use
      */
@@ -109,6 +114,7 @@ export class LanguageServer {
         const interpreter = new Interpreter(interpreterModules, config.maxExecutionSteps);
         const parser = new Parser(true);
         this.diagramUtils = {
+            config: config.defaultConfig,
             connection: this.connection,
             interpreter,
             parser,
@@ -134,6 +140,7 @@ export class LanguageServer {
             SetLanguageServerIdNotification.type,
             this.onSetSecondaryLanguageServer.bind(this)
         );
+        this.connection.onNotification(ConfigNotification.type, this.onUpdateConfig.bind(this));
     }
 
     /**
@@ -256,6 +263,18 @@ export class LanguageServer {
     private onSetSecondaryLanguageServer(id: number): void {
         if (id > 0) {
             this.layoutedDiagramManager = new LocalDiagramImplementationManager(this.diagramUtils, id);
+        }
+    }
+
+    /**
+     * Updates the config of this language server
+     *
+     * @param params the new config
+     */
+    private onUpdateConfig(params: DynamicLanuageServerConfig): void {
+        this.diagramUtils.config = params;
+        for (const diagram of this.diagrams.values()) {
+            diagram.onDidChangeConfig();
         }
     }
 }

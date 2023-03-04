@@ -82,7 +82,7 @@ export class LocalDiagramImplementationManager extends DiagramImplementationMana
      */
     private async handleUpdateDiagramRequest(message: RequestUpdateDiagramMessage): Promise<ReplyUpdateDiagramMessage> {
         const implementation = this.getNewDiagramImplementation(message.id);
-        const updateDiagramResult = await implementation.updateDiagram(message.source);
+        const updateDiagramResult = await implementation.updateDiagram(message.source, message.config);
         const diagram = updateDiagramResult.diagram;
         const result: ReplyUpdateDiagramMessage = {
             type: ReplyUpdateDiagramMessage.type,
@@ -109,7 +109,7 @@ export class LocalDiagramImplementationManager extends DiagramImplementationMana
         const implementation = this.getNewDiagramImplementation(message.id);
         const result: ReplyGenerateCompletionItemMessage = {
             type: ReplyGenerateCompletionItemMessage.type,
-            items: await implementation.generateCompletionItems(message.position)
+            items: await implementation.generateCompletionItems(message.source, message.config, message.position)
         };
         return result;
     }

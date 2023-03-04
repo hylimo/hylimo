@@ -23,11 +23,6 @@ export class Diagram {
     private transactionManager = new TransactionManager(this, defaultEditRegistry);
 
     /**
-     * A counter which increases on every change to the document (after layouting)
-     */
-    version = 0;
-
-    /**
      * The implementation to which all requests are delegated
      */
     private implementation?: DiagramImplementation;
@@ -57,6 +52,13 @@ export class Diagram {
     }
 
     /**
+     * Called to update the diagram based on a config change
+     */
+    async onDidChangeConfig(): Promise<void> {
+        return this.onDidChangeContent();
+    }
+
+    /**
      * Updates the current transaction based on changes to the document.
      * Should update indices to correspond to the new file.
      *
@@ -67,7 +69,7 @@ export class Diagram {
     }
 
     /**
-     * Updates the Diagram based on an updated document
+     * Updates the Diagram based on an updated document or config change
      *
      * @returns diagnostic entries containing errors
      */
@@ -76,8 +78,10 @@ export class Diagram {
             this.document.uri,
             this.implementation
         );
-        const result = await this.implementation.updateDiagram(this.document.getText());
-        this.version++;
+        const result = await this.implementation.updateDiagram(
+            this.document.getText(),
+            this.utils.config.diagramConfig
+        );
         const diagram = result.diagram;
         this.currentDiagram = diagram;
         if (diagram != undefined) {
@@ -136,6 +140,10 @@ export class Diagram {
      */
     async generateCompletionItems(position: Position): Promise<CompletionItem[] | undefined> {
         const implementation = this.implementationManager.getNewDiagramImplementation(this.document.uri);
-        return implementation.generateCompletionItems(position);
+        return implementation.generateCompletionItems(
+            this.document.getText(),
+            this.utils.config.diagramConfig,
+            position
+        );
     }
 }

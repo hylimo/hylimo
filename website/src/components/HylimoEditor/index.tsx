@@ -23,6 +23,7 @@ import { createContainer } from "@hylimo/diagram-ui";
 import { ActionHandlerRegistry, IActionDispatcher, TYPES } from "sprotty";
 import { RequestModelAction, ActionMessage } from "sprotty-protocol";
 import {
+    ConfigNotification,
     DiagramActionNotification,
     DiagramOpenNotification,
     RemoteNotification,
@@ -31,6 +32,7 @@ import {
 } from "@hylimo/diagram-protocol";
 import { DiagramServerProxy, ResetCanvasBoundsAction } from "@hylimo/diagram-ui";
 import useResizeObserver from "@react-hook/resize-observer";
+import { DynamicLanuageServerConfig } from "@hylimo/diagram-protocol/src";
 
 /**
  * Name of the language
@@ -52,6 +54,12 @@ export default function HylimoEditor(): JSX.Element {
     const [code, setCode] = useLocalStorage<string>("code");
     const sprottyWrapper = useRef(null);
     const [actionDispatcher, setActionDispatcher] = useState<IActionDispatcher | undefined>();
+    const [languageClient, setLanguageClient] = useState<MonacoLanguageClient | undefined>();
+    const [languageServerConfig, setLanguageServerConfig] = useState<DynamicLanuageServerConfig>({
+        diagramConfig: {
+            theme: colorMode
+        }
+    });
 
     useEffect(() => {
         StandaloneServices.initialize({});
@@ -66,6 +74,7 @@ export default function HylimoEditor(): JSX.Element {
         const reader = new BrowserMessageReader(worker);
         const writer = new BrowserMessageWriter(worker);
         const languageClient = createLanguageClient({ reader, writer });
+        setLanguageClient(languageClient);
         languageClient.start().then(() => {
             languageClient.sendNotification(DiagramOpenNotification.type, {
                 clientId: uri,
@@ -117,6 +126,22 @@ export default function HylimoEditor(): JSX.Element {
         };
         actionDispatcher?.dispatch(action);
     });
+
+    useEffect(() => {
+        setLanguageServerConfig((currentConfig) => {
+            return {
+                ...currentConfig,
+                diagramConfig: {
+                    ...currentConfig.diagramConfig,
+                    theme: colorMode
+                }
+            };
+        });
+    }, [colorMode]);
+
+    useEffect(() => {
+        languageClient?.sendNotification(ConfigNotification.type, languageServerConfig);
+    }, [languageServerConfig]);
 
     return (
         <Allotment>

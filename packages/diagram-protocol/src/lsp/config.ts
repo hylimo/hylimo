@@ -4,7 +4,7 @@ import { NotificationType } from "vscode-languageserver-protocol";
 /**
  * Configuration for a diagram language server
  */
-export interface LanuageServerConfig {
+export interface DynamicLanuageServerConfig {
     /**
      * The configuration for the diagram itself
      */
@@ -18,5 +18,5 @@ export namespace ConfigNotification {
     /**
      * Notification type for sending a new configuration to the language server
      */
-    export const type = new NotificationType<LanuageServerConfig>("diagram/config");
+    export const type = new NotificationType<DynamicLanuageServerConfig>("diagram/config");
 }

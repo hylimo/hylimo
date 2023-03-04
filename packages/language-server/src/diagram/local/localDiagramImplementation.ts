@@ -28,6 +28,7 @@ import { TransactionalEdit } from "../../edit/edits/transactionalEdit";
 import { TranslationMoveEdit } from "../../edit/edits/translationMoveEdit";
 import { DiagramImplementation, DiagramUpdateResult } from "../diagramImplementation";
 import { SharedDiagramUtils } from "../../sharedDiagramUtils";
+import { DiagramConfig } from "@hylimo/diagram-common";
 
 /**
  * Local implementation of a diagram.
@@ -51,9 +52,9 @@ export class LocalDiagramImplementation extends DiagramImplementation {
         super();
     }
 
-    override async updateDiagram(source: string): Promise<DiagramUpdateResult> {
+    override async updateDiagram(source: string, config: DiagramConfig): Promise<DiagramUpdateResult> {
         this.document = TextDocument.create("", "sys", 0, source);
-        const renderResult = await this.utils.diagramEngine.render(source, { theme: "dark" }); // TODO
+        const renderResult = await this.utils.diagramEngine.render(source, config); // TODO
         const diagnostics: Diagnostic[] = [];
         const errors = renderResult.errors;
         diagnostics.push(...errors.lexingErrors.map(this.convertLexerError.bind(this)));
@@ -160,9 +161,15 @@ export class LocalDiagramImplementation extends DiagramImplementation {
         }
     }
 
-    override async generateCompletionItems(position: Position): Promise<CompletionItem[] | undefined> {
+    override async generateCompletionItems(
+        source: string,
+        config: DiagramConfig,
+        position: Position
+    ): Promise<CompletionItem[] | undefined> {
+        this.document = TextDocument.create("", "sys", 0, source);
         const items = this.utils.autocompletionEngine.autocomplete(
             this.document!.getText(),
+            this.utils.diagramEngine.convertConfig(config),
             this.document!.offsetAt(position)
         );
         if (items == undefined) {

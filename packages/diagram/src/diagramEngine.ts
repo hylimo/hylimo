@@ -1,4 +1,15 @@
-import { CstResult, InterpretationResult, Interpreter, Parser, RuntimeError, toExecutable } from "@hylimo/core";
+import {
+    CstResult,
+    ExecutableExpression,
+    InterpretationResult,
+    Interpreter,
+    Parser,
+    RuntimeError,
+    SemanticFieldNames,
+    id,
+    str,
+    toExecutable
+} from "@hylimo/core";
 import { LayoutEngine } from "./layout/layoutEngine";
 import { DiagramConfig } from "@hylimo/diagram-common";
 import { LayoutedDiagram } from "./layout/diagramLayoutResult";
@@ -66,7 +77,10 @@ export class DiagramEngine {
         let layoutedDiagram: LayoutedDiagram | undefined = undefined;
         const layoutErrors: Error[] = [];
         if (parserResult.ast != undefined) {
-            interpretationResult = this.interpreter.run(toExecutable(parserResult.ast));
+            interpretationResult = this.interpreter.run([
+                ...this.convertConfig(config),
+                ...toExecutable(parserResult.ast)
+            ]);
             if (interpretationResult.result != undefined) {
                 try {
                     layoutedDiagram = await this.layoutEngine.layout(interpretationResult.result);
@@ -86,5 +100,22 @@ export class DiagramEngine {
                 layoutErrors
             }
         };
+    }
+
+    /**
+     * Converts the config to a list of executable expressions
+     *
+     * @param config the config to convert
+     * @returns the expressions setting the config
+     */
+    convertConfig(config: DiagramConfig): ExecutableExpression[] {
+        const expression = id(SemanticFieldNames.THIS).assignField(
+            "config",
+            id("object").call({
+                name: "theme",
+                value: str(config.theme)
+            })
+        );
+        return toExecutable([expression]);
     }
 }

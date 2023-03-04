@@ -1,11 +1,11 @@
 import { CompletionItem, Position } from "vscode-languageserver";
-import { RemoteDiagramMessage } from "./remoteDiagramMessage";
 import { RemoteMessagePayload } from "../../../../diagram-protocol/src/lsp/remoteMessages";
+import { RequestUpdateDiagramMessage } from "./updateDiagramMessage";
 
 /**
  * Message to perform generateCompletionItem on a remote language server
  */
-export interface RequestGenerateCompletionItemMessage extends RemoteDiagramMessage {
+export interface RequestGenerateCompletionItemMessage extends Omit<RequestUpdateDiagramMessage, "type"> {
     type: typeof RequestGenerateCompletionItemMessage.type;
     /**
      * The autocompletion cursor position
