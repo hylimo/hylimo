@@ -1,5 +1,5 @@
 import { Expression, ExpressionMetadata, listType, optional, stringType } from "@hylimo/core";
-import { Element, Line, LineSegment, ModificationSpecification, Point, Size } from "@hylimo/diagram-common";
+import { ArcSegment, Element, Line, LineSegment, ModificationSpecification, Point, Size } from "@hylimo/diagram-common";
 import { LayoutElement, LayoutConfig, SizeConstraints, AttributeConfig } from "../layoutElement";
 import { Layout } from "../layoutEngine";
 
@@ -77,7 +77,7 @@ export abstract class ElementLayoutConfig implements LayoutConfig {
 
     /**
      * Called to create the outline of an element.
-     * Default implementation just returns the bounding box rect, starting at the top left position
+     * Default implementation just returns the bounding box rect, starting at the center right position
      *
      * @param layout performs the layout
      * @param element the element to get the outline of
@@ -86,36 +86,68 @@ export abstract class ElementLayoutConfig implements LayoutConfig {
      * @returns the outline of the element
      */
     outline(layout: Layout, element: LayoutElement, position: Point, size: Size): Line {
+        const { x, y } = position;
+        const { width, height } = size;
+        const startPos = {
+            x: x + width,
+            y: y + height / 2
+        };
         const segments: LineSegment[] = [
-            {
-                type: LineSegment.TYPE,
-                end: {
-                    x: position.x + size.width,
-                    y: position.y
-                }
-            },
-            {
-                type: LineSegment.TYPE,
-                end: {
-                    x: position.x + size.width,
-                    y: position.y + size.height
-                }
-            },
-            {
-                type: LineSegment.TYPE,
-                end: {
-                    x: position.x,
-                    y: position.y + size.height
-                }
-            },
-            {
-                type: LineSegment.TYPE,
-                end: position
-            }
+            this.lineSegment(x + width, y + height),
+            this.lineSegment(x + width / 2, y + height),
+            this.lineSegment(x, y + height),
+            this.lineSegment(x, y + height / 2),
+            this.lineSegment(x, y),
+            this.lineSegment(x + width / 2, y),
+            this.lineSegment(x + width, y),
+            this.lineSegment(startPos.x, startPos.y)
         ];
         return {
-            start: position,
+            start: startPos,
             segments
+        };
+    }
+
+    /**
+     * Helper to create a line segment
+     *
+     * @param x the end x coordinate
+     * @param y the end y coordiate
+     * @returns the generated line segment
+     */
+    protected lineSegment(x: number, y: number): LineSegment {
+        return {
+            type: LineSegment.TYPE,
+            end: {
+                x,
+                y
+            }
+        };
+    }
+
+    /**
+     * Helper to create a clockwise arc segment
+     *
+     * @param cx x coordinate of the center
+     * @param cy y coordinate of the center
+     * @param endX x coordinate of the end
+     * @param endY y coordinate of the end
+     * @param radius both x and y radius
+     * @returns the created arc segment
+     */
+    protected arcSegment(cx: number, cy: number, endX: number, endY: number, radius: number): ArcSegment {
+        return {
+            type: ArcSegment.TYPE,
+            clockwise: true,
+            end: {
+                x: endX,
+                y: endY
+            },
+            center: {
+                x: cx,
+                y: cy
+            },
+            radius
         };
     }
 }

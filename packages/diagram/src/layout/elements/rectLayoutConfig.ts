@@ -72,68 +72,30 @@ export class RectLayoutConfig extends ContentShapeLayoutConfig {
             const radius: number = element.cornerRadius;
             const { x, y } = position;
             const { width, height } = size;
+            const startPos = {
+                x: x + width,
+                y: y + height / 2
+            };
             const segments: (LineSegment | ArcSegment)[] = [
-                lineSegment(x + width - radius, y),
-                arcSegment(x + width - radius, y + radius, x + width, y + radius, radius),
-                lineSegment(x + width, y + height - radius),
-                arcSegment(x + width - radius, y + height - radius, x + width - radius, y + height, radius),
-                lineSegment(x + radius, y + height),
-                arcSegment(x + radius, y + height - radius, x, y + height - radius, radius),
-                lineSegment(x, y + radius),
-                arcSegment(x + radius, y + radius, x + radius, y, radius)
+                this.lineSegment(x + width, y + height - radius),
+                this.arcSegment(x + width - radius, y + height - radius, x + width - radius, y + height, radius),
+                this.lineSegment(x + width / 2, y + height),
+                this.lineSegment(x + radius, y + height),
+                this.arcSegment(x + radius, y + height - radius, x, y + height - radius, radius),
+                this.lineSegment(x, y + height / 2),
+                this.lineSegment(x, y + radius),
+                this.arcSegment(x + radius, y + radius, x + radius, y, radius),
+                this.lineSegment(x + width / 2, y),
+                this.lineSegment(x + width - radius, y),
+                this.arcSegment(x + width - radius, y + radius, x + width, y + radius, radius),
+                this.lineSegment(startPos.x, startPos.y)
             ];
             return {
-                start: {
-                    x: x + radius,
-                    y
-                },
+                start: startPos,
                 segments
             };
         } else {
             return super.outline(layout, element, position, size);
         }
     }
-}
-
-/**
- * Helper to create a line segment
- *
- * @param x the end x coordinate
- * @param y the end y coordiate
- * @returns the generated line segment
- */
-function lineSegment(x: number, y: number): LineSegment {
-    return {
-        type: LineSegment.TYPE,
-        end: {
-            x,
-            y
-        }
-    };
-}
-
-/**
- * Helper to create a clockwise arc segment
- *
- * @param cx x coordinate of the center
- * @param cy y coordinate of the center
- * @param endX x coordinate of the end
- * @param endY y coordinate of the end
- * @param radius both x and y radius
- * @returns the created arc segment
- */
-function arcSegment(cx: number, cy: number, endX: number, endY: number, radius: number): ArcSegment {
-    return {
-        type: ArcSegment.TYPE,
-        clockwise: true,
-        end: {
-            x: endX,
-            y: endY
-        },
-        center: {
-            x: cx,
-            y: cy
-        },
-        radius
-    };
 }

@@ -406,6 +406,30 @@ const scopeExpressions: Expression[] = [
     ),
     ...parse(
         `
+            scope.Position = object(
+                Right = 0,
+                BottomRight = 0.125,
+                Bottom = 0.25,
+                BottomLeft = 0.375,
+                Left = 0.5,
+                TopLeft = 0.625,
+                Top = 0.75,
+                TopRight = 0.875
+            )
+            scope.VAlign = object(
+                Top = "top",
+                Center = "center",
+                Bottom = "bottom"
+            )
+            scope.HAlign = object(
+                Left = "left",
+                Center = "center",
+                Right = "right"
+            )
+        `
+    ),
+    ...parse(
+        `
             scope.styles {
                 class("label-element") {
                     hAlign = "center"
