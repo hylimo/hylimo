@@ -1,8 +1,9 @@
-import { AutocompletionEngine, Interpreter, Parser } from "@hylimo/core";
+import { Interpreter, Parser } from "@hylimo/core";
 import { DiagramEngine } from "@hylimo/diagram";
 import { Connection } from "vscode-languageserver";
 import { DiagramServerManager } from "./diagramServerManager";
 import { DynamicLanuageServerConfig } from "@hylimo/diagram-protocol";
+import { CompletionEngine } from "./completion/completionEngine";
 
 /**
  * Shared utils for each diagram
@@ -33,7 +34,7 @@ export interface SharedDiagramUtils {
      */
     readonly diagramServerManager: DiagramServerManager;
     /**
-     * Autocompletion engine to use
+     * Completion engine to use
      */
-    readonly autocompletionEngine: AutocompletionEngine;
+    readonly completionEngine: CompletionEngine;
 }

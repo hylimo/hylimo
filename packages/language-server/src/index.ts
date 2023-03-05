@@ -1,3 +1,7 @@
+export * from "./completion/completionAstTransformer";
+export * from "./completion/completionEngine";
+export * from "./completion/completionError";
+export * from "./completion/executableCompletionExpression";
 export * from "./diagram/local/localDiagramImplementation";
 export * from "./diagram/local/localDiagramImplementationManager";
 export * from "./diagram/remote/generateCompletionItemsMessage";

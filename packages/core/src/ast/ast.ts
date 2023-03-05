@@ -1,4 +1,4 @@
-import { AutocompletionExpressionMetadata, ExpressionMetadata } from "./expressionMetadata";
+import { CompletionExpressionMetadata, ExpressionMetadata } from "./expressionMetadata";
 import { InvocationArgument } from "./invocationArgument";
 import { FieldEntry } from "../runtime/objects/baseObject";
 import { Type } from "../types/base";
@@ -124,7 +124,7 @@ export abstract class AbstractInvocationExpression<
  * Assignment Expression
  * Evaluates to the assigned value
  */
-export class AssignmentExpression extends Expression<AutocompletionExpressionMetadata> {
+export class AssignmentExpression extends Expression<CompletionExpressionMetadata> {
     static readonly TYPE = "AssignmentExpression";
     /**
      * Creates a new AssignmentExpression consisting of a value, a field, and an optional target on which the
@@ -139,7 +139,7 @@ export class AssignmentExpression extends Expression<AutocompletionExpressionMet
         readonly name: string,
         readonly target: Expression | undefined,
         readonly value: Expression,
-        metadata: AutocompletionExpressionMetadata
+        metadata: CompletionExpressionMetadata
     ) {
         super(AssignmentExpression.TYPE, metadata);
     }
@@ -197,7 +197,7 @@ export class DestructuringExpression extends Expression {
  * Field access expression
  * Evalueates to the value of the field
  */
-export class FieldAccessExpression extends Expression<AutocompletionExpressionMetadata> {
+export class FieldAccessExpression extends Expression<CompletionExpressionMetadata> {
     static readonly TYPE = "FieldAccessExpression";
     /**
      * Creates a new IdentifierExpression consisting of a target and a field to access
@@ -206,11 +206,7 @@ export class FieldAccessExpression extends Expression<AutocompletionExpressionMe
      * @param name name or index of the field to access
      * @param metadata metadata for the expression
      */
-    constructor(
-        readonly name: string | number,
-        readonly target: Expression,
-        metadata: AutocompletionExpressionMetadata
-    ) {
+    constructor(readonly name: string | number, readonly target: Expression, metadata: CompletionExpressionMetadata) {
         super(FieldAccessExpression.TYPE, metadata);
     }
 }
@@ -243,14 +239,14 @@ export class FunctionExpression extends AbstractFunctionExpression {
  * Identifier expression
  * Equivalent to a field access expression on the local scope
  */
-export class IdentifierExpression extends Expression<AutocompletionExpressionMetadata> {
+export class IdentifierExpression extends Expression<CompletionExpressionMetadata> {
     static readonly TYPE = "IdentifierExpression";
     /**
      * Creates a new IdentifierExpression consisting of an identifier
      * @param identifier the name of the identifier
      * @param metadata metadata for the expression
      */
-    constructor(readonly identifier: string, metadata: AutocompletionExpressionMetadata) {
+    constructor(readonly identifier: string, metadata: CompletionExpressionMetadata) {
         super(IdentifierExpression.TYPE, metadata);
     }
 }
@@ -345,7 +341,7 @@ export class NumberLiteralExpression extends LiteralExpression<number> {
  * Function invocation which provides the self parameter automatically
  * Accesses the field name on target, invokes it and provides target as self
  */
-export class SelfInvocationExpression extends AbstractInvocationExpression<AutocompletionExpressionMetadata> {
+export class SelfInvocationExpression extends AbstractInvocationExpression<CompletionExpressionMetadata> {
     static readonly TYPE = "SelfInvocationExpression";
     /**
      * Creates a new InvocationExpression consisting of an expression of which the result should be invoked,
@@ -360,7 +356,7 @@ export class SelfInvocationExpression extends AbstractInvocationExpression<Autoc
         readonly name: string | number,
         readonly target: Expression,
         argumentExpressions: InvocationArgument[],
-        metadata: AutocompletionExpressionMetadata
+        metadata: CompletionExpressionMetadata
     ) {
         super(argumentExpressions, SelfInvocationExpression.TYPE, metadata);
     }

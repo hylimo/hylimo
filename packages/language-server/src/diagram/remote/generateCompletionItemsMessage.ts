@@ -8,7 +8,7 @@ import { RequestUpdateDiagramMessage } from "./updateDiagramMessage";
 export interface RequestGenerateCompletionItemMessage extends Omit<RequestUpdateDiagramMessage, "type"> {
     type: typeof RequestGenerateCompletionItemMessage.type;
     /**
-     * The autocompletion cursor position
+     * The completion cursor position
      */
     position: Position;
 }

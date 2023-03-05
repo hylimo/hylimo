@@ -33,16 +33,16 @@ export namespace ExpressionMetadata {
 }
 
 /**
- * Metadata for Expressions with additional data for autocomplete
+ * Metadata for Expressions with additional data for complete
  */
-export interface AutocompletionExpressionMetadata extends ExpressionMetadata {
+export interface CompletionExpressionMetadata extends ExpressionMetadata {
     /**
-     * The position of the part of the expression which is affected by autocomplete.
+     * The position of the part of the expression which is affected by complete.
      * E.g. for an FieldAccessExpression, this would be the position of the dot and the field name
      */
-    autocompletionPosition?: ASTExpressionPosition;
+    completionPosition?: ASTExpressionPosition;
     /**
-     * The position of the identifier of the expression (the identifier which should be replaced on autocomplete)
+     * The position of the identifier of the expression (the identifier which should be replaced on complete)
      */
     identifierPosition?: ASTExpressionPosition;
 }

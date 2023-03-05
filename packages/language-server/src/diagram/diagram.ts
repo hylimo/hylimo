@@ -133,10 +133,10 @@ export class Diagram {
     }
 
     /**
-     * Generates autocompletion items for the given position.
+     * Generates completion items for the given position.
      *
-     * @param position the position to generate the autocompletion items for
-     * @returns the generated autocompletion items
+     * @param position the position to generate the completion items for
+     * @returns the generated completion items
      */
     async generateCompletionItems(position: Position): Promise<CompletionItem[] | undefined> {
         const implementation = this.implementationManager.getNewDiagramImplementation(this.document.uri);

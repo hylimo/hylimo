@@ -1,4 +1,4 @@
-import { InterpreterModule, Interpreter, Parser, defaultModules, AutocompletionEngine } from "@hylimo/core";
+import { InterpreterModule, Interpreter, Parser, defaultModules } from "@hylimo/core";
 import {
     CompletionItem,
     CompletionParams,
@@ -29,6 +29,7 @@ import { DiagramImplementationManager } from "./diagram/diagramImplementationMan
 import { RemoteDiagramImplementationManager } from "./diagram/remote/remoteDiagramImplementationManager";
 import { SetLanguageServerIdNotification } from "../../diagram-protocol/src/lsp/remoteMessages";
 import { ConfigNotification, DynamicLanuageServerConfig } from "@hylimo/diagram-protocol";
+import { CompletionEngine } from "./completion/completionEngine";
 
 /**
  * Config for creating a new language server
@@ -120,7 +121,7 @@ export class LanguageServer {
             parser,
             diagramEngine: new DiagramEngine(parser, interpreter, new LayoutEngine()),
             diagramServerManager: this.diagramServerManager,
-            autocompletionEngine: new AutocompletionEngine(interpreter)
+            completionEngine: new CompletionEngine(interpreter)
         };
         this.layoutedDiagramManager = new RemoteDiagramImplementationManager(this.diagramUtils);
         this.formatter = new Formatter(this.diagramUtils.parser);

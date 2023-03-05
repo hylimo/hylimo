@@ -14,7 +14,7 @@ import {
     AssignmentExpression
 } from "../ast/ast";
 import { ASTExpressionPosition } from "../ast/astExpressionPosition";
-import { AutocompletionExpressionMetadata, ExpressionMetadata } from "../ast/expressionMetadata";
+import { CompletionExpressionMetadata, ExpressionMetadata } from "../ast/expressionMetadata";
 import { InvocationArgument } from "../ast/invocationArgument";
 import { Parser } from "./parser";
 
@@ -92,23 +92,23 @@ export function generateCstToAstTransfromer(parser: Parser): ICstVisitor<CstVisi
     }
 
     /**
-     * Calls generateMetadata. Also adds the autocompletionPosition and identifierPosition based on the provided identifier
+     * Calls generateMetadata. Also adds the completionPosition and identifierPosition based on the provided identifier
      *
      * @param start the start position
      * @param end the end position
      * @param params the parameters required for generating the Metadata
      * @returns the combined start and end position or undefined
      */
-    function generateAutocompletionMetadata(
+    function generateCompletionMetadata(
         start: ASTExpressionPosition | IToken,
         end: ASTExpressionPosition | IToken,
         params: CstVisitorParameters,
         identifierPosition: IToken | ASTExpressionPosition
-    ): AutocompletionExpressionMetadata {
+    ): CompletionExpressionMetadata {
         const position = generatePosition(identifierPosition, identifierPosition);
         return {
             ...generateMetadata(start, end, params),
-            autocompletionPosition: position,
+            completionPosition: position,
             identifierPosition: position
         };
     }
@@ -282,7 +282,7 @@ export function generateCstToAstTransfromer(parser: Parser): ICstVisitor<CstVisi
                 const token = ctx.Identifier[0];
                 baseExpression = new IdentifierExpression(
                     token.image,
-                    generateAutocompletionMetadata(token, token, params, token)
+                    generateCompletionMetadata(token, token, params, token)
                 );
             } else if (ctx.literal) {
                 baseExpression = this.visit(ctx.literal, params);
@@ -376,19 +376,14 @@ export function generateCstToAstTransfromer(parser: Parser): ICstVisitor<CstVisi
                             accessDefinition.identifier,
                             baseExpression,
                             args,
-                            generateAutocompletionMetadata(
-                                startPos,
-                                endPos,
-                                params,
-                                accessDefinition.identifierPosition
-                            )
+                            generateCompletionMetadata(startPos, endPos, params, accessDefinition.identifierPosition)
                         );
                         baseExpression = this.applyCallBrackets(baseExpression, remaining, params);
                     } else {
                         baseExpression = new FieldAccessExpression(
                             accessDefinition.identifier,
                             baseExpression,
-                            generateAutocompletionMetadata(
+                            generateCompletionMetadata(
                                 startPos,
                                 accessDefinition.identifierPosition,
                                 params,
@@ -423,12 +418,12 @@ export function generateCstToAstTransfromer(parser: Parser): ICstVisitor<CstVisi
                     expression = new FieldAccessExpression(
                         identifier.image,
                         expression,
-                        generateAutocompletionMetadata(expression.position!, identifier, params, identifier)
+                        generateCompletionMetadata(expression.position!, identifier, params, identifier)
                     );
                 } else {
                     expression = new IdentifierExpression(
                         identifier.image,
-                        generateAutocompletionMetadata(identifier, identifier, params, identifier)
+                        generateCompletionMetadata(identifier, identifier, params, identifier)
                     );
                 }
             }
@@ -455,7 +450,7 @@ export function generateCstToAstTransfromer(parser: Parser): ICstVisitor<CstVisi
             const dotPosition = generatePosition(dotToken, dotToken);
             return new FieldAccessExpression("", baseExpression, {
                 ...generateMetadata(baseExpression.position!, dotToken, params),
-                autocompletionPosition: dotPosition,
+                completionPosition: dotPosition,
                 identifierPosition: {
                     startOffset: dotPosition.endOffset,
                     startLine: dotPosition.endLine,
@@ -524,10 +519,10 @@ export function generateCstToAstTransfromer(parser: Parser): ICstVisitor<CstVisi
                 if (expressions.length > 1) {
                     const target = expressions[0];
                     const value = expressions[1];
-                    const targetMeta = target.metadata as AutocompletionExpressionMetadata;
-                    const meta: AutocompletionExpressionMetadata = {
+                    const targetMeta = target.metadata as CompletionExpressionMetadata;
+                    const meta: CompletionExpressionMetadata = {
                         ...generateMetadata(target.position, value.position, params),
-                        autocompletionPosition: targetMeta.autocompletionPosition,
+                        completionPosition: targetMeta.completionPosition,
                         identifierPosition: targetMeta.identifierPosition
                     };
                     if (target instanceof IdentifierExpression) {

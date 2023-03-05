@@ -41,12 +41,12 @@ export abstract class DiagramImplementation {
     abstract generateTransactionalEdit(action: TransactionalAction): Promise<TransactionalEdit>;
 
     /**
-     * Generates autocompletion items for the given position.
+     * Generates completion items for the given position.
      *
      * @param source the source code of the diagram
      * @param config the config of the diagram
-     * @param position the position to generate the autocompletion items for
-     * @returns the generated autocompletion items
+     * @param position the position to generate the completion items for
+     * @returns the generated completion items
      */
     abstract generateCompletionItems(
         source: string,

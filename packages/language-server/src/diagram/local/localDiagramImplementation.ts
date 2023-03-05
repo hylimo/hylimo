@@ -1,4 +1,3 @@
-import { AutocompletionItemKind } from "@hylimo/core";
 import { LayoutedDiagram, RenderErrors } from "@hylimo/diagram";
 import {
     TransactionalAction,
@@ -8,17 +7,7 @@ import {
     ResizeAction,
     AxisAlignedSegmentEditAction
 } from "@hylimo/diagram-protocol";
-import {
-    Diagnostic,
-    DiagnosticSeverity,
-    uinteger,
-    Range,
-    CompletionItem,
-    Position,
-    TextEdit,
-    MarkupContent,
-    CompletionItemKind
-} from "vscode-languageserver";
+import { Diagnostic, DiagnosticSeverity, uinteger, Range, CompletionItem, Position } from "vscode-languageserver";
 import { TextDocument } from "vscode-languageserver-textdocument";
 import { AxisAlignedSegmentEdit } from "../../edit/edits/axisAlignedSegmentEdit";
 import { LineMoveEdit } from "../../edit/edits/lineMoveEdit";
@@ -168,87 +157,11 @@ export class LocalDiagramImplementation extends DiagramImplementation {
         position: Position
     ): Promise<CompletionItem[] | undefined> {
         this.document = TextDocument.create("", "sys", 0, source);
-        const items = this.utils.autocompletionEngine.autocomplete(
+        const items = this.utils.completionEngine.complete(
             this.document!.getText(),
             this.utils.diagramEngine.convertConfig(config),
             this.document!.offsetAt(position)
         );
-        if (items == undefined) {
-            return undefined;
-        }
-        return items.map((item) => {
-            const range = item.replaceRange;
-            return {
-                label: item.label,
-                detail: item.label,
-                documentation: this.preprocessDocumentation(item.documentation),
-                textEdit: TextEdit.replace(
-                    Range.create(
-                        Position.create(range.startLine, range.startColumn),
-                        Position.create(range.endLine, range.endColumn)
-                    ),
-                    item.value
-                ),
-                kind: this.convertCompletionKind(item.kind)
-            };
-        });
-    }
-
-    /**
-     * Preprocesses the documentation string to make it more readable in the editor
-     *
-     * @param documentation the syncscript documentation string, may be undefined
-     * @returns the processed documentation string
-     */
-    private preprocessDocumentation(documentation: string | undefined): MarkupContent | undefined {
-        if (documentation == undefined) {
-            return undefined;
-        }
-        const lines = documentation.split("\n").filter((line) => line.trim() != "");
-        const indentation = lines
-            .map((line) => line.match(/^\s*/)?.[0]?.length ?? 0)
-            .reduce((a, b) => Math.min(a, b), Number.MAX_SAFE_INTEGER);
-        const unendentedLines = lines.map((line) => line.substring(indentation));
-        const processedLines = unendentedLines
-            .map((line) => {
-                const whitespaceLength = line.match(/^\s*/)?.[0]?.length ?? 0;
-                const half = Math.floor(whitespaceLength / 2);
-                return line.substring(half);
-            })
-            .map((line) => {
-                if (line.trim() == "Params:") {
-                    return "\n**Params:**";
-                } else if (line.trim() == "Returns:") {
-                    return "\n**Returns:**\n";
-                } else {
-                    return line;
-                }
-            });
-        const processed = processedLines.join("\n");
-        return {
-            kind: "markdown",
-            value: processed
-        };
-    }
-
-    /**
-     * Converts a syncscript autocompletion item kind to a lsp completion item kind
-     *
-     * @param kind the syncscript autocompletion item kind to convert
-     * @returns the converted lsp completion item kind
-     */
-    private convertCompletionKind(kind: AutocompletionItemKind): CompletionItemKind {
-        switch (kind) {
-            case AutocompletionItemKind.METHOD:
-                return CompletionItemKind.Method;
-            case AutocompletionItemKind.FUNCTION:
-                return CompletionItemKind.Function;
-            case AutocompletionItemKind.VARIABLE:
-                return CompletionItemKind.Variable;
-            case AutocompletionItemKind.FIELD:
-                return CompletionItemKind.Field;
-            default:
-                return CompletionItemKind.Text;
-        }
+        return items;
     }
 }

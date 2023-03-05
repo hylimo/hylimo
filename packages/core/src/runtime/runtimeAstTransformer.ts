@@ -18,7 +18,6 @@ import { InvocationArgument } from "../ast/invocationArgument";
 import { ExecutableInvocationArgument } from "./ast/executableAbstractInvocationExpression";
 import { ExecutableAssignmentExpression } from "./ast/executableAssignmentExpression";
 import { ExecutableBracketExpression } from "./ast/executableBracketExpression";
-import { ExecutableConstExpression } from "./ast/executableConstExpression";
 import { ExecutableDestructuringExpression } from "./ast/executableDestructuringExpression";
 import { ExecutableExpression } from "./ast/executableExpression";
 import { ExecutableFieldAccessExpression } from "./ast/executableFieldAccessExpression";
