@@ -48,7 +48,8 @@ export const commonModule = InterpreterModule.create(
                             - 2: optional, if present must be a function which is called if the first argument is false
                         Returns:
                             If a function was called, the result of the function. Otherwise null
-                    `
+                    `,
+                    snippet: "($1) {\n    $2\n}"
                 },
                 [
                     [0, booleanType],
@@ -83,7 +84,8 @@ export const commonModule = InterpreterModule.create(
                             - 1: the body function, executed on each loop
                         Returns:
                             null
-                    `
+                    `,
+                    snippet: " { $1 } {\n    $2\n}"
                 },
                 [
                     [0, functionType],

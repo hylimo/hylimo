@@ -1,14 +1,20 @@
 import {
+    AbstractFunctionExpression,
     AbstractFunctionObject,
     assign,
     DefaultModuleNames,
     enumObject,
+    ExecutableAbstractFunctionExpression,
+    ExecutableNativeFunctionExpression,
     Expression,
+    ExpressionMetadata,
     fun,
     functionType,
     id,
     InterpreterModule,
-    native,
+    jsFun,
+    NativeFunctionExpression,
+    NativeFunctionType,
     optional,
     parse
 } from "@hylimo/core";
@@ -141,39 +147,6 @@ const scopeExpressions: Expression[] = [
             }
         )
     ),
-    assign(
-        "canvasElementLayout",
-        fun(
-            `
-                (self, callback) = args
-                result = object(pos = null, width = null, height = null, rotation = null)
-                callback.callWithScope(result)
-                if(result.pos != null) {
-                    self.pos = result.pos
-                }
-                if(result.width != null) {
-                    self.width = result.width
-                }
-                if(result.height != null) {
-                    self.height = result.height
-                }
-                if(result.rotation != null) {
-                    self.rotation = result.rotation
-                }
-            `,
-            {
-                docs: `
-                    Helper for which applies a layout operator to a CanvasElement.
-                    Handles pos, width and height.
-                    Params:
-                        - 0: the CanvasElement to which to apply the layout
-                        - 1: the callback providing pos, width and height
-                    Returns:
-                        undefined
-                `
-            }
-        )
-    ),
     ...parse(
         `
             lineBuilderProto = object()
@@ -242,11 +215,46 @@ const scopeExpressions: Expression[] = [
             }
         `
     ),
-    assign(
-        "canvasConnectionLayout",
+    id(scope).assignField(
+        "layout",
         fun(
             `
                 (self, callback) = args
+                self.scopes.layout = callback
+                result = object(pos = null, width = null, height = null, rotation = null)
+                callback.callWithScope(result)
+                if(result.pos != null) {
+                    self.pos = result.pos
+                }
+                if(result.width != null) {
+                    self.width = result.width
+                }
+                if(result.height != null) {
+                    self.height = result.height
+                }
+                if(result.rotation != null) {
+                    self.rotation = result.rotation
+                }
+                self
+            `,
+            {
+                docs: `
+                    Layout operator which can be applied either to a CanvasElement
+                    Params:
+                        - 0: the CanvasElement or CanvasConnection to ally the layout to
+                        - 1: callback which provides the layout definition
+                    Returns:
+                        The provided element
+                `
+            }
+        )
+    ),
+    id(scope).assignField(
+        "with",
+        fun(
+            `
+                (self, callback) = args
+                self.scopes.with = callback
                 result = object(
                     over = null,
                     end = self.endProvider,
@@ -279,46 +287,19 @@ const scopeExpressions: Expression[] = [
                     self.start = result.over.start
                     self.contents = result.over.segments
                 }
-            `,
-            {
-                docs: `
-                    Helper for which applies a layout operator to a CanvasConnection.
-                    Handles the routing points.
-                    Params:
-                        - 0: the CanvasConnection to which to apply the layout
-                        - 1: the callback providing the new route via the field over
-                    Returns:
-                        undefined
-                `
-            }
-        )
-    ),
-    id(scope).assignField(
-        "layout",
-        fun(
-            `
-                (self, callback) = args
-                self.scopes.layout = callback
-                if (self.type == "canvasElement") {
-                    canvasElementLayout(self, callback)
-                } {
-                    if (self.type == "canvasConnection") {
-                        canvasConnectionLayout(self, callback)
-                    } {
-                        error("cannot apply layout to " + self.type)
-                    }
-                }
                 self
             `,
             {
                 docs: `
-                    Layout operator which can be applied either to a CanvasElement or a CanvasConnection
+                    Helper for which applies a with operator to a CanvasConnection.
+                    Handles the routing points, and labels.
                     Params:
-                        - 0: the CanvasElement or CanvasConnection to ally the layout to
-                        - 1: callback which provides the layout definition
+                        - 0: the CanvasConnection to which to apply the with
+                        - 1: the callback providing the new route via the field over
                     Returns:
-                        The provided element
-                `
+                        undefined
+                `,
+                snippet: ` {\n    over = start($1).line(end($2))\n}`
             }
         )
     ),
@@ -362,18 +343,25 @@ const scopeExpressions: Expression[] = [
     ),
     id(scope).assignField(
         "withRegisterSource",
-        fun([
-            ...parse("this.callback = it"),
-            native((args, context, staticScope, callExpression) => {
-                const callback = staticScope.getField("callback", context) as AbstractFunctionObject<any>;
+        jsFun((args, context) => {
+            const callback = args.getField(0, context) as AbstractFunctionObject<
+                ExecutableAbstractFunctionExpression<AbstractFunctionExpression>
+            >;
+            const wrapperFunctionCallback: NativeFunctionType = (args, context, staticScope, callExpression) => {
                 const result = callback.invoke(args, context);
                 result.value.setLocalField("source", {
                     value: result.value,
                     source: callExpression
                 });
                 return result;
-            })
-        ])
+            };
+            const wrapperFunctionExpression = new NativeFunctionExpression(
+                wrapperFunctionCallback,
+                callback.definition.expression.decorator,
+                ExpressionMetadata.NO_EDIT
+            );
+            return new ExecutableNativeFunctionExpression(wrapperFunctionExpression).evaluate(context);
+        })
     ),
     id(scope).assignField(
         "createConnectionOperator",

@@ -32,7 +32,7 @@ import {
 } from "@hylimo/diagram-protocol";
 import { DiagramServerProxy, ResetCanvasBoundsAction } from "@hylimo/diagram-ui";
 import useResizeObserver from "@react-hook/resize-observer";
-import { DynamicLanuageServerConfig } from "@hylimo/diagram-protocol/src";
+import { DynamicLanuageServerConfig } from "@hylimo/diagram-protocol";
 
 /**
  * Name of the language
@@ -152,6 +152,9 @@ export default function HylimoEditor(): JSX.Element {
                         fixedOverflowWidgets: true,
                         hover: {
                             above: false
+                        },
+                        suggest: {
+                            snippetsPreventQuickSuggestions: false
                         }
                     }}
                     theme={colorMode === "dark" ? "custom-dark" : "custom-light"}

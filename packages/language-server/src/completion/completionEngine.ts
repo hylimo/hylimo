@@ -1,6 +1,6 @@
-import { Parser } from "@hylimo/core/src/parser/parser";
-import { ExecutableExpression } from "@hylimo/core/src/runtime/ast/executableExpression";
-import { Interpreter } from "@hylimo/core/src/runtime/interpreter";
+import { Parser } from "@hylimo/core";
+import { ExecutableExpression } from "@hylimo/core";
+import { Interpreter } from "@hylimo/core";
 import { CompletionAstTransformer } from "./completionAstTransformer";
 import { CompletionError } from "./completionError";
 import { CompletionItem } from "vscode-languageserver";

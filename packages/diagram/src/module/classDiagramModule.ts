@@ -201,11 +201,11 @@ const scopeExpressions: Expression[] = [
     ),
     ...parse(
         `
-            scope.class = scope.withRegisterSource {
+            scope.class = scope.withRegisterSource [ snippet = "(\\"$1\\") {\\n    $2\\n}" ] {
                 (name, callback) = args
                 _class(name, callback, args.stereotypes, self = args.self)
             }
-            scope.interface = scope.withRegisterSource {
+            scope.interface = scope.withRegisterSource [ snippet = "(\\"$1\\") {\\n    $2\\n}" ] {
                 (name, callback) = args
                 stereotypes = list("interface")
                 otherStereotypes = args.stereotypes

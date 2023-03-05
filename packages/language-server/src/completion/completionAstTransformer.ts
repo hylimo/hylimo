@@ -6,9 +6,9 @@ import {
     NumberLiteralExpression,
     SelfInvocationExpression
 } from "@hylimo/core/src/ast/ast";
-import { CompletionExpressionMetadata } from "@hylimo/core/src/ast/expressionMetadata";
-import { ExecutableExpression } from "@hylimo/core/src/runtime/ast/executableExpression";
-import { RuntimeAstTransformer } from "@hylimo/core/src/runtime/runtimeAstTransformer";
+import { CompletionExpressionMetadata } from "@hylimo/core";
+import { ExecutableExpression } from "@hylimo/core";
+import { RuntimeAstTransformer } from "@hylimo/core";
 import { ExecutableCompletionExpression } from "./executableCompletionExpression";
 
 /**
