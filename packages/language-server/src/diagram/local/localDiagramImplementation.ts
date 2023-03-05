@@ -54,7 +54,8 @@ export class LocalDiagramImplementation extends DiagramImplementation {
 
     override async updateDiagram(source: string, config: DiagramConfig): Promise<DiagramUpdateResult> {
         this.document = TextDocument.create("", "sys", 0, source);
-        const renderResult = await this.utils.diagramEngine.render(source, config); // TODO
+        const renderResult = await this.utils.diagramEngine.render(source, config);
+        this.layoutResult = renderResult.layoutedDiagram;
         const diagnostics: Diagnostic[] = [];
         const errors = renderResult.errors;
         diagnostics.push(...errors.lexingErrors.map(this.convertLexerError.bind(this)));
