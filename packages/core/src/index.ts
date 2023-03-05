@@ -23,6 +23,7 @@ export * from "./runtime/ast/executableFieldAccessExpression";
 export * from "./runtime/ast/executableFunctionExpression";
 export * from "./runtime/ast/executableIdentifierExpression";
 export * from "./runtime/ast/executableInvocationExpression";
+export * from "./runtime/ast/executableNativeExpression";
 export * from "./runtime/ast/executableNativeFunctionExpression";
 export * from "./runtime/ast/executableNumberLiteralExpression";
 export * from "./runtime/ast/executableSelfInvocationExpression";

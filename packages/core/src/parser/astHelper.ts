@@ -7,7 +7,8 @@ import {
     FunctionExpression,
     AbstractInvocationExpression,
     NativeFunctionExpression,
-    NativeFunctionType
+    NativeFunctionType,
+    NativeExpression
 } from "../ast/ast";
 import { ExpressionMetadata } from "../ast/expressionMetadata";
 import { InvocationArgument } from "../ast/invocationArgument";
@@ -202,6 +203,27 @@ export function native(
     decorators: { [index: string]: string | null } = {}
 ): NativeFunctionExpression {
     return new NativeFunctionExpression(callback, parseDecorators(decorators), ExpressionMetadata.NO_EDIT);
+}
+
+/**
+ * Helper to create an expression which evaluates to an enum, meaning an object whith the defined entries
+ * Each entry does NOT have its source set
+ *
+ * @param entries the entries of the enum
+ * @returns the created expression which evaluates to the enum
+ */
+export function enumObject(entries: Record<string, string | number>): Expression {
+    return new NativeExpression((context) => {
+        const object = context.newObject();
+        for (const [key, value] of Object.entries(entries)) {
+            if (typeof value === "string") {
+                object.setLocalField(key, { value: context.newString(value) });
+            } else {
+                object.setLocalField(key, { value: context.newNumber(value) });
+            }
+        }
+        return { value: object };
+    });
 }
 
 /**

@@ -11,7 +11,8 @@ import {
     NativeFunctionExpression,
     NumberLiteralExpression,
     SelfInvocationExpression,
-    StringLiteralExpression
+    StringLiteralExpression,
+    NativeExpression
 } from "./ast";
 
 /**
@@ -55,6 +56,8 @@ export abstract class ASTVisitor<C, O> {
                 return this.visitSelfInvocationExpression(expression as SelfInvocationExpression, context);
             case StringLiteralExpression.TYPE:
                 return this.visistStringLiteralExpression(expression as StringLiteralExpression, context);
+            case NativeExpression.TYPE:
+                return this.visitNativeExpression(expression as NativeExpression, context);
             default:
                 throw new Error(`Unknown expression type ${expression.type}`);
         }
@@ -72,4 +75,5 @@ export abstract class ASTVisitor<C, O> {
     abstract visitNumberLiteralExpression(expression: NumberLiteralExpression, context: C): O;
     abstract visitSelfInvocationExpression(expression: SelfInvocationExpression, context: C): O;
     abstract visistStringLiteralExpression(expression: StringLiteralExpression, context: C): O;
+    abstract visitNativeExpression(expression: NativeExpression, context: C): O;
 }

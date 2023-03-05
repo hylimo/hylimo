@@ -176,6 +176,20 @@ export class ConstExpression extends Expression {
 }
 
 /**
+ * An expression which provides a callback which should be executed by the interpreter
+ */
+export class NativeExpression extends Expression {
+    static readonly TYPE = "NativeExpression";
+    /**
+     * Creates a new NativeExpression which evaluates to the result of the callback
+     * @param callback the callback which should be executed by the ExecutableNativeExpression
+     */
+    constructor(readonly callback: (context: InterpreterContext) => FieldEntry) {
+        super(NativeExpression.TYPE, ExpressionMetadata.NO_EDIT);
+    }
+}
+
+/**
  * Destructuring expression
  * Evaluates the right side, and assigns all names on the left side the value at their index
  */

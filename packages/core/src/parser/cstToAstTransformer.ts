@@ -628,7 +628,11 @@ function generatePosition(
         endPos = end;
     }
     return {
-        ...startPos,
-        ...endPos
+        startOffset: startPos.startOffset,
+        startLine: startPos.startLine,
+        startColumn: startPos.startColumn,
+        endOffset: endPos.endOffset,
+        endLine: endPos.endLine,
+        endColumn: endPos.endColumn
     };
 }

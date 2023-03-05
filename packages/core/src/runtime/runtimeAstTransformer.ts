@@ -11,7 +11,8 @@ import {
     NumberLiteralExpression,
     SelfInvocationExpression,
     StringLiteralExpression,
-    Expression
+    Expression,
+    NativeExpression
 } from "../ast/ast";
 import { ASTVisitor } from "../ast/astVisitor";
 import { InvocationArgument } from "../ast/invocationArgument";
@@ -25,6 +26,7 @@ import { ExecutableFieldAccessExpression } from "./ast/executableFieldAccessExpr
 import { ExecutableFunctionExpression } from "./ast/executableFunctionExpression";
 import { ExecutableIdentifierExpression } from "./ast/executableIdentifierExpression";
 import { ExecutableInvocationExpression } from "./ast/executableInvocationExpression";
+import { ExecutableNativeExpression } from "./ast/executableNativeExpression";
 import { ExecutableNativeFunctionExpression } from "./ast/executableNativeFunctionExpression";
 import { ExecutableNumberLiteralExpression } from "./ast/executableNumberLiteralExpression";
 import { ExecutableSelfInvocationExpression } from "./ast/executableSelfInvocationExpression";
@@ -92,6 +94,10 @@ export class RuntimeAstTransformer extends ASTVisitor<undefined, ExecutableExpre
 
     override visistStringLiteralExpression(expression: StringLiteralExpression): ExecutableExpression<any> {
         return new ExecutableStringLiteralExpression(expression);
+    }
+
+    override visitNativeExpression(expression: NativeExpression): ExecutableExpression<any> {
+        return new ExecutableNativeExpression(expression);
     }
 
     override visit(expression: Expression): ExecutableExpression<any> {
