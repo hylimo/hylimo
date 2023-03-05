@@ -34,7 +34,7 @@ export class ExecutableSelfInvocationExpression extends ExecutableAbstractInvoca
         const fieldValue = targetValue.value.getField(this.expression.name, context);
         return fieldValue.invoke(
             [
-                { value: ExecutableConstExpression.of(targetValue), name: SemanticFieldNames.SELF },
+                { value: new ExecutableConstExpression(targetValue), name: SemanticFieldNames.SELF },
                 ...this.argumentExpressions
             ],
             context,

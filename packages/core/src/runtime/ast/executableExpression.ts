@@ -7,7 +7,7 @@ import { FieldEntry } from "../objects/baseObject";
  *
  * @param T the type of expression this represents
  */
-export abstract class ExecutableExpression<T extends Expression = Expression> {
+export abstract class ExecutableExpression<T extends Expression | undefined = Expression | undefined> {
     /**
      * Base constructor for all Expressions
      * @param metadata metadata for the expression

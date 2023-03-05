@@ -182,7 +182,7 @@ export const objectModule = InterpreterModule.create(
                                     ? new ExecutableStringLiteralExpression(str(key))
                                     : new ExecutableNumberLiteralExpression(num(key));
                             callback.invoke(
-                                [{ value: ExecutableConstExpression.of(value) }, { value: keyExpression }],
+                                [{ value: new ExecutableConstExpression(value) }, { value: keyExpression }],
                                 context
                             );
                         });

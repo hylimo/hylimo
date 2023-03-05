@@ -33,7 +33,10 @@ export class ExecutableInvocationExpression extends ExecutableAbstractInvocation
         const targetValue = this.target.evaluate(context).value;
         return targetValue.invoke(
             [
-                { value: ExecutableConstExpression.of({ value: context.currentScope }), name: SemanticFieldNames.SELF },
+                {
+                    value: new ExecutableConstExpression({ value: context.currentScope }),
+                    name: SemanticFieldNames.SELF
+                },
                 ...this.argumentExpressions
             ],
             context,

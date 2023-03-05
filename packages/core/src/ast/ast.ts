@@ -162,20 +162,6 @@ export class BracketExpression extends Expression {
 }
 
 /**
- * Wrapper over an already existing expression, can be used to prevent re-evaluation
- */
-export class ConstExpression extends Expression {
-    static readonly TYPE = "ConstExpression";
-    /**
-     * Creates a new ConstExpression with the specified value
-     * @param value the value which is wrapped
-     */
-    constructor(readonly value: FieldEntry) {
-        super(ConstExpression.TYPE, ExpressionMetadata.NO_EDIT);
-    }
-}
-
-/**
  * An expression which provides a callback which should be executed by the interpreter
  */
 export class NativeExpression extends Expression {

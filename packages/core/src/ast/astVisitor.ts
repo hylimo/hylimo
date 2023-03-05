@@ -2,7 +2,6 @@ import {
     Expression,
     AssignmentExpression,
     BracketExpression,
-    ConstExpression,
     DestructuringExpression,
     FieldAccessExpression,
     FunctionExpression,
@@ -36,8 +35,6 @@ export abstract class ASTVisitor<C, O> {
                 return this.visitAssignmentExpression(expression as AssignmentExpression, context);
             case BracketExpression.TYPE:
                 return this.visitBracketExpression(expression as BracketExpression, context);
-            case ConstExpression.TYPE:
-                return this.visitConstExpression(expression as ConstExpression, context);
             case DestructuringExpression.TYPE:
                 return this.visitDestructoringExpression(expression as DestructuringExpression, context);
             case FieldAccessExpression.TYPE:
@@ -65,7 +62,6 @@ export abstract class ASTVisitor<C, O> {
 
     abstract visitAssignmentExpression(expression: AssignmentExpression, context: C): O;
     abstract visitBracketExpression(expression: BracketExpression, context: C): O;
-    abstract visitConstExpression(expression: ConstExpression, context: C): O;
     abstract visitDestructoringExpression(expression: DestructuringExpression, context: C): O;
     abstract visitFieldAccessExpression(expression: FieldAccessExpression, context: C): O;
     abstract visitFunctionExpression(expression: FunctionExpression, context: C): O;

@@ -148,7 +148,7 @@ export const listModule = InterpreterModule.create(
                         for (let i = 0; i < length; i++) {
                             callback.invoke(
                                 [
-                                    { value: ExecutableConstExpression.of(self.getFieldEntry(i, context)) },
+                                    { value: new ExecutableConstExpression(self.getFieldEntry(i, context)) },
                                     { value: new ExecutableNumberLiteralExpression(num(i)) }
                                 ],
                                 context
@@ -231,7 +231,7 @@ export const listModule = InterpreterModule.create(
                             const list = listFunction.invoke(args, context);
                             const callback = staticScope.getField("callback", context);
                             const invokeArguments: ExecutableInvocationArgument[] = [
-                                { value: ExecutableConstExpression.of(list) }
+                                { value: new ExecutableConstExpression(list) }
                             ];
                             const selfArgument = args.find((arg) => arg.name === SemanticFieldNames.SELF);
                             if (selfArgument != undefined) {

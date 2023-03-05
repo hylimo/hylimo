@@ -1,7 +1,6 @@
 import {
     AssignmentExpression,
     BracketExpression,
-    ConstExpression,
     DestructuringExpression,
     FieldAccessExpression,
     FunctionExpression,
@@ -46,10 +45,6 @@ export class RuntimeAstTransformer extends ASTVisitor<undefined, ExecutableExpre
 
     override visitBracketExpression(expression: BracketExpression): ExecutableExpression<any> {
         return new ExecutableBracketExpression(expression, this.visit(expression.expression));
-    }
-
-    override visitConstExpression(expression: ConstExpression): ExecutableExpression<any> {
-        return new ExecutableConstExpression(expression);
     }
 
     override visitDestructoringExpression(expression: DestructuringExpression): ExecutableExpression<any> {
