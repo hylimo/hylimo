@@ -1,3 +1,5 @@
+import { AbstractInvocationExpression } from "../../ast/ast";
+import { ExecutableInvocationArgument } from "../ast/executableAbstractInvocationExpression";
 import { InterpreterContext } from "../interpreter";
 import { RuntimeError } from "../runtimeError";
 import { SemanticFieldNames } from "../semanticFieldNames";
@@ -208,5 +210,14 @@ export class FullObject extends BaseObject {
             });
         }
         return this.nativeObject;
+    }
+
+    override invoke(
+        _args: ExecutableInvocationArgument[],
+        _context: InterpreterContext,
+        _scope?: FullObject,
+        _callExpression?: AbstractInvocationExpression
+    ): FieldEntry {
+        throw new RuntimeError("Invoke not supported");
     }
 }

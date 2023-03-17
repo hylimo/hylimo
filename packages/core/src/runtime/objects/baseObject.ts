@@ -78,14 +78,12 @@ export abstract class BaseObject {
      * @param scope if provided, the scope to use
      * @param callExpression the expression which causes the call and returns the results
      */
-    invoke(
-        _args: ExecutableInvocationArgument[],
-        _context: InterpreterContext,
-        _scope?: FullObject,
-        _callExpression?: AbstractInvocationExpression
-    ): FieldEntry {
-        throw new RuntimeError("Invoke not supported");
-    }
+    abstract invoke(
+        args: ExecutableInvocationArgument[],
+        context: InterpreterContext,
+        scope?: FullObject,
+        callExpression?: AbstractInvocationExpression
+    ): FieldEntry;
 
     /**
      * Creates a readable string representation
@@ -143,6 +141,15 @@ export abstract class SimpleObject extends BaseObject {
 
     override deleteField(_key: string | number, _context: InterpreterContext): void {
         throw new RuntimeError("Cannot delete field of a non-Object");
+    }
+
+    override invoke(
+        _args: ExecutableInvocationArgument[],
+        _context: InterpreterContext,
+        _scope?: FullObject,
+        _callExpression?: AbstractInvocationExpression
+    ): FieldEntry {
+        throw new RuntimeError("Invoke not supported");
     }
 }
 

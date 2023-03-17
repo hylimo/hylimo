@@ -31,11 +31,14 @@ const scopeExpressions: Expression[] = [
     ...parse(
         `
             callback = it
-            ${scope} = object(
-                _styles = styles({ }),
+            scope = object(
                 fonts = list(defaultFonts.roboto, defaultFonts.openSans, defaultFonts.sourceCodePro),
                 contents = list(),
-                _classCounter = 0
+                internal = object(
+                    classCounter = 0,
+                    styles = styles({ })
+                ),
+                protos = object()
             )
         `
     ),
@@ -109,8 +112,8 @@ const scopeExpressions: Expression[] = [
             `
                 (first, second) = args
                 if(second != null) {
-                    className = "canvas-content-" + scope._classCounter
-                    scope._classCounter = scope._classCounter + 1
+                    className = "canvas-content-" + scope.internal.classCounter
+                    scope.internal.classCounter = scope.internal.classCounter + 1
                     if (first.class == null) {
                         first.class = list(className)
                     } {
@@ -131,7 +134,7 @@ const scopeExpressions: Expression[] = [
                     first
                 } {
                     resultStyles = styles(first)
-                    scope._styles.styles.addAll(resultStyles.styles)
+                    scope.internal.styles.styles.addAll(resultStyles.styles)
                 }
             `,
             {
@@ -341,36 +344,40 @@ const scopeExpressions: Expression[] = [
             `
         )
     ),
-    id(scope).assignField(
-        "withRegisterSource",
-        jsFun((args, context) => {
-            const callback = args.getField(0, context) as AbstractFunctionObject<
-                ExecutableAbstractFunctionExpression<AbstractFunctionExpression>
-            >;
-            const wrapperFunctionCallback: NativeFunctionType = (args, context, staticScope, callExpression) => {
-                const result = callback.invoke(args, context);
-                result.value.setLocalField("source", {
-                    value: result.value,
-                    source: callExpression
-                });
-                return result;
-            };
-            const wrapperFunctionExpression = new NativeFunctionExpression(
-                wrapperFunctionCallback,
-                callback.definition.expression.decorator,
-                ExpressionMetadata.NO_EDIT
-            );
-            return new ExecutableNativeFunctionExpression(wrapperFunctionExpression).evaluate(context);
-        })
-    ),
-    id(scope).assignField(
-        "createConnectionOperator",
-        fun(
-            `
+    id(scope)
+        .field("internal")
+        .assignField(
+            "withRegisterSource",
+            jsFun((args, context) => {
+                const callback = args.getField(0, context) as AbstractFunctionObject<
+                    ExecutableAbstractFunctionExpression<AbstractFunctionExpression>
+                >;
+                const wrapperFunctionCallback: NativeFunctionType = (args, context, staticScope, callExpression) => {
+                    const result = callback.invoke(args, context);
+                    result.value.setLocalField("source", {
+                        value: result.value,
+                        source: callExpression
+                    });
+                    return result;
+                };
+                const wrapperFunctionExpression = new NativeFunctionExpression(
+                    wrapperFunctionCallback,
+                    callback.definition.expression.decorator,
+                    ExpressionMetadata.NO_EDIT
+                );
+                return new ExecutableNativeFunctionExpression(wrapperFunctionExpression).evaluate(context);
+            })
+        ),
+    id(scope)
+        .field("internal")
+        .assignField(
+            "createConnectionOperator",
+            fun(
+                `
                 startMarkerFactory = args.startMarkerFactory
                 endMarkerFactory = args.endMarkerFactory
                 class = args.class
-                scope.withRegisterSource {
+                scope.internal.withRegisterSource {
                     (start, end) = args
                     _createConnection(
                         start,
@@ -381,8 +388,8 @@ const scopeExpressions: Expression[] = [
                     )
                 }
             `,
-            {
-                docs: `
+                {
+                    docs: `
                     Creates new connection operator function which can be used create new connections.
                     Params:
                         - 0: optional start marker
@@ -390,9 +397,9 @@ const scopeExpressions: Expression[] = [
                     Returns:
                         The generated eonnection operator function
                 `
-            }
-        )
-    ),
+                }
+            )
+        ),
     id(scope).assignField(
         "Position",
         enumObject({
@@ -432,7 +439,7 @@ const scopeExpressions: Expression[] = [
             scopeEnhancer(scope)
             callback.callWithScope(scope)
             diagramCanvas = canvas(contents = scope.contents)
-            diagram(diagramCanvas, scope._styles, scope.fonts)
+            diagram(diagramCanvas, scope.internal.styles, scope.fonts)
         `
     )
 ];

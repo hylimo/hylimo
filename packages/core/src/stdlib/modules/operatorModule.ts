@@ -112,11 +112,11 @@ export const operatorModule = InterpreterModule.create(
                     let second = args.getFieldEntry(1, context);
                     if (isString(first.value) && !isString(second.value)) {
                         second = context
-                            .getField("toStr")
+                            .getGlobalField("toStr")
                             .invoke([{ value: new ExecutableConstExpression(second) }], context);
                     } else if (isString(second.value) && !isString(first.value)) {
                         first = context
-                            .getField("toStr")
+                            .getGlobalField("toStr")
                             .invoke([{ value: new ExecutableConstExpression(first) }], context);
                     }
                     return first.value

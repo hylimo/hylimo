@@ -1,6 +1,9 @@
+import { AbstractInvocationExpression } from "../../ast/ast";
+import { ExecutableInvocationArgument } from "../ast/executableAbstractInvocationExpression";
 import { InterpreterContext } from "../interpreter";
 import { RuntimeError } from "../runtimeError";
 import { BaseObject, FieldEntry } from "./baseObject";
+import { FullObject } from "./fullObject";
 
 /**
  * BaseObject supporting neither get or set field, or call.
@@ -29,6 +32,15 @@ export class NullObject extends BaseObject {
 
     override deleteField(key: string | number, _context: InterpreterContext): void {
         throw new RuntimeError(`Deleting fields on null not supported: try to delete ${key}`);
+    }
+
+    override invoke(
+        _args: ExecutableInvocationArgument[],
+        _context: InterpreterContext,
+        _scope?: FullObject,
+        _callExpression?: AbstractInvocationExpression
+    ): FieldEntry {
+        throw new RuntimeError("Invoking null is not supported");
     }
 
     override toString(): string {

@@ -197,7 +197,7 @@ export const numberModule = InterpreterModule.create(
                 jsFun(
                     (args, context) => {
                         return toBoolean(
-                            assertNumber(args.getField(SemanticFieldNames.SELF, context)) <
+                            assertNumber(args.getField(SemanticFieldNames.SELF, context)) <=
                                 assertNumber(args.getField(0, context)),
                             context
                         );
@@ -220,7 +220,7 @@ export const numberModule = InterpreterModule.create(
                 jsFun(
                     (args, context) => {
                         return toBoolean(
-                            assertNumber(args.getField(SemanticFieldNames.SELF, context)) >
+                            assertNumber(args.getField(SemanticFieldNames.SELF, context)) >=
                                 assertNumber(args.getField(0, context)),
                             context
                         );

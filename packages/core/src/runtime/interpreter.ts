@@ -153,8 +153,18 @@ export class InterpreterContext {
      * @param key identifier of the field
      * @returns the value of the field
      */
-    getField(key: string | number): BaseObject {
+    getGlobalField(key: string | number): BaseObject {
         return this.globalScope.getField(key, this);
+    }
+
+    /**
+     * Gets a field on the current scope
+     *
+     * @param key identifier of the field
+     * @returns the value of the field
+     */
+    getField(key: string | number): BaseObject {
+        return this.currentScope.getField(key, this);
     }
 
     /**

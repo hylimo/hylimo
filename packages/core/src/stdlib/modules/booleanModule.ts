@@ -37,9 +37,9 @@ export function assertBoolean(value: BaseObject, description = ""): boolean {
  */
 export function toBoolean(value: boolean, context: InterpreterContext): BaseObject {
     if (value) {
-        return context.getField("true");
+        return context.getGlobalField("true");
     } else {
-        return context.getField("false");
+        return context.getGlobalField("false");
     }
 }
 

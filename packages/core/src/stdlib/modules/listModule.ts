@@ -233,16 +233,14 @@ export const listModule = InterpreterModule.create(
                             const invokeArguments: ExecutableInvocationArgument[] = [
                                 { value: new ExecutableConstExpression(list) }
                             ];
-                            const selfArgument = args.find((arg) => arg.name === SemanticFieldNames.SELF);
-                            if (selfArgument != undefined) {
-                                invokeArguments.push(selfArgument);
-                            }
+                            invokeArguments.push(...args.filter((arg) => arg.name !== undefined));
                             return callback.invoke(invokeArguments, context);
                         })
                     ],
                     {
                         docs: `
-                            Creates a function which puts all parameters in a list, and then calls callback with that list
+                            Creates a function which puts all indexed parameters in a list, and then calls callback with that list.
+                            Also provides all named arguments to the callback under the same name.
                             Params:
                                 - 0: the callback to use
                             Returns:
