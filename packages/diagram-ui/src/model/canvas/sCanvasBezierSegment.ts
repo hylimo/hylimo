@@ -1,9 +1,8 @@
-import { BezierSegment, CanvasBezierSegment, MarkerRenderInformation, Point } from "@hylimo/diagram-common";
+import { CanvasBezierSegment, Point, SegmentLayoutInformation } from "@hylimo/diagram-common";
 import { VNode } from "snabbdom";
 import { svg } from "sprotty";
-import { SCanvasConnectionSegment, SegmentLayoutInformation } from "./sCanvasConnectionSegment";
+import { SCanvasConnectionSegment } from "./sCanvasConnectionSegment";
 import { SCanvasPoint } from "./sCanvasPoint";
-import { SMarker } from "./sMarker";
 
 /**
  * Model for CanvasBezierSegment
@@ -46,25 +45,6 @@ export class SCanvasBezierSegment extends SCanvasConnectionSegment implements Ca
         return [this.end, this.startControlPoint, this.endControlPoint];
     }
 
-    override calculateMarkerRenderInformation(marker: SMarker, start: Point): MarkerRenderInformation {
-        if (marker.pos == "start") {
-            return CanvasBezierSegment.calculateMarkerRenderInformation(start, this.startControlPointPosition, marker);
-        } else {
-            return CanvasBezierSegment.calculateMarkerRenderInformation(
-                this.endPosition,
-                this.endControlPointPosition,
-                marker
-            );
-        }
-    }
-
-    override generatePathString(layout: SegmentLayoutInformation): string {
-        const c1 = this.startControlPointPosition;
-        const c2 = this.endControlPointPosition;
-        const end = layout.end;
-        return `C ${c1.x} ${c1.y} ${c2.x} ${c2.y} ${end.x} ${end.y}`;
-    }
-
     override generateControlViewElements(layout: SegmentLayoutInformation): VNode[] {
         const c1 = this.startControlPointPosition;
         const c2 = this.endControlPointPosition;
@@ -94,17 +74,6 @@ export class SCanvasBezierSegment extends SCanvasConnectionSegment implements Ca
                     [className]: true
                 }
             })
-        ];
-    }
-
-    override generateSegments(layout: SegmentLayoutInformation): BezierSegment[] {
-        return [
-            {
-                type: BezierSegment.TYPE,
-                end: layout.end,
-                startControlPoint: this.startControlPointPosition,
-                endControlPoint: this.endControlPointPosition
-            }
         ];
     }
 }

@@ -37,12 +37,11 @@ export namespace Marker {
     }
 }
 /**
- * Information required to rendre a CanvasConnectionSegment with a marker
+ * Information required to layout a CanvasConnectionSegment with a marker
  */
-
-export interface MarkerRenderInformation {
+export interface MarkerLayoutInformation {
     /**
-     * The new point to render the CanvasConnectionSegment
+     * The new point to layout the CanvasConnectionSegment
      */
     newPoint: Point;
     /**

@@ -1,10 +1,9 @@
-import { CanvasConnection, MarkerRenderInformation, Point, TransformedLine } from "@hylimo/diagram-common";
+import { CanvasConnection, CanvasConnectionLayout, Point, TransformedLine } from "@hylimo/diagram-common";
 import { LinearAnimatable } from "../../features/animation/model";
 import { LineProvider } from "../../features/layout/lineProvider";
 import { SCanvasConnectionSegment } from "./sCanvasConnectionSegment";
 import { SCanvasContent } from "./sCanvasContent";
 import { SCanvasPoint } from "./sCanvasPoint";
-import { identity } from "transformation-matrix";
 import { SMarker } from "./sMarker";
 
 /**
@@ -51,13 +50,9 @@ export class SCanvasConnection extends SCanvasContent implements CanvasConnectio
      */
     segments!: SCanvasConnectionSegment[];
     /**
-     * Render information for the start marker, if existing
+     * Layout used for rendering
      */
-    startMarkerInformation?: MarkerRenderInformation;
-    /**
-     * Render information for the end marker, if existing
-     */
-    endMarkerInformation?: MarkerRenderInformation;
+    layout!: CanvasConnectionLayout;
     /**
      * The provided line
      */
@@ -87,60 +82,11 @@ export class SCanvasConnection extends SCanvasContent implements CanvasConnectio
                 (child) => child instanceof SCanvasConnectionSegment
             ) as SCanvasConnectionSegment[];
         });
-        this.cachedProperty<MarkerRenderInformation | null>("startMarkerInformation", () => {
-            const startMarker = this.startMarker;
-            const startPos = this.startPosition;
-            if (startMarker != null) {
-                const startSegment = this.segments[0];
-                return startSegment.calculateMarkerRenderInformation(startMarker, startPos);
-            } else {
-                return null;
-            }
-        });
-        this.cachedProperty<MarkerRenderInformation | null>("endMarkerInformation", () => {
-            const endMarker = this.endMarker;
-            if (endMarker != null) {
-                let endStartPosition: Point;
-                const segments = this.segments;
-                if (segments.length == 1) {
-                    endStartPosition = this.startPosition;
-                } else {
-                    endStartPosition = segments.at(-2)!.endPosition;
-                }
-                return segments.at(-1)!.calculateMarkerRenderInformation(endMarker, endStartPosition);
-            } else {
-                return null;
-            }
+        this.cachedProperty<CanvasConnectionLayout>("layout", () => {
+            return this.parent.layoutEngine.layoutConnection(this);
         });
         this.cachedProperty<TransformedLine>("line", () => {
-            let originalStart = this.startPosition;
-            const start = this.startMarkerInformation?.newPoint ?? originalStart;
-            let startPos = start;
-            const segments = this.segments;
-            const lineSegments = segments.flatMap((segment, i) => {
-                let endPos: Point;
-                if (i == segments.length - 1) {
-                    endPos = this.endMarkerInformation?.newPoint ?? segment.endPosition;
-                } else {
-                    endPos = segment.endPosition;
-                }
-                const result = segment.generateSegments({
-                    start: startPos,
-                    end: endPos,
-                    originalStart,
-                    originalEnd: segment.endPosition
-                });
-                startPos = endPos;
-                originalStart = segment.endPosition;
-                return result;
-            });
-            return {
-                transform: identity(),
-                line: {
-                    start,
-                    segments: lineSegments
-                }
-            };
+            return this.parent.layoutEngine.layoutLine(this);
         });
     }
 

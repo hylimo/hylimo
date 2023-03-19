@@ -1,0 +1,16 @@
+{
+    "name": "@hylimo/diagram-render",
+    "version": "0.0.1",
+    "main": "lib/index",
+    "types": "lib/index",
+    "files": [
+        "lib",
+        "src"
+    ],
+    "scripts": {
+        "build": "tsc"
+    },
+    "dependencies": {
+        "@hylimo/diagram": "^0.0.1"
+    }
+}

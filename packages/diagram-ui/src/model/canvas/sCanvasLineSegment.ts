@@ -1,6 +1,5 @@
-import { CanvasLineSegment, LineSegment, MarkerRenderInformation, Point } from "@hylimo/diagram-common";
-import { SCanvasConnectionSegment, SegmentLayoutInformation } from "./sCanvasConnectionSegment";
-import { SMarker } from "./sMarker";
+import { CanvasLineSegment, SegmentLayoutInformation } from "@hylimo/diagram-common";
+import { SCanvasConnectionSegment } from "./sCanvasConnectionSegment";
 import { VNode } from "snabbdom";
 
 /**
@@ -12,30 +11,7 @@ export class SCanvasLineSegment extends SCanvasConnectionSegment implements Canv
         return [this.end];
     }
 
-    override calculateMarkerRenderInformation(marker: SMarker, start: Point): MarkerRenderInformation {
-        const end = this.endPosition;
-        if (marker.pos == "start") {
-            return CanvasLineSegment.calculateMarkerRenderInformation(start, end, marker);
-        } else {
-            return CanvasLineSegment.calculateMarkerRenderInformation(end, start, marker);
-        }
-    }
-
-    override generatePathString(layout: SegmentLayoutInformation): string {
-        const end = layout.end;
-        return `L ${end.x} ${end.y}`;
-    }
-
     override generateControlViewElements(_layout: SegmentLayoutInformation): VNode[] {
         return [];
-    }
-
-    override generateSegments(layout: SegmentLayoutInformation): LineSegment[] {
-        return [
-            {
-                type: LineSegment.TYPE,
-                end: layout.end
-            }
-        ];
     }
 }

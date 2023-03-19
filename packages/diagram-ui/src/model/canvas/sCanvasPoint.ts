@@ -9,7 +9,7 @@ export abstract class SCanvasPoint extends SCanvasContent implements CanvasPoint
     /**
      * The provided position
      */
-    abstract position: Point;
+    position!: Point;
     /**
      * If present, this point is manipulatable
      */
@@ -20,5 +20,12 @@ export abstract class SCanvasPoint extends SCanvasContent implements CanvasPoint
      */
     get isVisible(): boolean {
         return this.parent.pointVisibilityManager.isVisible(this.id);
+    }
+
+    constructor() {
+        super();
+        this.cachedProperty<Point>("position", () => {
+            return this.parent.layoutEngine.getPoint(this.id);
+        });
     }
 }

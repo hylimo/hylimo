@@ -5,7 +5,6 @@ import { PositionProvider } from "../../features/layout/positionProvider";
 import { SLayoutedElement } from "../sLayoutedElement";
 import { SCanvasContent } from "./sCanvasContent";
 import { SCanvasPoint } from "./sCanvasPoint";
-import { compose, translate, rotateDEG } from "transformation-matrix";
 
 /**
  * Anbimated fields for SCanvasElement
@@ -86,15 +85,7 @@ export class SCanvasElement
             }
         });
         this.cachedProperty<TransformedLine>("line", () => {
-            const position = this.position;
-            return {
-                line: this.outline,
-                transform: compose(
-                    translate(position.x, position.y),
-                    rotateDEG(this.rotation),
-                    translate(this.x, this.y)
-                )
-            };
+            return this.parent.layoutEngine.layoutLine(this);
         });
     }
 

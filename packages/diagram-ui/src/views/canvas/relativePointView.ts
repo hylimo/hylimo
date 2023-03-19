@@ -15,12 +15,13 @@ export class RelativePointView extends CanvasPointView<SRelativePoint> {
         _args?: IViewArgs | undefined
     ): VNode | undefined {
         const position = model.position;
+        const target = model.targetPosition;
         return svg(
             "g",
             null,
             svg("polyline", {
                 attrs: {
-                    points: `${position.target.x},${position.target.y} ${position.target.x},${position.y} ${position.x},${position.y}`
+                    points: `${target.x},${target.y} ${target.x},${position.y} ${position.x},${position.y}`
                 },
                 class: {
                     "canvas-dependency-line": true

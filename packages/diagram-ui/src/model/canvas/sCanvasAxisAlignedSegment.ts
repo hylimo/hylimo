@@ -1,14 +1,7 @@
-import {
-    CanvasAxisAlignedSegment,
-    LineSegment,
-    MarkerRenderInformation,
-    ModificationSpecification,
-    Point
-} from "@hylimo/diagram-common";
+import { CanvasAxisAlignedSegment, ModificationSpecification, SegmentLayoutInformation } from "@hylimo/diagram-common";
 import { VNode } from "snabbdom";
 import { svg } from "sprotty";
-import { SCanvasConnectionSegment, SegmentLayoutInformation } from "./sCanvasConnectionSegment";
-import { SMarker } from "./sMarker";
+import { SCanvasConnectionSegment } from "./sCanvasConnectionSegment";
 
 export class SCanvasAxisAlignedSegment extends SCanvasConnectionSegment implements CanvasAxisAlignedSegment {
     /**
@@ -28,30 +21,6 @@ export class SCanvasAxisAlignedSegment extends SCanvasConnectionSegment implemen
 
     override get dependencies(): string[] {
         return [this.end];
-    }
-
-    override calculateMarkerRenderInformation(marker: SMarker, start: Point): MarkerRenderInformation {
-        if (marker.pos == "start") {
-            return CanvasAxisAlignedSegment.calculateMarkerRenderInformation(
-                start,
-                this.endPosition,
-                this.verticalPos,
-                marker
-            );
-        } else {
-            return CanvasAxisAlignedSegment.calculateMarkerRenderInformation(
-                this.endPosition,
-                start,
-                1 - this.verticalPos,
-                marker
-            );
-        }
-    }
-
-    override generatePathString(layout: SegmentLayoutInformation): string {
-        const { start, end } = layout;
-        const verticalX = start.x + (end.x - start.x) * this.verticalPos;
-        return `H ${verticalX} V ${end.y} H ${end.x}`;
     }
 
     override generateControlViewElements(layout: SegmentLayoutInformation): VNode[] {
@@ -78,30 +47,5 @@ export class SCanvasAxisAlignedSegment extends SCanvasConnectionSegment implemen
         } else {
             return [];
         }
-    }
-
-    override generateSegments(layout: SegmentLayoutInformation): LineSegment[] {
-        const { start, end } = layout;
-        const verticalX = start.x + (end.x - start.x) * this.verticalPos;
-        return [
-            {
-                type: LineSegment.TYPE,
-                end: {
-                    x: verticalX,
-                    y: start.y
-                }
-            },
-            {
-                type: LineSegment.TYPE,
-                end: {
-                    x: verticalX,
-                    y: end.y
-                }
-            },
-            {
-                type: LineSegment.TYPE,
-                end
-            }
-        ];
     }
 }

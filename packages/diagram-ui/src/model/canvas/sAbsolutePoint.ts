@@ -22,10 +22,6 @@ export class SAbsolutePoint extends SCanvasPoint implements AbsolutePoint, Point
      */
     y!: number;
 
-    override get position(): Point {
-        return { x: this.x, y: this.y };
-    }
-
     override get dependencies(): string[] {
         return [];
     }

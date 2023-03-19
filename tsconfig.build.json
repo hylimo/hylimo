@@ -22,6 +22,9 @@
         },
         {
             "path": "packages/diagram-protocol"
+        },
+        {
+            "path": "packages/diagram-render"
         }
     ]
 }

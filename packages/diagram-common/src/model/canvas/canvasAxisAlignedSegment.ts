@@ -1,7 +1,7 @@
 import { calculateMarkerRenderInformationInternal, CanvasConnectionSegment } from "./canvasConnectionSegment";
 import { Element } from "../base/element";
 import { Point } from "bezier-js";
-import { BaseMarker, MarkerRenderInformation } from "./marker";
+import { BaseMarker, MarkerLayoutInformation } from "./marker";
 import { ModificationSpecification } from "../modificationSpecification";
 
 /**
@@ -59,7 +59,7 @@ export namespace CanvasAxisAlignedSegment {
         endPoint: Point,
         verticalPos: number,
         marker: BaseMarker
-    ): MarkerRenderInformation {
+    ): MarkerLayoutInformation {
         if (verticalPos === 0) {
             return calculateMarkerRenderInformationInternal(pos, { x: pos.x, y: endPoint.y }, marker);
         } else {

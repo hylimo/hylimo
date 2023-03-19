@@ -26,10 +26,6 @@ export class SLinePoint extends SCanvasPoint implements LinePoint, LinearAnimata
      */
     distance?: number;
     /**
-     * Cached position on the line
-     */
-    position!: Point;
-    /**
      * Cached position without distance
      */
     rootPosition!: Point;
@@ -54,9 +50,6 @@ export class SLinePoint extends SCanvasPoint implements LinePoint, LinearAnimata
                     transform: identity()
                 };
             }
-        });
-        this.cachedProperty<Point>("position", () => {
-            return LineEngine.DEFAULT.getPoint(this.pos, this.distance ?? 0, this.line);
         });
         this.cachedProperty<Point>("rootPosition", () => {
             return LineEngine.DEFAULT.getPoint(this.pos, 0, this.line);

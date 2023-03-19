@@ -1,6 +1,6 @@
 import { Point } from "../../common/point";
 import { Element } from "../base/element";
-import { BaseMarker, MarkerRenderInformation } from "./marker";
+import { BaseMarker, MarkerLayoutInformation } from "./marker";
 import { Math2D } from "../../common/math";
 
 /**
@@ -25,7 +25,7 @@ export function calculateMarkerRenderInformationInternal(
     pos: Point,
     helperPos: Point,
     marker: BaseMarker
-): MarkerRenderInformation {
+): MarkerLayoutInformation {
     const markerWidth = marker.width * marker.lineStart;
     const rotation = (Math.atan2(pos.y - helperPos.y, pos.x - helperPos.x) * 180) / Math.PI;
     const normalizedDelta = Math2D.normalize(Math2D.sub(helperPos, pos));
