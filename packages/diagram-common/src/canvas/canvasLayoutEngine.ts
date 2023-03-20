@@ -177,13 +177,13 @@ export abstract class CanvasLayoutEngine {
         endMarkerInformation: MarkerLayoutInformation | null
     ): [Line, SegmentLayoutInformation[]] {
         let originalStart = connection.start;
-        const start = startMarkerInformation?.newPoint ?? originalStart;
+        const start = startMarkerInformation?.newPosition ?? originalStart;
         let startPos = start;
         const segments = connection.segments;
         const layouts = segments.map((segment, i) => {
             let endPos: Point;
             if (i == segments.length - 1) {
-                endPos = endMarkerInformation?.newPoint ?? this.getPoint(segment.end);
+                endPos = endMarkerInformation?.newPosition ?? this.getPoint(segment.end);
             } else {
                 endPos = this.getPoint(segment.end);
             }
@@ -258,35 +258,31 @@ export abstract class CanvasLayoutEngine {
     /**
      * Gets the point a canvas point is positioned at.
      *
-     * @param id the id of the point to get
+     * @param id the id of the point or canvas element to get
      * @returns the point the canvas point is positioned at
      */
     getPointInternal(pointId: string): Point {
-        const point = this.getElement(pointId);
-        if (point == null) {
+        const element = this.getElement(pointId);
+        if (element == null) {
             throw new Error(`Point with id ${pointId} not found`);
         }
-        if (AbsolutePoint.isAbsolutePoint(point)) {
-            return { x: point.x, y: point.y };
-        } else if (RelativePoint.isRelativePoint(point)) {
-            let target: Point;
-            const targetElement = this.getElement(point.target);
-            if (CanvasElement.isCanvasElement(targetElement)) {
-                if (targetElement.pos != undefined) {
-                    target = this.getPoint(targetElement.pos);
-                } else {
-                    target = Point.ORIGIN;
-                }
-            } else {
-                target = this.getPoint(point.target);
-            }
-            return { x: target.x + point.offsetX, y: target.y + point.offsetY };
-        } else if (LinePoint.isLinePoint(point)) {
-            const lineProvider = this.getElement(point.lineProvider);
+        if (AbsolutePoint.isAbsolutePoint(element)) {
+            return { x: element.x, y: element.y };
+        } else if (RelativePoint.isRelativePoint(element)) {
+            const target = this.getPoint(element.target);
+            return { x: target.x + element.offsetX, y: target.y + element.offsetY };
+        } else if (LinePoint.isLinePoint(element)) {
+            const lineProvider = this.getElement(element.lineProvider);
             const line = this.layoutLine(lineProvider as CanvasConnection | CanvasElement);
-            return LineEngine.DEFAULT.getPoint(point.pos, point.distance ?? 0, line);
+            return LineEngine.DEFAULT.getPoint(element.pos, element.distance ?? 0, line);
+        } else if (CanvasElement.isCanvasElement(element)) {
+            if (element.pos != undefined) {
+                return this.getPoint(element.pos);
+            } else {
+                return Point.ORIGIN;
+            }
         } else {
-            throw new Error(`Unknown point type: ${point.type}`);
+            throw new Error(`Unknown point type: ${element.type}`);
         }
     }
 

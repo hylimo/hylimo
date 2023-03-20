@@ -1,6 +1,6 @@
 import { Point } from "../../common/point";
 import { Element } from "../base/element";
-import { BaseMarker, MarkerLayoutInformation } from "./marker";
+import { Marker, MarkerLayoutInformation } from "./marker";
 import { CanvasConnectionSegment, calculateMarkerRenderInformationInternal } from "./canvasConnectionSegment";
 
 /**
@@ -54,7 +54,7 @@ export namespace CanvasBezierSegment {
     export function calculateMarkerRenderInformation(
         pos: Point,
         controlPoint: Point,
-        marker: BaseMarker
+        marker: Marker
     ): MarkerLayoutInformation {
         return calculateMarkerRenderInformationInternal(pos, controlPoint, marker);
     }

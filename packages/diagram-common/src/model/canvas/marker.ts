@@ -1,20 +1,17 @@
 import { Point } from "../../common/point";
-import { Size } from "../../common/size";
 import { Element } from "../base/element";
 import { SizedElement } from "../base/sizedElement";
 
-export interface BaseMarker extends Size {
-    /**
-     * The position on the vertical center line where the line actually starts
-     */
-    lineStart: number;
-}
 /**
  * Marker which can be placed at the start or end of a CanvasConnection
  */
 
-export interface Marker extends SizedElement, BaseMarker {
+export interface Marker extends SizedElement {
     type: typeof Marker.TYPE;
+    /**
+     * The position on the vertical center line where the line actually starts
+     */
+    lineStart: number;
     /**
      * Is it a start or end marker?
      */
@@ -41,9 +38,17 @@ export namespace Marker {
  */
 export interface MarkerLayoutInformation {
     /**
+     * The actual marker
+     */
+    marker: Marker;
+    /**
      * The new point to layout the CanvasConnectionSegment
      */
-    newPoint: Point;
+    newPosition: Point;
+    /**
+     * The position of the marker
+     */
+    position: Point;
     /**
      * The rotation in degrees (0-360)
      */

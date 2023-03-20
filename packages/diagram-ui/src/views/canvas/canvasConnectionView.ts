@@ -1,4 +1,4 @@
-import { MarkerLayoutInformation, Point } from "@hylimo/diagram-common";
+import { MarkerLayoutInformation } from "@hylimo/diagram-common";
 import { injectable } from "inversify";
 import { VNode } from "snabbdom";
 import { IView, IViewArgs, RenderingContext, svg } from "sprotty";
@@ -20,7 +20,7 @@ export class CanvasConnectionView implements IView {
         const segments = model.children.filter(
             (child) => child instanceof SCanvasConnectionSegment
         ) as SCanvasConnectionSegment[];
-        const childMarkers = this.renderMarkers(model, segments, context);
+        const childMarkers = this.renderMarkers(model, context);
         const { path, childControlElements } = this.renderPathAndControlElements(model, segments);
         return svg(
             "g",
@@ -73,21 +73,17 @@ export class CanvasConnectionView implements IView {
      * @param context rendering context
      * @returns the new start and end pos of the connection (without the markers), and the childMarkers
      */
-    private renderMarkers(
-        model: Readonly<SCanvasConnection>,
-        segments: SCanvasConnectionSegment[],
-        context: RenderingContext
-    ): VNode[] {
+    private renderMarkers(model: Readonly<SCanvasConnection>, context: RenderingContext): VNode[] {
         const startMarker = model.startMarker;
         const endMarker = model.endMarker;
         const childMarkers: VNode[] = [];
         if (endMarker != undefined) {
             const renderInformation = model.layout.endMarker!;
-            childMarkers.push(this.renderMarker(endMarker, renderInformation, segments.at(-1)!.endPosition, context));
+            childMarkers.push(this.renderMarker(endMarker, renderInformation, context));
         }
         if (startMarker != undefined) {
             const renderInformation = model.layout.startMarker!;
-            childMarkers.push(this.renderMarker(startMarker, renderInformation, model.startPosition, context));
+            childMarkers.push(this.renderMarker(startMarker, renderInformation, context));
         }
         return childMarkers;
     }
@@ -96,24 +92,20 @@ export class CanvasConnectionView implements IView {
      * Renders a marker
      *
      * @param marker the marker to render
-     * @param renderInformation required information for rendering
+     * @param markerLayout required information for rendering
      * @param position the position of the marker
      * @param context rendering context
      * @returns the rendered marker
      */
-    private renderMarker(
-        marker: SMarker,
-        renderInformation: MarkerLayoutInformation,
-        position: Point,
-        context: RenderingContext
-    ): VNode {
-        const translation = `translate(${position.x - marker.width},${position.y - marker.height / 2})`;
-        const rotation = `rotate(${renderInformation.rotation},${marker.width},${marker.height / 2})`;
+    private renderMarker(marker: SMarker, markerLayout: MarkerLayoutInformation, context: RenderingContext): VNode {
+        const rotation = markerLayout.rotation;
+        const { x, y } = markerLayout.position;
+        const { width, height } = marker;
         return svg(
             "g",
             {
                 attrs: {
-                    transform: translation + rotation
+                    transform: `translate(${x},${y}) rotate(${rotation}) translate(${-width},${-height / 2})`
                 }
             },
             context.renderElement(marker)
