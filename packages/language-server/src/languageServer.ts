@@ -113,7 +113,7 @@ export class LanguageServer {
             ...config.additionalInterpreterModules
         ];
         const interpreter = new Interpreter(interpreterModules, config.maxExecutionSteps);
-        const parser = new Parser(true);
+        const parser = new Parser();
         this.diagramUtils = {
             config: config.defaultConfig,
             connection: this.connection,

@@ -81,7 +81,7 @@ export class LocalDiagramImplementation extends DiagramImplementation {
         const pos = error.position;
         let location: Range;
         if (!Number.isNaN(error.token.startLine)) {
-            location = Range.create(pos.startLine!, pos.startColumn!, pos.endLine!, pos.endColumn!);
+            location = Range.create(pos.startLine, pos.startColumn, pos.endLine, pos.endColumn);
         } else {
             location = Range.create(0, 0, uinteger.MAX_VALUE, uinteger.MAX_VALUE);
         }
@@ -158,9 +158,9 @@ export class LocalDiagramImplementation extends DiagramImplementation {
     ): Promise<CompletionItem[] | undefined> {
         this.document = TextDocument.create("", "sys", 0, source);
         const items = this.utils.completionEngine.complete(
-            this.document!.getText(),
+            this.document.getText(),
             this.utils.diagramEngine.convertConfig(config),
-            this.document!.offsetAt(position)
+            this.document.offsetAt(position)
         );
         return items;
     }

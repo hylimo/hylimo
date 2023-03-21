@@ -9,7 +9,7 @@ export abstract class Expression<M extends ExpressionMetadata = ExpressionMetada
     /**
      * Getter for the position from the metadata
      */
-    get position(): ASTExpressionPosition | undefined {
+    get position(): ASTExpressionPosition {
         return this.metadata.position;
     }
 

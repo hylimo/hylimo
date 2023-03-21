@@ -15,14 +15,14 @@ import { FactorReplacementNumberGenerator } from "../generators/factorReplacemen
  */
 export function generateFactorNumberGenerator(entry: FieldEntry, meta: any): EditGeneratorEntry {
     const source = entry.source;
-    const position = source?.position;
     if (source == undefined) {
         throw new Error("entry and its source must not be undefined");
     }
+    const position = source.position;
     if (source instanceof NumberLiteralExpression) {
         return {
-            start: position!.startOffset,
-            end: position!.endOffset,
+            start: position.startOffset,
+            end: position.endOffset,
             generator: FactorReplacementNumberGenerator.create(source.value),
             meta
         };
@@ -34,8 +34,8 @@ export function generateFactorNumberGenerator(entry: FieldEntry, meta: any): Edi
         }
     }
     return {
-        start: position!.endOffset,
-        end: position!.endOffset,
+        start: position.endOffset,
+        end: position.endOffset,
         generator: FactorMultiplicativeNumberGenerator.create(1),
         meta
     };
@@ -73,12 +73,12 @@ function generateFactorMultiplicativeNumberGeneratorIfPossible(
         return undefined;
     }
     const leftSideEndOffset = expression.argumentExpressions[0].value.position?.endOffset ?? Number.POSITIVE_INFINITY;
-    if (target.position!.startOffset < leftSideEndOffset) {
+    if (target.position.startOffset < leftSideEndOffset) {
         return undefined;
     }
     return {
         start: leftSideEndOffset,
-        end: expression.position!.endOffset,
+        end: expression.position.endOffset,
         generator: FactorMultiplicativeNumberGenerator.create(fraction ? 1 / rightSide.value : rightSide.value),
         meta
     };

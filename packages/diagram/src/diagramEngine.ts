@@ -79,7 +79,7 @@ export class DiagramEngine {
         if (parserResult.ast != undefined) {
             interpretationResult = this.interpreter.run([
                 ...this.convertConfig(config),
-                ...toExecutable(parserResult.ast)
+                ...toExecutable(parserResult.ast, true)
             ]);
             if (interpretationResult.result != undefined) {
                 try {

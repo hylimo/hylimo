@@ -12,7 +12,7 @@ export class CompletionEngine {
     /**
      * Fault tolerant parser used to parse the code
      */
-    private readonly parser = new Parser(true, true);
+    private readonly parser = new Parser(true);
 
     /**
      * Creates a new CompletionEngine with the given interpreter and max execution steps

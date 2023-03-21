@@ -12,13 +12,13 @@ import { ReplacementNumberGenerator } from "../generators/replacementNumberGener
  */
 export function generateReplacementNumberGenerator(entry: FieldEntry, meta: any): EditGeneratorEntry {
     const source = entry.source;
-    const position = source?.position;
     if (source == undefined) {
         throw new Error("entry and its source must not be undefined");
     }
+    const position = source.position;
     return {
-        start: position!.startOffset,
-        end: position!.endOffset,
+        start: position.startOffset,
+        end: position.endOffset,
         generator: ReplacementNumberGenerator.create(),
         meta
     };

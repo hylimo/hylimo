@@ -50,20 +50,6 @@ export interface CstVisitorParameters {
 
 export function generateCstToAstTransfromer(parser: Parser): ICstVisitor<CstVisitorParameters, any> {
     /**
-     * Helper to discard position information if parser does not allow tracking
-     *
-     * @param position the position to maybe return
-     * @returns parser.astPositions ? position : undefined
-     */
-    function optionalPosition(position: ASTExpressionPosition): ASTExpressionPosition | undefined {
-        if (parser.astPositions) {
-            return position;
-        } else {
-            return undefined;
-        }
-    }
-
-    /**
      * Helper which wraps generatePosition in metadata and optionalPosition.
      * Takes the
      * Also returns undefined if start or end is undefined.
@@ -78,10 +64,8 @@ export function generateCstToAstTransfromer(parser: Parser): ICstVisitor<CstVisi
         end: ASTExpressionPosition | IToken,
         params: CstVisitorParameters
     ): ExpressionMetadata {
-        let position: ASTExpressionPosition | undefined = undefined;
-        if (start != undefined && end != undefined) {
-            position = optionalPosition(generatePosition(start, end));
-        }
+        const position = generatePosition(start, end);
+
         return {
             position,
             isEditable: params.editable && position != undefined
@@ -312,7 +296,7 @@ export function generateCstToAstTransfromer(parser: Parser): ICstVisitor<CstVisi
             params: CstVisitorParameters
         ): Expression {
             let expression = baseExpression;
-            const startPos = baseExpression.position!;
+            const startPos = baseExpression.position;
             for (let i = 0; i < callBrackets.length; i++) {
                 const [args, endPos] = callBrackets[i];
                 expression = new InvocationExpression(expression, args, generateMetadata(startPos, endPos, params));
@@ -360,7 +344,7 @@ export function generateCstToAstTransfromer(parser: Parser): ICstVisitor<CstVisi
          */
         private fieldAccessExpression(ctx: any, params: CstVisitorParameters): Expression {
             let baseExpression = this.visit(ctx.callExpression, params);
-            const startPos = baseExpression.position!;
+            const startPos = baseExpression.position;
             if (ctx.simpleCallExpression) {
                 const accessDefininitions: AccessDefinition[] = ctx.simpleCallExpression.map((exp: CstNode) =>
                     this.visit(exp, params)
@@ -415,7 +399,7 @@ export function generateCstToAstTransfromer(parser: Parser): ICstVisitor<CstVisi
                     expression = new FieldAccessExpression(
                         identifier.image,
                         expression,
-                        generateCompletionMetadata(expression.position!, identifier, params, identifier)
+                        generateCompletionMetadata(expression.position, identifier, params, identifier)
                     );
                 } else {
                     expression = new IdentifierExpression(
@@ -446,7 +430,7 @@ export function generateCstToAstTransfromer(parser: Parser): ICstVisitor<CstVisi
         ): Expression {
             const dotPosition = generatePosition(dotToken, dotToken);
             return new FieldAccessExpression("", baseExpression, {
-                ...generateMetadata(baseExpression.position!, dotToken, params),
+                ...generateMetadata(baseExpression.position, dotToken, params),
                 completionPosition: dotPosition,
                 identifierPosition: {
                     startOffset: dotPosition.endOffset,

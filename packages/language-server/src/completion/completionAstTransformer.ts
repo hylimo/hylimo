@@ -22,7 +22,7 @@ export class CompletionAstTransformer extends RuntimeAstTransformer {
      * @param position the position in the source code where the completion is requested
      */
     constructor(private readonly position: number) {
-        super();
+        super(true);
     }
 
     override visitAssignmentExpression(expression: AssignmentExpression): ExecutableExpression<any> {

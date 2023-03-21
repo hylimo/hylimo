@@ -69,7 +69,7 @@ export abstract class ElementLayoutConfig implements LayoutConfig {
             if (!ExpressionMetadata.isEditable(expression?.metadata)) {
                 return null;
             }
-            const position = expression!.position!;
+            const position = expression!.position;
             result[key] = [position.startOffset, position.endOffset];
         }
         return result;

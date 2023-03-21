@@ -84,7 +84,7 @@ export class MoveMouseListener extends MouseListener {
         if (this.startPosition) {
             const root = target.root as SRoot;
             if (this.moveHandler === undefined) {
-                this.moveHandler = this.createHandler(target, this.targetElement!);
+                this.moveHandler = this.createHandler(target, this.targetElement);
                 root.sequenceNumber = 0;
                 this.sequenceNumber = 0;
             }

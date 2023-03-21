@@ -8,7 +8,7 @@ export interface ExpressionMetadata {
     /**
      * The position of the expression
      */
-    readonly position?: ASTExpressionPosition;
+    readonly position: ASTExpressionPosition;
     /**
      * If false, the expression should not be edited
      */
@@ -16,11 +16,6 @@ export interface ExpressionMetadata {
 }
 
 export namespace ExpressionMetadata {
-    /**
-     * Constant noEdit no position metadata
-     */
-    export const NO_EDIT: ExpressionMetadata = Object.freeze({ isEditable: false });
-
     /**
      * Checks if a ExpressionMetadata is editable
      *
@@ -40,9 +35,9 @@ export interface CompletionExpressionMetadata extends ExpressionMetadata {
      * The position of the part of the expression which is affected by complete.
      * E.g. for an FieldAccessExpression, this would be the position of the dot and the field name
      */
-    completionPosition?: ASTExpressionPosition;
+    completionPosition: ASTExpressionPosition;
     /**
      * The position of the identifier of the expression (the identifier which should be replaced on complete)
      */
-    identifierPosition?: ASTExpressionPosition;
+    identifierPosition: ASTExpressionPosition;
 }

@@ -41,7 +41,7 @@ export function generateAddFieldToScopeGenerator(
  * @returns the generated entry
  */
 function generateAddFieldToScope(scope: FunctionExpression, document: TextDocument, meta: any): EditGeneratorEntry {
-    const position = scope.position!;
+    const position = scope.position;
     if (position.startLine == position.endLine) {
         return generateAddFieldToScopeReplaceInner(position, document, meta);
     } else {
@@ -68,10 +68,10 @@ function generateCreateNewScope(
     if (source == undefined) {
         throw new Error("element must have a source");
     }
-    const indentation = extractIndentation(document, source.position!.startLine);
+    const indentation = extractIndentation(document, source.position.startLine);
     return {
-        start: source.position!.endOffset,
-        end: source.position!.endOffset,
+        start: source.position.endOffset,
+        end: source.position.endOffset,
         generator: FieldEntryGenerator.create(
             ` ${scopeName} {\n`,
             `\n${indentation}}`,

@@ -15,7 +15,7 @@ export class ExecutableDestructuringExpression extends ExecutableExpression<Dest
      * @param names the names of the fields to assign to
      */
     constructor(
-        expression: DestructuringExpression,
+        expression: DestructuringExpression | undefined,
         readonly value: ExecutableExpression<any>,
         readonly names: (string | number)[]
     ) {

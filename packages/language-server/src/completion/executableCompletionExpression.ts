@@ -65,7 +65,7 @@ export class ExecutableCompletionExpression extends ExecutableExpression<Express
             } else {
                 kind = isFunction ? CompletionItemKind.Function : CompletionItemKind.Variable;
             }
-            const range = this.expression!.metadata.identifierPosition!;
+            const range = this.expression!.metadata.identifierPosition;
             items.push(this.createCompletionItem(key, docs, range, kind));
             if (snippet != undefined) {
                 items.push(this.createSnippetCompletionItem(key, docs, snippet, range));

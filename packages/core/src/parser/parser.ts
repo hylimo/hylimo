@@ -85,10 +85,9 @@ export class Parser extends CstParser {
     /**
      * Creates a new parser
      *
-     * @param astPositions whether to generate AST positions
      * @param faultTolerant whether the parser accepts slightly invalid inputs
      */
-    constructor(readonly astPositions: boolean, readonly faultTolerant: boolean = false) {
+    constructor(readonly faultTolerant: boolean = false) {
         super(lexerDefinition, {
             nodeLocationTracking: "full"
         });

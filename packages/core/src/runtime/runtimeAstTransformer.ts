@@ -27,9 +27,18 @@ import { ExecutableStringLiteralExpression } from "./ast/executableStringLiteral
  * Transforms the AST into an executable AST
  */
 export class RuntimeAstTransformer extends ASTVisitor<undefined, ExecutableExpression<any>> {
+    /**
+     * Creates a new RuntimeAstTransformer
+     *
+     * @param keepExpression if true, the created executable expression will keep the original expression
+     */
+    constructor(private readonly keepExpression: boolean) {
+        super();
+    }
+
     override visitAssignmentExpression(expression: AssignmentExpression): ExecutableExpression<any> {
         return new ExecutableAssignmentExpression(
-            expression,
+            this.optionalExpression(expression),
             this.visitOptional(expression.target),
             this.visit(expression.value),
             expression.name
@@ -37,44 +46,52 @@ export class RuntimeAstTransformer extends ASTVisitor<undefined, ExecutableExpre
     }
 
     override visitBracketExpression(expression: BracketExpression): ExecutableExpression<any> {
-        return new ExecutableBracketExpression(expression, this.visit(expression.expression));
+        return new ExecutableBracketExpression(this.optionalExpression(expression), this.visit(expression.expression));
     }
 
     override visitDestructoringExpression(expression: DestructuringExpression): ExecutableExpression<any> {
-        return new ExecutableDestructuringExpression(expression, this.visit(expression.value), expression.names);
+        return new ExecutableDestructuringExpression(
+            this.optionalExpression(expression),
+            this.visit(expression.value),
+            expression.names
+        );
     }
 
     override visitFieldAccessExpression(expression: FieldAccessExpression): ExecutableExpression<any> {
-        return new ExecutableFieldAccessExpression(expression, this.visit(expression.target), expression.name);
+        return new ExecutableFieldAccessExpression(
+            this.optionalExpression(expression),
+            this.visit(expression.target),
+            expression.name
+        );
     }
 
     override visitFunctionExpression(expression: FunctionExpression): ExecutableExpression<any> {
         return new ExecutableFunctionExpression(
-            expression,
+            this.optionalExpression(expression),
             expression.expressions.map(this.visit.bind(this)),
             expression.decorator
         );
     }
 
     override visitIdentifierExpression(expression: IdentifierExpression): ExecutableExpression<any> {
-        return new ExecutableIdentifierExpression(expression, expression.identifier);
+        return new ExecutableIdentifierExpression(this.optionalExpression(expression), expression.identifier);
     }
 
     override visitInvocationExpression(expression: InvocationExpression): ExecutableExpression<any> {
         return new ExecutableInvocationExpression(
-            expression,
+            this.optionalExpression(expression),
             this.generateInvocationArguments(expression.argumentExpressions),
             this.visit(expression.target)
         );
     }
 
     override visitNumberLiteralExpression(expression: NumberLiteralExpression): ExecutableExpression<any> {
-        return new ExecutableNumberLiteralExpression(expression, expression.value);
+        return new ExecutableNumberLiteralExpression(this.optionalExpression(expression), expression.value);
     }
 
     override visitSelfInvocationExpression(expression: SelfInvocationExpression): ExecutableExpression<any> {
         return new ExecutableSelfInvocationExpression(
-            expression,
+            this.optionalExpression(expression),
             this.generateInvocationArguments(expression.argumentExpressions),
             this.visit(expression.target),
             expression.name
@@ -82,7 +99,7 @@ export class RuntimeAstTransformer extends ASTVisitor<undefined, ExecutableExpre
     }
 
     override visistStringLiteralExpression(expression: StringLiteralExpression): ExecutableExpression<any> {
-        return new ExecutableStringLiteralExpression(expression, expression.value);
+        return new ExecutableStringLiteralExpression(this.optionalExpression(expression), expression.value);
     }
 
     override visit(expression: Expression): ExecutableExpression<any> {
@@ -112,5 +129,15 @@ export class RuntimeAstTransformer extends ASTVisitor<undefined, ExecutableExpre
                 value: this.visit(arg.value)
             };
         });
+    }
+
+    /**
+     * Returns the provided expression if keepExpression is true, otherwise undefined
+     *
+     * @param expression the expression to return if keepExpression is true
+     * @returns the provided expression if keepExpression is true, otherwise undefined
+     */
+    private optionalExpression<T extends Expression>(expression: T): T | undefined {
+        return this.keepExpression ? expression : undefined;
     }
 }

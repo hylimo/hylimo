@@ -102,7 +102,7 @@ function parseDecorators(decorators: { [index: string]: string | null }): Map<st
 /**
  * Helper to parse function bodies
  */
-const parser = new Parser(false);
+const parser = new Parser();
 
 /**
  * Helper to parse some expressions
@@ -115,7 +115,7 @@ export function parse(expressions: string): ExecutableExpression[] {
     if (parserResult.lexingErrors.length > 0 || parserResult.parserErrors.length > 0) {
         throw new Error("Invalid fun to parse");
     }
-    return toExecutable(parserResult.ast!);
+    return toExecutable(parserResult.ast!, false);
 }
 
 /**
@@ -216,14 +216,18 @@ export function enumObject(entries: Record<string, string | number>): Executable
 /**
  * Helper to map an AST to an executable AST
  */
-const runtimeAstTransformer = new RuntimeAstTransformer();
+const runtimeAstTransformers = new Map([
+    [true, new RuntimeAstTransformer(true)],
+    [false, new RuntimeAstTransformer(false)]
+]);
 
 /**
  * Maps an array of AST expressions to an array of executable expressions
  *
  * @param expressions the expressions to map
+ * @param keepExpression if true, the executable expression has the original expression assigned
  * @returns the mapped expressions
  */
-export function toExecutable(expressions: Expression[]): ExecutableExpression<any>[] {
-    return expressions.map((expression) => runtimeAstTransformer.visit(expression));
+export function toExecutable(expressions: Expression[], keepExpression: boolean): ExecutableExpression<any>[] {
+    return expressions.map((expression) => runtimeAstTransformers.get(keepExpression)!.visit(expression));
 }

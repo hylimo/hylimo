@@ -15,14 +15,14 @@ import { DeltaReplacementNumberGenerator } from "../generators/deltaReplacementN
  */
 export function generateDeltaNumberGenerator(entry: FieldEntry, meta: any): EditGeneratorEntry {
     const source = entry.source;
-    const position = source?.position;
     if (source == undefined) {
         throw new Error("entry and its source must not be undefined");
     }
+    const position = source.position;
     if (source instanceof NumberLiteralExpression) {
         return {
-            start: position!.startOffset,
-            end: position!.endOffset,
+            start: position.startOffset,
+            end: position.endOffset,
             generator: DeltaReplacementNumberGenerator.create(source.value),
             meta
         };
@@ -34,8 +34,8 @@ export function generateDeltaNumberGenerator(entry: FieldEntry, meta: any): Edit
         }
     }
     return {
-        start: position!.endOffset,
-        end: position!.endOffset,
+        start: position.endOffset,
+        end: position.endOffset,
         generator: DeltaAdditiveNumberGenerator.create(0),
         meta
     };
@@ -73,12 +73,12 @@ function generateDeltaAdditiveNumberGeneratorIfPossible(
         return undefined;
     }
     const leftSideEndOffset = expression.argumentExpressions[0].value.position?.endOffset ?? Number.POSITIVE_INFINITY;
-    if (target.position!.startOffset < leftSideEndOffset) {
+    if (target.position.startOffset < leftSideEndOffset) {
         return undefined;
     }
     return {
         start: leftSideEndOffset,
-        end: expression.position!.endOffset,
+        end: expression.position.endOffset,
         generator: DeltaAdditiveNumberGenerator.create(rightSide.value * sign),
         meta
     };

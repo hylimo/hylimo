@@ -139,7 +139,7 @@ export class TransactionManager {
     updateLayoutedDiagram(layoutedDiagram: BaseLayoutedDiagram): void {
         if (this.lastKnownAction != undefined && this.lastAppliedAction != undefined && this.edit != undefined) {
             if (this.lastKnownAction != this.lastAppliedAction) {
-                const engine = this.registry.getEditEngine(this.edit!);
+                const engine = this.registry.getEditEngine(this.edit);
                 engine.predictActionDiff(this.edit, layoutedDiagram, this.lastAppliedAction, this.lastKnownAction);
             }
         }
