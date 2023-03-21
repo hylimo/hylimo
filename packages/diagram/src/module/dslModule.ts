@@ -1,19 +1,15 @@
 import {
-    AbstractFunctionExpression,
-    AbstractFunctionObject,
     assign,
     DefaultModuleNames,
     enumObject,
-    ExecutableAbstractFunctionExpression,
+    ExecutableExpression,
     ExecutableNativeFunctionExpression,
-    Expression,
-    ExpressionMetadata,
     fun,
+    FunctionObject,
     functionType,
     id,
     InterpreterModule,
     jsFun,
-    NativeFunctionExpression,
     NativeFunctionType,
     optional,
     parse
@@ -27,7 +23,7 @@ const scope = "scope";
 /**
  * Expressions which create the initial scope which is passed to the callback of all diagram DSL functions
  */
-const scopeExpressions: Expression[] = [
+const scopeExpressions: ExecutableExpression[] = [
     ...parse(
         `
             callback = it
@@ -349,9 +345,7 @@ const scopeExpressions: Expression[] = [
         .assignField(
             "withRegisterSource",
             jsFun((args, context) => {
-                const callback = args.getField(0, context) as AbstractFunctionObject<
-                    ExecutableAbstractFunctionExpression<AbstractFunctionExpression>
-                >;
+                const callback = args.getField(0, context) as FunctionObject;
                 const wrapperFunctionCallback: NativeFunctionType = (args, context, staticScope, callExpression) => {
                     const result = callback.invoke(args, context);
                     result.value.setLocalField("source", {
@@ -360,12 +354,10 @@ const scopeExpressions: Expression[] = [
                     });
                     return result;
                 };
-                const wrapperFunctionExpression = new NativeFunctionExpression(
+                return new ExecutableNativeFunctionExpression(
                     wrapperFunctionCallback,
-                    callback.definition.expression.decorator,
-                    ExpressionMetadata.NO_EDIT
-                );
-                return new ExecutableNativeFunctionExpression(wrapperFunctionExpression).evaluate(context);
+                    callback.definition.decorator
+                ).evaluate(context);
             })
         ),
     id(scope)

@@ -3,12 +3,12 @@ import {
     assertObject,
     assign,
     DefaultModuleNames,
-    Expression,
+    ExecutableExpression,
+    ExecutableInvocationArgument,
     fun,
     functionType,
     id,
     InterpreterModule,
-    InvocationArgument,
     jsFun,
     literal,
     namedType,
@@ -61,7 +61,7 @@ const allStyleAttributes = computeAllStyleAttributes();
  * @param element config of the element
  * @returns the function to create the element
  */
-function createElementFunction(element: LayoutConfig): Expression {
+function createElementFunction(element: LayoutConfig): ExecutableExpression {
     const allAttributes = [...element.attributes, ...element.styleAttributes];
     return jsFun(
         (args, context) => {
@@ -117,7 +117,7 @@ const fontType = objectType(
  * @param url the url of the font
  * @returns an invocation argument containing the font object
  */
-function font(name: string, url: string): InvocationArgument {
+function font(name: string, url: string): ExecutableInvocationArgument {
     return {
         name,
         value: id("font").call(str(url))

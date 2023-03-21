@@ -7,7 +7,6 @@ import {
     Element,
     LineCap,
     LineJoin,
-    Marker,
     MarkerLayoutInformation,
     Path,
     Point,
@@ -90,7 +89,7 @@ export abstract class SimplifiedDiagramVisitor<C, O> {
 
     /**
      * Simplifies a canvas connection by transforming it to a canvas element with a path, and canvas elements for both markers
-     * 
+     *
      * @param connection the connection to simplify
      * @param layoutEngine the layout engine of the parent canvas
      * @returns the simplified canvas element

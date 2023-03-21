@@ -1,25 +1,21 @@
-import {
-    IdentifierExpression,
-    StringLiteralExpression,
-    NumberLiteralExpression,
-    Expression,
-    AssignmentExpression,
-    FunctionExpression,
-    AbstractInvocationExpression,
-    NativeFunctionExpression,
-    NativeFunctionType,
-    NativeExpression
-} from "../ast/ast";
-import { ExpressionMetadata } from "../ast/expressionMetadata";
-import { InvocationArgument } from "../ast/invocationArgument";
-import { ExecutableExpression } from "../runtime/ast/executableExpression";
-import { InterpreterContext } from "../runtime/interpreter";
-import { BaseObject, FieldEntry } from "../runtime/objects/baseObject";
-import { FullObject } from "../runtime/objects/fullObject";
-import { generateArgs } from "../runtime/objects/functionObject";
-import { RuntimeAstTransformer } from "../runtime/runtimeAstTransformer";
+import { AbstractInvocationExpression } from "../ast/abstractInvocationExpression";
+import { Expression } from "../ast/expression";
+import { ExecutableAssignmentExpression } from "./ast/executableAssignmentExpression";
+import { ExecutableExpression } from "./ast/executableExpression";
+import { ExecutableIdentifierExpression } from "./ast/executableIdentifierExpression";
+import { ExecutableNativeFunctionExpression, NativeFunctionType } from "./ast/executableNativeFunctionExpression";
+import { ExecutableNumberLiteralExpression } from "./ast/executableNumberLiteralExpression";
+import { ExecutableStringLiteralExpression } from "./ast/executableStringLiteralExpression";
+import { InterpreterContext } from "./interpreter";
+import { BaseObject, FieldEntry } from "./objects/baseObject";
+import { FullObject } from "./objects/fullObject";
+import { generateArgs } from "./objects/functionObject";
+import { RuntimeAstTransformer } from "./runtimeAstTransformer";
 import { Type } from "../types/base";
-import { Parser } from "./parser";
+import { Parser } from "../parser/parser";
+import { ExecutableFunctionExpression } from "./ast/executableFunctionExpression";
+import { ExecutableNativeExpression } from "./ast/executableNativeExpression";
+import { InvocationArgument } from "../ast/invocationExpression";
 
 /**
  * Helper function to create an IdentifierExpression without a position
@@ -27,8 +23,8 @@ import { Parser } from "./parser";
  * @param identifier the name of the identifier
  * @returns the created IdentifierExpression
  */
-export function id(identifier: string): IdentifierExpression {
-    return new IdentifierExpression(identifier, ExpressionMetadata.NO_EDIT);
+export function id(identifier: string): ExecutableIdentifierExpression {
+    return new ExecutableIdentifierExpression(undefined, identifier);
 }
 
 /**
@@ -37,8 +33,8 @@ export function id(identifier: string): IdentifierExpression {
  * @param value the value of the literal
  * @returns the created literal expression
  */
-export function str(value: string): StringLiteralExpression {
-    return new StringLiteralExpression(value, ExpressionMetadata.NO_EDIT);
+export function str(value: string): ExecutableStringLiteralExpression {
+    return new ExecutableStringLiteralExpression(undefined, value);
 }
 
 /**
@@ -47,20 +43,20 @@ export function str(value: string): StringLiteralExpression {
  * @param value the value of the literal
  * @returns the created literal expression
  */
-export function num(value: number): NumberLiteralExpression {
-    return new NumberLiteralExpression(value, ExpressionMetadata.NO_EDIT);
+export function num(value: number): ExecutableNumberLiteralExpression {
+    return new ExecutableNumberLiteralExpression(undefined, value);
 }
 
 /**
- * Helper function to create an AssignmentExpression without a target
+ * Helper function to create an ExecutableAssignmentExpression without a target
  * (uses scope as target)
  *
  * @param field the name of the field to assign
  * @param value the new value of the field
- * @returns the created AssignmentExpression
+ * @returns the created ExecutableAssignmentExpression
  */
-export function assign(field: string, value: Expression): AssignmentExpression {
-    return new AssignmentExpression(field, undefined, value, ExpressionMetadata.NO_EDIT);
+export function assign(field: string, value: ExecutableExpression): ExecutableAssignmentExpression {
+    return new ExecutableAssignmentExpression(undefined, undefined, value, field);
 }
 
 /**
@@ -114,16 +110,16 @@ const parser = new Parser(false);
  * @param expressions the expressions to parse
  * @returns the parsed expressions
  */
-export function parse(expressions: string): Expression[] {
+export function parse(expressions: string): ExecutableExpression[] {
     const parserResult = parser.parse(expressions);
     if (parserResult.lexingErrors.length > 0 || parserResult.parserErrors.length > 0) {
         throw new Error("Invalid fun to parse");
     }
-    return parserResult.ast!;
+    return toExecutable(parserResult.ast!);
 }
 
 /**
- * Helper to create a FunctionExpression
+ * Helper to create a ExecutableFunctionExpression
  *
  * @param expressions body of the function, if a string is provided it is parsed first
  * @param decorators decorators applied to the function
@@ -131,22 +127,17 @@ export function parse(expressions: string): Expression[] {
  * @returns the created FunctionExpression
  */
 export function fun(
-    expressions: Expression[] | string,
+    expressions: ExecutableExpression[] | string,
     decorators: { [index: string]: string | null } = {},
     types?: [string | number, Type][]
-): FunctionExpression {
-    let parsedExpressions: Expression[];
+): ExecutableFunctionExpression {
+    let parsedExpressions: ExecutableExpression[];
     if (typeof expressions === "string") {
         parsedExpressions = parse(expressions);
     } else {
         parsedExpressions = expressions;
     }
-    return new FunctionExpression(
-        parsedExpressions,
-        parseDecorators(decorators),
-        ExpressionMetadata.NO_EDIT,
-        new Map(types)
-    );
+    return new ExecutableFunctionExpression(undefined, parsedExpressions, parseDecorators(decorators), new Map(types));
 }
 
 /**
@@ -165,7 +156,7 @@ export function jsFun(
     ) => BaseObject | FieldEntry,
     decorators: { [index: string]: string | null } = {},
     types?: [string | number, Type][]
-): NativeFunctionExpression {
+): ExecutableNativeFunctionExpression {
     if (types) {
         for (const [key, type] of types) {
             if (type == undefined) {
@@ -173,22 +164,18 @@ export function jsFun(
             }
         }
     }
-    return new NativeFunctionExpression(
-        (args, context, staticScope, callExpression) => {
-            const evaluatedArgs = generateArgs(args, context, new Map(types));
-            const oldScope = context.currentScope;
-            context.currentScope = staticScope;
-            const res = callback(evaluatedArgs, context, callExpression);
-            context.currentScope = oldScope;
-            if (res instanceof BaseObject) {
-                return { value: res };
-            } else {
-                return res;
-            }
-        },
-        parseDecorators(decorators),
-        ExpressionMetadata.NO_EDIT
-    );
+    return new ExecutableNativeFunctionExpression((args, context, staticScope, callExpression) => {
+        const evaluatedArgs = generateArgs(args, context, new Map(types));
+        const oldScope = context.currentScope;
+        context.currentScope = staticScope;
+        const res = callback(evaluatedArgs, context, callExpression);
+        context.currentScope = oldScope;
+        if (res instanceof BaseObject) {
+            return { value: res };
+        } else {
+            return res;
+        }
+    }, parseDecorators(decorators));
 }
 
 /**
@@ -201,8 +188,8 @@ export function jsFun(
 export function native(
     callback: NativeFunctionType,
     decorators: { [index: string]: string | null } = {}
-): NativeFunctionExpression {
-    return new NativeFunctionExpression(callback, parseDecorators(decorators), ExpressionMetadata.NO_EDIT);
+): ExecutableNativeFunctionExpression {
+    return new ExecutableNativeFunctionExpression(callback, parseDecorators(decorators));
 }
 
 /**
@@ -212,8 +199,8 @@ export function native(
  * @param entries the entries of the enum
  * @returns the created expression which evaluates to the enum
  */
-export function enumObject(entries: Record<string, string | number>): Expression {
-    return new NativeExpression((context) => {
+export function enumObject(entries: Record<string, string | number>): ExecutableNativeExpression {
+    return new ExecutableNativeExpression((context) => {
         const object = context.newObject();
         for (const [key, value] of Object.entries(entries)) {
             if (typeof value === "string") {

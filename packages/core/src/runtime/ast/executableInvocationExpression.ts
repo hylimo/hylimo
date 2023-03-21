@@ -1,4 +1,4 @@
-import { InvocationExpression } from "../../ast/ast";
+import { InvocationExpression } from "../../ast/invocationExpression";
 import { InterpreterContext } from "../interpreter";
 import { FieldEntry } from "../objects/baseObject";
 import { SemanticFieldNames } from "../semanticFieldNames";
@@ -22,7 +22,7 @@ export class ExecutableInvocationExpression extends ExecutableAbstractInvocation
      * @param target evaluated to provide the function to invoke
      */
     constructor(
-        expression: InvocationExpression,
+        expression: InvocationExpression | undefined,
         argumentExpressions: ExecutableInvocationArgument[],
         readonly target: ExecutableExpression<any>
     ) {

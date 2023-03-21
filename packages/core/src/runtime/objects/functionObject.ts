@@ -1,4 +1,4 @@
-import { AbstractInvocationExpression } from "../../ast/ast";
+import { AbstractInvocationExpression } from "../../ast/abstractInvocationExpression";
 import { Type } from "../../types/base";
 import { validate } from "../../types/validate";
 import { ExecutableAbstractFunctionExpression } from "../ast/executableAbstractFunctionExpression";
@@ -86,7 +86,7 @@ export class FunctionObject extends AbstractFunctionObject<ExecutableFunctionExp
             scope.setLocalField(SemanticFieldNames.PROTO, { value: this.parentScope });
         }
         scope.setLocalField(SemanticFieldNames.THIS, { value: scope });
-        const generatedArgs = generateArgs(args, context, this.definition.expression.types);
+        const generatedArgs = generateArgs(args, context, this.definition.types);
         scope.setLocalField(SemanticFieldNames.ARGS, { value: generatedArgs });
         scope.setLocalField(SemanticFieldNames.IT, generatedArgs.getFieldEntry(0, context));
         context.currentScope = scope;
@@ -126,7 +126,7 @@ export class NativeFunctionObject extends AbstractFunctionObject<ExecutableNativ
         callExpression?: AbstractInvocationExpression
     ): FieldEntry {
         context.nextStep();
-        const res = this.definition.expression.callback(args, context, this.parentScope, callExpression);
+        const res = this.definition.callback(args, context, this.parentScope, callExpression);
         return res;
     }
 

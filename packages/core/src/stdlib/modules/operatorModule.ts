@@ -1,4 +1,4 @@
-import { fun, id, jsFun, native } from "../../parser/astHelper";
+import { fun, id, jsFun, native } from "../../runtime/executableAstHelper";
 import { ExecutableConstExpression } from "../../runtime/ast/executableConstExpression";
 import { InterpreterModule } from "../../runtime/interpreter";
 import { RuntimeError } from "../../runtime/runtimeError";

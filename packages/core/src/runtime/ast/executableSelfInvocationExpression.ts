@@ -1,4 +1,4 @@
-import { SelfInvocationExpression } from "../../ast/ast";
+import { SelfInvocationExpression } from "../../ast/selfInvocationExpression";
 import { InterpreterContext } from "../interpreter";
 import { FieldEntry } from "../objects/baseObject";
 import { SemanticFieldNames } from "../semanticFieldNames";
@@ -20,18 +20,20 @@ export class ExecutableSelfInvocationExpression extends ExecutableAbstractInvoca
      * @param expression the expression this represents
      * @param argumentExpressions evaluated to provide arguments
      * @param target evaluated to provide the function to invoke
+     * @param name the name of the field to access
      */
     constructor(
-        expression: SelfInvocationExpression,
+        expression: SelfInvocationExpression | undefined,
         argumentExpressions: ExecutableInvocationArgument[],
-        readonly target: ExecutableExpression<any>
+        readonly target: ExecutableExpression<any>,
+        readonly name: string | number
     ) {
         super(expression, argumentExpressions);
     }
 
     override evaluateInternal(context: InterpreterContext): FieldEntry {
         const targetValue = this.target.evaluateWithSource(context);
-        const fieldValue = targetValue.value.getField(this.expression.name, context);
+        const fieldValue = targetValue.value.getField(this.name, context);
         return fieldValue.invoke(
             [
                 { value: new ExecutableConstExpression(targetValue), name: SemanticFieldNames.SELF },

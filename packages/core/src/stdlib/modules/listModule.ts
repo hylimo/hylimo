@@ -1,7 +1,6 @@
-import { assign, fun, id, jsFun, native, num } from "../../parser/astHelper";
+import { assign, fun, id, jsFun, native, num } from "../../runtime/executableAstHelper";
 import { ExecutableInvocationArgument } from "../../runtime/ast/executableAbstractInvocationExpression";
 import { ExecutableConstExpression } from "../../runtime/ast/executableConstExpression";
-import { ExecutableNumberLiteralExpression } from "../../runtime/ast/executableNumberLiteralExpression";
 import { InterpreterModule } from "../../runtime/interpreter";
 import { BaseObject } from "../../runtime/objects/baseObject";
 import { FullObject } from "../../runtime/objects/fullObject";
@@ -149,7 +148,7 @@ export const listModule = InterpreterModule.create(
                             callback.invoke(
                                 [
                                     { value: new ExecutableConstExpression(self.getFieldEntry(i, context)) },
-                                    { value: new ExecutableNumberLiteralExpression(num(i)) }
+                                    { value: num(i) }
                                 ],
                                 context
                             );

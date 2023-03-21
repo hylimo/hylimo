@@ -1,4 +1,5 @@
-import { AbstractInvocationExpression, Expression } from "../../ast/ast";
+import { AbstractInvocationExpression } from "../../ast/abstractInvocationExpression";
+import { Expression } from "../../ast/expression";
 import { ExecutableInvocationArgument } from "../ast/executableAbstractInvocationExpression";
 import { InterpreterContext } from "../interpreter";
 import { RuntimeError } from "../runtimeError";

@@ -1,4 +1,4 @@
-import { AssignmentExpression } from "../../ast/ast";
+import { AssignmentExpression } from "../../ast/assignmentExpression";
 import { InterpreterContext } from "../interpreter";
 import { BaseObject, FieldEntry } from "../objects/baseObject";
 import { ExecutableExpression } from "./executableExpression";
@@ -13,11 +13,13 @@ export class ExecutableAssignmentExpression extends ExecutableExpression<Assignm
      * @param expression the expression this represents
      * @param target evaluated to provide the object to assign to
      * @param value evaluated to provide the value to assign
+     * @param name the name of the field to assign to
      */
     constructor(
-        expression: AssignmentExpression,
+        expression: AssignmentExpression | undefined,
         readonly target: ExecutableExpression<any> | undefined,
-        readonly value: ExecutableExpression<any>
+        readonly value: ExecutableExpression<any>,
+        readonly name: string | number
     ) {
         super(expression);
     }
@@ -31,9 +33,9 @@ export class ExecutableAssignmentExpression extends ExecutableExpression<Assignm
         }
         const valueValue = this.value.evaluateWithSource(context);
         if (this.target) {
-            targetValue.setLocalField(this.expression.name, valueValue);
+            targetValue.setLocalField(this.name, valueValue);
         } else {
-            targetValue.setFieldEntry(this.expression.name, valueValue, context);
+            targetValue.setFieldEntry(this.name, valueValue, context);
         }
         return valueValue;
     }

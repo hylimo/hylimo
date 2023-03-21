@@ -1,6 +1,6 @@
 import { DefaultModuleNames } from "../defaultModuleNames";
 import { InterpreterModule } from "../../runtime/interpreter";
-import { assign, fun, id, jsFun, native, num, str } from "../../parser/astHelper";
+import { assign, fun, id, jsFun, native, num, str } from "../../runtime/executableAstHelper";
 import { SemanticFieldNames } from "../../runtime/semanticFieldNames";
 import { assertFunction, assertObject } from "../typeHelpers";
 import { BaseObject } from "../../runtime/objects/baseObject";
@@ -15,8 +15,6 @@ import { numberType } from "../../types/number";
 import { objectType } from "../../types/object";
 import { functionType } from "../../types/function";
 import { ExecutableConstExpression } from "../../runtime/ast/executableConstExpression";
-import { ExecutableStringLiteralExpression } from "../../runtime/ast/executableStringLiteralExpression";
-import { ExecutableNumberLiteralExpression } from "../../runtime/ast/executableNumberLiteralExpression";
 
 /**
  * Name of the temporary field where the object prototype is assigned
@@ -177,10 +175,7 @@ export const objectModule = InterpreterModule.create(
                         assertFunction(callback, "first positional argument of forEach");
                         assertObject(self, "self argument of forEach");
                         self.fields.forEach((value, key) => {
-                            const keyExpression =
-                                typeof key === "string"
-                                    ? new ExecutableStringLiteralExpression(str(key))
-                                    : new ExecutableNumberLiteralExpression(num(key));
+                            const keyExpression = typeof key === "string" ? str(key) : num(key);
                             callback.invoke(
                                 [{ value: new ExecutableConstExpression(value) }, { value: keyExpression }],
                                 context

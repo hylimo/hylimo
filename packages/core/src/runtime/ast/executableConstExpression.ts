@@ -5,7 +5,7 @@ import { ExecutableExpression } from "./executableExpression";
 /**
  * Executable ConstExpression
  */
-export class ExecutableConstExpression extends ExecutableExpression<undefined> {
+export class ExecutableConstExpression extends ExecutableExpression {
     /**
      * Creates a new ExecutableConstExpression based on the provided value
      *

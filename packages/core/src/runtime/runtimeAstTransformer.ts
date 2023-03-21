@@ -1,20 +1,15 @@
-import {
-    AssignmentExpression,
-    BracketExpression,
-    DestructuringExpression,
-    FieldAccessExpression,
-    FunctionExpression,
-    IdentifierExpression,
-    InvocationExpression,
-    NativeFunctionExpression,
-    NumberLiteralExpression,
-    SelfInvocationExpression,
-    StringLiteralExpression,
-    Expression,
-    NativeExpression
-} from "../ast/ast";
+import { StringLiteralExpression } from "../ast/stringLiteralExpression";
+import { SelfInvocationExpression } from "../ast/selfInvocationExpression";
+import { NumberLiteralExpression } from "../ast/numberLiteralExpression";
+import { InvocationArgument, InvocationExpression } from "../ast/invocationExpression";
+import { IdentifierExpression } from "../ast/identifierExpression";
+import { FunctionExpression } from "../ast/functionExpression";
+import { FieldAccessExpression } from "../ast/fieldAccessExpression";
+import { DestructuringExpression } from "../ast/destructuringExpression";
+import { BracketExpression } from "../ast/bracketExpression";
+import { AssignmentExpression } from "../ast/assignmentExpression";
+import { Expression } from "../ast/expression";
 import { ASTVisitor } from "../ast/astVisitor";
-import { InvocationArgument } from "../ast/invocationArgument";
 import { ExecutableInvocationArgument } from "./ast/executableAbstractInvocationExpression";
 import { ExecutableAssignmentExpression } from "./ast/executableAssignmentExpression";
 import { ExecutableBracketExpression } from "./ast/executableBracketExpression";
@@ -24,8 +19,6 @@ import { ExecutableFieldAccessExpression } from "./ast/executableFieldAccessExpr
 import { ExecutableFunctionExpression } from "./ast/executableFunctionExpression";
 import { ExecutableIdentifierExpression } from "./ast/executableIdentifierExpression";
 import { ExecutableInvocationExpression } from "./ast/executableInvocationExpression";
-import { ExecutableNativeExpression } from "./ast/executableNativeExpression";
-import { ExecutableNativeFunctionExpression } from "./ast/executableNativeFunctionExpression";
 import { ExecutableNumberLiteralExpression } from "./ast/executableNumberLiteralExpression";
 import { ExecutableSelfInvocationExpression } from "./ast/executableSelfInvocationExpression";
 import { ExecutableStringLiteralExpression } from "./ast/executableStringLiteralExpression";
@@ -38,7 +31,8 @@ export class RuntimeAstTransformer extends ASTVisitor<undefined, ExecutableExpre
         return new ExecutableAssignmentExpression(
             expression,
             this.visitOptional(expression.target),
-            this.visit(expression.value)
+            this.visit(expression.value),
+            expression.name
         );
     }
 
@@ -47,19 +41,23 @@ export class RuntimeAstTransformer extends ASTVisitor<undefined, ExecutableExpre
     }
 
     override visitDestructoringExpression(expression: DestructuringExpression): ExecutableExpression<any> {
-        return new ExecutableDestructuringExpression(expression, this.visit(expression.value));
+        return new ExecutableDestructuringExpression(expression, this.visit(expression.value), expression.names);
     }
 
     override visitFieldAccessExpression(expression: FieldAccessExpression): ExecutableExpression<any> {
-        return new ExecutableFieldAccessExpression(expression, this.visit(expression.target));
+        return new ExecutableFieldAccessExpression(expression, this.visit(expression.target), expression.name);
     }
 
     override visitFunctionExpression(expression: FunctionExpression): ExecutableExpression<any> {
-        return new ExecutableFunctionExpression(expression, expression.expressions.map(this.visit.bind(this)));
+        return new ExecutableFunctionExpression(
+            expression,
+            expression.expressions.map(this.visit.bind(this)),
+            expression.decorator
+        );
     }
 
     override visitIdentifierExpression(expression: IdentifierExpression): ExecutableExpression<any> {
-        return new ExecutableIdentifierExpression(expression);
+        return new ExecutableIdentifierExpression(expression, expression.identifier);
     }
 
     override visitInvocationExpression(expression: InvocationExpression): ExecutableExpression<any> {
@@ -70,28 +68,21 @@ export class RuntimeAstTransformer extends ASTVisitor<undefined, ExecutableExpre
         );
     }
 
-    override visitNativeFunctionExpression(expression: NativeFunctionExpression): ExecutableExpression<any> {
-        return new ExecutableNativeFunctionExpression(expression);
-    }
-
     override visitNumberLiteralExpression(expression: NumberLiteralExpression): ExecutableExpression<any> {
-        return new ExecutableNumberLiteralExpression(expression);
+        return new ExecutableNumberLiteralExpression(expression, expression.value);
     }
 
     override visitSelfInvocationExpression(expression: SelfInvocationExpression): ExecutableExpression<any> {
         return new ExecutableSelfInvocationExpression(
             expression,
             this.generateInvocationArguments(expression.argumentExpressions),
-            this.visit(expression.target)
+            this.visit(expression.target),
+            expression.name
         );
     }
 
     override visistStringLiteralExpression(expression: StringLiteralExpression): ExecutableExpression<any> {
-        return new ExecutableStringLiteralExpression(expression);
-    }
-
-    override visitNativeExpression(expression: NativeExpression): ExecutableExpression<any> {
-        return new ExecutableNativeExpression(expression);
+        return new ExecutableStringLiteralExpression(expression, expression.value);
     }
 
     override visit(expression: Expression): ExecutableExpression<any> {

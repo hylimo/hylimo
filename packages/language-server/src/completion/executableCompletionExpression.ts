@@ -1,4 +1,4 @@
-import { ASTExpressionPosition, AbstractFunctionExpression, Expression } from "@hylimo/core";
+import { ASTExpressionPosition, Expression } from "@hylimo/core";
 import { CompletionExpressionMetadata } from "@hylimo/core";
 import { ExecutableExpression } from "@hylimo/core";
 import { InterpreterContext } from "@hylimo/core";
@@ -54,9 +54,9 @@ export class ExecutableCompletionExpression extends ExecutableExpression<Express
             let isFunction = false;
             const value = entry.value;
             if (value instanceof AbstractFunctionObject) {
-                const functionExpression = value.definition.expression as AbstractFunctionExpression;
-                docs = functionExpression.decorator.get("docs") ?? "";
-                snippet = functionExpression.decorator.get("snippet");
+                const decorator = value.definition.decorator;
+                docs = decorator.get("docs") ?? "";
+                snippet = decorator.get("snippet");
                 isFunction = true;
             }
             let kind: CompletionItemKind;
@@ -65,7 +65,7 @@ export class ExecutableCompletionExpression extends ExecutableExpression<Express
             } else {
                 kind = isFunction ? CompletionItemKind.Function : CompletionItemKind.Variable;
             }
-            const range = this.expression.metadata.identifierPosition!;
+            const range = this.expression!.metadata.identifierPosition!;
             items.push(this.createCompletionItem(key, docs, range, kind));
             if (snippet != undefined) {
                 items.push(this.createSnippetCompletionItem(key, docs, snippet, range));

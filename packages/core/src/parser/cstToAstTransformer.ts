@@ -1,21 +1,18 @@
 import { ICstVisitor, CstNode, IToken } from "chevrotain";
-import {
-    LiteralExpression,
-    StringLiteralExpression,
-    NumberLiteralExpression,
-    FunctionExpression,
-    Expression,
-    IdentifierExpression,
-    InvocationExpression,
-    BracketExpression,
-    SelfInvocationExpression,
-    FieldAccessExpression,
-    DestructuringExpression,
-    AssignmentExpression
-} from "../ast/ast";
+import { StringLiteralExpression } from "../ast/stringLiteralExpression";
+import { SelfInvocationExpression } from "../ast/selfInvocationExpression";
+import { NumberLiteralExpression } from "../ast/numberLiteralExpression";
+import { LiteralExpression } from "../ast/literalExpression";
+import { InvocationArgument, InvocationExpression } from "../ast/invocationExpression";
+import { IdentifierExpression } from "../ast/identifierExpression";
+import { FunctionExpression } from "../ast/functionExpression";
+import { FieldAccessExpression } from "../ast/fieldAccessExpression";
+import { DestructuringExpression } from "../ast/destructuringExpression";
+import { BracketExpression } from "../ast/bracketExpression";
+import { AssignmentExpression } from "../ast/assignmentExpression";
+import { Expression } from "../ast/expression";
 import { ASTExpressionPosition } from "../ast/astExpressionPosition";
 import { CompletionExpressionMetadata, ExpressionMetadata } from "../ast/expressionMetadata";
-import { InvocationArgument } from "../ast/invocationArgument";
 import { Parser } from "./parser";
 
 /**

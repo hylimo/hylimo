@@ -116,6 +116,6 @@ export class DiagramEngine {
                 value: str(config.theme)
             })
         );
-        return toExecutable([expression]);
+        return [expression];
     }
 }

@@ -1,4 +1,4 @@
-import { AbstractInvocationExpression } from "../../ast/ast";
+import { AbstractInvocationExpression } from "../../ast/abstractInvocationExpression";
 import { ExecutableExpression } from "./executableExpression";
 
 /**
@@ -13,7 +13,7 @@ export abstract class ExecutableAbstractInvocationExpression<
      * @param expression the expression this represents
      * @param argumentExpressions the expressions to execute
      */
-    constructor(expression: T, readonly argumentExpressions: ExecutableInvocationArgument[]) {
+    constructor(expression: T | undefined, readonly argumentExpressions: ExecutableInvocationArgument[]) {
         super(expression);
     }
 }

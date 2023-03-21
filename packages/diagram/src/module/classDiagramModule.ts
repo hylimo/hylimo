@@ -2,6 +2,7 @@ import {
     assertString,
     assign,
     ExecutableConstExpression,
+    ExecutableExpression,
     Expression,
     fun,
     FunctionObject,
@@ -107,7 +108,7 @@ function convertFieldsAndFunctions(expressions: Expression[]): [string[], string
 /**
  * Expressions for the callback provided to generateDiagramEnvironment
  */
-const scopeExpressions: Expression[] = [
+const scopeExpressions: ExecutableExpression[] = [
     assign(scope, id(SemanticFieldNames.IT)),
     assign(
         "_classEntryScopeGenerator",

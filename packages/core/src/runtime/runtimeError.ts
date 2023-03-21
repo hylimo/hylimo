@@ -1,4 +1,4 @@
-import { Expression } from "../ast/ast";
+import { Expression } from "../ast/expression";
 import { ASTExpressionPosition } from "../ast/astExpressionPosition";
 
 /**

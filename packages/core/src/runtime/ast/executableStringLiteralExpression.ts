@@ -1,14 +1,14 @@
-import { StringLiteralExpression } from "../../ast/ast";
+import { StringLiteralExpression } from "../../ast/stringLiteralExpression";
 import { InterpreterContext } from "../interpreter";
 import { FieldEntry } from "../objects/baseObject";
 import { StringObject } from "../objects/stringObject";
-import { ExecutableExpression } from "./executableExpression";
+import { ExecutableLiteralExpression } from "./executableLiteralExpression";
 
 /**
  * Executable StringLiteralExpression
  */
-export class ExecutableStringLiteralExpression extends ExecutableExpression<StringLiteralExpression> {
+export class ExecutableStringLiteralExpression extends ExecutableLiteralExpression<StringLiteralExpression> {
     override evaluateInternal(context: InterpreterContext): FieldEntry {
-        return { value: new StringObject(this.expression.value, context.stringPrototype) };
+        return { value: new StringObject(this.value, context.stringPrototype) };
     }
 }

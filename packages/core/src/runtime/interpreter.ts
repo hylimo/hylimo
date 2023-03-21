@@ -1,5 +1,3 @@
-import { Expression } from "../ast/ast";
-import { toExecutable } from "../parser/astHelper";
 import { ExecutableExpression } from "./ast/executableExpression";
 import { BaseObject } from "./objects/baseObject";
 import { FullObject } from "./objects/fullObject";
@@ -219,13 +217,13 @@ export namespace InterpreterModule {
         name: string,
         dependencies: string[],
         runtimeDependencies: string[],
-        expressions: Expression[]
+        expressions: ExecutableExpression[]
     ): InterpreterModule {
         return {
             name,
             dependencies,
             runtimeDependencies,
-            expressions: toExecutable(expressions)
+            expressions: expressions
         };
     }
 }

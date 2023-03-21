@@ -1,4 +1,4 @@
-import { assign, fun, id, jsFun, native } from "../../parser/astHelper";
+import { assign, fun, id, jsFun, native } from "../../runtime/executableAstHelper";
 import { InterpreterContext, InterpreterModule } from "../../runtime/interpreter";
 import { BaseObject } from "../../runtime/objects/baseObject";
 import { FullObject } from "../../runtime/objects/fullObject";

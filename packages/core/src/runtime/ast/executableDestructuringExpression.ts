@@ -1,4 +1,4 @@
-import { DestructuringExpression } from "../../ast/ast";
+import { DestructuringExpression } from "../../ast/destructuringExpression";
 import { InterpreterContext } from "../interpreter";
 import { FieldEntry } from "../objects/baseObject";
 import { ExecutableExpression } from "./executableExpression";
@@ -12,16 +12,20 @@ export class ExecutableDestructuringExpression extends ExecutableExpression<Dest
      *
      * @param expression the expression this represents
      * @param value evaluated to provide the value to assign
+     * @param names the names of the fields to assign to
      */
-    constructor(expression: DestructuringExpression, readonly value: ExecutableExpression<any>) {
+    constructor(
+        expression: DestructuringExpression,
+        readonly value: ExecutableExpression<any>,
+        readonly names: (string | number)[]
+    ) {
         super(expression);
     }
 
     override evaluateInternal(context: InterpreterContext): FieldEntry {
         const valueValue = this.value.evaluateWithSource(context);
-        const names = this.expression.names;
-        for (let i = 0; i < names.length; i++) {
-            context.currentScope.setLocalField(names[i], valueValue.value.getFieldEntry(i, context));
+        for (let i = 0; i < this.names.length; i++) {
+            context.currentScope.setLocalField(this.names[i], valueValue.value.getFieldEntry(i, context));
         }
         return valueValue;
     }

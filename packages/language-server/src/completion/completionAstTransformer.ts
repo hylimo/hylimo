@@ -1,12 +1,12 @@
 import {
     AssignmentExpression,
+    CompletionExpressionMetadata,
     Expression,
     FieldAccessExpression,
     IdentifierExpression,
     NumberLiteralExpression,
     SelfInvocationExpression
-} from "@hylimo/core/src/ast/ast";
-import { CompletionExpressionMetadata } from "@hylimo/core";
+} from "@hylimo/core";
 import { ExecutableExpression } from "@hylimo/core";
 import { RuntimeAstTransformer } from "@hylimo/core";
 import { ExecutableCompletionExpression } from "./executableCompletionExpression";

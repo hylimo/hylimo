@@ -1,5 +1,5 @@
 import { CstNode, CstParser, ICstVisitor, ILexingError, IRecognitionException, Lexer } from "chevrotain";
-import { Expression } from "../ast/ast";
+import { Expression } from "../ast/expression";
 import { ASTExpressionPosition } from "../ast/astExpressionPosition";
 import { CstVisitorParameters, generateCstToAstTransfromer } from "./cstToAstTransformer";
 import {

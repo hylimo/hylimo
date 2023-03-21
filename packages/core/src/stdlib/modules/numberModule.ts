@@ -1,4 +1,4 @@
-import { assign, fun, id, jsFun, num } from "../../parser/astHelper";
+import { assign, fun, id, jsFun, num } from "../../runtime/executableAstHelper";
 import { InterpreterModule } from "../../runtime/interpreter";
 import { NumberObject } from "../../runtime/objects/numberObject";
 import { SemanticFieldNames } from "../../runtime/semanticFieldNames";
