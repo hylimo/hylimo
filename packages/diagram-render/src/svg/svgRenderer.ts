@@ -1,15 +1,27 @@
 import { Root, Rect, Path, Text, Canvas, Element, WithBounds, convertFontsToCssStyle } from "@hylimo/diagram-common";
 import { SimplifiedDiagramVisitor } from "@hylimo/diagram-common";
-import { extractLayoutAttributes, extractShapeAttributes } from "./attributeHelpers";
+import { extractLayoutAttributes, extractOutlinedShapeAttributes, extractShapeAttributes } from "./attributeHelpers";
 import { SimplifiedCanvasElement } from "@hylimo/diagram-common";
 import { create } from "xmlbuilder2";
 import { XMLBuilder } from "xmlbuilder2/lib/interfaces";
 
+/**
+ * Renderer which renders a diagram to svg
+ */
 export class SVGRenderer {
     /**
      * Visitor to render the diagram to svg
      */
-    private readonly visitor = new SVGDiagramVisitor();
+    private readonly visitor: SVGDiagramVisitor;
+
+    /**
+     * Creates a new svg renderer
+     *
+     * @param margin the margin to apply to the bounding box
+     */
+    constructor(margin = 10) {
+        this.visitor = new SVGDiagramVisitor(margin);
+    }
 
     /**
      * Renders the provided root to an svg string
@@ -73,20 +85,34 @@ type SVGNode =
  * Visitor to render the diagram to svg
  */
 class SVGDiagramVisitor extends SimplifiedDiagramVisitor<undefined, SVGNode[]> {
+    /**
+     * Creates a new svg diagram visitor
+     *
+     * @param margin the margin to apply to the bounding box
+     */
+    constructor(private readonly margin: number) {
+        super();
+    }
+
     override visitRoot(element: WithBounds<Root>): SVGNode[] {
         const viewBox = element.bounds;
-        const { width, height } = viewBox.size;
-        const { x, y } = viewBox.position;
+        const x = viewBox.position.x - this.margin;
+        const y = viewBox.position.y - this.margin;
+        const width = viewBox.size.width + this.margin * 2;
+        const height = viewBox.size.height + this.margin * 2;
         const additionalChildren: SVGNode[] = [
             {
                 type: "style",
-                children: ["text { white-space: pre; }" + convertFontsToCssStyle(element.fonts)]
+                children: ["text { white-space: pre; }\n" + convertFontsToCssStyle(element.fonts)]
             }
         ];
         const result = {
             type: "svg",
             children: [...additionalChildren, ...this.visitChildren(element)],
-            viewBox: `${x} ${y} ${width} ${height}`
+            viewBox: `${x} ${y} ${width} ${height}`,
+            width,
+            height,
+            xmlns: "http://www.w3.org/2000/svg"
         };
         return [result];
     }
@@ -95,7 +121,7 @@ class SVGDiagramVisitor extends SimplifiedDiagramVisitor<undefined, SVGNode[]> {
         const result: SVGNode = {
             type: "rect",
             children: [],
-            ...extractLayoutAttributes(element)
+            ...extractOutlinedShapeAttributes(element)
         };
         if (element.cornerRadius) {
             result.rx = Math.max(0, element.cornerRadius - (element.strokeWidth ? element.strokeWidth / 2 : 0));
@@ -120,7 +146,7 @@ class SVGDiagramVisitor extends SimplifiedDiagramVisitor<undefined, SVGNode[]> {
     override visitText(element: Text): SVGNode[] {
         const result: SVGNode = {
             type: "text",
-            children: [],
+            children: [element.text],
             ...extractLayoutAttributes(element),
             fill: element.fill,
             "font-family": element.fontFamily,
@@ -139,7 +165,7 @@ class SVGDiagramVisitor extends SimplifiedDiagramVisitor<undefined, SVGNode[]> {
         const position = element.pos;
         const result: SVGNode = {
             type: "g",
-            transform: `translate(${position.x}, ${position.y}) rotate(${element.rotation}) translate(${element.x}, ${element.y})`,
+            transform: `translate(${position.x}, ${position.y}) rotate(${element.rotation})`,
             children: this.visitChildren(element)
         };
         return [result];

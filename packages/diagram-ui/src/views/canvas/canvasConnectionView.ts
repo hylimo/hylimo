@@ -100,12 +100,11 @@ export class CanvasConnectionView implements IView {
     private renderMarker(marker: SMarker, markerLayout: MarkerLayoutInformation, context: RenderingContext): VNode {
         const rotation = markerLayout.rotation;
         const { x, y } = markerLayout.position;
-        const { width, height } = marker;
         return svg(
             "g",
             {
                 attrs: {
-                    transform: `translate(${x},${y}) rotate(${rotation}) translate(${-width},${-height / 2})`
+                    transform: `translate(${x},${y}) rotate(${rotation})`
                 }
             },
             context.renderElement(marker)

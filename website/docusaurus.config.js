@@ -48,6 +48,17 @@ const config = {
                         label: "Docs"
                     },
                     {
+                        type: "dropdown",
+                        position: "right",
+                        label: "Export",
+                        items: [
+                            {
+                                type: "custom-export",
+                            }
+                        ],
+                        ifdiagramexists: true
+                    },
+                    {
                         href: "https://github.com/hylimo/hylimo",
                         label: "GitHub",
                         position: "right"

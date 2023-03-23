@@ -24,6 +24,9 @@ class BBox {
      * @param point the point to include in the bounds
      */
     includePoint(point: Point): void {
+        if (Number.isNaN(point.x) || Number.isNaN(point.y)) {
+            throw new Error("NaN in point");
+        }
         this.minX = Math.min(this.minX, point.x);
         this.minY = Math.min(this.minY, point.y);
         this.maxX = Math.max(this.maxX, point.x);
@@ -39,6 +42,9 @@ class BBox {
      * @param maxY the maximum y value
      */
     includeBounds(minX: number, minY: number, maxX: number, maxY: number): void {
+        if (Number.isNaN(minX) || Number.isNaN(minY) || Number.isNaN(maxX) || Number.isNaN(maxY)) {
+            throw new Error("NaN in bounds");
+        }
         this.minX = Math.min(this.minX, minX);
         this.minY = Math.min(this.minY, minY);
         this.maxX = Math.max(this.maxX, maxX);
@@ -191,14 +197,16 @@ class PathBBoxCalculator {
                 globalStartVector = undefined;
                 lastVector = undefined;
             } else {
-                const { startVector, endVector } = this.extractSegmentData(segment, x, y);
-                if (globalStartVector == undefined) {
-                    globalStartVector = startVector;
+                const { startVector, endVector, end } = this.extractSegmentData(segment, x, y);
+                if (end.x != x || end.y != y) {
+                    if (globalStartVector == undefined) {
+                        globalStartVector = startVector;
+                    }
+                    if (lastVector != undefined) {
+                        this.applyInnerPoint(start, lastVector, startVector);
+                    }
+                    lastVector = endVector;
                 }
-                if (lastVector != undefined) {
-                    this.applyInnerPoint(start, lastVector, startVector);
-                }
-                lastVector = endVector;
             }
         });
     }
@@ -213,9 +221,14 @@ class PathBBoxCalculator {
      * @param y the start point y coordinate
      * @returns the extracted vectors
      */
-    private extractSegmentData(seg: Segment, x: number, y: number): { startVector: Point; endVector: Point } {
+    private extractSegmentData(
+        seg: Segment,
+        x: number,
+        y: number
+    ): { startVector: Point; endVector: Point; end: Point } {
         let startVector: Point;
         let endVector: Point;
+        let end: Point;
         switch (seg[0]) {
             case "H": {
                 startVector = {
@@ -223,6 +236,7 @@ class PathBBoxCalculator {
                     y: 0
                 };
                 endVector = startVector;
+                end = { x: seg[1], y };
                 break;
             }
             case "V": {
@@ -231,6 +245,7 @@ class PathBBoxCalculator {
                     y: seg[1] - y
                 };
                 endVector = startVector;
+                end = { x, y: seg[1] };
                 break;
             }
             case "L": {
@@ -239,6 +254,7 @@ class PathBBoxCalculator {
                     y: seg[2] - y
                 };
                 endVector = startVector;
+                end = { x: seg[1], y: seg[2] };
                 break;
             }
             case "C": {
@@ -253,6 +269,7 @@ class PathBBoxCalculator {
                     x: seg[5] - seg[3],
                     y: seg[6] - seg[4]
                 };
+                end = { x: seg[5], y: seg[6] };
                 break;
             }
             case "Q": {
@@ -267,6 +284,7 @@ class PathBBoxCalculator {
                     x: seg[3] - seg[1],
                     y: seg[4] - seg[2]
                 };
+                end = { x: seg[3], y: seg[4] };
                 break;
             }
             default: {
@@ -276,7 +294,8 @@ class PathBBoxCalculator {
 
         return {
             startVector,
-            endVector
+            endVector,
+            end
         };
     }
 

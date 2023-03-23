@@ -190,10 +190,10 @@ export namespace Math2D {
      * @returns the rotated bounds
      */
     export function rotateBounds(bounds: Bounds, rotation: number): Bounds {
-        const topLeft = rotate(sub(bounds.position, { x: bounds.size.width / 2, y: bounds.size.height / 2 }), rotation);
-        const topRight = rotate(add({ x: bounds.size.width, y: 0 }, topLeft), rotation);
-        const bottomLeft = rotate(add({ x: 0, y: bounds.size.height }, topLeft), rotation);
-        const bottomRight = rotate(add({ x: bounds.size.width, y: bounds.size.height }, topLeft), rotation);
+        const topLeft = rotate(bounds.position, rotation);
+        const topRight = rotate(add({ x: bounds.size.width, y: 0 }, bounds.position), rotation);
+        const bottomLeft = rotate(add({ x: 0, y: bounds.size.height }, bounds.position), rotation);
+        const bottomRight = rotate(add({ x: bounds.size.width, y: bounds.size.height }, bounds.position), rotation);
         const minX = Math.min(topLeft.x, topRight.x, bottomLeft.x, bottomRight.x);
         const minY = Math.min(topLeft.y, topRight.y, bottomLeft.y, bottomRight.y);
         const maxX = Math.max(topLeft.x, topRight.x, bottomLeft.x, bottomRight.x);

@@ -45,7 +45,7 @@ export class MarkerLayoutConfig extends StyledElementLayoutConfig {
             id,
             ...size,
             lineStart: element.styles.lineStart ?? 0,
-            children: layout.layout(content, Point.ORIGIN, size, `${id}_0`),
+            children: layout.layout(content, { x: -size.width, y: -size.height / 2 }, size, `${id}_0`),
             pos: element.position
         };
         return [result];

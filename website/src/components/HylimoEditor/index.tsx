@@ -1,6 +1,6 @@
 import "reflect-metadata";
 import { Allotment } from "allotment";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import { useColorMode } from "@docusaurus/theme-common";
 import "allotment/dist/style.css";
 import { customDarkTheme, customLightTheme, languageConfiguration, monarchTokenProvider } from "./language";
@@ -33,6 +33,8 @@ import {
 import { DiagramServerProxy, ResetCanvasBoundsAction } from "@hylimo/diagram-ui";
 import useResizeObserver from "@react-hook/resize-observer";
 import { DynamicLanuageServerConfig } from "@hylimo/diagram-protocol";
+import { GlobalStateContext } from "../../theme/Root";
+import { Root } from "@hylimo/diagram-common";
 
 /**
  * Name of the language
@@ -50,6 +52,7 @@ const uri = "inmemory://model/1";
  * @returns the created editor component
  */
 export default function HylimoEditor(): JSX.Element {
+    const { setDiagram } = useContext(GlobalStateContext);
     const { colorMode } = useColorMode();
     const [code, setCode] = useLocalStorage<string>("code");
     const sprottyWrapper = useRef(null);
@@ -87,6 +90,9 @@ export default function HylimoEditor(): JSX.Element {
                 override initialize(registry: ActionHandlerRegistry): void {
                     super.initialize(registry);
                     languageClient.onNotification(DiagramActionNotification.type, (message) => {
+                        if ("newRoot" in message.action && message.action.newRoot != undefined) {
+                            setDiagram(message.action.newRoot as Root);
+                        }
                         this.messageReceived(message);
                     });
                     languageClient.onNotification(RemoteNotification.type, (message) => {
@@ -142,6 +148,8 @@ export default function HylimoEditor(): JSX.Element {
     useEffect(() => {
         languageClient?.sendNotification(ConfigNotification.type, languageServerConfig);
     }, [languageServerConfig]);
+
+    useEffect(() => () => setDiagram(null), []);
 
     return (
         <Allotment>

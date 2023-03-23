@@ -47,10 +47,10 @@ export abstract class SimplifiedDiagramVisitor<C, O> {
     private simplify(element: Element): WithBounds<Element> {
         switch (element.type) {
             case Root.TYPE: {
-                const children = element.children.map(this.simplify);
+                const children = element.children.map(this.simplify.bind(this));
                 return {
                     ...element,
-                    children: element.children.map(this.simplify.bind(this)),
+                    children,
                     bounds: Math2D.mergeBounds(...children.map((child) => child.bounds))
                 };
             }
@@ -85,7 +85,7 @@ export abstract class SimplifiedDiagramVisitor<C, O> {
                     height: element.height
                 }
             },
-            children: element.children.map(this.simplify)
+            children: element.children.map(this.simplify.bind(this))
         };
     }
 
@@ -107,7 +107,7 @@ export abstract class SimplifiedDiagramVisitor<C, O> {
             case Text.TYPE:
                 return this.visitText(element as WithBounds<Text>, context);
             case Canvas.TYPE:
-                return this.visitCanvas(this.simplifyCanvas(element as Canvas), context);
+                return this.visitCanvas(element as WithBounds<Canvas>, context);
             case CanvasElement.TYPE:
                 return this.visitCanvasElement(element as WithBounds<SimplifiedCanvasElement>, context);
             default:
@@ -153,7 +153,7 @@ export abstract class SimplifiedDiagramVisitor<C, O> {
         const pos = layoutEngine.getPoint(element.id);
         return {
             ...element,
-            children: element.children.map(this.simplify),
+            children: element.children.map(this.simplify.bind(this)),
             pos,
             bounds: this.calculateCanvasElementBounds(
                 pos,
@@ -254,7 +254,7 @@ export abstract class SimplifiedDiagramVisitor<C, O> {
             width: marker.width,
             height: marker.height,
             rotation: layout.rotation,
-            children: marker.children.map(this.simplify),
+            children: marker.children.map(this.simplify.bind(this)),
             pos: layout.position,
             bounds: this.calculateCanvasElementBounds(
                 layout.position,
@@ -286,7 +286,7 @@ export abstract class SimplifiedDiagramVisitor<C, O> {
         width: number,
         height: number
     ): Bounds {
-        const bounds = Math2D.rotateBounds({ position: { x, y }, size: { width, height } }, rotation);
+        const bounds = Math2D.rotateBounds({ position: { x, y }, size: { width, height } }, (rotation * Math.PI) / 180);
         return {
             position: {
                 x: bounds.position.x + pos.x,
