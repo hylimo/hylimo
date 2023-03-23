@@ -67,8 +67,7 @@ export default function HylimoEditor(): JSX.Element {
     useEffect(() => {
         StandaloneServices.initialize({});
         MonacoServices.install();
-        const worker = new Worker(new URL("./languageServer.ts", import.meta.url));
-        const secondaryWorker = new Worker(new URL("./languageServer.ts", import.meta.url));
+        const [worker, secondaryWorker] = [0, 1].map(() => new Worker(new URL("./languageServer.ts", import.meta.url)));
         const secondaryConnection = createProtocolConnection(
             new BrowserMessageReader(secondaryWorker),
             new BrowserMessageWriter(secondaryWorker)
