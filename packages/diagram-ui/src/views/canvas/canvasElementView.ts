@@ -62,7 +62,7 @@ export class CanvasElementView implements IView {
             "g",
             {
                 attrs: {
-                    transform: `translate(${position.x}, ${position.y}) rotate(${model.rotation}) translate(${model.x}, ${model.y})`
+                    transform: `translate(${position.x}, ${position.y}) rotate(${model.rotation})`
                 },
                 class: {
                     "canvas-element": true
@@ -85,6 +85,8 @@ export class CanvasElementView implements IView {
                 "selected-rect": true
             },
             attrs: {
+                x: model.x,
+                y: model.y,
                 width: model.width,
                 height: model.height
             }
@@ -99,13 +101,12 @@ export class CanvasElementView implements IView {
      * @returns The rotate icon
      */
     private generateRotationIcon(model: Readonly<SCanvasElement>): VNode {
-        const x = -model.x;
         const zoom = findViewportZoom(model);
-        const y = -CanvasElementView.ROTATE_ICON_DISTANCE / zoom;
+        const y = model.y - CanvasElementView.ROTATE_ICON_DISTANCE / zoom;
         return svg("path", {
             attrs: {
                 d: CanvasElementView.ROTATE_PATH,
-                transform: `translate(${x}, ${y}) scale(${(1 / zoom / CanvasElementView.ROTATE_PATH_SIZE) * 13})`
+                transform: `translate(0, ${y}) scale(${(1 / zoom / CanvasElementView.ROTATE_PATH_SIZE) * 13})`
             },
             class: {
                 [CanvasElementView.ROTATE_ICON_CLASS]: true
@@ -190,7 +191,7 @@ export class CanvasElementView implements IView {
         pos = pos % 4;
         const x = pos === 1 || pos === 2 ? model.width : 0;
         const y = pos < 2 ? 0 : model.height;
-        return { x, y };
+        return { x: model.x + x, y: model.y + y };
     }
 }
 

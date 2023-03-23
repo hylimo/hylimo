@@ -1,6 +1,6 @@
 import { DiagramUpdateResult } from "../diagramImplementation";
 import { RemoteDiagramMessage } from "./remoteDiagramMessage";
-import { RemoteMessagePayload } from "../../../../diagram-protocol/src/lsp/remoteMessages";
+import { RemoteMessagePayload } from "@hylimo/diagram-protocol";
 import { DiagramConfig } from "@hylimo/diagram-common";
 
 /**

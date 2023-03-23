@@ -5,7 +5,9 @@
  */
 
 import svgPath from "svgpath";
-import { Math2D, Point, Size } from "@hylimo/diagram-common";
+import { Point } from "../common/point";
+import { Size } from "../common/size";
+import { Math2D } from "../common/math";
 
 /**
  * Bounding box of a path

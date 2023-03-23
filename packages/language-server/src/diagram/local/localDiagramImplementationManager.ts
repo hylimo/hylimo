@@ -6,7 +6,7 @@ import {
     ReplyGenerateTransactionalEditMessage
 } from "../remote/generateTransactionalEditMessage";
 import { RegisterRemoteLanguageServerMessage } from "../remote/registerRemoteLanguageServerMessage";
-import { RemoteMessagePayload } from "../../../../diagram-protocol/src/lsp/remoteMessages";
+import { RemoteMessagePayload } from "@hylimo/diagram-protocol";
 import { RequestUpdateDiagramMessage, ReplyUpdateDiagramMessage } from "../remote/updateDiagramMessage";
 import { LocalDiagramImplementation } from "./localDiagramImplementation";
 import {

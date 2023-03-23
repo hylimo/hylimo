@@ -1,10 +1,6 @@
 import { Connection } from "vscode-languageserver";
 import { DiagramImplementation } from "./diagramImplementation";
-import {
-    RemoteMessagePayload,
-    RemoteNotification,
-    RemoteRequest
-} from "../../../diagram-protocol/src/lsp/remoteMessages";
+import { RemoteMessagePayload, RemoteNotification, RemoteRequest } from "@hylimo/diagram-protocol";
 
 /**
  * Manages the layouted diagrams. Base class for the remote and local implementation.

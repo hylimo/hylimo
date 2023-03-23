@@ -1,7 +1,7 @@
 import { Point } from "../common/point";
 import { BezierSegment } from "../line/model/bezierSegment";
-import { CanvasBezierSegment } from "../model/canvas/canvasBezierSegment";
-import { Marker, MarkerLayoutInformation } from "../model/canvas/marker";
+import { CanvasBezierSegment } from "../model/elements/canvas/canvasBezierSegment";
+import { Marker, MarkerLayoutInformation } from "../model/elements/canvas/marker";
 import { SegmentLayoutInformation } from "./canvasConnectionLayout";
 import { SegmentLayoutEngine } from "./segmentLayoutEngine";
 

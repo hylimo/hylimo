@@ -1,7 +1,7 @@
 import { TransactionalAction } from "@hylimo/diagram-protocol";
 import { TransactionalEdit } from "../../edit/edits/transactionalEdit";
 import { RemoteDiagramMessage } from "./remoteDiagramMessage";
-import { RemoteMessagePayload } from "../../../../diagram-protocol/src/lsp/remoteMessages";
+import { RemoteMessagePayload } from "@hylimo/diagram-protocol";
 
 /**
  * Message to perform generateTransactionalEdit on a remote language server

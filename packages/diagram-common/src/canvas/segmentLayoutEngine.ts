@@ -1,7 +1,7 @@
 import { Point } from "../common/point";
 import { Segment } from "../line/model/segment";
-import { CanvasConnectionSegment } from "../model/canvas/canvasConnectionSegment";
-import { Marker, MarkerLayoutInformation } from "../model/canvas/marker";
+import { CanvasConnectionSegment } from "../model/elements/canvas/canvasConnectionSegment";
+import { Marker, MarkerLayoutInformation } from "../model/elements/canvas/marker";
 import { SegmentLayoutInformation } from "./canvasConnectionLayout";
 import { CanvasLayoutEngine } from "./canvasLayoutEngine";
 

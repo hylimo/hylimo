@@ -82,7 +82,7 @@ export class CanvasElementLayoutConfig extends EditableCanvasContentLayoutConfig
             ...this.extractPosAndMoveable(element),
             ...this.extractRotationAndRotateable(element),
             ...this.extractResizable(element),
-            children: layout.layout(content, Point.ORIGIN, size, `${id}_0`),
+            children: layout.layout(content, { x, y }, size, `${id}_0`),
             outline: content.layoutConfig.outline(
                 layout,
                 content,

@@ -4,7 +4,7 @@ import { DiagramImplementationManager } from "../diagramImplementationManager";
 import { LocalDiagramImplementation } from "../local/localDiagramImplementation";
 import { RegisterRemoteLanguageServerMessage } from "./registerRemoteLanguageServerMessage";
 import { RemoteDiagramImplementation } from "./remoteDiagramImplementation";
-import { RemoteMessagePayload } from "../../../../diagram-protocol/src/lsp/remoteMessages";
+import { RemoteMessagePayload } from "@hylimo/diagram-protocol";
 
 /**
  * Manages the layouted diagrams. This is the remote implementation.

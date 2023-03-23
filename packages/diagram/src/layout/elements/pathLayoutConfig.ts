@@ -1,7 +1,7 @@
 import { enumType, numberType, stringType } from "@hylimo/core";
 import { Size, Point, Element, Path, LineJoin, LineCap } from "@hylimo/diagram-common";
 import svgPath from "svgpath";
-import { PathBBox, svgPathBbox } from "../../path/svgPathBbox";
+import { PathBBox, svgPathBbox } from "@hylimo/diagram-common";
 import { LayoutElement, SizeConstraints } from "../layoutElement";
 import { Layout } from "../layoutEngine";
 import { ShapeLayoutConfig } from "./shapeLayoutConfig";

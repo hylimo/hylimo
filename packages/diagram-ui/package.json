@@ -13,6 +13,7 @@
     "dependencies": {
         "@hylimo/diagram-common": "^0.0.1",
         "@hylimo/diagram-protocol": "^0.0.1",
+        "@hylimo/diagram-render": "^0.0.1",
         "sprotty": "^0.13.0",
         "sprotty-protocol": "^0.13.0"
     }

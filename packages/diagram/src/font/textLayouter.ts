@@ -1,8 +1,7 @@
 import { Font } from "fontkit";
 import LineBreaker, { Break } from "linebreak";
 import { LayoutElement } from "../layout/layoutElement";
-import { Text, Size } from "@hylimo/diagram-common";
-import { FontFamily } from "../../../diagram-common/src/font/font";
+import { Text, Size, FontFamily } from "@hylimo/diagram-common";
 
 /**
  * Result of a text layout process

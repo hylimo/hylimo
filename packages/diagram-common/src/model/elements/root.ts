@@ -1,10 +1,10 @@
-import { FontFamilyConfig } from "./font/fontConfig";
-import { Element } from "./model/base/element";
+import { FontFamilyConfig } from "../../font/fontConfig";
+import { Element } from "./base/element";
 
 /**
  * Root diagram element, defining child elements and fonts
  */
-export interface Root {
+export interface Root extends Element {
     /**
      * Type of the element
      */
@@ -13,10 +13,6 @@ export interface Root {
      * The id of the element
      */
     id: typeof Root.TYPE;
-    /**
-     * Child elementes
-     */
-    children: Element[];
     /**
      * Defined font families
      */

@@ -1,4 +1,4 @@
-import { Line } from "../../line/model/line";
+import { Line } from "../../../line/model/line";
 import { Element } from "../base/element";
 import { LayoutedElement } from "../base/layoutedElement";
 import { ModificationSpecification } from "../modificationSpecification";

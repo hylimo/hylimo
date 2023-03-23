@@ -1,2 +1,2 @@
-export * from "./common/simplifiedDiagramVisitor";
-export * from "./common/simplifiedTypes";
+export * from "./svg/attributeHelpers";
+export * from "./svg/svgRenderer";

@@ -1,5 +1,5 @@
 import { CompletionItem, Position } from "vscode-languageserver";
-import { RemoteMessagePayload } from "../../../../diagram-protocol/src/lsp/remoteMessages";
+import { RemoteMessagePayload } from "@hylimo/diagram-protocol";
 import { RequestUpdateDiagramMessage } from "./updateDiagramMessage";
 
 /**

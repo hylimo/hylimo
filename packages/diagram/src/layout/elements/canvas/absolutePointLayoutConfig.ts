@@ -33,8 +33,8 @@ export class AbsolutePointLayoutConfig extends CanvasPointLayoutConfig {
         const result: AbsolutePoint = {
             type: AbsolutePoint.TYPE,
             id,
-            x: xFieldEntry?.value?.toNative(),
-            y: yFieldEntry?.value.toNative(),
+            x: xFieldEntry?.value?.toNative() + position.x,
+            y: yFieldEntry?.value.toNative() + position.y,
             editable: this.generateModificationSpecification({ x: xFieldEntry?.source, y: yFieldEntry?.source }),
             children: []
         };

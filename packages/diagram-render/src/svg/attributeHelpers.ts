@@ -1,6 +1,4 @@
-import { StrokedElement } from "@hylimo/diagram-common";
-import { SLayoutedElement } from "../model/sLayoutedElement";
-import { SShape } from "../model/sShape";
+import { LayoutedElement, Shape, StrokedElement } from "@hylimo/diagram-common";
 
 /**
  * Extracts layout attributes
@@ -8,7 +6,7 @@ import { SShape } from "../model/sShape";
  * @param model the model which provides the attributes
  * @returns the extracted attribzutes
  */
-export function extractLayoutAttributes(model: Readonly<SLayoutedElement>): {
+export function extractLayoutAttributes(model: Readonly<LayoutedElement>): {
     x: number;
     y: number;
     width: number;
@@ -29,7 +27,9 @@ export function extractLayoutAttributes(model: Readonly<SLayoutedElement>): {
  * @param model the model which provides the attributes
  * @returns the extracted attributes
  */
-export function extractOutlinedShapeAttributes(model: Readonly<SShape>) {
+export function extractOutlinedShapeAttributes(
+    model: Readonly<Shape>
+): ReturnType<typeof extractShapeAttributes> & ReturnType<typeof extractLayoutAttributes> {
     const res = extractShapeAttributes(model);
     if (model.strokeWidth) {
         res.x += model.strokeWidth / 2;
@@ -46,7 +46,12 @@ export function extractOutlinedShapeAttributes(model: Readonly<SShape>) {
  * @param model the model which provides the attributes
  * @returns the extracted attributes
  */
-export function extractStrokeAttriabutes(model: Readonly<StrokedElement>) {
+export function extractStrokeAttriabutes(model: Readonly<StrokedElement>): {
+    stroke: string | false;
+    "stroke-opacity": number | false;
+    "stroke-width": number | false;
+    "stroke-dasharray": string | false;
+} {
     return {
         stroke: model.stroke ?? false,
         "stroke-opacity": model.strokeOpacity ?? false,
@@ -61,12 +66,16 @@ export function extractStrokeAttriabutes(model: Readonly<StrokedElement>) {
  * @param model the model which provides the attributes
  * @returns the extracted attributes
  */
-export function extractShapeAttributes(model: Readonly<SShape>) {
+export function extractShapeAttributes(model: Readonly<Shape>): ReturnType<typeof extractLayoutAttributes> &
+    ReturnType<typeof extractStrokeAttriabutes> & {
+        fill: string;
+        "fill-opacity": number | false;
+    } {
     const res = {
         ...extractLayoutAttributes(model),
+        ...extractStrokeAttriabutes(model),
         fill: model.fill ?? "none",
-        "fill-opacity": model.fillOpacity,
-        ...extractStrokeAttriabutes(model)
+        "fill-opacity": model.fillOpacity ?? (false as number | false)
     };
     return res;
 }

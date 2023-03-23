@@ -5,7 +5,7 @@ import { IView, IViewArgs, RenderingContext, svg } from "sprotty";
 import { SCanvasConnection } from "../../model/canvas/sCanvasConnection";
 import { SCanvasConnectionSegment } from "../../model/canvas/sCanvasConnectionSegment";
 import { SMarker } from "../../model/canvas/sMarker";
-import { extractStrokeAttriabutes } from "../attributeHelpers";
+import { extractStrokeAttriabutes } from "@hylimo/diagram-render";
 
 /**
  * IView that represents a CanvasConnection

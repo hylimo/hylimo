@@ -1,6 +1,6 @@
 import { applyToPoint, inverse } from "transformation-matrix";
 import { Point } from "../../common/point";
-import { LinePoint } from "../../model/canvas/canvasPoint";
+import { LinePoint } from "../../model/elements/canvas/canvasPoint";
 import { ArcSegment } from "../model/arcSegment";
 import { BezierSegment } from "../model/bezierSegment";
 import { TransformedLine } from "../model/line";

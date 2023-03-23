@@ -55,7 +55,6 @@ export * from "./views/canvas/canvasView";
 export * from "./views/canvas/linePointView";
 export * from "./views/canvas/markerView";
 export * from "./views/canvas/relativePointView";
-export * from "./views/attributeHelpers";
 export * from "./views/pathView";
 export * from "./views/rectView";
 export * from "./views/rootView";

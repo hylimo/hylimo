@@ -2,19 +2,19 @@ import { compose, identity, rotateDEG, translate } from "transformation-matrix";
 import { Point } from "../common/point";
 import { Line, TransformedLine } from "../line/model/line";
 import { Segment } from "../line/model/segment";
-import { CanvasAxisAlignedSegment } from "../model/canvas/canvasAxisAlignedSegment";
-import { CanvasBezierSegment } from "../model/canvas/canvasBezierSegment";
-import { CanvasConnection } from "../model/canvas/canvasConnection";
-import { CanvasConnectionSegment } from "../model/canvas/canvasConnectionSegment";
-import { CanvasElement } from "../model/canvas/canvasElement";
-import { CanvasLineSegment } from "../model/canvas/canvasLineSegment";
-import { Marker, MarkerLayoutInformation } from "../model/canvas/marker";
+import { CanvasAxisAlignedSegment } from "../model/elements/canvas/canvasAxisAlignedSegment";
+import { CanvasBezierSegment } from "../model/elements/canvas/canvasBezierSegment";
+import { CanvasConnection } from "../model/elements/canvas/canvasConnection";
+import { CanvasConnectionSegment } from "../model/elements/canvas/canvasConnectionSegment";
+import { CanvasElement } from "../model/elements/canvas/canvasElement";
+import { CanvasLineSegment } from "../model/elements/canvas/canvasLineSegment";
+import { Marker, MarkerLayoutInformation } from "../model/elements/canvas/marker";
 import { AxisAlignedSegmentLayoutEngine } from "./axisAlignedSegmentLayoutEngine";
 import { BezierSegmentLayoutEngine } from "./bezierSegmentLayoutEngine";
 import { CanvasConnectionLayout, SegmentLayoutInformation } from "./canvasConnectionLayout";
 import { LineSegmentLayoutEngine } from "./lineSegmentLayoutEngine";
 import { SegmentLayoutEngine } from "./segmentLayoutEngine";
-import { AbsolutePoint, CanvasPoint, LinePoint, RelativePoint } from "../model/canvas/canvasPoint";
+import { AbsolutePoint, CanvasPoint, LinePoint, RelativePoint } from "../model/elements/canvas/canvasPoint";
 import { LineEngine } from "../line/engine/lineEngine";
 
 /**
@@ -124,11 +124,7 @@ export abstract class CanvasLayoutEngine {
             }
             return {
                 line: element.outline,
-                transform: compose(
-                    translate(position.x, position.y),
-                    rotateDEG(element.rotation),
-                    translate(element.x, element.y)
-                )
+                transform: compose(translate(position.x, position.y), rotateDEG(element.rotation))
             };
         }
     }

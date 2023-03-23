@@ -1,4 +1,4 @@
-import { Size } from "../../common/size";
+import { Size } from "../../../common/size";
 import { Element } from "./element";
 
 /**

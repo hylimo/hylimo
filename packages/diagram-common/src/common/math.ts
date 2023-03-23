@@ -1,3 +1,4 @@
+import { Bounds } from "./bounds";
 import { Point } from "./point";
 
 /**
@@ -155,6 +156,57 @@ export namespace Math2D {
         return {
             x: vector.x * cos - vector.y * sin,
             y: vector.x * sin + vector.y * cos
+        };
+    }
+
+    /**
+     * Merges a list of bounds into a single bounds
+     *
+     * @param bounds the bounds to merge
+     * @returns the merged bounds
+     */
+    export function mergeBounds(...bounds: Bounds[]): Bounds {
+        const minX = Math.min(...bounds.map((b) => b.position.x));
+        const minY = Math.min(...bounds.map((b) => b.position.y));
+        const maxX = Math.max(...bounds.map((b) => b.position.x + b.size.width));
+        const maxY = Math.max(...bounds.map((b) => b.position.y + b.size.height));
+        return {
+            position: {
+                x: minX,
+                y: minY
+            },
+            size: {
+                width: maxX - minX,
+                height: maxY - minY
+            }
+        };
+    }
+
+    /**
+     * Rotates the given bounds by the given angle (in radians)
+     *
+     * @param bounds the bounds to rotate
+     * @param rotation the rotation to apply to the bounds
+     * @returns the rotated bounds
+     */
+    export function rotateBounds(bounds: Bounds, rotation: number): Bounds {
+        const topLeft = rotate(sub(bounds.position, { x: bounds.size.width / 2, y: bounds.size.height / 2 }), rotation);
+        const topRight = rotate(add({ x: bounds.size.width, y: 0 }, topLeft), rotation);
+        const bottomLeft = rotate(add({ x: 0, y: bounds.size.height }, topLeft), rotation);
+        const bottomRight = rotate(add({ x: bounds.size.width, y: bounds.size.height }, topLeft), rotation);
+        const minX = Math.min(topLeft.x, topRight.x, bottomLeft.x, bottomRight.x);
+        const minY = Math.min(topLeft.y, topRight.y, bottomLeft.y, bottomRight.y);
+        const maxX = Math.max(topLeft.x, topRight.x, bottomLeft.x, bottomRight.x);
+        const maxY = Math.max(topLeft.y, topRight.y, bottomLeft.y, bottomRight.y);
+        return {
+            position: {
+                x: minX,
+                y: minY
+            },
+            size: {
+                width: maxX - minX,
+                height: maxY - minY
+            }
         };
     }
 }

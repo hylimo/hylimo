@@ -11,6 +11,7 @@
         "build": "tsc"
     },
     "dependencies": {
-        "@hylimo/diagram": "^0.0.1"
+        "@hylimo/diagram": "^0.0.1",
+        "xmlbuilder2": "^3.0.2"
     }
 }

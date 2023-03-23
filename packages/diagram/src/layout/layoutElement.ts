@@ -1,6 +1,7 @@
 import { FieldEntry, FullObject, Type } from "@hylimo/core";
 import { Element, Line, Point, Size } from "@hylimo/diagram-common";
 import { Layout } from "./layoutEngine";
+import { Bounds } from "@hylimo/diagram-common";
 
 /**
  * Size constraints from min to max size
@@ -8,14 +9,6 @@ import { Layout } from "./layoutEngine";
 export interface SizeConstraints {
     min: Size;
     max: Size;
-}
-
-/**
- * Bounds for layouting
- */
-export interface Bounds {
-    position: Point;
-    size: Size;
 }
 
 /**

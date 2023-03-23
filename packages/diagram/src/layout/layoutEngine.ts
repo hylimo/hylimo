@@ -1,7 +1,6 @@
 import { BaseObject, FieldEntry, FullObject, nativeToList } from "@hylimo/core";
 import { assertString } from "@hylimo/core";
-import { FontFamily } from "../../../diagram-common/src/font/font";
-import { FontFamilyConfig, Element, Size, Point } from "@hylimo/diagram-common";
+import { FontFamilyConfig, Element, Size, Point, FontFamily } from "@hylimo/diagram-common";
 import { FontManager } from "../font/fontManager";
 import { TextLayouter } from "../font/textLayouter";
 import { generateStyles, Selector, SelectorType, Style, StyleList } from "../styles";
