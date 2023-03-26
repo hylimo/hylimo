@@ -1,5 +1,5 @@
-import { literal, numberType, or, stringType } from "@hylimo/core";
-import { Element, Point, Size } from "@hylimo/diagram-common";
+import { enumType, numberType, stringType } from "@hylimo/core";
+import { Element, FontStyle, FontWeight, Point, Size } from "@hylimo/diagram-common";
 import { LayoutElement, SizeConstraints } from "../layoutElement";
 import { Layout } from "../layoutEngine";
 import { ElementLayoutConfig } from "./elementLayoutConfig";
@@ -26,12 +26,12 @@ export class SpanLayoutConfig extends ElementLayoutConfig {
                 {
                     name: "fontWeight",
                     description: 'optional font weight, if given must be either "normal" or "bold"',
-                    type: or(literal("normal"), literal("bold"))
+                    type: enumType(FontWeight)
                 },
                 {
                     name: "fontStyle",
                     description: 'optional font style, if given must be either "normal" or "italic"',
-                    type: or(literal("normal"), literal("italic"))
+                    type: enumType(FontStyle)
                 }
             ]
         );

@@ -2,7 +2,7 @@ import { injectable } from "inversify";
 import { VNode } from "snabbdom";
 import { IViewArgs, RenderingContext, IView, svg } from "sprotty";
 import { SText } from "../model/sText";
-import { extractLayoutAttributes } from "@hylimo/diagram-render";
+import { extractLayoutAttributes } from "@hylimo/diagram-render-svg";
 
 /**
  * IView that represents an svg text

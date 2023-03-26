@@ -7,8 +7,11 @@
     "references": [
         {
             "path": "../diagram"
+        },
+        {
+            "path": "../diagram-render-svg"
         }
     ],
-    "include": ["src/**/*.ts"],
+    "include": ["src/**/*.ts", "types/*.d.ts"],
     "exclude": ["lib", "node_modules"]
 }

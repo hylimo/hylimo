@@ -1,7 +1,7 @@
-import { Font } from "fontkit";
 import LineBreaker, { Break } from "linebreak";
 import { LayoutElement } from "../layout/layoutElement";
-import { Text, Size, FontFamily } from "@hylimo/diagram-common";
+import { Text, Size, FontWeight, FontStyle } from "@hylimo/diagram-common";
+import { FontCollection } from "./fontCollection";
 
 /**
  * Result of a text layout process
@@ -30,7 +30,7 @@ export class TextLayouter {
      * @param maxWidth the max width
      * @returns the size it needs
      */
-    layout(text: LayoutElement, fonts: Map<string, FontFamily>, maxWidth: number): TextLayoutResult {
+    layout(text: LayoutElement, fonts: FontCollection, maxWidth: number): TextLayoutResult {
         let usedMaxWidth = 0;
         let offsetX = 0;
         let offsetY = 0;
@@ -66,8 +66,8 @@ export class TextLayouter {
                 fill: styles.fill,
                 fontFamily: styles.fontFamily,
                 fontSize: styles.fontSize,
-                fontWeight: styles.fontWeight,
-                fontStyle: styles.fontStyle,
+                fontWeight: styles.fontWeight ?? FontWeight.Normal,
+                fontStyle: styles.fontStyle ?? FontStyle.Normal,
                 id: "",
                 x: textOffset,
                 y: offsetY,
@@ -83,21 +83,11 @@ export class TextLayouter {
             const textContent = styles.text as string;
             const lineBreaker = new LineBreaker(textContent + " ");
             let lineBreak: Break | null = lineBreaker.nextBreak();
-            const fontFamily = fonts.get(styles.fontFamily)!;
-            let font: Font;
-            if (styles.fontWeight == "bold") {
-                if (styles.fontStyle == "italic") {
-                    font = fontFamily.boldItalic;
-                } else {
-                    font = fontFamily.bold;
-                }
-            } else {
-                if (styles.fontStyle == "italic") {
-                    font = fontFamily.italic;
-                } else {
-                    font = fontFamily.normal;
-                }
-            }
+            const font = fonts.getFont(
+                styles.fontFamily,
+                styles.fontWeight ?? FontWeight.Normal,
+                styles.fontStyle ?? FontStyle.Normal
+            );
             const scalingFactor = styles.fontSize / font.unitsPerEm;
             fontAscent = scalingFactor * (font.ascent + font.lineGap / 2);
             fontDescent = scalingFactor * (-font.descent + font.lineGap / 2);

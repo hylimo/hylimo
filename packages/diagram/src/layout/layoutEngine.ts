@@ -1,6 +1,6 @@
 import { BaseObject, FieldEntry, FullObject, nativeToList } from "@hylimo/core";
 import { assertString } from "@hylimo/core";
-import { FontFamilyConfig, Element, Size, Point, FontFamily } from "@hylimo/diagram-common";
+import { Element, Size, Point, FontFamily } from "@hylimo/diagram-common";
 import { FontManager } from "../font/fontManager";
 import { TextLayouter } from "../font/textLayouter";
 import { generateStyles, Selector, SelectorType, Style, StyleList } from "../styles";
@@ -16,6 +16,7 @@ import {
     VerticalAlignment
 } from "./layoutElement";
 import { layouts } from "./layouts";
+import { FontCollection } from "../font/fontCollection";
 
 /**
  * Performs layout, generates a model as a result
@@ -53,20 +54,14 @@ export class LayoutEngine {
     async layout(diagram: BaseObject): Promise<LayoutedDiagram> {
         this.assertDiagram(diagram);
         const nativeFonts = diagram.getLocalFieldOrUndefined("fonts")?.value?.toNative();
-        const fontMap = new Map<string, FontFamily>();
-        const fontFamilyConfigs: FontFamilyConfig[] = [];
         const fontFamilies = await Promise.all(
             nativeToList(nativeFonts).map(async (config) => this.fontManager.getFontFamily(config))
         );
-        for (const fontFamily of fontFamilies) {
-            const config = fontFamily.config;
-            fontMap.set(config.fontFamily, fontFamily);
-            fontFamilyConfigs.push(config);
-        }
+        const fontFamilyConfigs = fontFamilies.map((family) => family.config);
         const layout = new Layout(
             this,
             generateStyles(diagram.getLocalFieldOrUndefined("styles")?.value as FullObject),
-            fontMap,
+            new FontCollection(fontFamilies),
             fontFamilies[0]
         );
         const layoutElement = layout.measure(
@@ -135,7 +130,7 @@ export class Layout {
     constructor(
         readonly engine: LayoutEngine,
         readonly styles: StyleList,
-        readonly fonts: Map<string, FontFamily>,
+        readonly fonts: FontCollection,
         readonly defaultFont: FontFamily
     ) {}
 

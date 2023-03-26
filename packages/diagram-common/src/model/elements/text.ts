@@ -26,11 +26,27 @@ export interface Text extends LayoutedElement {
     /**
      * normal or bold weight
      */
-    fontWeight: "normal" | "bold";
+    fontWeight: FontWeight;
     /**
      * normal or italic style
      */
-    fontStyle: "normal" | "italic";
+    fontStyle: FontStyle;
+}
+
+/**
+ * Enum for font weights, includes normal and bold
+ */
+export enum FontWeight {
+    Normal = "normal",
+    Bold = "bold"
+}
+
+/**
+ * Enum for font styles, includes normal and italic
+ */
+export enum FontStyle {
+    Normal = "normal",
+    Italic = "italic"
 }
 
 export namespace Text {

@@ -1,5 +1,5 @@
 {
-    "name": "@hylimo/diagram-ui",
+    "name": "@hylimo/diagram-render-svg",
     "version": "0.0.1",
     "main": "lib/index",
     "types": "lib/index",
@@ -12,9 +12,6 @@
     },
     "dependencies": {
         "@hylimo/diagram-common": "^0.0.1",
-        "@hylimo/diagram-protocol": "^0.0.1",
-        "@hylimo/diagram-render-svg": "^0.0.1",
-        "sprotty": "^0.13.0",
-        "sprotty-protocol": "^0.13.0"
+        "xmlbuilder2": "^3.0.2"
     }
 }

@@ -171,6 +171,12 @@ class SVGDiagramVisitor extends SimplifiedDiagramVisitor<undefined, SVGNode[]> {
         return [result];
     }
 
+    /**
+     * Visists all children of the provided element and calls visitElement on them
+     *
+     * @param element the element to visit the children of
+     * @returns the result of the visit
+     */
     private visitChildren(element: Element): SVGNode[] {
         return element.children.flatMap((child) => this.visitElement(child));
     }

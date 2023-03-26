@@ -2,7 +2,7 @@ import { injectable } from "inversify";
 import { VNode, Attrs } from "snabbdom";
 import { IViewArgs, RenderingContext, IView, svg } from "sprotty";
 import { SRect } from "../model/sRect";
-import { extractOutlinedShapeAttributes } from "@hylimo/diagram-render";
+import { extractOutlinedShapeAttributes } from "@hylimo/diagram-render-svg";
 
 /**
  * IView that represents an svg rect

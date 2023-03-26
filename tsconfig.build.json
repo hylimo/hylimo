@@ -24,7 +24,10 @@
             "path": "packages/diagram-protocol"
         },
         {
-            "path": "packages/diagram-render"
+            "path": "packages/diagram-render-svg"
+        },
+        {
+            "path": "packages/diagram-render-pdf"
         }
     ]
 }

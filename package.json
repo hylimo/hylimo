@@ -50,7 +50,8 @@
                 {
                     "argsIgnorePattern": "^_"
                 }
-            ]
+            ],
+            "no-async-promise-executor": "off"
         }
     }
 }

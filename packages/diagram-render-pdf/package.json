@@ -1,5 +1,5 @@
 {
-    "name": "@hylimo/diagram-render",
+    "name": "@hylimo/diagram-render-pdf",
     "version": "0.0.1",
     "main": "lib/index",
     "types": "lib/index",
@@ -12,6 +12,10 @@
     },
     "dependencies": {
         "@hylimo/diagram": "^0.0.1",
-        "xmlbuilder2": "^3.0.2"
+        "@hylimo/diagram-render-svg": "^0.0.1",
+        "pdfkit": "^0.13.0"
+    },
+    "devDependencies": {
+        "@types/pdfkit": "^0.12.8"
     }
 }

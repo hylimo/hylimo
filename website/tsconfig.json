@@ -14,6 +14,12 @@
         },
         {
             "path": "../packages/diagram-ui"
+        },
+        {
+            "path": "../packages/diagram-render-svg"
+        },
+        {
+            "path": "../packages/diagram-render-pdf"
         }
     ],
     "include": ["src/**/*.ts(x?)"]
