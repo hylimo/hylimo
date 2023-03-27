@@ -1,5 +1,6 @@
 import { assign, fun, id, jsFun, str } from "../../runtime/executableAstHelper";
 import { InterpreterModule } from "../../runtime/interpreter";
+import { FieldEntry } from "../../runtime/objects/baseObject";
 import { RuntimeError } from "../../runtime/runtimeError";
 import { SemanticFieldNames } from "../../runtime/semanticFieldNames";
 import { booleanType } from "../../types/boolean";
@@ -66,15 +67,16 @@ export const commonModule = InterpreterModule.create(
                     const body = args.getField(1, context);
                     assertFunction(condition);
                     assertFunction(body);
+                    let lastValue: FieldEntry = { value: context.null };
                     // eslint-disable-next-line no-constant-condition
                     while (true) {
                         const conditionRes = condition.invoke([], context).value;
                         if (!assertBoolean(conditionRes, "result of the condition function")) {
                             break;
                         }
-                        body.invoke([], context);
+                        lastValue = body.invoke([], context);
                     }
-                    return context.null;
+                    return lastValue;
                 },
                 {
                     docs: `
@@ -83,7 +85,7 @@ export const commonModule = InterpreterModule.create(
                             - 0: the condition function, executed before each loop, must return a boolean
                             - 1: the body function, executed on each loop
                         Returns:
-                            null
+                            The result of the last loop iteration or null if the loop was never executed.
                     `,
                     snippet: " { $1 } {\n    $2\n}"
                 },

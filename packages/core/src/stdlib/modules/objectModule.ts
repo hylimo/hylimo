@@ -3,7 +3,7 @@ import { InterpreterModule } from "../../runtime/interpreter";
 import { assign, fun, id, jsFun, native, num, str } from "../../runtime/executableAstHelper";
 import { SemanticFieldNames } from "../../runtime/semanticFieldNames";
 import { assertFunction, assertObject } from "../typeHelpers";
-import { BaseObject } from "../../runtime/objects/baseObject";
+import { BaseObject, FieldEntry } from "../../runtime/objects/baseObject";
 import { StringObject } from "../../runtime/objects/stringObject";
 import { NumberObject } from "../../runtime/objects/numberObject";
 import { RuntimeError } from "../../runtime/runtimeError";
@@ -174,14 +174,15 @@ export const objectModule = InterpreterModule.create(
                         const callback = args.getField(0, context);
                         assertFunction(callback, "first positional argument of forEach");
                         assertObject(self, "self argument of forEach");
+                        let lastValue: FieldEntry = { value: context.null };
                         self.fields.forEach((value, key) => {
                             const keyExpression = typeof key === "string" ? str(key) : num(key);
-                            callback.invoke(
+                            lastValue = callback.invoke(
                                 [{ value: new ExecutableConstExpression(value) }, { value: keyExpression }],
                                 context
                             );
                         });
-                        return context.null;
+                        return lastValue;
                     },
                     {
                         docs: `
@@ -192,7 +193,7 @@ export const objectModule = InterpreterModule.create(
                                 - "self": the object on which all fields are iterated
                                 - 0: the callback, called with two positional parameters (value and key)
                             Returns:
-                                null
+                                The result of the last call to the callback or null if the object is empty.
                         `
                     },
                     [

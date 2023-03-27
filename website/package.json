@@ -13,8 +13,8 @@
         "write-heading-ids": "docusaurus write-heading-ids"
     },
     "dependencies": {
-        "@docusaurus/core": "2.3.1",
-        "@docusaurus/preset-classic": "2.3.1",
+        "@docusaurus/core": "^2.4.0",
+        "@docusaurus/preset-classic": "^2.4.0",
         "@hylimo/core": "^0.0.1",
         "@hylimo/diagram-render-pdf": "^0.0.1",
         "@hylimo/diagram-render-svg": "^0.0.1",
@@ -38,7 +38,7 @@
         "vscode-languageserver-protocol": "^3.17.2"
     },
     "devDependencies": {
-        "@docusaurus/module-type-aliases": "2.3.1",
+        "@docusaurus/module-type-aliases": "^2.4.0",
         "@tsconfig/docusaurus": "^1.0.6",
         "@types/file-saver": "^2.0.5",
         "monaco-editor-webpack-plugin": "^7.0.1"

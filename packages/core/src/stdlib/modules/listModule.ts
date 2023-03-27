@@ -2,7 +2,7 @@ import { assign, fun, id, jsFun, native, num } from "../../runtime/executableAst
 import { ExecutableInvocationArgument } from "../../runtime/ast/executableAbstractInvocationExpression";
 import { ExecutableConstExpression } from "../../runtime/ast/executableConstExpression";
 import { InterpreterModule } from "../../runtime/interpreter";
-import { BaseObject } from "../../runtime/objects/baseObject";
+import { BaseObject, FieldEntry } from "../../runtime/objects/baseObject";
 import { FullObject } from "../../runtime/objects/fullObject";
 import { generateArgs } from "../../runtime/objects/functionObject";
 import { RuntimeError } from "../../runtime/runtimeError";
@@ -144,8 +144,9 @@ export const listModule = InterpreterModule.create(
                         const callback = args.getField(0, context);
                         assertFunction(callback, "first positional argument of forEach");
                         const length = assertNumber(self.getField(lengthField, context), "length field of a list");
+                        let lastValue: FieldEntry = { value: context.null };
                         for (let i = 0; i < length; i++) {
-                            callback.invoke(
+                            lastValue = callback.invoke(
                                 [
                                     { value: new ExecutableConstExpression(self.getFieldEntry(i, context)) },
                                     { value: num(i) }
@@ -153,7 +154,7 @@ export const listModule = InterpreterModule.create(
                                 context
                             );
                         }
-                        return context.null;
+                        return lastValue;
                     },
                     {
                         docs: `
@@ -162,7 +163,7 @@ export const listModule = InterpreterModule.create(
                                 - "self": the list on which all fields are iterated
                                 - 0: the callback, called with two positional parameters (value and index)
                             Returns:
-                                null
+                                The result of the last call to the callback or null if the list is empty.
                         `
                     },
                     [
