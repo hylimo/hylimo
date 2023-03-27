@@ -9,7 +9,7 @@ import {
     SimplifiedDiagramVisitor,
     Text,
     WithBounds
-} from "../../diagram-common/src";
+} from "@hylimo/diagram-common";
 import PDFDocument from "pdfkit/js/pdfkit.standalone.js";
 import { extractOutlinedShapeAttributes, extractShapeAttributes } from "@hylimo/diagram-render-svg";
 

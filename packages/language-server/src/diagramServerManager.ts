@@ -2,9 +2,8 @@ import { Root } from "@hylimo/diagram-common";
 import { ActionMessage, GeneratorArguments, SModelRoot } from "sprotty-protocol";
 import { Connection } from "vscode-languageserver";
 import { Diagram } from "./diagram/diagram";
-import { DiagramActionNotification } from "../../diagram-protocol/src/lsp/diagramNotificationTypes";
 import { DiagramServer } from "./edit/diagramServer";
-import { IncrementalUpdate, IncrementalUpdateAction } from "@hylimo/diagram-protocol";
+import { IncrementalUpdate, IncrementalUpdateAction, DiagramActionNotification } from "@hylimo/diagram-protocol";
 
 /**
  * Manages DiagramServer instances and associates them with TextDocuments

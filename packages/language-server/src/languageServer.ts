@@ -21,14 +21,15 @@ import {
     DiagramActionNotification,
     DiagramCloseNotification,
     DiagramOpenNotification,
-    OpenDiagramMessage
-} from "../../diagram-protocol/src/lsp/diagramNotificationTypes";
+    OpenDiagramMessage,
+    SetLanguageServerIdNotification,
+    ConfigNotification,
+    DynamicLanuageServerConfig
+} from "@hylimo/diagram-protocol";
 import { SharedDiagramUtils } from "./sharedDiagramUtils";
 import { LocalDiagramImplementationManager } from "./diagram/local/localDiagramImplementationManager";
 import { DiagramImplementationManager } from "./diagram/diagramImplementationManager";
 import { RemoteDiagramImplementationManager } from "./diagram/remote/remoteDiagramImplementationManager";
-import { SetLanguageServerIdNotification } from "../../diagram-protocol/src/lsp/remoteMessages";
-import { ConfigNotification, DynamicLanuageServerConfig } from "@hylimo/diagram-protocol";
 import { CompletionEngine } from "./completion/completionEngine";
 
 /**
