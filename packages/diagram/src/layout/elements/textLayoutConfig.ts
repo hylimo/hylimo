@@ -1,8 +1,9 @@
-import { FullObject, listType, literal, objectToList, objectType, SemanticFieldNames } from "@hylimo/core";
+import { FullObject, listType, objectToList } from "@hylimo/core";
 import { Element, Size, Point, Text } from "@hylimo/diagram-common";
 import { LayoutElement, SizeConstraints } from "../layoutElement";
 import { Layout } from "../layoutEngine";
 import { StyledElementLayoutConfig } from "./styledElementLayoutConfig";
+import { elementType } from "../../module/types";
 
 /**
  * Layout config for text
@@ -15,14 +16,7 @@ export class TextLayoutConfig extends StyledElementLayoutConfig {
                 {
                     name: "contents",
                     description: "a list of spans to display",
-                    type: listType(
-                        objectType(
-                            new Map([
-                                [SemanticFieldNames.PROTO, objectType(new Map([["_type", literal("element")]]))],
-                                ["type", literal("span")]
-                            ])
-                        )
-                    )
+                    type: listType(elementType("span"))
                 }
             ],
             []

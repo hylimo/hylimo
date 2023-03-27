@@ -8,7 +8,7 @@ export class RuntimeError extends Error {
     /**
      * Interpreation steps
      */
-    interpretationStack: Expression[] = [];
+    interpretationStack: (Expression | undefined)[] = [];
 
     /**
      * Creates a new RuntimeError
@@ -30,7 +30,7 @@ export class RuntimeError extends Error {
      */
     findFirstPosition(): ASTExpressionPosition | undefined {
         for (const stackEntry of this.interpretationStack) {
-            if (stackEntry.position) {
+            if (stackEntry?.position != undefined) {
                 return stackEntry.position;
             }
         }

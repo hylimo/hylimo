@@ -1,8 +1,9 @@
-import { FullObject, literal, numberType, objectType, SemanticFieldNames } from "@hylimo/core";
+import { FullObject, numberType } from "@hylimo/core";
 import { Size, Point, Element, Marker } from "@hylimo/diagram-common";
 import { LayoutElement, SizeConstraints } from "../../layoutElement";
 import { Layout } from "../../layoutEngine";
 import { StyledElementLayoutConfig } from "../styledElementLayoutConfig";
+import { elementType } from "../../../module/types";
 
 /**
  * Layout config for marker
@@ -15,9 +16,7 @@ export class MarkerLayoutConfig extends StyledElementLayoutConfig {
                 {
                     name: "content",
                     description: "the inner element",
-                    type: objectType(
-                        new Map([[SemanticFieldNames.PROTO, objectType(new Map([["_type", literal("element")]]))]])
-                    )
+                    type: elementType()
                 }
             ],
             [

@@ -1,6 +1,7 @@
-import { optional, objectType, SemanticFieldNames, literal } from "@hylimo/core";
+import { optional, objectType } from "@hylimo/core";
 import { AttributeConfig } from "../../layoutElement";
 import { CanvasContentLayoutConfig } from "./canvasContentLayoutConfig";
+import { elementType } from "../../../module/types";
 
 /**
  * Base layout config for CanvasElementLayoutConfig and CanvasConnectionLayoutConfig
@@ -21,11 +22,7 @@ export abstract class EditableCanvasContentLayoutConfig extends CanvasContentLay
                     name: "source",
                     description:
                         "the CanvasContent itself, used for the metadata, should be assigned to an expression where infix functions can be added",
-                    type: optional(
-                        objectType(
-                            new Map([[SemanticFieldNames.PROTO, objectType(new Map([["_type", literal("element")]]))]])
-                        )
-                    )
+                    type: optional(elementType())
                 },
                 {
                     name: "scopes",

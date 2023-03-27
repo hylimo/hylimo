@@ -1,9 +1,10 @@
-import { FullObject, listType, literal, objectToList, objectType, SemanticFieldNames } from "@hylimo/core";
-import { Size, Point, Element, Canvas } from "@hylimo/diagram-common";
+import { FullObject, listType, objectToList, or } from "@hylimo/core";
+import { Size, Point, Element, Canvas, CanvasElement, CanvasConnection } from "@hylimo/diagram-common";
 import { LayoutElement, SizeConstraints } from "../../layoutElement";
 import { Layout } from "../../layoutEngine";
 import { StyledElementLayoutConfig } from "../styledElementLayoutConfig";
 import { CanvasContentLayoutConfig } from "./canvasContentLayoutConfig";
+import { canvasPointType, elementType } from "../../../module/types";
 
 /**
  * Layout config for the canvas
@@ -16,11 +17,7 @@ export class CanvasLayoutConfig extends StyledElementLayoutConfig {
                 {
                     name: "contents",
                     description: "the inner elements",
-                    type: listType(
-                        objectType(
-                            new Map([[SemanticFieldNames.PROTO, objectType(new Map([["_type", literal("element")]]))]])
-                        )
-                    )
+                    type: listType(or(canvasPointType, elementType(CanvasElement.TYPE, CanvasConnection.TYPE)))
                 }
             ],
             []

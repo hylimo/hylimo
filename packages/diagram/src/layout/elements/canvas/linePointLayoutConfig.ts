@@ -1,8 +1,9 @@
-import { Expression, FullObject, literal, numberType, objectType, optional, SemanticFieldNames } from "@hylimo/core";
-import { Size, Element, LinePoint, Point } from "@hylimo/diagram-common";
+import { Expression, FullObject, numberType, optional } from "@hylimo/core";
+import { Size, Element, LinePoint, Point, CanvasConnection, CanvasElement } from "@hylimo/diagram-common";
 import { LayoutElement } from "../../layoutElement";
 import { Layout } from "../../layoutEngine";
 import { CanvasPointLayoutConfig } from "./canvasPointLayoutConfig";
+import { elementType } from "../../../module/types";
 
 /**
  * Layout config for line points
@@ -25,9 +26,7 @@ export class LinePointLayoutConfig extends CanvasPointLayoutConfig {
                 {
                     name: "lineProvider",
                     description: "the target which provides the line",
-                    type: objectType(
-                        new Map([[SemanticFieldNames.PROTO, objectType(new Map([["_type", literal("element")]]))]])
-                    )
+                    type: elementType(CanvasConnection.TYPE, CanvasElement.TYPE)
                 }
             ],
             []

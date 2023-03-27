@@ -1,6 +1,7 @@
-import { FullObject, listType, literal, objectToList, objectType, SemanticFieldNames } from "@hylimo/core";
+import { FullObject, listType, objectToList } from "@hylimo/core";
 import { AttributeConfig, LayoutElement } from "../layoutElement";
 import { StyledElementLayoutConfig } from "./styledElementLayoutConfig";
+import { elementType } from "../../module/types";
 
 /**
  * Base class for all layout configs which contain contents
@@ -20,11 +21,7 @@ export abstract class PanelLayoutConfig extends StyledElementLayoutConfig {
                 {
                     name: "contents",
                     description: "the inner elements",
-                    type: listType(
-                        objectType(
-                            new Map([[SemanticFieldNames.PROTO, objectType(new Map([["_type", literal("element")]]))]])
-                        )
-                    )
+                    type: listType(elementType())
                 },
                 ...additionalAttributes
             ],

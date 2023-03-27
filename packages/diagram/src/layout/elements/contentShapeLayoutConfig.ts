@@ -1,6 +1,6 @@
-import { literal, objectType, optional, SemanticFieldNames } from "@hylimo/core";
 import { AttributeConfig } from "../layoutElement";
 import { ShapeLayoutConfig } from "./shapeLayoutConfig";
+import { elementType } from "../../module/types";
 
 /**
  * Base class for all shape layout configs with a content
@@ -20,11 +20,7 @@ export abstract class ContentShapeLayoutConfig extends ShapeLayoutConfig {
                 {
                     name: "content",
                     description: "the inner element",
-                    type: optional(
-                        objectType(
-                            new Map([[SemanticFieldNames.PROTO, objectType(new Map([["_type", literal("element")]]))]])
-                        )
-                    )
+                    type: elementType()
                 },
                 ...additionalAttributes
             ],

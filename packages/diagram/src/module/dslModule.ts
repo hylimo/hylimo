@@ -12,8 +12,11 @@ import {
     jsFun,
     NativeFunctionType,
     optional,
+    or,
     parse
 } from "@hylimo/core";
+import { canvasPointType, elementType } from "./types";
+import { CanvasElement } from "@hylimo/diagram-common";
 
 /**
  * Identifier for the scope variable
@@ -337,7 +340,12 @@ const scopeExpressions: ExecutableExpression[] = [
                 connection.endProvider = endProvider
                 scope.contents += connection
                 connection
-            `
+            `,
+            {},
+            [
+                [0, or(canvasPointType, elementType(CanvasElement.TYPE))],
+                [0, or(canvasPointType, elementType(CanvasElement.TYPE))]
+            ]
         )
     ),
     id(scope)

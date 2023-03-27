@@ -1,6 +1,6 @@
-import { FullObject, literal, objectToList, objectType, optional, listType, SemanticFieldNames } from "@hylimo/core";
+import { FullObject, objectToList, optional, listType } from "@hylimo/core";
 import { Size, Point, Element, CanvasConnection, Marker } from "@hylimo/diagram-common";
-import { canvasPointType } from "../../../module/types";
+import { canvasPointType, elementType } from "../../../module/types";
 import { LayoutElement, SizeConstraints } from "../../layoutElement";
 import { Layout } from "../../layoutEngine";
 import { extractStrokeStyleAttributes, strokeStyleAttributes } from "../attributes";
@@ -9,14 +9,7 @@ import { EditableCanvasContentLayoutConfig } from "./editableCanvasContentLayout
 /**
  * Type for start and end marker
  */
-const markerType = optional(
-    objectType(
-        new Map([
-            [SemanticFieldNames.PROTO, objectType(new Map([["_type", literal("element")]]))],
-            ["type", literal(Marker.TYPE)]
-        ])
-    )
-);
+const markerType = optional(elementType(Marker.TYPE));
 
 /**
  * Layout config or CanvasConnection
@@ -31,11 +24,7 @@ export class CanvasConnectionLayoutConfig extends EditableCanvasContentLayoutCon
                 {
                     name: "contents",
                     description: "the inner elements",
-                    type: listType(
-                        objectType(
-                            new Map([[SemanticFieldNames.PROTO, objectType(new Map([["_type", literal("element")]]))]])
-                        )
-                    )
+                    type: listType(elementType())
                 },
                 {
                     name: "startMarker",

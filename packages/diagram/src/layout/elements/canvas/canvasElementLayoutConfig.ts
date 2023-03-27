@@ -1,14 +1,6 @@
-import {
-    objectType,
-    SemanticFieldNames,
-    literal,
-    FullObject,
-    numberType,
-    optional,
-    FunctionExpression
-} from "@hylimo/core";
+import { FullObject, numberType, optional, FunctionExpression } from "@hylimo/core";
 import { Size, Point, Element, CanvasElement, ModificationSpecification } from "@hylimo/diagram-common";
-import { canvasPointType } from "../../../module/types";
+import { canvasPointType, elementType } from "../../../module/types";
 import { HorizontalAlignment, LayoutElement, SizeConstraints, VerticalAlignment } from "../../layoutElement";
 import { Layout } from "../../layoutEngine";
 import { alignStyleAttributes, sizeStyleAttributes } from "../attributes";
@@ -27,9 +19,7 @@ export class CanvasElementLayoutConfig extends EditableCanvasContentLayoutConfig
                 {
                     name: "content",
                     description: "the inner element",
-                    type: objectType(
-                        new Map([[SemanticFieldNames.PROTO, objectType(new Map([["_type", literal("element")]]))]])
-                    )
+                    type: elementType()
                 },
                 {
                     name: "pos",
