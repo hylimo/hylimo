@@ -431,7 +431,7 @@ const scopeExpressions: ExecutableExpression[] = [
             scopeEnhancer(scope)
             callback.callWithScope(scope)
             diagramCanvas = canvas(contents = scope.contents)
-            diagram(diagramCanvas, scope.internal.styles, scope.fonts)
+            createDiagram(diagramCanvas, scope.internal.styles, scope.fonts)
         `
     )
 ];
@@ -475,6 +475,7 @@ export const dslModule = InterpreterModule.create(
                 },
                 [[0, optional(functionType)]]
             )
-        )
+        ),
+        assign("diagram", id("generateDiagramEnvironment").call())
     ]
 );

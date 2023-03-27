@@ -366,7 +366,7 @@ export const diagramModule = InterpreterModule.create(
             )
         ),
         assign(
-            "diagram",
+            "createDiagram",
             fun(
                 `
                     (element, stylesObject, fonts) = args
