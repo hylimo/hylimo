@@ -63,7 +63,7 @@ export class TextLayouter {
             currentTextElements.push({
                 type: Text.TYPE,
                 text,
-                fill: styles.fill,
+                fill: styles.fill ?? "none",
                 fontFamily: styles.fontFamily,
                 fontSize: styles.fontSize,
                 fontWeight: styles.fontWeight ?? FontWeight.Normal,
