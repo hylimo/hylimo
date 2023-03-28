@@ -65,7 +65,7 @@ export const defaultStyleAttributes = [
 export const strokeStyleAttributes = [
     { name: "stroke", description: "optional stroke, must be a valid color string", type: stringType },
     {
-        name: "stokeOpacity",
+        name: "strokeOpacity",
         description: "optional stroke opacity, must be a number between 0 and 1",
         type: numberType
     },

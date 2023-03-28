@@ -5,13 +5,14 @@ import {
     Path,
     Rect,
     Root,
+    Shape,
     SimplifiedCanvasElement,
     SimplifiedDiagramVisitor,
     Text,
     WithBounds
 } from "@hylimo/diagram-common";
 import PDFDocument from "pdfkit/js/pdfkit.standalone.js";
-import { extractOutlinedShapeAttributes, extractShapeAttributes } from "@hylimo/diagram-render-svg";
+import { ShapeAttributes, extractOutlinedShapeAttributes, extractShapeAttributes } from "@hylimo/diagram-render-svg";
 
 /**
  * Renderer which renders a diagram to pdf
@@ -100,7 +101,7 @@ export class PDFDiagramVisitor extends SimplifiedDiagramVisitor<PDFKit.PDFDocume
         } else {
             context.rect(shapeAttributes.x, shapeAttributes.y, shapeAttributes.width, shapeAttributes.height);
         }
-        this.drawShape(context, shapeAttributes);
+        this.drawShape(context, shapeAttributes, element);
         this.visitChildren(element, context);
     }
 
@@ -112,7 +113,7 @@ export class PDFDiagramVisitor extends SimplifiedDiagramVisitor<PDFKit.PDFDocume
         context.lineJoin(element.lineJoin);
         context.lineCap(element.lineCap);
         context.miterLimit(element.miterLimit);
-        this.drawShape(context, shapeAttributes);
+        this.drawShape(context, shapeAttributes, element);
         context.restore();
     }
 
@@ -148,17 +149,19 @@ export class PDFDiagramVisitor extends SimplifiedDiagramVisitor<PDFKit.PDFDocume
      *
      * @param context the document to use
      * @param styles the styles of the shape
+     * @param element the shape to draw
      */
-    private drawShape(context: PDFKit.PDFDocument, styles: ReturnType<typeof extractShapeAttributes>): void {
-        if (styles.fill !== "none" && styles["fill-opacity"] !== false) {
-            context.fillOpacity(styles["fill-opacity"]);
+    private drawShape(context: PDFKit.PDFDocument, styles: ShapeAttributes, element: Shape): void {
+        if (styles.fill !== "none") {
+            context.fillOpacity(styles["fill-opacity"] ?? 1);
         }
         if (styles.stroke) {
-            if (styles["stroke-opacity"] !== false) {
-                context.strokeOpacity(styles["stroke-opacity"]);
-            }
-            if (styles["stroke-width"] !== false) {
-                context.lineWidth(styles["stroke-width"]);
+            context.strokeOpacity(styles["stroke-opacity"] ?? 1);
+            context.lineWidth(styles["stroke-width"] as number);
+            if (styles["stroke-dasharray"] != undefined) {
+                context.dash(element.strokeDash!, { space: element.strokeDashSpace ?? element.strokeDash! });
+            } else {
+                context.undash();
             }
         }
         const fill = styles.fill === "none" ? undefined : styles.fill;

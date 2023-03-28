@@ -1,17 +1,22 @@
 import { LayoutedElement, Shape, StrokedElement } from "@hylimo/diagram-common";
 
 /**
+ * SVG layout attributes
+ */
+export interface LayoutAttributes {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+}
+
+/**
  * Extracts layout attributes
  *
  * @param model the model which provides the attributes
  * @returns the extracted attribzutes
  */
-export function extractLayoutAttributes(model: Readonly<LayoutedElement>): {
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-} {
+export function extractLayoutAttributes(model: Readonly<LayoutedElement>): LayoutAttributes {
     return {
         x: model.x,
         y: model.y,
@@ -27,9 +32,7 @@ export function extractLayoutAttributes(model: Readonly<LayoutedElement>): {
  * @param model the model which provides the attributes
  * @returns the extracted attributes
  */
-export function extractOutlinedShapeAttributes(
-    model: Readonly<Shape>
-): ReturnType<typeof extractShapeAttributes> & ReturnType<typeof extractLayoutAttributes> {
+export function extractOutlinedShapeAttributes(model: Readonly<Shape>): ShapeAttributes {
     const res = extractShapeAttributes(model);
     if (model.strokeWidth) {
         res.x += model.strokeWidth / 2;
@@ -41,23 +44,42 @@ export function extractOutlinedShapeAttributes(
 }
 
 /**
+ * SVG stroke attributes
+ */
+export interface StrokeAttributes {
+    stroke?: string;
+    "stroke-opacity"?: number;
+    "stroke-width"?: number;
+    "stroke-dasharray"?: string;
+}
+
+/**
  * Extracts stroke style attributes
  *
  * @param model the model which provides the attributes
  * @returns the extracted attributes
  */
-export function extractStrokeAttriabutes(model: Readonly<StrokedElement>): {
-    stroke: string | false;
-    "stroke-opacity": number | false;
-    "stroke-width": number | false;
-    "stroke-dasharray": string | false;
-} {
-    return {
-        stroke: model.stroke ?? false,
-        "stroke-opacity": model.strokeOpacity ?? false,
-        "stroke-width": model.strokeWidth ?? false,
-        "stroke-dasharray": model.strokeDash != undefined ? `${model.strokeDash} ${model.strokeDashSpace}` : false
-    };
+export function extractStrokeAttriabutes(model: Readonly<StrokedElement>): StrokeAttributes {
+    const res: StrokeAttributes = {};
+    if (model.stroke != undefined) {
+        res.stroke = model.stroke;
+        if (model.strokeOpacity != undefined) {
+            res["stroke-opacity"] = model.strokeOpacity;
+        }
+        res["stroke-width"] = model.strokeWidth ?? 1;
+        if (model.strokeDash != undefined) {
+            res["stroke-dasharray"] = `${model.strokeDash} ${model.strokeDashSpace ?? model.strokeDash}`;
+        }
+    }
+    return res;
+}
+
+/**
+ * SVG shape attributes, includes layout and stroke attributes
+ */
+export interface ShapeAttributes extends StrokeAttributes, LayoutAttributes {
+    fill: string;
+    "fill-opacity"?: number;
 }
 
 /**
@@ -66,16 +88,14 @@ export function extractStrokeAttriabutes(model: Readonly<StrokedElement>): {
  * @param model the model which provides the attributes
  * @returns the extracted attributes
  */
-export function extractShapeAttributes(model: Readonly<Shape>): ReturnType<typeof extractLayoutAttributes> &
-    ReturnType<typeof extractStrokeAttriabutes> & {
-        fill: string;
-        "fill-opacity": number | false;
-    } {
-    const res = {
+export function extractShapeAttributes(model: Readonly<Shape>): ShapeAttributes {
+    const res: ShapeAttributes = {
         ...extractLayoutAttributes(model),
         ...extractStrokeAttriabutes(model),
-        fill: model.fill ?? "none",
-        "fill-opacity": model.fillOpacity ?? (false as number | false)
+        fill: model.fill ?? "none"
     };
+    if (model.fillOpacity != undefined) {
+        res["fill-opacity"] = model.fillOpacity;
+    }
     return res;
 }

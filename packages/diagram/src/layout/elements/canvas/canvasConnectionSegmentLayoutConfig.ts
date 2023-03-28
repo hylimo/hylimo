@@ -1,10 +1,11 @@
-import { FullObject, numberType, RuntimeError, stringType } from "@hylimo/core";
+import { FullObject, RuntimeError } from "@hylimo/core";
 import { Size } from "@hylimo/diagram-common";
 import { canvasPointType } from "../../../module/types";
 import { AttributeConfig, LayoutElement, SizeConstraints } from "../../layoutElement";
 import { Layout } from "../../layoutEngine";
 import { ElementLayoutConfig } from "../elementLayoutConfig";
 import { CanvasContentLayoutConfig } from "./canvasContentLayoutConfig";
+import { strokeStyleAttributes } from "../attributes";
 
 /**
  * Base class for all canvas connection segment layout configs
@@ -28,16 +29,7 @@ export abstract class CanvasConnectionSegmentLayoutConfig extends ElementLayoutC
                 },
                 ...additionalAttributes
             ],
-            [
-                { name: "stroke", description: "optional stroke, must be a valid color string", type: stringType },
-                {
-                    name: "stokeOpacity",
-                    description: "optional stroke opacity, must be a number between 0 and 1",
-                    type: numberType
-                },
-                { name: "strokeWidth", description: "optional width of the stroke", type: numberType },
-                ...additionalStyleAttributes
-            ]
+            [...strokeStyleAttributes, ...additionalStyleAttributes]
         );
     }
 
