@@ -1,4 +1,5 @@
-import { assign, fun, id, jsFun, num } from "../../runtime/executableAstHelper";
+import { ExecutableNativeExpression } from "../../runtime/ast/executableNativeExpression";
+import { assign, fun, id, jsFun } from "../../runtime/executableAstHelper";
 import { InterpreterModule } from "../../runtime/interpreter";
 import { NumberObject } from "../../runtime/objects/numberObject";
 import { SemanticFieldNames } from "../../runtime/semanticFieldNames";
@@ -35,7 +36,7 @@ export const numberModule = InterpreterModule.create(
     [DefaultModuleNames.BOOLEAN],
     [
         fun([
-            assign(numberProto, num(0).field(SemanticFieldNames.PROTO)),
+            assign(numberProto, new ExecutableNativeExpression((context) => ({ value: context.numberPrototype }))),
             id(numberProto).assignField(
                 "+",
                 jsFun(

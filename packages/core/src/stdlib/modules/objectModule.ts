@@ -15,6 +15,7 @@ import { numberType } from "../../types/number";
 import { objectType } from "../../types/object";
 import { functionType } from "../../types/function";
 import { ExecutableConstExpression } from "../../runtime/ast/executableConstExpression";
+import { ExecutableNativeExpression } from "../../runtime/ast/executableNativeExpression";
 
 /**
  * Name of the temporary field where the object prototype is assigned
@@ -47,7 +48,7 @@ export const objectModule = InterpreterModule.create(
     [DefaultModuleNames.COMMON, DefaultModuleNames.BOOLEAN],
     [
         fun([
-            assign(objectProto, id(SemanticFieldNames.ARGS).field(SemanticFieldNames.PROTO)),
+            assign(objectProto, new ExecutableNativeExpression((context) => ({ value: context.objectPrototype }))),
             id(objectProto).assignField(
                 "toString",
                 jsFun(

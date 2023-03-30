@@ -1,4 +1,4 @@
-import { BooleanObject } from "../stdlib/modules/booleanModule";
+import { BooleanObject } from "../runtime/objects/booleanObject";
 import { Type } from "./base";
 
 /**

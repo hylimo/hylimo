@@ -1,18 +1,14 @@
+import { ExecutableNativeExpression } from "../../runtime/ast/executableNativeExpression";
 import { assign, fun, id, jsFun, native } from "../../runtime/executableAstHelper";
 import { InterpreterContext, InterpreterModule } from "../../runtime/interpreter";
 import { BaseObject } from "../../runtime/objects/baseObject";
+import { BooleanObject } from "../../runtime/objects/booleanObject";
 import { FullObject } from "../../runtime/objects/fullObject";
-import { LiteralObject } from "../../runtime/objects/literalObject";
 import { RuntimeError } from "../../runtime/runtimeError";
 import { SemanticFieldNames } from "../../runtime/semanticFieldNames";
 import { booleanType } from "../../types/boolean";
 import { DefaultModuleNames } from "../defaultModuleNames";
 import { assertSelfShortCircuitArguments } from "../typeHelpers";
-
-/**
- * Boolean literal
- */
-export class BooleanObject extends LiteralObject<boolean> {}
 
 /**
  * Helper to check that an object is a BooleanObject, throws an error if not
@@ -58,7 +54,7 @@ export const booleanModule = InterpreterModule.create(
     [],
     [
         fun([
-            assign(booleanProto, id("object").call()),
+            assign(booleanProto, new ExecutableNativeExpression((context) => ({ value: context.booleanPrototype }))),
             id(SemanticFieldNames.PROTO).assignField(
                 "true",
                 jsFun((args, context) => new BooleanObject(true, args.getField(0, context) as FullObject)).call(

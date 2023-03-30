@@ -31,6 +31,6 @@ export class ExecutableNativeFunctionExpression extends ExecutableAbstractFuncti
     }
 
     override evaluateInternal(context: InterpreterContext): FieldEntry {
-        return { value: new NativeFunctionObject(this, context.currentScope, context.nativeFunctionPrototype) };
+        return { value: new NativeFunctionObject(this, context.currentScope, context.functionPrototype) };
     }
 }

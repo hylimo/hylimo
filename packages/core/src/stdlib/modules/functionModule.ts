@@ -1,3 +1,4 @@
+import { ExecutableNativeExpression } from "../../runtime/ast/executableNativeExpression";
 import { assign, fun, id, jsFun } from "../../runtime/executableAstHelper";
 import { InterpreterModule } from "../../runtime/interpreter";
 import { SemanticFieldNames } from "../../runtime/semanticFieldNames";
@@ -21,7 +22,7 @@ export const functionModule = InterpreterModule.create(
     [],
     [
         fun([
-            assign(functionProto, fun([]).field(SemanticFieldNames.PROTO)),
+            assign(functionProto, new ExecutableNativeExpression((context) => ({ value: context.functionPrototype }))),
             id(functionProto).assignField(
                 "callWithScope",
                 jsFun(

@@ -1,4 +1,5 @@
-import { assign, fun, id, jsFun, str } from "../../runtime/executableAstHelper";
+import { ExecutableNativeExpression } from "../../runtime/ast/executableNativeExpression";
+import { assign, fun, id, jsFun } from "../../runtime/executableAstHelper";
 import { InterpreterModule } from "../../runtime/interpreter";
 import { StringObject } from "../../runtime/objects/stringObject";
 import { SemanticFieldNames } from "../../runtime/semanticFieldNames";
@@ -21,7 +22,7 @@ export const stringModule = InterpreterModule.create(
     [DefaultModuleNames.BOOLEAN, DefaultModuleNames.COMMON],
     [
         fun([
-            assign(stringProto, str("").field(SemanticFieldNames.PROTO)),
+            assign(stringProto, new ExecutableNativeExpression((context) => ({ value: context.stringPrototype }))),
             id(stringProto).assignField(
                 "==",
                 jsFun(

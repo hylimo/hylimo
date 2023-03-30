@@ -28,13 +28,13 @@ export class InterpreterContext {
      */
     readonly stringPrototype: FullObject;
     /**
-     * Prototype for all created DSL functions
+     * Prototype for all boolean objects
+     */
+    readonly booleanPrototype: FullObject;
+    /**
+     * Prototype for all created DSL functions, including native functions
      */
     readonly functionPrototype: FullObject;
-    /**
-     * Prototype for all native js functions
-     */
-    readonly nativeFunctionPrototype: FullObject;
     /**
      * The current amount of execution steps.
      * Should never get larger than maxExecutionSteps.
@@ -68,8 +68,8 @@ export class InterpreterContext {
         this.objectPrototype = new FullObject();
         this.numberPrototype = this.newObject();
         this.stringPrototype = this.newObject();
+        this.booleanPrototype = this.newObject();
         this.functionPrototype = this.newObject();
-        this.nativeFunctionPrototype = this.newObject();
         this.currentScope = this.newObject();
         this.currentScope.setFieldEntry(SemanticFieldNames.THIS, { value: this.currentScope }, this);
         this.globalScope = this.currentScope;
