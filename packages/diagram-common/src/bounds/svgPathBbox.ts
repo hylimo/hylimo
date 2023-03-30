@@ -367,8 +367,12 @@ class PathBBoxCalculator {
         const miterLength = halfWidth / Math.sin(theta / 2);
         if (miterLength <= this.styles.miterLimit * halfWidth) {
             const miterVector = Math2D.add(normalizedStartVector, normalizedEndVector);
-            const miterPoint = Math2D.add(point, Math2D.scaleTo(miterVector, miterLength));
-            this.bbox.includePoint(miterPoint);
+            if (Math2D.length(miterVector) === 0) {
+                this.applyButtEndPoint(point, startVector);
+            } else {
+                const miterPoint = Math2D.add(point, Math2D.scaleTo(miterVector, miterLength));
+                this.bbox.includePoint(miterPoint);
+            }
         } else {
             this.applyBevelJoin(point, startVector, endVector);
         }
