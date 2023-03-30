@@ -1,6 +1,6 @@
-import { FullObject, numberType } from "@hylimo/core";
-import { Size, Element, RelativePoint, Point } from "@hylimo/diagram-common";
-import { canvasPointType } from "../../../module/types";
+import { FullObject, numberType, or } from "@hylimo/core";
+import { Size, Element, RelativePoint, Point, CanvasElement } from "@hylimo/diagram-common";
+import { canvasPointType, elementType } from "../../../module/types";
 import { LayoutElement } from "../../layoutElement";
 import { Layout } from "../../layoutEngine";
 import { CanvasPointLayoutConfig } from "./canvasPointLayoutConfig";
@@ -25,8 +25,8 @@ export class RelativePointLayoutConfig extends CanvasPointLayoutConfig {
                 },
                 {
                     name: "target",
-                    description: "the target point ofh which the relative point is based",
-                    type: canvasPointType
+                    description: "the target point or canvas element of which the relative point is based",
+                    type: or(canvasPointType, elementType(CanvasElement.TYPE))
                 }
             ],
             []
