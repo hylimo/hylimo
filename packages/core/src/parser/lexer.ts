@@ -126,12 +126,13 @@ export const Comma = createToken({
  *    - equal sign
  *    - round/curly/square brackets
  *    - double quotes
+ *    - /*, *\/, //
  *  - if there are trailing underscores or dollar signs, those are only part if afterwards there is no alphnumerical character
  *    - otherwise these are part of the next textual identifier
  */
 export const Identifier = createToken({
     name: "Identifier",
-    pattern: /(([!#%&'*+\-/:;<=>?@\\^`|~]|\.{2,}|([_$](?![_$]*[a-z0-9])))+)|([a-z_$][a-z0-9_$]*)/i
+    pattern: /(([!#%&'+\-:;<=>?@\\^`|~]|\*(?!\/)|\/(?![/*])|\.{2,}|([_$](?![_$]*[a-z0-9])))+)|([a-z_$][a-z0-9_$]*)/i
 });
 
 /**
@@ -142,7 +143,7 @@ export const Identifier = createToken({
  */
 export const SignMinus = createToken({
     name: "SignMinus",
-    pattern: /-(?=[^\S\n]*\.?[0-9])/,
+    pattern: /-(?=\.?[0-9])/,
     longer_alt: Identifier
 });
 
@@ -182,6 +183,24 @@ export const Number = createToken({
 });
 
 /**
+ * Single line comment token
+ */
+export const SingleLineComment = createToken({
+    name: "SingleLineComment ",
+    pattern: /\/\/[^\n]*/,
+    group: "comment"
+});
+
+/**
+ * Multi line comment token
+ */
+export const MultiLineComment = createToken({
+    name: "MultiLineComment",
+    pattern: /\/\*[\s\S]*?\*\//,
+    group: "comment"
+});
+
+/**
  * All tokens except newline tokens
  */
 const standardTokens = [
@@ -198,7 +217,9 @@ const standardTokens = [
     SignMinus,
     Identifier,
     String,
-    Number
+    Number,
+    SingleLineComment,
+    MultiLineComment
 ];
 
 /**

@@ -1,4 +1,4 @@
-import { CstNode, CstParser, ICstVisitor, ILexingError, IRecognitionException, Lexer } from "chevrotain";
+import { CstNode, CstParser, ICstVisitor, ILexingError, IRecognitionException, IToken, Lexer } from "chevrotain";
 import { Expression } from "../ast/expression";
 import { ASTExpressionPosition } from "../ast/astExpressionPosition";
 import { CstVisitorParameters, generateCstToAstTransfromer } from "./cstToAstTransformer";
@@ -61,6 +61,10 @@ export interface CstResult {
      * The executable
      */
     ast?: Expression[];
+    /**
+     * Comments in the cst
+     */
+    comments: IToken[];
 }
 
 /**
@@ -356,6 +360,7 @@ export class Parser extends CstParser {
             error.column! -= 1;
         }
         return {
+            comments: lexerResult.groups.comment,
             lexingErrors: lexerResult.errors,
             parserErrors: this.errors.map((error) => ({
                 ...error,
