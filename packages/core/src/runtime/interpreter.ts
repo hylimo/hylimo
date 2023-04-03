@@ -1,5 +1,6 @@
 import { ExecutableExpression } from "./ast/executableExpression";
 import { BaseObject } from "./objects/baseObject";
+import { BooleanObject } from "./objects/booleanObject";
 import { FullObject } from "./objects/fullObject";
 import { NullObject } from "./objects/nullObject";
 import { NumberObject } from "./objects/numberObject";
@@ -132,6 +133,16 @@ export class InterpreterContext {
      */
     newNumber(value: number): NumberObject {
         return new NumberObject(value, this.numberPrototype);
+    }
+
+    /**
+     * Creates a new BooleanObject with the provided value
+     *
+     * @param value the value of the boolean
+     * @returns the created object
+     */
+    newBoolean(value: boolean): BooleanObject {
+        return new BooleanObject(value, this.booleanPrototype);
     }
 
     /**

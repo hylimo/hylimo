@@ -1,43 +1,12 @@
 import { ExecutableNativeExpression } from "../../runtime/ast/executableNativeExpression";
 import { assign, fun, id, jsFun, native } from "../../runtime/executableAstHelper";
-import { InterpreterContext, InterpreterModule } from "../../runtime/interpreter";
-import { BaseObject } from "../../runtime/objects/baseObject";
+import { InterpreterModule } from "../../runtime/interpreter";
 import { BooleanObject } from "../../runtime/objects/booleanObject";
 import { FullObject } from "../../runtime/objects/fullObject";
-import { RuntimeError } from "../../runtime/runtimeError";
 import { SemanticFieldNames } from "../../runtime/semanticFieldNames";
 import { booleanType } from "../../types/boolean";
 import { DefaultModuleNames } from "../defaultModuleNames";
-import { assertSelfShortCircuitArguments } from "../typeHelpers";
-
-/**
- * Helper to check that an object is a BooleanObject, throws an error if not
- *
- * @param value the value to check
- * @param description the description of the value, part of the error message
- * @returns the value of the BooleanObject
- */
-export function assertBoolean(value: BaseObject, description = ""): boolean {
-    if (!(value instanceof BooleanObject)) {
-        throw new RuntimeError(`${description} is not a boolean`);
-    }
-    return value.value;
-}
-
-/**
- * Converts a js boolean to a BooleanObject
- *
- * @param value the js boolean to convert
- * @param context the interpreter context used to access true or false
- * @returns the BooleanObject equivalence of value
- */
-export function toBoolean(value: boolean, context: InterpreterContext): BaseObject {
-    if (value) {
-        return context.getGlobalField("true");
-    } else {
-        return context.getGlobalField("false");
-    }
-}
+import { assertBoolean, assertSelfShortCircuitArguments } from "../typeHelpers";
 
 /**
  * Name of the boolean proto object
@@ -50,8 +19,8 @@ const booleanProto = "booleanProto";
  */
 export const booleanModule = InterpreterModule.create(
     DefaultModuleNames.BOOLEAN,
-    [DefaultModuleNames.OBJECT],
     [],
+    [DefaultModuleNames.COMMON],
     [
         fun([
             assign(booleanProto, new ExecutableNativeExpression((context) => ({ value: context.booleanPrototype }))),
@@ -73,10 +42,9 @@ export const booleanModule = InterpreterModule.create(
                     (args, context) => {
                         const [first, second] = assertSelfShortCircuitArguments(args, "&&");
                         return {
-                            value: toBoolean(
+                            value: context.newBoolean(
                                 assertBoolean(first.evaluate(context).value, "left side of &&") &&
-                                    assertBoolean(second.evaluate(context).value, "right side of &&"),
-                                context
+                                    assertBoolean(second.evaluate(context).value, "right side of &&")
                             )
                         };
                     },
@@ -99,10 +67,9 @@ export const booleanModule = InterpreterModule.create(
                     (args, context) => {
                         const [first, second] = assertSelfShortCircuitArguments(args, "||");
                         return {
-                            value: toBoolean(
+                            value: context.newBoolean(
                                 assertBoolean(first.evaluate(context).value, "left side of ||") ||
-                                    assertBoolean(second.evaluate(context).value, "right side of ||"),
-                                context
+                                    assertBoolean(second.evaluate(context).value, "right side of ||")
                             )
                         };
                     },
@@ -118,13 +85,40 @@ export const booleanModule = InterpreterModule.create(
                         `
                     }
                 )
+            ),
+            id(booleanProto).assignField(
+                "==",
+                jsFun(
+                    (args, context) => {
+                        const self = assertBoolean(args.getField(SemanticFieldNames.SELF, context));
+                        const other = args.getField(0, context);
+                        let res: boolean;
+                        if (other instanceof BooleanObject) {
+                            res = self === other.value;
+                        } else {
+                            res = false;
+                        }
+                        return context.newBoolean(res);
+                    },
+                    {
+                        docs: `
+                            Compares self to another value, returns true if they are the same boolean.
+                            Params:
+                                - "self": a boolean to compare
+                                - 0: other value for the comparison
+                            Returns:
+                                true iff both values are the same boolean
+                        `
+                    },
+                    [[SemanticFieldNames.SELF, booleanType]]
+                )
             )
         ]).call(),
         assign(
             "!",
             jsFun(
                 (args, context) => {
-                    return toBoolean(!assertBoolean(args.getField(0, context)), context);
+                    return context.newBoolean(!assertBoolean(args.getField(0, context)));
                 },
                 {
                     docs: `

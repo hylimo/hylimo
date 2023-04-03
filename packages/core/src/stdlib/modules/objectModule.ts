@@ -7,7 +7,6 @@ import { BaseObject, FieldEntry } from "../../runtime/objects/baseObject";
 import { StringObject } from "../../runtime/objects/stringObject";
 import { NumberObject } from "../../runtime/objects/numberObject";
 import { RuntimeError } from "../../runtime/runtimeError";
-import { toBoolean } from "./booleanModule";
 import { generateArgs } from "../../runtime/objects/functionObject";
 import { or } from "../../types/or";
 import { stringType } from "../../types/string";
@@ -40,12 +39,12 @@ function assertIndex(value: BaseObject): string | number {
 
 /**
  * Object module
- * Adds toStr function and functions on object
+ * Adds toString function and functions on object
  */
 export const objectModule = InterpreterModule.create(
     DefaultModuleNames.OBJECT,
     [],
-    [DefaultModuleNames.COMMON, DefaultModuleNames.BOOLEAN],
+    [DefaultModuleNames.COMMON],
     [
         fun([
             assign(objectProto, new ExecutableNativeExpression((context) => ({ value: context.objectPrototype }))),
@@ -209,7 +208,7 @@ export const objectModule = InterpreterModule.create(
                     (args, context) => {
                         const self = args.getField(SemanticFieldNames.SELF, context);
                         const other = args.getField(0, context);
-                        return toBoolean(self === other, context);
+                        return context.newBoolean(self === other);
                     },
                     {
                         docs: `

@@ -1,6 +1,5 @@
 import {
     assign,
-    DefaultModuleNames,
     enumObject,
     ExecutableExpression,
     ExecutableNativeFunctionExpression,
@@ -450,13 +449,7 @@ const scopeExpressions: ExecutableExpression[] = [
 export const dslModule = InterpreterModule.create(
     "dsl",
     [],
-    [
-        DefaultModuleNames.OBJECT,
-        DefaultModuleNames.LIST,
-        DefaultModuleNames.FUNCTION,
-        DefaultModuleNames.BOOLEAN,
-        "diagram"
-    ],
+    ["diagram"],
     [
         assign(
             "generateDiagramEnvironment",

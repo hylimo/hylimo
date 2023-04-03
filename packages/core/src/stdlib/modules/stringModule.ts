@@ -6,7 +6,6 @@ import { SemanticFieldNames } from "../../runtime/semanticFieldNames";
 import { stringType } from "../../types/string";
 import { DefaultModuleNames } from "../defaultModuleNames";
 import { assertString } from "../typeHelpers";
-import { toBoolean } from "./booleanModule";
 
 /**
  * Name of the temporary field where the string prototype is assigned
@@ -19,7 +18,7 @@ const stringProto = "stringProto";
 export const stringModule = InterpreterModule.create(
     DefaultModuleNames.STRING,
     [],
-    [DefaultModuleNames.BOOLEAN, DefaultModuleNames.COMMON],
+    [DefaultModuleNames.COMMON],
     [
         fun([
             assign(stringProto, new ExecutableNativeExpression((context) => ({ value: context.stringPrototype }))),
@@ -38,7 +37,7 @@ export const stringModule = InterpreterModule.create(
                         } else {
                             res = false;
                         }
-                        return toBoolean(res, context);
+                        return context.newBoolean(res);
                     },
                     {
                         docs: `

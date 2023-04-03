@@ -5,7 +5,6 @@ import { RuntimeError } from "../../runtime/runtimeError";
 import { SemanticFieldNames } from "../../runtime/semanticFieldNames";
 import { DefaultModuleNames } from "../defaultModuleNames";
 import { assertNumber, isString } from "../typeHelpers";
-import { toBoolean } from "./booleanModule";
 
 /**
  * Operator module
@@ -14,7 +13,7 @@ import { toBoolean } from "./booleanModule";
 export const operatorModule = InterpreterModule.create(
     DefaultModuleNames.OPERATOR,
     [],
-    [DefaultModuleNames.BOOLEAN],
+    [DefaultModuleNames.COMMON],
     [
         ...["*", "/", "%", "&&", "||", ">", ">=", "<", "<=", ">>", "<<", "+="].map((operator) =>
             id(SemanticFieldNames.THIS).assignField(
@@ -57,7 +56,7 @@ export const operatorModule = InterpreterModule.create(
                     const first = args.getFieldEntry(0, context);
                     const second = args.getFieldEntry(1, context);
                     if (first.value.isNull) {
-                        return toBoolean(second.value.isNull, context);
+                        return context.newBoolean(second.value.isNull);
                     } else {
                         return first.value
                             .getField("==", context)
@@ -87,11 +86,10 @@ export const operatorModule = InterpreterModule.create(
         id(SemanticFieldNames.THIS).assignField(
             "!=",
             fun(
-                [
-                    id("!").call(
-                        id("==").call(id(SemanticFieldNames.ARGS).field(0), id(SemanticFieldNames.ARGS).field(1))
-                    )
-                ],
+                `
+                    (lhs, rhs) = args
+                    !(lhs == rhs)
+                `,
                 {
                     docs: `
                         Unequality operator, negates the result of the equality operator

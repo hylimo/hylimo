@@ -6,7 +6,6 @@ import { functionType } from "../../types/function";
 import { objectType } from "../../types/object";
 import { DefaultModuleNames } from "../defaultModuleNames";
 import { assertFunction, assertObject } from "../typeHelpers";
-import { toBoolean } from "./booleanModule";
 
 /**
  * Name of the temporary field where the function prototype is assigned
@@ -19,7 +18,7 @@ const functionProto = "functionProto";
 export const functionModule = InterpreterModule.create(
     DefaultModuleNames.FUNCTION,
     [],
-    [],
+    [DefaultModuleNames.COMMON],
     [
         fun([
             assign(functionProto, new ExecutableNativeExpression((context) => ({ value: context.functionPrototype }))),
@@ -62,7 +61,7 @@ export const functionModule = InterpreterModule.create(
                     (args, context) => {
                         const self = args.getField(SemanticFieldNames.SELF, context);
                         const other = args.getField(0, context);
-                        return toBoolean(self === other, context);
+                        return context.newBoolean(self === other);
                     },
                     {
                         docs: `

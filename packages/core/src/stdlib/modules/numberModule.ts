@@ -7,7 +7,6 @@ import { Type } from "../../types/base";
 import { numberType } from "../../types/number";
 import { DefaultModuleNames } from "../defaultModuleNames";
 import { assertNumber } from "../typeHelpers";
-import { toBoolean } from "./booleanModule";
 
 /**
  * Name of the temporary field where the number prototype is assigned
@@ -33,7 +32,7 @@ const numberOperatorFunctionTypes: [string | number, Type][] = [
 export const numberModule = InterpreterModule.create(
     DefaultModuleNames.NUMBER,
     [],
-    [DefaultModuleNames.BOOLEAN],
+    [DefaultModuleNames.COMMON],
     [
         fun([
             assign(numberProto, new ExecutableNativeExpression((context) => ({ value: context.numberPrototype }))),
@@ -151,10 +150,9 @@ export const numberModule = InterpreterModule.create(
                 "<",
                 jsFun(
                     (args, context) => {
-                        return toBoolean(
+                        return context.newBoolean(
                             assertNumber(args.getField(SemanticFieldNames.SELF, context)) <
-                                assertNumber(args.getField(0, context)),
-                            context
+                                assertNumber(args.getField(0, context))
                         );
                     },
                     {
@@ -174,10 +172,9 @@ export const numberModule = InterpreterModule.create(
                 ">",
                 jsFun(
                     (args, context) => {
-                        return toBoolean(
+                        return context.newBoolean(
                             assertNumber(args.getField(SemanticFieldNames.SELF, context)) >
-                                assertNumber(args.getField(0, context)),
-                            context
+                                assertNumber(args.getField(0, context))
                         );
                     },
                     {
@@ -197,10 +194,9 @@ export const numberModule = InterpreterModule.create(
                 "<=",
                 jsFun(
                     (args, context) => {
-                        return toBoolean(
+                        return context.newBoolean(
                             assertNumber(args.getField(SemanticFieldNames.SELF, context)) <=
-                                assertNumber(args.getField(0, context)),
-                            context
+                                assertNumber(args.getField(0, context))
                         );
                     },
                     {
@@ -220,10 +216,9 @@ export const numberModule = InterpreterModule.create(
                 ">=",
                 jsFun(
                     (args, context) => {
-                        return toBoolean(
+                        return context.newBoolean(
                             assertNumber(args.getField(SemanticFieldNames.SELF, context)) >=
-                                assertNumber(args.getField(0, context)),
-                            context
+                                assertNumber(args.getField(0, context))
                         );
                     },
                     {
@@ -251,7 +246,7 @@ export const numberModule = InterpreterModule.create(
                         } else {
                             res = false;
                         }
-                        return toBoolean(res, context);
+                        return context.newBoolean(res);
                     },
                     {
                         docs: `

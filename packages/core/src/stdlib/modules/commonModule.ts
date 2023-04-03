@@ -1,4 +1,5 @@
-import { assign, fun, id, jsFun, str } from "../../runtime/executableAstHelper";
+import { ExecutableConstExpression } from "../../runtime/ast/executableConstExpression";
+import { assign, jsFun } from "../../runtime/executableAstHelper";
 import { InterpreterModule } from "../../runtime/interpreter";
 import { FieldEntry } from "../../runtime/objects/baseObject";
 import { RuntimeError } from "../../runtime/runtimeError";
@@ -6,11 +7,9 @@ import { SemanticFieldNames } from "../../runtime/semanticFieldNames";
 import { booleanType } from "../../types/boolean";
 import { functionType } from "../../types/function";
 import { optional } from "../../types/null";
-import { numberType } from "../../types/number";
 import { stringType } from "../../types/string";
 import { DefaultModuleNames } from "../defaultModuleNames";
-import { assertFunction, assertString } from "../typeHelpers";
-import { assertBoolean } from "./booleanModule";
+import { assertBoolean, assertFunction, assertString } from "../typeHelpers";
 
 /**
  * Common module
@@ -19,7 +18,13 @@ import { assertBoolean } from "./booleanModule";
 export const commonModule = InterpreterModule.create(
     DefaultModuleNames.COMMON,
     [],
-    [DefaultModuleNames.BOOLEAN, DefaultModuleNames.OPERATOR, DefaultModuleNames.LIST],
+    [
+        DefaultModuleNames.BOOLEAN,
+        DefaultModuleNames.NUMBER,
+        DefaultModuleNames.STRING,
+        DefaultModuleNames.OBJECT,
+        DefaultModuleNames.FUNCTION
+    ],
     [
         assign("null", jsFun((_, context) => context.null).call()),
         assign(
@@ -97,15 +102,24 @@ export const commonModule = InterpreterModule.create(
         ),
         assign(
             "toStr",
-            fun(
-                [
-                    assign("_value", id(SemanticFieldNames.ARGS).field(0)),
-                    id("if").call(
-                        id("==").call(id("null"), id("_value")),
-                        fun([str("null")]),
-                        fun([id("_value").callField("toString")])
-                    )
-                ],
+            jsFun(
+                (args, context) => {
+                    const value = args.getFieldEntry(0, context);
+                    if (value.value.isNull) {
+                        return context.newString("null");
+                    } else {
+                        const toString = value.value.getField("toString", context);
+                        return toString.invoke(
+                            [
+                                {
+                                    name: SemanticFieldNames.SELF,
+                                    value: new ExecutableConstExpression(value)
+                                }
+                            ],
+                            context
+                        );
+                    }
+                },
                 {
                     docs: `
                         Transforms the input to a string and returns it.
@@ -132,37 +146,6 @@ export const commonModule = InterpreterModule.create(
                     `
                 },
                 [[0, stringType]]
-            )
-        ),
-        assign(
-            "range",
-            fun(
-                `
-                    (n, step) = args
-                    step = step ?? 1
-                    res = list()
-                    i = 0
-                    while { i < n } {
-                        res.add(i)
-                        i = i + step
-                    }
-                    res
-                `,
-                {
-                    docs: `
-                        Generates a list with a range of numbers from 0 up to
-                        n with n < the first parameter.
-                        Params:
-                            - 0: the max value
-                            - 1: optional step size, defaults to 1
-                        Returns:
-                            A list with the generated numbers
-                    `
-                },
-                [
-                    [0, numberType],
-                    [1, optional(numberType)]
-                ]
             )
         )
     ]

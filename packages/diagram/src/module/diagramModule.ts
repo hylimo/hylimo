@@ -129,8 +129,8 @@ function font(name: string, url: string): ExecutableInvocationArgument {
  */
 export const diagramModule = InterpreterModule.create(
     "diagram",
-    [DefaultModuleNames.OBJECT],
-    [DefaultModuleNames.LIST, DefaultModuleNames.FUNCTION, DefaultModuleNames.BOOLEAN],
+    [DefaultModuleNames.COMMON, DefaultModuleNames.LIST, DefaultModuleNames.OPERATOR],
+    [],
     [
         fun([
             assign(elementProto, id("object").call({ name: "_type", value: str("element") })),

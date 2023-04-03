@@ -1,6 +1,7 @@
 import { ExecutableInvocationArgument } from "../runtime/ast/executableAbstractInvocationExpression";
 import { ExecutableExpression } from "../runtime/ast/executableExpression";
 import { BaseObject } from "../runtime/objects/baseObject";
+import { BooleanObject } from "../runtime/objects/booleanObject";
 import { FullObject } from "../runtime/objects/fullObject";
 import { AbstractFunctionObject } from "../runtime/objects/functionObject";
 import { NumberObject } from "../runtime/objects/numberObject";
@@ -42,6 +43,20 @@ export function isString(value: BaseObject): boolean {
 export function assertNumber(value: BaseObject, description = ""): number {
     if (!(value instanceof NumberObject)) {
         throw new RuntimeError(`${description} is not a number`);
+    }
+    return value.value;
+}
+
+/**
+ * Helper to check that an object is a BooleanObject, throws an error if not
+ *
+ * @param value the value to check
+ * @param description the description of the value, part of the error message
+ * @returns the value of the BooleanObject
+ */
+export function assertBoolean(value: BaseObject, description = ""): boolean {
+    if (!(value instanceof BooleanObject)) {
+        throw new RuntimeError(`${description} is not a boolean`);
     }
     return value.value;
 }

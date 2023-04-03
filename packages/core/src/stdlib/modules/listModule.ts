@@ -12,6 +12,8 @@ import { listType } from "../../types/list";
 import { objectType } from "../../types/object";
 import { DefaultModuleNames } from "../defaultModuleNames";
 import { assertFunction, assertNumber } from "../typeHelpers";
+import { numberType } from "../../types/number";
+import { optional } from "../../types/null";
 
 /**
  * Name of the temporary field where the list prototype is assigned
@@ -28,8 +30,8 @@ const lengthField = "length";
  */
 export const listModule = InterpreterModule.create(
     DefaultModuleNames.LIST,
-    [DefaultModuleNames.OBJECT],
     [DefaultModuleNames.COMMON],
+    [],
     [
         fun([
             assign(listProto, id("object").call()),
@@ -277,6 +279,37 @@ export const listModule = InterpreterModule.create(
                         `
                     },
                     [[0, objectType()]]
+                )
+            ),
+            id(SemanticFieldNames.IT).assignField(
+                "range",
+                fun(
+                    `
+                        (n, step) = args
+                        step = step ?? 1
+                        res = list()
+                        i = 0
+                        while { i < n } {
+                            res.add(i)
+                            i = i + step
+                        }
+                        res
+                    `,
+                    {
+                        docs: `
+                            Generates a list with a range of numbers from 0 up to
+                            n with n < the first parameter.
+                            Params:
+                                - 0: the max value
+                                - 1: optional step size, defaults to 1
+                            Returns:
+                                A list with the generated numbers
+                        `
+                    },
+                    [
+                        [0, numberType],
+                        [1, optional(numberType)]
+                    ]
                 )
             )
         ]).call(id(SemanticFieldNames.THIS))
