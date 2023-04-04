@@ -294,11 +294,15 @@ export class MoveMouseListener extends MouseListener {
             return null;
         }
         const { points, elements } = this.computePoints(selected, index);
-        const pointsToMove: SCanvasPoint[] = this.getPointsToMove(points, index, elements);
+        const { points: pointsToMove, elements: elementsToMove } = this.getPointsAndElementsToMove(
+            points,
+            index,
+            elements
+        );
 
         const modificationSpecifications = [
             ...[...pointsToMove].map((point) => point.editable),
-            ...[...elements].map((element) => element.moveable)
+            ...[...elementsToMove].map((element) => element.moveable)
         ];
         if (!ModificationSpecification.isConsistent(modificationSpecifications)) {
             return null;
@@ -356,29 +360,50 @@ export class MoveMouseListener extends MouseListener {
     }
 
     /**
-     * Gets the points which are required to move so that points are moved as a whole.
+     * Gets the points and elements which are required to move so that points are moved as a whole.
+     * Returns the points which should be moved, and elements without points which should be moved
      *
      * @param points the points to move
      * @param index used for point lookup
      * @param elements elements which are moved by creating a new point
-     * @returns the points which are required to move to move the given points
+     * @returns the points and elements which are required to move to move the given points
      */
-    private getPointsToMove(points: Set<SCanvasPoint>, index: IModelIndex, elements: Set<SCanvasElement>) {
+    private getPointsAndElementsToMove(
+        points: Set<SCanvasPoint>,
+        index: IModelIndex,
+        elements: Set<SCanvasElement>
+    ): { points: SCanvasPoint[]; elements: Set<SCanvasElement> } {
         const movedPoints = new Set(points);
+        const movedElements = new Set(elements);
         let currentPoints: Set<SCanvasPoint> = points;
         do {
             const newPoints = new Set<SCanvasPoint>();
             for (const point of currentPoints) {
                 if (point instanceof SRelativePoint && point.editable == null) {
-                    const targetPoint = index.getById(point.target) as SCanvasPoint;
-                    newPoints.add(targetPoint);
-                    movedPoints.add(targetPoint);
+                    let targetPoint: SCanvasPoint | undefined;
+                    const target = index.getById(point.target) as SCanvasPoint | SCanvasElement;
+                    if (target instanceof SCanvasPoint) {
+                        targetPoint = target;
+                    } else {
+                        if (target.pos != undefined) {
+                            targetPoint = index.getById(target.pos) as SCanvasPoint;
+                        } else {
+                            movedElements.add(target);
+                        }
+                    }
+                    if (targetPoint != undefined) {
+                        newPoints.add(targetPoint);
+                        movedPoints.add(targetPoint);
+                    }
                 }
             }
             currentPoints = newPoints;
         } while (currentPoints.size > 0);
 
-        return [...movedPoints].filter((point) => !this.isPointImplicitelyMoved(point, index, movedPoints, elements));
+        const toMove = [...movedPoints].filter(
+            (point) => !this.isPointImplicitelyMoved(point, index, movedPoints, elements)
+        );
+        return { points: toMove, elements: movedElements };
     }
 
     /**
@@ -472,8 +497,12 @@ export class MoveMouseListener extends MouseListener {
         movedElements: Set<SCanvasElement>
     ): boolean {
         if (point instanceof SRelativePoint) {
-            const target = index.getById(point.target) as SCanvasPoint;
-            return this.isPointMoved(target, index, movedPoints, movedElements);
+            const target = index.getById(point.target) as SCanvasPoint | SCanvasElement;
+            if (target instanceof SCanvasPoint) {
+                return this.isPointMoved(target, index, movedPoints, movedElements);
+            } else {
+                return this.isElementMoved(target, index, movedPoints, movedElements);
+            }
         } else if (point instanceof SLinePoint) {
             const lineProviderId = point.lineProvider;
             const lineProvider = index.getById(lineProviderId) as SCanvasContent;

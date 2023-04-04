@@ -292,7 +292,7 @@ export const numberModule = InterpreterModule.create(
                         },
                         {
                             docs: `
-                                Rounds a number uü to the smallest integer greater than or equal to the provided value.
+                                Rounds a number up to the smallest integer greater than or equal to the provided value.
                                 Params:
                                     - 0: the number to round up
                                 Returns:
