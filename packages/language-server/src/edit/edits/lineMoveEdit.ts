@@ -5,6 +5,7 @@ import { EditGenerator } from "../generators/editGenerator";
 import { GeneratorRegistry } from "../generators/generatorRegistry";
 import { generateReplacementNumberGenerator } from "./generateReplacementNumberGenerator";
 import { TransactionalEdit, TransactionalEditEngine } from "./transactionalEdit";
+import { EditGeneratorEntry } from "./editGeneratorEntry";
 
 /**
  * TransactionalEdit for LineMoveActions
@@ -38,7 +39,7 @@ export namespace LineMoveEdit {
         }
         return {
             type: LineMoveEdit.TYPE,
-            generatorEntries
+            generatorEntries: EditGeneratorEntry.sortAndValidate(generatorEntries)
         };
     }
 }

@@ -75,7 +75,7 @@ export namespace TranslationMoveEdit {
         });
         return {
             type: TranslationMoveEdit.TYPE,
-            generatorEntries,
+            generatorEntries: EditGeneratorEntry.sortAndValidate(generatorEntries),
             hasNewPoint
         };
     }

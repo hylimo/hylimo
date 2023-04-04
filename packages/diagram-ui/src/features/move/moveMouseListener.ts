@@ -26,7 +26,6 @@ import { CanvasElementView, ResizePosition } from "../../views/canvas/canvasElem
 import { RotationHandler } from "./rotationHandler";
 import { SCanvasConnection } from "../../model/canvas/sCanvasConnection";
 import { SCanvasContent } from "../../model/canvas/sCanvasContent";
-import { SCanvasConnectionSegment } from "../../model/canvas/sCanvasConnectionSegment";
 import { SRoot } from "../../model/sRoot";
 import { ResizeHandler } from "./resizeHandler";
 import { SCanvasAxisAlignedSegment } from "../../model/canvas/sCanvasAxisAlignedSegment";
@@ -307,8 +306,7 @@ export class MoveMouseListener extends MouseListener {
         if (!ModificationSpecification.isConsistent(modificationSpecifications)) {
             return null;
         }
-
-        return this.createMoveHandlerForPointsAndElements(pointsToMove, elements);
+        return this.createMoveHandlerForPointsAndElements(pointsToMove, elementsToMove);
     }
 
     /**
@@ -510,11 +508,8 @@ export class MoveMouseListener extends MouseListener {
                 return this.isElementMoved(lineProvider, index, movedPoints, movedElements);
             }
             if (lineProvider instanceof SCanvasConnection) {
-                const affectedSegment = LinePoint.calcSegmentIndex(point.pos, lineProvider.children.length);
-                const points = [
-                    lineProvider.start,
-                    ...(lineProvider.children as SCanvasConnectionSegment[]).map((segment) => segment.end)
-                ];
+                const affectedSegment = LinePoint.calcSegmentIndex(point.pos, lineProvider.segments.length);
+                const points = [lineProvider.start, ...lineProvider.segments.map((segment) => segment.end)];
                 const relevantPoints = [
                     index.getById(points[affectedSegment]),
                     index.getById(points[affectedSegment + 1])

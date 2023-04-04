@@ -97,7 +97,7 @@ export namespace ResizeEdit {
         });
         return {
             type: ResizeEdit.TYPE,
-            generatorEntries
+            generatorEntries: EditGeneratorEntry.sortAndValidate(generatorEntries)
         };
     }
 }
