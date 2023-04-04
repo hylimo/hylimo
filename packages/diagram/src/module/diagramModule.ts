@@ -248,7 +248,7 @@ export const diagramModule = InterpreterModule.create(
                         (callback) = args
                         res = object(styles = list())
                         res.type = selector("type")
-                        res.class = selector("class")
+                        res.cls = selector("class")
                         anySelector = selector("any")
                         res.any = { 
                             anySelector("", it, self = args.self)

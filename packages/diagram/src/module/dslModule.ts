@@ -119,13 +119,14 @@ const scopeExpressions: ExecutableExpression[] = [
                     }
                     first.scopes.styles = second
                     scope.styles {
-                        class(className) {
+                        cls(className) {
                             this.any = any
-                            this.class = class
+                            this.cls = cls
                             this.type = type
                             this.unset = unset
                             this.var = var
                             this.vars = vars
+                            this.class = first.class
                             second.callWithScope(this)
                         }
                     }
@@ -273,7 +274,7 @@ const scopeExpressions: ExecutableExpression[] = [
                             pos = scope.lpos(self, pos ?? 0, distance),
                             rotation = rotation,
                             scopes = object(),
-                            class= list("label-element")
+                            class = list("label-element")
                         )
                         scope.contents += labelCanvasElement
                         labelCanvasElement
@@ -431,7 +432,7 @@ const scopeExpressions: ExecutableExpression[] = [
     ...parse(
         `
             scope.styles {
-                class("label-element") {
+                cls("label-element") {
                     hAlign = "center"
                 }
             }

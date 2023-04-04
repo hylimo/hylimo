@@ -410,23 +410,23 @@ const scopeExpressions: ExecutableExpression[] = [
                 type("span") {
                     fill = var("primary")
                 }
-                class("class") {
+                cls("class") {
                     stroke = var("primary")
                     strokeWidth = var("strokeWidth")
                     type("vbox") {
                         margin = 5
                     }
                 }
-                class("title") {
+                cls("title") {
                     hAlign = "center"
                     type("span") {
                         fontWeight = "bold"
                     }
                 }
-                class("stereotype") {
+                cls("stereotype") {
                     hAlign = "center"
                 }
-                class("separator") {
+                cls("separator") {
                     marginTop = 5
                     marginBottom = 5
                     marginLeft = -5
@@ -438,25 +438,25 @@ const scopeExpressions: ExecutableExpression[] = [
                     stroke = var("primary")
                     strokeWidth = var("strokeWidth")
                 }
-                class("class-element") {
+                cls("class-element") {
                     vAlign = "center"
                     hAlign = "center"
                     minWidth = 300
                 }
-                class("marker") {
+                cls("marker") {
                     height = 25
                 }
-                class("marker-path") {
+                cls("marker-path") {
                     strokeWidth = var("strokeWidth")
                     stroke = var("primary")
                 }
-                class("filled-marker-path") {
+                cls("filled-marker-path") {
                     fill = var("primary")
                 }
-                class("dashed-connection") {
+                cls("dashed-connection") {
                     strokeDash = 10
                 }
-                class("cross-marker-path") {
+                cls("cross-marker-path") {
                     marginRight = 5
                 }
             }
