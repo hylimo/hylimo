@@ -4,6 +4,7 @@ import { InterpreterModule } from "../../runtime/interpreter";
 import { BooleanObject } from "../../runtime/objects/booleanObject";
 import { FullObject } from "../../runtime/objects/fullObject";
 import { SemanticFieldNames } from "../../runtime/semanticFieldNames";
+import { Type } from "../../types/base";
 import { booleanType } from "../../types/boolean";
 import { DefaultModuleNames } from "../defaultModuleNames";
 import { assertBoolean, assertSelfShortCircuitArguments } from "../typeHelpers";
@@ -12,6 +13,14 @@ import { assertBoolean, assertSelfShortCircuitArguments } from "../typeHelpers";
  * Name of the boolean proto object
  */
 const booleanProto = "booleanProto";
+
+/**
+ * Type for boolean operator functions
+ */
+const booleanOperatorFunctionTypes: [string | number, Type][] = [
+    [0, booleanType],
+    [SemanticFieldNames.SELF, booleanType]
+];
 
 /**
  * Boolean module
@@ -84,6 +93,94 @@ export const booleanModule = InterpreterModule.create(
                                 The result of the logical or
                         `
                     }
+                )
+            ),
+            id(booleanProto).assignField(
+                "<",
+                jsFun(
+                    (args, context) => {
+                        return context.newBoolean(
+                            assertBoolean(args.getField(SemanticFieldNames.SELF, context)) <
+                                assertBoolean(args.getField(0, context))
+                        );
+                    },
+                    {
+                        docs: `
+                            Performs "<" comparison of two booleans.
+                            Params:
+                                - "self": the left side of the comparison, must be a boolean
+                                - 0: the right side of the comparison, must be a boolean
+                            Returns:
+                                true if the left side is less than the right side
+                        `
+                    },
+                    booleanOperatorFunctionTypes
+                )
+            ),
+            id(booleanProto).assignField(
+                ">",
+                jsFun(
+                    (args, context) => {
+                        return context.newBoolean(
+                            assertBoolean(args.getField(SemanticFieldNames.SELF, context)) >
+                                assertBoolean(args.getField(0, context))
+                        );
+                    },
+                    {
+                        docs: `
+                            Performs ">" comparison of two booleans.
+                            Params:
+                                - "self": the left side of the comparison, must be a boolean
+                                - 0: the right side of the comparison, must be a boolean
+                            Returns:
+                                true if the left side is greater than the right side
+                        `
+                    },
+                    booleanOperatorFunctionTypes
+                )
+            ),
+            id(booleanProto).assignField(
+                "<=",
+                jsFun(
+                    (args, context) => {
+                        return context.newBoolean(
+                            assertBoolean(args.getField(SemanticFieldNames.SELF, context)) <=
+                                assertBoolean(args.getField(0, context))
+                        );
+                    },
+                    {
+                        docs: `
+                            Performs "<=" comparison of two booleans.
+                            Params:
+                                - "self": the left side of the comparison, must be a boolean
+                                - 0: the right side of the comparison, must be a boolean
+                            Returns:
+                                true if the left side is less than or equal to the right side
+                        `
+                    },
+                    booleanOperatorFunctionTypes
+                )
+            ),
+            id(booleanProto).assignField(
+                ">=",
+                jsFun(
+                    (args, context) => {
+                        return context.newBoolean(
+                            assertBoolean(args.getField(SemanticFieldNames.SELF, context)) >=
+                                assertBoolean(args.getField(0, context))
+                        );
+                    },
+                    {
+                        docs: `
+                            Performs ">=" comparison of two booleans.
+                            Params:
+                                - "self": the left side of the comparison, must be a boolean
+                                - 0: the right side of the comparison, must be a boolean
+                            Returns:
+                                true if the left side is greater than or equal to the right side
+                        `
+                    },
+                    booleanOperatorFunctionTypes
                 )
             ),
             id(booleanProto).assignField(

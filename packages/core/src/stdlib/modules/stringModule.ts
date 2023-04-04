@@ -3,6 +3,7 @@ import { assign, fun, id, jsFun } from "../../runtime/executableAstHelper";
 import { InterpreterModule } from "../../runtime/interpreter";
 import { StringObject } from "../../runtime/objects/stringObject";
 import { SemanticFieldNames } from "../../runtime/semanticFieldNames";
+import { Type } from "../../types/base";
 import { stringType } from "../../types/string";
 import { DefaultModuleNames } from "../defaultModuleNames";
 import { assertString } from "../typeHelpers";
@@ -11,6 +12,14 @@ import { assertString } from "../typeHelpers";
  * Name of the temporary field where the string prototype is assigned
  */
 const stringProto = "stringProto";
+
+/**
+ * Type for string operator functions
+ */
+const stringOperatorFunctionTypes: [string | number, Type][] = [
+    [0, stringType],
+    [SemanticFieldNames.SELF, stringType]
+];
 
 /**
  * String module providing string functionality
@@ -22,6 +31,94 @@ export const stringModule = InterpreterModule.create(
     [
         fun([
             assign(stringProto, new ExecutableNativeExpression((context) => ({ value: context.stringPrototype }))),
+            id(stringProto).assignField(
+                "<",
+                jsFun(
+                    (args, context) => {
+                        return context.newBoolean(
+                            assertString(args.getField(SemanticFieldNames.SELF, context)) <
+                                assertString(args.getField(0, context))
+                        );
+                    },
+                    {
+                        docs: `
+                            Performs "<" comparison of two strings.
+                            Params:
+                                - "self": the left side of the comparison, must be a string
+                                - 0: the right side of the comparison, must be a string
+                            Returns:
+                                true if the left side is less than the right side
+                        `
+                    },
+                    stringOperatorFunctionTypes
+                )
+            ),
+            id(stringProto).assignField(
+                ">",
+                jsFun(
+                    (args, context) => {
+                        return context.newBoolean(
+                            assertString(args.getField(SemanticFieldNames.SELF, context)) >
+                                assertString(args.getField(0, context))
+                        );
+                    },
+                    {
+                        docs: `
+                            Performs ">" comparison of two strings.
+                            Params:
+                                - "self": the left side of the comparison, must be a string
+                                - 0: the right side of the comparison, must be a string
+                            Returns:
+                                true if the left side is greater than the right side
+                        `
+                    },
+                    stringOperatorFunctionTypes
+                )
+            ),
+            id(stringProto).assignField(
+                "<=",
+                jsFun(
+                    (args, context) => {
+                        return context.newBoolean(
+                            assertString(args.getField(SemanticFieldNames.SELF, context)) <=
+                                assertString(args.getField(0, context))
+                        );
+                    },
+                    {
+                        docs: `
+                            Performs "<=" comparison of two strings.
+                            Params:
+                                - "self": the left side of the comparison, must be a string
+                                - 0: the right side of the comparison, must be a string
+                            Returns:
+                                true if the left side is less than or equal to the right side
+                        `
+                    },
+                    stringOperatorFunctionTypes
+                )
+            ),
+            id(stringProto).assignField(
+                ">=",
+                jsFun(
+                    (args, context) => {
+                        return context.newBoolean(
+                            assertString(args.getField(SemanticFieldNames.SELF, context)) >=
+                                assertString(args.getField(0, context))
+                        );
+                    },
+                    {
+                        docs: `
+                            Performs ">=" comparison of two strings.
+                            Params:
+                                - "self": the left side of the comparison, must be a string
+                                - 0: the right side of the comparison, must be a string
+                            Returns:
+                                true if the left side is greater than or equal to the right side
+                        `
+                    },
+                    stringOperatorFunctionTypes
+                )
+            ),
             id(stringProto).assignField(
                 "==",
                 jsFun(
