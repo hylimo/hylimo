@@ -12,9 +12,13 @@ export interface ArcSegment extends Segment {
      */
     center: Point;
     /**
-     * The radius
+     * The radius in x direction
      */
-    radius: number;
+    radiusX: number;
+    /**
+     * The radius in y direction
+     */
+    radiusY: number;
     /**
      * Clockwise or counter-clockwise arc?
      */

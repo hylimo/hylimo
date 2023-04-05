@@ -147,7 +147,8 @@ export abstract class ElementLayoutConfig implements LayoutConfig {
                 x: cx,
                 y: cy
             },
-            radius
+            radiusX: radius,
+            radiusY: radius
         };
     }
 }

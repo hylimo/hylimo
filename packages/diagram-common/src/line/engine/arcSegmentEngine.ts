@@ -1,6 +1,7 @@
 import { Math2D } from "../../common/math";
 import { Point } from "../../common/point";
 import { ArcSegment } from "../model/arcSegment";
+import { projectPointOnConic } from "./conicProjection";
 import { NearestPointResult, SegmentEngine } from "./segmentEngine";
 
 /**
@@ -9,64 +10,97 @@ import { NearestPointResult, SegmentEngine } from "./segmentEngine";
 export class ArcSegmentEngine extends SegmentEngine<ArcSegment> {
     override projectPoint(point: Point, segment: ArcSegment, segmentStartPoint: Point): NearestPointResult {
         const { startAngle, deltaAngle } = this.getArcData(segmentStartPoint, segment);
-        const endAngle = startAngle + deltaAngle;
-        const position = (x: number) => ({
-            x: segment.center.x + segment.radius * Math.cos(x),
-            y: segment.center.y + segment.radius * Math.sin(x)
-        });
-        const dist = (x: number) => {
-            const delta = Math2D.sub(point, position(x));
-            return Math2D.length(delta);
-        };
-        const angle = Math2D.angle(Math2D.sub(point, segment.center));
-        let deltaPointAngle = angle - startAngle;
-        if (deltaPointAngle < 0 && deltaAngle > 0) {
-            deltaPointAngle += 2 * Math.PI;
-        } else if (deltaAngle > 0 && deltaAngle < 0) {
-            deltaPointAngle -= 2 * Math.PI;
-        }
-        if (Math.abs(deltaPointAngle) < Math.abs(deltaAngle)) {
-            return {
-                distance: dist(angle),
-                position: deltaPointAngle / deltaAngle,
-                point: position(angle)
-            };
-        } else {
-            const startDist = dist(startAngle);
-            const endDist = dist(endAngle);
-            if (startDist < endDist) {
-                return {
-                    distance: startDist,
-                    position: 0,
-                    point: position(startAngle)
-                };
-            } else {
-                return {
-                    distance: endDist,
-                    position: 1,
-                    point: position(endAngle)
-                };
+        const possiblePoints = [segmentStartPoint, segment.end];
+        possiblePoints.push(
+            ...projectPointOnConic(
+                this.conicEquationOfEllipse(segment.radiusX, segment.radiusY, segment.center.x, segment.center.y),
+                point
+            )
+        );
+        let minDist = Number.POSITIVE_INFINITY;
+        let minPos = 0;
+        let minPoint = possiblePoints[0];
+        for (let i = 0; i < possiblePoints.length; i++) {
+            const p = possiblePoints[i];
+            const dist = Math2D.distance(possiblePoints[i], point);
+            if (dist < minDist) {
+                if (i <= 1) {
+                    minPos = i;
+                } else {
+                    const angle = Math2D.angle(Math2D.sub(p, segment.center));
+                    let deltaPointAngle = angle - startAngle;
+                    if (deltaPointAngle < 0 && deltaAngle > 0) {
+                        deltaPointAngle += 2 * Math.PI;
+                    } else if (deltaAngle > 0 && deltaAngle < 0) {
+                        deltaPointAngle -= 2 * Math.PI;
+                    }
+                    if (Math.abs(deltaPointAngle) < Math.abs(deltaAngle)) {
+                        minPos = deltaPointAngle / deltaAngle;
+                    } else {
+                        continue;
+                    }
+                }
+                minPoint = p;
+                minDist = dist;
             }
         }
+
+        return {
+            point: minPoint,
+            distance: minDist,
+            position: minPos
+        };
+    }
+
+    /**
+     * Calculates the coefficients of the conic equation for an ellipse with the given semi-axes lengths and center coordinates.
+     *
+     * @param dx The semi-axis length in the x-direction.
+     * @param dy The semi-axis length in the y-direction.
+     * @param cx The x-coordinate of the center.
+     * @param cy The y-coordinate of the center.
+     * @returns A tuple with the coefficients A, B, C, D, E, and F of the conic equation, in that order.
+     */
+    private conicEquationOfEllipse(
+        dx: number,
+        dy: number,
+        cx: number,
+        cy: number
+    ): [number, number, number, number, number, number] {
+        const A = dx ** 2;
+        const B = 0;
+        const C = dy ** 2;
+        const D = -cx * dx ** 2;
+        const E = -cy * dy ** 2;
+        const F = dx ** 2 * cx ** 2 + dy ** 2 * cy ** 2 - dx ** 2 * dy ** 2;
+        return [A, B, C, D, E, F];
     }
 
     override getPoint(position: number, distance: number, segment: ArcSegment, segmentStartPoint: Point): Point {
         const { startAngle, deltaAngle } = this.getArcData(segmentStartPoint, segment);
         const finalAngle = startAngle + position * deltaAngle;
         const center = segment.center;
-        return {
-            x: center.x + (segment.radius + distance) * Math.cos(finalAngle),
-            y: center.y + (segment.radius + distance) * Math.sin(finalAngle)
+        const normal = Math2D.scaleTo(this.getNormalVector(position, segment, segmentStartPoint), distance);
+        const point = {
+            x: center.x + segment.radiusX * Math.cos(finalAngle),
+            y: center.y + segment.radiusY * Math.sin(finalAngle)
         };
+        return Math2D.add(point, normal);
     }
 
     override getNormalVector(position: number, segment: ArcSegment, segmentStartPoint: Point): Point {
         const { startAngle, deltaAngle } = this.getArcData(segmentStartPoint, segment);
-        const finalAngle = startAngle + position * deltaAngle;
-        return {
-            x: Math.cos(finalAngle),
-            y: Math.sin(finalAngle)
-        };
+        const a = startAngle + position * deltaAngle;
+        const dx = segment.radiusX;
+        const dy = segment.radiusY;
+        const nx = ((dx * dy) / Math.sqrt((dy * Math.cos(a)) ^ (2 + dx * Math.sin(a)) ^ 2)) ^ (-1 * dy * Math.cos(a));
+        const ny = ((dx * dy) / Math.sqrt((dy * Math.cos(a)) ^ (2 + dx * Math.sin(a)) ^ 2)) ^ (-1 * dx * Math.sin(a));
+
+        if (Math.cos(a) < 0) {
+            return { x: -nx, y: -ny };
+        } else {
+            return { x: nx, y: ny };
+        }
     }
 
     /**
