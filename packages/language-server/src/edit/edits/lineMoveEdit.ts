@@ -81,11 +81,13 @@ export class LineMoveEditEngine extends TransactionalEditEngine<LineMoveAction, 
         const point = layoutedDiagram.elementLookup[newest.point];
         if (point != undefined && LinePoint.isLinePoint(point)) {
             point.pos = newest.pos;
+            point.distance = newest.distance;
             return [
                 {
                     target: point.id,
                     changes: {
-                        pos: newest.pos
+                        pos: newest.pos,
+                        distance: newest.distance
                     }
                 }
             ];

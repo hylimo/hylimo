@@ -21,26 +21,30 @@ export class ArcSegmentEngine extends SegmentEngine<ArcSegment> {
         let minPos = 0;
         let minPoint = possiblePoints[0];
         for (let i = 0; i < possiblePoints.length; i++) {
-            const p = possiblePoints[i];
-            const dist = Math2D.distance(possiblePoints[i], point);
+            const pos = possiblePoints[i];
+            const dist = Math2D.distance(pos, point);
             if (dist < minDist) {
                 if (i <= 1) {
                     minPos = i;
                 } else {
-                    const angle = Math2D.angle(Math2D.sub(p, segment.center));
-                    let deltaPointAngle = angle - startAngle;
-                    if (deltaPointAngle < 0 && deltaAngle > 0) {
-                        deltaPointAngle += 2 * Math.PI;
+                    const relativePos = Math2D.sub(pos, segment.center);
+                    const angle = Math2D.angle({
+                        x: relativePos.x / segment.radiusX,
+                        y: relativePos.y / segment.radiusY
+                    });
+                    let deltaPosAngle = angle - startAngle;
+                    if (deltaPosAngle < 0 && deltaAngle > 0) {
+                        deltaPosAngle += 2 * Math.PI;
                     } else if (deltaAngle > 0 && deltaAngle < 0) {
-                        deltaPointAngle -= 2 * Math.PI;
+                        deltaPosAngle -= 2 * Math.PI;
                     }
-                    if (Math.abs(deltaPointAngle) < Math.abs(deltaAngle)) {
-                        minPos = deltaPointAngle / deltaAngle;
+                    if (Math.abs(deltaPosAngle) < Math.abs(deltaAngle)) {
+                        minPos = deltaPosAngle / deltaAngle;
                     } else {
                         continue;
                     }
                 }
-                minPoint = p;
+                minPoint = pos;
                 minDist = dist;
             }
         }
@@ -67,12 +71,12 @@ export class ArcSegmentEngine extends SegmentEngine<ArcSegment> {
         cx: number,
         cy: number
     ): [number, number, number, number, number, number] {
-        const A = dx ** 2;
+        const A = dy ** 2;
         const B = 0;
-        const C = dy ** 2;
-        const D = -cx * dx ** 2;
-        const E = -cy * dy ** 2;
-        const F = dx ** 2 * cx ** 2 + dy ** 2 * cy ** 2 - dx ** 2 * dy ** 2;
+        const C = dx ** 2;
+        const D = -cx * A;
+        const E = -cy * C;
+        const F = A * cx * cx + C * cy * cy - dx * dx * dy * dy;
         return [A, B, C, D, E, F];
     }
 
@@ -96,11 +100,7 @@ export class ArcSegmentEngine extends SegmentEngine<ArcSegment> {
         const nx = (dy * Math.cos(a)) / Math.sqrt((dy * Math.cos(a)) ** 2 + (dx * Math.sin(a)) ** 2);
         const ny = (dx * Math.sin(a)) / Math.sqrt((dy * Math.cos(a)) ** 2 + (dx * Math.sin(a)) ** 2);
 
-        if (Math.cos(a) < 0) {
-            return { x: -nx, y: -ny };
-        } else {
-            return { x: nx, y: ny };
-        }
+        return { x: nx, y: ny };
     }
 
     /**
