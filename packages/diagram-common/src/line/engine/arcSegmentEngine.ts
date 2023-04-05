@@ -93,8 +93,8 @@ export class ArcSegmentEngine extends SegmentEngine<ArcSegment> {
         const a = startAngle + position * deltaAngle;
         const dx = segment.radiusX;
         const dy = segment.radiusY;
-        const nx = ((dx * dy) / Math.sqrt((dy * Math.cos(a)) ^ (2 + dx * Math.sin(a)) ^ 2)) ^ (-1 * dy * Math.cos(a));
-        const ny = ((dx * dy) / Math.sqrt((dy * Math.cos(a)) ^ (2 + dx * Math.sin(a)) ^ 2)) ^ (-1 * dx * Math.sin(a));
+        const nx = (dy * Math.cos(a)) / Math.sqrt((dy * Math.cos(a)) ** 2 + (dx * Math.sin(a)) ** 2);
+        const ny = (dx * Math.sin(a)) / Math.sqrt((dy * Math.cos(a)) ** 2 + (dx * Math.sin(a)) ** 2);
 
         if (Math.cos(a) < 0) {
             return { x: -nx, y: -ny };

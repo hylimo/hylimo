@@ -6,6 +6,7 @@ import {
     CanvasConnection,
     CanvasElement,
     CanvasLineSegment,
+    Ellipse,
     LinePoint,
     Marker,
     Path,
@@ -60,6 +61,8 @@ import { SPath } from "./model/sPath";
 import { PathView } from "./views/pathView";
 import { resetCanvasBoundsModule } from "./features/canvas-bounds/di.config";
 import { SCanvasAxisAlignedSegment } from "./model/canvas/sCanvasAxisAlignedSegment";
+import { SEllipse } from "./model/sEllipse";
+import { EllipseView } from "./views/ellipseView";
 
 /**
  * The module used
@@ -71,6 +74,7 @@ const diagramModule = new ContainerModule((bind, unbind, isBound, rebind) => {
 
     configureModelElement(context, Root.TYPE, SRoot, SRootView);
     configureModelElement(context, Rect.TYPE, SRect, RectView);
+    configureModelElement(context, Ellipse.TYPE, SEllipse, EllipseView);
     configureModelElement(context, Path.TYPE, SPath, PathView);
     configureModelElement(context, Text.TYPE, SText, TextView);
     configureModelElement(context, Canvas.TYPE, SCanvas, CanvasView);

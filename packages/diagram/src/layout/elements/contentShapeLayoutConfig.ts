@@ -1,6 +1,7 @@
 import { AttributeConfig } from "../layoutElement";
 import { ShapeLayoutConfig } from "./shapeLayoutConfig";
 import { elementType } from "../../module/types";
+import { optional } from "@hylimo/core";
 
 /**
  * Base class for all shape layout configs with a content
@@ -20,7 +21,7 @@ export abstract class ContentShapeLayoutConfig extends ShapeLayoutConfig {
                 {
                     name: "content",
                     description: "the inner element",
-                    type: elementType()
+                    type: optional(elementType())
                 },
                 ...additionalAttributes
             ],

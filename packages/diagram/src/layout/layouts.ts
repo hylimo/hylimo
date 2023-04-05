@@ -15,6 +15,7 @@ import { VBoxLayoutConfig } from "./elements/vboxLayoutConfig";
 import { LayoutConfig } from "./layoutElement";
 import { PathLayoutConfig } from "./elements/pathLayoutConfig";
 import { CanvasAxisAlignedSegmentLayoutConfig } from "./elements/canvas/canvasAxisAlignedSegmentLayoutConfig";
+import { EllipseLayoutConfig } from "./elements/ellipseLayoutConfig";
 
 /**
  * Known layouts
@@ -35,5 +36,6 @@ export const layouts: LayoutConfig[] = [
     new RelativePointLayoutConfig(),
     new LinePointLayoutConfig(),
     new MarkerLayoutConfig(),
-    new PathLayoutConfig()
+    new PathLayoutConfig(),
+    new EllipseLayoutConfig()
 ];
