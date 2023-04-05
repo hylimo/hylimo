@@ -16,6 +16,7 @@ import { Math2D } from "../../common/math";
 import { Bounds } from "../../common/bounds";
 import { svgPathBbox } from "../../bounds/svgPathBbox";
 import { CanvasConnectionLayout } from "../../canvas/canvasConnectionLayout";
+import { Ellipse } from "../elements/ellipse";
 
 /**
  * Visitor which simplifies the provided diagram model, and visists each element
@@ -57,6 +58,7 @@ export abstract class SimplifiedDiagramVisitor<C, O> {
             case Rect.TYPE:
             case Path.TYPE:
             case Text.TYPE:
+            case Ellipse.TYPE:
                 return this.simplifyLayoutedElement(element as LayoutedElement);
             case Canvas.TYPE:
                 return this.simplifyCanvas(element as Canvas);
@@ -102,6 +104,8 @@ export abstract class SimplifiedDiagramVisitor<C, O> {
                 return this.visitRoot(element as WithBounds<Root>, context);
             case Rect.TYPE:
                 return this.visitRect(element as WithBounds<Rect>, context);
+            case Ellipse.TYPE:
+                return this.visitEllipse(element as WithBounds<Ellipse>, context);
             case Path.TYPE:
                 return this.visitPath(element as WithBounds<Path>, context);
             case Text.TYPE:
@@ -298,6 +302,7 @@ export abstract class SimplifiedDiagramVisitor<C, O> {
 
     abstract visitRoot(element: WithBounds<Root>, context: C): O;
     abstract visitRect(element: WithBounds<Rect>, context: C): O;
+    abstract visitEllipse(element: WithBounds<Ellipse>, context: C): O;
     abstract visitPath(element: WithBounds<Path>, context: C): O;
     abstract visitText(element: WithBounds<Text>, context: C): O;
     abstract visitCanvas(element: WithBounds<Canvas>, context: C): O;

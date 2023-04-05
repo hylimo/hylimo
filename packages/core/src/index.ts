@@ -35,6 +35,7 @@ export * from "./runtime/ast/executableNumberLiteralExpression";
 export * from "./runtime/ast/executableSelfInvocationExpression";
 export * from "./runtime/ast/executableStringLiteralExpression";
 export * from "./runtime/objects/baseObject";
+export * from "./runtime/objects/booleanObject";
 export * from "./runtime/objects/fullObject";
 export * from "./runtime/objects/functionObject";
 export * from "./runtime/objects/literalObject";

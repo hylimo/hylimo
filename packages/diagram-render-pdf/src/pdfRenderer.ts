@@ -2,6 +2,7 @@ import { FontCollection, FontManager } from "@hylimo/diagram";
 import {
     Canvas,
     Element,
+    Ellipse,
     Path,
     Rect,
     Root,
@@ -12,7 +13,11 @@ import {
     WithBounds
 } from "@hylimo/diagram-common";
 import PDFDocument from "pdfkit/js/pdfkit.standalone.js";
-import { ShapeAttributes, extractOutlinedShapeAttributes, extractShapeAttributes } from "@hylimo/diagram-render-svg";
+import {
+    ShapeStyleAttributes,
+    extractOutlinedShapeAttributes,
+    extractShapeStyleAttributes
+} from "@hylimo/diagram-render-svg";
 
 /**
  * Renderer which renders a diagram to pdf
@@ -105,8 +110,21 @@ export class PDFDiagramVisitor extends SimplifiedDiagramVisitor<PDFKit.PDFDocume
         this.visitChildren(element, context);
     }
 
+    override visitEllipse(element: WithBounds<Ellipse>, context: PDFKit.PDFDocument): void {
+        const shapeAttributes = extractShapeStyleAttributes(element);
+        const strokeWidth = element.strokeWidth ?? 0;
+        context.ellipse(
+            element.x + element.width / 2,
+            element.y + element.height / 2,
+            (element.width - strokeWidth) / 2,
+            (element.height - strokeWidth) / 2
+        );
+        this.drawShape(context, shapeAttributes, element);
+        this.visitChildren(element, context);
+    }
+
     override visitPath(element: WithBounds<Path>, context: PDFKit.PDFDocument): void {
-        const shapeAttributes = extractShapeAttributes(element);
+        const shapeAttributes = extractShapeStyleAttributes(element);
         context.save();
         context.translate(element.x, element.y);
         context.path(element.path);
@@ -151,7 +169,7 @@ export class PDFDiagramVisitor extends SimplifiedDiagramVisitor<PDFKit.PDFDocume
      * @param styles the styles of the shape
      * @param element the shape to draw
      */
-    private drawShape(context: PDFKit.PDFDocument, styles: ShapeAttributes, element: Shape): void {
+    private drawShape(context: PDFKit.PDFDocument, styles: ShapeStyleAttributes, element: Shape): void {
         if (styles.fill !== "none") {
             context.fillOpacity(styles["fill-opacity"] ?? 1);
         }

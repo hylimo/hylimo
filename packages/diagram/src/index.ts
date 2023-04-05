@@ -18,6 +18,7 @@ export * from "./layout/elements/canvas/relativePointLayoutConfig";
 export * from "./layout/elements/attributes";
 export * from "./layout/elements/contentShapeLayoutConfig";
 export * from "./layout/elements/elementLayoutConfig";
+export * from "./layout/elements/ellipseLayoutConfig";
 export * from "./layout/elements/hboxLayoutConfig";
 export * from "./layout/elements/panelLayoutConfig";
 export * from "./layout/elements/pathLayoutConfig";

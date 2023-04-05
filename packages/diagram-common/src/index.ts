@@ -14,6 +14,7 @@ export * from "./font/font";
 export * from "./font/fontConfig";
 export * from "./line/engine/arcSegmentEngine";
 export * from "./line/engine/bezierSegmentEngine";
+export * from "./line/engine/conicProjection";
 export * from "./line/engine/lineEngine";
 export * from "./line/engine/lineSegmentEngine";
 export * from "./line/engine/segmentEngine";

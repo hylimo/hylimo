@@ -32,8 +32,8 @@ export function extractLayoutAttributes(model: Readonly<LayoutedElement>): Layou
  * @param model the model which provides the attributes
  * @returns the extracted attributes
  */
-export function extractOutlinedShapeAttributes(model: Readonly<Shape>): ShapeAttributes {
-    const res = extractShapeAttributes(model);
+export function extractOutlinedShapeAttributes(model: Readonly<Shape>): ShapeStyleAttributes & LayoutAttributes {
+    const res = { ...extractShapeStyleAttributes(model), ...extractLayoutAttributes(model) };
     if (model.strokeWidth) {
         res.x += model.strokeWidth / 2;
         res.y += model.strokeWidth / 2;
@@ -77,20 +77,19 @@ export function extractStrokeAttriabutes(model: Readonly<StrokedElement>): Strok
 /**
  * SVG shape attributes, includes layout and stroke attributes
  */
-export interface ShapeAttributes extends StrokeAttributes, LayoutAttributes {
+export interface ShapeStyleAttributes extends StrokeAttributes {
     fill: string;
     "fill-opacity"?: number;
 }
 
 /**
- * Extracts layout and style properties for shapes
+ * Extracts style properties for shapes
  *
  * @param model the model which provides the attributes
  * @returns the extracted attributes
  */
-export function extractShapeAttributes(model: Readonly<Shape>): ShapeAttributes {
-    const res: ShapeAttributes = {
-        ...extractLayoutAttributes(model),
+export function extractShapeStyleAttributes(model: Readonly<Shape>): ShapeStyleAttributes {
+    const res: ShapeStyleAttributes = {
         ...extractStrokeAttriabutes(model),
         fill: model.fill ?? "none"
     };

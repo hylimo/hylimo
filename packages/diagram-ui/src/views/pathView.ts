@@ -2,7 +2,7 @@ import { injectable } from "inversify";
 import { VNode, Attrs } from "snabbdom";
 import { IViewArgs, RenderingContext, IView, svg } from "sprotty";
 import { SPath } from "../model/sPath";
-import { extractShapeAttributes } from "@hylimo/diagram-render-svg";
+import { extractShapeStyleAttributes } from "@hylimo/diagram-render-svg";
 
 /**
  * IView that represents an svg path
@@ -11,7 +11,7 @@ import { extractShapeAttributes } from "@hylimo/diagram-render-svg";
 export class PathView implements IView {
     render(model: Readonly<SPath>, _context: RenderingContext, _args?: IViewArgs | undefined): VNode | undefined {
         const attrs: Attrs = {
-            ...extractShapeAttributes(model),
+            ...extractShapeStyleAttributes(model),
             "stroke-linejoin": model.lineJoin,
             "stroke-linecap": model.lineCap,
             "stroke-miterlimit": model.miterLimit,

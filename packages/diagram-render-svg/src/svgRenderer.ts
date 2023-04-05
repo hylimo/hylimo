@@ -1,6 +1,20 @@
-import { Root, Rect, Path, Text, Canvas, Element, WithBounds, convertFontsToCssStyle } from "@hylimo/diagram-common";
+import {
+    Root,
+    Rect,
+    Path,
+    Text,
+    Canvas,
+    Element,
+    WithBounds,
+    convertFontsToCssStyle,
+    Ellipse
+} from "@hylimo/diagram-common";
 import { SimplifiedDiagramVisitor } from "@hylimo/diagram-common";
-import { extractLayoutAttributes, extractOutlinedShapeAttributes, extractShapeAttributes } from "./attributeHelpers";
+import {
+    extractLayoutAttributes,
+    extractOutlinedShapeAttributes,
+    extractShapeStyleAttributes
+} from "./attributeHelpers";
 import { SimplifiedCanvasElement } from "@hylimo/diagram-common";
 import { create } from "xmlbuilder2";
 import { XMLBuilder } from "xmlbuilder2/lib/interfaces";
@@ -129,11 +143,25 @@ class SVGDiagramVisitor extends SimplifiedDiagramVisitor<undefined, SVGNode[]> {
         return [result, ...this.visitChildren(element)];
     }
 
+    override visitEllipse(element: WithBounds<Ellipse>): SVGNode[] {
+        const strokeWidth = element.strokeWidth ?? 0;
+        const result: SVGNode = {
+            type: "ellipse",
+            children: [],
+            ...extractShapeStyleAttributes(element),
+            cx: element.x + element.width / 2,
+            cy: element.y + element.height / 2,
+            rx: (element.width - strokeWidth) / 2,
+            ry: (element.height - strokeWidth) / 2
+        };
+        return [result, ...this.visitChildren(element)];
+    }
+
     override visitPath(element: Path): SVGNode[] {
         const result: SVGNode = {
             type: "path",
             children: [],
-            ...extractShapeAttributes(element),
+            ...extractShapeStyleAttributes(element),
             "stroke-linejoin": element.lineJoin,
             "stroke-linecap": element.lineCap,
             "stroke-miterlimit": element.miterLimit,
