@@ -25,6 +25,7 @@ export * from "./layout/elements/pathLayoutConfig";
 export * from "./layout/elements/rectLayoutConfig";
 export * from "./layout/elements/shapeLayoutConfig";
 export * from "./layout/elements/spanLayoutConfig";
+export * from "./layout/elements/stackLayoutConfig";
 export * from "./layout/elements/styledElementLayoutConfig";
 export * from "./layout/elements/textLayoutConfig";
 export * from "./layout/elements/vboxLayoutConfig";

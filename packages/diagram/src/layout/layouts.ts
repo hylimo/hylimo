@@ -16,6 +16,7 @@ import { LayoutConfig } from "./layoutElement";
 import { PathLayoutConfig } from "./elements/pathLayoutConfig";
 import { CanvasAxisAlignedSegmentLayoutConfig } from "./elements/canvas/canvasAxisAlignedSegmentLayoutConfig";
 import { EllipseLayoutConfig } from "./elements/ellipseLayoutConfig";
+import { StackLayoutConfig } from "./elements/stackLayoutConfig";
 
 /**
  * Known layouts
@@ -24,6 +25,7 @@ export const layouts: LayoutConfig[] = [
     new RectLayoutConfig(),
     new VBoxLayoutConfig(),
     new HBoxLayoutConfig(),
+    new StackLayoutConfig(),
     new TextLayoutConfig(),
     new SpanLayoutConfig(),
     new CanvasLayoutConfig(),
