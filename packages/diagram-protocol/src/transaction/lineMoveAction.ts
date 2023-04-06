@@ -14,6 +14,10 @@ export interface LineMoveAction extends TransactionalAction {
      */
     pos: number;
     /**
+     * New segment of the LinePoint
+     */
+    segment?: number;
+    /**
      * New distance of the LinePoint
      */
     distance?: number;

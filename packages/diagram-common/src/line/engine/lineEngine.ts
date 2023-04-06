@@ -41,13 +41,16 @@ export class LineEngine {
         if (line.segments.length == 0) {
             return {
                 pos: 0,
+                relativePos: 0,
+                segment: 0,
                 distance: 0
             };
         }
         const localPoint = applyToPoint(inverse(transform), point);
         const lengthPerSegment = 1 / line.segments.length;
         let minDistance = Number.POSITIVE_INFINITY;
-        let position = 0;
+        let relativePosition = 0;
+        let segmentIndex = 0;
         let distance = 0;
         let startPosition = line.start;
         for (let i = 0; i < line.segments.length; i++) {
@@ -56,7 +59,8 @@ export class LineEngine {
             const candidate = engine.projectPoint(localPoint, segment, startPosition);
             if (candidate.distance < minDistance) {
                 minDistance = candidate.distance;
-                position = lengthPerSegment * (i + candidate.position);
+                relativePosition = candidate.position;
+                segmentIndex = i;
                 const normal = engine.getNormalVector(candidate.position, segment, startPosition);
                 const d2 = normal.x ** 2 + normal.y ** 2;
                 distance = ((point.x - candidate.point.x) * normal.x + (point.y - candidate.point.y) * normal.y) / d2;
@@ -64,7 +68,9 @@ export class LineEngine {
             startPosition = segment.end;
         }
         return {
-            pos: position,
+            pos: lengthPerSegment * (segmentIndex + relativePosition),
+            relativePos: relativePosition,
+            segment: segmentIndex,
             distance
         };
     }
@@ -73,25 +79,29 @@ export class LineEngine {
      * Gets a point on a segment
      *
      * @param position the position of the point on the segment, a number between 0 and 1
+     * @param segment the segment to which position is relative to
      * @param distance the distance to the line at which the point should be located
      * @param transformedLine line with associated transform
      * @returns the point on the line
      */
-    getPoint(position: number, distance: number, transformedLine: TransformedLine): Point {
+    getPoint(position: number, segment: number | undefined, distance: number, transformedLine: TransformedLine): Point {
         const { line, transform } = transformedLine;
         if (line.segments.length == 0) {
             return line.start;
         }
-        const segmentIndex = LinePoint.calcSegmentIndex(position, line.segments.length);
+        let segmentIndex: number;
+        let relativePosition: number;
+        if (segment != undefined) {
+            segmentIndex = Math.min(Math.max(Math.round(segment), 0), transformedLine.line.segments.length - 1);
+            relativePosition = position;
+        } else {
+            segmentIndex = LinePoint.calcSegmentIndex(position, line.segments.length);
+            relativePosition = position * line.segments.length - segmentIndex;
+        }
         const segmentStartPos = segmentIndex == 0 ? line.start : line.segments[segmentIndex - 1].end;
-        const segment = line.segments[segmentIndex];
-        const engine = this.getEngine(segment);
-        const localPoint = engine.getPoint(
-            position * line.segments.length - segmentIndex,
-            distance,
-            segment,
-            segmentStartPos
-        );
+        const lineSegment = line.segments[segmentIndex];
+        const engine = this.getEngine(lineSegment);
+        const localPoint = engine.getPoint(relativePosition, distance, lineSegment, segmentStartPos);
         return applyToPoint(transform, localPoint);
     }
 
@@ -119,6 +129,14 @@ export interface ProjectionResult {
      * Position on the line which is closest to the provided point
      */
     pos: number;
+    /**
+     * The relative position on the segment
+     */
+    relativePos: number;
+    /**
+     * The segment index
+     */
+    segment: number;
     /**
      * Distance for relative LinePoints.
      * This is the distance to the line which results in the lowest distance to the point.

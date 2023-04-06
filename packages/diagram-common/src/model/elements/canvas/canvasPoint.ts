@@ -102,6 +102,10 @@ export interface LinePoint extends CanvasPoint {
      */
     pos: number;
     /**
+     * The segment to which pos is relative to, if not provided, pos is relative to the whole line
+     */
+    segment?: number;
+    /**
      * The distance of the point to the line
      */
     distance?: number;

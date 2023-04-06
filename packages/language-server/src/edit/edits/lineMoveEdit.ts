@@ -37,6 +37,11 @@ export namespace LineMoveEdit {
                 generateReplacementNumberGenerator(point.element.getLocalFieldOrUndefined("distance")!, "distance")
             );
         }
+        if (action.segment != undefined) {
+            generatorEntries.push(
+                generateReplacementNumberGenerator(point.element.getLocalFieldOrUndefined("segment")!, "segment")
+            );
+        }
         return {
             type: LineMoveEdit.TYPE,
             generatorEntries: EditGeneratorEntry.sortAndValidate(generatorEntries)
@@ -67,6 +72,8 @@ export class LineMoveEditEngine extends TransactionalEditEngine<LineMoveAction, 
             return this.generatorRegistory.generateEdit(action.pos, generator);
         } else if (meta === "distance") {
             return this.generatorRegistory.generateEdit(action.distance!, generator);
+        } else if (meta === "segment") {
+            return this.generatorRegistory.generateEdit(action.segment!, generator);
         } else {
             throw new Error(`Unknown meta information for LineMoveEdit: ${meta}`);
         }
@@ -82,12 +89,14 @@ export class LineMoveEditEngine extends TransactionalEditEngine<LineMoveAction, 
         if (point != undefined && LinePoint.isLinePoint(point)) {
             point.pos = newest.pos;
             point.distance = newest.distance;
+            point.segment = newest.segment;
             return [
                 {
                     target: point.id,
                     changes: {
                         pos: newest.pos,
-                        distance: newest.distance
+                        distance: newest.distance,
+                        segment: newest.segment
                     }
                 }
             ];

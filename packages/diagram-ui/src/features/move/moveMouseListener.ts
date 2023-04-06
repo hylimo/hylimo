@@ -350,6 +350,7 @@ export class MoveMouseListener extends MouseListener {
                 this.transactionIdProvider.generateId(),
                 linePoint.position,
                 linePoint.distance == undefined,
+                linePoint.segment != undefined,
                 linePoint.line
             );
         } else {

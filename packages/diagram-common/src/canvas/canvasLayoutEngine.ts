@@ -270,7 +270,7 @@ export abstract class CanvasLayoutEngine {
         } else if (LinePoint.isLinePoint(element)) {
             const lineProvider = this.getElement(element.lineProvider);
             const line = this.layoutLine(lineProvider as CanvasConnection | CanvasElement);
-            return LineEngine.DEFAULT.getPoint(element.pos, element.distance ?? 0, line);
+            return LineEngine.DEFAULT.getPoint(element.pos, element.segment, element.distance ?? 0, line);
         } else if (CanvasElement.isCanvasElement(element)) {
             if (element.pos != undefined) {
                 return this.getPoint(element.pos);

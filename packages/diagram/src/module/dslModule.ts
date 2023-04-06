@@ -88,7 +88,7 @@ const scopeExpressions: ExecutableExpression[] = [
         fun(
             `
                 (lineProvider, pos, distance) = args
-                point = linePoint(lineProvider = lineProvider, pos = pos, distance = distance)
+                point = linePoint(lineProvider = lineProvider, pos = pos, distance = distance, segment = args.seg)
                 scope.contents += point
                 point
             `,
@@ -98,6 +98,7 @@ const scopeExpressions: ExecutableExpression[] = [
                     Params:
                         - 0: the line provider
                         - 1: the relative position on the line, number between 0 and 1
+                        - "seg": the segment to which the position is relative to, if not provided, the whole line is considered, should be an integer
                     Returns:
                         The created line point
                 `
@@ -271,7 +272,7 @@ const scopeExpressions: ExecutableExpression[] = [
                                 contents = list(span(text = labelText)),
                                 class = list("label")
                             ),
-                            pos = scope.lpos(self, pos ?? 0, distance),
+                            pos = scope.lpos(self, pos ?? 0, distance, seg = args.seg),
                             rotation = rotation,
                             scopes = object(),
                             class = list("label-element")
