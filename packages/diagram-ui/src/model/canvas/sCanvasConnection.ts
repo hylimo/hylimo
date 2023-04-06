@@ -1,4 +1,4 @@
-import { CanvasConnection, CanvasConnectionLayout, Point, TransformedLine } from "@hylimo/diagram-common";
+import { CanvasConnection, CanvasConnectionLayout, Point, Stroke, TransformedLine } from "@hylimo/diagram-common";
 import { LinearAnimatable } from "../../features/animation/model";
 import { LineProvider } from "../../features/layout/lineProvider";
 import { SCanvasConnectionSegment } from "./sCanvasConnectionSegment";
@@ -9,7 +9,7 @@ import { SMarker } from "./sMarker";
 /**
  * Animated fields for CanvasConnection
  */
-const canvasConnectionAnimatedFields = new Set(["strokeWidth", "strokeOpacity"]);
+const canvasConnectionAnimatedFields = new Set([]);
 
 /**
  * Model for CanvasConnection
@@ -24,15 +24,7 @@ export class SCanvasConnection extends SCanvasContent implements CanvasConnectio
     /**
      * The color of the stroke
      */
-    stroke?: string;
-    /**
-     * The opacity applied to the stroke
-     */
-    strokeOpacity?: number;
-    /**
-     * The width of the stroke
-     */
-    strokeWidth?: number;
+    stroke?: Stroke;
     /**
      * Getter for the position associated with start
      */

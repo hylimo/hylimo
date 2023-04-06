@@ -38,7 +38,7 @@ export class EllipseLayoutConfig extends ContentShapeLayoutConfig {
             children: []
         };
         if (element.content) {
-            const contentSize = this.calculateInnerSize(size, result.strokeWidth ?? 0);
+            const contentSize = this.calculateInnerSize(size, result.stroke?.width ?? 0);
             const contentPosition = Math2D.add(position, {
                 x: (size.width - contentSize.width) / 2,
                 y: (size.height - contentSize.height) / 2

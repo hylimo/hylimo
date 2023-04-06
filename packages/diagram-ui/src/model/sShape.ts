@@ -1,4 +1,4 @@
-import { Shape } from "@hylimo/diagram-common";
+import { Fill, Shape, Stroke } from "@hylimo/diagram-common";
 import { SLayoutedElement } from "./sLayoutedElement";
 
 /**
@@ -6,35 +6,18 @@ import { SLayoutedElement } from "./sLayoutedElement";
  */
 export abstract class SShape extends SLayoutedElement implements Shape {
     /**
-     * The color of the fill of the shape
+     * The fill of the shape
      */
-    fill!: string;
+    fill?: Fill;
     /**
-     * The opacity applied to the fill
+     * The stroke of the shape
      */
-    fillOpacity!: number;
-    /**
-     * The color of the stroke
-     */
-    stroke!: string;
-    /**
-     * The opacity applied to the stroke
-     */
-    strokeOpacity!: number;
-    /**
-     * The width of the stroke
-     */
-    strokeWidth!: number;
+    stroke?: Stroke;
 }
 
 export namespace SShape {
     /**
      * Default animated fields
      */
-    export const defaultAnimatedFields = [
-        ...SLayoutedElement.defaultAnimatedFields,
-        "strokeWidth",
-        "strokeOpacity",
-        "fillOpacity"
-    ];
+    export const defaultAnimatedFields = [...SLayoutedElement.defaultAnimatedFields];
 }

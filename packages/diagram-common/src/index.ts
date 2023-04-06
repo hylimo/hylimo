@@ -23,6 +23,7 @@ export * from "./line/model/bezierSegment";
 export * from "./line/model/line";
 export * from "./line/model/lineSegment";
 export * from "./line/model/segment";
+export * from "./model/elements/base/colored";
 export * from "./model/elements/base/element";
 export * from "./model/elements/base/layoutedElement";
 export * from "./model/elements/base/positionedElement";

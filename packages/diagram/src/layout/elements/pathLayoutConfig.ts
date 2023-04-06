@@ -1,5 +1,5 @@
-import { enumType, numberType, stringType } from "@hylimo/core";
-import { Size, Point, Element, Path, LineJoin, LineCap } from "@hylimo/diagram-common";
+import { stringType } from "@hylimo/core";
+import { Size, Point, Element, Path } from "@hylimo/diagram-common";
 import svgPath from "svgpath";
 import { PathBBox, svgPathBbox } from "@hylimo/diagram-common";
 import { LayoutElement, SizeConstraints } from "../layoutElement";
@@ -20,38 +20,17 @@ export class PathLayoutConfig extends ShapeLayoutConfig {
                     type: stringType
                 }
             ],
-            [
-                {
-                    name: "lineJoin",
-                    description: "the line join style",
-                    type: enumType(LineJoin)
-                },
-                {
-                    name: "lineCap",
-                    description: "the line cap style",
-                    type: enumType(LineCap)
-                },
-                {
-                    name: "miterLimit",
-                    description: "the miter limit",
-                    type: numberType
-                }
-            ]
+            []
         );
     }
 
     override measure(layout: Layout, element: LayoutElement, constraints: SizeConstraints): Size {
-        const additionalStrokeProperties = this.extractAdditionalStrokeProperties(element);
         const shapeProperties = this.extractShapeProperties(element);
         const path = element.element.getLocalFieldOrUndefined("path")?.value.toNative();
-        const boundingBox = svgPathBbox(path, {
-            ...additionalStrokeProperties,
-            lineWidth: shapeProperties.strokeWidth ?? 0
-        });
+        const boundingBox = svgPathBbox(path, shapeProperties.stroke);
         element.boundsAndProperties = {
             properties: {
-                ...shapeProperties,
-                ...additionalStrokeProperties
+                ...shapeProperties
             },
             path,
             boundingBox
@@ -155,22 +134,5 @@ export class PathLayoutConfig extends ShapeLayoutConfig {
             children: []
         };
         return [result];
-    }
-
-    /**
-     * Extracts lineJoin, lineCap and miterLimit from the element.
-     * If not defined, adds default values.
-     *
-     * @param element the element to extract the properties from
-     * @returns the extracted properties
-     */
-    private extractAdditionalStrokeProperties(
-        element: LayoutElement
-    ): Pick<Path, "lineJoin" | "lineCap" | "miterLimit"> {
-        return {
-            lineJoin: element.styles.lineJoin ?? LineJoin.Miter,
-            lineCap: element.styles.lineCap ?? LineCap.Butt,
-            miterLimit: element.styles.miterLimit ?? 4
-        };
     }
 }

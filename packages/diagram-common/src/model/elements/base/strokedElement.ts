@@ -1,3 +1,4 @@
+import { Stroke } from "./colored";
 import { Element } from "./element";
 
 /**
@@ -5,23 +6,7 @@ import { Element } from "./element";
  */
 export interface StrokedElement extends Element {
     /**
-     * The color of the stroke
+     * The stroke
      */
-    stroke?: string;
-    /**
-     * The opacity applied to the stroke
-     */
-    strokeOpacity?: number;
-    /**
-     * The width of the stroke
-     */
-    strokeWidth?: number;
-    /**
-     * The length of the dashes, stroke is not dashed if not set
-     */
-    strokeDash?: number;
-    /**
-     * The space between dashes, defaults to strokeDash
-     */
-    strokeDashSpace?: number;
+    stroke?: Stroke;
 }

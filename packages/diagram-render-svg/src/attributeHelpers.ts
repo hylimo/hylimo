@@ -1,4 +1,4 @@
-import { LayoutedElement, Shape, StrokedElement } from "@hylimo/diagram-common";
+import { LayoutedElement, LineCap, LineJoin, Shape, StrokedElement } from "@hylimo/diagram-common";
 
 /**
  * SVG layout attributes
@@ -34,11 +34,12 @@ export function extractLayoutAttributes(model: Readonly<LayoutedElement>): Layou
  */
 export function extractOutlinedShapeAttributes(model: Readonly<Shape>): ShapeStyleAttributes & LayoutAttributes {
     const res = { ...extractShapeStyleAttributes(model), ...extractLayoutAttributes(model) };
-    if (model.strokeWidth) {
-        res.x += model.strokeWidth / 2;
-        res.y += model.strokeWidth / 2;
-        res.width = Math.max(0, res.width - model.strokeWidth);
-        res.height = Math.max(0, res.height - model.strokeWidth);
+    const strokeWidth = model.stroke?.width;
+    if (strokeWidth) {
+        res.x += strokeWidth / 2;
+        res.y += strokeWidth / 2;
+        res.width = Math.max(0, res.width - strokeWidth);
+        res.height = Math.max(0, res.height - strokeWidth);
     }
     return res;
 }
@@ -51,6 +52,9 @@ export interface StrokeAttributes {
     "stroke-opacity"?: number;
     "stroke-width"?: number;
     "stroke-dasharray"?: string;
+    "stroke-linejoin"?: LineJoin;
+    "stroke-linecap"?: LineCap;
+    "stroke-miterlimit"?: number;
 }
 
 /**
@@ -62,14 +66,18 @@ export interface StrokeAttributes {
 export function extractStrokeAttriabutes(model: Readonly<StrokedElement>): StrokeAttributes {
     const res: StrokeAttributes = {};
     if (model.stroke != undefined) {
-        res.stroke = model.stroke;
-        if (model.strokeOpacity != undefined) {
-            res["stroke-opacity"] = model.strokeOpacity;
+        const stroke = model.stroke;
+        res.stroke = stroke.color;
+        if (stroke.opacity != 1) {
+            res["stroke-opacity"] = stroke.opacity;
         }
-        res["stroke-width"] = model.strokeWidth ?? 1;
-        if (model.strokeDash != undefined) {
-            res["stroke-dasharray"] = `${model.strokeDash} ${model.strokeDashSpace ?? model.strokeDash}`;
+        res["stroke-width"] = stroke.width;
+        if (stroke.dash != undefined) {
+            res["stroke-dasharray"] = `${stroke.dash} ${stroke.dashSpace ?? stroke.dash}`;
         }
+        res["stroke-linecap"] = stroke.lineCap;
+        res["stroke-linejoin"] = stroke.lineJoin;
+        res["stroke-miterlimit"] = stroke.miterLimit;
     }
     return res;
 }
@@ -91,10 +99,13 @@ export interface ShapeStyleAttributes extends StrokeAttributes {
 export function extractShapeStyleAttributes(model: Readonly<Shape>): ShapeStyleAttributes {
     const res: ShapeStyleAttributes = {
         ...extractStrokeAttriabutes(model),
-        fill: model.fill ?? "none"
+        fill: model.fill?.color ?? "none"
     };
-    if (model.fillOpacity != undefined) {
-        res["fill-opacity"] = model.fillOpacity;
+    if (model.fill != undefined) {
+        const fill = model.fill;
+        if (fill.opacity != 1) {
+            res["fill-opacity"] = fill.opacity;
+        }
     }
     return res;
 }

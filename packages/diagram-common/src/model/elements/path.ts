@@ -11,18 +11,6 @@ export interface Path extends Shape {
      * Defines the path
      */
     path: string;
-    /**
-     * Defines how segments are joined together
-     */
-    lineJoin: LineJoin;
-    /**
-     * Defines how the end of a line is drawn
-     */
-    lineCap: LineCap;
-    /**
-     * Defines the max miter length relative to the line width
-     */
-    miterLimit: number;
 }
 
 export namespace Path {
@@ -39,22 +27,4 @@ export namespace Path {
     export function isPath(value: Element): value is Path {
         return value.type === TYPE;
     }
-}
-
-/**
- * Stroke line join styles
- */
-export enum LineJoin {
-    Miter = "miter",
-    Round = "round",
-    Bevel = "bevel"
-}
-
-/**
- * Stroke line cap styles
- */
-export enum LineCap {
-    Butt = "butt",
-    Round = "round",
-    Square = "square"
 }

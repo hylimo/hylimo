@@ -8,6 +8,7 @@ import svgPath from "svgpath";
 import { Point } from "../common/point";
 import { Size } from "../common/size";
 import { Math2D } from "../common/math";
+import { LineCap, LineJoin } from "../model/elements/base/colored";
 
 /**
  * Bounding box of a path
@@ -74,15 +75,15 @@ interface Styles {
     /**
      * Stroke width
      */
-    lineWidth: number;
+    width: number;
     /**
      * Stroke line cap
      */
-    lineCap: "butt" | "round" | "square";
+    lineCap: LineCap;
     /**
      * Stroke line join
      */
-    lineJoin: "miter" | "round" | "bevel";
+    lineJoin: LineJoin;
     /**
      * Miter limit
      */
@@ -306,7 +307,7 @@ class PathBBoxCalculator {
      * @param minMaxY min and max values for y
      */
     private extendBounds(minMaxX: MinMax, minMaxY: MinMax): void {
-        const halfWidth = this.styles.lineWidth / 2;
+        const halfWidth = this.styles.width / 2;
         this.bbox.includeBounds(
             minMaxX[0] - halfWidth,
             minMaxY[0] - halfWidth,
@@ -326,7 +327,7 @@ class PathBBoxCalculator {
      */
     private applyInnerPoint(point: Point, startVector: Point, endVector: Point): void {
         this.innerBBox.includePoint(point);
-        if (this.styles.lineWidth === 0) {
+        if (this.styles.width === 0) {
             this.bbox.includePoint(point);
         } else {
             const invertedEndVector = Math2D.scale(endVector, -1);
@@ -363,7 +364,7 @@ class PathBBoxCalculator {
         const normalizedStartVector = Math2D.normalize(startVector);
         const normalizedEndVector = Math2D.normalize(endVector);
         const theta = Math2D.angleBetween(normalizedStartVector, normalizedEndVector);
-        const halfWidth = this.styles.lineWidth / 2;
+        const halfWidth = this.styles.width / 2;
         const miterLength = halfWidth / Math.sin(theta / 2);
         if (miterLength <= this.styles.miterLimit * halfWidth) {
             const miterVector = Math2D.add(normalizedStartVector, normalizedEndVector);
@@ -401,7 +402,7 @@ class PathBBoxCalculator {
      */
     private applyRoundJoin(point: Point, startVector: Point, endVector: Point): void {
         this.applyBevelJoin(point, startVector, endVector);
-        const halfWidth = this.styles.lineWidth / 2;
+        const halfWidth = this.styles.width / 2;
         const startAngle = Math2D.angle(startVector);
         const dot = Math2D.dot(startVector, endVector);
         const det = startVector.x * endVector.y - startVector.y * endVector.x;
@@ -455,7 +456,7 @@ class PathBBoxCalculator {
      */
     private applyEndPoint(point: Point, vector: Point): void {
         this.innerBBox.includePoint(point);
-        if (this.styles.lineWidth === 0) {
+        if (this.styles.width === 0) {
             this.bbox.includePoint(point);
         } else {
             switch (this.styles.lineCap) {
@@ -481,7 +482,7 @@ class PathBBoxCalculator {
      * @param point the end point of the line
      */
     private applyRoundEnd(point: Point): void {
-        const halfWidth = this.styles.lineWidth / 2;
+        const halfWidth = this.styles.width / 2;
         this.bbox.includeBounds(point.x - halfWidth, point.y - halfWidth, point.x + halfWidth, point.y + halfWidth);
     }
 
@@ -493,8 +494,8 @@ class PathBBoxCalculator {
      */
     private applyButtEndPoint(point: Point, vector: Point): void {
         const normal = Math2D.normalize(Math2D.normal(vector));
-        this.bbox.includePoint(Math2D.add(point, Math2D.scale(normal, this.styles.lineWidth / 2)));
-        this.bbox.includePoint(Math2D.add(point, Math2D.scale(normal, -this.styles.lineWidth / 2)));
+        this.bbox.includePoint(Math2D.add(point, Math2D.scale(normal, this.styles.width / 2)));
+        this.bbox.includePoint(Math2D.add(point, Math2D.scale(normal, -this.styles.width / 2)));
     }
 
     /**
@@ -504,7 +505,7 @@ class PathBBoxCalculator {
      * @param vector the vector of the line
      */
     private applySquareEndPoint(point: Point, vector: Point): void {
-        const newEndPoint = Math2D.add(point, Math2D.scaleTo(vector, this.styles.lineWidth / 2));
+        const newEndPoint = Math2D.add(point, Math2D.scaleTo(vector, this.styles.width / 2));
         this.applyButtEndPoint(newEndPoint, vector);
     }
 
@@ -600,7 +601,15 @@ class PathBBoxCalculator {
  * @param d SVG path for which their bounding box will be computed.
  * @returns The bounding box of the path.
  */
-export function svgPathBbox(d: string, styles: Styles): PathBBox {
-    const calculator = new PathBBoxCalculator(d, styles);
+export function svgPathBbox(d: string, styles: Styles | undefined): PathBBox {
+    const calculator = new PathBBoxCalculator(
+        d,
+        styles ?? {
+            width: 0,
+            lineCap: LineCap.Butt,
+            lineJoin: LineJoin.Bevel,
+            miterLimit: 0
+        }
+    );
     return calculator.pathBBox;
 }

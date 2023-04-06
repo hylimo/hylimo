@@ -1,6 +1,7 @@
 import { enumType, numberType, stringType } from "@hylimo/core";
-import { Element, StrokedElement } from "@hylimo/diagram-common";
+import { StrokedElement } from "@hylimo/diagram-common";
 import { HorizontalAlignment, VerticalAlignment } from "../layoutElement";
+import { LineCap, LineJoin } from "@hylimo/diagram-common";
 
 /**
  * Style attributes related to size
@@ -79,6 +80,21 @@ export const strokeStyleAttributes = [
         name: "strokeDashSpace",
         description: "space between dashes, only used if strokeDash is set, defaults to strokeDash",
         type: numberType
+    },
+    {
+        name: "strokeLineJoin",
+        description: "the line join style",
+        type: enumType(LineJoin)
+    },
+    {
+        name: "strokeLineCap",
+        description: "the line cap style",
+        type: enumType(LineCap)
+    },
+    {
+        name: "strokeMiterLimit",
+        description: "the miter limit",
+        type: numberType
     }
 ];
 
@@ -105,14 +121,19 @@ export const shapeStyleAttributes = [...strokeStyleAttributes, ...fillStyleAtrri
  * @param styles all styles
  * @returns the extracted and normalized style properties
  */
-export function extractStrokeStyleAttributes(styles: Record<string, any>): Omit<StrokedElement, keyof Element> {
+export function extractStrokeStyleAttributes(styles: Record<string, any>): Pick<StrokedElement, "stroke"> {
     if (styles.stroke != undefined) {
         return {
-            stroke: styles.stroke,
-            strokeOpacity: styles.strokeOpacity,
-            strokeWidth: styles.strokeWidth ?? 1,
-            strokeDash: styles.strokeDash,
-            strokeDashSpace: styles.strokeDashSpace ?? styles.strokeDash
+            stroke: {
+                color: styles.stroke,
+                opacity: styles.strokeOpacity ?? 1,
+                width: styles.strokeWidth ?? 1,
+                dash: styles.strokeDash,
+                dashSpace: styles.strokeDashSpace ?? styles.strokeDash,
+                lineCap: styles.strokeLineCap ?? LineCap.Butt,
+                lineJoin: styles.strokeLineJoin ?? LineJoin.Miter,
+                miterLimit: styles.strokeMiterLimit ?? 4
+            }
         };
     } else {
         return {};

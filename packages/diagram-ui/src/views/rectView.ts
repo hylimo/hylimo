@@ -14,7 +14,8 @@ export class RectView implements IView {
             ...extractOutlinedShapeAttributes(model)
         };
         if (model.cornerRadius) {
-            attrs.rx = Math.max(0, model.cornerRadius - (model.strokeWidth ? model.strokeWidth / 2 : 0));
+            const strokeWidth = model.stroke?.width;
+            attrs.rx = Math.max(0, model.cornerRadius - (strokeWidth ? strokeWidth / 2 : 0));
         }
         return svg(
             "g",

@@ -112,7 +112,7 @@ export class PDFDiagramVisitor extends SimplifiedDiagramVisitor<PDFKit.PDFDocume
 
     override visitEllipse(element: WithBounds<Ellipse>, context: PDFKit.PDFDocument): void {
         const shapeAttributes = extractShapeStyleAttributes(element);
-        const strokeWidth = element.strokeWidth ?? 0;
+        const strokeWidth = element.stroke?.width ?? 0;
         context.ellipse(
             element.x + element.width / 2,
             element.y + element.height / 2,
@@ -128,9 +128,6 @@ export class PDFDiagramVisitor extends SimplifiedDiagramVisitor<PDFKit.PDFDocume
         context.save();
         context.translate(element.x, element.y);
         context.path(element.path);
-        context.lineJoin(element.lineJoin);
-        context.lineCap(element.lineCap);
-        context.miterLimit(element.miterLimit);
         this.drawShape(context, shapeAttributes, element);
         context.restore();
     }
@@ -173,14 +170,18 @@ export class PDFDiagramVisitor extends SimplifiedDiagramVisitor<PDFKit.PDFDocume
         if (styles.fill !== "none") {
             context.fillOpacity(styles["fill-opacity"] ?? 1);
         }
-        if (styles.stroke) {
+        if (element.stroke) {
+            const stroke = element.stroke;
             context.strokeOpacity(styles["stroke-opacity"] ?? 1);
             context.lineWidth(styles["stroke-width"] as number);
-            if (styles["stroke-dasharray"] != undefined) {
-                context.dash(element.strokeDash!, { space: element.strokeDashSpace ?? element.strokeDash! });
+            if (stroke.dash != undefined) {
+                context.dash(stroke.dash, { space: stroke.dashSpace ?? stroke.dash! });
             } else {
                 context.undash();
             }
+            context.lineJoin(stroke.lineJoin);
+            context.lineCap(stroke.lineCap);
+            context.miterLimit(stroke.miterLimit);
         }
         const fill = styles.fill === "none" ? undefined : styles.fill;
         const stroke = styles.stroke || undefined;

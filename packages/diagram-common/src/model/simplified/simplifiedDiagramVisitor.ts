@@ -2,7 +2,7 @@ import { CanvasLayoutEngine } from "../../canvas/canvasLayoutEngine";
 import { Canvas } from "../elements/canvas/canvas";
 import { CanvasElement } from "../elements/canvas/canvasElement";
 import { MarkerLayoutInformation } from "../elements/canvas/marker";
-import { Path, LineCap, LineJoin } from "../elements/path";
+import { Path } from "../elements/path";
 import { Rect } from "../elements/rect";
 import { Root } from "../elements/root";
 import { SimplifiedCanvasElement, WithBounds } from "./simplifiedTypes";
@@ -190,9 +190,6 @@ export abstract class SimplifiedDiagramVisitor<C, O> {
             id: connection.id,
             path: layout.path,
             children: [],
-            miterLimit: 0,
-            lineCap: LineCap.Butt,
-            lineJoin: LineJoin.Miter,
             ...defaultSizeAndPos,
             bounds: this.calculateConnectionBounds(connection, layout)
         };
@@ -222,12 +219,7 @@ export abstract class SimplifiedDiagramVisitor<C, O> {
      * @returns the bounds of the connection
      */
     private calculateConnectionBounds(connection: CanvasConnection, layout: CanvasConnectionLayout): Bounds {
-        const pathBounds = svgPathBbox(layout.path, {
-            lineWidth: connection.strokeWidth ?? 1,
-            lineCap: LineCap.Butt,
-            lineJoin: LineJoin.Miter,
-            miterLimit: 4
-        });
+        const pathBounds = svgPathBbox(layout.path, connection.stroke);
         return {
             position: {
                 x: pathBounds.x - pathBounds.overflow.left,

@@ -138,13 +138,14 @@ class SVGDiagramVisitor extends SimplifiedDiagramVisitor<undefined, SVGNode[]> {
             ...extractOutlinedShapeAttributes(element)
         };
         if (element.cornerRadius) {
-            result.rx = Math.max(0, element.cornerRadius - (element.strokeWidth ? element.strokeWidth / 2 : 0));
+            const strokeWidth = element.stroke?.width;
+            result.rx = Math.max(0, element.cornerRadius - (strokeWidth ? strokeWidth / 2 : 0));
         }
         return [result, ...this.visitChildren(element)];
     }
 
     override visitEllipse(element: WithBounds<Ellipse>): SVGNode[] {
-        const strokeWidth = element.strokeWidth ?? 0;
+        const strokeWidth = element.stroke?.width ?? 0;
         const result: SVGNode = {
             type: "ellipse",
             children: [],
@@ -162,9 +163,6 @@ class SVGDiagramVisitor extends SimplifiedDiagramVisitor<undefined, SVGNode[]> {
             type: "path",
             children: [],
             ...extractShapeStyleAttributes(element),
-            "stroke-linejoin": element.lineJoin,
-            "stroke-linecap": element.lineCap,
-            "stroke-miterlimit": element.miterLimit,
             d: element.path,
             transform: `translate(${element.x}, ${element.y})`
         };

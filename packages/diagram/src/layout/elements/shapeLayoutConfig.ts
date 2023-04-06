@@ -6,7 +6,7 @@ import { StyledElementLayoutConfig } from "./styledElementLayoutConfig";
 /**
  * Helper interface for shape properties
  */
-export type ShapeProperties = Pick<Shape, "fill" | "fillOpacity" | "stroke" | "strokeOpacity" | "strokeWidth">;
+export type ShapeProperties = Pick<Shape, "fill" | "stroke">;
 
 /**
  * Base class for all shape layout configs
@@ -32,8 +32,13 @@ export abstract class ShapeLayoutConfig extends StyledElementLayoutConfig {
     extractShapeProperties(element: LayoutElement): ShapeProperties {
         const styles = element.styles;
         const res: ShapeProperties = {
-            fill: styles.fill,
-            fillOpacity: styles.fillOpacity,
+            fill:
+                styles.fill != undefined
+                    ? {
+                          color: styles.fill,
+                          opacity: styles.fillOpacity ?? 1
+                      }
+                    : undefined,
             ...extractStrokeStyleAttributes(styles)
         };
         return res;
