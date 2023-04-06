@@ -262,7 +262,7 @@ const scopeExpressions: ExecutableExpression[] = [
                     over = null,
                     end = self.endProvider,
                     start = {
-                        pos = self.startProvider(it)
+                        pos = self.startProvider(args)
                         object(proto = lineBuilderProto, segments = list(), start = pos)
                     },
                     label = {
@@ -316,7 +316,7 @@ const scopeExpressions: ExecutableExpression[] = [
                 startPoint = start
                 startProvider = if((start.type == "canvasElement") || (start.type == "canvasConnection")) {
                     startPoint = scope.lpos(start, 0)
-                    { scope.lpos(start, it) }
+                    { scope.lpos(start, it.get(0), seg = it.seg) }
                 } {
                     { start }
                 }
