@@ -10,10 +10,14 @@ import { ModificationSpecification } from "../modificationSpecification";
 export interface CanvasAxisAlignedSegment extends CanvasConnectionSegment {
     type: typeof CanvasAxisAlignedSegment.TYPE;
     /**
-     * The position on the x-axis where the vertical segment starts
-     * Between 0 and 1, 0 being the start of the horizontal segment and 1 being the end
+     * Values betweeen 0 and 1:
+     * The position on the x-axis where the vertical segment starts.
+     * 0 being the start of the horizontal segment and 1 being the end.
+     * Values between -1 and 0:
+     * The position on the y-axis where the horizontal segment starts.
+     * 0 being the end of the vertical segment and -1 being the start
      */
-    verticalPos: number;
+    pos: number;
     /**
      * Defines if verticalPos is editable
      */
@@ -49,21 +53,21 @@ export namespace CanvasAxisAlignedSegment {
     /**
      * Calculates the MarkerRenderInformation based on the two points of the line and the size of the marker
      *
-     * @param pos the position of the end with the marker
+     * @param point the position of the end with the marker
      * @param endPoint the end point of the axis aligned segment
-     * @param verticalPos the position on the x-axis where the vertical segment starts
+     * @param pos the pos of the segment
      * @param marker the marker to render
      */
     export function calculateMarkerRenderInformation(
-        pos: Point,
+        point: Point,
         endPoint: Point,
-        verticalPos: number,
+        pos: number,
         marker: Marker
     ): MarkerLayoutInformation {
-        if (verticalPos === 0) {
-            return calculateMarkerRenderInformationInternal(pos, { x: pos.x, y: endPoint.y }, marker);
+        if (pos > -1 && pos <= 0) {
+            return calculateMarkerRenderInformationInternal(point, { x: point.x, y: endPoint.y }, marker);
         } else {
-            return calculateMarkerRenderInformationInternal(pos, { x: endPoint.x, y: pos.y }, marker);
+            return calculateMarkerRenderInformationInternal(point, { x: endPoint.x, y: point.y }, marker);
         }
     }
 }

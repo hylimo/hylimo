@@ -79,7 +79,7 @@ export class EllipseLayoutConfig extends ContentShapeLayoutConfig {
      * @returns the stroke vector at 45°
      */
     private calculate45DegreeStrokeVector(size: Size, strokeWidth: number): Point {
-        if (strokeWidth == 0) {
+        if (strokeWidth === 0) {
             return Point.ORIGIN;
         }
         const sqrt2half = Math.sqrt(2) / 2;
@@ -98,6 +98,14 @@ export class EllipseLayoutConfig extends ContentShapeLayoutConfig {
      * @returns the inner size
      */
     private calculateInnerSize(size: Size, strokeWidth: number): Size {
+        if (
+            size.width === 0 ||
+            size.width === Number.POSITIVE_INFINITY ||
+            size.height === 0 ||
+            size.height === Number.POSITIVE_INFINITY
+        ) {
+            return size;
+        }
         const sqrt2half = Math.sqrt(2) / 2;
         const borderSize = this.calculate45DegreeStrokeVector(size, strokeWidth);
         return { width: sqrt2half * size.width - 2 * borderSize.x, height: sqrt2half * size.height - 2 * borderSize.y };

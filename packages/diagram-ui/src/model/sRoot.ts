@@ -1,5 +1,6 @@
 import { FontFamilyConfig, convertFontsToCssStyle } from "@hylimo/diagram-common";
 import { ModelIndexImpl, ViewportRootElement } from "sprotty";
+import { SCanvasAxisAlignedSegment } from "./canvas/sCanvasAxisAlignedSegment";
 
 /**
  * Root element.
@@ -124,7 +125,10 @@ export class SRoot extends ViewportRootElement {
             cursor: ew-resize;
         }
 
-        .axis-aligned-segment-edit {
+        .${SCanvasAxisAlignedSegment.SEGMENT_EDIT_CLASS_X} {
+            cursor: ns-resize;
+        }
+        .${SCanvasAxisAlignedSegment.SEGMENT_EDIT_CLASS_Y} {
             cursor: ew-resize;
         }
         `;

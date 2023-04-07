@@ -17,12 +17,12 @@ export class AxisAlignedSegmentLayoutEngine extends SegmentLayoutEngine<CanvasAx
     ): MarkerLayoutInformation {
         const end = this.engine.getPoint(segment.end);
         if (marker.pos == "start") {
-            return CanvasAxisAlignedSegment.calculateMarkerRenderInformation(start, end, segment.verticalPos, marker);
+            return CanvasAxisAlignedSegment.calculateMarkerRenderInformation(start, end, segment.pos, marker);
         } else {
             return CanvasAxisAlignedSegment.calculateMarkerRenderInformation(
                 end,
                 start,
-                1 - segment.verticalPos,
+                segment.pos < 0 ? -1 - segment.pos : 1 - segment.pos,
                 marker
             );
         }
@@ -30,13 +30,18 @@ export class AxisAlignedSegmentLayoutEngine extends SegmentLayoutEngine<CanvasAx
 
     override generatePathString(segment: CanvasAxisAlignedSegment, layout: SegmentLayoutInformation): string {
         const { start, end } = layout;
-        const verticalX = start.x + (end.x - start.x) * segment.verticalPos;
-        return `H ${verticalX} V ${end.y} H ${end.x}`;
+        if (segment.pos >= 0) {
+            const verticalX = start.x + (end.x - start.x) * segment.pos;
+            return `H ${verticalX} V ${end.y} H ${end.x}`;
+        } else {
+            const horizontalY = end.y + (end.y - start.y) * segment.pos;
+            return `V ${horizontalY} H ${end.x} V ${end.y}`;
+        }
     }
 
     override generateSegments(segment: CanvasAxisAlignedSegment, layout: SegmentLayoutInformation): Segment[] {
         const { start, end } = layout;
-        const verticalX = start.x + (end.x - start.x) * segment.verticalPos;
+        const verticalX = start.x + (end.x - start.x) * segment.pos;
         return [
             {
                 type: LineSegment.TYPE,

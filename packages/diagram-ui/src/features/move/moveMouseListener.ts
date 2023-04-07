@@ -169,36 +169,39 @@ export class MoveMouseListener extends MouseListener {
                 return this.createResizeHandler(target, classList);
             }
         } else if (target instanceof SCanvasConnection && classList != undefined) {
-            if (classList.contains(SCanvasAxisAlignedSegment.SEGMENT_EDIT_CLASS)) {
-                return this.createAxisAlignedSegmentHandler(target, targetElement as HTMLElement);
+            if (classList.contains(SCanvasAxisAlignedSegment.SEGMENT_EDIT_CLASS_Y)) {
+                return this.createAxisAlignedSegmentHandler(targetElement as HTMLElement, true);
+            } else if (classList.contains(SCanvasAxisAlignedSegment.SEGMENT_EDIT_CLASS_X)) {
+                return this.createAxisAlignedSegmentHandler(targetElement as HTMLElement, false);
             }
         }
         return this.createMoveHandler(target);
     }
 
     /**
-     * Creats a move handler for the given target.
-     * Handles moving the verticalPos of an axis aligned canvas connection segment
+     * Creates a move handler for the given target.
+     * Handles moving the vertical or horizontal pos of an axis aligned canvas connection segment
      *
-     * @param target the CanvasConnection of which the segment is part of
      * @param targetElement the clicked svg element
+     * @param vertical true if the vertical segment is moved, false if the horizontal segment is moved
      * @returns the move handler if move is supported, otherwise null
      */
     private createAxisAlignedSegmentHandler(
-        target: SCanvasConnection,
-        targetElement: HTMLElement
+        targetElement: HTMLElement,
+        vertical: boolean
     ): AxisAligedSegmentEditHandler | null {
         const dataset = targetElement.dataset;
         const id = dataset.id!;
-        const segment = target.root.index.getById(id) as SCanvasAxisAlignedSegment;
-        const startX = Number.parseFloat(dataset.startX!);
-        const endX = Number.parseFloat(dataset.endX!);
+        const start = Number.parseFloat(dataset.start!);
+        const end = Number.parseFloat(dataset.end!);
+        const current = Number.parseFloat(dataset.current!);
         return new AxisAligedSegmentEditHandler(
             id,
             this.transactionIdProvider.generateId(),
-            startX + segment.verticalPos * (endX - startX),
-            startX,
-            endX
+            current,
+            start,
+            end,
+            vertical
         );
     }
 

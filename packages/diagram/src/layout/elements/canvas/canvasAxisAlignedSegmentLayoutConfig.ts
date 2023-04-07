@@ -29,7 +29,7 @@ export class CanvasAxisAlignedSegmentLayoutConfig extends CanvasConnectionSegmen
             type: CanvasAxisAlignedSegment.TYPE,
             children: [],
             end: this.getContentId(element, "end"),
-            verticalPos: verticalPosFieldEntry?.value?.toNative(),
+            pos: verticalPosFieldEntry?.value?.toNative(),
             editable: this.generateModificationSpecification({ verticalPos: verticalPosFieldEntry?.source })
         };
         return [result];
