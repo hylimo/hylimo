@@ -41,9 +41,6 @@ export class UpdateModelCommand extends BaseUpdateModelCommand {
                 remainingMatchResult[id] = match;
             }
         });
-        if ((newRoot as { noAnimation?: boolean }).noAnimation) {
-            return newRoot;
-        }
         const animations: Animation[] = [];
         if (elementAnimations.length > 0) {
             animations.push(new LinearInterpolationAnimation(newRoot, elementAnimations, context));

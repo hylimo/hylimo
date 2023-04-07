@@ -7,7 +7,7 @@ import { LinearAnimatable } from "../../features/animation/model";
 /**
  * Animated fields for CanvasAxisAlignedSegment
  */
-const canvasAxisAlignedSegmentAnimatedFields = new Set("pos");
+const canvasAxisAlignedSegmentAnimatedFields = new Set(["pos"]);
 
 /**
  * CanvasAxisAlignedSegment model element

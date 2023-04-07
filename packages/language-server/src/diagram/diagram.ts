@@ -87,7 +87,6 @@ export class Diagram {
         if (diagram != undefined) {
             this.transactionManager.updateLayoutedDiagram(diagram);
             const root = diagram.rootElement;
-            root.noAnimation = true;
             this.utils.diagramServerManager.updatedDiagram(this.document.uri, root);
         }
         return result.diagnostics;

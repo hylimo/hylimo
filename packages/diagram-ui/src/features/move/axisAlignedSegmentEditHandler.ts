@@ -32,7 +32,7 @@ export class AxisAligedSegmentEditHandler implements MoveHandler {
             element: this.element,
             transactionId: this.transactionId,
             commited,
-            verticalPos: this.vertical ? newPos : newPos - 1,
+            pos: this.vertical ? newPos : newPos - 1,
             sequenceNumber
         };
     }

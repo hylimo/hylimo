@@ -62,7 +62,7 @@ export class AxisAlignedSegmentEditEngine extends TransactionalEditEngine<
         generator: EditGenerator,
         _meta: any
     ): string {
-        return this.generatorRegistory.generateEdit(action.verticalPos, generator);
+        return this.generatorRegistory.generateEdit(action.pos, generator);
     }
 
     override predictActionDiff(
@@ -73,12 +73,12 @@ export class AxisAlignedSegmentEditEngine extends TransactionalEditEngine<
     ): IncrementalUpdate[] {
         const element = layoutedDiagram.elementLookup[newest.element];
         if (element != undefined && CanvasAxisAlignedSegment.isCanvasAxisAlignedSegment(element)) {
-            element.verticalPos = newest.verticalPos;
+            element.pos = newest.pos;
             return [
                 {
                     target: element.id,
                     changes: {
-                        verticalPos: newest.verticalPos
+                        pos: newest.pos
                     }
                 }
             ];

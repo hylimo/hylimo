@@ -12,7 +12,7 @@ export interface AxisAlignedSegmentEditAction extends TransactionalAction {
     /**
      * The new vertical position of the segment
      */
-    verticalPos: number;
+    pos: number;
 }
 
 export namespace AxisAlignedSegmentEditAction {
