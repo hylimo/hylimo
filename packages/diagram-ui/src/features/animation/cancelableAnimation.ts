@@ -19,12 +19,27 @@ export abstract class CancelableAnimation extends Animation {
 
     tween(t: number, context: CommandExecutionContext): SModelRoot {
         if (CancelableCommandExecutionContext.isCanceled(context)) {
-            return this.newModel;
+            if (CancelableCommandExecutionContext.isCanceledAndSkipped(context)) {
+                return this.tweenAndUpdateChangeRevision(1, context);
+            } else {
+                return this.newModel;
+            }
         } else {
-            const newRoot = this.tweenInternal(t, context);
-            (newRoot as SRoot).changeRevision++;
-            return newRoot;
+            return this.tweenAndUpdateChangeRevision(t, context);
         }
+    }
+
+    /**
+     * Calls tween and updates the change revision of the new model
+     *
+     * @param t varies between 0 (start of animation) and 1 (end of animation)
+     * @param context provided context
+     * @returns the new model
+     */
+    private tweenAndUpdateChangeRevision(t: number, context: CommandExecutionContext): SModelRoot {
+        const newRoot = this.tweenInternal(t, context);
+        (newRoot as SRoot).changeRevision++;
+        return newRoot;
     }
 
     /**

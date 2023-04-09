@@ -6,8 +6,12 @@ import {
     ICommand,
     SModelRoot
 } from "sprotty";
-import { CancelableCommandExecutionContext } from "../features/animation/cancelableCommandExecutionContext";
+import {
+    CancelState,
+    CancelableCommandExecutionContext
+} from "../features/animation/cancelableCommandExecutionContext";
 import { UpdateModelCommand } from "../features/update/updateModel";
+import { IncrementalUpdateModelCommand } from "../features/update/incrementalUpdateModel";
 
 /**
  * CommandStack with support for CancelableAnimations.
@@ -25,8 +29,14 @@ export class CommandStack extends SprottyCommandStack {
         operation: (context: CommandExecutionContext) => CommandReturn,
         beforeResolve: (command: ICommand, context: CommandExecutionContext) => void
     ): void {
-        if (command instanceof UpdateModelCommand && this.lastContext != undefined) {
-            CancelableCommandExecutionContext.setCanceled(this.lastContext);
+        if (
+            (command instanceof UpdateModelCommand || command instanceof IncrementalUpdateModelCommand) &&
+            this.lastContext != undefined
+        ) {
+            CancelableCommandExecutionContext.setCanceled(
+                this.lastContext,
+                command instanceof IncrementalUpdateModelCommand
+            );
         }
         super.handleCommand(command, operation, beforeResolve);
     }
@@ -34,7 +44,7 @@ export class CommandStack extends SprottyCommandStack {
     protected override createContext(currentModel: SModelRoot): CancelableCommandExecutionContext {
         const context = {
             ...super.createContext(currentModel),
-            canceled: false
+            cancelState: CancelState.RUNNING
         };
         this.lastContext = context;
         return context;
