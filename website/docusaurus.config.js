@@ -59,8 +59,14 @@ const config = {
                         ifdiagramexists: true
                     },
                     {
+                        type: "custom-save",
+                        ifdiagramcodeexists: true,
+                        position: "right"
+                    },
+                    {
                         href: "https://github.com/hylimo/hylimo",
-                        label: "GitHub",
+                        className: "header-github-link header-link-icon",
+                        "aria-label": "GitHub repository",
                         position: "right"
                     }
                 ]

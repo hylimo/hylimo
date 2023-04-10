@@ -12,8 +12,16 @@ import { useColorMode } from "@docusaurus/theme-common";
  */
 const svgRenderer = new SVGRenderer();
 
+/**
+ * Used to render pdf
+ */
 const pdfRenderer = new PDFRenderer();
 
+/**
+ * Navbar item to export the diagram
+ *
+ * @returns the created navbar item
+ */
 export default function ExportNavbarItem(): JSX.Element {
     const { diagram } = useContext(GlobalStateContext);
     const { colorMode } = useColorMode();

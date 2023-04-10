@@ -52,7 +52,7 @@ const uri = "inmemory://model/1";
  * @returns the created editor component
  */
 export default function HylimoEditor(): JSX.Element {
-    const { setDiagram } = useContext(GlobalStateContext);
+    const { setDiagram, setDiagramCode } = useContext(GlobalStateContext);
     const { colorMode } = useColorMode();
     const [code, setCode] = useLocalStorage<string>("code");
     const sprottyWrapper = useRef(null);
@@ -65,6 +65,7 @@ export default function HylimoEditor(): JSX.Element {
     });
 
     useEffect(() => {
+        setDiagramCode(code);
         StandaloneServices.initialize({});
         MonacoServices.install();
         const [worker, secondaryWorker] = [0, 1].map(() => new Worker(new URL("./languageServer.ts", import.meta.url)));
@@ -174,7 +175,10 @@ export default function HylimoEditor(): JSX.Element {
                     }}
                     language={language}
                     value={code}
-                    onChange={setCode}
+                    onChange={(code) => {
+                        setCode(code);
+                        setDiagramCode(code);
+                    }}
                 ></MonacoEditor>
             </Allotment.Pane>
             <Allotment.Pane>

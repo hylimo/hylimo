@@ -9,13 +9,17 @@ import { GlobalStateContext } from "../Root";
  * @returns the navbar item or null
  */
 export default function NavbarItemWrapper(props: any) {
-    const { diagram } = useContext(GlobalStateContext);
+    const { diagram, diagramCode } = useContext(GlobalStateContext);
     if (props.ifdiagramexists && diagram == null) {
+        return null;
+    }
+    if (props.ifdiagramcodeexists && diagramCode == null) {
         return null;
     }
     const newProps = {
         ...props,
-        ifdiagramexists: undefined
+        ifdiagramexists: undefined,
+        ifdiagramcodeexists: undefined
     };
     return (
         <>
