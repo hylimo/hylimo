@@ -15,6 +15,7 @@ import {
 import PDFDocument from "pdfkit/js/pdfkit.standalone.js";
 import {
     ShapeStyleAttributes,
+    extractFillAttributes,
     extractOutlinedShapeAttributes,
     extractShapeStyleAttributes
 } from "@hylimo/diagram-render-svg";
@@ -136,12 +137,15 @@ export class PDFDiagramVisitor extends SimplifiedDiagramVisitor<PDFKit.PDFDocume
         const font = this.fontCollection.getFont(element.fontFamily, element.fontWeight, element.fontStyle);
         const scalingFactor = element.fontSize / font.unitsPerEm;
         const glyphRun = font.layout(element.text);
+        const fillAttributes = extractFillAttributes(element);
         context.save();
         context.translate(element.x, element.y);
         context.scale(scalingFactor, -scalingFactor);
         for (const glyph of glyphRun.glyphs) {
             const path = glyph.path.toSVG();
-            context.path(path).fill(element.fill);
+            context.path(path);
+            context.fillOpacity(fillAttributes["fill-opacity"] ?? 1);
+            context.fill(fillAttributes.fill);
             context.translate(glyph.advanceWidth, 0);
         }
         context.restore();

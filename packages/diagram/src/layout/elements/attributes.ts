@@ -1,5 +1,5 @@
 import { enumType, numberType, stringType } from "@hylimo/core";
-import { StrokedElement } from "@hylimo/diagram-common";
+import { FilledElement, StrokedElement } from "@hylimo/diagram-common";
 import { HorizontalAlignment, VerticalAlignment } from "../layoutElement";
 import { LineCap, LineJoin } from "@hylimo/diagram-common";
 
@@ -101,7 +101,7 @@ export const strokeStyleAttributes = [
 /**
  * Fill-related style attributes
  */
-export const fillStyleAtrributes = [
+export const fillStyleAttributes = [
     {
         name: "fillOpacity",
         description: "optional fill opacity , must be a number between 0 and 1",
@@ -113,7 +113,7 @@ export const fillStyleAtrributes = [
 /**
  * Shape style attributes, includes fill and stroke attributes
  */
-export const shapeStyleAttributes = [...strokeStyleAttributes, ...fillStyleAtrributes];
+export const shapeStyleAttributes = [...strokeStyleAttributes, ...fillStyleAttributes];
 
 /**
  * Extracts stroke style properties from a style record
@@ -133,6 +133,25 @@ export function extractStrokeStyleAttributes(styles: Record<string, any>): Pick<
                 lineCap: styles.strokeLineCap ?? LineCap.Butt,
                 lineJoin: styles.strokeLineJoin ?? LineJoin.Miter,
                 miterLimit: styles.strokeMiterLimit ?? 4
+            }
+        };
+    } else {
+        return {};
+    }
+}
+
+/**
+ * Extracts fill style properties from a style record
+ *
+ * @param styles all styles
+ * @returns the extracted and normalized style properties
+ */
+export function extractFillStyleAttributes(styles: Record<string, any>): Pick<FilledElement, "fill"> {
+    if (styles.fill != undefined) {
+        return {
+            fill: {
+                color: styles.fill,
+                opacity: styles.fillOpacity ?? 1
             }
         };
     } else {

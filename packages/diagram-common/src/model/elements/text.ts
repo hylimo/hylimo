@@ -1,20 +1,17 @@
 import { Element } from "./base/element";
+import { FilledElement } from "./base/filledElement";
 import { LayoutedElement } from "./base/layoutedElement";
 
 /**
  * Text element
  * Always rendered in a single line
  */
-export interface Text extends LayoutedElement {
+export interface Text extends LayoutedElement, FilledElement {
     type: typeof Text.TYPE;
     /**
      * The text to display
      */
     text: string;
-    /**
-     * The color of the text
-     */
-    fill: string;
     /**
      * The font family to use
      */

@@ -2,7 +2,7 @@ import { injectable } from "inversify";
 import { VNode } from "snabbdom";
 import { IViewArgs, RenderingContext, IView, svg } from "sprotty";
 import { SText } from "../model/sText";
-import { extractLayoutAttributes } from "@hylimo/diagram-render-svg";
+import { extractFillAttributes, extractLayoutAttributes } from "@hylimo/diagram-render-svg";
 
 /**
  * IView that represents an svg text
@@ -15,7 +15,7 @@ export class TextView implements IView {
             {
                 attrs: {
                     ...extractLayoutAttributes(model),
-                    fill: model.fill,
+                    ...extractFillAttributes(model),
                     "font-family": model.fontFamily,
                     "font-size": model.fontSize,
                     "font-style": model.fontStyle,

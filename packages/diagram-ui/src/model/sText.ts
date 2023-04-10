@@ -1,4 +1,4 @@
-import { FontStyle, FontWeight, Text } from "@hylimo/diagram-common";
+import { Fill, FontStyle, FontWeight, Text } from "@hylimo/diagram-common";
 import { LinearAnimatable } from "../features/animation/model";
 import { SLayoutedElement } from "./sLayoutedElement";
 
@@ -20,7 +20,7 @@ export class SText extends SLayoutedElement implements Text, LinearAnimatable {
     /**
      * The color of the text
      */
-    fill!: string;
+    fill?: Fill;
     /**
      * The font family to use
      */

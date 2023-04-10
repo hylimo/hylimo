@@ -1,6 +1,6 @@
 import { Shape } from "@hylimo/diagram-common";
 import { LayoutElement, AttributeConfig } from "../layoutElement";
-import { extractStrokeStyleAttributes, shapeStyleAttributes } from "./attributes";
+import { extractFillStyleAttributes, extractStrokeStyleAttributes, shapeStyleAttributes } from "./attributes";
 import { StyledElementLayoutConfig } from "./styledElementLayoutConfig";
 
 /**
@@ -32,13 +32,7 @@ export abstract class ShapeLayoutConfig extends StyledElementLayoutConfig {
     extractShapeProperties(element: LayoutElement): ShapeProperties {
         const styles = element.styles;
         const res: ShapeProperties = {
-            fill:
-                styles.fill != undefined
-                    ? {
-                          color: styles.fill,
-                          opacity: styles.fillOpacity ?? 1
-                      }
-                    : undefined,
+            ...extractFillStyleAttributes(styles),
             ...extractStrokeStyleAttributes(styles)
         };
         return res;

@@ -3,6 +3,7 @@ import { Element, FontStyle, FontWeight, Point, Size } from "@hylimo/diagram-com
 import { LayoutElement, SizeConstraints } from "../layoutElement";
 import { Layout } from "../layoutEngine";
 import { ElementLayoutConfig } from "./elementLayoutConfig";
+import { fillStyleAttributes } from "./attributes";
 
 /**
  * Layout config for span, does not handle actual layouting and measuring
@@ -16,7 +17,7 @@ export class SpanLayoutConfig extends ElementLayoutConfig {
             "span",
             [{ name: "text", description: "the text to display", type: stringType }],
             [
-                { name: "fill", description: "optional text color, must be a valid color string", type: stringType },
+                ...fillStyleAttributes,
                 {
                     name: "fontFamily",
                     description: "optional font family to use, must be registered font family name string",

@@ -1,4 +1,5 @@
 import { LayoutedElement, LineCap, LineJoin, Shape, StrokedElement } from "@hylimo/diagram-common";
+import { FilledElement } from "@hylimo/diagram-common/src/model/elements/base/filledElement";
 
 /**
  * SVG layout attributes
@@ -48,7 +49,7 @@ export function extractOutlinedShapeAttributes(model: Readonly<Shape>): ShapeSty
  * SVG stroke attributes
  */
 export interface StrokeAttributes {
-    stroke?: string;
+    stroke: string;
     "stroke-opacity"?: number;
     "stroke-width"?: number;
     "stroke-dasharray"?: string;
@@ -64,7 +65,9 @@ export interface StrokeAttributes {
  * @returns the extracted attributes
  */
 export function extractStrokeAttriabutes(model: Readonly<StrokedElement>): StrokeAttributes {
-    const res: StrokeAttributes = {};
+    const res: StrokeAttributes = {
+        stroke: "none"
+    };
     if (model.stroke != undefined) {
         const stroke = model.stroke;
         res.stroke = stroke.color;
@@ -83,12 +86,37 @@ export function extractStrokeAttriabutes(model: Readonly<StrokedElement>): Strok
 }
 
 /**
- * SVG shape attributes, includes layout and stroke attributes
+ * SVG fill attributes
  */
-export interface ShapeStyleAttributes extends StrokeAttributes {
+export interface FillAttributes {
     fill: string;
     "fill-opacity"?: number;
 }
+
+/**
+ * Extracts stroke style attributes
+ *
+ * @param model the model which provides the attributes
+ * @returns the extracted attributes
+ */
+export function extractFillAttributes(model: Readonly<FilledElement>): FillAttributes {
+    const res: FillAttributes = {
+        fill: "none"
+    };
+    if (model.fill != undefined) {
+        const fill = model.fill;
+        res.fill = fill.color;
+        if (fill.opacity != 1) {
+            res["fill-opacity"] = fill.opacity;
+        }
+    }
+    return res;
+}
+
+/**
+ * SVG shape attributes, includes layout and stroke attributes
+ */
+export interface ShapeStyleAttributes extends StrokeAttributes, FillAttributes {}
 
 /**
  * Extracts style properties for shapes
@@ -97,15 +125,8 @@ export interface ShapeStyleAttributes extends StrokeAttributes {
  * @returns the extracted attributes
  */
 export function extractShapeStyleAttributes(model: Readonly<Shape>): ShapeStyleAttributes {
-    const res: ShapeStyleAttributes = {
+    return {
         ...extractStrokeAttriabutes(model),
-        fill: model.fill?.color ?? "none"
+        ...extractFillAttributes(model)
     };
-    if (model.fill != undefined) {
-        const fill = model.fill;
-        if (fill.opacity != 1) {
-            res["fill-opacity"] = fill.opacity;
-        }
-    }
-    return res;
 }

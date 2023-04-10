@@ -11,6 +11,7 @@ import {
 } from "@hylimo/diagram-common";
 import { SimplifiedDiagramVisitor } from "@hylimo/diagram-common";
 import {
+    extractFillAttributes,
     extractLayoutAttributes,
     extractOutlinedShapeAttributes,
     extractShapeStyleAttributes
@@ -174,7 +175,7 @@ class SVGDiagramVisitor extends SimplifiedDiagramVisitor<undefined, SVGNode[]> {
             type: "text",
             children: [element.text],
             ...extractLayoutAttributes(element),
-            fill: element.fill,
+            ...extractFillAttributes(element),
             "font-family": element.fontFamily,
             "font-size": element.fontSize,
             "font-style": element.fontStyle,

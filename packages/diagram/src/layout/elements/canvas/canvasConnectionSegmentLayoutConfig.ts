@@ -5,7 +5,6 @@ import { AttributeConfig, LayoutElement, SizeConstraints } from "../../layoutEle
 import { Layout } from "../../layoutEngine";
 import { ElementLayoutConfig } from "../elementLayoutConfig";
 import { CanvasContentLayoutConfig } from "./canvasContentLayoutConfig";
-import { strokeStyleAttributes } from "../attributes";
 
 /**
  * Base class for all canvas connection segment layout configs
@@ -29,7 +28,7 @@ export abstract class CanvasConnectionSegmentLayoutConfig extends ElementLayoutC
                 },
                 ...additionalAttributes
             ],
-            [...strokeStyleAttributes, ...additionalStyleAttributes]
+            additionalStyleAttributes
         );
     }
 

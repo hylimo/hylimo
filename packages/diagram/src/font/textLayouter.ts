@@ -2,6 +2,7 @@ import LineBreaker, { Break } from "linebreak";
 import { LayoutElement } from "../layout/layoutElement";
 import { Text, Size, FontWeight, FontStyle } from "@hylimo/diagram-common";
 import { FontCollection } from "./fontCollection";
+import { extractFillStyleAttributes } from "../layout/elements/attributes";
 
 /**
  * Result of a text layout process
@@ -63,7 +64,7 @@ export class TextLayouter {
             currentTextElements.push({
                 type: Text.TYPE,
                 text,
-                fill: styles.fill ?? "none",
+                ...extractFillStyleAttributes(styles),
                 fontFamily: styles.fontFamily,
                 fontSize: styles.fontSize,
                 fontWeight: styles.fontWeight ?? FontWeight.Normal,
