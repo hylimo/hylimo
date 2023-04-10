@@ -90,47 +90,53 @@ export class PDFDiagramVisitor extends SimplifiedDiagramVisitor<PDFKit.PDFDocume
     }
 
     override visitRect(element: WithBounds<Rect>, context: PDFKit.PDFDocument): void {
-        const shapeAttributes = extractOutlinedShapeAttributes(element);
-        if (element.cornerRadius) {
-            const radius = Math.min(
-                element.cornerRadius,
-                element.bounds.size.width / 2,
-                element.bounds.size.height / 2
-            );
-            context.roundedRect(
-                shapeAttributes.x,
-                shapeAttributes.y,
-                shapeAttributes.width,
-                shapeAttributes.height,
-                radius
-            );
-        } else {
-            context.rect(shapeAttributes.x, shapeAttributes.y, shapeAttributes.width, shapeAttributes.height);
+        if (this.isShapeVisible(element)) {
+            const shapeAttributes = extractOutlinedShapeAttributes(element);
+            if (element.cornerRadius) {
+                const radius = Math.min(
+                    element.cornerRadius,
+                    element.bounds.size.width / 2,
+                    element.bounds.size.height / 2
+                );
+                context.roundedRect(
+                    shapeAttributes.x,
+                    shapeAttributes.y,
+                    shapeAttributes.width,
+                    shapeAttributes.height,
+                    radius
+                );
+            } else {
+                context.rect(shapeAttributes.x, shapeAttributes.y, shapeAttributes.width, shapeAttributes.height);
+            }
+            this.drawShape(context, shapeAttributes, element);
         }
-        this.drawShape(context, shapeAttributes, element);
         this.visitChildren(element, context);
     }
 
     override visitEllipse(element: WithBounds<Ellipse>, context: PDFKit.PDFDocument): void {
-        const shapeAttributes = extractShapeStyleAttributes(element);
-        const strokeWidth = element.stroke?.width ?? 0;
-        context.ellipse(
-            element.x + element.width / 2,
-            element.y + element.height / 2,
-            (element.width - strokeWidth) / 2,
-            (element.height - strokeWidth) / 2
-        );
-        this.drawShape(context, shapeAttributes, element);
+        if (this.isShapeVisible(element)) {
+            const shapeAttributes = extractShapeStyleAttributes(element);
+            const strokeWidth = element.stroke?.width ?? 0;
+            context.ellipse(
+                element.x + element.width / 2,
+                element.y + element.height / 2,
+                (element.width - strokeWidth) / 2,
+                (element.height - strokeWidth) / 2
+            );
+            this.drawShape(context, shapeAttributes, element);
+        }
         this.visitChildren(element, context);
     }
 
     override visitPath(element: WithBounds<Path>, context: PDFKit.PDFDocument): void {
-        const shapeAttributes = extractShapeStyleAttributes(element);
-        context.save();
-        context.translate(element.x, element.y);
-        context.path(element.path);
-        this.drawShape(context, shapeAttributes, element);
-        context.restore();
+        if (this.isShapeVisible(element)) {
+            const shapeAttributes = extractShapeStyleAttributes(element);
+            context.save();
+            context.translate(element.x, element.y);
+            context.path(element.path);
+            this.drawShape(context, shapeAttributes, element);
+            context.restore();
+        }
     }
 
     override visitText(element: WithBounds<Text>, context: PDFKit.PDFDocument): void {
@@ -164,6 +170,16 @@ export class PDFDiagramVisitor extends SimplifiedDiagramVisitor<PDFKit.PDFDocume
         context.rotate(element.rotation);
         this.visitChildren(element, context);
         context.restore();
+    }
+
+    /**
+     * Checks if either fill or stroke is defined
+     *
+     * @param element the element to check
+     * @returns true if either fill or stroke is defined
+     */
+    private isShapeVisible(element: Readonly<Shape>): boolean {
+        return element.fill != undefined || element.stroke != undefined;
     }
 
     /**
