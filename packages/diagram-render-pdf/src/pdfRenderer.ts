@@ -142,10 +142,13 @@ export class PDFDiagramVisitor extends SimplifiedDiagramVisitor<PDFKit.PDFDocume
         context.translate(element.x, element.y);
         context.scale(scalingFactor, -scalingFactor);
         for (const glyph of glyphRun.glyphs) {
-            const path = glyph.path.toSVG();
-            context.path(path);
-            context.fillOpacity(fillAttributes["fill-opacity"] ?? 1);
-            context.fill(fillAttributes.fill);
+            if (!/^\s*$/.test(String.fromCodePoint(...glyph.codePoints)) && element.fill != undefined) {
+                const path = glyph.path.toSVG();
+                context.path(path);
+                context.fillOpacity(fillAttributes["fill-opacity"] ?? 1);
+                context.fillColor(fillAttributes.fill);
+                context.fill();
+            }
             context.translate(glyph.advanceWidth, 0);
         }
         context.restore();
@@ -188,11 +191,12 @@ export class PDFDiagramVisitor extends SimplifiedDiagramVisitor<PDFKit.PDFDocume
             context.miterLimit(stroke.miterLimit);
         }
         const fill = styles.fill === "none" ? undefined : styles.fill;
-        const stroke = styles.stroke || undefined;
+        const stroke = styles.stroke === "none" ? undefined : styles.stroke;
         if (fill != undefined && stroke != undefined) {
             context.fillAndStroke(fill, stroke);
         } else if (fill != undefined) {
-            context.fill(fill);
+            context.fillColor(fill);
+            context.fill();
         } else if (stroke != undefined) {
             context.stroke(stroke);
         }
