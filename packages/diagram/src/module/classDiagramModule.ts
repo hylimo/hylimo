@@ -178,7 +178,7 @@ const scopeExpressions: ExecutableExpression[] = [
         "_class",
         fun(
             `
-                (name, optionalCallback, stereotype, abstract) = args
+                (name, optionalCallback, stereotypes, abstract) = args
                 callback = optionalCallback ?? {}
                 result = object(sections = list())
                 result.section = listWrapper {
