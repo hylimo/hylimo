@@ -178,7 +178,7 @@ const scopeExpressions: ExecutableExpression[] = [
         "_class",
         fun(
             `
-                (name, optionalCallback, stereotypes) = args
+                (name, optionalCallback, stereotype, abstract) = args
                 callback = optionalCallback ?? {}
                 result = object(sections = list())
                 result.section = listWrapper {
@@ -224,6 +224,9 @@ const scopeExpressions: ExecutableExpression[] = [
                     class = list("class"),
                     content = vbox(contents = classContents)
                 )
+                if(abstract == true) {
+                    renderedClass.class += "abstract"
+                }
                 classElement = canvasElement(
                     content = renderedClass,
                     scopes = object(default = callback),
@@ -383,7 +386,7 @@ const scopeExpressions: ExecutableExpression[] = [
         `
             scope.class = scope.internal.withRegisterSource [ snippet = "(\\"$1\\") {\\n    $2\\n}" ] {
                 (name, callback) = args
-                _class(name, callback, args.stereotypes, self = args.self)
+                _class(name, callback, args.stereotypes, args.abstract, self = args.self)
             }
             scope.interface = scope.internal.withRegisterSource [ snippet = "(\\"$1\\") {\\n    $2\\n}" ] {
                 (name, callback) = args
@@ -392,7 +395,7 @@ const scopeExpressions: ExecutableExpression[] = [
                 if(otherStereotypes != null) {
                     stereotypes.addAll(otherStereotypes)
                 }
-                _class(name, callback, stereotypes, self = args.self)
+                _class(name, callback, stereotypes, args.abstract, self = args.self)
             }
         `
     ),
@@ -415,6 +418,13 @@ const scopeExpressions: ExecutableExpression[] = [
                     strokeWidth = var("strokeWidth")
                     type("vbox") {
                         margin = 5
+                    }
+                }
+                cls("abstract") {
+                    cls("title") {
+                        type("span") {
+                            fontStyle = "italic"
+                        }
                     }
                 }
                 cls("title") {
