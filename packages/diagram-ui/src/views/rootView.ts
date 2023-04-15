@@ -15,6 +15,31 @@ export class SRootView implements IView {
             null,
             svg("style", null, model.generateStyle()),
             svg(
+                "defs",
+                null,
+                svg(
+                    "marker",
+                    {
+                        attrs: {
+                            id: "arrow",
+                            viewBox: "0 0 10 10",
+                            refX: 9,
+                            refY: 5,
+                            markerWidth: 6,
+                            markerHeight: 6,
+                            markerUnits: "strokeWidth",
+                            orient: "auto-start-reverse"
+                        }
+                    },
+                    svg("path", {
+                        attrs: {
+                            d: "M 0 0 L 10 5 L 0 10 z",
+                            fill: "var(--diagram-layout-color)"
+                        }
+                    })
+                )
+            ),
+            svg(
                 "g",
                 {
                     attrs: {

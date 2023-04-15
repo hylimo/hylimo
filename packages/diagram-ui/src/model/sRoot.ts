@@ -7,6 +7,11 @@ import { SCanvasAxisAlignedSegment } from "./canvas/sCanvasAxisAlignedSegment";
  */
 export class SRoot extends ViewportRootElement {
     /**
+     * The default point size
+     */
+    static readonly POINT_SIZE = 16;
+
+    /**
      * Defined font families
      */
     fonts!: FontFamilyConfig[];
@@ -65,7 +70,7 @@ export class SRoot extends ViewportRootElement {
         
         .canvas-point {
             stroke-linecap: round;
-            stroke-width: calc(16px / var(--diagram-zoom));
+            stroke-width: calc(${SRoot.POINT_SIZE}px / var(--diagram-zoom));
             stroke: var(--diagram-layout-color);
         }
         
