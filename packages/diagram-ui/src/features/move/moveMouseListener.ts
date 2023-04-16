@@ -225,7 +225,7 @@ export class MoveMouseListener extends MouseListener {
                 scaleX = target.width / (target.width + target.x);
             }
             if (scaleX != undefined && Math.abs(scaleX) > maxResizeScale) {
-                scaleX = Math.sign(scaleX) * 1;
+                scaleX = Math.sign(scaleX) * -1;
             }
         }
         let scaleY: number | undefined = undefined;
@@ -236,7 +236,7 @@ export class MoveMouseListener extends MouseListener {
                 scaleY = target.height / (target.height + target.y);
             }
             if (scaleY != undefined && Math.abs(scaleY) > maxResizeScale) {
-                scaleY = Math.sign(scaleY) * 1;
+                scaleY = Math.sign(scaleY) * -1;
             }
         }
         if (scaleX != undefined || scaleY != undefined) {
