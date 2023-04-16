@@ -432,6 +432,11 @@ const scopeExpressions: ExecutableExpression[] = [
     ),
     ...parse(
         `
+            scope.element = scope.internal.withRegisterSource {
+                this.element = canvasElement(content = it, scopes = object())
+                scope.contents += this.element
+                this.element
+            }
             scope.styles {
                 cls("label-element") {
                     hAlign = "center"
