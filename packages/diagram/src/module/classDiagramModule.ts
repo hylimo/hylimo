@@ -175,6 +175,59 @@ const scopeExpressions: ExecutableExpression[] = [
         ])
     ),
     assign(
+        "_title",
+        fun(
+            `
+                (name, stereotypes) = args
+                this.contents = list()
+                if(stereotypes != null) {
+                    stereotypes.forEach {
+                        contents += text(
+                            contents = list(span(text = "\\u00AB" + it + "\\u00BB")),
+                            class = list("stereotype")
+                        )
+                    }
+                }
+
+                contents += text(contents = list(span(text = name)), class = list("title"))
+                vbox(contents = contents)
+            `
+        )
+    ),
+    assign(
+        "_package",
+        fun(
+            `
+                (name, optionalCallback, stereotypes) = args
+                packageElement = canvasElement(
+                    scopes = object(),
+                    class = list("package-element"),
+                    content = vbox(
+                        contents = list(
+                            stack(
+                                contents = list(
+                                    rect(content = _title(name, stereotypes), class = list("title-wrapper")),
+                                    path(path = "M 0 0 V 1", hAlign = "left"),
+                                    path(path = "M 0 0 V 1", hAlign = "right"),
+                                    path(path = "M 0 0 H 1", vAlign = "top")
+                                ),
+                                class = list("package")
+                            ),
+                            rect(
+                                class = list("package-body")
+                            )
+                        )
+                    )
+                )
+                scope.contents += packageElement
+                if(optionalCallback != null) {
+                    optionalCallback()
+                }
+                packageElement
+            `
+        )
+    ),
+    assign(
         "_class",
         fun(
             `
@@ -201,17 +254,7 @@ const scopeExpressions: ExecutableExpression[] = [
 
                 callback.callWithScope(result)
                 classContents = list()
-
-                if(stereotypes != null) {
-                    stereotypes.forEach {
-                        classContents += text(
-                            contents = list(span(text = "\\u00AB" + it + "\\u00BB")),
-                            class = list("stereotype")
-                        )
-                    }
-                }
-
-                classContents += text(contents = list(span(text = name)), class = list("title"))
+                classContents += _title(name, stereotypes)
 
                 result.sections.forEach {
                     classContents += path(path = "M 0 0 L 1 0", class = list("separator"))
@@ -384,6 +427,10 @@ const scopeExpressions: ExecutableExpression[] = [
     ),
     ...parse(
         `
+            scope.package = scope.internal.withRegisterSource [ snippet = "(\\"$1\\") {\\n    $2\\n}" ] {
+                (name, callback) = args
+                _package(name, callback, args.stereotypes, self = args.self)
+            }
             scope.class = scope.internal.withRegisterSource [ snippet = "(\\"$1\\") {\\n    $2\\n}" ] {
                 (name, callback) = args
                 _class(name, callback, args.stereotypes, args.abstract, self = args.self)
@@ -452,6 +499,30 @@ const scopeExpressions: ExecutableExpression[] = [
                     vAlign = "center"
                     hAlign = "center"
                     minWidth = 300
+                }
+                cls("package-element") {
+                    minWidth = 300
+                }
+                cls("package-body") {
+                    minHeight = 50
+                    stroke = var("primary")
+                    strokeWidth = var("strokeWidth")
+                }
+                cls("package") {
+                    type("vbox") {
+                        margin = 5
+                    }
+                    cls("title-wrapper") {
+                        marginLeft = var("strokeWidth")
+                        marginRight = var("strokeWidth")
+                        marginTop = var("strokeWidth")
+                    }
+                    type("path") {
+                        stroke = var("primary")
+                        strokeWidth = var("strokeWidth")
+                    }
+                    minWidth = 100
+                    hAlign = "left"
                 }
                 cls("marker") {
                     height = 25

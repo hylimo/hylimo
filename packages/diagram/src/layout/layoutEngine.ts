@@ -319,10 +319,18 @@ export class Layout {
         marginX: number,
         marginY: number
     ): SizeConstraints {
+        let minWidth = 0;
+        let minHeight = 0;
+        if (styles.hAlign == undefined) {
+            minWidth = constraints.min.width - marginX;
+        }
+        if (styles.vAlign == undefined) {
+            minHeight = constraints.min.height - marginY;
+        }
         return {
             min: {
-                width: Math.max(styles.width ?? Math.max(styles.minWidth ?? 0, constraints.min.width - marginX), 0),
-                height: Math.max(styles.height ?? Math.max(styles.minHeight ?? 0, constraints.min.height - marginY), 0)
+                width: Math.max(styles.width ?? Math.max(styles.minWidth ?? 0, minWidth), 0),
+                height: Math.max(styles.height ?? Math.max(styles.minHeight ?? 0, minHeight), 0)
             },
             max: {
                 width: Math.max(
