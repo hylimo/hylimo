@@ -17,19 +17,38 @@ export class FontManager {
     private readonly fontCache = new Map<string, Font>();
 
     /**
+     * Cache for font families
+     */
+    private readonly fontFamilyCache = new Map<string, FontFamily>();
+
+    /**
      * Gets a font family, caches results if possible
      *
      * @param config the config of the font family
-     * @returns the created font family
+     * @returns the created font family, and a boolean indicating if the font family was cached
      */
-    async getFontFamily(config: FontFamilyConfig): Promise<FontFamily> {
-        return {
+    async getFontFamily(config: FontFamilyConfig): Promise<{ fontFamily: FontFamily; cacheHit: boolean }> {
+        const fontFamily = {
             config,
             normal: await this.getFont(config.normal),
             italic: await this.getFont(config.italic),
             bold: await this.getFont(config.bold),
             boldItalic: await this.getFont(config.boldItalic)
         };
+        const cachedFontFamily = this.fontFamilyCache.get(config.fontFamily);
+        let cacheHit = false;
+        if (cachedFontFamily != undefined) {
+            if (
+                cachedFontFamily.normal === fontFamily.normal &&
+                cachedFontFamily.italic === fontFamily.italic &&
+                cachedFontFamily.bold === fontFamily.bold &&
+                cachedFontFamily.boldItalic === fontFamily.boldItalic
+            ) {
+                cacheHit = true;
+            }
+        }
+        this.fontFamilyCache.set(config.fontFamily, fontFamily);
+        return { fontFamily, cacheHit };
     }
 
     /**

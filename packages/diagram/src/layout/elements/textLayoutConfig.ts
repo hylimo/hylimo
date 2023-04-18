@@ -27,8 +27,16 @@ export class TextLayoutConfig extends StyledElementLayoutConfig {
         const contents = this.getContents(element);
         if (contents.length > 0) {
             element.contents = contents.map((content) => layout.measure(content, element, constraints));
-            const layoutRes = layout.engine.textLayouter.layout(element, layout.fonts, constraints.max.width);
-            element.layoutedContents = layoutRes.elements;
+            const layoutRes = layout.engine.textCache.getOrCompute(
+                {
+                    maxWidth: constraints.max.width,
+                    spans: (element.contents as LayoutElement[]).map((content) => content.styles)
+                },
+                () => {
+                    return layout.engine.textLayouter.layout(element, layout.fonts, constraints.max.width);
+                }
+            );
+            element.layoutedContents = layoutRes.elements.map((element) => ({ ...element }));
             return layoutRes.size;
         } else {
             element.contents = [];

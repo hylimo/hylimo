@@ -30,6 +30,7 @@ export * from "./layout/elements/styledElementLayoutConfig";
 export * from "./layout/elements/textLayoutConfig";
 export * from "./layout/elements/vboxLayoutConfig";
 export * from "./layout/diagramLayoutResult";
+export * from "./layout/layoutCache";
 export * from "./layout/layoutElement";
 export * from "./layout/layoutEngine";
 export * from "./layout/layouts";

@@ -1,10 +1,19 @@
 import { stringType } from "@hylimo/core";
-import { Size, Point, Element, Path } from "@hylimo/diagram-common";
+import { Size, Point, Element, Path, Stroke } from "@hylimo/diagram-common";
 import svgPath from "svgpath";
-import { PathBBox, svgPathBbox } from "@hylimo/diagram-common";
+import { svgPathBbox } from "@hylimo/diagram-common";
 import { LayoutElement, SizeConstraints } from "../layoutElement";
 import { Layout } from "../layoutEngine";
 import { ShapeLayoutConfig } from "./shapeLayoutConfig";
+
+/**
+ * The maximum number of iterations
+ */
+const MAX_ITERATIONS = 15;
+/**
+ * A small error
+ */
+const EPSILON = 0.00000000001;
 
 /**
  * Layout config for path
@@ -25,114 +34,73 @@ export class PathLayoutConfig extends ShapeLayoutConfig {
     }
 
     override measure(layout: Layout, element: LayoutElement, constraints: SizeConstraints): Size {
-        const shapeProperties = this.extractShapeProperties(element);
-        const path = element.element.getLocalFieldOrUndefined("path")?.value.toNative();
-        const boundingBox = svgPathBbox(path, shapeProperties.stroke);
-        element.boundsAndProperties = {
-            properties: {
-                ...shapeProperties
-            },
-            path,
-            boundingBox
-        };
-        const minSize = constraints.min;
-        const maxSize = constraints.max;
-        const overflowX = boundingBox.overflow.left + boundingBox.overflow.right;
-        const overflowY = boundingBox.overflow.top + boundingBox.overflow.bottom;
-        const [minScaleX, maxScaleX] = this.calculateScaleRange(
-            boundingBox.width,
-            overflowX,
-            minSize.width,
-            maxSize.width
-        );
-        const [minScaleY, maxScaleY] = this.calculateScaleRange(
-            boundingBox.height,
-            overflowY,
-            minSize.height,
-            maxSize.height
-        );
-        const scale = this.calculateScale(minScaleX, minScaleY, maxScaleX, maxScaleY);
+        const strokeWidth = this.extractShapeProperties(element).stroke?.width ?? 0;
         return {
-            width: boundingBox.width * scale + overflowX,
-            height: boundingBox.height * scale + overflowY
+            width: Math.max(constraints.min.width, strokeWidth),
+            height: Math.max(constraints.min.height, strokeWidth)
         };
-    }
-
-    /**
-     * Calculates the scale range for a given length, overflow and min/max length.
-     *
-     * @param length the inner length
-     * @param overflow the total overflow, sum of start and end overflow
-     * @param minLength the minimum length
-     * @param maxLength the maximum length
-     * @returns the scale range, consisting of minimum and maximum scale
-     */
-    private calculateScaleRange(
-        length: number,
-        overflow: number,
-        minLength: number,
-        maxLength: number
-    ): [number, number] {
-        if (length === 0) {
-            return [Number.NEGATIVE_INFINITY, Number.POSITIVE_INFINITY];
-        }
-        const minScale = (minLength - overflow) / length;
-        const maxScale = (maxLength - overflow) / length;
-        return [minScale, maxScale];
-    }
-
-    /**
-     * Calculates the scale given scale ranges for x and y.
-     * If the ranges overlap, the minimum of the overlapping range is returned.
-     * If this minimum is negative infinity, 1 is returned.
-     * Otherwise the maximum of the smaller range is returned.
-     *
-     * @param minScaleX the minimum scale for x
-     * @param minScaleY the minimum scale for y
-     * @param maxScaleX the maximum scale for x
-     * @param maxScaleY the maximum scale for y
-     * @returns the calculated scale
-     */
-    private calculateScale(minScaleX: number, minScaleY: number, maxScaleX: number, maxScaleY: number): number {
-        const overlap = Math.min(maxScaleX, maxScaleY) - Math.max(minScaleX, minScaleY);
-        if (overlap > 0) {
-            const scale = Math.max(minScaleX, minScaleY);
-            if (scale === Number.NEGATIVE_INFINITY) {
-                return 1;
-            } else {
-                return scale;
-            }
-        } else {
-            return Math.min(maxScaleX, maxScaleY);
-        }
     }
 
     override layout(layout: Layout, element: LayoutElement, position: Point, size: Size, id: string): Element[] {
-        const path = element.boundsAndProperties.path as string;
-        const boundingBox = element.boundsAndProperties.boundingBox as PathBBox;
-        const overflowX = boundingBox.overflow.left + boundingBox.overflow.right;
-        const overflowY = boundingBox.overflow.top + boundingBox.overflow.bottom;
-        const scaleX =
-            boundingBox.width === 0 ? Number.POSITIVE_INFINITY : (size.width - overflowX) / boundingBox.width;
-        const scaleY =
-            boundingBox.height === 0 ? Number.POSITIVE_INFINITY : (size.height - overflowY) / boundingBox.height;
-        let scale = Math.min(scaleX, scaleY);
-        if (scale === Number.POSITIVE_INFINITY) {
-            scale = 1;
-        }
+        const shapeProperties = this.extractShapeProperties(element);
+        const path = element.element.getLocalFieldOrUndefined("path")?.value.toNative();
+        const layoutedPath = layout.engine.pathCache.getOrCompute(
+            {
+                path,
+                stroke: shapeProperties.stroke,
+                size
+            },
+            () => this.layoutPath(path, shapeProperties.stroke, size)
+        );
         const result: Path = {
             type: Path.TYPE,
             id,
             ...position,
             ...size,
-            ...element.boundsAndProperties.properties,
-            path: svgPath(path)
-                .translate(-boundingBox.x, -boundingBox.y)
-                .scale(scale)
-                .translate(boundingBox.overflow.left, boundingBox.overflow.top)
-                .toString(),
+            ...shapeProperties,
+            path: layoutedPath,
             children: []
         };
         return [result];
+    }
+
+    /**
+     * Layouts a path iteratively
+     *
+     * @param path the path to layout
+     * @param stroke the stroke of the path
+     * @param size the size to use
+     * @returns the layouted path
+     */
+    private layoutPath(path: string, stroke: Stroke | undefined, size: Size): string {
+        const originalPath = path;
+        let error = Number.POSITIVE_INFINITY;
+        let iterations = 0;
+        let scaleX = 1;
+        let scaleY = 1;
+        let boundingBox = svgPathBbox(path, stroke);
+        while (iterations < MAX_ITERATIONS && error > EPSILON) {
+            const overflowX = boundingBox.overflow.left + boundingBox.overflow.right;
+            const overflowY = boundingBox.overflow.top + boundingBox.overflow.bottom;
+            const newScaleX = boundingBox.width === 0 ? 1 : (size.width - overflowX) / boundingBox.width;
+            const newScaleY = boundingBox.height === 0 ? 1 : (size.height - overflowY) / boundingBox.height;
+            scaleX = scaleX * newScaleX;
+            scaleY = scaleY * newScaleY;
+            const newPath = svgPath(originalPath).scale(scaleX, scaleY).toString();
+            const newBoundingBox = svgPathBbox(newPath, stroke);
+            const newError =
+                Math.abs(size.width - (boundingBox.width + boundingBox.overflow.left + boundingBox.overflow.right)) +
+                Math.abs(size.height - (boundingBox.height + boundingBox.overflow.top + boundingBox.overflow.bottom));
+            if (newError > error) {
+                break;
+            }
+            error = newError;
+            path = newPath;
+            boundingBox = newBoundingBox;
+            iterations++;
+        }
+        return svgPath(path)
+            .translate(-boundingBox.x + boundingBox.overflow.left, -boundingBox.y + boundingBox.overflow.top)
+            .toString();
     }
 }

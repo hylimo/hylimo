@@ -290,7 +290,7 @@ const scopeExpressions: ExecutableExpression[] = [
                 diamond = {
                     marker(
                         content = path(
-                            path = "M 18 7 L9 13 L1 7 L9 1 Z",
+                            path = "M 1 0 L 0 1 L -1 0 L 0 -1 Z",
                             class = list("diamond-marker-path", "marker-path")
                         ),
                         class=list("diamond-marker", "marker"),
@@ -300,7 +300,7 @@ const scopeExpressions: ExecutableExpression[] = [
                 filledDiamond = {
                     marker(
                         content = path(
-                            path = "M 18 7 L9 13 L1 7 L9 1 Z",
+                            path = "M 1 0 L 0 1 L -1 0 L 0 -1 Z",
                             class = list("filled-diamond-marker-path", "marker-path", "filled-marker-path")
                         ),
                         class=list("filled-diamond-marker", "marker"),
@@ -526,6 +526,13 @@ const scopeExpressions: ExecutableExpression[] = [
                 }
                 cls("marker") {
                     height = 25
+                    width = 25
+                }
+                cls("diamond-marker") {
+                    width = 40
+                }
+                cls("filled-diamond-marker") {
+                    width = 40
                 }
                 cls("marker-path") {
                     strokeWidth = var("strokeWidth")

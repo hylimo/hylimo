@@ -94,7 +94,7 @@ export namespace Math2D {
      * @returns the angle between the two vectors
      */
     export function angleBetween(a: Vector, b: Vector): number {
-        return Math.acos(dot(a, b) / Math.sqrt(a.x * a.x + a.y * a.y * b.x * b.x + b.y * b.y));
+        return Math.acos(dot(a, b) / Math.sqrt((a.x * a.x + a.y * a.y) * (b.x * b.x + b.y * b.y)));
     }
 
     /**

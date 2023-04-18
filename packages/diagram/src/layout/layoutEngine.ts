@@ -1,8 +1,8 @@
 import { BaseObject, FieldEntry, FullObject, nativeToList } from "@hylimo/core";
 import { assertString } from "@hylimo/core";
-import { Element, Size, Point, FontFamily } from "@hylimo/diagram-common";
+import { Element, Size, Point, FontFamily, Stroke } from "@hylimo/diagram-common";
 import { FontManager } from "../font/fontManager";
-import { TextLayouter } from "../font/textLayouter";
+import { TextLayoutResult, TextLayouter } from "../font/textLayouter";
 import { generateStyles, Selector, SelectorType, Style, StyleList } from "../styles";
 import { LayoutedDiagram } from "./diagramLayoutResult";
 import {
@@ -17,6 +17,44 @@ import {
 } from "./layoutElement";
 import { layouts } from "./layouts";
 import { FontCollection } from "../font/fontCollection";
+import { LayoutCache } from "./layoutCache";
+
+/**
+ * The amount of iterations which are cached
+ */
+const CACHE_TTL = 3;
+
+/**
+ * Key of the text cache
+ */
+interface TextCacheKey {
+    /**
+     * the max width provided to layout
+     */
+    maxWidth: number;
+    /**
+     * The styles of the spans the text consists of
+     */
+    spans: Record<string, any>[];
+}
+
+/**
+ * Cache key for path layouting
+ */
+interface PathCacheKey {
+    /**
+     * The path to layout
+     */
+    path: string;
+    /**
+     * The stroke required for layouting
+     */
+    stroke: Stroke | undefined;
+    /**
+     * The size to width the path is scaled to
+     */
+    size: Size;
+}
 
 /**
  * Performs layout, generates a model as a result
@@ -38,6 +76,16 @@ export class LayoutEngine {
     readonly textLayouter = new TextLayouter();
 
     /**
+     * Cache used for text layouting
+     */
+    readonly textCache = new LayoutCache<TextCacheKey, TextLayoutResult>(CACHE_TTL);
+
+    /**
+     * Cache for path layouting
+     */
+    readonly pathCache = new LayoutCache<PathCacheKey, string>(CACHE_TTL);
+
+    /**
      * Creates a new layout engine
      */
     constructor() {
@@ -50,13 +98,25 @@ export class LayoutEngine {
      * Layouts a diagram defined using syncscript
      *
      * @param diagram the diagram to layout
+     * @returns the layouted diagram
      */
     async layout(diagram: BaseObject): Promise<LayoutedDiagram> {
         this.assertDiagram(diagram);
         const nativeFonts = diagram.getLocalFieldOrUndefined("fonts")?.value?.toNative();
+        let cacheMiss = false;
         const fontFamilies = await Promise.all(
-            nativeToList(nativeFonts).map(async (config) => this.fontManager.getFontFamily(config))
+            nativeToList(nativeFonts).map(async (config) => {
+                const { fontFamily, cacheHit } = await this.fontManager.getFontFamily(config);
+                cacheMiss = cacheMiss || !cacheHit;
+                return fontFamily;
+            })
         );
+        if (cacheMiss) {
+            this.textCache.clear();
+        } else {
+            this.textCache.nextIteration();
+        }
+        this.pathCache.nextIteration();
         const fontFamilyConfigs = fontFamilies.map((family) => family.config);
         const layout = new Layout(
             this,

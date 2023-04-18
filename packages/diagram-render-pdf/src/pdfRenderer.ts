@@ -43,7 +43,7 @@ export class PDFRenderer {
             try {
                 const parts: Uint8Array[] = [];
                 const fontFamilies = await Promise.all(root.fonts.map((font) => this.fontManager.getFontFamily(font)));
-                const fontCollection = new FontCollection(fontFamilies);
+                const fontCollection = new FontCollection(fontFamilies.map((family) => family.fontFamily));
                 const document = new PDFDocument({ autoFirstPage: false });
                 const visitor = new PDFDiagramVisitor(this.margin, background, fontCollection);
                 document.on("data", (data: Uint8Array) => parts.push(data));
