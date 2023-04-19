@@ -179,13 +179,13 @@ const scopeExpressions: ExecutableExpression[] = [
         "_title",
         fun(
             `
-                (name, stereotypes) = args
+                (name, keywords) = args
                 this.contents = list()
-                if(stereotypes != null) {
-                    stereotypes.forEach {
+                if(keywords != null) {
+                    keywords.forEach {
                         contents += text(
                             contents = list(span(text = "\\u00AB" + it + "\\u00BB")),
-                            class = list("stereotype")
+                            class = list("keyword")
                         )
                     }
                 }
@@ -199,7 +199,7 @@ const scopeExpressions: ExecutableExpression[] = [
         "_package",
         fun(
             `
-                (name, optionalCallback, stereotypes) = args
+                (name, optionalCallback, keywords) = args
                 packageElement = canvasElement(
                     scopes = object(),
                     class = list("package-element"),
@@ -207,7 +207,7 @@ const scopeExpressions: ExecutableExpression[] = [
                         contents = list(
                             stack(
                                 contents = list(
-                                    rect(content = _title(name, stereotypes), class = list("title-wrapper")),
+                                    rect(content = _title(name, keywords), class = list("title-wrapper")),
                                     path(path = "M 0 0 V 1", hAlign = "left"),
                                     path(path = "M 0 0 V 1", hAlign = "right"),
                                     path(path = "M 0 0 H 1", vAlign = "top")
@@ -265,7 +265,7 @@ const scopeExpressions: ExecutableExpression[] = [
         "_class",
         fun(
             `
-                (name, optionalCallback, stereotypes, abstract) = args
+                (name, optionalCallback, keywords, abstract) = args
                 callback = optionalCallback ?? {}
                 result = object(sections = list())
                 result.section = listWrapper {
@@ -288,7 +288,7 @@ const scopeExpressions: ExecutableExpression[] = [
 
                 callback.callWithScope(result)
                 classContents = list()
-                classContents += _title(name, stereotypes)
+                classContents += _title(name, keywords)
 
                 result.sections.forEach {
                     classContents += path(path = "M 0 0 L 1 0", class = list("separator"))
@@ -467,20 +467,20 @@ const scopeExpressions: ExecutableExpression[] = [
             }
             scope.package = scope.internal.withRegisterSource [ snippet = "(\\"$1\\") {\\n    $2\\n}" ] {
                 (name, callback) = args
-                _package(name, callback, args.stereotypes, self = args.self)
+                _package(name, callback, args.keywords, self = args.self)
             }
             scope.class = scope.internal.withRegisterSource [ snippet = "(\\"$1\\") {\\n    $2\\n}" ] {
                 (name, callback) = args
-                _class(name, callback, args.stereotypes, args.abstract, self = args.self)
+                _class(name, callback, args.keywords, args.abstract, self = args.self)
             }
             scope.interface = scope.internal.withRegisterSource [ snippet = "(\\"$1\\") {\\n    $2\\n}" ] {
                 (name, callback) = args
-                stereotypes = list("interface")
-                otherStereotypes = args.stereotypes
-                if(otherStereotypes != null) {
-                    stereotypes.addAll(otherStereotypes)
+                keywords = list("interface")
+                otherKeywords = args.keywords
+                if(otherKeywords != null) {
+                    keywords.addAll(otherKeywords)
                 }
-                _class(name, callback, stereotypes, args.abstract, self = args.self)
+                _class(name, callback, keywords, args.abstract, self = args.self)
             }
         `
     ),
@@ -557,7 +557,7 @@ const scopeExpressions: ExecutableExpression[] = [
                         fontWeight = "bold"
                     }
                 }
-                cls("stereotype") {
+                cls("keyword") {
                     hAlign = "center"
                 }
                 cls("separator") {
