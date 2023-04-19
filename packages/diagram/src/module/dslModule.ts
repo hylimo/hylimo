@@ -266,12 +266,12 @@ const scopeExpressions: ExecutableExpression[] = [
                         object(proto = lineBuilderProto, segments = list(), start = pos)
                     },
                     label = {
-                        (labelText, pos, distance, rotation) = args
+                        (labelContent, pos, distance, rotation) = args
+                        if(object().==(self = "".proto, labelContent.proto)) {
+                            labelContent = list(span(text = labelContent))
+                        }
                         labelCanvasElement = canvasElement(
-                            content = text(
-                                contents = list(span(text = labelText)),
-                                class = list("label")
-                            ),
+                            content = text(contents = labelContent, class = list("label")),
                             pos = scope.lpos(self, pos ?? 0, distance, seg = args.seg),
                             rotation = rotation,
                             scopes = object(),

@@ -15,7 +15,8 @@ import {
     parse,
     RuntimeError,
     SemanticFieldNames,
-    StringLiteralExpression
+    StringLiteralExpression,
+    stringType
 } from "@hylimo/core";
 
 /**
@@ -228,6 +229,39 @@ const scopeExpressions: ExecutableExpression[] = [
         )
     ),
     assign(
+        "_comment",
+        fun(
+            `
+                textContent = it
+                commentElement = canvasElement(
+                    scopes = object(),
+                    content = stack(
+                        contents = list(
+                            path(path = "M0 0 H 1", vAlign = "top", class = list("comment-top")),
+                            path(path = "M0 0 H 1", vAlign = "bottom"),
+                            path(path = "M0 0 V 1", hAlign = "left"),
+                            path(path = "M0 0 V 1", hAlign = "right", class = list("comment-right")),
+                            vbox(
+                                contents = list(
+                                    path(
+                                        path = "M 0 0 V 1 H 1 Z",
+                                        hAlign = "right",
+                                        vAlign = "top",
+                                        class = list("comment-triangle")
+                                    ),
+                                    text(contents = list(span(text = textContent)), class = list("comment"))
+                                )
+                            )
+                        )
+                    ),
+                    class = list("comment-element")
+                )
+                scope.contents += commentElement
+                commentElement
+            `
+        )
+    ),
+    assign(
         "_class",
         fun(
             `
@@ -427,6 +461,10 @@ const scopeExpressions: ExecutableExpression[] = [
     ),
     ...parse(
         `
+            scope.comment = scope.internal.withRegisterSource [ snippet = "(\\"$1\\")" ] {
+                (content) = args
+                _comment(content, self = args.self)
+            }
             scope.package = scope.internal.withRegisterSource [ snippet = "(\\"$1\\") {\\n    $2\\n}" ] {
                 (name, callback) = args
                 _package(name, callback, args.stereotypes, self = args.self)
@@ -446,6 +484,44 @@ const scopeExpressions: ExecutableExpression[] = [
             }
         `
     ),
+    id(scope).assignField(
+        "readingLeft",
+        fun(
+            `
+                list(span(text = "\\u25b8", fontFamily = "Source Code Pro"), span(text = it))
+            `,
+            {
+                docs: `
+                    Can be used to create a label with an arrow pointing to the right.
+                    Typically used for labels on associations to indicate the the reading direction from right to left
+                    Params:
+                        - 0: the text of the label
+                    Returns:
+                        A list of spans, containing the arrow and the text
+                `
+            },
+            [[0, stringType]]
+        )
+    ),
+    id(scope).assignField(
+        "readingright",
+        fun(
+            `
+                list(span(text = it), span(text = "\\u25c0", fontFamily = "Source Code Pro"))
+            `,
+            {
+                docs: `
+                    Can be used to create a label with an arrow pointing to the left.
+                    Typically used for labels on associations to indicate the the reading direction from left to right
+                    Params:
+                        - 0: the text of the label
+                    Returns:
+                        A list of spans, containing the arrow and the text
+                `
+            },
+            [[0, stringType]]
+        )
+    ),
     fun(
         `
             scope.styles {
@@ -456,6 +532,7 @@ const scopeExpressions: ExecutableExpression[] = [
                         "#000000"
                     }
                     strokeWidth = 2
+                    commentTriangleSize = 20
                 }
                 type("span") {
                     fill = var("primary")
@@ -523,6 +600,31 @@ const scopeExpressions: ExecutableExpression[] = [
                     }
                     minWidth = 100
                     hAlign = "left"
+                }
+                cls("comment-element") {
+                    vAlign = "center"
+                    hAlign = "center"
+                    minWidth = 80
+                    maxWidth = 300
+                    cls("comment-right") {
+                        marginTop = var("commentTriangleSize")
+                    }
+                    cls("comment-top") {
+                        marginRight = var("commentTriangleSize")
+                    }
+                    cls("comment-triangle") {
+                        width = var("commentTriangleSize")
+                        height = var("commentTriangleSize")
+                    }
+                    type("path") {
+                        stroke = var("primary")
+                        strokeWidth = var("strokeWidth")
+                    }
+                }
+                cls("comment") {
+                    marginRight = 5
+                    marginLeft = 5
+                    marginBottom = 5
                 }
                 cls("marker") {
                     height = 25
