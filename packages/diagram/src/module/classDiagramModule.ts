@@ -488,7 +488,7 @@ const scopeExpressions: ExecutableExpression[] = [
         "readingLeft",
         fun(
             `
-                list(span(text = "\\u25b8", fontFamily = "Source Code Pro"), span(text = it))
+                list(span(text = "\\u25c0", class = list("direction-triangle")), span(text = it))
             `,
             {
                 docs: `
@@ -504,10 +504,10 @@ const scopeExpressions: ExecutableExpression[] = [
         )
     ),
     id(scope).assignField(
-        "readingright",
+        "readingRight",
         fun(
             `
-                list(span(text = it), span(text = "\\u25c0", fontFamily = "Source Code Pro"))
+                list(span(text = it), span(text = "\\u25b8", class = list("direction-triangle")))
             `,
             {
                 docs: `
@@ -648,6 +648,15 @@ const scopeExpressions: ExecutableExpression[] = [
                 }
                 cls("cross-marker-path") {
                     marginRight = 5
+                }
+                type("text") {
+                    cls("direction-triangle") {
+                        fontFamily = "Source Code Pro"
+                        fontSize = 20
+                    }
+                }
+                type("span") {
+                    fontSize = 16
                 }
             }
         `
