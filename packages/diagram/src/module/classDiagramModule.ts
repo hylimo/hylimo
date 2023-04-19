@@ -643,6 +643,9 @@ const scopeExpressions: ExecutableExpression[] = [
                 cls("filled-marker-path") {
                     fill = var("primary")
                 }
+                cls("arrow-marker-path") {
+                    strokeLineJoin = "bevel"
+                }
                 cls("dashed-connection") {
                     strokeDash = 10
                 }
