@@ -52,13 +52,27 @@ interface PathCacheKey {
      */
     stroke: Stroke | undefined;
     /**
-     * The size to width the path is scaled to
+     * The size constraints
      */
-    size: Size;
+    constraints: SizeConstraints;
     /**
      * The stretch mode
      */
     stretch: StretchMode;
+}
+
+/**
+ * Cache entry of layouted paths
+ */
+export interface LayoutedPath {
+    /**
+     * The layouted path
+     */
+    path: string;
+    /**
+     * The size of the layouted path
+     */
+    size: Size;
 }
 
 /**
@@ -88,7 +102,7 @@ export class LayoutEngine {
     /**
      * Cache for path layouting
      */
-    readonly pathCache = new LayoutCache<PathCacheKey, string>(CACHE_TTL);
+    readonly pathCache = new LayoutCache<PathCacheKey, LayoutedPath>(CACHE_TTL);
 
     /**
      * Creates a new layout engine
