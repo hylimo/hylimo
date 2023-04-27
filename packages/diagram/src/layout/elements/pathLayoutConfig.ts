@@ -57,31 +57,74 @@ export class PathLayoutConfig extends ShapeLayoutConfig {
         const shapeProperties = this.extractShapeProperties(element);
         const path = element.element.getLocalFieldOrUndefined("path")?.value.toNative();
         const stretch = element.styles.stretch ?? StretchMode.FILL;
-        const layoutedPath = layout.engine.pathCache.getOrCompute(
-            {
-                path,
-                stroke: shapeProperties.stroke,
-                constraints,
-                stretch
-            },
-            () => this.layoutPath(path, shapeProperties.stroke, constraints, stretch)
-        );
+        const layoutedPath = this.layoutPath(path, shapeProperties.stroke, constraints, stretch, layout);
         element.layoutedPath = layoutedPath;
         element.shapeProperties = shapeProperties;
-        return layoutedPath.size;
+        const strokeWidth = shapeProperties.stroke?.width ?? 0;
+        return {
+            width: Math.max(layoutedPath.size.width, strokeWidth),
+            height: Math.max(layoutedPath.size.height, strokeWidth)
+        };
     }
 
     override layout(layout: Layout, element: LayoutElement, position: Point, size: Size, id: string): Element[] {
+        const expectedSize = element.layoutedPath.size;
+        const shapeProperties = element.shapeProperties;
+        let layoutedPath = element.layoutedPath;
+        if (size.width !== expectedSize.width || size.height !== expectedSize.height) {
+            const path = element.element.getLocalFieldOrUndefined("path")?.value.toNative();
+            const stretch = element.styles.stretch ?? StretchMode.FILL;
+            layoutedPath = this.layoutPath(
+                path,
+                shapeProperties.stroke,
+                {
+                    min: size,
+                    max: size
+                },
+                stretch,
+                layout
+            );
+        }
         const result: Path = {
             type: Path.TYPE,
             id,
             ...position,
             ...size,
             ...element.shapeProperties,
-            path: element.layoutedPath.path,
+            path: layoutedPath.path,
             children: []
         };
         return [result];
+    }
+
+    /**
+     * Layouts a path iteratively
+     * Also handles caching
+     *
+     * @param path the path to layout
+     * @param stroke the stroke of the path
+     * @param size the size to use
+     * @param stretch the stretch mode to use
+     * @param layout the layout to use
+     * @returns the layouted path
+     */
+    private layoutPath(
+        path: string,
+        stroke: Stroke | undefined,
+        constraints: SizeConstraints,
+        stretch: StretchMode,
+        layout: Layout
+    ): LayoutedPath {
+        const layoutedPath = layout.engine.pathCache.getOrCompute(
+            {
+                path,
+                stroke,
+                constraints,
+                stretch
+            },
+            () => this.layoutPathInternal(path, stroke, constraints, stretch)
+        );
+        return layoutedPath;
     }
 
     /**
@@ -93,7 +136,7 @@ export class PathLayoutConfig extends ShapeLayoutConfig {
      * @param stretch the stretch mode to use
      * @returns the layouted path
      */
-    private layoutPath(
+    private layoutPathInternal(
         path: string,
         stroke: Stroke | undefined,
         constraints: SizeConstraints,
