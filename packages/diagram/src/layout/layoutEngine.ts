@@ -18,6 +18,7 @@ import {
 import { layouts } from "./layouts";
 import { FontCollection } from "../font/fontCollection";
 import { LayoutCache } from "./layoutCache";
+import { StretchMode } from "./elements/pathLayoutConfig";
 
 /**
  * The amount of iterations which are cached
@@ -54,6 +55,10 @@ interface PathCacheKey {
      * The size to width the path is scaled to
      */
     size: Size;
+    /**
+     * The stretch mode
+     */
+    stretch: StretchMode;
 }
 
 /**
