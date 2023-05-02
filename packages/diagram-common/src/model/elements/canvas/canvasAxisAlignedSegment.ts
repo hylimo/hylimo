@@ -1,8 +1,8 @@
 import { calculateMarkerRenderInformationInternal, CanvasConnectionSegment } from "./canvasConnectionSegment";
 import { Element } from "../base/element";
-import { Point } from "bezier-js";
 import { Marker, MarkerLayoutInformation } from "./marker";
 import { ModificationSpecification } from "../modificationSpecification";
+import { Point } from "../../../common/point";
 
 /**
  * Axis aligned connection segment, consiting of a vertical and one or two horizontal segments.
