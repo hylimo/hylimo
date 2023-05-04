@@ -186,15 +186,15 @@ export const diagramModule = InterpreterModule.create(
                         if(contentsCardinality > 0) {
                             this.callback = element.get(0)
                             if(callback != null) {
-                                scopeObject = object(_element = element)
+                                scopeObject = object()
                                 if(contentsCardinality == 1) {
                                     scopeObject.addContent = {
-                                        args.self._element.content = it
+                                        element.content = it
                                     }
                                 } {
                                     scopeObject.addContent = {
                                         this.content = it
-                                        this.element = args.self._element
+                                        this.element = element
                                         if(element.contents == null) {
                                             element.contents = list(content)
                                         } {
@@ -207,28 +207,6 @@ export const diagramModule = InterpreterModule.create(
                         }
                         if(scope.addContent != null) {
                             scope.addContent(element)
-                        }
-                    `
-                )
-            ),
-            assign(
-                "_setContent",
-                fun(
-                    `
-                        args.self._element.content = it
-                    `
-                )
-            ),
-            assign(
-                "_addContent",
-                fun(
-                    `
-                        this.content = it
-                        this.element = args.self._element
-                        if(element.contents == null) {
-                            element.contents = list(content)
-                        } {
-                            element.contents.add(content)
                         }
                     `
                 )
