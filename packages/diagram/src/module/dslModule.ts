@@ -433,7 +433,12 @@ const scopeExpressions: ExecutableExpression[] = [
     ...parse(
         `
             scope.element = scope.internal.withRegisterSource {
-                this.element = canvasElement(content = it, scopes = object())
+                callbackOrElement = it
+                this.element = if(callbackOrElement._type == "element") {
+                    canvasElement(content = callbackOrElement, scopes = object())
+                } {
+                    canvasElement(scopes = object(), callbackOrElement)
+                }
                 scope.contents += this.element
                 this.element
             }

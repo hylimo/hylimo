@@ -7,8 +7,10 @@ import { CanvasConnectionSegmentLayoutConfig } from "./canvasConnectionSegmentLa
  * Layout config for canvas line segments
  */
 export class CanvasLineSegmentLayoutConfig extends CanvasConnectionSegmentLayoutConfig {
+    override type = CanvasLineSegment.TYPE;
+
     constructor() {
-        super(CanvasLineSegment.TYPE, [], []);
+        super([], []);
     }
 
     override layout(layout: Layout, element: LayoutElement, position: Point, size: Size, id: string): Element[] {

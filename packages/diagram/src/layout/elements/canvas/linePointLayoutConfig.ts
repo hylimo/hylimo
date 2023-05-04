@@ -9,9 +9,10 @@ import { elementType } from "../../../module/types";
  * Layout config for line points
  */
 export class LinePointLayoutConfig extends CanvasPointLayoutConfig {
+    override type = LinePoint.TYPE;
+
     constructor() {
         super(
-            LinePoint.TYPE,
             [
                 {
                     name: "pos",

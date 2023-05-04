@@ -8,9 +8,10 @@ import { CanvasConnectionSegmentLayoutConfig } from "./canvasConnectionSegmentLa
  * Layout config for canvas line segments
  */
 export class CanvasBezierSegmentLayoutConfig extends CanvasConnectionSegmentLayoutConfig {
+    override type = CanvasBezierSegment.TYPE;
+
     constructor() {
         super(
-            CanvasBezierSegment.TYPE,
             [
                 {
                     name: "startControlPoint",

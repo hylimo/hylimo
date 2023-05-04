@@ -1,6 +1,6 @@
-import { enumType, numberType, stringType } from "@hylimo/core";
+import { enumType, nullType, numberType, stringType } from "@hylimo/core";
 import { Element, FontStyle, FontWeight, Point, Size } from "@hylimo/diagram-common";
-import { LayoutElement, SizeConstraints } from "../layoutElement";
+import { ContentCardinality, LayoutElement, SizeConstraints } from "../layoutElement";
 import { Layout } from "../layoutEngine";
 import { ElementLayoutConfig } from "./elementLayoutConfig";
 import { fillStyleAttributes } from "./attributes";
@@ -9,12 +9,15 @@ import { fillStyleAttributes } from "./attributes";
  * Layout config for span, does not handle actual layouting and measuring
  */
 export class SpanLayoutConfig extends ElementLayoutConfig {
+    override type = "span";
+    override contentType = nullType;
+    override contentCardinality = ContentCardinality.ExactlyOne;
+
     /**
      * Creates a new SpanLayoutConfig
      */
     constructor() {
         super(
-            "span",
             [{ name: "text", description: "the text to display", type: stringType }],
             [
                 ...fillStyleAttributes,

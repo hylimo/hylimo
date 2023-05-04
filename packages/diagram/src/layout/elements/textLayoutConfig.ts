@@ -1,6 +1,6 @@
-import { FullObject, listType, objectToList } from "@hylimo/core";
+import { FullObject, objectToList } from "@hylimo/core";
 import { Element, Size, Point, Text } from "@hylimo/diagram-common";
-import { LayoutElement, SizeConstraints } from "../layoutElement";
+import { ContentCardinality, LayoutElement, SizeConstraints } from "../layoutElement";
 import { Layout } from "../layoutEngine";
 import { StyledElementLayoutConfig } from "./styledElementLayoutConfig";
 import { elementType } from "../../module/types";
@@ -9,18 +9,12 @@ import { elementType } from "../../module/types";
  * Layout config for text
  */
 export class TextLayoutConfig extends StyledElementLayoutConfig {
+    override type = Text.TYPE;
+    override contentType = elementType("span");
+    override contentCardinality = ContentCardinality.AtLeastOne;
+
     constructor() {
-        super(
-            Text.TYPE,
-            [
-                {
-                    name: "contents",
-                    description: "a list of spans to display",
-                    type: listType(elementType("span"))
-                }
-            ],
-            []
-        );
+        super([], []);
     }
 
     override measure(layout: Layout, element: LayoutElement, constraints: SizeConstraints): Size {

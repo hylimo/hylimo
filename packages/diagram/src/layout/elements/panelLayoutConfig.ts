@@ -1,5 +1,5 @@
-import { FullObject, listType, objectToList } from "@hylimo/core";
-import { AttributeConfig, LayoutElement } from "../layoutElement";
+import { FullObject, objectToList } from "@hylimo/core";
+import { AttributeConfig, ContentCardinality, LayoutElement } from "../layoutElement";
 import { StyledElementLayoutConfig } from "./styledElementLayoutConfig";
 import { elementType } from "../../module/types";
 
@@ -7,26 +7,17 @@ import { elementType } from "../../module/types";
  * Base class for all layout configs which contain contents
  */
 export abstract class PanelLayoutConfig extends StyledElementLayoutConfig {
+    override contentType = elementType();
+    override contentCardinality = ContentCardinality.Many;
+
     /**
      * Creates a new StyledElementLayoutConfig
      *
-     * @param type the supported type
      * @param additionalAttributes additional non-style attributes
      * @param styleAttributes the supported style attributes
      */
-    constructor(type: string, additionalAttributes: AttributeConfig[], additionalStyleAttributes: AttributeConfig[]) {
-        super(
-            type,
-            [
-                {
-                    name: "contents",
-                    description: "the inner elements",
-                    type: listType(elementType())
-                },
-                ...additionalAttributes
-            ],
-            additionalStyleAttributes
-        );
+    constructor(additionalAttributes: AttributeConfig[], additionalStyleAttributes: AttributeConfig[]) {
+        super(additionalAttributes, additionalStyleAttributes);
     }
 
     /**

@@ -167,6 +167,32 @@ export interface AttributeConfig {
 }
 
 /**
+ * Defines the cardinality of the contents attribute
+ */
+export enum ContentCardinality {
+    /**
+     * 0
+     */
+    None,
+    /**
+     * 0..1
+     */
+    Optional,
+    /**
+     * 1
+     */
+    ExactlyOne,
+    /**
+     * 0..*
+     */
+    Many,
+    /**
+     * 1..*
+     */
+    AtLeastOne
+}
+
+/**
  * Interface defining how to layout a UI element
  */
 export interface LayoutConfig {
@@ -182,6 +208,14 @@ export interface LayoutConfig {
      * Non-style attributes it supports
      */
     attributes: AttributeConfig[];
+    /**
+     * The type of the contents attribute
+     */
+    contentType: Type;
+    /**
+     * The cardinality of the contents attribute
+     */
+    contentCardinality: ContentCardinality;
     /**
      * Called to determine the size the element requires
      *

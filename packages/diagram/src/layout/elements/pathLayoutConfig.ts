@@ -2,9 +2,10 @@ import { enumType, stringType } from "@hylimo/core";
 import { Size, Point, Element, Path, Stroke } from "@hylimo/diagram-common";
 import svgPath from "svgpath";
 import { svgPathBbox } from "@hylimo/diagram-common";
-import { LayoutElement, SizeConstraints } from "../layoutElement";
+import { ContentCardinality, LayoutElement, SizeConstraints } from "../layoutElement";
 import { Layout, LayoutedPath } from "../layoutEngine";
 import { ShapeLayoutConfig } from "./shapeLayoutConfig";
+import { elementType } from "../../module/types";
 
 /**
  * The maximum number of iterations
@@ -33,9 +34,12 @@ export enum StretchMode {
  * Layout config for path
  */
 export class PathLayoutConfig extends ShapeLayoutConfig {
+    override type = Path.TYPE;
+    override contentType = elementType();
+    override contentCardinality = ContentCardinality.None;
+
     constructor() {
         super(
-            Path.TYPE,
             [
                 {
                     name: "path",

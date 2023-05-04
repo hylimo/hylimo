@@ -1,6 +1,6 @@
-import { Expression, ExpressionMetadata, listType, optional, stringType } from "@hylimo/core";
+import { Expression, ExpressionMetadata, Type, listType, optional, stringType } from "@hylimo/core";
 import { ArcSegment, Element, Line, LineSegment, ModificationSpecification, Point, Size } from "@hylimo/diagram-common";
-import { LayoutElement, LayoutConfig, SizeConstraints, AttributeConfig } from "../layoutElement";
+import { LayoutElement, LayoutConfig, SizeConstraints, AttributeConfig, ContentCardinality } from "../layoutElement";
 import { Layout } from "../layoutEngine";
 
 /**
@@ -19,17 +19,25 @@ export abstract class ElementLayoutConfig implements LayoutConfig {
     ];
 
     /**
+     * What type of element is supported
+     */
+    abstract readonly type: string;
+    /**
+     * The type of the contents attribute
+     */
+    abstract readonly contentType: Type;
+    /**
+     * The cardinality of the contents attribute
+     */
+    abstract readonly contentCardinality: ContentCardinality;
+
+    /**
      * Assigns type and styleAttributes
      *
-     * @param type the supported type
      * @param additionalAttributes additional non-style attributes
      * @param styleAttributes the supported style attributes
      */
-    constructor(
-        readonly type: string,
-        additionalAttributes: AttributeConfig[],
-        readonly styleAttributes: AttributeConfig[]
-    ) {
+    constructor(additionalAttributes: AttributeConfig[], readonly styleAttributes: AttributeConfig[]) {
         this.attributes.push(...additionalAttributes);
     }
 

@@ -8,8 +8,10 @@ import { FullObject } from "@hylimo/core";
  * Layout config for ellipse
  */
 export class EllipseLayoutConfig extends ContentShapeLayoutConfig {
+    override type = Ellipse.TYPE;
+
     constructor() {
-        super(Ellipse.TYPE, [], []);
+        super([], []);
     }
 
     override measure(layout: Layout, element: LayoutElement, constraints: SizeConstraints): Size {

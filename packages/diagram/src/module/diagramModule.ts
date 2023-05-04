@@ -3,13 +3,17 @@ import {
     assertObject,
     assign,
     DefaultModuleNames,
+    ExecutableConstExpression,
     ExecutableExpression,
     ExecutableInvocationArgument,
+    ExecutableNumberLiteralExpression,
+    ExecutableStringLiteralExpression,
     fun,
     functionType,
     id,
     InterpreterModule,
     jsFun,
+    listType,
     literal,
     namedType,
     nullType,
@@ -23,7 +27,7 @@ import {
     validate
 } from "@hylimo/core";
 import { openSans, roboto, sourceCodePro } from "@hylimo/fonts";
-import { AttributeConfig, LayoutConfig } from "../layout/layoutElement";
+import { AttributeConfig, ContentCardinality, LayoutConfig } from "../layout/layoutElement";
 import { layouts } from "../layout/layouts";
 
 /**
@@ -62,12 +66,46 @@ const allStyleAttributes = computeAllStyleAttributes();
  * @returns the function to create the element
  */
 function createElementFunction(element: LayoutConfig): ExecutableExpression {
-    const allAttributes = [...element.attributes, ...element.styleAttributes];
+    const contentCardinality = element.contentCardinality;
+    const contentAttributes: AttributeConfig[] = [];
+    const isOneContent =
+        contentCardinality === ContentCardinality.ExactlyOne || contentCardinality === ContentCardinality.Optional;
+    const isManyContent =
+        contentCardinality === ContentCardinality.Many || contentCardinality === ContentCardinality.AtLeastOne;
+    let cardinalityNumber = 0;
+    if (isOneContent) {
+        contentAttributes.push({
+            name: "content",
+            description: "the content of the element",
+            type: element.contentType
+        });
+        cardinalityNumber = 1;
+    } else if (isManyContent) {
+        contentAttributes.push({
+            name: "contents",
+            description: "the contents of the element",
+            type: listType(element.contentType)
+        });
+        cardinalityNumber = Number.POSITIVE_INFINITY;
+    }
+    const allAttributes = [...element.attributes, ...element.styleAttributes, ...contentAttributes];
+
     return jsFun(
         (args, context) => {
-            args.setLocalField(SemanticFieldNames.SELF, { value: context.null });
-            args.setLocalField("type", { value: context.newString(element.type) });
-            args.setLocalField(SemanticFieldNames.PROTO, context.currentScope.getLocalField(elementProto, context));
+            context.getField("_evaluateElement").invoke(
+                [
+                    {
+                        value: new ExecutableConstExpression({ value: args })
+                    },
+                    {
+                        value: new ExecutableStringLiteralExpression(undefined, element.type)
+                    },
+                    {
+                        value: new ExecutableNumberLiteralExpression(undefined, cardinalityNumber)
+                    }
+                ],
+                context
+            );
             return args;
         },
         {
@@ -84,7 +122,9 @@ function createElementFunction(element: LayoutConfig): ExecutableExpression {
             ...element.styleAttributes.map<[string, Type]>((attr) => [
                 attr.name,
                 or(nullType, attr.type, styleValueType)
-            ])
+            ]),
+            ...contentAttributes.map<[string, Type]>((attr) => [attr.name, optional(attr.type)]),
+            [0, optional(functionType)]
         ]
     );
 }
@@ -134,6 +174,65 @@ export const diagramModule = InterpreterModule.create(
     [
         fun([
             assign(elementProto, id("object").call({ name: "_type", value: str("element") })),
+            assign(
+                "_evaluateElement",
+                fun(
+                    `
+                        (element, type, contentsCardinality) = args
+                        this.scope = element.self
+                        element.self = null
+                        element.type = type
+                        element.proto = ${elementProto}
+                        if(contentsCardinality > 0) {
+                            this.callback = element.get(0)
+                            if(callback != null) {
+                                scopeObject = object(_element = element)
+                                if(contentsCardinality == 1) {
+                                    scopeObject.addContent = {
+                                        args.self._element.content = it
+                                    }
+                                } {
+                                    scopeObject.addContent = {
+                                        this.content = it
+                                        this.element = args.self._element
+                                        if(element.contents == null) {
+                                            element.contents = list(content)
+                                        } {
+                                            element.contents.add(content)
+                                        }
+                                    }
+                                }
+                                callback.callWithScope(scopeObject)
+                            }
+                        }
+                        if(scope.addContent != null) {
+                            scope.addContent(element)
+                        }
+                    `
+                )
+            ),
+            assign(
+                "_setContent",
+                fun(
+                    `
+                        args.self._element.content = it
+                    `
+                )
+            ),
+            assign(
+                "_addContent",
+                fun(
+                    `
+                        this.content = it
+                        this.element = args.self._element
+                        if(element.contents == null) {
+                            element.contents = list(content)
+                        } {
+                            element.contents.add(content)
+                        }
+                    `
+                )
+            ),
             ...layouts.map((config) =>
                 id(SemanticFieldNames.IT).assignField(config.type, createElementFunction(config))
             )

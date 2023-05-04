@@ -15,12 +15,11 @@ export abstract class ShapeLayoutConfig extends StyledElementLayoutConfig {
     /**
      * Assigns type and styleAttributes
      *
-     * @param type the supported type
      * @param additionalAttributes additional non-style attributes
      * @param additionalStyleAttributes the supported additional style attributes
      */
-    constructor(type: string, additionalAttributes: AttributeConfig[], additionalStyleAttributes: AttributeConfig[]) {
-        super(type, additionalAttributes, [...shapeStyleAttributes, ...additionalStyleAttributes]);
+    constructor(additionalAttributes: AttributeConfig[], additionalStyleAttributes: AttributeConfig[]) {
+        super(additionalAttributes, [...shapeStyleAttributes, ...additionalStyleAttributes]);
     }
 
     /**

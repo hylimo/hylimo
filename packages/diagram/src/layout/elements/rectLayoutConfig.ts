@@ -8,9 +8,10 @@ import { ContentShapeLayoutConfig } from "./contentShapeLayoutConfig";
  * Layout config for rect
  */
 export class RectLayoutConfig extends ContentShapeLayoutConfig {
+    override type = Rect.TYPE;
+
     constructor() {
         super(
-            Rect.TYPE,
             [],
             [
                 {

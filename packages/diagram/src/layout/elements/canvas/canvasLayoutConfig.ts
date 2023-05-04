@@ -1,6 +1,16 @@
 import { FullObject, listType, objectToList, or } from "@hylimo/core";
-import { Size, Point, Element, Canvas, CanvasElement, CanvasConnection } from "@hylimo/diagram-common";
-import { LayoutElement, SizeConstraints } from "../../layoutElement";
+import {
+    Size,
+    Point,
+    Element,
+    Canvas,
+    CanvasElement,
+    CanvasConnection,
+    AbsolutePoint,
+    RelativePoint,
+    LinePoint
+} from "@hylimo/diagram-common";
+import { ContentCardinality, LayoutElement, SizeConstraints } from "../../layoutElement";
 import { Layout } from "../../layoutEngine";
 import { StyledElementLayoutConfig } from "../styledElementLayoutConfig";
 import { CanvasContentLayoutConfig } from "./canvasContentLayoutConfig";
@@ -10,9 +20,18 @@ import { canvasPointType, elementType } from "../../../module/types";
  * Layout config for the canvas
  */
 export class CanvasLayoutConfig extends StyledElementLayoutConfig {
+    override type = Canvas.TYPE;
+    override contentType = elementType(
+        CanvasElement.TYPE,
+        CanvasConnection.TYPE,
+        AbsolutePoint.TYPE,
+        RelativePoint.TYPE,
+        LinePoint.TYPE
+    );
+    override contentCardinality = ContentCardinality.Many;
+
     constructor() {
         super(
-            Canvas.TYPE,
             [
                 {
                     name: "contents",

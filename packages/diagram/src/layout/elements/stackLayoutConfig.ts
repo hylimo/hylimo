@@ -7,8 +7,10 @@ import { PanelLayoutConfig } from "./panelLayoutConfig";
  * Layout config for stack
  */
 export class StackLayoutConfig extends PanelLayoutConfig {
+    override type = "stack";
+
     constructor() {
-        super("stack", [], []);
+        super([], []);
     }
 
     override measure(layout: Layout, element: LayoutElement, constraints: SizeConstraints): Size {

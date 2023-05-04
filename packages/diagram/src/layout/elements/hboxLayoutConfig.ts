@@ -7,8 +7,10 @@ import { PanelLayoutConfig } from "./panelLayoutConfig";
  * Layout config for hbox
  */
 export class HBoxLayoutConfig extends PanelLayoutConfig {
+    override type = "hbox";
+
     constructor() {
-        super("hbox", [], []);
+        super([], []);
     }
 
     override measure(layout: Layout, element: LayoutElement, constraints: SizeConstraints): Size {

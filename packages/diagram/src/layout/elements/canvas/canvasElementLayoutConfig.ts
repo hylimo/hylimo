@@ -1,7 +1,13 @@
 import { FullObject, numberType, optional, FunctionExpression } from "@hylimo/core";
 import { Size, Point, Element, CanvasElement, ModificationSpecification } from "@hylimo/diagram-common";
 import { canvasPointType, elementType } from "../../../module/types";
-import { HorizontalAlignment, LayoutElement, SizeConstraints, VerticalAlignment } from "../../layoutElement";
+import {
+    ContentCardinality,
+    HorizontalAlignment,
+    LayoutElement,
+    SizeConstraints,
+    VerticalAlignment
+} from "../../layoutElement";
 import { Layout } from "../../layoutEngine";
 import { alignStyleAttributes, sizeStyleAttributes } from "../attributes";
 import { EditableCanvasContentLayoutConfig } from "./editableCanvasContentLayoutConfig";
@@ -11,10 +17,12 @@ import { EditableCanvasContentLayoutConfig } from "./editableCanvasContentLayout
  */
 export class CanvasElementLayoutConfig extends EditableCanvasContentLayoutConfig {
     override isLayoutContent = false;
+    override type = CanvasElement.TYPE;
+    override contentType = elementType();
+    override contentCardinality = ContentCardinality.ExactlyOne;
 
     constructor() {
         super(
-            CanvasElement.TYPE,
             [
                 {
                     name: "content",

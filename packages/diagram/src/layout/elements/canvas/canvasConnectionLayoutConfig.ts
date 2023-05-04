@@ -1,7 +1,16 @@
 import { FullObject, objectToList, optional, listType } from "@hylimo/core";
-import { Size, Point, Element, CanvasConnection, Marker } from "@hylimo/diagram-common";
+import {
+    Size,
+    Point,
+    Element,
+    CanvasConnection,
+    Marker,
+    CanvasBezierSegment,
+    CanvasLineSegment,
+    CanvasAxisAlignedSegment
+} from "@hylimo/diagram-common";
 import { canvasPointType, elementType } from "../../../module/types";
-import { LayoutElement, SizeConstraints } from "../../layoutElement";
+import { ContentCardinality, LayoutElement, SizeConstraints } from "../../layoutElement";
 import { Layout } from "../../layoutEngine";
 import { extractStrokeStyleAttributes, strokeStyleAttributes } from "../attributes";
 import { EditableCanvasContentLayoutConfig } from "./editableCanvasContentLayoutConfig";
@@ -16,10 +25,17 @@ const markerType = optional(elementType(Marker.TYPE));
  */
 export class CanvasConnectionLayoutConfig extends EditableCanvasContentLayoutConfig {
     override isLayoutContent = false;
+    override type = CanvasConnection.TYPE;
+    override contentType = elementType(
+        CanvasBezierSegment.TYPE,
+        CanvasLineSegment.TYPE,
+        CanvasAxisAlignedSegment.TYPE,
+        Marker.TYPE
+    );
+    override contentCardinality = ContentCardinality.AtLeastOne;
 
     constructor() {
         super(
-            CanvasConnection.TYPE,
             [
                 {
                     name: "contents",

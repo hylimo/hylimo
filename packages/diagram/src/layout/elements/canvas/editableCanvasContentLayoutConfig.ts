@@ -10,13 +10,11 @@ export abstract class EditableCanvasContentLayoutConfig extends CanvasContentLay
     /**
      * Creates a CanvasCoEditableCanvasContentLayoutConfigntentLayoutconfig
      *
-     * @param type the supported type
      * @param additionalAttributes additional non-style attributes
      * @param styleAttributes the supported style attributes
      */
-    constructor(type: string, additionalAttributes: AttributeConfig[], styleAttributes: AttributeConfig[]) {
+    constructor(additionalAttributes: AttributeConfig[], styleAttributes: AttributeConfig[]) {
         super(
-            type,
             [
                 {
                     name: "source",

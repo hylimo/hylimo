@@ -9,11 +9,10 @@ export abstract class StyledElementLayoutConfig extends ElementLayoutConfig {
     /**
      * Creates a new StyledElementLayoutConfig
      *
-     * @param type the supported type
      * @param additionalAttributes additional non-style attributes
      * @param styleAttributes the supported style attributes
      */
-    constructor(type: string, additionalAttributes: AttributeConfig[], additionalStyleAttributes: AttributeConfig[]) {
-        super(type, additionalAttributes, [...defaultStyleAttributes, ...additionalStyleAttributes]);
+    constructor(additionalAttributes: AttributeConfig[], additionalStyleAttributes: AttributeConfig[]) {
+        super(additionalAttributes, [...defaultStyleAttributes, ...additionalStyleAttributes]);
     }
 }

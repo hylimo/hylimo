@@ -8,9 +8,10 @@ import { CanvasPointLayoutConfig } from "./canvasPointLayoutConfig";
  * Layout config for absolute points
  */
 export class AbsolutePointLayoutConfig extends CanvasPointLayoutConfig {
+    override type = AbsolutePoint.TYPE;
+
     constructor() {
         super(
-            AbsolutePoint.TYPE,
             [
                 {
                     name: "x",

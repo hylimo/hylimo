@@ -1,6 +1,6 @@
 import { FullObject, numberType } from "@hylimo/core";
 import { Size, Point, Element, Marker } from "@hylimo/diagram-common";
-import { LayoutElement, SizeConstraints } from "../../layoutElement";
+import { ContentCardinality, LayoutElement, SizeConstraints } from "../../layoutElement";
 import { Layout } from "../../layoutEngine";
 import { StyledElementLayoutConfig } from "../styledElementLayoutConfig";
 import { elementType } from "../../../module/types";
@@ -9,9 +9,12 @@ import { elementType } from "../../../module/types";
  * Layout config for marker
  */
 export class MarkerLayoutConfig extends StyledElementLayoutConfig {
+    override type = Marker.TYPE;
+    override contentType = elementType();
+    override contentCardinality = ContentCardinality.ExactlyOne;
+
     constructor() {
         super(
-            Marker.TYPE,
             [
                 {
                     name: "content",

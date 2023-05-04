@@ -1,7 +1,7 @@
-import { FullObject, RuntimeError } from "@hylimo/core";
+import { FullObject, RuntimeError, nullType } from "@hylimo/core";
 import { Size } from "@hylimo/diagram-common";
 import { canvasPointType } from "../../../module/types";
-import { AttributeConfig, LayoutElement, SizeConstraints } from "../../layoutElement";
+import { AttributeConfig, ContentCardinality, LayoutElement, SizeConstraints } from "../../layoutElement";
 import { Layout } from "../../layoutEngine";
 import { ElementLayoutConfig } from "../elementLayoutConfig";
 import { CanvasContentLayoutConfig } from "./canvasContentLayoutConfig";
@@ -10,16 +10,17 @@ import { CanvasContentLayoutConfig } from "./canvasContentLayoutConfig";
  * Base class for all canvas connection segment layout configs
  */
 export abstract class CanvasConnectionSegmentLayoutConfig extends ElementLayoutConfig {
+    override contentType = nullType;
+    override contentCardinality = ContentCardinality.None;
+
     /**
      * Creates a new CanvasConnectionSegmentLayoutConfig
      *
-     * @param type the supported type
      * @param additionalAttributes additional non-style attributes
      * @param additionalStyleAttributes the supported style attributes
      */
-    constructor(type: string, additionalAttributes: AttributeConfig[], additionalStyleAttributes: AttributeConfig[]) {
+    constructor(additionalAttributes: AttributeConfig[], additionalStyleAttributes: AttributeConfig[]) {
         super(
-            type,
             [
                 {
                     name: "end",

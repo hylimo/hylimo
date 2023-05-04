@@ -8,9 +8,10 @@ import { CanvasConnectionSegmentLayoutConfig } from "./canvasConnectionSegmentLa
  * Layout config for canvas line segments
  */
 export class CanvasAxisAlignedSegmentLayoutConfig extends CanvasConnectionSegmentLayoutConfig {
+    override type = CanvasAxisAlignedSegment.TYPE;
+
     constructor() {
         super(
-            CanvasAxisAlignedSegment.TYPE,
             [
                 {
                     name: "verticalPos",

@@ -9,9 +9,10 @@ import { CanvasPointLayoutConfig } from "./canvasPointLayoutConfig";
  * Layout config for relative points
  */
 export class RelativePointLayoutConfig extends CanvasPointLayoutConfig {
+    override type = RelativePoint.TYPE;
+
     constructor() {
         super(
-            RelativePoint.TYPE,
             [
                 {
                     name: "offsetX",
