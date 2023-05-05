@@ -164,4 +164,28 @@ export class LocalDiagramImplementation extends DiagramImplementation {
         );
         return items;
     }
+
+    override async getSourceRange(element: string): Promise<Range | undefined> {
+        try {
+            if (this.layoutResult == undefined || this.document == undefined) {
+                return undefined;
+            } else {
+                let targetElement = this.layoutResult.layoutElementLookup.get(element);
+                while (targetElement != undefined) {
+                    const source = targetElement.element.getLocalFieldOrUndefined("source")?.source;
+                    if (source != undefined) {
+                        return Range.create(
+                            this.document.positionAt(source.position.startOffset),
+                            this.document.positionAt(source.position.endOffset)
+                        );
+                    }
+                    targetElement = targetElement?.parent;
+                }
+                return undefined;
+            }
+        } catch (e) {
+            console.log(e);
+        }
+        return undefined;
+    }
 }

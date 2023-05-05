@@ -1,6 +1,7 @@
 import {
     AxisAlignedSegmentEditAction,
     LineMoveAction,
+    NavigateToSourceAction,
     ResizeAction,
     RotationAction,
     TranslationMoveAction
@@ -21,5 +22,6 @@ export abstract class DiagramServerProxy extends SprottyDiagramServerProxy {
         registry.register(RotationAction.KIND, this);
         registry.register(ResizeAction.KIND, this);
         registry.register(AxisAlignedSegmentEditAction.KIND, this);
+        registry.register(NavigateToSourceAction.KIND, this);
     }
 }

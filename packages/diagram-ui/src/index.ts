@@ -18,6 +18,8 @@ export * from "./features/move/moveMouseListener";
 export * from "./features/move/resizeHandler";
 export * from "./features/move/rotationHandler";
 export * from "./features/move/translationMoveHandler";
+export * from "./features/navigation/di.config";
+export * from "./features/navigation/navigationMouseListener";
 export * from "./features/transaction/di.config";
 export * from "./features/transaction/transactionIdProvider";
 export * from "./features/update/di.config";

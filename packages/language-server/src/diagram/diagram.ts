@@ -2,7 +2,11 @@ import { TextDocument, TextDocumentContentChangeEvent } from "vscode-languageser
 import { SharedDiagramUtils } from "../sharedDiagramUtils";
 import { CompletionItem, Diagnostic, Position, TextDocumentEdit } from "vscode-languageserver";
 import { TransactionManager } from "../edit/transactionManager";
-import { TransactionalAction } from "@hylimo/diagram-protocol";
+import {
+    NavigateToSourceAction,
+    PublishDocumentRevealNotification,
+    TransactionalAction
+} from "@hylimo/diagram-protocol";
 import { DiagramImplementation } from "./diagramImplementation";
 import { BaseLayoutedDiagram } from "@hylimo/diagram";
 import { defaultEditRegistry } from "../edit/edits/transactionalEditRegistry";
@@ -104,6 +108,24 @@ export class Diagram {
             incrementalUpdates,
             action.sequenceNumber
         );
+    }
+
+    /**
+     * Handles a navigate to source action
+     *
+     * @param action the action to handle
+     */
+    async handleNavigateToSourceAction(action: NavigateToSourceAction): Promise<void> {
+        if (this.implementation == undefined) {
+            throw new Error("Cannot generate transactional edit without implementation");
+        }
+        const range = await this.implementation.getSourceRange(action.element);
+        if (range != undefined) {
+            await this.utils.connection.sendNotification(PublishDocumentRevealNotification.type, {
+                uri: this.document.uri,
+                range
+            });
+        }
     }
 
     /**

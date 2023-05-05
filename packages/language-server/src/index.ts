@@ -6,6 +6,7 @@ export * from "./diagram/local/localDiagramImplementation";
 export * from "./diagram/local/localDiagramImplementationManager";
 export * from "./diagram/remote/generateCompletionItemsMessage";
 export * from "./diagram/remote/generateTransactionalEditMessage";
+export * from "./diagram/remote/getSourceRangeMessage";
 export * from "./diagram/remote/registerRemoteLanguageServerMessage";
 export * from "./diagram/remote/remoteDiagramImplementation";
 export * from "./diagram/remote/remoteDiagramImplementationManager";

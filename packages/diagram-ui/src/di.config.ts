@@ -63,6 +63,7 @@ import { resetCanvasBoundsModule } from "./features/canvas-bounds/di.config";
 import { SCanvasAxisAlignedSegment } from "./model/canvas/sCanvasAxisAlignedSegment";
 import { SEllipse } from "./model/sEllipse";
 import { EllipseView } from "./views/ellipseView";
+import { navigationModule } from "./features/navigation/di.config";
 
 /**
  * The module used
@@ -110,7 +111,14 @@ export function createContainer(widgetId: string): Container {
     loadDefaultModules(container, {
         exclude: [sprottyUpdateModule, sprottyMoveModule, sprottyZOrderModule, decorationModule, undoRedoModule]
     });
-    container.load(updateModule, zorderModule, transactionModule, moveModule, resetCanvasBoundsModule);
+    container.load(
+        updateModule,
+        zorderModule,
+        transactionModule,
+        moveModule,
+        resetCanvasBoundsModule,
+        navigationModule
+    );
     container.load(diagramModule);
 
     overrideViewerOptions(container, {

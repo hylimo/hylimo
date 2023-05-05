@@ -1,6 +1,6 @@
 import { BaseLayoutedDiagram } from "@hylimo/diagram";
 import { TransactionalAction } from "@hylimo/diagram-protocol";
-import { CompletionItem, Diagnostic, Position } from "vscode-languageserver";
+import { CompletionItem, Diagnostic, Position, Range } from "vscode-languageserver";
 import { TransactionalEdit } from "../edit/edits/transactionalEdit";
 import { DiagramConfig } from "@hylimo/diagram-common";
 
@@ -53,4 +53,12 @@ export abstract class DiagramImplementation {
         config: DiagramConfig,
         position: Position
     ): Promise<CompletionItem[] | undefined>;
+
+    /**
+     * Gets the source range of an element
+     *
+     * @param element the id of the element
+     * @returns the source range of the element
+     */
+    abstract getSourceRange(element: string): Promise<Range | undefined>;
 }

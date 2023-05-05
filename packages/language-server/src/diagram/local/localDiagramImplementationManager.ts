@@ -13,6 +13,8 @@ import {
     ReplyGenerateCompletionItemMessage,
     RequestGenerateCompletionItemMessage
 } from "../remote/generateCompletionItemsMessage";
+import { ReplyGetSourceRangeMessage, RequestGetSourceRangeMessage } from "../remote/getSourceRangeMessage";
+import { Range } from "vscode-languageserver";
 
 /**
  * Manages the layouted diagrams. This is the local implementation.
@@ -52,8 +54,10 @@ export class LocalDiagramImplementationManager extends DiagramImplementationMana
             return this.handleGenerateTransactionalEditRequest(message);
         } else if (RequestGenerateCompletionItemMessage.is(message)) {
             return this.handleGenerateCompletionItemsRequest(message);
+        } else if (RequestGetSourceRangeMessage.is(message)) {
+            return this.handleGetSourceRangeRequest(message);
         } else {
-            throw new Error("Unexpected message type");
+            throw new Error("Unexpected message type: " + message.type);
         }
     }
 
@@ -110,6 +114,23 @@ export class LocalDiagramImplementationManager extends DiagramImplementationMana
         const result: ReplyGenerateCompletionItemMessage = {
             type: ReplyGenerateCompletionItemMessage.type,
             items: await implementation.generateCompletionItems(message.source, message.config, message.position)
+        };
+        return result;
+    }
+
+    /**
+     * Handles a request to get the source range of an element.
+     *
+     * @param message the message requesting the source range
+     * @returns the response message payload
+     */
+    private async handleGetSourceRangeRequest(
+        message: RequestGetSourceRangeMessage
+    ): Promise<ReplyGetSourceRangeMessage> {
+        const implementation = this.getNewDiagramImplementation(message.id);
+        const result: ReplyGetSourceRangeMessage = {
+            type: ReplyGetSourceRangeMessage.type,
+            range: await implementation.getSourceRange(message.element)
         };
         return result;
     }

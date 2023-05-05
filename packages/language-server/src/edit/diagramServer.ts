@@ -1,4 +1,4 @@
-import { TransactionalAction } from "@hylimo/diagram-protocol";
+import { NavigateToSourceAction, TransactionalAction } from "@hylimo/diagram-protocol";
 import { Action, DiagramServer as SprottyDiagramServer, DiagramServices } from "sprotty-protocol";
 import { Diagram } from "../diagram/diagram";
 
@@ -24,6 +24,8 @@ export class DiagramServer extends SprottyDiagramServer {
     protected override async handleAction(action: Action): Promise<void> {
         if (TransactionalAction.isTransactionalAction(action)) {
             return this.diagram.handleTransactionalAction(action);
+        } else if (NavigateToSourceAction.is(action)) {
+            return this.diagram.handleNavigateToSourceAction(action);
         } else {
             return super.handleAction(action);
         }

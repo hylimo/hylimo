@@ -35,6 +35,7 @@ import useResizeObserver from "@react-hook/resize-observer";
 import { DynamicLanuageServerConfig } from "@hylimo/diagram-protocol";
 import { GlobalStateContext } from "../../theme/Root";
 import { Root } from "@hylimo/diagram-common";
+import { PublishDocumentRevealNotification } from "@hylimo/diagram-protocol/src";
 
 /**
  * Name of the language
@@ -56,6 +57,7 @@ export default function HylimoEditor(): JSX.Element {
     const { colorMode } = useColorMode();
     const [code, setCode] = useLocalStorage<string>("code");
     const sprottyWrapper = useRef(null);
+    const monaco = useRef<MonacoEditor | null>(null);
     const [actionDispatcher, setActionDispatcher] = useState<IActionDispatcher | undefined>();
     const [languageClient, setLanguageClient] = useState<MonacoLanguageClient | undefined>();
     const [languageServerConfig, setLanguageServerConfig] = useState<DynamicLanuageServerConfig>({
@@ -77,6 +79,20 @@ export default function HylimoEditor(): JSX.Element {
         const reader = new BrowserMessageReader(worker);
         const writer = new BrowserMessageWriter(worker);
         const languageClient = createLanguageClient({ reader, writer });
+        languageClient.onNotification(PublishDocumentRevealNotification.type, (message) => {
+            const editor = monaco.current?.editor;
+            if (editor) {
+                const range = message.range;
+                const editorRange = {
+                    startLineNumber: range.start.line + 1,
+                    startColumn: range.start.character + 1,
+                    endLineNumber: range.end.line + 1,
+                    endColumn: range.end.character + 1
+                };
+                editor.setSelection(editorRange);
+                editor.revealRange(editorRange);
+            }
+        });
         setLanguageClient(languageClient);
         languageClient.start().then(() => {
             languageClient.sendNotification(DiagramOpenNotification.type, {
@@ -173,6 +189,7 @@ export default function HylimoEditor(): JSX.Element {
                         editor.editor.defineTheme("custom-dark", customDarkTheme as any);
                         editor.editor.defineTheme("custom-light", customLightTheme as any);
                     }}
+                    ref={monaco}
                     language={language}
                     value={code}
                     onChange={(code) => {
