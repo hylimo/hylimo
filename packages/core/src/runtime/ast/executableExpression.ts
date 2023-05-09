@@ -4,7 +4,7 @@ import { FieldEntry } from "../objects/baseObject";
 import {
     ExecutableAssignmentExpression,
     ExecutableFieldAccessExpression,
-    ExecutableInvocationArgument,
+    ExecutableListEntry,
     ExecutableInvocationExpression,
     ExecutableSelfInvocationExpression
 } from "../..";
@@ -97,7 +97,7 @@ export abstract class ExecutableExpression<T extends Expression = Expression> {
      * @param args arguments passt to the function
      * @returns the created InvocationExpression
      */
-    call(...args: (ExecutableInvocationArgument | ExecutableExpression)[]): ExecutableInvocationExpression {
+    call(...args: (ExecutableListEntry | ExecutableExpression)[]): ExecutableInvocationExpression {
         const escapedArgs = args.map((arg) => {
             if (arg instanceof ExecutableExpression) {
                 return { value: arg };
@@ -118,8 +118,8 @@ export abstract class ExecutableExpression<T extends Expression = Expression> {
      */
     callField(
         name: string,
-        ...args: (ExecutableInvocationArgument | ExecutableExpression)[]
-    ): ExecutableInvocationExpression {
+        ...args: (ExecutableListEntry | ExecutableExpression)[]
+    ): ExecutableSelfInvocationExpression {
         const escapedArgs = args.map((arg) => {
             if (arg instanceof ExecutableExpression) {
                 return { value: arg };

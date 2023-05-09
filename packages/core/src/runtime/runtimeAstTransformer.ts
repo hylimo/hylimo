@@ -1,7 +1,8 @@
 import { StringLiteralExpression } from "../ast/stringLiteralExpression";
 import { SelfInvocationExpression } from "../ast/selfInvocationExpression";
 import { NumberLiteralExpression } from "../ast/numberLiteralExpression";
-import { InvocationArgument, InvocationExpression } from "../ast/invocationExpression";
+import { InvocationExpression } from "../ast/invocationExpression";
+import { ListEntry } from "../ast/listEntry";
 import { IdentifierExpression } from "../ast/identifierExpression";
 import { FunctionExpression } from "../ast/functionExpression";
 import { FieldAccessExpression } from "../ast/fieldAccessExpression";
@@ -10,7 +11,7 @@ import { BracketExpression } from "../ast/bracketExpression";
 import { AssignmentExpression } from "../ast/assignmentExpression";
 import { Expression } from "../ast/expression";
 import { ASTVisitor } from "../ast/astVisitor";
-import { ExecutableInvocationArgument } from "./ast/executableAbstractInvocationExpression";
+import { ExecutableListEntry } from "./ast/executableListEntry";
 import { ExecutableAssignmentExpression } from "./ast/executableAssignmentExpression";
 import { ExecutableBracketExpression } from "./ast/executableBracketExpression";
 import { ExecutableDestructuringExpression } from "./ast/executableDestructuringExpression";
@@ -22,6 +23,8 @@ import { ExecutableInvocationExpression } from "./ast/executableInvocationExpres
 import { ExecutableNumberLiteralExpression } from "./ast/executableNumberLiteralExpression";
 import { ExecutableSelfInvocationExpression } from "./ast/executableSelfInvocationExpression";
 import { ExecutableStringLiteralExpression } from "./ast/executableStringLiteralExpression";
+import { ObjectExpression } from "../ast/objectExpression";
+import { ExecutableObjectExpression } from "./ast/executableObjectExpression";
 
 /**
  * Transforms the AST into an executable AST
@@ -69,7 +72,7 @@ export class RuntimeAstTransformer extends ASTVisitor<undefined, ExecutableExpre
         return new ExecutableFunctionExpression(
             this.optionalExpression(expression),
             expression.expressions.map(this.visit.bind(this)),
-            expression.decorator
+            undefined
         );
     }
 
@@ -80,7 +83,7 @@ export class RuntimeAstTransformer extends ASTVisitor<undefined, ExecutableExpre
     override visitInvocationExpression(expression: InvocationExpression): ExecutableExpression<any> {
         return new ExecutableInvocationExpression(
             this.optionalExpression(expression),
-            this.generateInvocationArguments(expression.argumentExpressions),
+            this.generateListEntries(expression.argumentExpressions),
             this.visit(expression.target)
         );
     }
@@ -92,7 +95,7 @@ export class RuntimeAstTransformer extends ASTVisitor<undefined, ExecutableExpre
     override visitSelfInvocationExpression(expression: SelfInvocationExpression): ExecutableExpression<any> {
         return new ExecutableSelfInvocationExpression(
             this.optionalExpression(expression),
-            this.generateInvocationArguments(expression.argumentExpressions),
+            this.generateListEntries(expression.argumentExpressions),
             this.visit(expression.target),
             expression.name
         );
@@ -100,6 +103,13 @@ export class RuntimeAstTransformer extends ASTVisitor<undefined, ExecutableExpre
 
     override visistStringLiteralExpression(expression: StringLiteralExpression): ExecutableExpression<any> {
         return new ExecutableStringLiteralExpression(this.optionalExpression(expression), expression.value);
+    }
+
+    override visitObjectExpression(expression: ObjectExpression): ExecutableExpression<any> {
+        return new ExecutableObjectExpression(
+            this.optionalExpression(expression),
+            this.generateListEntries(expression.fields)
+        );
     }
 
     override visit(expression: Expression): ExecutableExpression<any> {
@@ -117,12 +127,12 @@ export class RuntimeAstTransformer extends ASTVisitor<undefined, ExecutableExpre
     }
 
     /**
-     * Maps the provided invocation arguments to executable invocation arguments
+     * Maps the provided list entries to executable list entries
      *
-     * @param args the invocation arguments to map
-     * @returns the mapped invocation arguments
+     * @param args the list entries to map
+     * @returns the mapped list entries
      */
-    private generateInvocationArguments(args: InvocationArgument[]): ExecutableInvocationArgument[] {
+    private generateListEntries(args: ListEntry[]): ExecutableListEntry[] {
         return args.map((arg) => {
             return {
                 name: arg.name,

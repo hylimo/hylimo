@@ -1,6 +1,6 @@
 import { AbstractInvocationExpression } from "../../ast/abstractInvocationExpression";
 import { Expression } from "../../ast/expression";
-import { ExecutableInvocationArgument } from "../ast/executableAbstractInvocationExpression";
+import { ExecutableListEntry } from "../ast/executableListEntry";
 import { InterpreterContext } from "../interpreter";
 import { RuntimeError } from "../runtimeError";
 import { SemanticFieldNames } from "../semanticFieldNames";
@@ -80,7 +80,7 @@ export abstract class BaseObject {
      * @param callExpression the expression which causes the call and returns the results
      */
     abstract invoke(
-        args: ExecutableInvocationArgument[],
+        args: ExecutableListEntry[],
         context: InterpreterContext,
         scope?: FullObject,
         callExpression?: AbstractInvocationExpression
@@ -145,7 +145,7 @@ export abstract class SimpleObject extends BaseObject {
     }
 
     override invoke(
-        _args: ExecutableInvocationArgument[],
+        _args: ExecutableListEntry[],
         _context: InterpreterContext,
         _scope?: FullObject,
         _callExpression?: AbstractInvocationExpression

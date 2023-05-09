@@ -3,7 +3,6 @@ import { assign, fun, id, jsFun } from "../../runtime/executableAstHelper";
 import { InterpreterModule } from "../../runtime/interpreter";
 import { NumberObject } from "../../runtime/objects/numberObject";
 import { SemanticFieldNames } from "../../runtime/semanticFieldNames";
-import { Type } from "../../types/base";
 import { numberType } from "../../types/number";
 import { DefaultModuleNames } from "../defaultModuleNames";
 import { assertNumber } from "../typeHelpers";
@@ -17,14 +16,6 @@ const numberProto = "numberProto";
  * Identifier for the math object
  */
 const mathObject = "Math";
-
-/**
- * Type for number operator functions
- */
-const numberOperatorFunctionTypes: [string | number, Type][] = [
-    [0, numberType],
-    [SemanticFieldNames.SELF, numberType]
-];
 
 /**
  * Number module providing numerical operators (+, -, *, /, %, <, <=, >, >=, ==)
@@ -46,16 +37,13 @@ export const numberModule = InterpreterModule.create(
                         );
                     },
                     {
-                        docs: `
-                            Calculates the sum of two numbers.
-                            Params:
-                                - "self": the left side of the sum, must be a number
-                                - 0: the right side of the sum, must be a number
-                            Returns:
-                                The sum of the two numbers
-                        `
-                    },
-                    numberOperatorFunctionTypes
+                        docs: "Performs addition of two numbers.",
+                        params: [
+                            [SemanticFieldNames.SELF, "the left side of the sum, must be a number", numberType],
+                            [0, "the right side of the sum, must be a number", numberType]
+                        ],
+                        returns: "the sum of the two numbers"
+                    }
                 )
             ),
             id(numberProto).assignField(
@@ -68,16 +56,13 @@ export const numberModule = InterpreterModule.create(
                         );
                     },
                     {
-                        docs: `
-                            Calculates the difference of two numbers.
-                            Params:
-                                - "self": the left side of the difference, must be a number
-                                - 0: the right side of the difference, must be a number
-                            Returns:
-                                The difference of the two numbers
-                        `
-                    },
-                    numberOperatorFunctionTypes
+                        docs: "Calculates the difference of two numbers.",
+                        params: [
+                            [SemanticFieldNames.SELF, "the left side of the difference, must be a number", numberType],
+                            [0, "the right side of the difference, must be a number", numberType]
+                        ],
+                        returns: "the difference of the two numbers"
+                    }
                 )
             ),
             id(numberProto).assignField(
@@ -90,16 +75,13 @@ export const numberModule = InterpreterModule.create(
                         );
                     },
                     {
-                        docs: `
-                            Calculates the product of two numbers.
-                            Params:
-                                - "self": the left side of the product, must be a number
-                                - 0: the right side of the product, must be a number
-                            Returns:
-                                The product of the two numbers
-                        `
-                    },
-                    numberOperatorFunctionTypes
+                        docs: "Calculates the product of two numbers.",
+                        params: [
+                            [SemanticFieldNames.SELF, "the left side of the product, must be a number", numberType],
+                            [0, "the right side of the product, must be a number", numberType]
+                        ],
+                        returns: "the product of the two numbers"
+                    }
                 )
             ),
             id(numberProto).assignField(
@@ -112,16 +94,13 @@ export const numberModule = InterpreterModule.create(
                         );
                     },
                     {
-                        docs: `
-                            Calculates the quotient of two numbers.
-                            Params:
-                                - "self": the left side of the quotient, must be a number
-                                - 0: the right side of the quotient, must be a number
-                            Returns:
-                                The quotient of the two numbers
-                        `
-                    },
-                    numberOperatorFunctionTypes
+                        docs: "Calculates the quotient of two numbers.",
+                        params: [
+                            [SemanticFieldNames.SELF, "the left side of the quotient, must be a number", numberType],
+                            [0, "the right side of the quotient, must be a number", numberType]
+                        ],
+                        returns: "the quotient of the two numbers"
+                    }
                 )
             ),
             id(numberProto).assignField(
@@ -134,16 +113,13 @@ export const numberModule = InterpreterModule.create(
                         );
                     },
                     {
-                        docs: `
-                            Calculates the modulus of two numbers.
-                            Params:
-                                - "self": the left side of the modulus, must be a number
-                                - 0: the right side of the modulus, must be a number
-                            Returns:
-                                The modulus of the two numbers
-                        `
-                    },
-                    numberOperatorFunctionTypes
+                        docs: "Calculates the modulus of two numbers.",
+                        params: [
+                            [SemanticFieldNames.SELF, "the left side of the modulus, must be a number", numberType],
+                            [0, "the right side of the modulus, must be a number", numberType]
+                        ],
+                        returns: "the modulus of the two numbers"
+                    }
                 )
             ),
             id(numberProto).assignField(
@@ -156,16 +132,13 @@ export const numberModule = InterpreterModule.create(
                         );
                     },
                     {
-                        docs: `
-                            Performs "<" comparison of two numbers.
-                            Params:
-                                - "self": the left side of the comparison, must be a number
-                                - 0: the right side of the comparison, must be a number
-                            Returns:
-                                true if the left side is less than the right side
-                        `
-                    },
-                    numberOperatorFunctionTypes
+                        docs: 'Performs "<" comparison of two numbers.',
+                        params: [
+                            [SemanticFieldNames.SELF, "the left side of the comparison, must be a number", numberType],
+                            [0, "the right side of the comparison, must be a number", numberType]
+                        ],
+                        returns: "true if the left side is less than the right side"
+                    }
                 )
             ),
             id(numberProto).assignField(
@@ -178,16 +151,13 @@ export const numberModule = InterpreterModule.create(
                         );
                     },
                     {
-                        docs: `
-                            Performs ">" comparison of two numbers.
-                            Params:
-                                - "self": the left side of the comparison, must be a number
-                                - 0: the right side of the comparison, must be a number
-                            Returns:
-                                true if the left side is greater than the right side
-                        `
-                    },
-                    numberOperatorFunctionTypes
+                        docs: 'Performs ">" comparison of two numbers.',
+                        params: [
+                            [SemanticFieldNames.SELF, "the left side of the comparison, must be a number", numberType],
+                            [0, "the right side of the comparison, must be a number", numberType]
+                        ],
+                        returns: "true if the left side is greater than the right side"
+                    }
                 )
             ),
             id(numberProto).assignField(
@@ -200,16 +170,13 @@ export const numberModule = InterpreterModule.create(
                         );
                     },
                     {
-                        docs: `
-                            Performs "<=" comparison of two numbers.
-                            Params:
-                                - "self": the left side of the comparison, must be a number
-                                - 0: the right side of the comparison, must be a number
-                            Returns:
-                                true if the left side is less than or equal to the right side
-                        `
-                    },
-                    numberOperatorFunctionTypes
+                        docs: 'Performs "<=" comparison of two numbers.',
+                        params: [
+                            [SemanticFieldNames.SELF, "the left side of the comparison, must be a number", numberType],
+                            [0, "the right side of the comparison, must be a number", numberType]
+                        ],
+                        returns: "true if the left side is less than or equal to the right side"
+                    }
                 )
             ),
             id(numberProto).assignField(
@@ -222,16 +189,13 @@ export const numberModule = InterpreterModule.create(
                         );
                     },
                     {
-                        docs: `
-                            Performs ">=" comparison of two numbers.
-                            Params:
-                                - "self": the left side of the comparison, must be a number
-                                - 0: the right side of the comparison, must be a number
-                            Returns:
-                                true if the left side is greater than or equal to the right side
-                        `
-                    },
-                    numberOperatorFunctionTypes
+                        docs: 'Performs ">=" comparison of two numbers.',
+                        params: [
+                            [SemanticFieldNames.SELF, "the left side of the comparison, must be a number", numberType],
+                            [0, "the right side of the comparison, must be a number", numberType]
+                        ],
+                        returns: "true if the left side is greater than or equal to the right side"
+                    }
                 )
             ),
             id(numberProto).assignField(
@@ -249,16 +213,12 @@ export const numberModule = InterpreterModule.create(
                         return context.newBoolean(res);
                     },
                     {
-                        docs: `
-                            Compares self to another value, returns true if they are the same number.
-                            Params:
-                                - "self": a number to compare
-                                - 0: other value for the comparison
-                            Returns:
-                                true iff both values are the same number
-                        `
-                    },
-                    [[SemanticFieldNames.SELF, numberType]]
+                        docs: "Compares self to another value, returns true if they are the same number.",
+                        params: [
+                            [SemanticFieldNames.SELF, "the left side of the comparison, must be a number", numberType]
+                        ],
+                        returns: "true if the left side is equal to the right side"
+                    }
                 )
             )
         ]).call(),
@@ -273,15 +233,10 @@ export const numberModule = InterpreterModule.create(
                             return context.newNumber(Math.floor(assertNumber(args.getField(0, context))));
                         },
                         {
-                            docs: `
-                                Rounds a number down to the largester integer less than or equal to the provided value.
-                                Params:
-                                    - 0: the number to round down
-                                Returns:
-                                    The floored number
-                            `
-                        },
-                        [[0, numberType]]
+                            docs: "Rounds a number down to the largest integer less than or equal to the provided value.",
+                            params: [[0, "the number to round down", numberType]],
+                            returns: "The floored number"
+                        }
                     )
                 ),
                 id(mathObject).assignField(
@@ -291,15 +246,10 @@ export const numberModule = InterpreterModule.create(
                             return context.newNumber(Math.ceil(assertNumber(args.getField(0, context))));
                         },
                         {
-                            docs: `
-                                Rounds a number up to the smallest integer greater than or equal to the provided value.
-                                Params:
-                                    - 0: the number to round up
-                                Returns:
-                                    The ceiled number
-                            `
-                        },
-                        [[0, numberType]]
+                            docs: "Rounds a number up to the smallest integer greater than or equal to the provided value.",
+                            params: [[0, "the number to round up", numberType]],
+                            returns: "The ceiled number"
+                        }
                     )
                 ),
                 id(mathObject).assignField(
@@ -309,15 +259,10 @@ export const numberModule = InterpreterModule.create(
                             return context.newNumber(Math.round(assertNumber(args.getField(0, context))));
                         },
                         {
-                            docs: `
-                                Rounds a number to the nearest integer.
-                                Params:
-                                    - 0: the number to round
-                                Returns:
-                                    The rounded number
-                            `
-                        },
-                        [[0, numberType]]
+                            docs: "Rounds a number to the nearest integer.",
+                            params: [[0, "the number to round", numberType]],
+                            returns: "The rounded number"
+                        }
                     )
                 ),
                 id(mathObject)

@@ -1,6 +1,6 @@
 import { ExpressionMetadata } from "./expressionMetadata";
 import { Expression } from "./expression";
-import { InvocationArgument } from "./invocationExpression";
+import { ListEntry } from "./listEntry";
 
 /**
  * Base class for all invocation expressions, provides helper to generate args
@@ -14,7 +14,14 @@ export abstract class AbstractInvocationExpression<
      * @param metadata metadata for the expression
      * @param type used for serialization and debugging
      */
-    constructor(readonly argumentExpressions: InvocationArgument[], type: string, metadata: M) {
+    constructor(readonly argumentExpressions: ListEntry[], type: string, metadata: M) {
         super(type, metadata);
+    }
+
+    protected override markReadOnlyInternal(): void {
+        super.markReadOnlyInternal();
+        for (const arg of this.argumentExpressions) {
+            arg.value.markReadOnly();
+        }
     }
 }

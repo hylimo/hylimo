@@ -1,8 +1,10 @@
 import { AbstractInvocationExpression } from "../../ast/abstractInvocationExpression";
-import { Type } from "../../types/base";
 import { validate } from "../../types/validate";
-import { ExecutableAbstractFunctionExpression } from "../ast/executableAbstractFunctionExpression";
-import { ExecutableInvocationArgument } from "../ast/executableAbstractInvocationExpression";
+import {
+    ExecutableAbstractFunctionExpression,
+    FunctionDocumentation
+} from "../ast/executableAbstractFunctionExpression";
+import { ExecutableListEntry } from "../ast/executableListEntry";
 import { ExecutableFunctionExpression } from "../ast/executableFunctionExpression";
 import { ExecutableNativeFunctionExpression } from "../ast/executableNativeFunctionExpression";
 import { InterpreterContext } from "../interpreter";
@@ -19,9 +21,54 @@ export abstract class AbstractFunctionObject<T extends ExecutableAbstractFunctio
      *
      * @param parentScope the parent scope, on exec a new scope with this as parent is created
      * @param proto the prototype of this object
+     * @param docs the documentation of this function
      */
-    constructor(readonly definition: T, readonly parentScope: FullObject, proto: FullObject) {
+    constructor(readonly definition: T, readonly parentScope: FullObject, proto: FullObject, public docs: BaseObject) {
         super(proto);
+    }
+
+    override getFieldEntry(key: string | number, context: InterpreterContext): FieldEntry {
+        if (key === SemanticFieldNames.DOCS) {
+            return {
+                value: this.docs
+            };
+        } else {
+            return super.getFieldEntry(key, context);
+        }
+    }
+
+    override getFieldEntries(): Record<string, FieldEntry> {
+        const result = super.getFieldEntries();
+        if (this.docs !== undefined) {
+            result[SemanticFieldNames.DOCS] = {
+                value: this.docs
+            };
+        }
+        return result;
+    }
+
+    override setFieldEntry(key: string | number, value: FieldEntry, context: InterpreterContext): void {
+        if (key === SemanticFieldNames.DOCS) {
+            this.docs = value.value;
+        } else {
+            super.setFieldEntry(key, value, context);
+        }
+    }
+
+    override setLocalField(key: string | number, value: FieldEntry) {
+        if (key === SemanticFieldNames.DOCS) {
+            this.docs = value.value;
+        } else {
+            super.setLocalField(key, value);
+        }
+    }
+
+    override deleteField(key: string | number, context: InterpreterContext): void {
+        if (key === SemanticFieldNames.DOCS) {
+            this.docs = context.null;
+        } else {
+            super.deleteField(key, context);
+        }
     }
 
     override toNative(): any {
@@ -39,9 +86,9 @@ export abstract class AbstractFunctionObject<T extends ExecutableAbstractFunctio
  * @throws RuntimeError when the provided arguments to not match provided types
  */
 export function generateArgs(
-    args: ExecutableInvocationArgument[],
+    args: ExecutableListEntry[],
     context: InterpreterContext,
-    types?: Map<string | number, Type>
+    documentation: FunctionDocumentation | undefined
 ): FullObject {
     const argsObject = context.newObject();
     let indexCounter = 0;
@@ -49,16 +96,19 @@ export function generateArgs(
         const value = argumentExpression.value.evaluateWithSource(context);
         argsObject.setLocalField(argumentExpression.name ?? indexCounter++, value);
     }
-    for (const [key, type] of types?.entries() ?? []) {
-        const argValue = argsObject.getLocalField(key, context).value;
-        validate(type, `Invalid value for parameter ${key}`, argValue, context, () => {
-            if (typeof key === "number" && args[key] && args[key].name === undefined) {
-                return args[key].value.expression;
-            } else if (typeof key === "string") {
-                return [...args].reverse().find((arg) => arg.name === key)?.value?.expression;
-            }
-            return undefined;
-        });
+    for (const entry of documentation?.params ?? []) {
+        const [key, description, type] = entry;
+        if (type != undefined) {
+            const argValue = argsObject.getLocalField(key, context).value;
+            validate(type, `Invalid value for parameter ${key}: ${description}`, argValue, context, () => {
+                if (typeof key === "number" && args[key] && args[key].name === undefined) {
+                    return args[key].value.expression;
+                } else if (typeof key === "string") {
+                    return [...args].reverse().find((arg) => arg.name === key)?.value?.expression;
+                }
+                return undefined;
+            });
+        }
     }
     return argsObject;
 }
@@ -73,12 +123,18 @@ export class FunctionObject extends AbstractFunctionObject<ExecutableFunctionExp
      * @param definition defines the function (what to execute)
      * @param parentScope the parent scope, on exec a new scope with this as parent is created
      * @param proto the prototype of this object
+     * @param docs the documentation of this function
      */
-    constructor(definition: ExecutableFunctionExpression, parentScope: FullObject, proto: FullObject) {
-        super(definition, parentScope, proto);
+    constructor(
+        definition: ExecutableFunctionExpression,
+        parentScope: FullObject,
+        proto: FullObject,
+        docs: BaseObject
+    ) {
+        super(definition, parentScope, proto, docs);
     }
 
-    override invoke(args: ExecutableInvocationArgument[], context: InterpreterContext, scope?: FullObject): FieldEntry {
+    override invoke(args: ExecutableListEntry[], context: InterpreterContext, scope?: FullObject): FieldEntry {
         context.nextStep();
         const oldScope = context.currentScope;
         if (!scope) {
@@ -86,7 +142,7 @@ export class FunctionObject extends AbstractFunctionObject<ExecutableFunctionExp
             scope.setLocalField(SemanticFieldNames.PROTO, { value: this.parentScope });
         }
         scope.setLocalField(SemanticFieldNames.THIS, { value: scope });
-        const generatedArgs = generateArgs(args, context, this.definition.types);
+        const generatedArgs = generateArgs(args, context, this.definition.documentation);
         scope.setLocalField(SemanticFieldNames.ARGS, { value: generatedArgs });
         scope.setLocalField(SemanticFieldNames.IT, generatedArgs.getFieldEntry(0, context));
         context.currentScope = scope;
@@ -114,13 +170,19 @@ export class NativeFunctionObject extends AbstractFunctionObject<ExecutableNativ
      * @param definition defines the function (what to execute)
      * @param parentScope the parent scope, on exec a new scope with this as parent is created
      * @param proto the prototype of this object
+     * @param docs the documentation of this function
      */
-    constructor(definition: ExecutableNativeFunctionExpression, parentScope: FullObject, proto: FullObject) {
-        super(definition, parentScope, proto);
+    constructor(
+        definition: ExecutableNativeFunctionExpression,
+        parentScope: FullObject,
+        proto: FullObject,
+        docs: BaseObject
+    ) {
+        super(definition, parentScope, proto, docs);
     }
 
     override invoke(
-        args: ExecutableInvocationArgument[],
+        args: ExecutableListEntry[],
         context: InterpreterContext,
         _scope?: FullObject,
         callExpression?: AbstractInvocationExpression

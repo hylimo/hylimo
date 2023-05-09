@@ -56,13 +56,9 @@ export const objectModule = InterpreterModule.create(
                         return context.newString(self.toString());
                     },
                     {
-                        docs: `
-                            Creates and returns a string representation.
-                            Params:
-                                - "self": the input which is transformed to a string
-                            Returns:
-                                The string representation
-                        `
+                        docs: "Creates and returns a string representation.",
+                        params: [[SemanticFieldNames.SELF, "the input which is transformed to a string"]],
+                        returns: "The string representation"
                     }
                 )
             ),
@@ -74,17 +70,17 @@ export const objectModule = InterpreterModule.create(
                         return self.getFieldEntry(assertIndex(args.getField(0, context)), context);
                     },
                     {
-                        docs: `
-                            Gets the value of the field at the defined index.
-                            Takes the proto chain into account.
-                            Params:
-                                - 0: the index to access, must be a valid index (string or integer >= 0)
-                                - "self": where to access the field
-                            Returns:
-                                The found value
-                        `
-                    },
-                    [[0, or(stringType, numberType)]]
+                        docs: "Gets the field at the defined index. Takes the proto chain into account.",
+                        params: [
+                            [
+                                0,
+                                "the index to access, must be a valid index (string or integer >= 0)",
+                                or(stringType, numberType)
+                            ],
+                            [SemanticFieldNames.SELF, "where to access the field", objectType()]
+                        ],
+                        returns: "The found value"
+                    }
                 )
             ),
             id(objectProto).assignField(
@@ -96,20 +92,17 @@ export const objectModule = InterpreterModule.create(
                         return self.getLocalField(assertIndex(args.getField(0, context)), context);
                     },
                     {
-                        docs: `
-                            Gets the value of the field at the defined index.
-                            Only supported on objects, and does NOT take the proto chain into account.
-                            Params:
-                                - 0: the index to access, must be a valid index (string or integer >= 0)
-                                - "self": object on which to get the field
-                            Returns:
-                                The found value
-                        `
-                    },
-                    [
-                        [0, or(stringType, numberType)],
-                        [SemanticFieldNames.SELF, objectType()]
-                    ]
+                        docs: "Gets the value of the field at the defined index. Only supported on objects, and does NOT take the proto chain into account.",
+                        params: [
+                            [
+                                0,
+                                "the index to access, must be a valid index (string or integer >= 0)",
+                                or(stringType, numberType)
+                            ],
+                            [SemanticFieldNames.SELF, "object on which to get the field", objectType()]
+                        ],
+                        returns: "The found value"
+                    }
                 )
             ),
             id(objectProto).assignField(
@@ -122,20 +115,17 @@ export const objectModule = InterpreterModule.create(
                         return context.null;
                     },
                     {
-                        docs: `
-                            Deletes the field at the defined index.
-                            Only supported on objects, and does NOT take the proto chain into account.
-                            Params:
-                                - 0: the index to delete, must be a valid index (string or integer >= 0)
-                                - "self": object on which to delete the field
-                            Returns:
-                                null
-                        `
-                    },
-                    [
-                        [0, or(stringType, numberType)],
-                        [SemanticFieldNames.SELF, objectType()]
-                    ]
+                        docs: "Deletes the field at the defined index. Only supported on objects, and does NOT take the proto chain into account.",
+                        params: [
+                            [
+                                0,
+                                "the index to delete, must be a valid index (string or integer >= 0)",
+                                or(stringType, numberType)
+                            ],
+                            [SemanticFieldNames.SELF, "object on which to delete the field", objectType()]
+                        ],
+                        returns: "null"
+                    }
                 )
             ),
             id(objectProto).assignField(
@@ -149,21 +139,18 @@ export const objectModule = InterpreterModule.create(
                         return value;
                     },
                     {
-                        docs: `
-                            Sets the value of the field at the defined index.
-                            Only supported on objects, and does NOT take the proto chain into account.
-                            Params:
-                                - 0: the index to access, must be a valid index (string or integer >= 0)
-                                - 1: the value to assign
-                                - "self": object on which to set the field
-                            Returns:
-                                The assigned value
-                        `
-                    },
-                    [
-                        [0, or(stringType, numberType)],
-                        [SemanticFieldNames.SELF, objectType()]
-                    ]
+                        docs: "Sets the value of the field at the defined index. Only supported on objects, and does NOT take the proto chain into account.",
+                        params: [
+                            [
+                                0,
+                                "the index to access, must be a valid index (string or integer >= 0)",
+                                or(stringType, numberType)
+                            ],
+                            [1, "the value to assign"],
+                            [SemanticFieldNames.SELF, "object on which to set the field", objectType()]
+                        ],
+                        returns: "The assigned value"
+                    }
                 )
             ),
             id(objectProto).assignField(
@@ -185,21 +172,13 @@ export const objectModule = InterpreterModule.create(
                         return lastValue;
                     },
                     {
-                        docs: `
-                            Iterates over all fields of self and calls the callback with the value and key of the field.
-                            Includes the proto field.
-                            Does not guarantee any order of the visited fields.
-                            Params:
-                                - "self": the object on which all fields are iterated
-                                - 0: the callback, called with two positional parameters (value and key)
-                            Returns:
-                                The result of the last call to the callback or null if the object is empty.
-                        `
-                    },
-                    [
-                        [0, functionType],
-                        [SemanticFieldNames.SELF, objectType()]
-                    ]
+                        docs: "Iterates over all fields of self and calls the callback with the value and key of the field. Includes the proto field. Does not guarantee any order of the visited fields.",
+                        params: [
+                            [0, "the callback, called with two positional parameters (value and key)", functionType],
+                            [SemanticFieldNames.SELF, "the object on which all fields are iterated", objectType()]
+                        ],
+                        returns: "The result of the last call to the callback or null if the object is empty."
+                    }
                 )
             ),
             id(objectProto).assignField(
@@ -211,14 +190,12 @@ export const objectModule = InterpreterModule.create(
                         return context.newBoolean(self === other);
                     },
                     {
-                        docs: `
-                            Compares self to another value, returns true if they are the same.
-                            Params:
-                                - "self": one value for the comparison
-                                - 0: other value for the comparison
-                            Returns:
-                                true iff both values are the same
-                        `
+                        docs: "Compares self to another value, returns true if they are the same.",
+                        params: [
+                            [SemanticFieldNames.SELF, "one value for the comparison"],
+                            [0, "other value for the comparison"]
+                        ],
+                        returns: "true iff both values are the same"
                     }
                 )
             )
@@ -228,17 +205,13 @@ export const objectModule = InterpreterModule.create(
             native(
                 (args, context) => {
                     args.shift();
-                    const evaluatedArgs = generateArgs(args, context);
+                    const evaluatedArgs = generateArgs(args, context, undefined);
                     return { value: evaluatedArgs };
                 },
                 {
-                    docs: `
-                        Function which returns its arguments. Can be used to construct an object
-                        Params:
-                            any
-                        Returns:
-                            An object with all provided params
-                    `
+                    docs: "Function which returns its arguments. Can be used to construct an object",
+                    params: [[0, "all positional arguments: any"]],
+                    returns: "An object with all provided params"
                 }
             )
         )

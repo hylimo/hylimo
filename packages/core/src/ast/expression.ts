@@ -20,4 +20,22 @@ export abstract class Expression<M extends ExpressionMetadata = ExpressionMetada
      * @param metadata the metadata of the expression
      */
     constructor(readonly type: string, readonly metadata: M) {}
+
+    /**
+     * Marks the expression as read only
+     * If the expression is already read only, this method does nothing
+     */
+    markReadOnly(): void {
+        if (this.metadata.isEditable) {
+            this.markReadOnlyInternal();
+        }
+    }
+
+    /**
+     * Marks the expression as read only
+     * Should be overwritten to mark subexpressions as read only
+     */
+    protected markReadOnlyInternal(): void {
+        this.metadata.isEditable = false;
+    }
 }

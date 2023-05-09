@@ -165,13 +165,10 @@ const scopeExpressions: ExecutableExpression[] = [
                         and optionally a colon and a return type identifier (e.g. test() : int).
                         Parameters are defined like fields, and separated by commas.
                         Example: \`point(x : int, y : int) : Point\`
-                        Params:
-                            - 0: the function which defines the fields and functions
-                        Returns:
-                            null
-                    `
-                },
-                [[0, functionType]]
+                    `,
+                    params: [[0, "the function which defines the fields and functions", functionType]],
+                    returns: "null"
+                }
             )
         ])
     ),
@@ -461,19 +458,19 @@ const scopeExpressions: ExecutableExpression[] = [
     ),
     ...parse(
         `
-            scope.comment = scope.internal.withRegisterSource [ snippet = "(\\"$1\\")" ] {
+            scope.comment = scope.internal.withRegisterSource /*[ snippet = "(\\"$1\\")" ] */ {
                 (content) = args
                 _comment(content, self = args.self)
             }
-            scope.package = scope.internal.withRegisterSource [ snippet = "(\\"$1\\") {\\n    $2\\n}" ] {
+            scope.package = scope.internal.withRegisterSource /*[ snippet = "(\\"$1\\") {\\n    $2\\n}" ]*/ {
                 (name, callback) = args
                 _package(name, callback, args.keywords, self = args.self)
             }
-            scope.class = scope.internal.withRegisterSource [ snippet = "(\\"$1\\") {\\n    $2\\n}" ] {
+            scope.class = scope.internal.withRegisterSource /*[ snippet = "(\\"$1\\") {\\n    $2\\n}" ]*/ {
                 (name, callback) = args
                 _class(name, callback, args.keywords, args.abstract, self = args.self)
             }
-            scope.interface = scope.internal.withRegisterSource [ snippet = "(\\"$1\\") {\\n    $2\\n}" ] {
+            scope.interface = scope.internal.withRegisterSource/* [ snippet = "(\\"$1\\") {\\n    $2\\n}" ]*/ {
                 (name, callback) = args
                 keywords = list("interface")
                 otherKeywords = args.keywords
@@ -491,16 +488,10 @@ const scopeExpressions: ExecutableExpression[] = [
                 list(span(text = "\\u25c0", class = list("direction-triangle")), span(text = it))
             `,
             {
-                docs: `
-                    Can be used to create a label with an arrow pointing to the right.
-                    Typically used for labels on associations to indicate the the reading direction from right to left
-                    Params:
-                        - 0: the text of the label
-                    Returns:
-                        A list of spans, containing the arrow and the text
-                `
-            },
-            [[0, stringType]]
+                docs: "Can be used to create a label with an arrow pointing to the right. Typically used for labels on associations to indicate the the reading direction from right to left.",
+                params: [[0, "the text of the label", stringType]],
+                returns: "A list of spans, containing the arrow and the text"
+            }
         )
     ),
     id(scope).assignField(
@@ -510,16 +501,10 @@ const scopeExpressions: ExecutableExpression[] = [
                 list(span(text = it), span(text = "\\u25b8", class = list("direction-triangle")))
             `,
             {
-                docs: `
-                    Can be used to create a label with an arrow pointing to the left.
-                    Typically used for labels on associations to indicate the the reading direction from left to right
-                    Params:
-                        - 0: the text of the label
-                    Returns:
-                        A list of spans, containing the arrow and the text
-                `
-            },
-            [[0, stringType]]
+                docs: "Can be used to create a label with an arrow pointing to the left. Typically used for labels on associations to indicate the the reading direction from left to right.",
+                params: [[0, "the text of the label", stringType]],
+                returns: "A list of spans, containing the arrow and the text"
+            }
         )
     ),
     fun(

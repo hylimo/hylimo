@@ -1,4 +1,4 @@
-import { ExecutableInvocationArgument } from "../runtime/ast/executableAbstractInvocationExpression";
+import { ExecutableListEntry } from "../runtime/ast/executableListEntry";
 import { ExecutableExpression } from "../runtime/ast/executableExpression";
 import { BaseObject } from "../runtime/objects/baseObject";
 import { BooleanObject } from "../runtime/objects/booleanObject";
@@ -104,7 +104,7 @@ export function assertObject(value: BaseObject, description = ""): asserts value
  * @returns the expressions of first (self) and second (positional) argument
  */
 export function assertSelfShortCircuitArguments(
-    args: ExecutableInvocationArgument[],
+    args: ExecutableListEntry[],
     description: string
 ): [ExecutableExpression<any>, ExecutableExpression<any>] {
     if (args.length == 2) {

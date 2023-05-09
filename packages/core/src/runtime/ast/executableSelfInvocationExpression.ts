@@ -2,10 +2,8 @@ import { SelfInvocationExpression } from "../../ast/selfInvocationExpression";
 import { InterpreterContext } from "../interpreter";
 import { FieldEntry } from "../objects/baseObject";
 import { SemanticFieldNames } from "../semanticFieldNames";
-import {
-    ExecutableAbstractInvocationExpression,
-    ExecutableInvocationArgument
-} from "./executableAbstractInvocationExpression";
+import { ExecutableAbstractInvocationExpression } from "./executableAbstractInvocationExpression";
+import { ExecutableListEntry } from "./executableListEntry";
 import { ExecutableConstExpression } from "./executableConstExpression";
 import { ExecutableExpression } from "./executableExpression";
 
@@ -24,7 +22,7 @@ export class ExecutableSelfInvocationExpression extends ExecutableAbstractInvoca
      */
     constructor(
         expression: SelfInvocationExpression | undefined,
-        argumentExpressions: ExecutableInvocationArgument[],
+        argumentExpressions: ExecutableListEntry[],
         readonly target: ExecutableExpression<any>,
         readonly name: string | number
     ) {

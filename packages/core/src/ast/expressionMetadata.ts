@@ -12,7 +12,7 @@ export interface ExpressionMetadata {
     /**
      * If false, the expression should not be edited
      */
-    readonly isEditable: boolean;
+    isEditable: boolean;
 }
 
 export namespace ExpressionMetadata {

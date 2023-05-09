@@ -4,7 +4,6 @@ import { InterpreterModule } from "../../runtime/interpreter";
 import { BooleanObject } from "../../runtime/objects/booleanObject";
 import { FullObject } from "../../runtime/objects/fullObject";
 import { SemanticFieldNames } from "../../runtime/semanticFieldNames";
-import { Type } from "../../types/base";
 import { booleanType } from "../../types/boolean";
 import { DefaultModuleNames } from "../defaultModuleNames";
 import { assertBoolean, assertSelfShortCircuitArguments } from "../typeHelpers";
@@ -13,14 +12,6 @@ import { assertBoolean, assertSelfShortCircuitArguments } from "../typeHelpers";
  * Name of the boolean proto object
  */
 const booleanProto = "booleanProto";
-
-/**
- * Type for boolean operator functions
- */
-const booleanOperatorFunctionTypes: [string | number, Type][] = [
-    [0, booleanType],
-    [SemanticFieldNames.SELF, booleanType]
-];
 
 /**
  * Boolean module
@@ -58,15 +49,20 @@ export const booleanModule = InterpreterModule.create(
                         };
                     },
                     {
-                        docs: `
-                            Performs logical and (&&).
-                            Short circuit evaluation! If self is false, the positional argument is not evaluated
-                            Params:
-                                - "self": the left side of the logical and, always evaluated
-                                - 0: the right side of the logical and, only evaluated if the left side is true
-                            Returns:
-                                The result of the logical and
-                        `
+                        docs: "Performs logical and (&&). Short circuit evaluation! If self is false, the positional argument is not evaluated",
+                        params: [
+                            [
+                                SemanticFieldNames.SELF,
+                                "the left side of the logical and, always evaluated",
+                                booleanType
+                            ],
+                            [
+                                0,
+                                "the right side of the logical and, only evaluated if the left side is true",
+                                booleanType
+                            ]
+                        ],
+                        returns: "The result of the logical and"
                     }
                 )
             ),
@@ -83,15 +79,16 @@ export const booleanModule = InterpreterModule.create(
                         };
                     },
                     {
-                        docs: `
-                            Performs logical or (||).
-                            Short circuit evaluation! If self is true, the positional argument is not evaluated
-                            Params:
-                                - "self": the left side of the logical or, always evaluated
-                                - 0: the right side of the logical or, only evaluated if the left side is false
-                            Returns:
-                                The result of the logical or
-                        `
+                        docs: "Performs logical or (||). Short circuit evaluation! If self is true, the positional argument is not evaluated",
+                        params: [
+                            [SemanticFieldNames.SELF, "the left side of the logical or, always evaluated", booleanType],
+                            [
+                                0,
+                                "the right side of the logical or, only evaluated if the left side is false",
+                                booleanType
+                            ]
+                        ],
+                        returns: "The result of the logical or"
                     }
                 )
             ),
@@ -105,16 +102,17 @@ export const booleanModule = InterpreterModule.create(
                         );
                     },
                     {
-                        docs: `
-                            Performs "<" comparison of two booleans.
-                            Params:
-                                - "self": the left side of the comparison, must be a boolean
-                                - 0: the right side of the comparison, must be a boolean
-                            Returns:
-                                true if the left side is less than the right side
-                        `
-                    },
-                    booleanOperatorFunctionTypes
+                        docs: "Performs '<' comparison of two booleans",
+                        params: [
+                            [
+                                SemanticFieldNames.SELF,
+                                "the left side of the comparison, must be a boolean",
+                                booleanType
+                            ],
+                            [0, "the right side of the comparison, must be a boolean", booleanType]
+                        ],
+                        returns: "true if the left side is less than the right side"
+                    }
                 )
             ),
             id(booleanProto).assignField(
@@ -127,16 +125,17 @@ export const booleanModule = InterpreterModule.create(
                         );
                     },
                     {
-                        docs: `
-                            Performs ">" comparison of two booleans.
-                            Params:
-                                - "self": the left side of the comparison, must be a boolean
-                                - 0: the right side of the comparison, must be a boolean
-                            Returns:
-                                true if the left side is greater than the right side
-                        `
-                    },
-                    booleanOperatorFunctionTypes
+                        docs: "Performs '>' comparison of two booleans",
+                        params: [
+                            [
+                                SemanticFieldNames.SELF,
+                                "the left side of the comparison, must be a boolean",
+                                booleanType
+                            ],
+                            [0, "the right side of the comparison, must be a boolean", booleanType]
+                        ],
+                        returns: "true if the left side is greater than the right side"
+                    }
                 )
             ),
             id(booleanProto).assignField(
@@ -149,16 +148,17 @@ export const booleanModule = InterpreterModule.create(
                         );
                     },
                     {
-                        docs: `
-                            Performs "<=" comparison of two booleans.
-                            Params:
-                                - "self": the left side of the comparison, must be a boolean
-                                - 0: the right side of the comparison, must be a boolean
-                            Returns:
-                                true if the left side is less than or equal to the right side
-                        `
-                    },
-                    booleanOperatorFunctionTypes
+                        docs: "Performs '<=' comparison of two booleans",
+                        params: [
+                            [
+                                SemanticFieldNames.SELF,
+                                "the left side of the comparison, must be a boolean",
+                                booleanType
+                            ],
+                            [0, "the right side of the comparison, must be a boolean", booleanType]
+                        ],
+                        returns: "true if the left side is less than or equal to the right side"
+                    }
                 )
             ),
             id(booleanProto).assignField(
@@ -171,16 +171,17 @@ export const booleanModule = InterpreterModule.create(
                         );
                     },
                     {
-                        docs: `
-                            Performs ">=" comparison of two booleans.
-                            Params:
-                                - "self": the left side of the comparison, must be a boolean
-                                - 0: the right side of the comparison, must be a boolean
-                            Returns:
-                                true if the left side is greater than or equal to the right side
-                        `
-                    },
-                    booleanOperatorFunctionTypes
+                        docs: "Performs '>=' comparison of two booleans",
+                        params: [
+                            [
+                                SemanticFieldNames.SELF,
+                                "the left side of the comparison, must be a boolean",
+                                booleanType
+                            ],
+                            [0, "the right side of the comparison, must be a boolean", booleanType]
+                        ],
+                        returns: "true if the left side is greater than or equal to the right side"
+                    }
                 )
             ),
             id(booleanProto).assignField(
@@ -198,16 +199,13 @@ export const booleanModule = InterpreterModule.create(
                         return context.newBoolean(res);
                     },
                     {
-                        docs: `
-                            Compares self to another value, returns true if they are the same boolean.
-                            Params:
-                                - "self": a boolean to compare
-                                - 0: other value for the comparison
-                            Returns:
-                                true iff both values are the same boolean
-                        `
-                    },
-                    [[SemanticFieldNames.SELF, booleanType]]
+                        docs: "Compares self to another value, returns true if they are the same boolean.",
+                        params: [
+                            [SemanticFieldNames.SELF, "a boolean to compare", booleanType],
+                            [0, "other value for the comparison", booleanType]
+                        ],
+                        returns: "true iff both values are the same boolean"
+                    }
                 )
             )
         ]).call(),
@@ -218,15 +216,10 @@ export const booleanModule = InterpreterModule.create(
                     return context.newBoolean(!assertBoolean(args.getField(0, context)));
                 },
                 {
-                    docs: `
-                        Negates a boolean
-                        Params:
-                            0: the boolean to negate
-                        Returns:
-                            The negated argument
-                    `
-                },
-                [[0, booleanType]]
+                    docs: "Negates a boolean",
+                    params: [[0, "the boolean to negate", booleanType]],
+                    returns: "The negated argument"
+                }
             )
         )
     ]

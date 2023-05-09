@@ -38,21 +38,13 @@ export const functionModule = InterpreterModule.create(
                         return res;
                     },
                     {
-                        docs: `
-                            Calls a function with a provided scope.
-                            Sets the prototype of the provided object.
-                            This should never be set again, otherwise bugs might occur with static scoping.
-                            Params:
-                                - "self": the function to call
-                                - 0: the scope to use
-                            Returns:
-                                the result of the call
-                        `
-                    },
-                    [
-                        [0, objectType()],
-                        [SemanticFieldNames.SELF, functionType]
-                    ]
+                        docs: "Calls a function with a provided scope. Sets the prototype of the provided object. This should never be set again, otherwise bugs might occur with static scoping.",
+                        params: [
+                            [SemanticFieldNames.SELF, "the function to call", functionType],
+                            [0, "the scope to use", objectType()]
+                        ],
+                        returns: "the result of the call"
+                    }
                 )
             ),
             id(functionProto).assignField(
@@ -64,14 +56,12 @@ export const functionModule = InterpreterModule.create(
                         return context.newBoolean(self === other);
                     },
                     {
-                        docs: `
-                            Compares self to another value, returns true if they are the same.
-                            Params:
-                                - "self": one value for the comparison
-                                - 0: other value for the comparison
-                            Returns:
-                                true iff both values are the same
-                        `
+                        docs: "Compares self to another value, returns true if they are the same.",
+                        params: [
+                            [SemanticFieldNames.SELF, "one value for the comparison"],
+                            [0, "other value for the comparison"]
+                        ],
+                        returns: "true iff both values are the same"
                     }
                 )
             )

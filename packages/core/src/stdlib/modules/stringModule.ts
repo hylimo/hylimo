@@ -3,7 +3,6 @@ import { assign, fun, id, jsFun } from "../../runtime/executableAstHelper";
 import { InterpreterModule } from "../../runtime/interpreter";
 import { StringObject } from "../../runtime/objects/stringObject";
 import { SemanticFieldNames } from "../../runtime/semanticFieldNames";
-import { Type } from "../../types/base";
 import { stringType } from "../../types/string";
 import { DefaultModuleNames } from "../defaultModuleNames";
 import { assertString } from "../typeHelpers";
@@ -12,14 +11,6 @@ import { assertString } from "../typeHelpers";
  * Name of the temporary field where the string prototype is assigned
  */
 const stringProto = "stringProto";
-
-/**
- * Type for string operator functions
- */
-const stringOperatorFunctionTypes: [string | number, Type][] = [
-    [0, stringType],
-    [SemanticFieldNames.SELF, stringType]
-];
 
 /**
  * String module providing string functionality
@@ -41,16 +32,13 @@ export const stringModule = InterpreterModule.create(
                         );
                     },
                     {
-                        docs: `
-                            Performs "<" comparison of two strings.
-                            Params:
-                                - "self": the left side of the comparison, must be a string
-                                - 0: the right side of the comparison, must be a string
-                            Returns:
-                                true if the left side is less than the right side
-                        `
-                    },
-                    stringOperatorFunctionTypes
+                        docs: 'Performs "<" comparison of two strings.',
+                        params: [
+                            ["self", "the left side of the comparison, must be a string", stringType],
+                            [0, "the right side of the comparison, must be a string", stringType]
+                        ],
+                        returns: "true if the left side is less than the right side"
+                    }
                 )
             ),
             id(stringProto).assignField(
@@ -63,16 +51,13 @@ export const stringModule = InterpreterModule.create(
                         );
                     },
                     {
-                        docs: `
-                            Performs ">" comparison of two strings.
-                            Params:
-                                - "self": the left side of the comparison, must be a string
-                                - 0: the right side of the comparison, must be a string
-                            Returns:
-                                true if the left side is greater than the right side
-                        `
-                    },
-                    stringOperatorFunctionTypes
+                        docs: 'Performs ">" comparison of two strings.',
+                        params: [
+                            ["self", "the left side of the comparison, must be a string", stringType],
+                            [0, "the right side of the comparison, must be a string", stringType]
+                        ],
+                        returns: "true if the left side is greater than the right side"
+                    }
                 )
             ),
             id(stringProto).assignField(
@@ -85,16 +70,13 @@ export const stringModule = InterpreterModule.create(
                         );
                     },
                     {
-                        docs: `
-                            Performs "<=" comparison of two strings.
-                            Params:
-                                - "self": the left side of the comparison, must be a string
-                                - 0: the right side of the comparison, must be a string
-                            Returns:
-                                true if the left side is less than or equal to the right side
-                        `
-                    },
-                    stringOperatorFunctionTypes
+                        docs: 'Performs "<=" comparison of two strings.',
+                        params: [
+                            ["self", "the left side of the comparison, must be a string", stringType],
+                            [0, "the right side of the comparison, must be a string", stringType]
+                        ],
+                        returns: "true if the left side is less than or equal to the right side"
+                    }
                 )
             ),
             id(stringProto).assignField(
@@ -107,16 +89,13 @@ export const stringModule = InterpreterModule.create(
                         );
                     },
                     {
-                        docs: `
-                            Performs ">=" comparison of two strings.
-                            Params:
-                                - "self": the left side of the comparison, must be a string
-                                - 0: the right side of the comparison, must be a string
-                            Returns:
-                                true if the left side is greater than or equal to the right side
-                        `
-                    },
-                    stringOperatorFunctionTypes
+                        docs: 'Performs ">=" comparison of two strings.',
+                        params: [
+                            ["self", "the left side of the comparison, must be a string", stringType],
+                            [0, "the right side of the comparison, must be a string", stringType]
+                        ],
+                        returns: "true if the left side is greater than or equal to the right side"
+                    }
                 )
             ),
             id(stringProto).assignField(
@@ -137,16 +116,13 @@ export const stringModule = InterpreterModule.create(
                         return context.newBoolean(res);
                     },
                     {
-                        docs: `
-                            Compares self to another value, returns true if they are the same string.
-                            Params:
-                                - "self": a string to compare
-                                - 0: other value for the comparison
-                            Returns:
-                                true iff both values are the same string
-                        `
-                    },
-                    [[SemanticFieldNames.SELF, stringType]]
+                        docs: "Compares self to another value, returns true if they are the same string.",
+                        params: [
+                            ["self", "a string to compare", stringType],
+                            [0, "other value for the comparison"]
+                        ],
+                        returns: "true iff both values are the same string"
+                    }
                 )
             ),
             id(stringProto).assignField(
@@ -158,19 +134,13 @@ export const stringModule = InterpreterModule.create(
                         return context.newString(self + other);
                     },
                     {
-                        docs: `
-                            Concatenates two strings.
-                            Params:
-                                - "self": the string to concatenate to
-                                - 0: the concatenated value, must be a string
-                            Returns:
-                                concatenation of the two strings
-                        `
-                    },
-                    [
-                        [0, stringType],
-                        [SemanticFieldNames.SELF, stringType]
-                    ]
+                        docs: "Concatenates two strings.",
+                        params: [
+                            ["self", "a string to concatenate", stringType],
+                            [0, "other value to concatenate", stringType]
+                        ],
+                        returns: "concatenation of the two strings"
+                    }
                 )
             )
         ]).call()

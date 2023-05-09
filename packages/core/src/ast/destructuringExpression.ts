@@ -18,4 +18,9 @@ export class DestructuringExpression extends Expression {
     constructor(readonly names: string[], readonly value: Expression, metadata: ExpressionMetadata) {
         super(DestructuringExpression.TYPE, metadata);
     }
+
+    protected override markReadOnlyInternal(): void {
+        super.markReadOnlyInternal();
+        this.value.markReadOnly();
+    }
 }

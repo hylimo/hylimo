@@ -1,5 +1,5 @@
 import { assign, fun, id, jsFun, native, num } from "../../runtime/executableAstHelper";
-import { ExecutableInvocationArgument } from "../../runtime/ast/executableAbstractInvocationExpression";
+import { ExecutableListEntry } from "../../runtime/ast/executableListEntry";
 import { ExecutableConstExpression } from "../../runtime/ast/executableConstExpression";
 import { InterpreterModule } from "../../runtime/interpreter";
 import { BaseObject, FieldEntry } from "../../runtime/objects/baseObject";
@@ -46,16 +46,13 @@ export const listModule = InterpreterModule.create(
                         return context.null;
                     },
                     {
-                        docs: `
-                            Adds an element to the list.
-                            Params:
-                                - "self": the list where to add the element
-                                - 0: the element to add
-                            Returns:
-                                null
-                        `
-                    },
-                    [[SemanticFieldNames.SELF, listType()]]
+                        docs: "Adds an element to the list.",
+                        params: [
+                            [SemanticFieldNames.SELF, "the list where to add the element", listType()],
+                            [0, "the element to add"]
+                        ],
+                        returns: "null"
+                    }
                 )
             ),
             id(listProto).assignField(
@@ -68,19 +65,13 @@ export const listModule = InterpreterModule.create(
                         }
                     `,
                     {
-                        docs: `
-                            Adds all elements in the provided list to the list.
-                            Params:
-                                - "self": the list where to add the elements
-                                - 0: the list of elements to add
-                            Returns:
-                                null
-                        `
-                    },
-                    [
-                        [SemanticFieldNames.SELF, listType()],
-                        [0, listType()]
-                    ]
+                        docs: "Adds all elements in the provided list to the list.",
+                        params: [
+                            [SemanticFieldNames.SELF, "the list where to add the elements", listType()],
+                            [0, "the list of elements to add", listType()]
+                        ],
+                        returns: "null"
+                    }
                 )
             ),
             id(listProto).assignField("+=", id(listProto).field("add")),
@@ -96,19 +87,13 @@ export const listModule = InterpreterModule.create(
                         result
                     `,
                     {
-                        docs: `
-                            Merges to lists and createas a new list.
-                            Params
-                                - "self": the first list
-                                - 0: the second list
-                            Returns:
-                                A new list with the elements of both parameters
-                        `
-                    },
-                    [
-                        [SemanticFieldNames.SELF, listType()],
-                        [0, listType()]
-                    ]
+                        docs: "Merges to lists and createas a new list.",
+                        params: [
+                            [SemanticFieldNames.SELF, "the first list", listType()],
+                            [0, "the second list", listType()]
+                        ],
+                        returns: "A new list with the elements of both parameters"
+                    }
                 )
             ),
             id(listProto).assignField(
@@ -127,15 +112,12 @@ export const listModule = InterpreterModule.create(
                         }
                     },
                     {
-                        docs: `
-                            Removes the last element from the list, throws an error if the list is empty.
-                            Params:
-                                - "self": the list from which to remove the last element
-                            Returns:
-                                The removed element
-                        `
-                    },
-                    [[SemanticFieldNames.SELF, listType()]]
+                        docs: "Removes the last element from the list, throws an error if the list is empty.",
+                        params: [
+                            [SemanticFieldNames.SELF, "the list from which to remove the last element", listType()]
+                        ],
+                        returns: "The removed element"
+                    }
                 )
             ),
             id(listProto).assignField(
@@ -159,19 +141,13 @@ export const listModule = InterpreterModule.create(
                         return lastValue;
                     },
                     {
-                        docs: `
-                            Iterates over all entries of self in order and calls the callback with the value and index of the entry.
-                            Params:
-                                - "self": the list on which all fields are iterated
-                                - 0: the callback, called with two positional parameters (value and index)
-                            Returns:
-                                The result of the last call to the callback or null if the list is empty.
-                        `
-                    },
-                    [
-                        [SemanticFieldNames.SELF, listType()],
-                        [0, functionType]
-                    ]
+                        docs: "Iterates over all entries of self in order and calls the callback with the value and index of the entry.",
+                        params: [
+                            [SemanticFieldNames.SELF, "the list on which all fields are iterated", listType()],
+                            [0, "the callback, called with two positional parameters (value and index)", functionType]
+                        ],
+                        returns: "The result of the last call to the callback or null if the list is empty."
+                    }
                 )
             ),
             id(listProto).assignField(
@@ -187,19 +163,13 @@ export const listModule = InterpreterModule.create(
                         res
                     `,
                     {
-                        docs: `
-                            Maps a list to a new list, with the order being preserved
-                            Params:
-                                - "self": the list on which all fields are mapped
-                                - 0: the callback, called with two positional parameters (value and index)
-                            Returns:
-                                The resulting new list.
-                        `
-                    },
-                    [
-                        [SemanticFieldNames.SELF, listType()],
-                        [0, functionType]
-                    ]
+                        docs: "Maps a list to a new list, with the order being preserved",
+                        params: [
+                            [SemanticFieldNames.SELF, "the list on which all fields are mapped", listType()],
+                            [0, "the callback, called with two positional parameters (value and index)", functionType]
+                        ],
+                        returns: "The resulting new list."
+                    }
                 )
             ),
             id(SemanticFieldNames.IT).assignField(
@@ -207,19 +177,15 @@ export const listModule = InterpreterModule.create(
                 native(
                     (args, context, staticScope) => {
                         const indexOnlyArgs = args.filter((value) => !value.name);
-                        const list = generateArgs(indexOnlyArgs, context);
+                        const list = generateArgs(indexOnlyArgs, context, undefined);
                         list.setLocalField(SemanticFieldNames.PROTO, staticScope.getFieldEntry(listProto, context));
                         list.setLocalField(lengthField, { value: context.newNumber(indexOnlyArgs.length) });
                         return { value: list };
                     },
                     {
-                        docs: `
-                            Creates a new list with the defined elements
-                            Params:
-                                - 0..*: the elements to add
-                            Returns:
-                                The created list
-                        `
+                        docs: "Creates a new list with the defined elements",
+                        params: [[0, "all positional elements: the elements to add"]],
+                        returns: "The created list"
                     }
                 )
             ),
@@ -232,7 +198,7 @@ export const listModule = InterpreterModule.create(
                             const listFunction = staticScope.getField("list", context);
                             const list = listFunction.invoke(args, context);
                             const callback = staticScope.getField("callback", context);
-                            const invokeArguments: ExecutableInvocationArgument[] = [
+                            const invokeArguments: ExecutableListEntry[] = [
                                 { value: new ExecutableConstExpression(list) }
                             ];
                             invokeArguments.push(...args.filter((arg) => arg.name !== undefined));
@@ -240,14 +206,9 @@ export const listModule = InterpreterModule.create(
                         })
                     ],
                     {
-                        docs: `
-                            Creates a function which puts all indexed parameters in a list, and then calls callback with that list.
-                            Also provides all named arguments to the callback under the same name.
-                            Params:
-                                - 0: the callback to use
-                            Returns:
-                                The created function
-                        `
+                        docs: "Creates a function which puts all indexed parameters in a list, and then calls callback with that list. Also provides all named arguments to the callback under the same name.",
+                        params: [[0, "the callback to use"]],
+                        returns: "The created function"
                     }
                 )
             ),
@@ -270,15 +231,10 @@ export const listModule = InterpreterModule.create(
                         return objectEntry;
                     },
                     {
-                        docs: `
-                            Modifies the provided object so that it is a list
-                            Params:
-                                - 0: the object to modify
-                            Returns:
-                                The modified provided object
-                        `
-                    },
-                    [[0, objectType()]]
+                        docs: "Modifies the provided object so that it is a list",
+                        params: [[0, "the object to modify", objectType()]],
+                        returns: "The modified provided object"
+                    }
                 )
             ),
             id(SemanticFieldNames.IT).assignField(
@@ -296,20 +252,13 @@ export const listModule = InterpreterModule.create(
                         res
                     `,
                     {
-                        docs: `
-                            Generates a list with a range of numbers from 0 up to
-                            n with n < the first parameter.
-                            Params:
-                                - 0: the max value
-                                - 1: optional step size, defaults to 1
-                            Returns:
-                                A list with the generated numbers
-                        `
-                    },
-                    [
-                        [0, numberType],
-                        [1, optional(numberType)]
-                    ]
+                        docs: "Generates a list with a range of numbers from 0 up to n with n < the first parameter.",
+                        params: [
+                            [0, "the max value", numberType],
+                            [1, "optional step size, defaults to 1", optional(numberType)]
+                        ],
+                        returns: "A list with the generated numbers"
+                    }
                 )
             )
         ]).call(id(SemanticFieldNames.THIS))

@@ -10,12 +10,13 @@ import {
     InterpreterModule,
     jsFun,
     NativeFunctionType,
+    numberType,
     optional,
     or,
     parse
 } from "@hylimo/core";
 import { canvasPointType, elementType } from "./types";
-import { CanvasElement } from "@hylimo/diagram-common";
+import { CanvasConnection, CanvasElement } from "@hylimo/diagram-common";
 
 /**
  * Identifier for the scope variable
@@ -50,14 +51,12 @@ const scopeExpressions: ExecutableExpression[] = [
                 point
             `,
             {
-                docs: `
-                    Create a absolute point
-                    Params:
-                        - 0: the x coordinate
-                        - 1: the y coordinate
-                    Returns:
-                        The created absolute point
-                `
+                docs: "Create a absolute point",
+                params: [
+                    [0, "the x coordinate", numberType],
+                    [1, "the y coordinate", numberType]
+                ],
+                returns: "The created absolute point"
             }
         )
     ),
@@ -71,15 +70,13 @@ const scopeExpressions: ExecutableExpression[] = [
                 point
             `,
             {
-                docs: `
-                    Create a relative point
-                    Params:
-                        - 0: the target to which the point is relative
-                        - 1: the x coordinate
-                        - 2: the y coordinate
-                    Returns:
-                        The created relative point
-                `
+                docs: "Create a relative point",
+                params: [
+                    [0, "the target to which the point is relative", elementType()],
+                    [1, "the x coordinate", numberType],
+                    [2, "the y coordinate", numberType]
+                ],
+                returns: "The created relative point"
             }
         )
     ),
@@ -93,15 +90,18 @@ const scopeExpressions: ExecutableExpression[] = [
                 point
             `,
             {
-                docs: `
-                    Create a line point
-                    Params:
-                        - 0: the line provider
-                        - 1: the relative position on the line, number between 0 and 1
-                        - "seg": the segment to which the position is relative to, if not provided, the whole line is considered, should be an integer
-                    Returns:
-                        The created line point
-                `
+                docs: "Create a line point",
+                params: [
+                    [0, "the line provider", elementType(CanvasElement.TYPE, CanvasConnection.TYPE)],
+                    [1, "the relative position on the line, number between 0 and 1", numberType],
+                    [2, "the distance from the line", optional(numberType)],
+                    [
+                        "seg",
+                        "the segment to which the position is relative to, if not provided, the whole line is considered, should be an integer",
+                        optional(numberType)
+                    ]
+                ],
+                returns: "The created line point"
             }
         )
     ),
@@ -138,15 +138,12 @@ const scopeExpressions: ExecutableExpression[] = [
                 }
             `,
             {
-                docs: `
-                    Style function which can either be used globally with one parameter
-                    or applied as operator to some (graphical) element
-                    Params:
-                        - 0: either the element or the callback which contains the style definition
-                        - 1: if an element was provided for 0, the callback
-                    Returns:
-                        The provided object if or null if none was provided
-                `
+                docs: "Style function which can either be used globally with one parameter or applied as operator to some (graphical) element",
+                params: [
+                    [0, "either the element or the callback which contains the style definition"],
+                    [1, "if an element was provided for 0, the callback"]
+                ],
+                returns: "The provided object if or null if none was provided"
             }
         )
     ),
@@ -241,14 +238,16 @@ const scopeExpressions: ExecutableExpression[] = [
                 self
             `,
             {
-                docs: `
-                    Layout operator which can be applied either to a CanvasElement
-                    Params:
-                        - 0: the CanvasElement or CanvasConnection to ally the layout to
-                        - 1: callback which provides the layout definition
-                    Returns:
-                        The provided element
-                `
+                docs: "Layout operator which can be applied either to a CanvasElement",
+                params: [
+                    [
+                        0,
+                        "the CanvasElement or CanvasConnection to ally the layout to",
+                        elementType(CanvasElement.TYPE, CanvasConnection.TYPE)
+                    ],
+                    [1, "callback which provides the layout definition", functionType]
+                ],
+                returns: "The provided element"
             }
         )
     ),
@@ -293,15 +292,12 @@ const scopeExpressions: ExecutableExpression[] = [
                 self
             `,
             {
-                docs: `
-                    Helper for which applies a with operator to a CanvasConnection.
-                    Handles the routing points, and labels.
-                    Params:
-                        - 0: the CanvasConnection to which to apply the with
-                        - 1: the callback providing the new route via the field over
-                    Returns:
-                        undefined
-                `,
+                docs: "Helper which applies a with operator to a CanvasElement. Handles the routing points, and labels.",
+                params: [
+                    [0, "the CanvasElement to which to apply the with", elementType(CanvasConnection.TYPE)],
+                    [1, "the callback providing the new route via the field over", functionType]
+                ],
+                returns: "null",
                 snippet: ` {\n    over = start($1).line(end($2))\n}`
             }
         )
@@ -342,11 +338,14 @@ const scopeExpressions: ExecutableExpression[] = [
                 scope.contents += connection
                 connection
             `,
-            {},
-            [
-                [0, or(canvasPointType, elementType(CanvasElement.TYPE))],
-                [0, or(canvasPointType, elementType(CanvasElement.TYPE))]
-            ]
+            {
+                docs: "Helper which creates a CanvasConnection between two elements",
+                params: [
+                    [0, "the start element", or(canvasPointType, elementType(CanvasElement.TYPE))],
+                    [1, "the end element", or(canvasPointType, elementType(CanvasElement.TYPE))]
+                ],
+                returns: "The created CanvasConnection"
+            }
         )
     ),
     id(scope)
@@ -365,7 +364,7 @@ const scopeExpressions: ExecutableExpression[] = [
                 };
                 return new ExecutableNativeFunctionExpression(
                     wrapperFunctionCallback,
-                    callback.definition.decorator
+                    callback.definition.documentation
                 ).evaluate(context);
             })
         ),
@@ -390,14 +389,12 @@ const scopeExpressions: ExecutableExpression[] = [
                 }
             `,
                 {
-                    docs: `
-                    Creates new connection operator function which can be used create new connections.
-                    Params:
-                        - 0: optional start marker
-                        - 1: optional end marker
-                    Returns:
-                        The generated eonnection operator function
-                `
+                    docs: "Creates new connection operator function which can be used create new connections.",
+                    params: [
+                        [0, "optional start marker factory", optional(functionType)],
+                        [1, "optional end marker factory", optional(functionType)]
+                    ],
+                    returns: "The generated connection operator function"
                 }
             )
         ),
@@ -465,10 +462,8 @@ export const dslModule = InterpreterModule.create(
     [
         assign(
             "generateDiagramEnvironment",
-            fun(
-                [...parse("scopeEnhancer = it ?? { }"), fun(scopeExpressions)],
-                {
-                    docs: `
+            fun([...parse("scopeEnhancer = it ?? { }"), fun(scopeExpressions)], {
+                docs: `
                         Creates a function which can be then used as a DSL function to create a diagram.
                         The function takes a callback, which is invoked with a custom scope.
                         By default, in this scope exist
@@ -480,14 +475,16 @@ export const dslModule = InterpreterModule.create(
                             - fonts: list of fonts
                         Additional function can be provided using the scopeEnhancer.
                         The function than uses styles, fonts and contents to create and return the diagram
-                        Params:
-                            - 0: the scope enhancer, a function which takes the scope and can modify it, optional
-                        Returns:
-                            The diagram DSL function
-                    `
-                },
-                [[0, optional(functionType)]]
-            )
+                    `,
+                params: [
+                    [
+                        0,
+                        "the scope enhancer, a function which takes the scope and can modify it, optional",
+                        optional(functionType)
+                    ]
+                ],
+                returns: "The diagram DSL function"
+            })
         ),
         assign("diagram", id("generateDiagramEnvironment").call())
     ]

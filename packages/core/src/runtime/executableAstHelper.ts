@@ -11,11 +11,11 @@ import { BaseObject, FieldEntry } from "./objects/baseObject";
 import { FullObject } from "./objects/fullObject";
 import { generateArgs } from "./objects/functionObject";
 import { RuntimeAstTransformer } from "./runtimeAstTransformer";
-import { Type } from "../types/base";
 import { Parser } from "../parser/parser";
 import { ExecutableFunctionExpression } from "./ast/executableFunctionExpression";
 import { ExecutableNativeExpression } from "./ast/executableNativeExpression";
-import { InvocationArgument } from "../ast/invocationExpression";
+import { ListEntry } from "../ast/listEntry";
+import { FunctionDocumentation } from "./ast/executableAbstractFunctionExpression";
 
 /**
  * Helper function to create an IdentifierExpression without a position
@@ -65,7 +65,7 @@ export function assign(field: string, value: ExecutableExpression): ExecutableAs
  * @param value the Expression used as the argument
  * @returns the created InvocationArgument
  */
-export function arg(value: Expression): InvocationArgument {
+export function arg(value: Expression): ListEntry {
     return {
         value
     };
@@ -78,25 +78,11 @@ export function arg(value: Expression): InvocationArgument {
  * @param name the name of the named argument
  * @returns the created InvocationArgument
  */
-export function namedArg(name: string, value: Expression): InvocationArgument {
+export function namedArg(name: string, value: Expression): ListEntry {
     return {
         name,
         value
     };
-}
-
-/**
- * Parsdes a set of decorators provided as object
- *
- * @param decorators the decorators before parsing
- * @returns the parsed decorators
- */
-function parseDecorators(decorators: { [index: string]: string | null }): Map<string, string | undefined> {
-    const parsedDecorators = new Map<string, string | undefined>();
-    for (const [name, value] of Object.entries(decorators)) {
-        parsedDecorators.set(name, value ?? undefined);
-    }
-    return parsedDecorators;
 }
 
 /**
@@ -128,8 +114,7 @@ export function parse(expressions: string): ExecutableExpression[] {
  */
 export function fun(
     expressions: ExecutableExpression[] | string,
-    decorators: { [index: string]: string | null } = {},
-    types?: [string | number, Type][]
+    documentation?: FunctionDocumentation
 ): ExecutableFunctionExpression {
     let parsedExpressions: ExecutableExpression[];
     if (typeof expressions === "string") {
@@ -137,15 +122,14 @@ export function fun(
     } else {
         parsedExpressions = expressions;
     }
-    return new ExecutableFunctionExpression(undefined, parsedExpressions, parseDecorators(decorators), new Map(types));
+    return new ExecutableFunctionExpression(undefined, parsedExpressions, documentation);
 }
 
 /**
  * Helper to create a NativeFunctionExpression with already evaluated arguments
  *
  * @param callback executed to get the result of the function
- * @param decorators decorators applied to the function
- * @param types argument types to check
+ * @param documentation the documentation of the function
  * @returns the created FunctionExpression
  */
 export function jsFun(
@@ -154,18 +138,10 @@ export function jsFun(
         context: InterpreterContext,
         callExpression: AbstractInvocationExpression | undefined
     ) => BaseObject | FieldEntry,
-    decorators: { [index: string]: string | null } = {},
-    types?: [string | number, Type][]
+    documentation?: FunctionDocumentation
 ): ExecutableNativeFunctionExpression {
-    if (types) {
-        for (const [key, type] of types) {
-            if (type == undefined) {
-                throw new Error(`Undefined type provided for key ${key}`);
-            }
-        }
-    }
     return new ExecutableNativeFunctionExpression((args, context, staticScope, callExpression) => {
-        const evaluatedArgs = generateArgs(args, context, new Map(types));
+        const evaluatedArgs = generateArgs(args, context, documentation);
         const oldScope = context.currentScope;
         context.currentScope = staticScope;
         const res = callback(evaluatedArgs, context, callExpression);
@@ -175,21 +151,21 @@ export function jsFun(
         } else {
             return res;
         }
-    }, parseDecorators(decorators));
+    }, documentation);
 }
 
 /**
  * Helper to create a NativeFunctionExpression with already evaluated arguments
  *
  * @param callback executed to get the result of the function
- * @param decorators decorators applied to the function
+ * @param documentation the documentation of the function
  * @returns the created FunctionExpression
  */
 export function native(
     callback: NativeFunctionType,
-    decorators: { [index: string]: string | null } = {}
+    documentation?: FunctionDocumentation
 ): ExecutableNativeFunctionExpression {
-    return new ExecutableNativeFunctionExpression(callback, parseDecorators(decorators));
+    return new ExecutableNativeFunctionExpression(callback, documentation);
 }
 
 /**

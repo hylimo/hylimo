@@ -3,14 +3,14 @@ import { InterpreterContext } from "../interpreter";
 import { FieldEntry } from "../objects/baseObject";
 import { FullObject } from "../objects/fullObject";
 import { NativeFunctionObject } from "../objects/functionObject";
-import { ExecutableAbstractFunctionExpression } from "./executableAbstractFunctionExpression";
-import { ExecutableInvocationArgument } from "./executableAbstractInvocationExpression";
+import { ExecutableAbstractFunctionExpression, FunctionDocumentation } from "./executableAbstractFunctionExpression";
+import { ExecutableListEntry } from "./executableListEntry";
 
 /**
  * Type for the callback of native functions
  */
 export type NativeFunctionType = (
-    args: ExecutableInvocationArgument[],
+    args: ExecutableListEntry[],
     context: InterpreterContext,
     staticScope: FullObject,
     callExpression: AbstractInvocationExpression | undefined
@@ -24,13 +24,20 @@ export class ExecutableNativeFunctionExpression extends ExecutableAbstractFuncti
      * Creats a new ExecutableNativeFunctionExpression
      *
      * @param callback the callback to call when the function is invoked
-     * @param decorator decorators of the function
+     * @param documentation the documentation of the function
      */
-    constructor(readonly callback: NativeFunctionType, decorator: Map<string, string | undefined>) {
-        super(undefined, decorator);
+    constructor(readonly callback: NativeFunctionType, documentation: FunctionDocumentation | undefined) {
+        super(undefined, documentation);
     }
 
     override evaluateInternal(context: InterpreterContext): FieldEntry {
-        return { value: new NativeFunctionObject(this, context.currentScope, context.functionPrototype) };
+        return {
+            value: new NativeFunctionObject(
+                this,
+                context.currentScope,
+                context.functionPrototype,
+                this.convertDocumentationToObject(context)
+            )
+        };
     }
 }

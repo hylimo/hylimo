@@ -46,22 +46,18 @@ export const commonModule = InterpreterModule.create(
                     }
                 },
                 {
-                    docs: `
-                        If control flow statement.
-                        Params:
-                            - 0: boolean which decides if the second or third argument is executed
-                            - 1: a function which is called if the first argument is true
-                            - 2: optional, if present must be a function which is called if the first argument is false
-                        Returns:
-                            If a function was called, the result of the function. Otherwise null
-                    `,
-                    snippet: "($1) {\n    $2\n}"
-                },
-                [
-                    [0, booleanType],
-                    [1, functionType],
-                    [2, optional(functionType)]
-                ]
+                    docs: "If control flow statement.",
+                    params: [
+                        [0, "boolean which decides if the second or third argument is executed", booleanType],
+                        [1, "a function which is called if the first argument is true", functionType],
+                        [
+                            2,
+                            "optional, if present must be a function which is called if the first argument is false",
+                            optional(functionType)
+                        ]
+                    ],
+                    returns: "If a function was called, the result of the function. Otherwise null"
+                }
             )
         ),
         assign(
@@ -84,20 +80,14 @@ export const commonModule = InterpreterModule.create(
                     return lastValue;
                 },
                 {
-                    docs: `
-                        While control flow statement.
-                        Params:
-                            - 0: the condition function, executed before each loop, must return a boolean
-                            - 1: the body function, executed on each loop
-                        Returns:
-                            The result of the last loop iteration or null if the loop was never executed.
-                    `,
+                    docs: "While control flow statement.",
+                    params: [
+                        [0, "the condition function, executed before each loop, must return a boolean", functionType],
+                        [1, "the body function, executed on each loop", functionType]
+                    ],
+                    returns: "The result of the last loop iteration or null if the loop was never executed.",
                     snippet: " { $1 } {\n    $2\n}"
-                },
-                [
-                    [0, functionType],
-                    [1, functionType]
-                ]
+                }
             )
         ),
         assign(
@@ -121,14 +111,9 @@ export const commonModule = InterpreterModule.create(
                     }
                 },
                 {
-                    docs: `
-                        Transforms the input to a string and returns it.
-                        If the input is null, returns null directly, otherwise calls toString on the input
-                        Params:
-                            - 0: the input to transform
-                        Returns:
-                            The string representation
-                    `
+                    docs: "Transforms the input to a string and returns it. If the input is null, returns null directly, otherwise calls toString on the input",
+                    params: [[0, "the input to transform"]],
+                    returns: "The string representation"
                 }
             )
         ),
@@ -139,13 +124,10 @@ export const commonModule = InterpreterModule.create(
                     throw new RuntimeError(assertString(args.getField(0, context)));
                 },
                 {
-                    docs: `
-                        Throws an error with the specified message.
-                        Params:
-                            - 0: the error message, must be a string
-                    `
-                },
-                [[0, stringType]]
+                    docs: "Throws an error with the specified message.",
+                    params: [[0, "the error message, must be a string", stringType]],
+                    returns: "The return value"
+                }
             )
         )
     ]

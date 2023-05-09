@@ -1,5 +1,5 @@
 import { AbstractInvocationExpression } from "../../ast/abstractInvocationExpression";
-import { ExecutableInvocationArgument } from "../ast/executableAbstractInvocationExpression";
+import { ExecutableListEntry } from "../ast/executableListEntry";
 import { InterpreterContext } from "../interpreter";
 import { RuntimeError } from "../runtimeError";
 import { BaseObject, FieldEntry } from "./baseObject";
@@ -35,7 +35,7 @@ export class NullObject extends BaseObject {
     }
 
     override invoke(
-        _args: ExecutableInvocationArgument[],
+        _args: ExecutableListEntry[],
         _context: InterpreterContext,
         _scope?: FullObject,
         _callExpression?: AbstractInvocationExpression

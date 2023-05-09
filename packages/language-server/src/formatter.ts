@@ -170,32 +170,6 @@ function generateFormatVisitor(parser: Parser): ICstVisitor<CommentManager, Doc>
         }
 
         /**
-         * Formats a function decorator
-         *
-         * @param ctx the children of the current CST node
-         * @param param the comment manager used to print comments
-         * @returns the formatted function decorator
-         */
-        private decorator(ctx: any, param: CommentManager): Doc {
-            const entries = (ctx.decoratorEntry ?? []).map((entry: CstNode) => this.visit(entry, param));
-            return group(["[", indent([softline, join([",", line], entries)]), softline, "]"]);
-        }
-
-        /**
-         * Formats a decorator entry
-         *
-         * @param ctx the children of the current CST node
-         * @returns the formatted decorator entry
-         */
-        private decoratorEntry(ctx: any): Doc {
-            if (ctx.String) {
-                return [ctx.Identifier[0].image, " = ", ctx.String[0].image];
-            } else {
-                return ctx.Identifier[0].image;
-            }
-        }
-
-        /**
          * Formats a function expression
          *
          * @param ctx the children of the current CST node
@@ -203,35 +177,26 @@ function generateFormatVisitor(parser: Parser): ICstVisitor<CommentManager, Doc>
          * @returns the formatted function expression
          */
         private function(ctx: any, param: CommentManager): Doc {
-            let decorator: Doc;
-            if (ctx.decorator) {
-                decorator = [this.visit(ctx.decorator, param), " "];
-            } else {
-                decorator = [];
-            }
             const expressions = ctx.expressions[0];
             const openBracket = ctx.OpenCurlyBracket[0];
             const closeBracket = ctx.CloseCurlyBracket[0];
             const expressionsDocs = this.visit(ctx.expressions, param);
             const expressionsChildren = expressions.children;
             const newLine = expressionsChildren.StartNewLine ? hardline : line;
-            return [
-                decorator,
-                group([
-                    "{",
-                    indent([
-                        newLine,
-                        ...this.commentsInRange(openBracket, expressions, param),
-                        expressionsDocs,
-                        ...this.commentsInRange(expressions, closeBracket, param, {
-                            endLine: false,
-                            startLine: true
-                        })
-                    ]),
+            return group([
+                "{",
+                indent([
                     newLine,
-                    "}"
-                ])
-            ];
+                    ...this.commentsInRange(openBracket, expressions, param),
+                    expressionsDocs,
+                    ...this.commentsInRange(expressions, closeBracket, param, {
+                        endLine: false,
+                        startLine: true
+                    })
+                ]),
+                newLine,
+                "}"
+            ]);
         }
 
         /**
@@ -268,13 +233,13 @@ function generateFormatVisitor(parser: Parser): ICstVisitor<CommentManager, Doc>
         }
 
         /**
-         * Formats a call argument
+         * Formats a list entry
          *
          * @param ctx the children of the current CST node
          * @param param the comment manager used to print comments
          * @returns the formatted call argument
          */
-        private callArgument(ctx: any, param: CommentManager): Doc {
+        private listEntry(ctx: any, param: CommentManager): Doc {
             if (ctx.Identifier) {
                 return [ctx.Identifier[0].image, " = ", this.visit(ctx.operatorExpression, param)];
             } else {
@@ -292,7 +257,7 @@ function generateFormatVisitor(parser: Parser): ICstVisitor<CommentManager, Doc>
         private callBrackets(ctx: any, param: CommentManager): Doc {
             const allBrackets: Doc[] = [];
             if (ctx.OpenRoundBracket) {
-                const args = (ctx.callArgument ?? []).map((argument: CstNode) => this.visit(argument, param));
+                const args = (ctx.listEntry ?? []).map((argument: CstNode) => this.visit(argument, param));
                 allBrackets.push(group(["(", indent([softline, join([",", line], args)]), softline, ")"]));
             }
             if (ctx.function) {
@@ -302,6 +267,18 @@ function generateFormatVisitor(parser: Parser): ICstVisitor<CommentManager, Doc>
                 allBrackets.push(...ctx.function.map((func: CstNode) => this.visit(func, param)));
             }
             return join(" ", allBrackets);
+        }
+
+        /**
+         * Formats an object expression
+         *
+         * @param ctx the children of the current CST node
+         * @param param the comment manager used to print comments
+         * @returns the formatted object expression
+         */
+        private objectExpression(ctx: any, param: CommentManager): Doc {
+            const args = (ctx.listEntry ?? []).map((argument: CstNode) => this.visit(argument, param));
+            return group(["[", indent([softline, join([",", line], args)]), softline, "]"]);
         }
 
         /**
@@ -319,8 +296,10 @@ function generateFormatVisitor(parser: Parser): ICstVisitor<CommentManager, Doc>
                 baseExpression = this.visit(ctx.literal, param);
             } else if (ctx.function) {
                 baseExpression = this.visit(ctx.function, param);
-            } else {
+            } else if (ctx.bracketExpression) {
                 baseExpression = this.visit(ctx.bracketExpression, param);
+            } else {
+                baseExpression = this.visit(ctx.objectExpression, param);
             }
             if (ctx.callBrackets) {
                 return [baseExpression, ctx.callBrackets.map((brackets: CstNode) => this.visit(brackets, param))];

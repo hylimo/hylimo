@@ -29,7 +29,7 @@ export function validate(
         } else {
             reasonMessagePart = reason;
         }
-        const message = `${messageStart}: ${reasonMessagePart}`;
+        const message = `${messageStart}: \n${reasonMessagePart}`;
         const error = new RuntimeError(message);
         const source = sourceGenerator();
         if (source) {

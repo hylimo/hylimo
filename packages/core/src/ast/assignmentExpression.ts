@@ -25,4 +25,12 @@ export class AssignmentExpression extends Expression<CompletionExpressionMetadat
     ) {
         super(AssignmentExpression.TYPE, metadata);
     }
+
+    protected override markReadOnlyInternal(): void {
+        super.markReadOnlyInternal();
+        this.value.markReadOnly();
+        if (this.target != undefined) {
+            this.target.markReadOnly();
+        }
+    }
 }

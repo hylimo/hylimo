@@ -1,20 +1,7 @@
 import { ExpressionMetadata } from "./expressionMetadata";
 import { Expression } from "./expression";
 import { AbstractInvocationExpression } from "./abstractInvocationExpression";
-
-/**
- * Argument for a function invocation
- */
-export interface InvocationArgument {
-    /**
-     * The optional name of the argument
-     */
-    name?: string;
-    /**
-     * Evaluated to be the value of the argument
-     */
-    value: Expression;
-}
+import { ListEntry } from "./listEntry";
 
 /*
  * Function invocation expression
@@ -30,7 +17,15 @@ export class InvocationExpression extends AbstractInvocationExpression {
      * @param argumentExpressions evaluated to provide arguments
      * @param metadata metadata for the expression
      */
-    constructor(readonly target: Expression, argumentExpressions: InvocationArgument[], metadata: ExpressionMetadata) {
+    constructor(readonly target: Expression, argumentExpressions: ListEntry[], metadata: ExpressionMetadata) {
         super(argumentExpressions, InvocationExpression.TYPE, metadata);
+    }
+
+    protected override markReadOnlyInternal(): void {
+        super.markReadOnlyInternal();
+        this.target.markReadOnly();
+        for (const argument of this.argumentExpressions) {
+            argument.value.markReadOnly();
+        }
     }
 }

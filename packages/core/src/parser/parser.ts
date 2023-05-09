@@ -1,7 +1,7 @@
 import { CstNode, CstParser, ICstVisitor, ILexingError, IRecognitionException, IToken, Lexer } from "chevrotain";
 import { Expression } from "../ast/expression";
 import { ASTExpressionPosition } from "../ast/astExpressionPosition";
-import { CstVisitorParameters, generateCstToAstTransfromer } from "./cstToAstTransformer";
+import { generateCstToAstTransfromer } from "./cstToAstTransformer";
 import {
     CloseCurlyBracket,
     CloseRoundBracket,
@@ -25,18 +25,17 @@ import {
  */
 export enum Rules {
     LITERAL = "literal",
-    DECORATOR = "decorator",
-    DECORATOR_ENTRY = "decoratorEntry",
     FUNCTION = "function",
     EXPRESSIONS = "expressions",
     CALL_EXPRESSION = "callExpression",
     SIMPLE_CALL_EXPRESSION = "simpleCallExpression",
     CALL_BRACKETS = "callBrackets",
-    CALL_ARGUMENT = "callArgument",
+    LIST_ENTRY = "listEntry",
     BRACKET_EXPRESSION = "bracketExpression",
     FIELD_ACCESS_EXPRESSION = "fieldAccessExpression",
     SIMPLE_FIELD_ACCESS_EXPRESSION = "simpleFieldAccessExpression",
     OPERATOR_EXPRESSION = "operatorExpression",
+    OBJECT_EXPRESSION = "objectExpression",
     EXPRESSION = "expression",
     DESTRUCTURING_EXPRESSION = "destructuringExpression"
 }
@@ -84,7 +83,7 @@ export class Parser extends CstParser {
     /**
      * Visitor to be used to generate the AST
      */
-    private readonly visitor: ICstVisitor<CstVisitorParameters, any>;
+    private readonly visitor: ICstVisitor<never, any>;
 
     /**
      * Creates a new parser
@@ -115,39 +114,9 @@ export class Parser extends CstParser {
     });
 
     /**
-     * Decorator which can be applied to functions
-     * Consists of square brackets with decorator entries inside
-     */
-    private decorator = this.RULE(Rules.DECORATOR, () => {
-        this.CONSUME(OpenSquareBracket);
-        this.MANY_SEP({
-            SEP: Comma,
-            DEF: () => {
-                this.SUBRULE(this.decoratorEntry);
-            }
-        });
-        this.CONSUME(CloseSquareBracket);
-    });
-
-    /**
-     * Decorator entry rule, either an identifier or an identifier
-     * followed by a string assignment
-     */
-    private decoratorEntry = this.RULE(Rules.DECORATOR_ENTRY, () => {
-        this.CONSUME(Identifier);
-        this.OPTION(() => {
-            this.CONSUME(Equal);
-            this.CONSUME(String);
-        });
-    });
-
-    /**
      * Function consisting of curly brackets with expressions inside
      */
     private function = this.RULE(Rules.FUNCTION, () => {
-        this.OPTION(() => {
-            this.SUBRULE(this.decorator);
-        });
         this.CONSUME(OpenCurlyBracket);
         this.SUBRULE(this.expressions);
         this.CONSUME(CloseCurlyBracket);
@@ -172,15 +141,27 @@ export class Parser extends CstParser {
     });
 
     /**
-     * Argument of a function invocation
+     * List entry, used for function parameters and object expressions
      * An (optionally named) operator expression (no assignment)
      */
-    private callArgument = this.RULE(Rules.CALL_ARGUMENT, () => {
+    private listEntry = this.RULE(Rules.LIST_ENTRY, () => {
         this.OPTION(() => {
             this.CONSUME(Identifier);
             this.CONSUME(Equal);
         });
         this.SUBRULE(this.operatorExpression);
+    });
+
+    /**
+     * Rule for object expressions allowing to create new objects
+     */
+    private objectExpression = this.RULE(Rules.OBJECT_EXPRESSION, () => {
+        this.CONSUME(OpenSquareBracket);
+        this.MANY_SEP({
+            SEP: Comma,
+            DEF: () => this.SUBRULE(this.listEntry)
+        });
+        this.CONSUME(CloseSquareBracket);
     });
 
     /**
@@ -196,7 +177,7 @@ export class Parser extends CstParser {
                     this.CONSUME(OpenRoundBracket);
                     this.MANY_SEP({
                         SEP: Comma,
-                        DEF: () => this.SUBRULE(this.callArgument)
+                        DEF: () => this.SUBRULE(this.listEntry)
                     });
                     this.CONSUME(CloseRoundBracket);
                 }
@@ -219,7 +200,8 @@ export class Parser extends CstParser {
             { ALT: () => this.CONSUME(Identifier) },
             { ALT: () => this.SUBRULE(this.literal) },
             { ALT: () => this.SUBRULE(this.function) },
-            { ALT: () => this.SUBRULE(this.bracketExpression) }
+            { ALT: () => this.SUBRULE(this.bracketExpression) },
+            { ALT: () => this.SUBRULE(this.objectExpression) }
         ]);
         this.MANY(() => {
             this.SUBRULE(this.callBrackets);
@@ -339,7 +321,7 @@ export class Parser extends CstParser {
      * @returns the generated AST
      */
     private generateAST(cst: CstNode): Expression[] {
-        return this.visitor.visit(cst, { editable: true }) as Expression[];
+        return this.visitor.visit(cst) as Expression[];
     }
 
     /**

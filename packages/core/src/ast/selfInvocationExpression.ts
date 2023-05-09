@@ -1,7 +1,7 @@
 import { CompletionExpressionMetadata } from "./expressionMetadata";
 import { Expression } from "./expression";
 import { AbstractInvocationExpression } from "./abstractInvocationExpression";
-import { InvocationArgument } from "./invocationExpression";
+import { ListEntry } from "./listEntry";
 
 /**
  * Function invocation which provides the self parameter automatically
@@ -22,9 +22,17 @@ export class SelfInvocationExpression extends AbstractInvocationExpression<Compl
     constructor(
         readonly name: string | number,
         readonly target: Expression,
-        argumentExpressions: InvocationArgument[],
+        argumentExpressions: ListEntry[],
         metadata: CompletionExpressionMetadata
     ) {
         super(argumentExpressions, SelfInvocationExpression.TYPE, metadata);
+    }
+
+    protected override markReadOnlyInternal(): void {
+        super.markReadOnlyInternal();
+        this.target.markReadOnly();
+        for (const argument of this.argumentExpressions) {
+            argument.value.markReadOnly();
+        }
     }
 }

@@ -1,4 +1,4 @@
-import { ASTExpressionPosition, Expression } from "@hylimo/core";
+import { ASTExpressionPosition, Expression, FullObject, SemanticFieldNames } from "@hylimo/core";
 import { CompletionExpressionMetadata } from "@hylimo/core";
 import { ExecutableExpression } from "@hylimo/core";
 import { InterpreterContext } from "@hylimo/core";
@@ -8,12 +8,12 @@ import { CompletionError } from "./completionError";
 import {
     CompletionItem,
     CompletionItemKind,
-    MarkupContent,
     Position,
     TextEdit,
     Range,
     InsertTextFormat,
-    InsertTextMode
+    InsertTextMode,
+    MarkupKind
 } from "vscode-languageserver";
 
 /**
@@ -33,32 +33,26 @@ export class ExecutableCompletionExpression extends ExecutableExpression<Express
     override evaluateInternal(context: InterpreterContext): never {
         if (this.context != undefined) {
             const completionContext = this.context.evaluate(context);
-            throw new CompletionError(this.transformCompletionContext(completionContext.value));
+            throw new CompletionError(this.transformCompletionContext(completionContext.value, context));
         } else {
-            throw new CompletionError(this.transformCompletionContext(context.currentScope));
+            throw new CompletionError(this.transformCompletionContext(context.currentScope, context));
         }
     }
 
     /**
      * Transforms the given context into completion items
      *
-     * @param context the context to transform
+     * @param value the context to transform
      * @param expression the expression where to complete
      * @returns the generated completion items
      */
-    private transformCompletionContext(context: BaseObject): CompletionItem[] {
+    private transformCompletionContext(value: BaseObject, context: InterpreterContext): CompletionItem[] {
         const items: CompletionItem[] = [];
-        for (const [key, entry] of Object.entries(context.getFieldEntries())) {
-            let docs = "";
-            let snippet: string | undefined = undefined;
-            let isFunction = false;
+        for (const [key, entry] of Object.entries(value.getFieldEntries())) {
             const value = entry.value;
-            if (value instanceof AbstractFunctionObject) {
-                const decorator = value.definition.decorator;
-                docs = decorator.get("docs") ?? "";
-                snippet = decorator.get("snippet");
-                isFunction = true;
-            }
+            const docs = this.getDocsDescription(value, context) ?? this.getFieldDescription(value, context, key) ?? "";
+            const snippet: string | undefined = this.getDocSnippet(value, context);
+            const isFunction = value instanceof AbstractFunctionObject;
             let kind: CompletionItemKind;
             if (this.context != undefined) {
                 kind = isFunction ? CompletionItemKind.Method : CompletionItemKind.Field;
@@ -72,6 +66,116 @@ export class ExecutableCompletionExpression extends ExecutableExpression<Express
             }
         }
         return items;
+    }
+
+    /**
+     * Gets the docs object from the given value
+     *
+     * @param value the value to get the docs from
+     * @param context context requried for accessing fields
+     * @returns the docs object or undefined if not found
+     */
+    private getDocs(value: BaseObject, context: InterpreterContext): FullObject | undefined {
+        if (value.isNull) {
+            return undefined;
+        }
+        const docs = value.getField(SemanticFieldNames.DOCS, context);
+        if (docs instanceof FullObject) {
+            return docs;
+        } else {
+            return undefined;
+        }
+    }
+
+    /**
+     * Gets the docs string from the given value
+     *
+     * @param value the value to get the docs from
+     * @param context context requried for accessing fields
+     * @returns the docs string or undefined if not found
+     */
+    private getDocsDescription(value: BaseObject, context: InterpreterContext): string | undefined {
+        const docs = this.getDocs(value, context);
+        if (docs == undefined) {
+            return undefined;
+        }
+        const description = docs.getField("docs", context);
+        return (
+            description.toString() +
+            "\n\n" +
+            ["Fields", "Params", "Returns", "Snippet"]
+                .map((field) => [field, this.getDocField(docs, field.toLowerCase(), context)])
+                .filter(([, value]) => value != undefined)
+                .map(([field, value]) => `**${field}:**\n${value}`)
+                .join("\n\n")
+        );
+    }
+
+    /**
+     * Gets the snippet from the given value
+     *
+     * @param value the value to get the snippet from
+     * @param context context requried for accessing fields
+     * @returns the snippet or undefined if not found
+     */
+    private getDocSnippet(value: BaseObject, context: InterpreterContext): string | undefined {
+        const docs = this.getDocs(value, context);
+        if (docs == undefined) {
+            return undefined;
+        }
+        const snippet = docs.getField("snippet", context);
+        if (snippet.isNull) {
+            return undefined;
+        }
+        return snippet.toString();
+    }
+
+    /**
+     * Gets the field description string for field from the docs
+     *
+     * @param value the value to get the field description from
+     * @param context context requried for accessing fields
+     * @param field the name of the field to get the description of
+     * @returns the field description or undefined if not found
+     */
+    private getFieldDescription(value: BaseObject, context: InterpreterContext, field: string | number) {
+        const docs = this.getDocs(value, context);
+        if (docs == undefined) {
+            return undefined;
+        }
+        const fields = docs.getField("fields", context);
+        if (!(fields instanceof FullObject)) {
+            return undefined;
+        }
+        const fieldDocs = fields.getField(field, context);
+        if (fieldDocs.isNull) {
+            return undefined;
+        }
+        return fieldDocs.toString();
+    }
+
+    /**
+     * Gets a field of the docs object as string
+     * If the object is an object, the fields are listed
+     *
+     * @param docs the docs object
+     * @param field the field to get
+     * @param context context requried for accessing fields
+     * @returns the field as string or undefined if not found
+     */
+    private getDocField(docs: FullObject, field: string, context: InterpreterContext): string | undefined {
+        const docField = docs.getField(field, context);
+        if (docField.isNull) {
+            return undefined;
+        }
+        if (docField instanceof FullObject) {
+            return [...docField.fields.entries()]
+                .filter(([key, entry]) => key !== SemanticFieldNames.PROTO && !entry.value.isNull)
+                .map(([key, entry]) => `- ${key}: ${entry.value.toString()}`)
+                .join("\n");
+        } else {
+            return docField.toString();
+        }
     }
 
     /**
@@ -92,7 +196,10 @@ export class ExecutableCompletionExpression extends ExecutableExpression<Express
         return {
             label: key,
             detail: key,
-            documentation: this.preprocessDocumentation(docs),
+            documentation: {
+                kind: MarkupKind.Markdown,
+                value: docs
+            },
             textEdit: TextEdit.replace(
                 Range.create(
                     Position.create(range.startLine, range.startColumn),
@@ -123,7 +230,10 @@ export class ExecutableCompletionExpression extends ExecutableExpression<Express
         return {
             label: key,
             detail: key,
-            documentation: this.preprocessDocumentation(docs, `\n\n**Snippet:**\n \`\`\`\n${snippetCode}\n\`\`\``),
+            documentation: {
+                kind: MarkupKind.Markdown,
+                value: docs
+            },
             textEdit: TextEdit.replace(
                 Range.create(
                     Position.create(range.startLine, range.startColumn),
@@ -134,45 +244,6 @@ export class ExecutableCompletionExpression extends ExecutableExpression<Express
             kind: CompletionItemKind.Snippet,
             insertTextFormat: InsertTextFormat.Snippet,
             insertTextMode: InsertTextMode.adjustIndentation
-        };
-    }
-
-    /**
-     * Preprocesses the documentation string to make it more readable in the editor
-     *
-     * @param documentation the syncscript documentation string, may be undefined
-     * @param additionalDocumentation documentation with is appended and assumed to have no indentation
-     * @returns the processed documentation string
-     */
-    private preprocessDocumentation(
-        documentation: string | undefined,
-        additionalDocumentation?: string
-    ): MarkupContent | undefined {
-        if (documentation == undefined) {
-            return undefined;
-        }
-        const lines = documentation.split("\n").filter((line) => line.trim() != "");
-        const indentation = lines
-            .map((line) => line.match(/^\s*/)?.[0]?.length ?? 0)
-            .reduce((a, b) => Math.min(a, b), Number.MAX_SAFE_INTEGER);
-        const unendentedLines = lines.map((line) => line.substring(indentation));
-        const processedLines = [...unendentedLines, ...(additionalDocumentation ?? "").split("\n")]
-            .map((line) => {
-                const whitespaceLength = line.match(/^\s*/)?.[0]?.length ?? 0;
-                const half = Math.floor(whitespaceLength / 2);
-                return line.substring(half);
-            })
-            .map((line) => {
-                if (/[a-z]+:/i.test(line.trim())) {
-                    return `\n**${line.trim()}**\n`;
-                } else {
-                    return line;
-                }
-            });
-        const processed = processedLines.join("\n");
-        return {
-            kind: "markdown",
-            value: processed
         };
     }
 }

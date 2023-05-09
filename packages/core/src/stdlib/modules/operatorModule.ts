@@ -36,15 +36,12 @@ export const operatorModule = InterpreterModule.create(
                             );
                     },
                     {
-                        docs: `
-                            The ${operator} operator, expects two arguments, calls ${operator} on the first 
-                            argument with the second argument.
-                            Params:
-                                - 0: the target where ${operator} is invoked
-                                - 1: the value passed to the ${operator} function
-                            Returns:
-                                The result of the invocation of ${operator} on the first argument
-                        `
+                        docs: `The ${operator} operator, expects two arguments, calls ${operator} on the first argument with the second argument.`,
+                        params: [
+                            [0, `the target where ${operator} is invoked`],
+                            [1, `the value passed to the ${operator} function`]
+                        ],
+                        returns: `The result of the invocation of ${operator} on the first argument`
                     }
                 )
             )
@@ -70,16 +67,13 @@ export const operatorModule = InterpreterModule.create(
                     }
                 },
                 {
-                    docs: `
-                        Equality operator. If first argument is null, returns true iff second argument is null.
-                        Otherwise calls == on the first argument with the second argument.
-                        Params:
-                            - 0: the left side of the == operator
-                            - 1: the right side of the == operator
-                        Returns:
-                            The result of the comparison, if the left side is null guaranteed a boolean, otherwise
-                            the result of the invokedc function.
-                    `
+                    docs: "Equality operator. If first argument is null, returns true iff second argument is null. Otherwise calls == on the first argument with the second argument.",
+                    params: [
+                        [0, "the left side of the == operator"],
+                        [1, "the right side of the == operator"]
+                    ],
+                    returns:
+                        "The result of the comparison, if the left side is null guaranteed a boolean, otherwise the result of the invokedc function."
                 }
             )
         ),
@@ -91,14 +85,12 @@ export const operatorModule = InterpreterModule.create(
                     !(lhs == rhs)
                 `,
                 {
-                    docs: `
-                        Unequality operator, negates the result of the equality operator
-                        Params:
-                            - 0: the left side of the != operator
-                            - 1: the right side of the != operator
-                        Returns:
-                            The negated result of the == operator
-                    `
+                    docs: "Unequality operator, negates the result of the equality operator",
+                    params: [
+                        [0, "the left side of the != operator"],
+                        [1, "the right side of the != operator"]
+                    ],
+                    returns: "The negated result of the == operator"
                 }
             )
         ),
@@ -128,16 +120,12 @@ export const operatorModule = InterpreterModule.create(
                         );
                 },
                 {
-                    docs: `
-                        The + operator, expects two arguments, calls + on the first 
-                        argument with the second argument.
-                        If any of the two arguments is a string, implicitely converts the other to a string.
-                        Params:
-                            - 0: the target where + is invoked
-                            - 1: the value passed to the + function
-                        Returns:
-                            The result of the invocation of + on the first argument
-                    `
+                    docs: "The + operator, expects two arguments, calls + on the first argument with the second argument. If any of the two arguments is a string, implicitely converts the other to a string.",
+                    params: [
+                        [0, "the target where + is invoked"],
+                        [1, "the value passed to the + function"]
+                    ],
+                    returns: "The result of the invocation of + on the first argument"
                 }
             )
         ),
@@ -157,16 +145,12 @@ export const operatorModule = InterpreterModule.create(
                     }
                 },
                 {
-                    docs: `
-                        The ?? operator, expects two arguments, returns the second argument if the first
-                        argument is null, otherwise returns the first argument.
-                        Evaluates the second argument only if the first is null.
-                        Params:
-                            - 0: the first argument, returned if not null
-                            - 1: the second argument, returned if the first is null
-                        Returns:
-                            The second argument if the first is null, otherwise the first
-                    `
+                    docs: "The ?? operator, expects two arguments, returns the second argument if the first argument is null, otherwise returns the first argument. Evaluates the second argument only if the first is null.",
+                    params: [
+                        [0, "the first argument, returned if not null"],
+                        [1, "the second argument, returned if the first is null"]
+                    ],
+                    returns: "The second argument if the first is null, otherwise the first"
                 }
             )
         ),
@@ -200,16 +184,12 @@ export const operatorModule = InterpreterModule.create(
                     }
                 },
                 {
-                    docs: `
-                        The - operator / function, expects one two arguments.
-                        If two are given, calls - on the first argument with the second argument.
-                        If one is given, negates the argument.
-                        Params:
-                            - 0: the target where - is invoked or if one argument the value to negate
-                            - 1: optional value passed to the - function
-                        Returns:
-                            The result of the invocation of - on the first argument or the negation result
-                    `
+                    docs: "The - operator / function, expects one two arguments. If two are given, calls - on the first argument with the second argument. If one is given, negates the argument.",
+                    params: [
+                        [0, "the target where - is invoked or if one argument the value to negate"],
+                        [1, "optional value passed to the - function"]
+                    ],
+                    returns: "The result of the invocation of - on the first argument or the negation result"
                 }
             )
         )

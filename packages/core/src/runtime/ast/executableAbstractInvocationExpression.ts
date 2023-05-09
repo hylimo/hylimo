@@ -1,4 +1,5 @@
 import { AbstractInvocationExpression } from "../../ast/abstractInvocationExpression";
+import { ExecutableListEntry } from "./executableListEntry";
 import { ExecutableExpression } from "./executableExpression";
 
 /**
@@ -13,21 +14,7 @@ export abstract class ExecutableAbstractInvocationExpression<
      * @param expression the expression this represents
      * @param argumentExpressions the expressions to execute
      */
-    constructor(expression: T | undefined, readonly argumentExpressions: ExecutableInvocationArgument[]) {
+    constructor(expression: T | undefined, readonly argumentExpressions: ExecutableListEntry[]) {
         super(expression);
     }
-}
-
-/**
- * Executable version of InvocationArgument
- */
-export interface ExecutableInvocationArgument {
-    /**
-     * The optional name of the argument
-     */
-    name?: string;
-    /**
-     * Evaluated to be the value of the argument
-     */
-    value: ExecutableExpression<any>;
 }

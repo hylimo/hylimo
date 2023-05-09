@@ -5,7 +5,7 @@ import {
     DefaultModuleNames,
     ExecutableConstExpression,
     ExecutableExpression,
-    ExecutableInvocationArgument,
+    ExecutableListEntry,
     ExecutableNumberLiteralExpression,
     ExecutableStringLiteralExpression,
     fun,
@@ -23,12 +23,12 @@ import {
     SemanticFieldNames,
     str,
     stringType,
-    Type,
     validate
 } from "@hylimo/core";
 import { openSans, roboto, sourceCodePro } from "@hylimo/fonts";
 import { AttributeConfig, ContentCardinality, LayoutConfig } from "../layout/layoutElement";
 import { layouts } from "../layout/layouts";
+import { elementType } from "./types";
 
 /**
  * Type for unset, default style values
@@ -88,7 +88,6 @@ function createElementFunction(element: LayoutConfig): ExecutableExpression {
         });
         cardinalityNumber = Number.POSITIVE_INFINITY;
     }
-    const allAttributes = [...element.attributes, ...element.styleAttributes, ...contentAttributes];
 
     return jsFun(
         (args, context) => {
@@ -109,23 +108,17 @@ function createElementFunction(element: LayoutConfig): ExecutableExpression {
             return args;
         },
         {
-            docs: [
-                `Creates a new ${element.type} element`,
-                `Params:`,
-                ...allAttributes.map((attribute) => `    - "${attribute.name}": ${attribute.description}`),
-                `Returns:`,
-                `    The created element`
-            ].join("\n")
-        },
-        [
-            ...element.attributes.map<[string, Type]>((attr) => [attr.name, attr.type]),
-            ...element.styleAttributes.map<[string, Type]>((attr) => [
-                attr.name,
-                or(nullType, attr.type, styleValueType)
-            ]),
-            ...contentAttributes.map<[string, Type]>((attr) => [attr.name, optional(attr.type)]),
-            [0, optional(functionType)]
-        ]
+            docs: `Creates a new ${element.type} element`,
+            params: [
+                ...element.attributes.map((attr) => [attr.name, attr.description, attr.type] as const),
+                ...element.styleAttributes.map(
+                    (attr) => [attr.name, attr.description, or(nullType, attr.type, styleValueType)] as const
+                ),
+                ...contentAttributes.map((attr) => [attr.name, attr.description, optional(attr.type)] as const),
+                [0, "test", optional(functionType)]
+            ],
+            returns: "the created element"
+        }
     );
 }
 
@@ -157,7 +150,7 @@ const fontType = objectType(
  * @param url the url of the font
  * @returns an invocation argument containing the font object
  */
-function font(name: string, url: string): ExecutableInvocationArgument {
+function font(name: string, url: string): ExecutableListEntry {
     return {
         name,
         value: id("font").call(str(url))
@@ -244,7 +237,7 @@ export const diagramModule = InterpreterModule.create(
                     fun(
                         `
                             (type) = args
-                            [docs = "Creates a new selector"] {
+                            /*[docs = "Creates a new selector"]*/ {
                                 (value, callback) = args
                                 this.selector = object(
                                     selectorType = type,
@@ -261,13 +254,9 @@ export const diagramModule = InterpreterModule.create(
                             }
                         `,
                         {
-                            docs: `
-                                Creates a selector with a specific type
-                                Params:
-                                    - 0: the type of the selector
-                                Returns:
-                                    A function which can be used to create instances of the selector type
-                            `
+                            docs: "Creates a selector with a specific type",
+                            params: [[0, "the type of the selector"]],
+                            returns: "A function which can be used to create instances of the selector type"
                         }
                     )
                 ),
@@ -288,17 +277,13 @@ export const diagramModule = InterpreterModule.create(
                             null
                         `,
                         {
-                            docs: `
-                                Invokes the callback provided as first parameter, extracts all variables set in the callback
-                                and sets all of them as variable values in a any selector.
-                                Params:
-                                    - 0: the callback to invoke
-                                    - "self": the styles object
-                                Returns:
-                                    null
-                            `
-                        },
-                        [[0, functionType]]
+                            docs: "Invokes the callback provided as first parameter, extracts all variables set in the callback and sets all of them as variable values in a any selector.",
+                            params: [
+                                [0, "the callback to invoke", functionType],
+                                [SemanticFieldNames.SELF, "the styles object"]
+                            ],
+                            returns: "null"
+                        }
                     )
                 ),
                 assign(
@@ -309,15 +294,10 @@ export const diagramModule = InterpreterModule.create(
                             object(name = name, _type = "var")
                         `,
                         {
-                            docs: `
-                                Creates a variable reference which can be used everywhere a style value is expected.
-                                Params:
-                                    - 0: the name of the variable
-                                Returns:
-                                    The created variable reference
-                            `
-                        },
-                        [[0, stringType]]
+                            docs: "Creates a variable reference which can be used everywhere a style value is expected.",
+                            params: [[0, "the name of the variable", stringType]],
+                            returns: "The created variable reference"
+                        }
                     )
                 ),
                 fun(
@@ -337,11 +317,9 @@ export const diagramModule = InterpreterModule.create(
                         res
                     `,
                     {
-                        docs: `
-                            Creates a new styles object. Use "cls" and "type" to create rules.
-                            Returns:
-                                The created styles object
-                        `
+                        docs: 'Creates a new styles object. Use "cls" and "type" to create rules.',
+                        params: [],
+                        returns: "The created styles object"
                     }
                 )
             ]).call()
@@ -360,25 +338,16 @@ export const diagramModule = InterpreterModule.create(
                     )
                 `,
                 {
-                    docs: `
-                        Creates a new font family.
-                        Params:
-                            - 0: the name of the font family
-                            - "normal": the normal font, should be a font
-                            - "italic": italic font
-                            - "bold": bold font
-                            - "boldItalic": bold italic font
-                        Returns:
-                            the created font family object
-                    `
-                },
-                [
-                    [0, stringType],
-                    ["normal", fontType],
-                    ["italic", fontType],
-                    ["bold", fontType],
-                    ["boldItalic", fontType]
-                ]
+                    docs: "Creates a new font family.",
+                    params: [
+                        [0, "the name of the font family", stringType],
+                        ["normal", "the normal font, should be a font", fontType],
+                        ["italic", "italic font", fontType],
+                        ["bold", "bold font", fontType],
+                        ["boldItalic", "bold italic font", fontType]
+                    ],
+                    returns: "the created font family object"
+                }
             )
         ),
         assign(
@@ -389,22 +358,18 @@ export const diagramModule = InterpreterModule.create(
                     object(url = url, name = name, variationSettings = variationSettings)
                 `,
                 {
-                    docs: `
-                        Creates a new font, should be used with fontFamily.
-                        Params:
-                            - 0: the url where the font can be found, e.g. a google fonts url
-                            - 1: if a collection font file is used, the name of the font to use
-                            - 2: if a variation font file is used, either the name of the named
-                                variation or an object with values for variation axes
-                        Returns:
-                            the created font object
-                    `
-                },
-                [
-                    [0, stringType],
-                    [1, optional(stringType)],
-                    [2, optional(objectType())]
-                ]
+                    docs: "Creates a new font, should be used with fontFamily.",
+                    params: [
+                        [0, "the url where the font can be found, e.g. a google fonts url", stringType],
+                        [1, "if a collection font file is used, the name of the font to use", optional(stringType)],
+                        [
+                            2,
+                            "if a variation font file is used, either the name of the named variation or an object with values for variation axes",
+                            optional(objectType())
+                        ]
+                    ],
+                    returns: "the created font object"
+                }
             )
         ),
         assign(
@@ -450,15 +415,13 @@ export const diagramModule = InterpreterModule.create(
                     object(element = element, styles = stylesObject, fonts = fonts)
                 `,
                 {
-                    docs: `
-                        Creates a new diagram, consisting of a ui element, styles and fonts
-                        Params:
-                            - 0: the root ui element
-                            - 1: the styles object created by the styles function
-                            - 2: a list of font family objects
-                        Returns:
-                            the created diagram object
-                    `
+                    docs: "Creates a new diagram, consisting of a ui element, styles and fonts",
+                    params: [
+                        [0, "the root ui element", elementType()],
+                        [1, "the styles object created by the styles function", objectType()],
+                        [2, "a list of font family objects", listType(objectType())]
+                    ],
+                    returns: "the created diagram object"
                 }
             )
         )

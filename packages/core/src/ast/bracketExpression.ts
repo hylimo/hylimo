@@ -16,4 +16,9 @@ export class BracketExpression extends Expression {
     constructor(readonly expression: Expression, metadata: ExpressionMetadata) {
         super(BracketExpression.TYPE, metadata);
     }
+
+    protected override markReadOnlyInternal(): void {
+        super.markReadOnlyInternal();
+        this.expression.markReadOnly();
+    }
 }

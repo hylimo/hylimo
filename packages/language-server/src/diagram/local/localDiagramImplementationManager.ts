@@ -14,7 +14,6 @@ import {
     RequestGenerateCompletionItemMessage
 } from "../remote/generateCompletionItemsMessage";
 import { ReplyGetSourceRangeMessage, RequestGetSourceRangeMessage } from "../remote/getSourceRangeMessage";
-import { Range } from "vscode-languageserver";
 
 /**
  * Manages the layouted diagrams. This is the local implementation.

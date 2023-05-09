@@ -18,4 +18,9 @@ export class FieldAccessExpression extends Expression<CompletionExpressionMetada
     constructor(readonly name: string | number, readonly target: Expression, metadata: CompletionExpressionMetadata) {
         super(FieldAccessExpression.TYPE, metadata);
     }
+
+    protected override markReadOnlyInternal(): void {
+        super.markReadOnlyInternal();
+        this.target.markReadOnly();
+    }
 }

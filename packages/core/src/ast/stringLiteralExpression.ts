@@ -4,7 +4,6 @@ import { LiteralExpression } from "./literalExpression";
 /**
  * String expression
  */
-
 export class StringLiteralExpression extends LiteralExpression<string> {
     static readonly TYPE = "StringLiteralExpression";
     /**
