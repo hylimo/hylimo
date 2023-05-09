@@ -1,5 +1,6 @@
+import { FunctionExpression } from "../../ast/functionExpression";
 import { ExecutableConstExpression } from "../../runtime/ast/executableConstExpression";
-import { assign, jsFun } from "../../runtime/executableAstHelper";
+import { assign, jsFun, native } from "../../runtime/executableAstHelper";
 import { InterpreterModule } from "../../runtime/interpreter";
 import { FieldEntry } from "../../runtime/objects/baseObject";
 import { RuntimeError } from "../../runtime/runtimeError";
@@ -127,6 +128,29 @@ export const commonModule = InterpreterModule.create(
                     docs: "Throws an error with the specified message.",
                     params: [[0, "the error message, must be a string", stringType]],
                     returns: "The return value"
+                }
+            )
+        ),
+        assign(
+            "noedit",
+            native(
+                (args, context) => {
+                    const argsToEdit = args.filter((arg) => arg.name !== SemanticFieldNames.SELF);
+                    if (argsToEdit.length !== 1) {
+                        throw new RuntimeError("noedit must be called with exactly one argument");
+                    }
+                    const fun = argsToEdit[0].value;
+                    const expression = fun.expression;
+                    if (!(expression instanceof FunctionExpression)) {
+                        throw new RuntimeError("noedit must be called with a function expression");
+                    }
+                    expression.markNoEdit();
+                    return fun.evaluate(context).value.invoke([], context);
+                },
+                {
+                    docs: "Must be called with a single function expression, which is created locally. Marks the function as not editable recursively, and executes the function immediately, returning its result.",
+                    params: [[0, "the function to execute"]],
+                    returns: "The return value of the function"
                 }
             )
         )

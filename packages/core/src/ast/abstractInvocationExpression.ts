@@ -18,10 +18,10 @@ export abstract class AbstractInvocationExpression<
         super(type, metadata);
     }
 
-    protected override markReadOnlyInternal(): void {
-        super.markReadOnlyInternal();
+    protected override markNoEditInternal(): void {
+        super.markNoEditInternal();
         for (const arg of this.argumentExpressions) {
-            arg.value.markReadOnly();
+            arg.value.markNoEdit();
         }
     }
 }

@@ -17,4 +17,11 @@ export class FunctionExpression extends Expression {
     constructor(readonly expressions: Expression[], metadata: ExpressionMetadata) {
         super(FunctionExpression.TYPE, metadata);
     }
+
+    override markNoEditInternal(): void {
+        super.markNoEditInternal();
+        for (const expression of this.expressions) {
+            expression.markNoEdit();
+        }
+    }
 }

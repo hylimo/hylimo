@@ -19,8 +19,8 @@ export class FieldAccessExpression extends Expression<CompletionExpressionMetada
         super(FieldAccessExpression.TYPE, metadata);
     }
 
-    protected override markReadOnlyInternal(): void {
-        super.markReadOnlyInternal();
-        this.target.markReadOnly();
+    protected override markNoEditInternal(): void {
+        super.markNoEditInternal();
+        this.target.markNoEdit();
     }
 }

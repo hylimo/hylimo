@@ -19,8 +19,8 @@ export class DestructuringExpression extends Expression {
         super(DestructuringExpression.TYPE, metadata);
     }
 
-    protected override markReadOnlyInternal(): void {
-        super.markReadOnlyInternal();
-        this.value.markReadOnly();
+    protected override markNoEditInternal(): void {
+        super.markNoEditInternal();
+        this.value.markNoEdit();
     }
 }

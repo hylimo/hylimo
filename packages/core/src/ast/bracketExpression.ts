@@ -17,8 +17,8 @@ export class BracketExpression extends Expression {
         super(BracketExpression.TYPE, metadata);
     }
 
-    protected override markReadOnlyInternal(): void {
-        super.markReadOnlyInternal();
-        this.expression.markReadOnly();
+    protected override markNoEditInternal(): void {
+        super.markNoEditInternal();
+        this.expression.markNoEdit();
     }
 }

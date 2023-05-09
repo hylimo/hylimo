@@ -21,11 +21,11 @@ export class InvocationExpression extends AbstractInvocationExpression {
         super(argumentExpressions, InvocationExpression.TYPE, metadata);
     }
 
-    protected override markReadOnlyInternal(): void {
-        super.markReadOnlyInternal();
-        this.target.markReadOnly();
+    protected override markNoEditInternal(): void {
+        super.markNoEditInternal();
+        this.target.markNoEdit();
         for (const argument of this.argumentExpressions) {
-            argument.value.markReadOnly();
+            argument.value.markNoEdit();
         }
     }
 }

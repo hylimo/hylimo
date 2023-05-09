@@ -17,4 +17,11 @@ export class ObjectExpression extends Expression {
     constructor(readonly fields: ListEntry[], metadata: ExpressionMetadata) {
         super(ObjectExpression.TYPE, metadata);
     }
+
+    override markNoEditInternal(): void {
+        super.markNoEditInternal();
+        for (const field of this.fields) {
+            field.value.markNoEdit();
+        }
+    }
 }
