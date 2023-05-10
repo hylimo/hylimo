@@ -43,11 +43,6 @@ import { PublishDocumentRevealNotification } from "@hylimo/diagram-protocol/src"
 const language = "syncscript";
 
 /**
- * The uri of the TextDocument
- */
-const uri = "inmemory://model/1";
-
-/**
  * Editor Component
  *
  * @returns the created editor component
@@ -95,13 +90,17 @@ export default function HylimoEditor(): JSX.Element {
         });
         setLanguageClient(languageClient);
         languageClient.start().then(() => {
+            const uri = monaco.current?.editor?.getModel()?.uri?.toString();
+            if (uri == undefined) {
+                throw new Error("Missing editor or model");
+            }
             languageClient.sendNotification(DiagramOpenNotification.type, {
                 clientId: uri,
                 diagramUri: uri
             });
 
             class LspDiagramServerProxy extends DiagramServerProxy {
-                override clientId = uri;
+                override clientId = uri!;
 
                 override initialize(registry: ActionHandlerRegistry): void {
                     super.initialize(registry);
@@ -140,6 +139,10 @@ export default function HylimoEditor(): JSX.Element {
             });
             setActionDispatcher(actionDispatcher);
         });
+        return () => {
+            worker.terminate();
+            secondaryWorker.terminate();
+        };
     }, []);
 
     useResizeObserver(sprottyWrapper, () => {
