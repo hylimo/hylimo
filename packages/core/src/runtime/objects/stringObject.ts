@@ -16,6 +16,6 @@ export class StringObject extends LiteralObject<string> {
     }
 
     override toString(): string {
-        return `"${this.value}"`;
+        return this.value;
     }
 }

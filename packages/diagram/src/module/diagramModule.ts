@@ -237,7 +237,7 @@ export const diagramModule = InterpreterModule.create(
                     fun(
                         `
                             (type) = args
-                            /*[docs = "Creates a new selector"]*/ {
+                            {
                                 (value, callback) = args
                                 this.selector = object(
                                     selectorType = type,

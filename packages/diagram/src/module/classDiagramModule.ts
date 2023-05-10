@@ -458,19 +458,31 @@ const scopeExpressions: ExecutableExpression[] = [
     ),
     ...parse(
         `
-            scope.comment = scope.internal.withRegisterSource /*[ snippet = "(\\"$1\\")" ] */ {
+            scope.comment = scope.internal.withRegisterSource {
                 (content) = args
                 _comment(content, self = args.self)
             }
-            scope.package = scope.internal.withRegisterSource /*[ snippet = "(\\"$1\\") {\\n    $2\\n}" ]*/ {
+            scope.comment.docs = [
+                docs = "Creates a comment.",
+                snippet = "(\\"$1\\")"
+            ]
+            scope.package = scope.internal.withRegisterSource {
                 (name, callback) = args
                 _package(name, callback, args.keywords, self = args.self)
             }
-            scope.class = scope.internal.withRegisterSource /*[ snippet = "(\\"$1\\") {\\n    $2\\n}" ]*/ {
+            scope.package.docs = [
+                docs = "Creates a package.",
+                snippet = "(\\"$1\\") {\\n    $2\\n}"
+            ]
+            scope.class = scope.internal.withRegisterSource {
                 (name, callback) = args
                 _class(name, callback, args.keywords, args.abstract, self = args.self)
             }
-            scope.interface = scope.internal.withRegisterSource/* [ snippet = "(\\"$1\\") {\\n    $2\\n}" ]*/ {
+            scope.class.docs = [
+                docs = "Creates a class.",
+                snippet = "(\\"$1\\") {\\n    $2\\n}"
+            ]
+            scope.interface = scope.internal.withRegisterSource  {
                 (name, callback) = args
                 keywords = list("interface")
                 otherKeywords = args.keywords
@@ -479,6 +491,10 @@ const scopeExpressions: ExecutableExpression[] = [
                 }
                 _class(name, callback, keywords, args.abstract, self = args.self)
             }
+            scope.interface.docs = [
+                docs = "Creates an interface.",
+                snippet = "(\\"$1\\") {\\n    $2\\n}"
+            ]
         `
     ),
     id(scope).assignField(
