@@ -94,7 +94,8 @@ export class MoveMouseListener extends MouseListener {
                     translation.x,
                     translation.y,
                     this.sequenceNumber++,
-                    false
+                    false,
+                    event
                 );
                 return [result];
             }
@@ -129,7 +130,13 @@ export class MoveMouseListener extends MouseListener {
             return [];
         }
         const translation = this.calculateTranslation(target, event);
-        const result = this.moveHandler.generateAction(translation.x, translation.y, this.sequenceNumber++, true);
+        const result = this.moveHandler.generateAction(
+            translation.x,
+            translation.y,
+            this.sequenceNumber++,
+            true,
+            event
+        );
         this.moveHandler = undefined;
         this.startPosition = undefined;
         return [result];

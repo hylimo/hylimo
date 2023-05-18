@@ -13,13 +13,28 @@ export class TranslationMoveHandler implements MoveHandler {
      */
     constructor(readonly points: string[], readonly transactionId: string) {}
 
-    generateAction(dx: number, dy: number, sequenceNumber: number, commited: boolean): TranslationMoveAction {
+    generateAction(
+        dx: number,
+        dy: number,
+        sequenceNumber: number,
+        commited: boolean,
+        event: MouseEvent
+    ): TranslationMoveAction {
+        let offsetX = dx;
+        let offsetY = dy;
+        if (event.shiftKey) {
+            if (Math.abs(dx) > Math.abs(dy)) {
+                offsetY = 0;
+            } else {
+                offsetX = 0;
+            }
+        }
         return {
             kind: TranslationMoveAction.KIND,
             transactionId: this.transactionId,
             elements: this.points,
-            offsetX: dx,
-            offsetY: dy,
+            offsetX,
+            offsetY,
             commited,
             sequenceNumber
         };

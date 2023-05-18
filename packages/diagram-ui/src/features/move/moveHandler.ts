@@ -11,7 +11,8 @@ export interface MoveHandler {
      * @param dy the absolute y offset
      * @param sequenceNumber the sequence number of the action
      * @param commited if true, this is the final action of the transaction
+     * @param event the mouse event which triggered the move
      * @returns the generated action
      */
-    generateAction(dx: number, dy: number, sequenceNumber: number, commited: boolean): Action;
+    generateAction(dx: number, dy: number, sequenceNumber: number, commited: boolean, event: MouseEvent): Action;
 }
