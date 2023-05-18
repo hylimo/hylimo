@@ -101,8 +101,11 @@ export function generateArgs(
         if (type != undefined) {
             const argValue = argsObject.getLocalField(key, context).value;
             validate(type, `Invalid value for parameter ${key}: ${description}`, argValue, context, () => {
-                if (typeof key === "number" && args[key] && args[key].name === undefined) {
-                    return args[key].value.expression;
+                if (typeof key === "number") {
+                    const indexArguments = args.filter((arg) => arg.name == undefined);
+                    if (indexArguments[key]) {
+                        return indexArguments[key].value.expression;
+                    }
                 } else if (typeof key === "string") {
                     return [...args].reverse().find((arg) => arg.name === key)?.value?.expression;
                 }
