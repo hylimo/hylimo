@@ -1,0 +1,45 @@
+.popup__background {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    background: var(--diagram-layout-color-overlay);
+    display: flex;
+    justify-content: center;
+}
+
+.popup__card {
+    margin: 50px;
+    max-width: 400px;
+    background: var(--ifm-background-surface-color);
+    flex: 1 1 auto;
+    border-radius: var(--ifm-global-radius);
+    padding: 15px;
+    padding-top: 10px;
+    height: fit-content;
+}
+
+.popup__title {
+    font-weight: var(--ifm-font-weight-semibold);
+}
+
+.setting__entry {
+    margin-top: 5px;
+}
+
+.setting__name {
+}
+
+.setting__input {
+    min-width: 65%;
+    padding: 5px;
+    border: 1px solid var(--ifm-color-primary-contrast-foreground);
+    border-radius: var(--ifm-global-radius);
+    background-color: var(--ifm-color-emphasis-100);
+    outline: none;
+}
+
+.setting__input:focus {
+    border: 1px solid var(--ifm-color-primary);
+}

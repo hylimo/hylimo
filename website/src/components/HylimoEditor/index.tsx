@@ -35,7 +35,8 @@ import useResizeObserver from "@react-hook/resize-observer";
 import { DynamicLanuageServerConfig } from "@hylimo/diagram-protocol";
 import { GlobalStateContext } from "../../theme/Root";
 import { Root } from "@hylimo/diagram-common";
-import { PublishDocumentRevealNotification } from "@hylimo/diagram-protocol/src";
+import { PublishDocumentRevealNotification } from "@hylimo/diagram-protocol";
+import SettingsDialog from "../SettingsDialog";
 
 /**
  * Name of the language
@@ -171,42 +172,45 @@ export default function HylimoEditor(): JSX.Element {
     useEffect(() => () => setDiagram(null), []);
 
     return (
-        <Allotment>
-            <Allotment.Pane>
-                <MonacoEditor
-                    options={{
-                        automaticLayout: true,
-                        fixedOverflowWidgets: true,
-                        hover: {
-                            above: false
-                        },
-                        suggest: {
-                            snippetsPreventQuickSuggestions: false
-                        }
-                    }}
-                    theme={colorMode === "dark" ? "custom-dark" : "custom-light"}
-                    editorWillMount={(editor) => {
-                        editor.languages.register({ id: language });
-                        editor.languages.setLanguageConfiguration(language, languageConfiguration as any);
-                        editor.languages.setMonarchTokensProvider(language, monarchTokenProvider as any);
-                        editor.editor.defineTheme("custom-dark", customDarkTheme as any);
-                        editor.editor.defineTheme("custom-light", customLightTheme as any);
-                    }}
-                    ref={monaco}
-                    language={language}
-                    value={code}
-                    onChange={(code) => {
-                        setCode(code);
-                        setDiagramCode(code);
-                    }}
-                ></MonacoEditor>
-            </Allotment.Pane>
-            <Allotment.Pane>
-                <div ref={sprottyWrapper} className="sprotty-wrapper">
-                    <div id="sprotty-container"></div>
-                </div>
-            </Allotment.Pane>
-        </Allotment>
+        <>
+            <Allotment>
+                <Allotment.Pane>
+                    <MonacoEditor
+                        options={{
+                            automaticLayout: true,
+                            fixedOverflowWidgets: true,
+                            hover: {
+                                above: false
+                            },
+                            suggest: {
+                                snippetsPreventQuickSuggestions: false
+                            }
+                        }}
+                        theme={colorMode === "dark" ? "custom-dark" : "custom-light"}
+                        editorWillMount={(editor) => {
+                            editor.languages.register({ id: language });
+                            editor.languages.setLanguageConfiguration(language, languageConfiguration as any);
+                            editor.languages.setMonarchTokensProvider(language, monarchTokenProvider as any);
+                            editor.editor.defineTheme("custom-dark", customDarkTheme as any);
+                            editor.editor.defineTheme("custom-light", customLightTheme as any);
+                        }}
+                        ref={monaco}
+                        language={language}
+                        value={code}
+                        onChange={(code) => {
+                            setCode(code);
+                            setDiagramCode(code);
+                        }}
+                    ></MonacoEditor>
+                </Allotment.Pane>
+                <Allotment.Pane>
+                    <div ref={sprottyWrapper} className="sprotty-wrapper">
+                        <div id="sprotty-container"></div>
+                    </div>
+                </Allotment.Pane>
+            </Allotment>
+            <SettingsDialog />
+        </>
     );
 }
 
