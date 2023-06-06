@@ -10,3 +10,4 @@ export * from "./lsp/config";
 export * from "./lsp/diagramNotificationTypes";
 export * from "./lsp/publishDocumentRevealNotification";
 export * from "./lsp/remoteMessages";
+export * from "./lsp/settings";

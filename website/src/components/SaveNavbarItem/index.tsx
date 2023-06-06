@@ -29,5 +29,5 @@ export default function SaveNavbarItem(): JSX.Element {
         };
     }, []);
 
-    return <a onClick={downloadCode} className={clsx(styles.downloadLink)}></a>;
+    return <a onClick={downloadCode} className={clsx(styles.downloadLink, "navbar__item")}></a>;
 }

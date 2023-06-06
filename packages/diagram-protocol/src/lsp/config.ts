@@ -1,14 +1,20 @@
 import { DiagramConfig } from "@hylimo/diagram-common";
 import { NotificationType } from "vscode-languageserver-protocol";
+import { LanguageServerSettings } from "./settings";
 
 /**
  * Configuration for a diagram language server
  */
-export interface DynamicLanuageServerConfig {
+export interface DynamicLanguageServerConfig {
     /**
      * The configuration for the diagram itself
      */
     diagramConfig: DiagramConfig;
+    /**
+     * The settings for the language server
+     * The are permanent values which can be modified by the user
+     */
+    settings: LanguageServerSettings;
 }
 
 /**
@@ -18,5 +24,5 @@ export namespace ConfigNotification {
     /**
      * Notification type for sending a new configuration to the language server
      */
-    export const type = new NotificationType<DynamicLanuageServerConfig>("diagram/config");
+    export const type = new NotificationType<DynamicLanguageServerConfig>("diagram/config");
 }

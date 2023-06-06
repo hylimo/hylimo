@@ -32,7 +32,7 @@ import {
 } from "@hylimo/diagram-protocol";
 import { DiagramServerProxy, ResetCanvasBoundsAction } from "@hylimo/diagram-ui";
 import useResizeObserver from "@react-hook/resize-observer";
-import { DynamicLanuageServerConfig } from "@hylimo/diagram-protocol";
+import { DynamicLanguageServerConfig } from "@hylimo/diagram-protocol";
 import { GlobalStateContext } from "../../theme/Root";
 import { Root } from "@hylimo/diagram-common";
 import { PublishDocumentRevealNotification } from "@hylimo/diagram-protocol";
@@ -49,17 +49,18 @@ const language = "syncscript";
  * @returns the created editor component
  */
 export default function HylimoEditor(): JSX.Element {
-    const { setDiagram, setDiagramCode } = useContext(GlobalStateContext);
+    const { setDiagram, setDiagramCode, showSettings, settings } = useContext(GlobalStateContext);
     const { colorMode } = useColorMode();
     const [code, setCode] = useLocalStorage<string>("code");
     const sprottyWrapper = useRef(null);
     const monaco = useRef<MonacoEditor | null>(null);
     const [actionDispatcher, setActionDispatcher] = useState<IActionDispatcher | undefined>();
     const [languageClient, setLanguageClient] = useState<MonacoLanguageClient | undefined>();
-    const [languageServerConfig, setLanguageServerConfig] = useState<DynamicLanuageServerConfig>({
+    const [languageServerConfig, setLanguageServerConfig] = useState<DynamicLanguageServerConfig>({
         diagramConfig: {
             theme: colorMode
-        }
+        },
+        settings: {}
     });
 
     useEffect(() => {
@@ -166,6 +167,15 @@ export default function HylimoEditor(): JSX.Element {
     }, [colorMode]);
 
     useEffect(() => {
+        setLanguageServerConfig((currentConfig) => {
+            return {
+                ...currentConfig,
+                settings: settings
+            };
+        });
+    }, [settings]);
+
+    useEffect(() => {
         languageClient?.sendNotification(ConfigNotification.type, languageServerConfig);
     }, [languageServerConfig]);
 
@@ -209,7 +219,7 @@ export default function HylimoEditor(): JSX.Element {
                     </div>
                 </Allotment.Pane>
             </Allotment>
-            <SettingsDialog />
+            {showSettings && <SettingsDialog />}
         </>
     );
 }

@@ -24,7 +24,7 @@ import {
     OpenDiagramMessage,
     SetLanguageServerIdNotification,
     ConfigNotification,
-    DynamicLanuageServerConfig
+    DynamicLanguageServerConfig
 } from "@hylimo/diagram-protocol";
 import { SharedDiagramUtils } from "./sharedDiagramUtils";
 import { LocalDiagramImplementationManager } from "./diagram/local/localDiagramImplementationManager";
@@ -39,7 +39,7 @@ export interface LanguageServerConfig {
     /**
      * The default config to use
      */
-    defaultConfig: DynamicLanuageServerConfig;
+    defaultConfig: DynamicLanguageServerConfig;
     /**
      * The connection to use
      */
@@ -273,7 +273,7 @@ export class LanguageServer {
      *
      * @param params the new config
      */
-    private onUpdateConfig(params: DynamicLanuageServerConfig): void {
+    private onUpdateConfig(params: DynamicLanguageServerConfig): void {
         this.diagramUtils.config = params;
         for (const diagram of this.diagrams.values()) {
             diagram.onDidChangeConfig();

@@ -52,6 +52,10 @@ nav.navbar {
   height: unset;
 }
 
+.navbar__item {
+  padding: var(--ifm-navbar-item-padding-vertical) calc(var(--ifm-navbar-item-padding-horizontal) / 2);
+}
+
 .sprotty-wrapper {
   height: 100%;
 }

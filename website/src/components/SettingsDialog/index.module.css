@@ -7,6 +7,7 @@
     background: var(--diagram-layout-color-overlay);
     display: flex;
     justify-content: center;
+    z-index: 36;
 }
 
 .popup__card {
@@ -42,4 +43,8 @@
 
 .setting__input:focus {
     border: 1px solid var(--ifm-color-primary);
+}
+
+.setting__input__invalid {
+    border: 1px solid var(--ifm-color-danger) !important;
 }

@@ -53,7 +53,7 @@ const config = {
                         label: "Export",
                         items: [
                             {
-                                type: "custom-export",
+                                type: "custom-export"
                             }
                         ],
                         ifdiagramexists: true
@@ -61,6 +61,11 @@ const config = {
                     {
                         type: "custom-save",
                         ifdiagramcodeexists: true,
+                        position: "right"
+                    },
+                    {
+                        type: "custom-settings",
+                        ifeditor: true,
                         position: "right"
                     },
                     {
