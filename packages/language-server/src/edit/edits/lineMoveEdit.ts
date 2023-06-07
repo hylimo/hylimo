@@ -1,6 +1,6 @@
 import { LayoutedDiagram } from "@hylimo/diagram";
 import { LinePoint } from "@hylimo/diagram-common";
-import { LineMoveAction, IncrementalUpdate } from "@hylimo/diagram-protocol";
+import { LineMoveAction, IncrementalUpdate, DynamicLanguageServerConfig } from "@hylimo/diagram-protocol";
 import { EditGenerator } from "../generators/editGenerator";
 import { GeneratorRegistry } from "../generators/generatorRegistry";
 import { generateReplacementNumberGenerator } from "./generateReplacementNumberGenerator";
@@ -103,5 +103,16 @@ export class LineMoveEditEngine extends TransactionalEditEngine<LineMoveAction, 
         } else {
             return [];
         }
+    }
+
+    override transformAction(action: LineMoveAction, config: DynamicLanguageServerConfig): LineMoveAction {
+        return {
+            ...action,
+            pos: this.round(action.pos, config.settings.linePointPosPrecision),
+            distance:
+                action.distance != undefined
+                    ? this.round(action.distance, config.settings.linePointDistancePrecision)
+                    : undefined
+        };
     }
 }

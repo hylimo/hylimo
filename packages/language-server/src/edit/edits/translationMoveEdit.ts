@@ -7,7 +7,8 @@ import { generateAddFieldToScopeGenerator } from "./generateAddFieldToScopeGener
 import { generateDeltaNumberGenerator } from "./generateDeltaNumberGenerator";
 import { TransactionalEdit, TransactionalEditEngine } from "./transactionalEdit";
 import { GeneratorRegistry } from "../generators/generatorRegistry";
-import { TranslationMoveAction, IncrementalUpdate } from "@hylimo/diagram-protocol";
+import { TranslationMoveAction, IncrementalUpdate, DynamicLanguageServerConfig } from "@hylimo/diagram-protocol";
+import { printNumber } from "../printNumber";
 
 /**
  * Generates EditGeneratorEntries for absolute and relative points
@@ -106,7 +107,7 @@ export class TranslationMoveEditEngine extends TransactionalEditEngine<Translati
             return this.generatorRegistory.generateEdit(action.offsetY, generator);
         } else if (meta === "pos") {
             return this.generatorRegistory.generateEdit(
-                { pos: `apos(${action.offsetX}, ${action.offsetY})` },
+                { pos: `apos(${printNumber(action.offsetX)}, ${printNumber(action.offsetY)})` },
                 generator
             );
         } else {
@@ -153,5 +154,16 @@ export class TranslationMoveEditEngine extends TransactionalEditEngine<Translati
             }
         }
         return updates;
+    }
+
+    override transformAction(
+        action: TranslationMoveAction,
+        config: DynamicLanguageServerConfig
+    ): TranslationMoveAction {
+        return {
+            ...action,
+            offsetX: this.round(action.offsetX, config.settings.translationPrecision),
+            offsetY: this.round(action.offsetY, config.settings.translationPrecision)
+        };
     }
 }

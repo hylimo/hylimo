@@ -1,5 +1,6 @@
 import { OriginalValueNumberGenerator } from "./originalValueNumberGenerator";
 import { EditEngine } from "./editGenerator";
+import { printNumber } from "../printNumber";
 
 /**
  * EditGenerator for modifying a number expression with a + - constant based on a delta
@@ -35,9 +36,9 @@ export const deltaAdditiveNumberEngine: EditEngine<number, DeltaAdditiveNumberGe
         if (newValue === 0) {
             return "";
         } else if (newValue > 0) {
-            return ` + ${newValue}`;
+            return ` + ${printNumber(newValue)}`;
         } else {
-            return ` - ${-newValue}`;
+            return ` - ${printNumber(-newValue)}`;
         }
     }
 };

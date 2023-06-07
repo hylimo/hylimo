@@ -7,7 +7,8 @@ import { generateReplacementNumberGenerator } from "./generateReplacementNumberG
 import { TransactionalEdit, TransactionalEditEngine } from "./transactionalEdit";
 import { GeneratorRegistry } from "../generators/generatorRegistry";
 import { TextDocument } from "vscode-languageserver-textdocument";
-import { RotationAction, IncrementalUpdate } from "@hylimo/diagram-protocol";
+import { RotationAction, IncrementalUpdate, DynamicLanguageServerConfig } from "@hylimo/diagram-protocol";
+import { printNumber } from "../printNumber";
 
 /**
  * Edit for RotationAction
@@ -73,7 +74,7 @@ export class RotationEditEngine extends TransactionalEditEngine<RotationAction, 
         if (meta === "rotation") {
             return this.generatorRegistory.generateEdit(action.rotation, generator);
         } else if (meta === "scopeRotation") {
-            return this.generatorRegistory.generateEdit({ rotation: action.rotation.toString() }, generator);
+            return this.generatorRegistory.generateEdit({ rotation: printNumber(action.rotation) }, generator);
         } else {
             throw new Error(`Unknown meta information for RotationEdit: ${meta}`);
         }
@@ -99,5 +100,12 @@ export class RotationEditEngine extends TransactionalEditEngine<RotationAction, 
         } else {
             return [];
         }
+    }
+
+    override transformAction(action: RotationAction, config: DynamicLanguageServerConfig): RotationAction {
+        return {
+            ...action,
+            rotation: this.round(action.rotation, config.settings.rotationPrecision)
+        };
     }
 }

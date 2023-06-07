@@ -1,6 +1,6 @@
 import { BaseLayoutedDiagram, LayoutedDiagram } from "@hylimo/diagram";
 import { CanvasAxisAlignedSegment } from "@hylimo/diagram-common";
-import { AxisAlignedSegmentEditAction, IncrementalUpdate } from "@hylimo/diagram-protocol";
+import { AxisAlignedSegmentEditAction, DynamicLanguageServerConfig, IncrementalUpdate } from "@hylimo/diagram-protocol";
 import { EditGenerator } from "../generators/editGenerator";
 import { GeneratorRegistry } from "../generators/generatorRegistry";
 import { generateReplacementNumberGenerator } from "./generateReplacementNumberGenerator";
@@ -85,5 +85,15 @@ export class AxisAlignedSegmentEditEngine extends TransactionalEditEngine<
         } else {
             return [];
         }
+    }
+
+    override transformAction(
+        action: AxisAlignedSegmentEditAction,
+        config: DynamicLanguageServerConfig
+    ): AxisAlignedSegmentEditAction {
+        return {
+            ...action,
+            pos: this.round(action.pos, config.settings.axisAlignedPosPrecision)
+        };
     }
 }

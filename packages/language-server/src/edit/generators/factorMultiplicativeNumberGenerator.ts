@@ -1,3 +1,4 @@
+import { printNumber } from "../printNumber";
 import { EditEngine } from "./editGenerator";
 import { OriginalValueNumberGenerator } from "./originalValueNumberGenerator";
 
@@ -35,9 +36,9 @@ export const factorMultiplicativeNumberEngine: EditEngine<number, FactorMultipli
         if (newValue === 1) {
             return "";
         } else if (newValue > 1) {
-            return ` * ${newValue}`;
+            return ` * ${printNumber(newValue)}`;
         } else {
-            return ` / ${1 / newValue}`;
+            return ` / ${printNumber(1 / newValue)}`;
         }
     }
 };

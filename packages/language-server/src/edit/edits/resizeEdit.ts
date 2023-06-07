@@ -8,6 +8,7 @@ import { EditGeneratorEntry } from "./editGeneratorEntry";
 import { generateAddFieldToScopeGenerator } from "./generateAddFieldToScopeGenerator";
 import { generateFactorNumberGenerator } from "./generateFactorNumberGenerator";
 import { TransactionalEdit, TransactionalEditEngine } from "./transactionalEdit";
+import { printNumber } from "../printNumber";
 
 /**
  * Metadata for generateAddFieldToScopeGenerator
@@ -127,12 +128,12 @@ export class ResizeEditEngine extends TransactionalEditEngine<ResizeAction, Resi
         } else if (meta === "height") {
             return this.generatorRegistory.generateEdit(action.factorY, generator);
         } else {
-            const data: Record<string, number> = {};
+            const data: Record<string, string> = {};
             if (meta.originalWidth != undefined) {
-                data.width = meta.originalWidth * (action.factorX ?? 1);
+                data.width = printNumber(meta.originalWidth * (action.factorX ?? 1));
             }
             if (meta.originalHeight != undefined) {
-                data.height = meta.originalHeight * (action.factorY ?? 1);
+                data.height = printNumber(meta.originalHeight * (action.factorY ?? 1));
             }
             return this.generatorRegistory.generateEdit(data, generator);
         }
@@ -170,5 +171,9 @@ export class ResizeEditEngine extends TransactionalEditEngine<ResizeAction, Resi
             }
         }
         return updates;
+    }
+
+    override transformAction(action: ResizeAction): ResizeAction {
+        return action;
     }
 }

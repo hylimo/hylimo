@@ -24,7 +24,7 @@ export class Diagram {
     /**
      * Handles TransactionActions
      */
-    private transactionManager = new TransactionManager(this, defaultEditRegistry);
+    private transactionManager = new TransactionManager(this, defaultEditRegistry, this.utils);
 
     /**
      * The implementation to which all requests are delegated

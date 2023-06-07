@@ -3,7 +3,7 @@ import { AxisAlignedSegmentEditEngine } from "./axisAlignedSegmentEdit";
 import { LineMoveEditEngine } from "./lineMoveEdit";
 import { ResizeEditEngine } from "./resizeEdit";
 import { RotationEditEngine } from "./rotationEdit";
-import { TransactionalEdit, TransactionalEditEngine } from "./transactionalEdit";
+import { TransactionalEditEngine } from "./transactionalEdit";
 import { TranslationMoveEditEngine } from "./translationMoveEdit";
 
 /**
@@ -13,7 +13,7 @@ export class TransactionalEditRegistory {
     /**
      * Map of all edit engines
      */
-    private readonly edits: Map<string, TransactionalEditEngine<any, any>> = new Map();
+    private readonly engines: Map<string, TransactionalEditEngine<any, any>> = new Map();
 
     /**
      * Creates a new TransactionalEditRegistory
@@ -21,20 +21,20 @@ export class TransactionalEditRegistory {
      * @param engines the edit engines to register
      */
     constructor(engines: TransactionalEditEngine<any, any>[]) {
-        engines.forEach((edit) => this.edits.set(edit.type, edit));
+        engines.forEach((edit) => this.engines.set(edit.actionType, edit));
     }
 
     /**
      * Returns the edit engine for the given type.
      * If no engine is found for the type, an error is thrown.
      *
-     * @param edit the edit to get the engine for
+     * @param actionKind the type of the edit to get the engine for
      * @returns the edit engine
      */
-    getEditEngine(edit: TransactionalEdit): TransactionalEditEngine<any, any> {
-        const engine = this.edits.get(edit.type);
+    getEditEngine(actionKind: string): TransactionalEditEngine<any, any> {
+        const engine = this.engines.get(actionKind);
         if (engine === undefined) {
-            throw new Error(`No engine found for edit type ${edit.type}`);
+            throw new Error(`No engine found for action type ${actionKind}`);
         }
         return engine;
     }

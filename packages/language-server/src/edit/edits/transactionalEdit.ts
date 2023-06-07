@@ -1,4 +1,4 @@
-import { IncrementalUpdate } from "@hylimo/diagram-protocol";
+import { DynamicLanguageServerConfig, IncrementalUpdate } from "@hylimo/diagram-protocol";
 import { Action } from "sprotty-protocol";
 import {
     Range,
@@ -107,6 +107,30 @@ export abstract class TransactionalEditEngine<A extends Action, T extends Transa
         lastApplied: A | undefined,
         newest: A
     ): IncrementalUpdate[];
+
+    /**
+     * Transforms the action based on settings and other values
+     *
+     * @param action the action to transform
+     * @param config the language server config
+     * @returns the transformed action
+     */
+    abstract transformAction(action: A, config: DynamicLanguageServerConfig): A;
+
+    /**
+     * Rounds a value to a specific precision if given
+     * If no precision is given, the value is returned unchanged
+     *
+     * @param value the value to round
+     * @param precision the precision to use
+     * @returns the rounded value
+     */
+    protected round(value: number, precision: number | undefined): number {
+        if (precision == undefined) {
+            return value;
+        }
+        return Math.round(value / precision) * precision;
+    }
 
     /**
      * Applies an action to all generators and creates a corresponding edit

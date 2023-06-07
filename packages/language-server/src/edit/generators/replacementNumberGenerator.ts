@@ -1,3 +1,4 @@
+import { printNumber } from "../printNumber";
 import { EditEngine, EditGenerator } from "./editGenerator";
 
 /**
@@ -28,6 +29,6 @@ export namespace ReplacementNumberGenerator {
 export const replacementNumberEngine: EditEngine<number, ReplacementNumberGenerator> = {
     type: ReplacementNumberGenerator.TYPE,
     generateEdit(data: number, _generator: ReplacementNumberGenerator) {
-        return data.toString();
+        return printNumber(data);
     }
 };

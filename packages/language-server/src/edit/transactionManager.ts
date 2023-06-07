@@ -4,6 +4,7 @@ import { TextDocumentContentChangeEvent } from "vscode-languageserver-textdocume
 import { Diagram } from "../diagram/diagram";
 import { TransactionalEdit, TransactionalEditEngine, Versioned } from "./edits/transactionalEdit";
 import { TransactionalEditRegistory } from "./edits/transactionalEditRegistry";
+import { SharedDiagramUtils } from "../sharedDiagramUtils";
 
 /**
  * Handles TransactionActions modifying the textdocument
@@ -42,8 +43,14 @@ export class TransactionManager {
      * Creates a new TransactionManager which handles edits to the specified textDocument
      *
      * @param diagram the associated Diagram
+     * @param registry the registry to use
+     * @param utils the shared diagram utils
      */
-    constructor(private readonly diagram: Diagram, private readonly registry: TransactionalEditRegistory) {}
+    constructor(
+        private readonly diagram: Diagram,
+        private readonly registry: TransactionalEditRegistory,
+        private readonly utils: SharedDiagramUtils
+    ) {}
 
     /**
      * Handles an action. Does currently not support concurrent/interleaved transactions
@@ -54,24 +61,25 @@ export class TransactionManager {
      * @returns the incremental updates
      */
     async handleAction(action: TransactionalAction): Promise<IncrementalUpdate[]> {
-        if (this.currentTransactionId != undefined && this.currentTransactionId != action.transactionId) {
+        const engine = this.registry.getEditEngine(action.kind);
+        const transformedAction = engine.transformAction(action, this.utils.config);
+        if (this.currentTransactionId != undefined && this.currentTransactionId != transformedAction.transactionId) {
             // eslint-disable-next-line no-console
             console.error("Concurrent transactions are not supported yet");
             this.resetActionState();
         }
-        if (this.currentTransactionId == action.transactionId && this.edit == undefined) {
+        if (this.currentTransactionId == transformedAction.transactionId && this.edit == undefined) {
             return [];
         }
-        this.currentTransactionId = action.transactionId;
+        this.currentTransactionId = transformedAction.transactionId;
         if (this.edit == undefined) {
             this.edit = {
-                ...(await this.diagram.generateTransactionalEdit(action)),
+                ...(await this.diagram.generateTransactionalEdit(transformedAction)),
                 version: this.diagram.document.version
             };
         }
-        const engine = this.registry.getEditEngine(this.edit);
-        const result = this.createHandleActionResult(action, engine);
-        this.lastKnownAction = action;
+        const result = this.createHandleActionResult(transformedAction, engine);
+        this.lastKnownAction = transformedAction;
         this.updateTextDocumentIfPossible();
         return result;
     }
@@ -87,7 +95,7 @@ export class TransactionManager {
             this.hasUpdatedDiagram
         ) {
             this.hasUpdatedDiagram = false;
-            const engine = this.registry.getEditEngine(this.edit);
+            const engine = this.registry.getEditEngine(this.lastKnownAction.kind);
             const textDocumentEdit = engine.applyAction(this.edit, this.lastKnownAction, this.diagram.document);
             this.lastAppliedAction = this.lastKnownAction;
             this.diagram.applyEdit(textDocumentEdit);
@@ -139,7 +147,7 @@ export class TransactionManager {
     updateLayoutedDiagram(layoutedDiagram: BaseLayoutedDiagram): void {
         if (this.lastKnownAction != undefined && this.lastAppliedAction != undefined && this.edit != undefined) {
             if (this.lastKnownAction != this.lastAppliedAction) {
-                const engine = this.registry.getEditEngine(this.edit);
+                const engine = this.registry.getEditEngine(this.lastKnownAction.kind);
                 engine.predictActionDiff(this.edit, layoutedDiagram, this.lastAppliedAction, this.lastKnownAction);
             }
         }

@@ -1,3 +1,4 @@
+import { printNumber } from "../printNumber";
 import { EditEngine } from "./editGenerator";
 import { OriginalValueNumberGenerator } from "./originalValueNumberGenerator";
 
@@ -31,6 +32,6 @@ export namespace FactorReplacementNumberGenerator {
 export const factorReplacementNumberEngine: EditEngine<number, FactorReplacementNumberGenerator> = {
     type: FactorReplacementNumberGenerator.TYPE,
     generateEdit(factor: number, generator: FactorReplacementNumberGenerator) {
-        return (generator.originalValue * factor).toString();
+        return printNumber(generator.originalValue * factor);
     }
 };

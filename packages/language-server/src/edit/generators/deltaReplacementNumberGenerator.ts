@@ -1,5 +1,6 @@
 import { OriginalValueNumberGenerator } from "./originalValueNumberGenerator";
 import { EditEngine } from "./editGenerator";
+import { printNumber } from "../printNumber";
 
 /**
  * EditGenerator which adds / removes a specified value from the original value and replaces the whole number
@@ -31,6 +32,6 @@ export namespace DeltaReplacementNumberGenerator {
 export const deltaReplacementNumberEngine: EditEngine<number, DeltaReplacementNumberGenerator> = {
     type: DeltaReplacementNumberGenerator.TYPE,
     generateEdit(delta: number, generator: DeltaReplacementNumberGenerator) {
-        return (generator.originalValue + delta).toString();
+        return printNumber(generator.originalValue + delta);
     }
 };
