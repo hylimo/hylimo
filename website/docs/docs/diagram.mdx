@@ -171,10 +171,42 @@ aCanvasConnection with {
 ```
 The builder for creating the segments supports the following methods:
 - start: starts the line, if the start element is a canvasElement takes the relative position on the outline as argument
+    ```
+    // canvas element start:
+    start(0)
+    // point start
+    start()
+    ```
 - end: ends the line, if the end element is a canvasElement takes the relative position on the outline as argument
+    ```
+    // canvas element end
+    end(0)
+    // point end
+    end()
+    ```
 - line: adds a line segment for each positional argument
+    ```
+    // 1 segment
+    start(0).line(end(0))
+    // 2 segments
+    start(0).line(apos(100, 100), end(0))
+    ```
 - bezier: adds a bezier segment, first takes relative coordinates for the start control point, next the end point, and last the relative coordinates for the end control point. Also supports adding multiple segments at once by repeating the first two parameters for each segment, control points are mirrored at each inner point.
+    ```
+    // 1 segment
+    over = start(0).bezier(100, 100, end(0), 100, 100)
+    // 2 segments
+    over = start(0).bezier(100, 100, apos(100, 100), 100, 100, end(0), 100, 100)
+    ```
 - axisAligned: adds an axis-aligned segment, takes the end point and a relative position between -1 and 1 for the center part of the segment. If the provided position is positive, the position defines the relative position of the vertical segment, if negative the relative position of the horizontal segment. Similar to other segment types, inputs can be repeated for multiple segments.
+    ```
+    // 1 segment, horizontal first
+    over = start(0).axisAligned(0.5, end(0))
+    // 1 segment, vertical first
+    over = start(0).axisAligned(-0.5, end(0))
+    // 2 segments
+    over = start(0).axisAligned(0.5, apos(100, 100), -0.5, end(0))
+    ```
 
 Label allows to create a label on the connection.
 The function takes the text to display, the relative position on the connection, and the distance to the connection as arguments.
