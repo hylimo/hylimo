@@ -103,15 +103,36 @@ export class CanvasElementView implements IView {
     private generateRotationIcon(model: Readonly<SCanvasElement>): VNode {
         const zoom = findViewportZoom(model);
         const y = model.y - CanvasElementView.ROTATE_ICON_DISTANCE / zoom;
-        return svg("path", {
-            attrs: {
-                d: CanvasElementView.ROTATE_PATH,
-                transform: `translate(0, ${y}) scale(${(1 / zoom / CanvasElementView.ROTATE_PATH_SIZE) * 13})`
+        return svg(
+            "g",
+            {
+                attrs: {
+                    transform: `translate(0, ${y}) scale(${(1 / zoom / CanvasElementView.ROTATE_PATH_SIZE) * 13})`
+                },
+                class: {
+                    [CanvasElementView.ROTATE_ICON_CLASS]: true
+                }
             },
-            class: {
-                [CanvasElementView.ROTATE_ICON_CLASS]: true
-            }
-        });
+            svg("path", {
+                attrs: {
+                    d: CanvasElementView.ROTATE_PATH
+                },
+                class: {
+                    [CanvasElementView.ROTATE_ICON_CLASS]: true
+                }
+            }),
+            svg("rect", {
+                attrs: {
+                    x: -CanvasElementView.ROTATE_PATH_SIZE / 2,
+                    y: -CanvasElementView.ROTATE_PATH_SIZE / 2,
+                    width: CanvasElementView.ROTATE_PATH_SIZE,
+                    height: CanvasElementView.ROTATE_PATH_SIZE
+                },
+                class: {
+                    [CanvasElementView.ROTATE_ICON_CLASS]: true
+                }
+            })
+        );
     }
 
     /**

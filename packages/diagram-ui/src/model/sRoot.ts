@@ -100,9 +100,13 @@ export class SRoot extends ViewportRootElement {
             pointer-events: visibleStroke;
         }
 
-        .canvas-rotate-icon {
+        .canvas-rotate-icon>path {
             fill: var(--diagram-layout-color);
-            pointer-events: bounding-box;
+        }
+
+        .canvas-rotate-icon>rect {
+            fill: transparent;
+            cursor: pointer;
         }
 
         .resize {
