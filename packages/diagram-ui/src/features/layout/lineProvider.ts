@@ -1,10 +1,10 @@
 import { TransformedLine } from "@hylimo/diagram-common";
-import { SModelElement, SModelExtension } from "sprotty";
+import { SModelElementImpl } from "sprotty";
 
 /**
  * Provides a line. This can be the element itself or an outline
  */
-export interface LineProvider extends SModelExtension {
+export interface LineProvider {
     /**
      * The provided line
      */
@@ -14,9 +14,9 @@ export interface LineProvider extends SModelExtension {
 /**
  * Checks if the provided element is a LineProvider
  *
- * @param element the SModelElement to check
+ * @param element the SModelElementImpl to check
  * @returns true if the element is a LineProvider
  */
-export function isLineProvider(element: SModelElement): element is SModelElement & LineProvider {
+export function isLineProvider(element: SModelElementImpl): element is SModelElementImpl & LineProvider {
     return "line" in element;
 }

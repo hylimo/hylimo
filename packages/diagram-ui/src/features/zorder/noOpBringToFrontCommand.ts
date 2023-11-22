@@ -1,5 +1,6 @@
 import { injectable } from "inversify";
-import { BringToFrontAction, Command, CommandExecutionContext, CommandReturn } from "sprotty";
+import { Command, CommandExecutionContext, CommandReturn } from "sprotty";
+import { BringToFrontAction } from "sprotty-protocol";
 
 /**
  * No-op command for bringToFront

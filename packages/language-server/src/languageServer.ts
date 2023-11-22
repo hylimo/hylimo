@@ -220,12 +220,12 @@ export class LanguageServer {
      * @param params defines the document and additional options
      * @returns edits which define how to update the document
      */
-    private onDocumentFormatting(params: DocumentFormattingParams): TextEdit[] {
+    private async onDocumentFormatting(params: DocumentFormattingParams): Promise<TextEdit[]> {
         const diagram = this.diagrams.get(params.textDocument.uri)!;
         return [
             TextEdit.replace(
                 Range.create(0, 0, uinteger.MAX_VALUE, uinteger.MAX_VALUE),
-                this.formatter.formatDocument(diagram.document, {
+                await this.formatter.formatDocument(diagram.document, {
                     useTabs: !params.options.insertSpaces,
                     tabWidth: params.options.tabSize
                 })

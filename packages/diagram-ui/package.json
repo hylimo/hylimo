@@ -14,7 +14,7 @@
         "@hylimo/diagram-common": "^0.0.1",
         "@hylimo/diagram-protocol": "^0.0.1",
         "@hylimo/diagram-render-svg": "^0.0.1",
-        "sprotty": "^0.13.0",
-        "sprotty-protocol": "^0.13.0"
+        "sprotty": "^1.0.0",
+        "sprotty-protocol": "^1.0.0"
     }
 }

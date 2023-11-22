@@ -59,7 +59,7 @@ export class Formatter {
      * @param options define how formatting is done
      * @returns the edits defining how to update the document
      */
-    formatDocument(document: TextDocument, options: { useTabs?: boolean; tabWidth?: number }): string {
+    formatDocument(document: TextDocument, options: { useTabs?: boolean; tabWidth?: number }): Promise<string> {
         return format(document.getText(), {
             parser: "syncscript",
             plugins: [this.plugin],

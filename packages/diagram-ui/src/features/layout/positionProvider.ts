@@ -1,10 +1,10 @@
 import { Point } from "@hylimo/diagram-common";
-import { SModelElement, SModelExtension } from "sprotty";
+import { SModelElementImpl } from "sprotty";
 
 /**
  * Provides a point which can be used as reference
  */
-export interface PositionProvider extends SModelExtension {
+export interface PositionProvider {
     /**
      * The provided position
      */
@@ -14,9 +14,9 @@ export interface PositionProvider extends SModelExtension {
 /**
  * Checks if the provided element is a PositionProvider
  *
- * @param element the SModelElement to check
+ * @param element the SModelElementImpl to check
  * @returns true if the element is a PositionProvider
  */
-export function isPositionProvider(element: SModelElement): element is SModelElement & PositionProvider {
+export function isPositionProvider(element: SModelElementImpl): element is SModelElementImpl & PositionProvider {
     return "position" in element;
 }

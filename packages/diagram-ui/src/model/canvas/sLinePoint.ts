@@ -1,5 +1,5 @@
 import { LineEngine, LinePoint, Point, TransformedLine } from "@hylimo/diagram-common";
-import { SModelElement } from "sprotty";
+import { SModelElementImpl } from "sprotty";
 import { LinearAnimatable } from "../../features/animation/model";
 import { isLineProvider } from "../../features/layout/lineProvider";
 import { SCanvasPoint } from "./sCanvasPoint";
@@ -42,7 +42,7 @@ export class SLinePoint extends SCanvasPoint implements LinePoint, LinearAnimata
         super();
 
         this.cachedProperty<TransformedLine>("line", () => {
-            const lineProvider = this.root.index.getById(this.lineProvider) as SModelElement;
+            const lineProvider = this.root.index.getById(this.lineProvider) as SModelElementImpl;
             if (isLineProvider(lineProvider)) {
                 return lineProvider.line;
             } else {
