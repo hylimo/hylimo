@@ -1,6 +1,6 @@
 {
     "name": "@hylimo/language-server",
-    "version": "0.0.1",
+    "version": "1.0.0",
     "main": "lib/index",
     "types": "lib/index",
     "files": [
@@ -11,9 +11,9 @@
         "build": "tsc"
     },
     "dependencies": {
-        "@hylimo/core": "^0.0.1",
-        "@hylimo/diagram": "^0.0.1",
-        "@hylimo/diagram-protocol": "^0.0.1",
+        "@hylimo/core": "^1.0.0",
+        "@hylimo/diagram": "^1.0.0",
+        "@hylimo/diagram-protocol": "^1.0.0",
         "prettier": "^2.7.2",
         "sprotty-protocol": "^0.13.0",
         "vscode-languageserver": "8.0.2",

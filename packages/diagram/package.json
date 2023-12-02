@@ -1,6 +1,6 @@
 {
     "name": "@hylimo/diagram",
-    "version": "0.0.1",
+    "version": "1.0.0",
     "main": "lib/index",
     "types": "lib/index",
     "files": [
@@ -11,9 +11,9 @@
         "build": "tsc"
     },
     "dependencies": {
-        "@hylimo/core": "^0.0.1",
-        "@hylimo/diagram-common": "^0.0.1",
-        "@hylimo/fonts": "^0.0.1",
+        "@hylimo/core": "^1.0.0",
+        "@hylimo/diagram-common": "^1.0.0",
+        "@hylimo/fonts": "^1.0.0",
         "axios": "^1.3.4",
         "fontkit": "^2.0.2",
         "linebreak": "^1.1.0",

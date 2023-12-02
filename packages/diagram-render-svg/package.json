@@ -1,6 +1,6 @@
 {
     "name": "@hylimo/diagram-render-svg",
-    "version": "0.0.1",
+    "version": "1.0.0",
     "main": "lib/index",
     "types": "lib/index",
     "files": [
@@ -11,7 +11,7 @@
         "build": "tsc"
     },
     "dependencies": {
-        "@hylimo/diagram-common": "^0.0.1",
+        "@hylimo/diagram-common": "^1.0.0",
         "xmlbuilder2": "^3.0.2"
     }
 }

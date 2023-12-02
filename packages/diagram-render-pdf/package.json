@@ -1,6 +1,6 @@
 {
     "name": "@hylimo/diagram-render-pdf",
-    "version": "0.0.1",
+    "version": "1.0.0",
     "main": "lib/index",
     "types": "lib/index",
     "files": [
@@ -11,8 +11,8 @@
         "build": "tsc"
     },
     "dependencies": {
-        "@hylimo/diagram": "^0.0.1",
-        "@hylimo/diagram-render-svg": "^0.0.1",
+        "@hylimo/diagram": "^1.0.0",
+        "@hylimo/diagram-render-svg": "^1.0.0",
         "pdfkit": "^0.13.0"
     },
     "devDependencies": {

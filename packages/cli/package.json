@@ -1,5 +1,5 @@
 {
-    "name": "@hylimo/diagram-ui",
+    "name": "@hylimo/cli",
     "version": "1.0.0",
     "main": "lib/index",
     "types": "lib/index",
@@ -11,10 +11,10 @@
         "build": "tsc"
     },
     "dependencies": {
-        "@hylimo/diagram-common": "^1.0.0",
-        "@hylimo/diagram-protocol": "^1.0.0",
+        "@hylimo/diagram": "^1.0.0",
+        "@hylimo/diagram-render-pdf": "^1.0.0",
         "@hylimo/diagram-render-svg": "^1.0.0",
-        "sprotty": "^0.13.0",
-        "sprotty-protocol": "^0.13.0"
-    }
+        "commander": "^11.1.0"
+    },
+    "bin": "lib/index.js"
 }
