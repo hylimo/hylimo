@@ -86,7 +86,12 @@ export class Diagram {
             this.document.getText(),
             this.utils.config.diagramConfig
         );
-        const diagram = result.diagram;
+        let diagram: BaseLayoutedDiagram | undefined
+        if (result.rootElement != undefined) {
+            diagram = BaseLayoutedDiagram.fromRoot(result.rootElement);
+        } else {
+            diagram = undefined;
+        }
         this.currentDiagram = diagram;
         if (diagram != undefined) {
             this.transactionManager.updateLayoutedDiagram(diagram);

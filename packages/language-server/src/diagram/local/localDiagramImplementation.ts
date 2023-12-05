@@ -53,7 +53,7 @@ export class LocalDiagramImplementation extends DiagramImplementation {
         diagnostics.push(...errors.layoutErrors.map(this.convertLayoutError.bind(this)));
         return {
             diagnostics,
-            diagram: renderResult.layoutedDiagram
+            rootElement: renderResult.layoutedDiagram?.rootElement
         };
     }
 

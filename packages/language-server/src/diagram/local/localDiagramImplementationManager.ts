@@ -86,15 +86,12 @@ export class LocalDiagramImplementationManager extends DiagramImplementationMana
     private async handleUpdateDiagramRequest(message: RequestUpdateDiagramMessage): Promise<ReplyUpdateDiagramMessage> {
         const implementation = this.getNewDiagramImplementation(message.id);
         const updateDiagramResult = await implementation.updateDiagram(message.source, message.config);
-        const diagram = updateDiagramResult.diagram;
+        const rootElement = updateDiagramResult.rootElement;
         const result: ReplyUpdateDiagramMessage = {
             type: ReplyUpdateDiagramMessage.type,
             result: {
                 diagnostics: updateDiagramResult.diagnostics,
-                diagram: diagram && {
-                    rootElement: diagram.rootElement,
-                    elementLookup: diagram.elementLookup
-                }
+                rootElement
             }
         };
         return result;
