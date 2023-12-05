@@ -1,6 +1,6 @@
 import { BaseObject, FieldEntry, FullObject, nativeToList } from "@hylimo/core";
 import { assertString } from "@hylimo/core";
-import { Element, Size, Point, FontFamily, Stroke } from "@hylimo/diagram-common";
+import { Element, Size, Point, Stroke } from "@hylimo/diagram-common";
 import { FontManager } from "../font/fontManager";
 import { TextLayoutResult, TextLayouter } from "../font/textLayouter";
 import { generateStyles, Selector, SelectorType, Style, StyleList } from "../styles";
@@ -19,6 +19,7 @@ import { layouts } from "./layouts";
 import { FontCollection } from "../font/fontCollection";
 import { LayoutCache } from "./layoutCache";
 import { StretchMode } from "./elements/pathLayoutConfig";
+import { FontFamily } from "../font/fontFamily";
 
 /**
  * The amount of iterations which are cached

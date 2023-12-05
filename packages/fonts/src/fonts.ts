@@ -1,3 +1,4 @@
+import { openSans } from "./fonts/openSans";
 import { roboto } from "./fonts/roboto";
 import { sourceCodePro } from "./fonts/sourceCodePro";
 
@@ -6,5 +7,6 @@ import { sourceCodePro } from "./fonts/sourceCodePro";
  */
 export const fonts = {
     sourceCodePro,
-    roboto
+    roboto,
+    openSans
 };

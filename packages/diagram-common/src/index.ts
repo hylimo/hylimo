@@ -10,7 +10,6 @@ export * from "./common/math";
 export * from "./common/point";
 export * from "./common/size";
 export * from "./font/convertFontToCssStyle";
-export * from "./font/font";
 export * from "./font/fontConfig";
 export * from "./line/engine/arcSegmentEngine";
 export * from "./line/engine/bezierSegmentEngine";

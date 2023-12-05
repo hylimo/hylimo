@@ -1,4 +1,5 @@
 export * from "./font/fontCollection";
+export * from "./font/fontFamily";
 export * from "./font/fontManager";
 export * from "./font/textLayouter";
 export * from "./layout/elements/canvas/absolutePointLayoutConfig";

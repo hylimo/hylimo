@@ -1,5 +1,5 @@
 import { Font } from "fontkit";
-import { FontFamilyConfig } from "./fontConfig";
+import { FontFamilyConfig } from "@hylimo/diagram-common";
 
 /**
  * Defines a font family to be used
