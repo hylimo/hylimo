@@ -49,7 +49,7 @@ const diagramEngine = new DiagramEngine(
     layoutEngine
 );
 
-const config : DiagramConfig = {
+const config: DiagramConfig = {
     theme: darkMode ? "dark" : "light"
 };
 
@@ -73,4 +73,4 @@ const config : DiagramConfig = {
         const svg = renderer.render(rootElement);
         fs.writeFileSync(outputFile, svg);
     }
-})()
+})();
