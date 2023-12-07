@@ -11,7 +11,8 @@ const languageServer = new LanguageServer({
     defaultConfig: {
         diagramConfig: {
             theme: "dark"
-        }
+        },
+        settings: {}
     },
     connection,
     additionalInterpreterModules: [classDiagramModule],

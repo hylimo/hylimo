@@ -24,7 +24,10 @@ import {
     OpenDiagramMessage,
     SetLanguageServerIdNotification,
     ConfigNotification,
-    DynamicLanguageServerConfig
+    DynamicLanguageServerConfig,
+    DiagramRequest,
+    DiagramRequestMessage,
+    DiagramResponseMessage
 } from "@hylimo/diagram-protocol";
 import { SharedDiagramUtils } from "./sharedDiagramUtils";
 import { LocalDiagramImplementationManager } from "./diagram/local/localDiagramImplementationManager";
@@ -143,6 +146,7 @@ export class LanguageServer {
             this.onSetSecondaryLanguageServer.bind(this)
         );
         this.connection.onNotification(ConfigNotification.type, this.onUpdateConfig.bind(this));
+        this.connection.onRequest(DiagramRequest.type, this.onRequestDiagram.bind(this));
     }
 
     /**
@@ -255,6 +259,22 @@ export class LanguageServer {
             throw new Error(`Unknown diagram: ${params.diagramUri}`);
         }
         this.diagramServerManager.addClient(params.clientId, diagram);
+    }
+
+    /**
+     * Handles a diagram request
+     *
+     * @param params defines the diagram to request
+     * @returns the requested diagram
+     */
+    private onRequestDiagram(params: DiagramRequestMessage): DiagramResponseMessage {
+        const diagram = this.diagrams.get(params.diagramUri);
+        if (!diagram) {
+            throw new Error(`Unknown diagram: ${params.diagramUri}`);
+        }
+        return {
+            diagram: diagram.currentDiagram
+        };
     }
 
     /**

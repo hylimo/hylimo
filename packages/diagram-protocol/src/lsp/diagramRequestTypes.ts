@@ -1,8 +1,14 @@
 import { BaseLayoutedDiagram } from "@hylimo/diagram-common";
 import { RequestType } from "vscode-languageserver-protocol";
 
+/**
+ * Namespace for the diagram request
+ */
 export namespace DiagramRequest {
-    export const type = new RequestType<DiagramRequestMessage, DiagramRequestMessage, any>("diagram/request");
+    /**
+     * Request type for diagram request
+     */
+    export const type = new RequestType<DiagramRequestMessage, DiagramResponseMessage, any>("diagram/request");
 }
 
 /**
@@ -15,6 +21,12 @@ export interface DiagramRequestMessage {
     diagramUri: string;
 }
 
+/**
+ * Message for responding to a diagram request
+ */
 export interface DiagramResponseMessage {
+    /**
+     * The found diagram
+     */
     diagram?: BaseLayoutedDiagram;
 }
