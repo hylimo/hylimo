@@ -11,6 +11,7 @@ export * from "./common/point";
 export * from "./common/size";
 export * from "./font/convertFontToCssStyle";
 export * from "./font/fontConfig";
+export * from "./layout/baseLayoutedDiagram";
 export * from "./line/engine/arcSegmentEngine";
 export * from "./line/engine/bezierSegmentEngine";
 export * from "./line/engine/conicProjection";

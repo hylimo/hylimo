@@ -37,6 +37,7 @@ export * from "./edit/generators/generatorRegistry";
 export * from "./edit/generators/originalValueNumberGenerator";
 export * from "./edit/generators/replacementNumberGenerator";
 export * from "./edit/diagramServer";
+export * from "./edit/printNumber";
 export * from "./edit/transactionManager";
 export * from "./diagramServerManager";
 export * from "./formatter";

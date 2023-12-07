@@ -1,5 +1,5 @@
 import { LayoutedElement, LineCap, LineJoin, Shape, StrokedElement } from "@hylimo/diagram-common";
-import { FilledElement } from "@hylimo/diagram-common/src/model/elements/base/filledElement";
+import { FilledElement } from "@hylimo/diagram-common";
 
 /**
  * SVG layout attributes

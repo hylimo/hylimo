@@ -10,7 +10,7 @@ import { TextDocument, TextEdit } from "vscode-languageserver-textdocument";
 import { EditGenerator } from "../generators/editGenerator";
 import { GeneratorRegistry } from "../generators/generatorRegistry";
 import { EditGeneratorEntry } from "./editGeneratorEntry";
-import { BaseLayoutedDiagram } from "@hylimo/diagram";
+import { BaseLayoutedDiagram } from "@hylimo/diagram-common";
 
 /**
  * Handles transaction al edits to a TextDocument

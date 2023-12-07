@@ -1,5 +1,5 @@
-import { BaseLayoutedDiagram, LayoutedDiagram } from "@hylimo/diagram";
-import { CanvasAxisAlignedSegment } from "@hylimo/diagram-common";
+import { LayoutedDiagram } from "@hylimo/diagram";
+import { BaseLayoutedDiagram, CanvasAxisAlignedSegment } from "@hylimo/diagram-common";
 import { AxisAlignedSegmentEditAction, DynamicLanguageServerConfig, IncrementalUpdate } from "@hylimo/diagram-protocol";
 import { EditGenerator } from "../generators/editGenerator";
 import { GeneratorRegistry } from "../generators/generatorRegistry";

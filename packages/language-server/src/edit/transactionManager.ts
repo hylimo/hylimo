@@ -1,4 +1,4 @@
-import { BaseLayoutedDiagram } from "@hylimo/diagram";
+import { BaseLayoutedDiagram } from "@hylimo/diagram-common";
 import { IncrementalUpdate, TransactionalAction } from "@hylimo/diagram-protocol";
 import { TextDocumentContentChangeEvent } from "vscode-languageserver-textdocument";
 import { Diagram } from "../diagram/diagram";

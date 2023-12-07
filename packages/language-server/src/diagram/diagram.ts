@@ -8,7 +8,7 @@ import {
     TransactionalAction
 } from "@hylimo/diagram-protocol";
 import { DiagramImplementation } from "./diagramImplementation";
-import { BaseLayoutedDiagram } from "@hylimo/diagram";
+import { BaseLayoutedDiagram } from "@hylimo/diagram-common";
 import { defaultEditRegistry } from "../edit/edits/transactionalEditRegistry";
 import { DiagramImplementationManager } from "./diagramImplementationManager";
 import { TransactionalEdit } from "../edit/edits/transactionalEdit";
