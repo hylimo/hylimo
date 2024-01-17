@@ -209,6 +209,21 @@ export const diagramModule = InterpreterModule.create(
             )
         ]).call(id(SemanticFieldNames.THIS)),
         assign(
+            "var",
+            fun(
+                `
+                    (name) = args
+                    object(name = name, _type = "var")
+                `,
+                {
+                    docs: "Creates a variable reference which can be used everywhere a style value is expected.",
+                    params: [[0, "the name of the variable", stringType]],
+                    returns: "The created variable reference"
+                }
+            )
+        ),
+        assign("unset", id("object").call({ name: "_type", value: str("unset") })),
+        assign(
             "styles",
             fun([
                 assign(selectorProto, id("object").call({ name: "_type", value: str("selectorProto") })),
@@ -286,20 +301,6 @@ export const diagramModule = InterpreterModule.create(
                         }
                     )
                 ),
-                assign(
-                    "var",
-                    fun(
-                        `
-                            (name) = args
-                            object(name = name, _type = "var")
-                        `,
-                        {
-                            docs: "Creates a variable reference which can be used everywhere a style value is expected.",
-                            params: [[0, "the name of the variable", stringType]],
-                            returns: "The created variable reference"
-                        }
-                    )
-                ),
                 fun(
                     `
                         (callback) = args
@@ -310,9 +311,7 @@ export const diagramModule = InterpreterModule.create(
                         res.any = { 
                             anySelector("", it, self = args.self)
                         }
-                        res.unset = object(_type = "unset")
                         res.vars = vars
-                        res.var = var
                         callback.callWithScope(res)
                         res
                     `,
