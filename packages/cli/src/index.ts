@@ -55,9 +55,7 @@ const config: DiagramConfig = {
 };
 
 (async () => {
-    const diagram = await diagramEngine.render(inputFileContent, {
-        theme: "light"
-    });
+    const diagram = await diagramEngine.render(inputFileContent, config);
     const rootElement = diagram.layoutedDiagram?.rootElement;
 
     if (!rootElement) {
