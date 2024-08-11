@@ -1,10 +1,10 @@
-import { AbstractInvocationExpression } from "../../ast/abstractInvocationExpression";
-import { Expression } from "../../ast/expression";
-import { ExecutableListEntry } from "../ast/executableListEntry";
-import { InterpreterContext } from "../interpreter";
-import { RuntimeError } from "../runtimeError";
-import { SemanticFieldNames } from "../semanticFieldNames";
-import { FullObject } from "./fullObject";
+import { AbstractInvocationExpression } from "../../ast/abstractInvocationExpression.js";
+import { Expression } from "../../ast/expression.js";
+import { ExecutableListEntry } from "../ast/executableListEntry.js";
+import { InterpreterContext } from "../interpreter.js";
+import { RuntimeError } from "../runtimeError.js";
+import { SemanticFieldNames } from "../semanticFieldNames.js";
+import { FullObject } from "./fullObject.js";
 
 /**
  * Base class for all runtime objects

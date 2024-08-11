@@ -1,4 +1,4 @@
-import { EditEngine, EditGenerator } from "./editGenerator";
+import { EditEngine, EditGenerator } from "./editGenerator.js";
 
 /**
  * EditGenerator which can add multiple fields

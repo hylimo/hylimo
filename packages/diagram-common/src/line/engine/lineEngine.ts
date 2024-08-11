@@ -1,15 +1,15 @@
 import { applyToPoint, inverse } from "transformation-matrix";
-import { Point } from "../../common/point";
-import { LinePoint } from "../../model/elements/canvas/canvasPoint";
-import { ArcSegment } from "../model/arcSegment";
-import { BezierSegment } from "../model/bezierSegment";
-import { TransformedLine } from "../model/line";
-import { LineSegment } from "../model/lineSegment";
-import { Segment } from "../model/segment";
-import { ArcSegmentEngine } from "./arcSegmentEngine";
-import { BezierSegmentEngine } from "./bezierSegmentEngine";
-import { LineSegmentEngine } from "./lineSegmentEngine";
-import { SegmentEngine } from "./segmentEngine";
+import { Point } from "../../common/point.js";
+import { LinePoint } from "../../model/elements/canvas/canvasPoint.js";
+import { ArcSegment } from "../model/arcSegment.js";
+import { BezierSegment } from "../model/bezierSegment.js";
+import { TransformedLine } from "../model/line.js";
+import { LineSegment } from "../model/lineSegment.js";
+import { Segment } from "../model/segment.js";
+import { ArcSegmentEngine } from "./arcSegmentEngine.js";
+import { BezierSegmentEngine } from "./bezierSegmentEngine.js";
+import { LineSegmentEngine } from "./lineSegmentEngine.js";
+import { SegmentEngine } from "./segmentEngine.js";
 
 /**
  * Helper to get closest points to a line, and calculate the position of a point on the line

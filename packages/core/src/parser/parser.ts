@@ -1,7 +1,7 @@
 import { CstNode, CstParser, ICstVisitor, ILexingError, IRecognitionException, IToken, Lexer } from "chevrotain";
-import { Expression } from "../ast/expression";
-import { ASTExpressionPosition } from "../ast/astExpressionPosition";
-import { generateCstToAstTransfromer } from "./cstToAstTransformer";
+import { Expression } from "../ast/expression.js";
+import { ASTExpressionPosition } from "../ast/astExpressionPosition.js";
+import { generateCstToAstTransfromer } from "./cstToAstTransformer.js";
 import {
     CloseCurlyBracket,
     CloseRoundBracket,
@@ -18,7 +18,7 @@ import {
     OpenSquareBracket,
     SignMinus,
     String
-} from "./lexer";
+} from "./lexer.js";
 
 /**
  * All existing grammar rules

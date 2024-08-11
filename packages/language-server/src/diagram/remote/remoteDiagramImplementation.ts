@@ -1,19 +1,19 @@
 import { TransactionalAction } from "@hylimo/diagram-protocol";
 import { CompletionItem, Position, Range } from "vscode-languageserver";
-import { TransactionalEdit } from "../../edit/edits/transactionalEdit";
-import { DiagramImplementation, DiagramUpdateResult } from "../diagramImplementation";
+import { TransactionalEdit } from "../../edit/edits/transactionalEdit.js";
+import { DiagramImplementation, DiagramUpdateResult } from "../diagramImplementation.js";
 import {
     ReplyGenerateCompletionItemMessage,
     RequestGenerateCompletionItemMessage
-} from "./generateCompletionItemsMessage";
+} from "./generateCompletionItemsMessage.js";
 import {
     RequestGenerateTransactionalEditMessage,
     ReplyGenerateTransactionalEditMessage
-} from "./generateTransactionalEditMessage";
-import { RemoteDiagramImplementationManager } from "./remoteDiagramImplementationManager";
-import { RequestUpdateDiagramMessage, ReplyUpdateDiagramMessage } from "./updateDiagramMessage";
+} from "./generateTransactionalEditMessage.js";
+import { RemoteDiagramImplementationManager } from "./remoteDiagramImplementationManager.js";
+import { RequestUpdateDiagramMessage, ReplyUpdateDiagramMessage } from "./updateDiagramMessage.js";
 import { DiagramConfig } from "@hylimo/diagram-common";
-import { ReplyGetSourceRangeMessage, RequestGetSourceRangeMessage } from "./getSourceRangeMessage";
+import { ReplyGetSourceRangeMessage, RequestGetSourceRangeMessage } from "./getSourceRangeMessage.js";
 
 /**
  * Remote implementation of a diagram.

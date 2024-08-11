@@ -1,12 +1,12 @@
-import { ExecutableExpression } from "./ast/executableExpression";
-import { BaseObject } from "./objects/baseObject";
-import { BooleanObject } from "./objects/booleanObject";
-import { FullObject } from "./objects/fullObject";
-import { NullObject } from "./objects/nullObject";
-import { NumberObject } from "./objects/numberObject";
-import { StringObject } from "./objects/stringObject";
-import { RuntimeError } from "./runtimeError";
-import { SemanticFieldNames } from "./semanticFieldNames";
+import { ExecutableExpression } from "./ast/executableExpression.js";
+import { BaseObject } from "./objects/baseObject.js";
+import { BooleanObject } from "./objects/booleanObject.js";
+import { FullObject } from "./objects/fullObject.js";
+import { NullObject } from "./objects/nullObject.js";
+import { NumberObject } from "./objects/numberObject.js";
+import { StringObject } from "./objects/stringObject.js";
+import { RuntimeError } from "./runtimeError.js";
+import { SemanticFieldNames } from "./semanticFieldNames.js";
 
 /**
  * Default InterpreterContext requiering only the maxExecutionSteps

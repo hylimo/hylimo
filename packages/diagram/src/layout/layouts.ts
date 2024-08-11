@@ -1,22 +1,22 @@
-import { AbsolutePointLayoutConfig } from "./elements/canvas/absolutePointLayoutConfig";
-import { CanvasBezierSegmentLayoutConfig } from "./elements/canvas/canvasBezierSegmentLayoutConfig";
-import { CanvasConnectionLayoutConfig } from "./elements/canvas/canvasConnectionLayoutConfig";
-import { CanvasElementLayoutConfig } from "./elements/canvas/canvasElementLayoutConfig";
-import { CanvasLayoutConfig } from "./elements/canvas/canvasLayoutConfig";
-import { CanvasLineSegmentLayoutConfig } from "./elements/canvas/canvasLineSegmentLayoutConfig";
-import { LinePointLayoutConfig } from "./elements/canvas/linePointLayoutConfig";
-import { MarkerLayoutConfig } from "./elements/canvas/markerLayoutConfig";
-import { RelativePointLayoutConfig } from "./elements/canvas/relativePointLayoutConfig";
-import { HBoxLayoutConfig } from "./elements/hboxLayoutConfig";
-import { RectLayoutConfig } from "./elements/rectLayoutConfig";
-import { SpanLayoutConfig } from "./elements/spanLayoutConfig";
-import { TextLayoutConfig } from "./elements/textLayoutConfig";
-import { VBoxLayoutConfig } from "./elements/vboxLayoutConfig";
-import { LayoutConfig } from "./layoutElement";
-import { PathLayoutConfig } from "./elements/pathLayoutConfig";
-import { CanvasAxisAlignedSegmentLayoutConfig } from "./elements/canvas/canvasAxisAlignedSegmentLayoutConfig";
-import { EllipseLayoutConfig } from "./elements/ellipseLayoutConfig";
-import { StackLayoutConfig } from "./elements/stackLayoutConfig";
+import { AbsolutePointLayoutConfig } from "./elements/canvas/absolutePointLayoutConfig.js";
+import { CanvasBezierSegmentLayoutConfig } from "./elements/canvas/canvasBezierSegmentLayoutConfig.js";
+import { CanvasConnectionLayoutConfig } from "./elements/canvas/canvasConnectionLayoutConfig.js";
+import { CanvasElementLayoutConfig } from "./elements/canvas/canvasElementLayoutConfig.js";
+import { CanvasLayoutConfig } from "./elements/canvas/canvasLayoutConfig.js";
+import { CanvasLineSegmentLayoutConfig } from "./elements/canvas/canvasLineSegmentLayoutConfig.js";
+import { LinePointLayoutConfig } from "./elements/canvas/linePointLayoutConfig.js";
+import { MarkerLayoutConfig } from "./elements/canvas/markerLayoutConfig.js";
+import { RelativePointLayoutConfig } from "./elements/canvas/relativePointLayoutConfig.js";
+import { HBoxLayoutConfig } from "./elements/hboxLayoutConfig.js";
+import { RectLayoutConfig } from "./elements/rectLayoutConfig.js";
+import { SpanLayoutConfig } from "./elements/spanLayoutConfig.js";
+import { TextLayoutConfig } from "./elements/textLayoutConfig.js";
+import { VBoxLayoutConfig } from "./elements/vboxLayoutConfig.js";
+import { LayoutConfig } from "./layoutElement.js";
+import { PathLayoutConfig } from "./elements/pathLayoutConfig.js";
+import { CanvasAxisAlignedSegmentLayoutConfig } from "./elements/canvas/canvasAxisAlignedSegmentLayoutConfig.js";
+import { EllipseLayoutConfig } from "./elements/ellipseLayoutConfig.js";
+import { StackLayoutConfig } from "./elements/stackLayoutConfig.js";
 
 /**
  * Known layouts

@@ -1,7 +1,7 @@
-import { Point } from "../../../common/point";
-import { Element } from "../base/element";
-import { Marker, MarkerLayoutInformation } from "./marker";
-import { CanvasConnectionSegment, calculateMarkerRenderInformationInternal } from "./canvasConnectionSegment";
+import { Point } from "../../../common/point.js";
+import { Element } from "../base/element.js";
+import { Marker, MarkerLayoutInformation } from "./marker.js";
+import { CanvasConnectionSegment, calculateMarkerRenderInformationInternal } from "./canvasConnectionSegment.js";
 
 /**
  * Cubic bezier connection segment

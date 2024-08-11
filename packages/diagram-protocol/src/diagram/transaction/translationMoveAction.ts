@@ -1,4 +1,4 @@
-import { TransactionalAction } from "./transactionalAction";
+import { TransactionalAction } from "./transactionalAction.js";
 
 /**
  * Translation move action to move absolute and relative points by an offset

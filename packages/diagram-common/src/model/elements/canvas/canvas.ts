@@ -1,5 +1,5 @@
-import { Element } from "../base/element";
-import { LayoutedElement } from "../base/layoutedElement";
+import { Element } from "../base/element.js";
+import { LayoutedElement } from "../base/layoutedElement.js";
 
 /**
  * Canvas consisting of points, elements and connections.

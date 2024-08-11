@@ -1,8 +1,8 @@
-import { Expression } from "../../ast/expression";
-import { Type } from "../../types/base";
-import { InterpreterContext } from "../interpreter";
-import { BaseObject } from "../objects/baseObject";
-import { ExecutableExpression } from "./executableExpression";
+import { Expression } from "../../ast/expression.js";
+import { Type } from "../../types/base.js";
+import { InterpreterContext } from "../interpreter.js";
+import { BaseObject } from "../objects/baseObject.js";
+import { ExecutableExpression } from "./executableExpression.js";
 
 /**
  * Documentation of a function

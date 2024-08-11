@@ -1,8 +1,6 @@
 ---
-sidebar_position: 3
-slug: /syncscript
+outline: deep
 ---
-
 # SyncScript
 SyncScript is a general-purpose programming language with focus on flexibility and implementing internal DSLs.
 Characteristings:
@@ -119,11 +117,13 @@ createPoint = {
     y = args.y
     // TODO
 }
+```
 The first index-based argument cal also be accessed under the name `it`:
 ```
 printWrapper = {
     println(it)
 }
+```
 To access further index-based arguments, the destructuring expression can be used:
 ```
 printWrapper = {

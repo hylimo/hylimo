@@ -10,9 +10,9 @@ import {
     str,
     toExecutable
 } from "@hylimo/core";
-import { LayoutEngine } from "./layout/layoutEngine";
+import { LayoutEngine } from "./layout/layoutEngine.js";
 import { DiagramConfig } from "@hylimo/diagram-common";
-import { LayoutedDiagram } from "./layout/diagramLayoutResult";
+import { LayoutedDiagram } from "./layout/diagramLayoutResult.js";
 
 /**
  * All errors that can occur during rendering of a diagram

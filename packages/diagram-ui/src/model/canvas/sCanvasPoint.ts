@@ -1,6 +1,6 @@
 import { CanvasPoint, ModificationSpecification, Point } from "@hylimo/diagram-common";
-import { PositionProvider } from "../../features/layout/positionProvider";
-import { SCanvasContent } from "./sCanvasContent";
+import { PositionProvider } from "../../features/layout/positionProvider.js";
+import { SCanvasContent } from "./sCanvasContent.js";
 
 /**
  * Base model for all canvas points

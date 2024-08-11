@@ -15,10 +15,10 @@ import {
     extractLayoutAttributes,
     extractOutlinedShapeAttributes,
     extractShapeStyleAttributes
-} from "./attributeHelpers";
+} from "./attributeHelpers.js";
 import { SimplifiedCanvasElement } from "@hylimo/diagram-common";
 import { create } from "xmlbuilder2";
-import { XMLBuilder } from "xmlbuilder2/lib/interfaces";
+import { XMLBuilder } from "xmlbuilder2/lib/interfaces.js";
 
 /**
  * Renderer which renders a diagram to svg

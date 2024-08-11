@@ -1,26 +1,15 @@
 {
-    "extends": "../tsconfig.json",
     "compilerOptions": {
-        "rootDir": "src",
-        "outDir": "lib",
-        "module": "ES2020"
+        "module": "esnext",
+        "target": "esnext",
+        "moduleResolution": "bundler",
+        "esModuleInterop": true,
+        "strict": true,
+        "skipLibCheck": true,
+        "resolveJsonModule": true,
+        "jsx": "preserve",
+        "lib": ["esnext", "dom", "dom.iterable"],
+        "types": ["vite/client"]
     },
-    "references": [
-        {
-            "path": "../packages/language-server"
-        },
-        {
-            "path": "../packages/core"
-        },
-        {
-            "path": "../packages/diagram-ui"
-        },
-        {
-            "path": "../packages/diagram-render-svg"
-        },
-        {
-            "path": "../packages/diagram-render-pdf"
-        }
-    ],
-    "include": ["src/**/*.ts(x?)"]
+    "include": [".vitepress/**/*.vue", ".vitepress/**/*.ts"]
 }

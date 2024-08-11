@@ -1,10 +1,10 @@
 import { BaseLayoutedDiagram } from "@hylimo/diagram-common";
 import { IncrementalUpdate, TransactionalAction } from "@hylimo/diagram-protocol";
 import { TextDocumentContentChangeEvent } from "vscode-languageserver-textdocument";
-import { Diagram } from "../diagram/diagram";
-import { TransactionalEdit, TransactionalEditEngine, Versioned } from "./edits/transactionalEdit";
-import { TransactionalEditRegistory } from "./edits/transactionalEditRegistry";
-import { SharedDiagramUtils } from "../sharedDiagramUtils";
+import { Diagram } from "../diagram/diagram.js";
+import { TransactionalEdit, TransactionalEditEngine, Versioned } from "./edits/transactionalEdit.js";
+import { TransactionalEditRegistory } from "./edits/transactionalEditRegistry.js";
+import { SharedDiagramUtils } from "../sharedDiagramUtils.js";
 
 /**
  * Handles TransactionActions modifying the textdocument

@@ -1,21 +1,21 @@
 import { ICstVisitor, CstNode, IToken } from "chevrotain";
-import { StringLiteralExpression } from "../ast/stringLiteralExpression";
-import { SelfInvocationExpression } from "../ast/selfInvocationExpression";
-import { NumberLiteralExpression } from "../ast/numberLiteralExpression";
-import { LiteralExpression } from "../ast/literalExpression";
-import { InvocationExpression } from "../ast/invocationExpression";
-import { ListEntry } from "../ast/listEntry";
-import { IdentifierExpression } from "../ast/identifierExpression";
-import { FunctionExpression } from "../ast/functionExpression";
-import { FieldAccessExpression } from "../ast/fieldAccessExpression";
-import { DestructuringExpression } from "../ast/destructuringExpression";
-import { BracketExpression } from "../ast/bracketExpression";
-import { AssignmentExpression } from "../ast/assignmentExpression";
-import { Expression } from "../ast/expression";
-import { ASTExpressionPosition } from "../ast/astExpressionPosition";
-import { CompletionExpressionMetadata, ExpressionMetadata } from "../ast/expressionMetadata";
-import { Parser } from "./parser";
-import { ObjectExpression } from "../ast/objectExpression";
+import { StringLiteralExpression } from "../ast/stringLiteralExpression.js";
+import { SelfInvocationExpression } from "../ast/selfInvocationExpression.js";
+import { NumberLiteralExpression } from "../ast/numberLiteralExpression.js";
+import { LiteralExpression } from "../ast/literalExpression.js";
+import { InvocationExpression } from "../ast/invocationExpression.js";
+import { ListEntry } from "../ast/listEntry.js";
+import { IdentifierExpression } from "../ast/identifierExpression.js";
+import { FunctionExpression } from "../ast/functionExpression.js";
+import { FieldAccessExpression } from "../ast/fieldAccessExpression.js";
+import { DestructuringExpression } from "../ast/destructuringExpression.js";
+import { BracketExpression } from "../ast/bracketExpression.js";
+import { AssignmentExpression } from "../ast/assignmentExpression.js";
+import { Expression } from "../ast/expression.js";
+import { ASTExpressionPosition } from "../ast/astExpressionPosition.js";
+import { CompletionExpressionMetadata, ExpressionMetadata } from "../ast/expressionMetadata.js";
+import { Parser } from "./parser.js";
+import { ObjectExpression } from "../ast/objectExpression.js";
 
 /**
  * Defines a function invocation

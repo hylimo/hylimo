@@ -1,10 +1,10 @@
 import { CanvasConnection, CanvasConnectionLayout, Point, Stroke, TransformedLine } from "@hylimo/diagram-common";
-import { LinearAnimatable } from "../../features/animation/model";
-import { LineProvider } from "../../features/layout/lineProvider";
-import { SCanvasConnectionSegment } from "./sCanvasConnectionSegment";
-import { SCanvasContent } from "./sCanvasContent";
-import { SCanvasPoint } from "./sCanvasPoint";
-import { SMarker } from "./sMarker";
+import { LinearAnimatable } from "../../features/animation/model.js";
+import { LineProvider } from "../../features/layout/lineProvider.js";
+import { SCanvasConnectionSegment } from "./sCanvasConnectionSegment.js";
+import { SCanvasContent } from "./sCanvasContent.js";
+import { SCanvasPoint } from "./sCanvasPoint.js";
+import { SMarker } from "./sMarker.js";
 
 /**
  * Animated fields for CanvasConnection

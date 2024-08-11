@@ -1,21 +1,21 @@
-import { AbstractInvocationExpression } from "../ast/abstractInvocationExpression";
-import { Expression } from "../ast/expression";
-import { ExecutableAssignmentExpression } from "./ast/executableAssignmentExpression";
-import { ExecutableExpression } from "./ast/executableExpression";
-import { ExecutableIdentifierExpression } from "./ast/executableIdentifierExpression";
-import { ExecutableNativeFunctionExpression, NativeFunctionType } from "./ast/executableNativeFunctionExpression";
-import { ExecutableNumberLiteralExpression } from "./ast/executableNumberLiteralExpression";
-import { ExecutableStringLiteralExpression } from "./ast/executableStringLiteralExpression";
-import { InterpreterContext } from "./interpreter";
-import { BaseObject, FieldEntry } from "./objects/baseObject";
-import { FullObject } from "./objects/fullObject";
-import { generateArgs } from "./objects/functionObject";
-import { RuntimeAstTransformer } from "./runtimeAstTransformer";
-import { Parser } from "../parser/parser";
-import { ExecutableFunctionExpression } from "./ast/executableFunctionExpression";
-import { ExecutableNativeExpression } from "./ast/executableNativeExpression";
-import { ListEntry } from "../ast/listEntry";
-import { FunctionDocumentation } from "./ast/executableAbstractFunctionExpression";
+import { AbstractInvocationExpression } from "../ast/abstractInvocationExpression.js";
+import { Expression } from "../ast/expression.js";
+import { ExecutableAssignmentExpression } from "./ast/executableAssignmentExpression.js";
+import { ExecutableExpression } from "./ast/executableExpression.js";
+import { ExecutableIdentifierExpression } from "./ast/executableIdentifierExpression.js";
+import { ExecutableNativeFunctionExpression, NativeFunctionType } from "./ast/executableNativeFunctionExpression.js";
+import { ExecutableNumberLiteralExpression } from "./ast/executableNumberLiteralExpression.js";
+import { ExecutableStringLiteralExpression } from "./ast/executableStringLiteralExpression.js";
+import { InterpreterContext } from "./interpreter.js";
+import { BaseObject, FieldEntry } from "./objects/baseObject.js";
+import { FullObject } from "./objects/fullObject.js";
+import { generateArgs } from "./objects/functionObject.js";
+import { RuntimeAstTransformer } from "./runtimeAstTransformer.js";
+import { Parser } from "../parser/parser.js";
+import { ExecutableFunctionExpression } from "./ast/executableFunctionExpression.js";
+import { ExecutableNativeExpression } from "./ast/executableNativeExpression.js";
+import { ListEntry } from "../ast/listEntry.js";
+import { FunctionDocumentation } from "./ast/executableAbstractFunctionExpression.js";
 
 /**
  * Helper function to create an IdentifierExpression without a position

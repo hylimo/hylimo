@@ -1,6 +1,6 @@
 import { SChildElement } from "sprotty";
 import { Element } from "@hylimo/diagram-common";
-import { SRoot } from "./sRoot";
+import { SRoot } from "./sRoot.js";
 
 /**
  * Base class for all elements

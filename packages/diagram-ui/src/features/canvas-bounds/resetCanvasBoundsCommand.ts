@@ -1,7 +1,7 @@
 import { injectable, inject } from "inversify";
 import { Command, CommandExecutionContext, CommandReturn, TYPES } from "sprotty";
 import { Bounds } from "sprotty-protocol";
-import { ResetCanvasBoundsAction } from "./resetCanvasBoundsAction";
+import { ResetCanvasBoundsAction } from "./resetCanvasBoundsAction.js";
 
 /**
  * Command for ResetCanvasBoundsAction
@@ -10,9 +10,7 @@ import { ResetCanvasBoundsAction } from "./resetCanvasBoundsAction";
 export class ResetCanvasBoundsCommand extends Command {
     static readonly KIND = ResetCanvasBoundsAction.KIND;
 
-    constructor(@inject(TYPES.Action) private readonly action: ResetCanvasBoundsAction) {
-        super();
-    }
+    @inject(TYPES.Action) private action!: ResetCanvasBoundsAction;
 
     override execute(context: CommandExecutionContext): CommandReturn {
         context.root.canvasBounds = Bounds.EMPTY;

@@ -1,6 +1,6 @@
-import { AttributeConfig } from "../layoutElement";
-import { defaultStyleAttributes } from "./attributes";
-import { ElementLayoutConfig } from "./elementLayoutConfig";
+import { AttributeConfig } from "../layoutElement.js";
+import { defaultStyleAttributes } from "./attributes.js";
+import { ElementLayoutConfig } from "./elementLayoutConfig.js";
 
 /**
  * Layout config for elements with default styles (width, height, ...)

@@ -1,8 +1,6 @@
 ---
-sidebar_position: 4
-slug: /diagram
+outline: deep
 ---
-
 # Diagram DSL
 HyLiMo provides several diagram type-independent features
 

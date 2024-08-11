@@ -1,6 +1,6 @@
 import { CommandExecutionContext, SModelElement, SModelRoot } from "sprotty";
-import { CancelableAnimation } from "./cancelableAnimation";
-import { LinearAnimatable } from "./model";
+import { CancelableAnimation } from "./cancelableAnimation.js";
+import { LinearAnimatable } from "./model.js";
 
 /**
  * Linear interpolation animation

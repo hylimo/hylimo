@@ -1,6 +1,6 @@
 import { TransactionalAction } from "@hylimo/diagram-protocol";
-import { TransactionalEdit } from "../../edit/edits/transactionalEdit";
-import { RemoteDiagramMessage } from "./remoteDiagramMessage";
+import { TransactionalEdit } from "../../edit/edits/transactionalEdit.js";
+import { RemoteDiagramMessage } from "./remoteDiagramMessage.js";
 import { RemoteMessagePayload } from "@hylimo/diagram-protocol";
 
 /**

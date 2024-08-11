@@ -2,8 +2,8 @@ import { Point } from "@hylimo/diagram-common";
 import { injectable } from "inversify";
 import { VNode } from "snabbdom";
 import { IView, IViewArgs, RenderingContext, svg } from "sprotty";
-import { findViewportZoom } from "../../base/findViewportZoom";
-import { SCanvasElement } from "../../model/canvas/sCanvasElement";
+import { findViewportZoom } from "../../base/findViewportZoom.js";
+import { SCanvasElement } from "../../model/canvas/sCanvasElement.js";
 
 /**
  * IView that represents a CanvasElement

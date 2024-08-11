@@ -1,14 +1,14 @@
 import { LayoutedDiagram } from "@hylimo/diagram";
 import { CanvasElement } from "@hylimo/diagram-common";
-import { EditGeneratorEntry } from "./editGeneratorEntry";
-import { EditGenerator } from "../generators/editGenerator";
-import { generateAddFieldToScopeGenerator } from "./generateAddFieldToScopeGenerator";
-import { generateReplacementNumberGenerator } from "./generateReplacementNumberGenerator";
-import { TransactionalEdit, TransactionalEditEngine } from "./transactionalEdit";
-import { GeneratorRegistry } from "../generators/generatorRegistry";
+import { EditGeneratorEntry } from "./editGeneratorEntry.js";
+import { EditGenerator } from "../generators/editGenerator.js";
+import { generateAddFieldToScopeGenerator } from "./generateAddFieldToScopeGenerator.js";
+import { generateReplacementNumberGenerator } from "./generateReplacementNumberGenerator.js";
+import { TransactionalEdit, TransactionalEditEngine } from "./transactionalEdit.js";
+import { GeneratorRegistry } from "../generators/generatorRegistry.js";
 import { TextDocument } from "vscode-languageserver-textdocument";
 import { RotationAction, IncrementalUpdate, DynamicLanguageServerConfig } from "@hylimo/diagram-protocol";
-import { printNumber } from "../printNumber";
+import { printNumber } from "../printNumber.js";
 
 /**
  * Edit for RotationAction

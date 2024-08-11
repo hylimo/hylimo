@@ -1,5 +1,5 @@
-import { Expression } from "../ast/expression";
-import { ASTExpressionPosition } from "../ast/astExpressionPosition";
+import { Expression } from "../ast/expression.js";
+import { ASTExpressionPosition } from "../ast/astExpressionPosition.js";
 
 /**
  * Error thrown during interpretation of a program

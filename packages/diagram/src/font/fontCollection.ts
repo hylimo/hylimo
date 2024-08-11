@@ -1,6 +1,6 @@
 import { FontStyle, FontWeight } from "@hylimo/diagram-common";
 import { Font } from "fontkit";
-import { FontFamily } from "./fontFamily";
+import { FontFamily } from "./fontFamily.js";
 
 /**
  * Collection of fonts

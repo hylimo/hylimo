@@ -9,7 +9,7 @@ import {
 } from "@hylimo/core";
 import { ExecutableExpression } from "@hylimo/core";
 import { RuntimeAstTransformer } from "@hylimo/core";
-import { ExecutableCompletionExpression } from "./executableCompletionExpression";
+import { ExecutableCompletionExpression } from "./executableCompletionExpression.js";
 
 /**
  * Transforms the AST into an executable AST where completion expressions are replaced with

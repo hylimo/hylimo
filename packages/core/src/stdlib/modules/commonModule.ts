@@ -1,16 +1,16 @@
-import { FunctionExpression } from "../../ast/functionExpression";
-import { ExecutableConstExpression } from "../../runtime/ast/executableConstExpression";
-import { assign, jsFun, native } from "../../runtime/executableAstHelper";
-import { InterpreterModule } from "../../runtime/interpreter";
-import { FieldEntry } from "../../runtime/objects/baseObject";
-import { RuntimeError } from "../../runtime/runtimeError";
-import { SemanticFieldNames } from "../../runtime/semanticFieldNames";
-import { booleanType } from "../../types/boolean";
-import { functionType } from "../../types/function";
-import { optional } from "../../types/null";
-import { stringType } from "../../types/string";
-import { DefaultModuleNames } from "../defaultModuleNames";
-import { assertBoolean, assertFunction, assertString } from "../typeHelpers";
+import { FunctionExpression } from "../../ast/functionExpression.js";
+import { ExecutableConstExpression } from "../../runtime/ast/executableConstExpression.js";
+import { assign, jsFun, native } from "../../runtime/executableAstHelper.js";
+import { InterpreterModule } from "../../runtime/interpreter.js";
+import { FieldEntry } from "../../runtime/objects/baseObject.js";
+import { RuntimeError } from "../../runtime/runtimeError.js";
+import { SemanticFieldNames } from "../../runtime/semanticFieldNames.js";
+import { booleanType } from "../../types/boolean.js";
+import { functionType } from "../../types/function.js";
+import { optional } from "../../types/null.js";
+import { stringType } from "../../types/string.js";
+import { DefaultModuleNames } from "../defaultModuleNames.js";
+import { assertBoolean, assertFunction, assertString } from "../typeHelpers.js";
 
 /**
  * Common module

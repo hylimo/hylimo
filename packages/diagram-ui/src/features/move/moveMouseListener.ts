@@ -10,26 +10,26 @@ import {
     SModelRoot
 } from "sprotty";
 import { Action } from "sprotty-protocol";
-import { SAbsolutePoint } from "../../model/canvas/sAbsolutePoint";
-import { SCanvas } from "../../model/canvas/sCanvas";
-import { SCanvasElement } from "../../model/canvas/sCanvasElement";
-import { SCanvasPoint } from "../../model/canvas/sCanvasPoint";
-import { SLinePoint } from "../../model/canvas/sLinePoint";
-import { SRelativePoint } from "../../model/canvas/sRelativePoint";
-import { MoveHandler } from "./moveHandler";
-import { TYPES } from "../types";
-import { TransactionIdProvider } from "../transaction/transactionIdProvider";
-import { TranslationMoveHandler } from "./translationMoveHandler";
-import { LineMoveHandler } from "./lineMoveHandler";
-import { findViewportZoom } from "../../base/findViewportZoom";
-import { CanvasElementView, ResizePosition } from "../../views/canvas/canvasElementView";
-import { RotationHandler } from "./rotationHandler";
-import { SCanvasConnection } from "../../model/canvas/sCanvasConnection";
-import { SCanvasContent } from "../../model/canvas/sCanvasContent";
-import { SRoot } from "../../model/sRoot";
-import { ResizeHandler } from "./resizeHandler";
-import { SCanvasAxisAlignedSegment } from "../../model/canvas/sCanvasAxisAlignedSegment";
-import { AxisAligedSegmentEditHandler } from "./axisAlignedSegmentEditHandler";
+import { SAbsolutePoint } from "../../model/canvas/sAbsolutePoint.js";
+import { SCanvas } from "../../model/canvas/sCanvas.js";
+import { SCanvasElement } from "../../model/canvas/sCanvasElement.js";
+import { SCanvasPoint } from "../../model/canvas/sCanvasPoint.js";
+import { SLinePoint } from "../../model/canvas/sLinePoint.js";
+import { SRelativePoint } from "../../model/canvas/sRelativePoint.js";
+import { MoveHandler } from "./moveHandler.js";
+import { TYPES } from "../types.js";
+import { TransactionIdProvider } from "../transaction/transactionIdProvider.js";
+import { TranslationMoveHandler } from "./translationMoveHandler.js";
+import { LineMoveHandler } from "./lineMoveHandler.js";
+import { findViewportZoom } from "../../base/findViewportZoom.js";
+import { CanvasElementView, ResizePosition } from "../../views/canvas/canvasElementView.js";
+import { RotationHandler } from "./rotationHandler.js";
+import { SCanvasConnection } from "../../model/canvas/sCanvasConnection.js";
+import { SCanvasContent } from "../../model/canvas/sCanvasContent.js";
+import { SRoot } from "../../model/sRoot.js";
+import { ResizeHandler } from "./resizeHandler.js";
+import { SCanvasAxisAlignedSegment } from "../../model/canvas/sCanvasAxisAlignedSegment.js";
+import { AxisAligedSegmentEditHandler } from "./axisAlignedSegmentEditHandler.js";
 
 /**
  * The maximum number of updates that can be performed on the same revision.

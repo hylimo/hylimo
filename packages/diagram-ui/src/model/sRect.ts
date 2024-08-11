@@ -1,6 +1,6 @@
 import { Rect } from "@hylimo/diagram-common";
-import { LinearAnimatable } from "../features/animation/model";
-import { SShape } from "./sShape";
+import { LinearAnimatable } from "../features/animation/model.js";
+import { SShape } from "./sShape.js";
 
 /**
  * Animated fields for SRect

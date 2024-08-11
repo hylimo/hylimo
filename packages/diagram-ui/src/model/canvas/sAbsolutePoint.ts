@@ -1,6 +1,6 @@
 import { AbsolutePoint, Point } from "@hylimo/diagram-common";
-import { LinearAnimatable } from "../../features/animation/model";
-import { SCanvasPoint } from "./sCanvasPoint";
+import { LinearAnimatable } from "../../features/animation/model.js";
+import { SCanvasPoint } from "./sCanvasPoint.js";
 
 /**
  * Animated fields for SAbsolutePoint

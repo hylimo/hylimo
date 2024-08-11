@@ -1,7 +1,7 @@
-import { ExpressionMetadata } from "./expressionMetadata";
-import { Expression } from "./expression";
-import { AbstractInvocationExpression } from "./abstractInvocationExpression";
-import { ListEntry } from "./listEntry";
+import { ExpressionMetadata } from "./expressionMetadata.js";
+import { Expression } from "./expression.js";
+import { AbstractInvocationExpression } from "./abstractInvocationExpression.js";
+import { ListEntry } from "./listEntry.js";
 
 /*
  * Function invocation expression

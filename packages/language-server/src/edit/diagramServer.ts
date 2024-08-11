@@ -1,6 +1,6 @@
 import { NavigateToSourceAction, TransactionalAction } from "@hylimo/diagram-protocol";
 import { Action, DiagramServer as SprottyDiagramServer, DiagramServices } from "sprotty-protocol";
-import { Diagram } from "../diagram/diagram";
+import { Diagram } from "../diagram/diagram.js";
 
 /**
  * Custom DiagramServer which redirects TransactionalActions to the diagram

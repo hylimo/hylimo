@@ -1,5 +1,5 @@
-import { literal } from "./literal";
-import { or } from "./or";
+import { literal } from "./literal.js";
+import { or } from "./or.js";
 
 /**
  * Generates a type for an enum

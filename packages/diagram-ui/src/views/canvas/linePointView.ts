@@ -1,8 +1,8 @@
 import { injectable } from "inversify";
 import { VNode } from "snabbdom";
 import { IViewArgs, RenderingContext, svg } from "sprotty";
-import { SLinePoint } from "../../model/canvas/sLinePoint";
-import { CanvasPointView } from "./canvasPointView";
+import { SLinePoint } from "../../model/canvas/sLinePoint.js";
+import { CanvasPointView } from "./canvasPointView.js";
 
 /**
  * IView that represents an LinePoint

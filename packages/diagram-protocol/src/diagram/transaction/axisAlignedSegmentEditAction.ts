@@ -1,4 +1,4 @@
-import { TransactionalAction } from "./transactionalAction";
+import { TransactionalAction } from "./transactionalAction.js";
 
 /**
  * Action to edit the verticalPos of an axis aligned canvas connection segment

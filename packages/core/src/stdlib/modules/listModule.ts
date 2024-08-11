@@ -1,19 +1,19 @@
-import { assign, fun, id, jsFun, native, num } from "../../runtime/executableAstHelper";
-import { ExecutableListEntry } from "../../runtime/ast/executableListEntry";
-import { ExecutableConstExpression } from "../../runtime/ast/executableConstExpression";
-import { InterpreterModule } from "../../runtime/interpreter";
-import { BaseObject, FieldEntry } from "../../runtime/objects/baseObject";
-import { FullObject } from "../../runtime/objects/fullObject";
-import { generateArgs } from "../../runtime/objects/functionObject";
-import { RuntimeError } from "../../runtime/runtimeError";
-import { SemanticFieldNames } from "../../runtime/semanticFieldNames";
-import { functionType } from "../../types/function";
-import { listType } from "../../types/list";
-import { objectType } from "../../types/object";
-import { DefaultModuleNames } from "../defaultModuleNames";
-import { assertFunction, assertNumber } from "../typeHelpers";
-import { numberType } from "../../types/number";
-import { optional } from "../../types/null";
+import { assign, fun, id, jsFun, native, num } from "../../runtime/executableAstHelper.js";
+import { ExecutableListEntry } from "../../runtime/ast/executableListEntry.js";
+import { ExecutableConstExpression } from "../../runtime/ast/executableConstExpression.js";
+import { InterpreterModule } from "../../runtime/interpreter.js";
+import { BaseObject, FieldEntry } from "../../runtime/objects/baseObject.js";
+import { FullObject } from "../../runtime/objects/fullObject.js";
+import { generateArgs } from "../../runtime/objects/functionObject.js";
+import { RuntimeError } from "../../runtime/runtimeError.js";
+import { SemanticFieldNames } from "../../runtime/semanticFieldNames.js";
+import { functionType } from "../../types/function.js";
+import { listType } from "../../types/list.js";
+import { objectType } from "../../types/object.js";
+import { DefaultModuleNames } from "../defaultModuleNames.js";
+import { assertFunction, assertNumber } from "../typeHelpers.js";
+import { numberType } from "../../types/number.js";
+import { optional } from "../../types/null.js";
 
 /**
  * Name of the temporary field where the list prototype is assigned

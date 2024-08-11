@@ -1,8 +1,8 @@
 import { FullObject, numberType } from "@hylimo/core";
 import { Element, Size, Rect, Point, Line, ArcSegment, LineSegment } from "@hylimo/diagram-common";
-import { LayoutElement, SizeConstraints, addToConstraints, addToSize } from "../layoutElement";
-import { Layout } from "../layoutEngine";
-import { ContentShapeLayoutConfig } from "./contentShapeLayoutConfig";
+import { LayoutElement, SizeConstraints, addToConstraints, addToSize } from "../layoutElement.js";
+import { Layout } from "../layoutEngine.js";
+import { ContentShapeLayoutConfig } from "./contentShapeLayoutConfig.js";
 
 /**
  * Layout config for rect

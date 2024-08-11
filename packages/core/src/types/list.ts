@@ -1,7 +1,7 @@
-import { FullObject } from "../runtime/objects/fullObject";
-import { assertNumber } from "../stdlib/typeHelpers";
-import { Type } from "./base";
-import { numberType } from "./number";
+import { FullObject } from "../runtime/objects/fullObject.js";
+import { assertNumber } from "../stdlib/typeHelpers.js";
+import { Type } from "./base.js";
+import { numberType } from "./number.js";
 
 /**
  * Generates a list type

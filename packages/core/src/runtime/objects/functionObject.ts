@@ -1,16 +1,16 @@
-import { AbstractInvocationExpression } from "../../ast/abstractInvocationExpression";
-import { validate } from "../../types/validate";
+import { AbstractInvocationExpression } from "../../ast/abstractInvocationExpression.js";
+import { validate } from "../../types/validate.js";
 import {
     ExecutableAbstractFunctionExpression,
     FunctionDocumentation
-} from "../ast/executableAbstractFunctionExpression";
-import { ExecutableListEntry } from "../ast/executableListEntry";
-import { ExecutableFunctionExpression } from "../ast/executableFunctionExpression";
-import { ExecutableNativeFunctionExpression } from "../ast/executableNativeFunctionExpression";
-import { InterpreterContext } from "../interpreter";
-import { SemanticFieldNames } from "../semanticFieldNames";
-import { BaseObject, FieldEntry, SimpleObject } from "./baseObject";
-import { FullObject } from "./fullObject";
+} from "../ast/executableAbstractFunctionExpression.js";
+import { ExecutableListEntry } from "../ast/executableListEntry.js";
+import { ExecutableFunctionExpression } from "../ast/executableFunctionExpression.js";
+import { ExecutableNativeFunctionExpression } from "../ast/executableNativeFunctionExpression.js";
+import { InterpreterContext } from "../interpreter.js";
+import { SemanticFieldNames } from "../semanticFieldNames.js";
+import { BaseObject, FieldEntry, SimpleObject } from "./baseObject.js";
+import { FullObject } from "./fullObject.js";
 
 /**
  * Base class for js functions and normal functions

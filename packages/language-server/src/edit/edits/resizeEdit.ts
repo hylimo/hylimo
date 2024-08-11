@@ -2,13 +2,13 @@ import { LayoutedDiagram, LayoutElement } from "@hylimo/diagram";
 import { CanvasElement, BaseLayoutedDiagram } from "@hylimo/diagram-common";
 import { ResizeAction, IncrementalUpdate } from "@hylimo/diagram-protocol";
 import { TextDocument } from "vscode-languageserver-textdocument";
-import { EditGenerator } from "../generators/editGenerator";
-import { GeneratorRegistry } from "../generators/generatorRegistry";
-import { EditGeneratorEntry } from "./editGeneratorEntry";
-import { generateAddFieldToScopeGenerator } from "./generateAddFieldToScopeGenerator";
-import { generateFactorNumberGenerator } from "./generateFactorNumberGenerator";
-import { TransactionalEdit, TransactionalEditEngine } from "./transactionalEdit";
-import { printNumber } from "../printNumber";
+import { EditGenerator } from "../generators/editGenerator.js";
+import { GeneratorRegistry } from "../generators/generatorRegistry.js";
+import { EditGeneratorEntry } from "./editGeneratorEntry.js";
+import { generateAddFieldToScopeGenerator } from "./generateAddFieldToScopeGenerator.js";
+import { generateFactorNumberGenerator } from "./generateFactorNumberGenerator.js";
+import { TransactionalEdit, TransactionalEditEngine } from "./transactionalEdit.js";
+import { printNumber } from "../printNumber.js";
 
 /**
  * Metadata for generateAddFieldToScopeGenerator

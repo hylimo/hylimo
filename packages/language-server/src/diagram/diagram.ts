@@ -1,17 +1,17 @@
 import { TextDocument, TextDocumentContentChangeEvent } from "vscode-languageserver-textdocument";
-import { SharedDiagramUtils } from "../sharedDiagramUtils";
+import { SharedDiagramUtils } from "../sharedDiagramUtils.js";
 import { CompletionItem, Diagnostic, Position, TextDocumentEdit } from "vscode-languageserver";
-import { TransactionManager } from "../edit/transactionManager";
+import { TransactionManager } from "../edit/transactionManager.js";
 import {
     NavigateToSourceAction,
     PublishDocumentRevealNotification,
     TransactionalAction
 } from "@hylimo/diagram-protocol";
-import { DiagramImplementation } from "./diagramImplementation";
+import { DiagramImplementation } from "./diagramImplementation.js";
 import { BaseLayoutedDiagram } from "@hylimo/diagram-common";
-import { defaultEditRegistry } from "../edit/edits/transactionalEditRegistry";
-import { DiagramImplementationManager } from "./diagramImplementationManager";
-import { TransactionalEdit } from "../edit/edits/transactionalEdit";
+import { defaultEditRegistry } from "../edit/edits/transactionalEditRegistry.js";
+import { DiagramImplementationManager } from "./diagramImplementationManager.js";
+import { TransactionalEdit } from "../edit/edits/transactionalEdit.js";
 
 /**
  * Holds the state for a specific diagram
@@ -21,6 +21,14 @@ export class Diagram {
      * The current diagram
      */
     currentDiagram?: BaseLayoutedDiagram;
+    /**
+     * Update counter to ensure older updates do not overwrite newer ones
+     */
+    private updateCounter = 0;
+    /**
+     * The last applied update
+     */
+    private currentUpdate = -1;
     /**
      * Handles TransactionActions
      */
@@ -48,11 +56,13 @@ export class Diagram {
      * Called when the content of the associated document changes
      */
     async onDidChangeContent(): Promise<void> {
-        const diagnostics: Diagnostic[] = await this.updateDiagram();
-        this.utils.connection.sendDiagnostics({
-            uri: this.document.uri,
-            diagnostics: diagnostics
-        });
+        const diagnostics = await this.updateDiagram();
+        if (diagnostics != undefined) {
+            this.utils.connection.sendDiagnostics({
+                uri: this.document.uri,
+                diagnostics: diagnostics
+            });
+        }
     }
 
     /**
@@ -75,13 +85,14 @@ export class Diagram {
     /**
      * Updates the Diagram based on an updated document or config change
      *
-     * @returns diagnostic entries containing errors
+     * @returns diagnostic entries containing errors, undefined if update is outdated (newer update has already been applied)
      */
-    private async updateDiagram(): Promise<Diagnostic[]> {
+    private async updateDiagram(): Promise<Diagnostic[] | undefined> {
         this.implementation = this.implementationManager.getNewDiagramImplementation(
             this.document.uri,
             this.implementation
         );
+        const currentUpdateCounter = this.updateCounter++;
         const result = await this.implementation.updateDiagram(
             this.document.getText(),
             this.utils.config.diagramConfig
@@ -92,6 +103,10 @@ export class Diagram {
         } else {
             diagram = undefined;
         }
+        if (currentUpdateCounter < this.currentUpdate) {
+            return undefined;
+        }
+        this.currentUpdate = currentUpdateCounter;
         this.currentDiagram = diagram;
         if (diagram != undefined) {
             this.transactionManager.updateLayoutedDiagram(diagram);

@@ -1,7 +1,7 @@
 import { injectable } from "inversify";
 import { VNode } from "snabbdom";
 import { IViewArgs, RenderingContext, IView, svg } from "sprotty";
-import { SText } from "../model/sText";
+import { SText } from "../model/sText.js";
 import { extractFillAttributes, extractLayoutAttributes } from "@hylimo/diagram-render-svg";
 
 /**

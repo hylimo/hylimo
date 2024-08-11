@@ -1,10 +1,10 @@
-import { defaultGeneratorRegistry } from "../generators/generatorRegistry";
-import { AxisAlignedSegmentEditEngine } from "./axisAlignedSegmentEdit";
-import { LineMoveEditEngine } from "./lineMoveEdit";
-import { ResizeEditEngine } from "./resizeEdit";
-import { RotationEditEngine } from "./rotationEdit";
-import { TransactionalEditEngine } from "./transactionalEdit";
-import { TranslationMoveEditEngine } from "./translationMoveEdit";
+import { defaultGeneratorRegistry } from "../generators/generatorRegistry.js";
+import { AxisAlignedSegmentEditEngine } from "./axisAlignedSegmentEdit.js";
+import { LineMoveEditEngine } from "./lineMoveEdit.js";
+import { ResizeEditEngine } from "./resizeEdit.js";
+import { RotationEditEngine } from "./rotationEdit.js";
+import { TransactionalEditEngine } from "./transactionalEdit.js";
+import { TranslationMoveEditEngine } from "./translationMoveEdit.js";
 
 /**
  * Registry for all edit engines

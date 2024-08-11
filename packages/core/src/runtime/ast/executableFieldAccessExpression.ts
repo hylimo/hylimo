@@ -1,7 +1,7 @@
-import { FieldAccessExpression } from "../../ast/fieldAccessExpression";
-import { InterpreterContext } from "../interpreter";
-import { FieldEntry } from "../objects/baseObject";
-import { ExecutableExpression } from "./executableExpression";
+import { FieldAccessExpression } from "../../ast/fieldAccessExpression.js";
+import { InterpreterContext } from "../interpreter.js";
+import { FieldEntry } from "../objects/baseObject.js";
+import { ExecutableExpression } from "./executableExpression.js";
 
 /**
  * Executable FieldAccessExpression

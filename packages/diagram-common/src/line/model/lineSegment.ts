@@ -1,4 +1,4 @@
-import { Segment } from "./segment";
+import { Segment } from "./segment.js";
 
 /**
  * Straight line segment

@@ -1,4 +1,4 @@
-import { ASTExpressionPosition } from "./astExpressionPosition";
+import { ASTExpressionPosition } from "./astExpressionPosition.js";
 
 /**
  * Metadata for Expressions

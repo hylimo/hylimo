@@ -1,6 +1,6 @@
-import { ExpressionMetadata } from "./expressionMetadata";
-import { Expression } from "./expression";
-import { ListEntry } from "./listEntry";
+import { ExpressionMetadata } from "./expressionMetadata.js";
+import { Expression } from "./expression.js";
+import { ListEntry } from "./listEntry.js";
 
 /**
  * Base class for all invocation expressions, provides helper to generate args

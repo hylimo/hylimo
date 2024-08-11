@@ -1,0 +1,151 @@
+/* VitePress fixes */
+
+:root {
+    --vp-nav-height: 51px;
+}
+
+.VPSidebar {
+    padding-left: 32px !important;
+    width: var(--vp-sidebar-width) !important;
+
+    &:not(.open) {
+        background-color: transparent !important;
+    }
+
+    .curtain {
+        display: none;
+    }
+}
+
+.VPSidebar::after {
+    content: "";
+    position: fixed;
+    top: 0px;
+    right: 0;
+    width: 1px;
+    height: calc(100% - var(--vp-nav-height));
+    background-color: var(--vp-c-gutter);
+    margin-top: var(--vp-nav-height);
+}
+
+.VPNav {
+    .container > .title {
+        position: relative !important;
+        padding-left: 32px !important;
+        width: var(--vp-sidebar-width) !important;
+        flex-shrink: 1;
+    }
+
+    .container {
+        max-width: unset !important;
+    }
+
+    .content {
+        padding-left: 0 !important;
+    }
+
+    .divider {
+        padding-left: 0 !important;
+    }
+
+    .VPNavBarTitle > .title {
+        border-bottom: none !important;
+    }
+
+    .VPNavBar {
+        .content {
+            padding-right: 0px !important;
+        }
+
+        .wrapper {
+            padding: 0 !important;
+        }
+    }
+}
+
+.VPLocalNav.has-sidebar {
+    border-bottom: none !important;
+
+    .container {
+        border-bottom: 1px solid var(--vp-c-gutter);
+    }
+}
+
+.VPNavBarSearch {
+    padding-left: 10px;
+}
+
+.VPNavBarMenu {
+    display: flex !important;
+}
+
+.VPNavBarMenuLink {
+    display: none !important;
+}
+
+@media (min-width: 768px) {
+    .VPNavBarMenuLink {
+        display: flex !important;
+    }
+
+    .VPNavBarMenu .nav-teleport-target:first-of-type::before {
+        margin-right: 8px;
+        margin-left: 8px;
+        width: 1px;
+        height: 24px;
+        background-color: var(--vp-c-divider);
+        content: "";
+    }
+}
+
+.VPSocialLinks,
+.VPNavBarExtra {
+    margin-right: 8px !important;
+}
+
+/* Sprotty */
+
+.sprotty-wrapper {
+    height: 100%;
+}
+
+.sprotty {
+    display: flex;
+    height: 100%;
+}
+
+.sprotty-hidden {
+    height: 0px !important;
+}
+
+.sprotty svg {
+    width: 100%;
+    flex: 1;
+    border-style: none;
+    border-width: 0px;
+    outline: none;
+}
+
+:root {
+    --diagram-layout-color: #606770;
+    --diagram-layout-color-selected: #00c6f2;
+    --diagram-layout-color-overlay: #88888855;
+    --diagram-background: #fffffe;
+    --diagram-grid: #bbb;
+}
+
+.dark {
+    --diagram-layout-color: #dadde1;
+    --diagram-background: #1e1e1e;
+    --diagram-grid: #444;
+}
+
+/* Monaco fixes */
+
+.monaco-editor :focus-visible {
+    outline: 1px solid var(--vscode-focusBorder);
+}
+
+.monaco-editor .button {
+    color: inherit;
+}

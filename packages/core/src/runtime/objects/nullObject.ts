@@ -1,9 +1,9 @@
-import { AbstractInvocationExpression } from "../../ast/abstractInvocationExpression";
-import { ExecutableListEntry } from "../ast/executableListEntry";
-import { InterpreterContext } from "../interpreter";
-import { RuntimeError } from "../runtimeError";
-import { BaseObject, FieldEntry } from "./baseObject";
-import { FullObject } from "./fullObject";
+import { AbstractInvocationExpression } from "../../ast/abstractInvocationExpression.js";
+import { ExecutableListEntry } from "../ast/executableListEntry.js";
+import { InterpreterContext } from "../interpreter.js";
+import { RuntimeError } from "../runtimeError.js";
+import { BaseObject, FieldEntry } from "./baseObject.js";
+import { FullObject } from "./fullObject.js";
 
 /**
  * BaseObject supporting neither get or set field, or call.

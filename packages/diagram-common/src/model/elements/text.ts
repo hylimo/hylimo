@@ -1,6 +1,6 @@
-import { Element } from "./base/element";
-import { FilledElement } from "./base/filledElement";
-import { LayoutedElement } from "./base/layoutedElement";
+import { Element } from "./base/element.js";
+import { FilledElement } from "./base/filledElement.js";
+import { LayoutedElement } from "./base/layoutedElement.js";
 
 /**
  * Text element

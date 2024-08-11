@@ -1,8 +1,8 @@
 import LineBreaker, { Break } from "linebreak";
-import { LayoutElement } from "../layout/layoutElement";
+import { LayoutElement } from "../layout/layoutElement.js";
 import { Text, Size, FontWeight, FontStyle } from "@hylimo/diagram-common";
-import { FontCollection } from "./fontCollection";
-import { extractFillStyleAttributes } from "../layout/elements/attributes";
+import { FontCollection } from "./fontCollection.js";
+import { extractFillStyleAttributes } from "../layout/elements/attributes.js";
 
 /**
  * Result of a text layout process

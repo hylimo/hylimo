@@ -1,13 +1,14 @@
-import { Expression } from "../../ast/expression";
-import { InterpreterContext } from "../interpreter";
-import { FieldEntry } from "../objects/baseObject";
+import { Expression } from "../../ast/expression.js";
+import { InterpreterContext } from "../interpreter.js";
+import { FieldEntry } from "../objects/baseObject.js";
+// DO NOT CHANGE! This is required to make circular imports work
 import {
     ExecutableAssignmentExpression,
     ExecutableFieldAccessExpression,
     ExecutableListEntry,
     ExecutableInvocationExpression,
     ExecutableSelfInvocationExpression
-} from "../..";
+} from "../../index.js";
 
 /**
  * Base class for all executable expressions.

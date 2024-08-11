@@ -1,7 +1,7 @@
-import { Element } from "../base/element";
-import { StrokedElement } from "../base/strokedElement";
-import { CanvasLineSegment } from "./canvasLineSegment";
-import { CanvasBezierSegment } from "./canvasBezierSegment";
+import { Element } from "../base/element.js";
+import { StrokedElement } from "../base/strokedElement.js";
+import { CanvasLineSegment } from "./canvasLineSegment.js";
+import { CanvasBezierSegment } from "./canvasBezierSegment.js";
 
 /**
  * Connection on a Canvas with an arbitrary amount of segments

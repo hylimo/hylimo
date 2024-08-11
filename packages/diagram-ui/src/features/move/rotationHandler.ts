@@ -1,6 +1,6 @@
 import { Point } from "@hylimo/diagram-common";
 import { RotationAction } from "@hylimo/diagram-protocol";
-import { MoveHandler } from "./moveHandler";
+import { MoveHandler } from "./moveHandler.js";
 
 /**
  * Move handler for rotating CanvasElements

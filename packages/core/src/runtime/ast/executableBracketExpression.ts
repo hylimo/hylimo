@@ -1,7 +1,7 @@
-import { BracketExpression } from "../../ast/bracketExpression";
-import { InterpreterContext } from "../interpreter";
-import { FieldEntry } from "../objects/baseObject";
-import { ExecutableExpression } from "./executableExpression";
+import { BracketExpression } from "../../ast/bracketExpression.js";
+import { InterpreterContext } from "../interpreter.js";
+import { FieldEntry } from "../objects/baseObject.js";
+import { ExecutableExpression } from "./executableExpression.js";
 
 /**
  * Expression which evaluates and returns an inner expression

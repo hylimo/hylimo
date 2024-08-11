@@ -1,7 +1,7 @@
 import { optional, objectType } from "@hylimo/core";
-import { AttributeConfig } from "../../layoutElement";
-import { CanvasContentLayoutConfig } from "./canvasContentLayoutConfig";
-import { elementType } from "../../../module/types";
+import { AttributeConfig } from "../../layoutElement.js";
+import { CanvasContentLayoutConfig } from "./canvasContentLayoutConfig.js";
+import { elementType } from "../../../module/types.js";
 
 /**
  * Base layout config for CanvasElementLayoutConfig and CanvasConnectionLayoutConfig

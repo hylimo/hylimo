@@ -4,7 +4,7 @@ import { ExecutableExpression } from "@hylimo/core";
 import { InterpreterContext } from "@hylimo/core";
 import { BaseObject } from "@hylimo/core";
 import { AbstractFunctionObject } from "@hylimo/core";
-import { CompletionError } from "./completionError";
+import { CompletionError } from "./completionError.js";
 import {
     CompletionItem,
     CompletionItemKind,

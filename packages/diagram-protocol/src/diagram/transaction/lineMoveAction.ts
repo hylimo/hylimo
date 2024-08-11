@@ -1,4 +1,4 @@
-import { TransactionalAction } from "./transactionalAction";
+import { TransactionalAction } from "./transactionalAction.js";
 
 /**
  * Action to move a LinePoint to a new position on the line

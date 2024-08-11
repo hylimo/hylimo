@@ -1,6 +1,6 @@
 import { LineEngine, Point, TransformedLine } from "@hylimo/diagram-common";
 import { LineMoveAction } from "@hylimo/diagram-protocol";
-import { MoveHandler } from "./moveHandler";
+import { MoveHandler } from "./moveHandler.js";
 
 /**
  * Move handler for line point moves

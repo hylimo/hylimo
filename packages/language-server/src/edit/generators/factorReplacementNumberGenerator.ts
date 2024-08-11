@@ -1,6 +1,6 @@
-import { printNumber } from "../printNumber";
-import { EditEngine } from "./editGenerator";
-import { OriginalValueNumberGenerator } from "./originalValueNumberGenerator";
+import { printNumber } from "../printNumber.js";
+import { EditEngine } from "./editGenerator.js";
+import { OriginalValueNumberGenerator } from "./originalValueNumberGenerator.js";
 
 /**
  * EditGenerator which replaces the whole number with a factor multiplied by the original value

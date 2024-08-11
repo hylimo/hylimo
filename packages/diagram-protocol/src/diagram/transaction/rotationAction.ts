@@ -1,4 +1,4 @@
-import { TransactionalAction } from "./transactionalAction";
+import { TransactionalAction } from "./transactionalAction.js";
 
 /**
  * Action to rotate a CanvasElement to a new rotation

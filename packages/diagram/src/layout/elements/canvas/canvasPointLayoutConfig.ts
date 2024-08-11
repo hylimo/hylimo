@@ -1,7 +1,7 @@
 import { Size } from "@hylimo/diagram-common";
-import { ContentCardinality, LayoutElement, SizeConstraints } from "../../layoutElement";
-import { Layout } from "../../layoutEngine";
-import { CanvasContentLayoutConfig } from "./canvasContentLayoutConfig";
+import { ContentCardinality, LayoutElement, SizeConstraints } from "../../layoutElement.js";
+import { Layout } from "../../layoutEngine.js";
+import { CanvasContentLayoutConfig } from "./canvasContentLayoutConfig.js";
 import { nullType } from "@hylimo/core";
 
 /**

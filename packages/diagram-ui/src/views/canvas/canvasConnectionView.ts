@@ -2,9 +2,9 @@ import { MarkerLayoutInformation } from "@hylimo/diagram-common";
 import { injectable } from "inversify";
 import { VNode } from "snabbdom";
 import { IView, IViewArgs, RenderingContext, svg } from "sprotty";
-import { SCanvasConnection } from "../../model/canvas/sCanvasConnection";
-import { SCanvasConnectionSegment } from "../../model/canvas/sCanvasConnectionSegment";
-import { SMarker } from "../../model/canvas/sMarker";
+import { SCanvasConnection } from "../../model/canvas/sCanvasConnection.js";
+import { SCanvasConnectionSegment } from "../../model/canvas/sCanvasConnectionSegment.js";
+import { SMarker } from "../../model/canvas/sMarker.js";
 import { extractStrokeAttriabutes } from "@hylimo/diagram-render-svg";
 
 /**

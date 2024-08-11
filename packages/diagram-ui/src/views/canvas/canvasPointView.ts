@@ -2,7 +2,7 @@ import { Point } from "@hylimo/diagram-common";
 import { injectable } from "inversify";
 import { VNode } from "snabbdom";
 import { IView, IViewArgs, RenderingContext, svg } from "sprotty";
-import { SCanvasPoint } from "../../model/canvas/sCanvasPoint";
+import { SCanvasPoint } from "../../model/canvas/sCanvasPoint.js";
 
 /**
  * Base class for CanvasPoint based views

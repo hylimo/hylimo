@@ -1,7 +1,7 @@
 import { Element, Point, Size } from "@hylimo/diagram-common";
-import { LayoutElement, SizeConstraints } from "../layoutElement";
-import { Layout } from "../layoutEngine";
-import { PanelLayoutConfig } from "./panelLayoutConfig";
+import { LayoutElement, SizeConstraints } from "../layoutElement.js";
+import { Layout } from "../layoutEngine.js";
+import { PanelLayoutConfig } from "./panelLayoutConfig.js";
 
 /**
  * Layout config for hbox

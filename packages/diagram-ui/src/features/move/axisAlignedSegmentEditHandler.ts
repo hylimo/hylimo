@@ -1,5 +1,5 @@
 import { AxisAlignedSegmentEditAction } from "@hylimo/diagram-protocol";
-import { MoveHandler } from "./moveHandler";
+import { MoveHandler } from "./moveHandler.js";
 
 /**
  * Move handler for moving the vertical segment of an axis aligned connection segment

@@ -1,20 +1,20 @@
-import { DefaultModuleNames } from "../defaultModuleNames";
-import { InterpreterModule } from "../../runtime/interpreter";
-import { assign, fun, id, jsFun, native, num, str } from "../../runtime/executableAstHelper";
-import { SemanticFieldNames } from "../../runtime/semanticFieldNames";
-import { assertFunction, assertObject } from "../typeHelpers";
-import { BaseObject, FieldEntry } from "../../runtime/objects/baseObject";
-import { StringObject } from "../../runtime/objects/stringObject";
-import { NumberObject } from "../../runtime/objects/numberObject";
-import { RuntimeError } from "../../runtime/runtimeError";
-import { generateArgs } from "../../runtime/objects/functionObject";
-import { or } from "../../types/or";
-import { stringType } from "../../types/string";
-import { numberType } from "../../types/number";
-import { objectType } from "../../types/object";
-import { functionType } from "../../types/function";
-import { ExecutableConstExpression } from "../../runtime/ast/executableConstExpression";
-import { ExecutableNativeExpression } from "../../runtime/ast/executableNativeExpression";
+import { DefaultModuleNames } from "../defaultModuleNames.js";
+import { InterpreterModule } from "../../runtime/interpreter.js";
+import { assign, fun, id, jsFun, native, num, str } from "../../runtime/executableAstHelper.js";
+import { SemanticFieldNames } from "../../runtime/semanticFieldNames.js";
+import { assertFunction, assertObject } from "../typeHelpers.js";
+import { BaseObject, FieldEntry } from "../../runtime/objects/baseObject.js";
+import { StringObject } from "../../runtime/objects/stringObject.js";
+import { NumberObject } from "../../runtime/objects/numberObject.js";
+import { RuntimeError } from "../../runtime/runtimeError.js";
+import { generateArgs } from "../../runtime/objects/functionObject.js";
+import { or } from "../../types/or.js";
+import { stringType } from "../../types/string.js";
+import { numberType } from "../../types/number.js";
+import { objectType } from "../../types/object.js";
+import { functionType } from "../../types/function.js";
+import { ExecutableConstExpression } from "../../runtime/ast/executableConstExpression.js";
+import { ExecutableNativeExpression } from "../../runtime/ast/executableNativeExpression.js";
 
 /**
  * Name of the temporary field where the object prototype is assigned

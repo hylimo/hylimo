@@ -9,11 +9,11 @@ import {
     CanvasLineSegment,
     CanvasAxisAlignedSegment
 } from "@hylimo/diagram-common";
-import { canvasPointType, elementType } from "../../../module/types";
-import { ContentCardinality, LayoutElement, SizeConstraints } from "../../layoutElement";
-import { Layout } from "../../layoutEngine";
-import { extractStrokeStyleAttributes, strokeStyleAttributes } from "../attributes";
-import { EditableCanvasContentLayoutConfig } from "./editableCanvasContentLayoutConfig";
+import { canvasPointType, elementType } from "../../../module/types.js";
+import { ContentCardinality, LayoutElement, SizeConstraints } from "../../layoutElement.js";
+import { Layout } from "../../layoutEngine.js";
+import { extractStrokeStyleAttributes, strokeStyleAttributes } from "../attributes.js";
+import { EditableCanvasContentLayoutConfig } from "./editableCanvasContentLayoutConfig.js";
 
 /**
  * Type for start and end marker

@@ -1,8 +1,8 @@
 import { Size, Point, Element, CanvasBezierSegment } from "@hylimo/diagram-common";
-import { canvasPointType } from "../../../module/types";
-import { LayoutElement } from "../../layoutElement";
-import { Layout } from "../../layoutEngine";
-import { CanvasConnectionSegmentLayoutConfig } from "./canvasConnectionSegmentLayoutConfig";
+import { canvasPointType } from "../../../module/types.js";
+import { LayoutElement } from "../../layoutElement.js";
+import { Layout } from "../../layoutEngine.js";
+import { CanvasConnectionSegmentLayoutConfig } from "./canvasConnectionSegmentLayoutConfig.js";
 
 /**
  * Layout config for canvas line segments

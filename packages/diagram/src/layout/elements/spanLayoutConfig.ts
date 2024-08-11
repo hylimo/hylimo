@@ -1,9 +1,9 @@
 import { enumType, nullType, numberType, stringType } from "@hylimo/core";
 import { Element, FontStyle, FontWeight, Point, Size } from "@hylimo/diagram-common";
-import { ContentCardinality, LayoutElement, SizeConstraints } from "../layoutElement";
-import { Layout } from "../layoutEngine";
-import { ElementLayoutConfig } from "./elementLayoutConfig";
-import { fillStyleAttributes } from "./attributes";
+import { ContentCardinality, LayoutElement, SizeConstraints } from "../layoutElement.js";
+import { Layout } from "../layoutEngine.js";
+import { ElementLayoutConfig } from "./elementLayoutConfig.js";
+import { fillStyleAttributes } from "./attributes.js";
 
 /**
  * Layout config for span, does not handle actual layouting and measuring

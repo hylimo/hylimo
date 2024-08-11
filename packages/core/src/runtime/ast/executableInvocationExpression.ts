@@ -1,11 +1,11 @@
-import { InvocationExpression } from "../../ast/invocationExpression";
-import { InterpreterContext } from "../interpreter";
-import { FieldEntry } from "../objects/baseObject";
-import { SemanticFieldNames } from "../semanticFieldNames";
-import { ExecutableAbstractInvocationExpression } from "./executableAbstractInvocationExpression";
-import { ExecutableListEntry } from "./executableListEntry";
-import { ExecutableConstExpression } from "./executableConstExpression";
-import { ExecutableExpression } from "./executableExpression";
+import { InvocationExpression } from "../../ast/invocationExpression.js";
+import { InterpreterContext } from "../interpreter.js";
+import { FieldEntry } from "../objects/baseObject.js";
+import { SemanticFieldNames } from "../semanticFieldNames.js";
+import { ExecutableAbstractInvocationExpression } from "./executableAbstractInvocationExpression.js";
+import { ExecutableListEntry } from "./executableListEntry.js";
+import { ExecutableConstExpression } from "./executableConstExpression.js";
+import { ExecutableExpression } from "./executableExpression.js";
 
 /**
  * Executable InvocationExpression

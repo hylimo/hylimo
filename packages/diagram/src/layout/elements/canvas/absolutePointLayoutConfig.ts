@@ -1,8 +1,8 @@
 import { numberType } from "@hylimo/core";
 import { Size, AbsolutePoint, Element, Point } from "@hylimo/diagram-common";
-import { LayoutElement } from "../../layoutElement";
-import { Layout } from "../../layoutEngine";
-import { CanvasPointLayoutConfig } from "./canvasPointLayoutConfig";
+import { LayoutElement } from "../../layoutElement.js";
+import { Layout } from "../../layoutEngine.js";
+import { CanvasPointLayoutConfig } from "./canvasPointLayoutConfig.js";
 
 /**
  * Layout config for absolute points

@@ -1,6 +1,6 @@
 import { Parser } from "@hylimo/core";
 import { Plugin, doc, Doc } from "prettier";
-import { format } from "prettier/standalone";
+import { format } from "prettier/standalone.js";
 import { TextDocument } from "vscode-languageserver-textdocument";
 import { CstNode, ICstVisitor, IToken } from "chevrotain";
 import { uinteger } from "vscode-languageserver";

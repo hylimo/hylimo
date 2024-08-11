@@ -1,7 +1,7 @@
 import { Size, Point, Element, Ellipse, Math2D, Line, ArcSegment } from "@hylimo/diagram-common";
-import { LayoutElement, SizeConstraints } from "../layoutElement";
-import { Layout } from "../layoutEngine";
-import { ContentShapeLayoutConfig } from "./contentShapeLayoutConfig";
+import { LayoutElement, SizeConstraints } from "../layoutElement.js";
+import { Layout } from "../layoutEngine.js";
+import { ContentShapeLayoutConfig } from "./contentShapeLayoutConfig.js";
 import { FullObject } from "@hylimo/core";
 
 /**

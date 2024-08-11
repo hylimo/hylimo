@@ -1,4 +1,4 @@
-import { LiteralObject } from "./literalObject";
+import { LiteralObject } from "./literalObject.js";
 
 /**
  * Boolean literal

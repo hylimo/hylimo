@@ -1,2 +1,2 @@
-export * from "./attributeHelpers";
-export * from "./svgRenderer";
+export * from "./attributeHelpers.js";
+export * from "./svgRenderer.js";

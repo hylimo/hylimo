@@ -1,4 +1,4 @@
-import { Point } from "../../common/point";
+import { Point } from "../../common/point.js";
 
 /**
  * Projects a point on a conic using WEP.

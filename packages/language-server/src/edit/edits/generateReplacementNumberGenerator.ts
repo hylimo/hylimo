@@ -1,6 +1,6 @@
 import { FieldEntry } from "@hylimo/core";
-import { EditGeneratorEntry } from "./editGeneratorEntry";
-import { ReplacementNumberGenerator } from "../generators/replacementNumberGenerator";
+import { EditGeneratorEntry } from "./editGeneratorEntry.js";
+import { ReplacementNumberGenerator } from "../generators/replacementNumberGenerator.js";
 
 /**
  * Generates a new EditGeneratorEntry based on the provided FieldEntry to modify.

@@ -1,4 +1,4 @@
-import { Type } from "./base";
+import { Type } from "./base.js";
 
 /**
  * Creats a new type with the specified name and an expected: newName reason

@@ -1,7 +1,7 @@
 import { Shape } from "@hylimo/diagram-common";
-import { LayoutElement, AttributeConfig } from "../layoutElement";
-import { extractFillStyleAttributes, extractStrokeStyleAttributes, shapeStyleAttributes } from "./attributes";
-import { StyledElementLayoutConfig } from "./styledElementLayoutConfig";
+import { LayoutElement, AttributeConfig } from "../layoutElement.js";
+import { extractFillStyleAttributes, extractStrokeStyleAttributes, shapeStyleAttributes } from "./attributes.js";
+import { StyledElementLayoutConfig } from "./styledElementLayoutConfig.js";
 
 /**
  * Helper interface for shape properties

@@ -1,8 +1,8 @@
-import { StringLiteralExpression } from "../../ast/stringLiteralExpression";
-import { InterpreterContext } from "../interpreter";
-import { FieldEntry } from "../objects/baseObject";
-import { StringObject } from "../objects/stringObject";
-import { ExecutableLiteralExpression } from "./executableLiteralExpression";
+import { StringLiteralExpression } from "../../ast/stringLiteralExpression.js";
+import { InterpreterContext } from "../interpreter.js";
+import { FieldEntry } from "../objects/baseObject.js";
+import { StringObject } from "../objects/stringObject.js";
+import { ExecutableLiteralExpression } from "./executableLiteralExpression.js";
 
 /**
  * Executable StringLiteralExpression

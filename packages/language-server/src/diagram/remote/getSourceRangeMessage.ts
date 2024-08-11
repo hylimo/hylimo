@@ -1,5 +1,5 @@
 import { Range } from "vscode-languageserver";
-import { RemoteDiagramMessage } from "./remoteDiagramMessage";
+import { RemoteDiagramMessage } from "./remoteDiagramMessage.js";
 import { RemoteMessagePayload } from "@hylimo/diagram-protocol";
 
 /**

@@ -1,6 +1,6 @@
-import { OriginalValueNumberGenerator } from "./originalValueNumberGenerator";
-import { EditEngine } from "./editGenerator";
-import { printNumber } from "../printNumber";
+import { OriginalValueNumberGenerator } from "./originalValueNumberGenerator.js";
+import { EditEngine } from "./editGenerator.js";
+import { printNumber } from "../printNumber.js";
 
 /**
  * EditGenerator for modifying a number expression with a + - constant based on a delta

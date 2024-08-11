@@ -1,5 +1,5 @@
-import { ExpressionMetadata } from "./expressionMetadata";
-import { Expression } from "./expression";
+import { ExpressionMetadata } from "./expressionMetadata.js";
+import { Expression } from "./expression.js";
 
 /**
  * Destructuring expression

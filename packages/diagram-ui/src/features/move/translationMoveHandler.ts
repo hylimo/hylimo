@@ -1,5 +1,5 @@
 import { TranslationMoveAction } from "@hylimo/diagram-protocol";
-import { MoveHandler } from "./moveHandler";
+import { MoveHandler } from "./moveHandler.js";
 
 /**
  * Move handler for translations of absolute and relative points

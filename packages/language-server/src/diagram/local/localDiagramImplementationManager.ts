@@ -1,19 +1,19 @@
-import { DiagramImplementation } from "../diagramImplementation";
-import { SharedDiagramUtils } from "../../sharedDiagramUtils";
-import { DiagramImplementationManager } from "../diagramImplementationManager";
+import { DiagramImplementation } from "../diagramImplementation.js";
+import { SharedDiagramUtils } from "../../sharedDiagramUtils.js";
+import { DiagramImplementationManager } from "../diagramImplementationManager.js";
 import {
     RequestGenerateTransactionalEditMessage,
     ReplyGenerateTransactionalEditMessage
-} from "../remote/generateTransactionalEditMessage";
-import { RegisterRemoteLanguageServerMessage } from "../remote/registerRemoteLanguageServerMessage";
+} from "../remote/generateTransactionalEditMessage.js";
+import { RegisterRemoteLanguageServerMessage } from "../remote/registerRemoteLanguageServerMessage.js";
 import { RemoteMessagePayload } from "@hylimo/diagram-protocol";
-import { RequestUpdateDiagramMessage, ReplyUpdateDiagramMessage } from "../remote/updateDiagramMessage";
-import { LocalDiagramImplementation } from "./localDiagramImplementation";
+import { RequestUpdateDiagramMessage, ReplyUpdateDiagramMessage } from "../remote/updateDiagramMessage.js";
+import { LocalDiagramImplementation } from "./localDiagramImplementation.js";
 import {
     ReplyGenerateCompletionItemMessage,
     RequestGenerateCompletionItemMessage
-} from "../remote/generateCompletionItemsMessage";
-import { ReplyGetSourceRangeMessage, RequestGetSourceRangeMessage } from "../remote/getSourceRangeMessage";
+} from "../remote/generateCompletionItemsMessage.js";
+import { ReplyGetSourceRangeMessage, RequestGetSourceRangeMessage } from "../remote/getSourceRangeMessage.js";
 
 /**
  * Manages the layouted diagrams. This is the local implementation.

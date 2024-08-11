@@ -1,5 +1,5 @@
-import { Size } from "../../../common/size";
-import { Element } from "./element";
+import { Size } from "../../../common/size.js";
+import { Element } from "./element.js";
 
 /**
  * Element with a size

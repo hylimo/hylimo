@@ -1,7 +1,7 @@
-import { Bounds } from "../../common/bounds";
-import { Point } from "../../common/point";
-import { Element } from "../elements/base/element";
-import { CanvasElement } from "../elements/canvas/canvasElement";
+import { Bounds } from "../../common/bounds.js";
+import { Point } from "../../common/point.js";
+import { Element } from "../elements/base/element.js";
+import { CanvasElement } from "../elements/canvas/canvasElement.js";
 
 /**
  * Simplified version of CanvasElement where pos is replaced with the actual point

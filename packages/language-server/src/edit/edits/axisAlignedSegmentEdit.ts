@@ -1,10 +1,10 @@
 import { LayoutedDiagram } from "@hylimo/diagram";
 import { BaseLayoutedDiagram, CanvasAxisAlignedSegment } from "@hylimo/diagram-common";
 import { AxisAlignedSegmentEditAction, DynamicLanguageServerConfig, IncrementalUpdate } from "@hylimo/diagram-protocol";
-import { EditGenerator } from "../generators/editGenerator";
-import { GeneratorRegistry } from "../generators/generatorRegistry";
-import { generateReplacementNumberGenerator } from "./generateReplacementNumberGenerator";
-import { TransactionalEdit, TransactionalEditEngine } from "./transactionalEdit";
+import { EditGenerator } from "../generators/editGenerator.js";
+import { GeneratorRegistry } from "../generators/generatorRegistry.js";
+import { generateReplacementNumberGenerator } from "./generateReplacementNumberGenerator.js";
+import { TransactionalEdit, TransactionalEditEngine } from "./transactionalEdit.js";
 
 /**
  * Edit for AxisAlignedSegmentEditAction

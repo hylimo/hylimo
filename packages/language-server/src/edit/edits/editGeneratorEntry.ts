@@ -1,4 +1,4 @@
-import { EditGenerator } from "../generators/editGenerator";
+import { EditGenerator } from "../generators/editGenerator.js";
 
 /**
  * Entry von an EditGenerator which defines the generator, a range, and some metadata

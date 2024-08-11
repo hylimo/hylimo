@@ -13,10 +13,10 @@ import {
     uinteger
 } from "vscode-languageserver";
 import { TextDocument, TextDocumentContentChangeEvent } from "vscode-languageserver-textdocument";
-import { Diagram } from "./diagram/diagram";
-import { Formatter } from "./formatter";
+import { Diagram } from "./diagram/diagram.js";
+import { Formatter } from "./formatter.js";
 import { DiagramEngine, diagramModule, dslModule, LayoutEngine } from "@hylimo/diagram";
-import { DiagramServerManager } from "./diagramServerManager";
+import { DiagramServerManager } from "./diagramServerManager.js";
 import {
     DiagramActionNotification,
     DiagramCloseNotification,
@@ -29,11 +29,11 @@ import {
     DiagramRequestMessage,
     DiagramResponseMessage
 } from "@hylimo/diagram-protocol";
-import { SharedDiagramUtils } from "./sharedDiagramUtils";
-import { LocalDiagramImplementationManager } from "./diagram/local/localDiagramImplementationManager";
-import { DiagramImplementationManager } from "./diagram/diagramImplementationManager";
-import { RemoteDiagramImplementationManager } from "./diagram/remote/remoteDiagramImplementationManager";
-import { CompletionEngine } from "./completion/completionEngine";
+import { SharedDiagramUtils } from "./sharedDiagramUtils.js";
+import { LocalDiagramImplementationManager } from "./diagram/local/localDiagramImplementationManager.js";
+import { DiagramImplementationManager } from "./diagram/diagramImplementationManager.js";
+import { RemoteDiagramImplementationManager } from "./diagram/remote/remoteDiagramImplementationManager.js";
+import { CompletionEngine } from "./completion/completionEngine.js";
 
 /**
  * Config for creating a new language server

@@ -1,8 +1,8 @@
-import { ObjectExpression } from "../../ast/objectExpression";
-import { InterpreterContext } from "../interpreter";
-import { FieldEntry } from "../objects/baseObject";
-import { ExecutableListEntry } from "./executableListEntry";
-import { ExecutableExpression } from "./executableExpression";
+import { ObjectExpression } from "../../ast/objectExpression.js";
+import { InterpreterContext } from "../interpreter.js";
+import { FieldEntry } from "../objects/baseObject.js";
+import { ExecutableListEntry } from "./executableListEntry.js";
+import { ExecutableExpression } from "./executableExpression.js";
 
 /**
  * Executable ObjectExpression

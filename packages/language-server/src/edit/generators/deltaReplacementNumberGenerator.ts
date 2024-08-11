@@ -1,6 +1,6 @@
-import { OriginalValueNumberGenerator } from "./originalValueNumberGenerator";
-import { EditEngine } from "./editGenerator";
-import { printNumber } from "../printNumber";
+import { OriginalValueNumberGenerator } from "./originalValueNumberGenerator.js";
+import { EditEngine } from "./editGenerator.js";
+import { printNumber } from "../printNumber.js";
 
 /**
  * EditGenerator which adds / removes a specified value from the original value and replaces the whole number

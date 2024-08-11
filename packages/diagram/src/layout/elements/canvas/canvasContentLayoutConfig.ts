@@ -1,6 +1,6 @@
 import { FullObject, RuntimeError } from "@hylimo/core";
-import { LayoutElement } from "../../layoutElement";
-import { ElementLayoutConfig } from "../elementLayoutConfig";
+import { LayoutElement } from "../../layoutElement.js";
+import { ElementLayoutConfig } from "../elementLayoutConfig.js";
 
 /**
  * Base class for CanvasElementLayoutConfig and CanvasConnectionLayoutConfig

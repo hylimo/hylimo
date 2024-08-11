@@ -1,6 +1,6 @@
 import { ContainerModule } from "inversify";
 import { TYPES } from "sprotty";
-import { MoveMouseListener } from "./moveMouseListener";
+import { MoveMouseListener } from "./moveMouseListener.js";
 
 /**
  * Move module for moving canvas elements

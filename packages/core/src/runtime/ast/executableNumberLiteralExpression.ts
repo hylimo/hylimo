@@ -1,8 +1,8 @@
-import { NumberLiteralExpression } from "../../ast/numberLiteralExpression";
-import { InterpreterContext } from "../interpreter";
-import { FieldEntry } from "../objects/baseObject";
-import { NumberObject } from "../objects/numberObject";
-import { ExecutableLiteralExpression } from "./executableLiteralExpression";
+import { NumberLiteralExpression } from "../../ast/numberLiteralExpression.js";
+import { InterpreterContext } from "../interpreter.js";
+import { FieldEntry } from "../objects/baseObject.js";
+import { NumberObject } from "../objects/numberObject.js";
+import { ExecutableLiteralExpression } from "./executableLiteralExpression.js";
 
 /**
  * Executable NumberLiteralExpression

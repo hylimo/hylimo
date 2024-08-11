@@ -1,5 +1,5 @@
-import { Type } from "./base";
-import { or } from "./or";
+import { Type } from "./base.js";
+import { or } from "./or.js";
 
 /**
  * Null type matching only null
