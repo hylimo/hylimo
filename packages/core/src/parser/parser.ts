@@ -17,7 +17,8 @@ import {
     OpenRoundBracket,
     OpenSquareBracket,
     SignMinus,
-    String
+    String,
+    TokenType
 } from "./lexer.js";
 
 /**
@@ -67,9 +68,17 @@ export interface CstResult {
 }
 
 /**
- * Label associated with a token that is only accepted in fault tolerant mode
+ * Additional token types
  */
-const faultTolerantToken = "FaultTolerantToken";
+enum AdditionalToken {
+    START_NEW_LINE = "StartNewLine",
+    FAULT_TOLERANT = "FaultTolerantToken"
+}
+
+/**
+ * Dictionary of all possible children of a CST node
+ */
+export type CstChildrenDictionary = Record<TokenType | AdditionalToken, IToken[]> & Record<Rules, CstNode[]>;
 
 /**
  * Parser used to generate a CST or AST
@@ -127,7 +136,7 @@ export class Parser extends CstParser {
      */
     private expressions = this.RULE(Rules.EXPRESSIONS, () => {
         this.MANY1(() => {
-            this.CONSUME1(NewLine, { LABEL: "StartNewLine" });
+            this.CONSUME1(NewLine, { LABEL: AdditionalToken.START_NEW_LINE });
         });
         this.OPTION1(() => {
             this.SUBRULE1(this.expression);
@@ -242,7 +251,7 @@ export class Parser extends CstParser {
             }
         });
         if (this.faultTolerant) {
-            this.OPTION(() => this.CONSUME1(Dot, { LABEL: faultTolerantToken }));
+            this.OPTION(() => this.CONSUME1(Dot, { LABEL: AdditionalToken.FAULT_TOLERANT }));
         }
     });
 
@@ -255,7 +264,7 @@ export class Parser extends CstParser {
             DEF: () => this.OR([{ ALT: () => this.CONSUME(Identifier) }, { ALT: () => this.CONSUME(SignMinus) }])
         });
         if (this.faultTolerant) {
-            this.OPTION(() => this.CONSUME2(Dot, { LABEL: faultTolerantToken }));
+            this.OPTION(() => this.CONSUME2(Dot, { LABEL: AdditionalToken.FAULT_TOLERANT }));
         }
     });
 
