@@ -1,7 +1,9 @@
 import { Expression } from "../../ast/expression.js";
 import { InterpreterContext } from "../interpreter.js";
 import { FieldEntry } from "../objects/baseObject.js";
-// DO NOT CHANGE! This is required to make circular imports work
+// DO NOT CHANGE!
+// These classes must not be imported from their originating file directly.
+// Otherwise circular imports will cause runtime errors.
 import {
     ExecutableAssignmentExpression,
     ExecutableFieldAccessExpression,
