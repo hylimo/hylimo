@@ -1,10 +1,11 @@
-import { Rules, TokenType } from "@hylimo/core";
+import { Rules } from "@hylimo/core";
 import { IToken } from "chevrotain";
 import { doc, Doc } from "prettier";
 import { uinteger } from "vscode-languageserver";
-import { PrintContext, Path, Print, Node, Comment } from "./types.js";
+import { PrintContext, Path, Print } from "./types.js";
+import { printDanglingComments } from "./comments.js";
 
-const { group, indent, join, line, hardline, softline, lineSuffix } = doc.builders;
+const { group, indent, join, line, hardline, softline } = doc.builders;
 
 /**
  * Lookup for printers for each CST node
@@ -52,11 +53,15 @@ function printLiteral({ ctx }: PrintContext): Doc {
  * @param context prettier print context
  * @returns the formatted function expression
  */
-function printFunction({ ctx, path, print }: PrintContext): Doc {
-    const expressions = ctx.expressions[0];
-    const newLine = expressions.StartNewLine ? hardline : line;
-    const child = path.map(print, Rules.EXPRESSIONS);
-    return group(["{", indent([newLine, child]), newLine, "}"]);
+function printFunction({ ctx, path, print, options }: PrintContext): Doc {
+    let children: Doc = [printDanglingComments(path, options)];
+    let newLine: Doc = line;
+    if (ctx.expressions != undefined) {
+        const expressions = ctx.expressions?.[0];
+        newLine = expressions?.StartNewLine ? hardline : line;
+        children.push(...path.map(print, Rules.EXPRESSIONS));
+    }
+    return group(["{", indent([newLine, children]), newLine, "}"]);
 }
 
 /**
@@ -65,9 +70,9 @@ function printFunction({ ctx, path, print }: PrintContext): Doc {
  * @param context prettier print context
  * @returns the formatted list of expressions
  */
-function printExpressions({ ctx, path, print }: PrintContext): Doc {
+function printExpressions({ ctx, path, print, options }: PrintContext): Doc {
     if (ctx.expression == undefined) {
-        return printDanglingComments(path);
+        return printDanglingComments(path, options);
     }
     let lastLine = uinteger.MAX_VALUE;
     return path.map((expression: any, i: number) => {
@@ -112,9 +117,6 @@ function printCallBrackets(context: PrintContext): Doc {
         allBrackets.push(group(["(", indent([softline, printInnerListEntries(context)]), softline, ")"]));
     }
     if (ctx.function) {
-        if (!ctx.OpenRoundBracket) {
-            allBrackets.push("");
-        }
         allBrackets.push(path.map(print, Rules.FUNCTION));
     }
     return join(" ", allBrackets);
@@ -137,12 +139,12 @@ function printObjectExpression(context: PrintContext): Doc {
  * @param context the print context
  * @returns the formatted inner list entries
  */
-function printInnerListEntries({ ctx, path, print }: PrintContext): Doc {
+function printInnerListEntries({ ctx, path, print, options }: PrintContext): Doc {
     if (ctx.listEntry != undefined) {
         const args = path.map(print, Rules.LIST_ENTRY);
         return join([",", line], args);
     } else {
-        return printDanglingComments(path);
+        return printDanglingComments(path, options);
     }
 }
 
@@ -166,7 +168,12 @@ function printCallExpression({ ctx, path, print }: PrintContext): Doc {
         baseExpression = path.map(print, Rules.OBJECT_EXPRESSION);
     }
     if (ctx.callBrackets != undefined) {
-        return [baseExpression, path.map(print, Rules.CALL_BRACKETS)];
+        const docs = [baseExpression];
+        if (ctx.callBrackets[0].OpenRoundBracket == undefined) {
+            docs.push(" ");
+        }
+        docs.push(path.map(print, Rules.CALL_BRACKETS));
+        return docs;
     } else {
         return baseExpression;
     }
@@ -273,42 +280,4 @@ function mapIfDefined(path: Path, print: Print, key: Rules): Doc[] {
     return [];
 }
 
-/**
- * Prints all dangling comments
- *
- * @param path the current path
- * @returns the formatted comments
- */
-function printDanglingComments(path: Path): Doc {
-    const node = path.node as Node;
-    const comments = (node as { comments?: Comment[] }).comments;
-    if (Array.isArray(comments) && comments.length > 0) {
-        const parts: Doc = [];
-        path.each((comment) => {
-            const commentToken = comment.node;
-            if (commentToken.trailing || commentToken.leading) {
-                return;
-            }
-            const commentDoc = printComment(commentToken);
-            if (commentToken.tokenType.name === TokenType.MULTI_LINE_COMMENT) {
-                parts.push(commentDoc);
-            } else {
-                parts.push(lineSuffix(commentDoc));
-            }
-        }, "comments");
-        return [join(hardline, parts)];
-    } else {
-        return [];
-    }
-}
 
-/**
- * Prints a comment
- *
- * @param comment the comment to print
- * @returns the formatted comment
- */
-export function printComment(comment: Comment): Doc {
-    comment.printed = true;
-    return comment.image;
-}

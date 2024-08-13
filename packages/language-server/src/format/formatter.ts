@@ -1,9 +1,10 @@
-import { Parser, TokenType } from "@hylimo/core";
+import { Parser, Rules, TokenType } from "@hylimo/core";
 import { Plugin, format } from "prettier";
 import { TextDocument } from "vscode-languageserver-textdocument";
 import { CstNode, IToken } from "chevrotain";
 import { Comment, Path, Node } from "./types.js";
-import { printers, printComment } from "./printers.js";
+import { printers } from "./printers.js";
+import { printComment } from "./comments.js";
 
 /**
  * Formatter used to format syncscript documents using a prettier plugin
@@ -59,9 +60,9 @@ export class Formatter {
                 },
                 locEnd: (node: IToken | Pick<CstNode, "location">) => {
                     if ("location" in node) {
-                        return node.location!.endOffset!;
+                        return node.location!.endOffset! + 1;
                     } else {
-                        return (node as IToken).endOffset as number;
+                        return ((node as IToken).endOffset as number) + 1;
                     }
                 }
             }
@@ -73,11 +74,22 @@ export class Formatter {
                     const printer = printers[node.name];
                     return printer({ ctx: node, path: path as Path, options, print });
                 },
-                printComment(commentPath) {
-                    return printComment(commentPath.node as Comment);
+                printComment(commentPath, options) {
+                    return printComment(commentPath.node as Comment, options);
                 },
                 canAttachComment(node) {
-                    return "name" in node;
+                    if (!("name" in node)) {
+                        return false;
+                    }
+                    if (typeof node.location?.startOffset !== "number") {
+                        return false;
+                    }
+                    if (node.name === Rules.EXPRESSIONS) {
+                        if (node.expression == undefined) {
+                            return false;
+                        }
+                    }
+                    return true;
                 },
                 getVisitorKeys(node) {
                     return Object.keys(node).filter((key) => key in printers);
@@ -101,9 +113,6 @@ export class Formatter {
             parser: "syncscript",
             plugins: [this.plugin],
             ...options
-        }).catch((error) => {
-            console.error(error);
-            return document.getText();
         });
     }
 }

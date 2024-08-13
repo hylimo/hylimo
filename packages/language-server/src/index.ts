@@ -39,6 +39,7 @@ export * from "./edit/generators/replacementNumberGenerator.js";
 export * from "./edit/diagramServer.js";
 export * from "./edit/printNumber.js";
 export * from "./edit/transactionManager.js";
+export * from "./format/comments.js";
 export * from "./format/formatter.js";
 export * from "./format/printers.js";
 export * from "./format/types.js";
