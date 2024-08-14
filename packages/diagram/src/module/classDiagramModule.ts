@@ -628,14 +628,14 @@ const scopeExpressions: ExecutableExpression[] = [
                     marginBottom = 5
                 }
                 cls("marker") {
-                    height = 25
-                    width = 25
+                    height = 17.5
+                    width = 17.5
                 }
                 cls("diamond-marker") {
-                    width = 40
+                    width = 28
                 }
                 cls("filled-diamond-marker") {
-                    width = 40
+                    width = 28
                 }
                 cls("marker-path") {
                     strokeWidth = var("strokeWidth")
