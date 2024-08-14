@@ -1,22 +1,22 @@
-import { CanvasLayoutEngine } from "../../canvas/canvasLayoutEngine";
-import { Canvas } from "../elements/canvas/canvas";
-import { CanvasElement } from "../elements/canvas/canvasElement";
-import { MarkerLayoutInformation } from "../elements/canvas/marker";
-import { Path } from "../elements/path";
-import { Rect } from "../elements/rect";
-import { Root } from "../elements/root";
-import { SimplifiedCanvasElement, WithBounds } from "./simplifiedTypes";
-import { Element } from "../elements/base/element";
-import { Text } from "../elements/text";
-import { CanvasConnection } from "../elements/canvas/canvasConnection";
-import { CanvasPoint } from "../elements/canvas/canvasPoint";
-import { Point } from "../../common/point";
-import { LayoutedElement } from "../elements/base/layoutedElement";
-import { Math2D } from "../../common/math";
-import { Bounds } from "../../common/bounds";
-import { svgPathBbox } from "../../bounds/svgPathBbox";
-import { CanvasConnectionLayout } from "../../canvas/canvasConnectionLayout";
-import { Ellipse } from "../elements/ellipse";
+import { CanvasLayoutEngine } from "../../canvas/canvasLayoutEngine.js";
+import { Canvas } from "../elements/canvas/canvas.js";
+import { CanvasElement } from "../elements/canvas/canvasElement.js";
+import { MarkerLayoutInformation } from "../elements/canvas/marker.js";
+import { Path } from "../elements/path.js";
+import { Rect } from "../elements/rect.js";
+import { Root } from "../elements/root.js";
+import { SimplifiedCanvasElement, WithBounds } from "./simplifiedTypes.js";
+import { Element } from "../elements/base/element.js";
+import { Text } from "../elements/text.js";
+import { CanvasConnection } from "../elements/canvas/canvasConnection.js";
+import { CanvasPoint } from "../elements/canvas/canvasPoint.js";
+import { Point } from "../../common/point.js";
+import { LayoutedElement } from "../elements/base/layoutedElement.js";
+import { Math2D } from "../../common/math.js";
+import { Bounds } from "../../common/bounds.js";
+import { svgPathBbox } from "../../bounds/svgPathBbox.js";
+import { CanvasConnectionLayout } from "../../canvas/canvasConnectionLayout.js";
+import { Ellipse } from "../elements/ellipse.js";
 
 /**
  * Visitor which simplifies the provided diagram model, and visists each element

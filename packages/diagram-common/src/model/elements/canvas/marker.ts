@@ -1,6 +1,6 @@
-import { Point } from "../../../common/point";
-import { Element } from "../base/element";
-import { SizedElement } from "../base/sizedElement";
+import { Point } from "../../../common/point.js";
+import { Element } from "../base/element.js";
+import { SizedElement } from "../base/sizedElement.js";
 
 /**
  * Marker which can be placed at the start or end of a CanvasConnection

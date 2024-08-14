@@ -1,9 +1,9 @@
-import { FunctionExpression } from "../../ast/functionExpression";
-import { InterpreterContext } from "../interpreter";
-import { FieldEntry } from "../objects/baseObject";
-import { FunctionObject } from "../objects/functionObject";
-import { ExecutableAbstractFunctionExpression, FunctionDocumentation } from "./executableAbstractFunctionExpression";
-import { ExecutableExpression } from "./executableExpression";
+import { FunctionExpression } from "../../ast/functionExpression.js";
+import { InterpreterContext } from "../interpreter.js";
+import { FieldEntry } from "../objects/baseObject.js";
+import { FunctionObject } from "../objects/functionObject.js";
+import { ExecutableAbstractFunctionExpression, FunctionDocumentation } from "./executableAbstractFunctionExpression.js";
+import { ExecutableExpression } from "./executableExpression.js";
 
 /**
  * Executable FunctionExpression

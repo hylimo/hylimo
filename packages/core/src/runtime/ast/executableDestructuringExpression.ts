@@ -1,7 +1,7 @@
-import { DestructuringExpression } from "../../ast/destructuringExpression";
-import { InterpreterContext } from "../interpreter";
-import { FieldEntry } from "../objects/baseObject";
-import { ExecutableExpression } from "./executableExpression";
+import { DestructuringExpression } from "../../ast/destructuringExpression.js";
+import { InterpreterContext } from "../interpreter.js";
+import { FieldEntry } from "../objects/baseObject.js";
+import { ExecutableExpression } from "./executableExpression.js";
 
 /**
  * Executable DestructuringExpression

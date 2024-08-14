@@ -1,8 +1,8 @@
-import { Math2D } from "../../common/math";
-import { Point } from "../../common/point";
-import { ArcSegment } from "../model/arcSegment";
-import { projectPointOnConic } from "./conicProjection";
-import { NearestPointResult, SegmentEngine } from "./segmentEngine";
+import { Math2D } from "../../common/math.js";
+import { Point } from "../../common/point.js";
+import { ArcSegment } from "../model/arcSegment.js";
+import { projectPointOnConic } from "./conicProjection.js";
+import { NearestPointResult, SegmentEngine } from "./segmentEngine.js";
 
 /**
  * Segment engine for ArcSegment

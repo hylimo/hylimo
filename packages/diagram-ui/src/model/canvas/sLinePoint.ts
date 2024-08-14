@@ -1,8 +1,8 @@
 import { LineEngine, LinePoint, Point, TransformedLine } from "@hylimo/diagram-common";
 import { SModelElement } from "sprotty";
-import { LinearAnimatable } from "../../features/animation/model";
-import { isLineProvider } from "../../features/layout/lineProvider";
-import { SCanvasPoint } from "./sCanvasPoint";
+import { LinearAnimatable } from "../../features/animation/model.js";
+import { isLineProvider } from "../../features/layout/lineProvider.js";
+import { SCanvasPoint } from "./sCanvasPoint.js";
 import { identity } from "transformation-matrix";
 
 const linePointAnimatedFields = new Set(["pos"]);

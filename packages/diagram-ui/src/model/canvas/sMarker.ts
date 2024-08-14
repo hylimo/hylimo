@@ -1,5 +1,5 @@
 import { Marker } from "@hylimo/diagram-common";
-import { SElement } from "../sElement";
+import { SElement } from "../sElement.js";
 
 /**
  * Model for Marker

@@ -1,8 +1,8 @@
 import { ASTExpressionPosition, FullObject, FunctionExpression } from "@hylimo/core";
 import { Position, Range, uinteger } from "vscode-languageserver";
 import { TextDocument } from "vscode-languageserver-textdocument";
-import { FieldEntryGenerator } from "../generators/fieldEntryGenerator";
-import { EditGeneratorEntry } from "./editGeneratorEntry";
+import { FieldEntryGenerator } from "../generators/fieldEntryGenerator.js";
+import { EditGeneratorEntry } from "./editGeneratorEntry.js";
 
 /**
  * Generates a new EditGeneratorEntry to add fields to a scope (and create the scope if it does not exist yet)

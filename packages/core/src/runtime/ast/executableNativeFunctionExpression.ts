@@ -1,10 +1,10 @@
-import { AbstractInvocationExpression } from "../../ast/abstractInvocationExpression";
-import { InterpreterContext } from "../interpreter";
-import { FieldEntry } from "../objects/baseObject";
-import { FullObject } from "../objects/fullObject";
-import { NativeFunctionObject } from "../objects/functionObject";
-import { ExecutableAbstractFunctionExpression, FunctionDocumentation } from "./executableAbstractFunctionExpression";
-import { ExecutableListEntry } from "./executableListEntry";
+import { AbstractInvocationExpression } from "../../ast/abstractInvocationExpression.js";
+import { InterpreterContext } from "../interpreter.js";
+import { FieldEntry } from "../objects/baseObject.js";
+import { FullObject } from "../objects/fullObject.js";
+import { NativeFunctionObject } from "../objects/functionObject.js";
+import { ExecutableAbstractFunctionExpression, FunctionDocumentation } from "./executableAbstractFunctionExpression.js";
+import { ExecutableListEntry } from "./executableListEntry.js";
 
 /**
  * Type for the callback of native functions

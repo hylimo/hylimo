@@ -1,6 +1,6 @@
 import { FontFamilyConfig, convertFontsToCssStyle } from "@hylimo/diagram-common";
 import { ModelIndexImpl, ViewportRootElement } from "sprotty";
-import { SCanvasAxisAlignedSegment } from "./canvas/sCanvasAxisAlignedSegment";
+import { SCanvasAxisAlignedSegment } from "./canvas/sCanvasAxisAlignedSegment.js";
 
 /**
  * Root element.
@@ -33,9 +33,10 @@ export class SRoot extends ViewportRootElement {
     /**
      * Genrates the style string based on the fonts
      *
+     * @param baseDiv the id of the base div
      * @returns the generated style string
      */
-    generateStyle(): string {
+    generateStyle(baseDiv: string): string {
         const staticStyles = `
         text {
             white-space: pre;
@@ -45,7 +46,7 @@ export class SRoot extends ViewportRootElement {
             pointer-events: visible;
         }
         
-        .sprotty svg {
+        #${baseDiv}.sprotty svg {
             --diagram-zoom: ${this.zoom};
             --diagram-zoom-normalized: ${this.zoom / Math.pow(2, Math.round(Math.log2(this.zoom) / 2) * 2)};
             --diagram-scroll-x: ${this.scroll.x}px;

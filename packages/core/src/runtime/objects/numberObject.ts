@@ -1,5 +1,5 @@
-import { FullObject } from "./fullObject";
-import { LiteralObject } from "./literalObject";
+import { FullObject } from "./fullObject.js";
+import { LiteralObject } from "./literalObject.js";
 
 /**
  * Represents a Number

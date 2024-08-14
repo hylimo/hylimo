@@ -1,11 +1,11 @@
-import { ExecutableNativeExpression } from "../../runtime/ast/executableNativeExpression";
-import { assign, fun, id, jsFun } from "../../runtime/executableAstHelper";
-import { InterpreterModule } from "../../runtime/interpreter";
-import { NumberObject } from "../../runtime/objects/numberObject";
-import { SemanticFieldNames } from "../../runtime/semanticFieldNames";
-import { numberType } from "../../types/number";
-import { DefaultModuleNames } from "../defaultModuleNames";
-import { assertNumber } from "../typeHelpers";
+import { ExecutableNativeExpression } from "../../runtime/ast/executableNativeExpression.js";
+import { assign, fun, id, jsFun } from "../../runtime/executableAstHelper.js";
+import { InterpreterModule } from "../../runtime/interpreter.js";
+import { NumberObject } from "../../runtime/objects/numberObject.js";
+import { SemanticFieldNames } from "../../runtime/semanticFieldNames.js";
+import { numberType } from "../../types/number.js";
+import { DefaultModuleNames } from "../defaultModuleNames.js";
+import { assertNumber } from "../typeHelpers.js";
 
 /**
  * Name of the temporary field where the number prototype is assigned

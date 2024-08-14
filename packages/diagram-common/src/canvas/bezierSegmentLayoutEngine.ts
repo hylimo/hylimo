@@ -1,9 +1,9 @@
-import { Point } from "../common/point";
-import { BezierSegment } from "../line/model/bezierSegment";
-import { CanvasBezierSegment } from "../model/elements/canvas/canvasBezierSegment";
-import { Marker, MarkerLayoutInformation } from "../model/elements/canvas/marker";
-import { SegmentLayoutInformation } from "./canvasConnectionLayout";
-import { SegmentLayoutEngine } from "./segmentLayoutEngine";
+import { Point } from "../common/point.js";
+import { BezierSegment } from "../line/model/bezierSegment.js";
+import { CanvasBezierSegment } from "../model/elements/canvas/canvasBezierSegment.js";
+import { Marker, MarkerLayoutInformation } from "../model/elements/canvas/marker.js";
+import { SegmentLayoutInformation } from "./canvasConnectionLayout.js";
+import { SegmentLayoutEngine } from "./segmentLayoutEngine.js";
 
 /**
  * Segment layout engine for bezier segments

@@ -26,9 +26,9 @@ import {
     validate
 } from "@hylimo/core";
 import { openSans, roboto, sourceCodePro } from "@hylimo/fonts";
-import { AttributeConfig, ContentCardinality, LayoutConfig } from "../layout/layoutElement";
-import { layouts } from "../layout/layouts";
-import { elementType } from "./types";
+import { AttributeConfig, ContentCardinality, LayoutConfig } from "../layout/layoutElement.js";
+import { layouts } from "../layout/layouts.js";
+import { elementType } from "./types.js";
 
 /**
  * Type for unset, default style values

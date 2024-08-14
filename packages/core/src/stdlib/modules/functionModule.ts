@@ -1,11 +1,11 @@
-import { ExecutableNativeExpression } from "../../runtime/ast/executableNativeExpression";
-import { assign, fun, id, jsFun } from "../../runtime/executableAstHelper";
-import { InterpreterModule } from "../../runtime/interpreter";
-import { SemanticFieldNames } from "../../runtime/semanticFieldNames";
-import { functionType } from "../../types/function";
-import { objectType } from "../../types/object";
-import { DefaultModuleNames } from "../defaultModuleNames";
-import { assertFunction, assertObject } from "../typeHelpers";
+import { ExecutableNativeExpression } from "../../runtime/ast/executableNativeExpression.js";
+import { assign, fun, id, jsFun } from "../../runtime/executableAstHelper.js";
+import { InterpreterModule } from "../../runtime/interpreter.js";
+import { SemanticFieldNames } from "../../runtime/semanticFieldNames.js";
+import { functionType } from "../../types/function.js";
+import { objectType } from "../../types/object.js";
+import { DefaultModuleNames } from "../defaultModuleNames.js";
+import { assertFunction, assertObject } from "../typeHelpers.js";
 
 /**
  * Name of the temporary field where the function prototype is assigned

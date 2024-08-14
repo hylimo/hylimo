@@ -1,8 +1,9 @@
 {
     "name": "@hylimo/cli",
     "version": "1.1.2",
-    "main": "lib/index",
-    "types": "lib/index",
+    "type": "module",
+    "main": "lib/index.js",
+    "types": "lib/index.d.ts",
     "files": [
         "lib",
         "src"

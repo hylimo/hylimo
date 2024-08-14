@@ -1,12 +1,12 @@
-import { ExecutableNativeExpression } from "../../runtime/ast/executableNativeExpression";
-import { assign, fun, id, jsFun, native } from "../../runtime/executableAstHelper";
-import { InterpreterModule } from "../../runtime/interpreter";
-import { BooleanObject } from "../../runtime/objects/booleanObject";
-import { FullObject } from "../../runtime/objects/fullObject";
-import { SemanticFieldNames } from "../../runtime/semanticFieldNames";
-import { booleanType } from "../../types/boolean";
-import { DefaultModuleNames } from "../defaultModuleNames";
-import { assertBoolean, assertSelfShortCircuitArguments } from "../typeHelpers";
+import { ExecutableNativeExpression } from "../../runtime/ast/executableNativeExpression.js";
+import { assign, fun, id, jsFun, native } from "../../runtime/executableAstHelper.js";
+import { InterpreterModule } from "../../runtime/interpreter.js";
+import { BooleanObject } from "../../runtime/objects/booleanObject.js";
+import { FullObject } from "../../runtime/objects/fullObject.js";
+import { SemanticFieldNames } from "../../runtime/semanticFieldNames.js";
+import { booleanType } from "../../types/boolean.js";
+import { DefaultModuleNames } from "../defaultModuleNames.js";
+import { assertBoolean, assertSelfShortCircuitArguments } from "../typeHelpers.js";
 
 /**
  * Name of the boolean proto object

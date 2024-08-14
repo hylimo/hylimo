@@ -1,5 +1,5 @@
 import { Connection } from "vscode-languageserver";
-import { DiagramImplementation } from "./diagramImplementation";
+import { DiagramImplementation } from "./diagramImplementation.js";
 import { RemoteMessagePayload, RemoteNotification, RemoteRequest } from "@hylimo/diagram-protocol";
 
 /**

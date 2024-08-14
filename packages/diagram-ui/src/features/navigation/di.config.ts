@@ -1,6 +1,6 @@
 import { ContainerModule } from "inversify";
 import { TYPES } from "sprotty";
-import { NavigationMouseListener } from "./navigationMouseListener";
+import { NavigationMouseListener } from "./navigationMouseListener.js";
 
 /**
  * Navigation module for navigating from canvas elements to the code

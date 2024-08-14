@@ -1,9 +1,9 @@
-import { assign, fun, id, jsFun } from "../../runtime/executableAstHelper";
-import { InterpreterModule } from "../../runtime/interpreter";
-import { SemanticFieldNames } from "../../runtime/semanticFieldNames";
-import { stringType } from "../../types/string";
-import { DefaultModuleNames } from "../defaultModuleNames";
-import { assertString } from "../typeHelpers";
+import { assign, fun, id, jsFun } from "../../runtime/executableAstHelper.js";
+import { InterpreterModule } from "../../runtime/interpreter.js";
+import { SemanticFieldNames } from "../../runtime/semanticFieldNames.js";
+import { stringType } from "../../types/string.js";
+import { DefaultModuleNames } from "../defaultModuleNames.js";
+import { assertString } from "../typeHelpers.js";
 
 /**
  * Debug module

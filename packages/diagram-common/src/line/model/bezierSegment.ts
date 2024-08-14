@@ -1,5 +1,5 @@
-import { Point } from "../../common/point";
-import { Segment } from "./segment";
+import { Point } from "../../common/point.js";
+import { Segment } from "./segment.js";
 
 /**
  * Bezier line segment consisting of a cubic bezier curve

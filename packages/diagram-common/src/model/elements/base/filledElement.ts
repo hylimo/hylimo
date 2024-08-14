@@ -1,5 +1,5 @@
-import { Fill } from "./colored";
-import { Element } from "./element";
+import { Fill } from "./colored.js";
+import { Element } from "./element.js";
 
 /**
  * Element with fill related properties

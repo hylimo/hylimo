@@ -7,9 +7,9 @@ import {
     TextDocumentContentChangeEvent
 } from "vscode-languageserver";
 import { TextDocument, TextEdit } from "vscode-languageserver-textdocument";
-import { EditGenerator } from "../generators/editGenerator";
-import { GeneratorRegistry } from "../generators/generatorRegistry";
-import { EditGeneratorEntry } from "./editGeneratorEntry";
+import { EditGenerator } from "../generators/editGenerator.js";
+import { GeneratorRegistry } from "../generators/generatorRegistry.js";
+import { EditGeneratorEntry } from "./editGeneratorEntry.js";
 import { BaseLayoutedDiagram } from "@hylimo/diagram-common";
 
 /**

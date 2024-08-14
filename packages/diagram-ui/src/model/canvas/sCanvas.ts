@@ -1,10 +1,10 @@
 import { Canvas, CanvasConnection, CanvasElement, CanvasLayoutEngine, CanvasPoint } from "@hylimo/diagram-common";
 import { SChildElement } from "sprotty";
-import { SLayoutedElement } from "../sLayoutedElement";
-import { PointVisibilityManager } from "./pointVisibilityManager";
-import { SCanvasPoint } from "./sCanvasPoint";
-import { SCanvasConnection } from "./sCanvasConnection";
-import { SCanvasElement } from "./sCanvasElement";
+import { SLayoutedElement } from "../sLayoutedElement.js";
+import { PointVisibilityManager } from "./pointVisibilityManager.js";
+import { SCanvasPoint } from "./sCanvasPoint.js";
+import { SCanvasConnection } from "./sCanvasConnection.js";
+import { SCanvasElement } from "./sCanvasElement.js";
 
 /**
  * Canvas model element

@@ -1,10 +1,10 @@
-import { Point } from "../common/point";
-import { LineSegment } from "../line/model/lineSegment";
-import { Segment } from "../line/model/segment";
-import { CanvasLineSegment } from "../model/elements/canvas/canvasLineSegment";
-import { Marker, MarkerLayoutInformation } from "../model/elements/canvas/marker";
-import { SegmentLayoutInformation } from "./canvasConnectionLayout";
-import { SegmentLayoutEngine } from "./segmentLayoutEngine";
+import { Point } from "../common/point.js";
+import { LineSegment } from "../line/model/lineSegment.js";
+import { Segment } from "../line/model/segment.js";
+import { CanvasLineSegment } from "../model/elements/canvas/canvasLineSegment.js";
+import { Marker, MarkerLayoutInformation } from "../model/elements/canvas/marker.js";
+import { SegmentLayoutInformation } from "./canvasConnectionLayout.js";
+import { SegmentLayoutEngine } from "./segmentLayoutEngine.js";
 
 /**
  * Segment layout engine for line segments

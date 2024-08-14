@@ -1,16 +1,16 @@
 import { FullObject, numberType, optional, FunctionExpression } from "@hylimo/core";
 import { Size, Point, Element, CanvasElement, ModificationSpecification } from "@hylimo/diagram-common";
-import { canvasPointType, elementType } from "../../../module/types";
+import { canvasPointType, elementType } from "../../../module/types.js";
 import {
     ContentCardinality,
     HorizontalAlignment,
     LayoutElement,
     SizeConstraints,
     VerticalAlignment
-} from "../../layoutElement";
-import { Layout } from "../../layoutEngine";
-import { alignStyleAttributes, sizeStyleAttributes } from "../attributes";
-import { EditableCanvasContentLayoutConfig } from "./editableCanvasContentLayoutConfig";
+} from "../../layoutElement.js";
+import { Layout } from "../../layoutEngine.js";
+import { alignStyleAttributes, sizeStyleAttributes } from "../attributes.js";
+import { EditableCanvasContentLayoutConfig } from "./editableCanvasContentLayoutConfig.js";
 
 /**
  * Layout config for canvas element

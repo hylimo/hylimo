@@ -1,7 +1,7 @@
 import { FieldEntry, IdentifierExpression, InvocationExpression, NumberLiteralExpression } from "@hylimo/core";
-import { EditGeneratorEntry } from "./editGeneratorEntry";
-import { DeltaAdditiveNumberGenerator } from "../generators/deltaAdditiveNumberGenerator";
-import { DeltaReplacementNumberGenerator } from "../generators/deltaReplacementNumberGenerator";
+import { EditGeneratorEntry } from "./editGeneratorEntry.js";
+import { DeltaAdditiveNumberGenerator } from "../generators/deltaAdditiveNumberGenerator.js";
+import { DeltaReplacementNumberGenerator } from "../generators/deltaReplacementNumberGenerator.js";
 
 /**
  * Generates a new EditGeneratorEntry based on the provided FieldEntry to modify.

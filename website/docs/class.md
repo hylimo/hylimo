@@ -1,8 +1,6 @@
 ---
-sidebar_position: 5
-slug: /class
+outline: deep
 ---
-
 # UML Class Diagram
 To create a UML class diagram, one uses the `classDiagram` diagram function:
 ```

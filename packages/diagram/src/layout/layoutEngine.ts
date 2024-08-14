@@ -1,10 +1,10 @@
 import { BaseObject, FieldEntry, FullObject, nativeToList } from "@hylimo/core";
 import { assertString } from "@hylimo/core";
 import { Element, Size, Point, Stroke } from "@hylimo/diagram-common";
-import { FontManager } from "../font/fontManager";
-import { TextLayoutResult, TextLayouter } from "../font/textLayouter";
-import { generateStyles, Selector, SelectorType, Style, StyleList } from "../styles";
-import { LayoutedDiagram } from "./diagramLayoutResult";
+import { FontManager } from "../font/fontManager.js";
+import { TextLayoutResult, TextLayouter } from "../font/textLayouter.js";
+import { generateStyles, Selector, SelectorType, Style, StyleList } from "../styles.js";
+import { LayoutedDiagram } from "./diagramLayoutResult.js";
 import {
     addToSize,
     HorizontalAlignment,
@@ -14,12 +14,12 @@ import {
     matchToConstraints,
     SizeConstraints,
     VerticalAlignment
-} from "./layoutElement";
-import { layouts } from "./layouts";
-import { FontCollection } from "../font/fontCollection";
-import { LayoutCache } from "./layoutCache";
-import { StretchMode } from "./elements/pathLayoutConfig";
-import { FontFamily } from "../font/fontFamily";
+} from "./layoutElement.js";
+import { layouts } from "./layouts.js";
+import { FontCollection } from "../font/fontCollection.js";
+import { LayoutCache } from "./layoutCache.js";
+import { StretchMode } from "./elements/pathLayoutConfig.js";
+import { FontFamily } from "../font/fontFamily.js";
 
 /**
  * The amount of iterations which are cached

@@ -1,6 +1,6 @@
 import { FieldEntry, FullObject, Type } from "@hylimo/core";
 import { Element, Line, Point, Size } from "@hylimo/diagram-common";
-import { Layout } from "./layoutEngine";
+import { Layout } from "./layoutEngine.js";
 import { Bounds } from "@hylimo/diagram-common";
 
 /**

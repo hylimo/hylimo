@@ -1,8 +1,8 @@
 import { Root } from "@hylimo/diagram-common";
 import { ActionMessage, GeneratorArguments, SModelRoot } from "sprotty-protocol";
 import { Connection } from "vscode-languageserver";
-import { Diagram } from "./diagram/diagram";
-import { DiagramServer } from "./edit/diagramServer";
+import { Diagram } from "./diagram/diagram.js";
+import { DiagramServer } from "./edit/diagramServer.js";
 import { IncrementalUpdate, IncrementalUpdateAction, DiagramActionNotification } from "@hylimo/diagram-protocol";
 
 /**
@@ -115,7 +115,7 @@ export class DiagramServerManager {
     async acceptAction(message: ActionMessage): Promise<void> {
         const diagramServer = this.diagramServers.get(message.clientId);
         if (!diagramServer) {
-            throw new Error(`Unknown client: ${message.clientId}`);
+            throw new Error(`Unknown client for message: ${JSON.stringify(message)}`);
         }
         return diagramServer.accept(message.action);
     }

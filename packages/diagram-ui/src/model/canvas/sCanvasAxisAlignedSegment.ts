@@ -1,8 +1,8 @@
 import { CanvasAxisAlignedSegment, ModificationSpecification, SegmentLayoutInformation } from "@hylimo/diagram-common";
 import { VNode } from "snabbdom";
 import { svg } from "sprotty";
-import { SCanvasConnectionSegment } from "./sCanvasConnectionSegment";
-import { LinearAnimatable } from "../../features/animation/model";
+import { SCanvasConnectionSegment } from "./sCanvasConnectionSegment.js";
+import { LinearAnimatable } from "../../features/animation/model.js";
 
 /**
  * Animated fields for CanvasAxisAlignedSegment

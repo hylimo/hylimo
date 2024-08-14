@@ -1,1 +1,1 @@
-export * from "./pdfRenderer";
+export * from "./pdfRenderer.js";

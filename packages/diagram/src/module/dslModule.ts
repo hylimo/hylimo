@@ -15,7 +15,7 @@ import {
     or,
     parse
 } from "@hylimo/core";
-import { canvasPointType, elementType } from "./types";
+import { canvasPointType, elementType } from "./types.js";
 import { CanvasConnection, CanvasElement } from "@hylimo/diagram-common";
 
 /**

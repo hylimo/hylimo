@@ -1,5 +1,5 @@
-import { Element } from "../model/elements/base/element";
-import { Root } from "../model/elements/root";
+import { Element } from "../model/elements/base/element.js";
+import { Root } from "../model/elements/root.js";
 
 export interface BaseLayoutedDiagram {
     /**

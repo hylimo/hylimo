@@ -1,7 +1,7 @@
-import { Line } from "../../../line/model/line";
-import { Element } from "../base/element";
-import { LayoutedElement } from "../base/layoutedElement";
-import { ModificationSpecification } from "../modificationSpecification";
+import { Line } from "../../../line/model/line.js";
+import { Element } from "../base/element.js";
+import { LayoutedElement } from "../base/layoutedElement.js";
+import { ModificationSpecification } from "../modificationSpecification.js";
 
 /**
  * Moveable and resizeable element in a canvas

@@ -1,5 +1,5 @@
-import { ExpressionMetadata } from "./expressionMetadata";
-import { ASTExpressionPosition } from "./astExpressionPosition";
+import { ExpressionMetadata } from "./expressionMetadata.js";
+import { ASTExpressionPosition } from "./astExpressionPosition.js";
 
 /**
  * Base interface for all expressions

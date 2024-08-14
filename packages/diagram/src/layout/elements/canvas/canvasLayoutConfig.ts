@@ -10,11 +10,11 @@ import {
     RelativePoint,
     LinePoint
 } from "@hylimo/diagram-common";
-import { ContentCardinality, LayoutElement, SizeConstraints } from "../../layoutElement";
-import { Layout } from "../../layoutEngine";
-import { StyledElementLayoutConfig } from "../styledElementLayoutConfig";
-import { CanvasContentLayoutConfig } from "./canvasContentLayoutConfig";
-import { canvasPointType, elementType } from "../../../module/types";
+import { ContentCardinality, LayoutElement, SizeConstraints } from "../../layoutElement.js";
+import { Layout } from "../../layoutEngine.js";
+import { StyledElementLayoutConfig } from "../styledElementLayoutConfig.js";
+import { CanvasContentLayoutConfig } from "./canvasContentLayoutConfig.js";
+import { canvasPointType, elementType } from "../../../module/types.js";
 
 /**
  * Layout config for the canvas

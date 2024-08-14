@@ -1,6 +1,6 @@
 import { Selectable } from "sprotty";
-import { SElement } from "../sElement";
-import { SCanvas } from "./sCanvas";
+import { SElement } from "../sElement.js";
+import { SCanvas } from "./sCanvas.js";
 
 /**
  * Base class for all canvas contents

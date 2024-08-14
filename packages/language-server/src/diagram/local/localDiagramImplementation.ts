@@ -9,14 +9,14 @@ import {
 } from "@hylimo/diagram-protocol";
 import { Diagnostic, DiagnosticSeverity, uinteger, Range, CompletionItem, Position } from "vscode-languageserver";
 import { TextDocument } from "vscode-languageserver-textdocument";
-import { AxisAlignedSegmentEdit } from "../../edit/edits/axisAlignedSegmentEdit";
-import { LineMoveEdit } from "../../edit/edits/lineMoveEdit";
-import { ResizeEdit } from "../../edit/edits/resizeEdit";
-import { RotationEdit } from "../../edit/edits/rotationEdit";
-import { TransactionalEdit } from "../../edit/edits/transactionalEdit";
-import { TranslationMoveEdit } from "../../edit/edits/translationMoveEdit";
-import { DiagramImplementation, DiagramUpdateResult } from "../diagramImplementation";
-import { SharedDiagramUtils } from "../../sharedDiagramUtils";
+import { AxisAlignedSegmentEdit } from "../../edit/edits/axisAlignedSegmentEdit.js";
+import { LineMoveEdit } from "../../edit/edits/lineMoveEdit.js";
+import { ResizeEdit } from "../../edit/edits/resizeEdit.js";
+import { RotationEdit } from "../../edit/edits/rotationEdit.js";
+import { TransactionalEdit } from "../../edit/edits/transactionalEdit.js";
+import { TranslationMoveEdit } from "../../edit/edits/translationMoveEdit.js";
+import { DiagramImplementation, DiagramUpdateResult } from "../diagramImplementation.js";
+import { SharedDiagramUtils } from "../../sharedDiagramUtils.js";
 import { DiagramConfig } from "@hylimo/diagram-common";
 
 /**

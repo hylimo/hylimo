@@ -1,6 +1,6 @@
-import { Element } from "../base/element";
-import { PositionedElement } from "../base/positionedElement";
-import { ModificationSpecification } from "../modificationSpecification";
+import { Element } from "../base/element.js";
+import { PositionedElement } from "../base/positionedElement.js";
+import { ModificationSpecification } from "../modificationSpecification.js";
 
 /**
  * Named point on a canvas

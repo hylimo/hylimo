@@ -1,6 +1,6 @@
 import { Math2D } from "@hylimo/diagram-common";
 import { ResizeAction } from "@hylimo/diagram-protocol";
-import { MoveHandler } from "./moveHandler";
+import { MoveHandler } from "./moveHandler.js";
 
 /**
  * A move handler that resizes the elements.

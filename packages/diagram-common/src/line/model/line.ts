@@ -1,6 +1,6 @@
 import { Matrix } from "transformation-matrix";
-import { Point } from "../../common/point";
-import { Segment } from "./segment";
+import { Point } from "../../common/point.js";
+import { Segment } from "./segment.js";
 
 /**
  * A line beginning at a start point, and consisting of a set of segments.

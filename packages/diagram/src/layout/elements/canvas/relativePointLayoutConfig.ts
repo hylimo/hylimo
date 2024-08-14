@@ -1,9 +1,9 @@
 import { FullObject, numberType, or } from "@hylimo/core";
 import { Size, Element, RelativePoint, Point, CanvasElement } from "@hylimo/diagram-common";
-import { canvasPointType, elementType } from "../../../module/types";
-import { LayoutElement } from "../../layoutElement";
-import { Layout } from "../../layoutEngine";
-import { CanvasPointLayoutConfig } from "./canvasPointLayoutConfig";
+import { canvasPointType, elementType } from "../../../module/types.js";
+import { LayoutElement } from "../../layoutElement.js";
+import { Layout } from "../../layoutEngine.js";
+import { CanvasPointLayoutConfig } from "./canvasPointLayoutConfig.js";
 
 /**
  * Layout config for relative points

@@ -1,5 +1,5 @@
-import { Element } from "./base/element";
-import { Shape } from "./shape";
+import { Element } from "./base/element.js";
+import { Shape } from "./shape.js";
 
 /**
  * An SVG path shape

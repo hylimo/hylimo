@@ -1,7 +1,7 @@
-import { CompletionExpressionMetadata } from "./expressionMetadata";
-import { Expression } from "./expression";
-import { AbstractInvocationExpression } from "./abstractInvocationExpression";
-import { ListEntry } from "./listEntry";
+import { CompletionExpressionMetadata } from "./expressionMetadata.js";
+import { Expression } from "./expression.js";
+import { AbstractInvocationExpression } from "./abstractInvocationExpression.js";
+import { ListEntry } from "./listEntry.js";
 
 /**
  * Function invocation which provides the self parameter automatically

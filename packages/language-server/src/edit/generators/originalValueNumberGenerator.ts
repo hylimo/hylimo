@@ -1,4 +1,4 @@
-import { EditGenerator } from "./editGenerator";
+import { EditGenerator } from "./editGenerator.js";
 
 /**
  * Base interface for generators that require the original value

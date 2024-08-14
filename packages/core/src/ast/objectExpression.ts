@@ -1,6 +1,6 @@
-import { Expression } from "./expression";
-import { ExpressionMetadata } from "./expressionMetadata";
-import { ListEntry } from "./listEntry";
+import { Expression } from "./expression.js";
+import { ExpressionMetadata } from "./expressionMetadata.js";
+import { ListEntry } from "./listEntry.js";
 
 /**
  * Object expression which creates a new object

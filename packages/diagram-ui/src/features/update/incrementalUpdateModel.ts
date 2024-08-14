@@ -1,15 +1,13 @@
 import { IncrementalUpdateAction } from "@hylimo/diagram-protocol";
 import { injectable, inject } from "inversify";
 import { Command, CommandExecutionContext, CommandReturn, TYPES } from "sprotty";
-import { SRoot } from "../../model/sRoot";
+import { SRoot } from "../../model/sRoot.js";
 
 @injectable()
 export class IncrementalUpdateModelCommand extends Command {
     static readonly KIND = IncrementalUpdateAction.KIND;
 
-    constructor(@inject(TYPES.Action) private readonly action: IncrementalUpdateAction) {
-        super();
-    }
+    @inject(TYPES.Action) private action!: IncrementalUpdateAction;
 
     override execute(context: CommandExecutionContext): CommandReturn {
         const root = context.root as SRoot;

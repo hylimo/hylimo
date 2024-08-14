@@ -1,9 +1,9 @@
 import { Expression, FullObject, numberType, optional } from "@hylimo/core";
 import { Size, Element, LinePoint, Point, CanvasConnection, CanvasElement } from "@hylimo/diagram-common";
-import { LayoutElement } from "../../layoutElement";
-import { Layout } from "../../layoutEngine";
-import { CanvasPointLayoutConfig } from "./canvasPointLayoutConfig";
-import { elementType } from "../../../module/types";
+import { LayoutElement } from "../../layoutElement.js";
+import { Layout } from "../../layoutEngine.js";
+import { CanvasPointLayoutConfig } from "./canvasPointLayoutConfig.js";
+import { elementType } from "../../../module/types.js";
 
 /**
  * Layout config for line points

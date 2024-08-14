@@ -1,5 +1,5 @@
-import { ExpressionMetadata } from "./expressionMetadata";
-import { LiteralExpression } from "./literalExpression";
+import { ExpressionMetadata } from "./expressionMetadata.js";
+import { LiteralExpression } from "./literalExpression.js";
 
 /**
  * Number expression

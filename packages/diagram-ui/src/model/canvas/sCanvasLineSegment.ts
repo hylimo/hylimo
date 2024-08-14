@@ -1,5 +1,5 @@
 import { CanvasLineSegment, SegmentLayoutInformation } from "@hylimo/diagram-common";
-import { SCanvasConnectionSegment } from "./sCanvasConnectionSegment";
+import { SCanvasConnectionSegment } from "./sCanvasConnectionSegment.js";
 import { VNode } from "snabbdom";
 
 /**

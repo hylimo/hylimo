@@ -1,5 +1,5 @@
-import { CompletionExpressionMetadata } from "./expressionMetadata";
-import { Expression } from "./expression";
+import { CompletionExpressionMetadata } from "./expressionMetadata.js";
+import { Expression } from "./expression.js";
 
 /**
  * Field access expression

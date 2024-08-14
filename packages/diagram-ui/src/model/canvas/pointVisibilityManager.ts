@@ -1,6 +1,6 @@
-import { SCanvas } from "./sCanvas";
-import { SCanvasConnection } from "./sCanvasConnection";
-import { SCanvasContent } from "./sCanvasContent";
+import { SCanvas } from "./sCanvas.js";
+import { SCanvasConnection } from "./sCanvasConnection.js";
+import { SCanvasContent } from "./sCanvasContent.js";
 
 /**
  * Manages a lookup for visible points

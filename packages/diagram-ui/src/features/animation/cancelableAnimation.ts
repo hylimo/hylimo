@@ -1,6 +1,6 @@
 import { Animation, CommandExecutionContext, SModelRoot } from "sprotty";
-import { SRoot } from "../../model/sRoot";
-import { CancelableCommandExecutionContext } from "./cancelableCommandExecutionContext";
+import { SRoot } from "../../model/sRoot.js";
+import { CancelableCommandExecutionContext } from "./cancelableCommandExecutionContext.js";
 
 /**
  * Base class for cancelable animations.

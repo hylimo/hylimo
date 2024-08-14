@@ -1,5 +1,5 @@
-import { LiteralExpression } from "../../ast/literalExpression";
-import { ExecutableExpression } from "./executableExpression";
+import { LiteralExpression } from "../../ast/literalExpression.js";
+import { ExecutableExpression } from "./executableExpression.js";
 
 /**
  * Executable LiteralExpression

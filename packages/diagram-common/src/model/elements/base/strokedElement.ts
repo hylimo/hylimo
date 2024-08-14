@@ -1,5 +1,5 @@
-import { Stroke } from "./colored";
-import { Element } from "./element";
+import { Stroke } from "./colored.js";
+import { Element } from "./element.js";
 
 /**
  * Element with stroke related properties

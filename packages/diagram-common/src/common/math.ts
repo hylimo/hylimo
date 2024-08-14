@@ -1,5 +1,5 @@
-import { Bounds } from "./bounds";
-import { Point } from "./point";
+import { Bounds } from "./bounds.js";
+import { Point } from "./point.js";
 
 /**
  * Alias for Point with other semantic

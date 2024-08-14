@@ -1,6 +1,6 @@
 import { ContainerModule } from "inversify";
 import { configureCommand } from "sprotty";
-import { NoOpBringToFrontCommand } from "./noOpBringToFrontCommand";
+import { NoOpBringToFrontCommand } from "./noOpBringToFrontCommand.js";
 
 /**
  * No-op zorder module

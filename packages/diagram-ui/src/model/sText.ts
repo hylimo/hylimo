@@ -1,6 +1,6 @@
 import { Fill, FontStyle, FontWeight, Text } from "@hylimo/diagram-common";
-import { LinearAnimatable } from "../features/animation/model";
-import { SLayoutedElement } from "./sLayoutedElement";
+import { LinearAnimatable } from "../features/animation/model.js";
+import { SLayoutedElement } from "./sLayoutedElement.js";
 
 /**
  * Animated fields for SText

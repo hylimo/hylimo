@@ -1,14 +1,14 @@
 import { LayoutedDiagram, LayoutElement } from "@hylimo/diagram";
 import { AbsolutePoint, CanvasElement, RelativePoint } from "@hylimo/diagram-common";
 import { TextDocument } from "vscode-languageserver-textdocument";
-import { EditGeneratorEntry } from "./editGeneratorEntry";
-import { EditGenerator } from "../generators/editGenerator";
-import { generateAddFieldToScopeGenerator } from "./generateAddFieldToScopeGenerator";
-import { generateDeltaNumberGenerator } from "./generateDeltaNumberGenerator";
-import { TransactionalEdit, TransactionalEditEngine } from "./transactionalEdit";
-import { GeneratorRegistry } from "../generators/generatorRegistry";
+import { EditGeneratorEntry } from "./editGeneratorEntry.js";
+import { EditGenerator } from "../generators/editGenerator.js";
+import { generateAddFieldToScopeGenerator } from "./generateAddFieldToScopeGenerator.js";
+import { generateDeltaNumberGenerator } from "./generateDeltaNumberGenerator.js";
+import { TransactionalEdit, TransactionalEditEngine } from "./transactionalEdit.js";
+import { GeneratorRegistry } from "../generators/generatorRegistry.js";
 import { TranslationMoveAction, IncrementalUpdate, DynamicLanguageServerConfig } from "@hylimo/diagram-protocol";
-import { printNumber } from "../printNumber";
+import { printNumber } from "../printNumber.js";
 
 /**
  * Generates EditGeneratorEntries for absolute and relative points

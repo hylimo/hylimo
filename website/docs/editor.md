@@ -1,8 +1,3 @@
----
-sidebar_position: 2
-slug: /editor
----
-
 # Hybrid Editor
 
 The hybrid editor is the main interface for creating and editing diagrams.
@@ -10,7 +5,7 @@ Its user interface is split into two areas: textual editor, and graphical editor
 General features of the web-based editor include
 - Automatic saving of diagrams to the browser's local storage
 - Download diagrams using Ctrl + S or the download button
-- Download rendered diagrams as SVG or PDF using the export button
+- Download rendered diagrams as SVG or PDF using the download button
 - Switch between a dark and light theme
 
 ## Textual Editor

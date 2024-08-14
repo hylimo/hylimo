@@ -1,5 +1,5 @@
-import { FontFamilyConfig } from "../../font/fontConfig";
-import { Element } from "./base/element";
+import { FontFamilyConfig } from "../../font/fontConfig.js";
+import { Element } from "./base/element.js";
 
 /**
  * Root diagram element, defining child elements and fonts

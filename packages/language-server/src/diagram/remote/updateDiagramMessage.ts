@@ -1,5 +1,5 @@
-import { DiagramUpdateResult } from "../diagramImplementation";
-import { RemoteDiagramMessage } from "./remoteDiagramMessage";
+import { DiagramUpdateResult } from "../diagramImplementation.js";
+import { RemoteDiagramMessage } from "./remoteDiagramMessage.js";
 import { RemoteMessagePayload } from "@hylimo/diagram-protocol";
 import { DiagramConfig } from "@hylimo/diagram-common";
 

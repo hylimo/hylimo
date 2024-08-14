@@ -1,9 +1,9 @@
-import { AbstractInvocationExpression } from "../../ast/abstractInvocationExpression";
-import { ExecutableListEntry } from "../ast/executableListEntry";
-import { InterpreterContext } from "../interpreter";
-import { RuntimeError } from "../runtimeError";
-import { SemanticFieldNames } from "../semanticFieldNames";
-import { BaseObject, FieldEntry } from "./baseObject";
+import { AbstractInvocationExpression } from "../../ast/abstractInvocationExpression.js";
+import { ExecutableListEntry } from "../ast/executableListEntry.js";
+import { InterpreterContext } from "../interpreter.js";
+import { RuntimeError } from "../runtimeError.js";
+import { SemanticFieldNames } from "../semanticFieldNames.js";
+import { BaseObject, FieldEntry } from "./baseObject.js";
 
 /**
  * Object with full support for both number (integer) and

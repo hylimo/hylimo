@@ -5,10 +5,10 @@
  */
 
 import svgPath from "svgpath";
-import { Point } from "../common/point";
-import { Size } from "../common/size";
-import { Math2D } from "../common/math";
-import { LineCap, LineJoin } from "../model/elements/base/colored";
+import { Point } from "../common/point.js";
+import { Size } from "../common/size.js";
+import { Math2D } from "../common/math.js";
+import { LineCap, LineJoin } from "../model/elements/base/colored.js";
 
 /**
  * Bounding box of a path

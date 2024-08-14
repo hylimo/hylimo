@@ -1,8 +1,8 @@
 import { CanvasBezierSegment, Point, SegmentLayoutInformation } from "@hylimo/diagram-common";
 import { VNode } from "snabbdom";
 import { svg } from "sprotty";
-import { SCanvasConnectionSegment } from "./sCanvasConnectionSegment";
-import { SCanvasPoint } from "./sCanvasPoint";
+import { SCanvasConnectionSegment } from "./sCanvasConnectionSegment.js";
+import { SCanvasPoint } from "./sCanvasPoint.js";
 
 /**
  * Model for CanvasBezierSegment

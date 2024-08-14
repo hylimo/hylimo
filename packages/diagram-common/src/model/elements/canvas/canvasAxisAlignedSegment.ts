@@ -1,8 +1,8 @@
-import { calculateMarkerRenderInformationInternal, CanvasConnectionSegment } from "./canvasConnectionSegment";
-import { Element } from "../base/element";
-import { Marker, MarkerLayoutInformation } from "./marker";
-import { ModificationSpecification } from "../modificationSpecification";
-import { Point } from "../../../common/point";
+import { calculateMarkerRenderInformationInternal, CanvasConnectionSegment } from "./canvasConnectionSegment.js";
+import { Element } from "../base/element.js";
+import { Marker, MarkerLayoutInformation } from "./marker.js";
+import { ModificationSpecification } from "../modificationSpecification.js";
+import { Point } from "../../../common/point.js";
 
 /**
  * Axis aligned connection segment, consiting of a vertical and one or two horizontal segments.

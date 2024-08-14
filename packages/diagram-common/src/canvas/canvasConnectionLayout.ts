@@ -1,6 +1,6 @@
-import { Point } from "../common/point";
-import { Line } from "../line/model/line";
-import { MarkerLayoutInformation } from "../model/elements/canvas/marker";
+import { Point } from "../common/point.js";
+import { Line } from "../line/model/line.js";
+import { MarkerLayoutInformation } from "../model/elements/canvas/marker.js";
 
 /**
  * The layout of a CanvasConnection

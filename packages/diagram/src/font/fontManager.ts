@@ -1,7 +1,7 @@
 import { FontFamilyConfig, FontConfig } from "@hylimo/diagram-common";
 import { Font, create } from "fontkit";
 import axios from "axios";
-import { FontFamily } from "./fontFamily";
+import { FontFamily } from "./fontFamily.js";
 
 /**
  * Handles retrieving fonts from an url
@@ -70,7 +70,7 @@ export class FontManager {
             buffer = buffer.buffer ?? buffer;
             // workaround as restructure still wants a Buffer and not an ArrayBuffer
             buffer.buffer = buffer;
-            fetchResult = create(buffer);
+            fetchResult = create(buffer) as Font;
             this.fetchCache.set(config.url, fetchResult);
         }
         if (config.name) {

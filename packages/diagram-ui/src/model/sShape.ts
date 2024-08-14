@@ -1,5 +1,5 @@
 import { Fill, Shape, Stroke } from "@hylimo/diagram-common";
-import { SLayoutedElement } from "./sLayoutedElement";
+import { SLayoutedElement } from "./sLayoutedElement.js";
 
 /**
  * Base class for all shapes

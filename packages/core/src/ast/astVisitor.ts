@@ -1,15 +1,15 @@
-import { StringLiteralExpression } from "./stringLiteralExpression";
-import { SelfInvocationExpression } from "./selfInvocationExpression";
-import { NumberLiteralExpression } from "./numberLiteralExpression";
-import { InvocationExpression } from "./invocationExpression";
-import { IdentifierExpression } from "./identifierExpression";
-import { FunctionExpression } from "./functionExpression";
-import { FieldAccessExpression } from "./fieldAccessExpression";
-import { DestructuringExpression } from "./destructuringExpression";
-import { BracketExpression } from "./bracketExpression";
-import { AssignmentExpression } from "./assignmentExpression";
-import { Expression } from "./expression";
-import { ObjectExpression } from "./objectExpression";
+import { StringLiteralExpression } from "./stringLiteralExpression.js";
+import { SelfInvocationExpression } from "./selfInvocationExpression.js";
+import { NumberLiteralExpression } from "./numberLiteralExpression.js";
+import { InvocationExpression } from "./invocationExpression.js";
+import { IdentifierExpression } from "./identifierExpression.js";
+import { FunctionExpression } from "./functionExpression.js";
+import { FieldAccessExpression } from "./fieldAccessExpression.js";
+import { DestructuringExpression } from "./destructuringExpression.js";
+import { BracketExpression } from "./bracketExpression.js";
+import { AssignmentExpression } from "./assignmentExpression.js";
+import { Expression } from "./expression.js";
+import { ObjectExpression } from "./objectExpression.js";
 
 /**
  * Visitor to transform an AST.

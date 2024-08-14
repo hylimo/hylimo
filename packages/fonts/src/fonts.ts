@@ -1,6 +1,6 @@
-import { openSans } from "./fonts/openSans";
-import { roboto } from "./fonts/roboto";
-import { sourceCodePro } from "./fonts/sourceCodePro";
+import { openSans } from "./fonts/openSans.js";
+import { roboto } from "./fonts/roboto.js";
+import { sourceCodePro } from "./fonts/sourceCodePro.js";
 
 /**
  * All default fonts

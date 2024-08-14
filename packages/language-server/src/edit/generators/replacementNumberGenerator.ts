@@ -1,5 +1,5 @@
-import { printNumber } from "../printNumber";
-import { EditEngine, EditGenerator } from "./editGenerator";
+import { printNumber } from "../printNumber.js";
+import { EditEngine, EditGenerator } from "./editGenerator.js";
 
 /**
  * EditGenerator which replaces a number complately

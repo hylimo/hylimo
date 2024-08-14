@@ -1,4 +1,4 @@
-import { Type } from "./base";
+import { Type } from "./base.js";
 
 /**
  * Any type accepting all values

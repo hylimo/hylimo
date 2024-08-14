@@ -12,12 +12,12 @@ import {
     UpdateModelCommand as BaseUpdateModelCommand,
     ViewportRootElement
 } from "sprotty";
-import { SRoot } from "../../model/sRoot";
+import { SRoot } from "../../model/sRoot.js";
 import {
     ElmentLinearInterpolationAnimation,
     LinearInterpolationAnimation
-} from "../animation/linearInterpolationAnimation";
-import { computeCommonAnimatableFields, isLinearAnimatable } from "../animation/model";
+} from "../animation/linearInterpolationAnimation.js";
+import { computeCommonAnimatableFields, isLinearAnimatable } from "../animation/model.js";
 
 /**
  * Custom UpdateModelCommand which handles linear interpolation animations

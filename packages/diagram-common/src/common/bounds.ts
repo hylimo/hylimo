@@ -1,5 +1,5 @@
-import { Point } from "./point";
-import { Size } from "./size";
+import { Point } from "./point.js";
+import { Size } from "./size.js";
 
 /**
  * Bounds, defined by a point and a size

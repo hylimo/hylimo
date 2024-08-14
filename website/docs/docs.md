@@ -1,8 +1,3 @@
----
-sidebar_position: 1
-slug: /
----
-
 # HyLiMo
 
 HyLiMo is a textual DSL and hybrid editor for efficient modular diagramming.
@@ -21,7 +16,7 @@ For technical aspects, we refer to the code documentation.
 - Modular approach, with initial support for UML class diagrams
 
 ## Example diagrams
-```
+```hylimo
 classDiagram {
     class("Movie")
 
@@ -35,10 +30,8 @@ classDiagram {
 }
 ```
 
-<details>
-<summary>Class diagram showcasing class, interface, package and comment</summary>
-
-```
+:::details Class diagram showcasing class, interface, package and comment
+```hylimo
 classDiagram {
     package("Automotive") layout {
         pos = apos(-213, -11)
@@ -89,13 +82,10 @@ classDiagram {
     }
 }
 ```
+:::
 
-</details>
-
-<details>
-<summary>Class diagram for the HyLiMo language server</summary>
-
-```
+:::details Class diagram for the HyLiMo language server
+```hylimo
 classDiagram {
 
     vdist = 190
@@ -243,13 +233,10 @@ classDiagram {
 
 }
 ```
+:::
 
-</details>
-
-<details>
-<summary>Package diagram of HyLiMo</summary>
-
-```
+:::details Package diagram of HyLiMo
+```hylimo
 classDiagram {
     customPackage = {
         this.package = package("") layout {
@@ -449,5 +436,4 @@ classDiagram {
     }
 }
 ```
-
-</details>
+:::

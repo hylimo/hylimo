@@ -1,10 +1,10 @@
 import { FullObject, RuntimeError, nullType } from "@hylimo/core";
 import { Size } from "@hylimo/diagram-common";
-import { canvasPointType } from "../../../module/types";
-import { AttributeConfig, ContentCardinality, LayoutElement, SizeConstraints } from "../../layoutElement";
-import { Layout } from "../../layoutEngine";
-import { ElementLayoutConfig } from "../elementLayoutConfig";
-import { CanvasContentLayoutConfig } from "./canvasContentLayoutConfig";
+import { canvasPointType } from "../../../module/types.js";
+import { AttributeConfig, ContentCardinality, LayoutElement, SizeConstraints } from "../../layoutElement.js";
+import { Layout } from "../../layoutEngine.js";
+import { ElementLayoutConfig } from "../elementLayoutConfig.js";
+import { CanvasContentLayoutConfig } from "./canvasContentLayoutConfig.js";
 
 /**
  * Base class for all canvas connection segment layout configs

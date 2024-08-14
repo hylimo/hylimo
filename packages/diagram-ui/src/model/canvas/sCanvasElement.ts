@@ -1,10 +1,10 @@
 import { CanvasElement, Line, ModificationSpecification, Point, TransformedLine } from "@hylimo/diagram-common";
-import { LinearAnimatable } from "../../features/animation/model";
-import { LineProvider } from "../../features/layout/lineProvider";
-import { PositionProvider } from "../../features/layout/positionProvider";
-import { SLayoutedElement } from "../sLayoutedElement";
-import { SCanvasContent } from "./sCanvasContent";
-import { SCanvasPoint } from "./sCanvasPoint";
+import { LinearAnimatable } from "../../features/animation/model.js";
+import { LineProvider } from "../../features/layout/lineProvider.js";
+import { PositionProvider } from "../../features/layout/positionProvider.js";
+import { SLayoutedElement } from "../sLayoutedElement.js";
+import { SCanvasContent } from "./sCanvasContent.js";
+import { SCanvasPoint } from "./sCanvasPoint.js";
 
 /**
  * Anbimated fields for SCanvasElement

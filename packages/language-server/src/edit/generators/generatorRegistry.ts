@@ -1,10 +1,10 @@
-import { deltaAdditiveNumberEngine } from "./deltaAdditiveNumberGenerator";
-import { deltaReplacementNumberEngine } from "./deltaReplacementNumberGenerator";
-import { EditEngine, EditGenerator } from "./editGenerator";
-import { factorMultiplicativeNumberEngine } from "./factorMultiplicativeNumberGenerator";
-import { factorReplacementNumberEngine } from "./factorReplacementNumberGenerator";
-import { fieldEntryEngine } from "./fieldEntryGenerator";
-import { replacementNumberEngine } from "./replacementNumberGenerator";
+import { deltaAdditiveNumberEngine } from "./deltaAdditiveNumberGenerator.js";
+import { deltaReplacementNumberEngine } from "./deltaReplacementNumberGenerator.js";
+import { EditEngine, EditGenerator } from "./editGenerator.js";
+import { factorMultiplicativeNumberEngine } from "./factorMultiplicativeNumberGenerator.js";
+import { factorReplacementNumberEngine } from "./factorReplacementNumberGenerator.js";
+import { fieldEntryEngine } from "./fieldEntryGenerator.js";
+import { replacementNumberEngine } from "./replacementNumberGenerator.js";
 
 /**
  * Registry for EditEngines

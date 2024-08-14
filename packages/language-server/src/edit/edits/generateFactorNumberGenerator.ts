@@ -1,7 +1,7 @@
 import { FieldEntry, IdentifierExpression, InvocationExpression, NumberLiteralExpression } from "@hylimo/core";
-import { EditGeneratorEntry } from "./editGeneratorEntry";
-import { FactorMultiplicativeNumberGenerator } from "../generators/factorMultiplicativeNumberGenerator";
-import { FactorReplacementNumberGenerator } from "../generators/factorReplacementNumberGenerator";
+import { EditGeneratorEntry } from "./editGeneratorEntry.js";
+import { FactorMultiplicativeNumberGenerator } from "../generators/factorMultiplicativeNumberGenerator.js";
+import { FactorReplacementNumberGenerator } from "../generators/factorReplacementNumberGenerator.js";
 
 /**
  * Generates a new EditGeneratorEntry based on the provided FieldEntry to modify.

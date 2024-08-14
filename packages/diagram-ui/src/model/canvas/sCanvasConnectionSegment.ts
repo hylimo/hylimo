@@ -1,8 +1,8 @@
 import { Point, SegmentLayoutInformation } from "@hylimo/diagram-common";
-import { SCanvasConnection } from "./sCanvasConnection";
-import { SCanvasPoint } from "./sCanvasPoint";
+import { SCanvasConnection } from "./sCanvasConnection.js";
+import { SCanvasPoint } from "./sCanvasPoint.js";
 import { VNode } from "snabbdom";
-import { SElement } from "../sElement";
+import { SElement } from "../sElement.js";
 
 /**
  * Base model for all CanvasConnectionSegments

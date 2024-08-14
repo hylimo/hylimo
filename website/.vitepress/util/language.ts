@@ -1,7 +1,9 @@
+import type { editor, languages } from "monaco-editor";
+
 /**
  * Token provider for correct syntax highlighting
  */
-export const monarchTokenProvider = {
+export const monarchTokenProvider: languages.IMonarchLanguage = {
     defaultToken: "default",
     includeLF: true,
     start: "expression",
@@ -156,7 +158,7 @@ export const monarchTokenProvider = {
 /**
  * Language configuration defining brackets
  */
-export const languageConfiguration = {
+export const languageConfiguration: languages.LanguageConfiguration = {
     surroundingPairs: [
         { open: "{", close: "}" },
         { open: "(", close: ")" },
@@ -179,7 +181,7 @@ export const languageConfiguration = {
 /**
  * Dark color theme
  */
-export const customDarkTheme = {
+export const customDarkTheme: editor.IStandaloneThemeData = {
     base: "vs-dark",
     inherit: true,
     rules: [
@@ -218,7 +220,7 @@ export const customDarkTheme = {
 /**
  * Light color theme
  */
-export const customLightTheme = {
+export const customLightTheme: editor.IStandaloneThemeData = {
     base: "vs",
     inherit: true,
     rules: [

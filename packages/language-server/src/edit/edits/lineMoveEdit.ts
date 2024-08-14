@@ -1,11 +1,11 @@
 import { LayoutedDiagram } from "@hylimo/diagram";
 import { LinePoint } from "@hylimo/diagram-common";
 import { LineMoveAction, IncrementalUpdate, DynamicLanguageServerConfig } from "@hylimo/diagram-protocol";
-import { EditGenerator } from "../generators/editGenerator";
-import { GeneratorRegistry } from "../generators/generatorRegistry";
-import { generateReplacementNumberGenerator } from "./generateReplacementNumberGenerator";
-import { TransactionalEdit, TransactionalEditEngine } from "./transactionalEdit";
-import { EditGeneratorEntry } from "./editGeneratorEntry";
+import { EditGenerator } from "../generators/editGenerator.js";
+import { GeneratorRegistry } from "../generators/generatorRegistry.js";
+import { generateReplacementNumberGenerator } from "./generateReplacementNumberGenerator.js";
+import { TransactionalEdit, TransactionalEditEngine } from "./transactionalEdit.js";
+import { EditGeneratorEntry } from "./editGeneratorEntry.js";
 
 /**
  * TransactionalEdit for LineMoveActions

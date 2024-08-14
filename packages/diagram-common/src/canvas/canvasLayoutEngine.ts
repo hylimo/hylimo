@@ -1,21 +1,21 @@
 import { compose, identity, rotateDEG, translate } from "transformation-matrix";
-import { Point } from "../common/point";
-import { Line, TransformedLine } from "../line/model/line";
-import { Segment } from "../line/model/segment";
-import { CanvasAxisAlignedSegment } from "../model/elements/canvas/canvasAxisAlignedSegment";
-import { CanvasBezierSegment } from "../model/elements/canvas/canvasBezierSegment";
-import { CanvasConnection } from "../model/elements/canvas/canvasConnection";
-import { CanvasConnectionSegment } from "../model/elements/canvas/canvasConnectionSegment";
-import { CanvasElement } from "../model/elements/canvas/canvasElement";
-import { CanvasLineSegment } from "../model/elements/canvas/canvasLineSegment";
-import { Marker, MarkerLayoutInformation } from "../model/elements/canvas/marker";
-import { AxisAlignedSegmentLayoutEngine } from "./axisAlignedSegmentLayoutEngine";
-import { BezierSegmentLayoutEngine } from "./bezierSegmentLayoutEngine";
-import { CanvasConnectionLayout, SegmentLayoutInformation } from "./canvasConnectionLayout";
-import { LineSegmentLayoutEngine } from "./lineSegmentLayoutEngine";
-import { SegmentLayoutEngine } from "./segmentLayoutEngine";
-import { AbsolutePoint, CanvasPoint, LinePoint, RelativePoint } from "../model/elements/canvas/canvasPoint";
-import { LineEngine } from "../line/engine/lineEngine";
+import { Point } from "../common/point.js";
+import { Line, TransformedLine } from "../line/model/line.js";
+import { Segment } from "../line/model/segment.js";
+import { CanvasAxisAlignedSegment } from "../model/elements/canvas/canvasAxisAlignedSegment.js";
+import { CanvasBezierSegment } from "../model/elements/canvas/canvasBezierSegment.js";
+import { CanvasConnection } from "../model/elements/canvas/canvasConnection.js";
+import { CanvasConnectionSegment } from "../model/elements/canvas/canvasConnectionSegment.js";
+import { CanvasElement } from "../model/elements/canvas/canvasElement.js";
+import { CanvasLineSegment } from "../model/elements/canvas/canvasLineSegment.js";
+import { Marker, MarkerLayoutInformation } from "../model/elements/canvas/marker.js";
+import { AxisAlignedSegmentLayoutEngine } from "./axisAlignedSegmentLayoutEngine.js";
+import { BezierSegmentLayoutEngine } from "./bezierSegmentLayoutEngine.js";
+import { CanvasConnectionLayout, SegmentLayoutInformation } from "./canvasConnectionLayout.js";
+import { LineSegmentLayoutEngine } from "./lineSegmentLayoutEngine.js";
+import { SegmentLayoutEngine } from "./segmentLayoutEngine.js";
+import { AbsolutePoint, CanvasPoint, LinePoint, RelativePoint } from "../model/elements/canvas/canvasPoint.js";
+import { LineEngine } from "../line/engine/lineEngine.js";
 
 /**
  * Connection, where the start point has been evaluated, and the children split into their types

@@ -1,6 +1,6 @@
 import { DiagramConfig } from "@hylimo/diagram-common";
 import { NotificationType } from "vscode-languageserver-protocol";
-import { LanguageServerSettings } from "./settings";
+import { LanguageServerSettings } from "./settings.js";
 
 /**
  * Configuration for a diagram language server

@@ -1,13 +1,13 @@
-import { ExecutableListEntry } from "../runtime/ast/executableListEntry";
-import { ExecutableExpression } from "../runtime/ast/executableExpression";
-import { BaseObject } from "../runtime/objects/baseObject";
-import { BooleanObject } from "../runtime/objects/booleanObject";
-import { FullObject } from "../runtime/objects/fullObject";
-import { AbstractFunctionObject } from "../runtime/objects/functionObject";
-import { NumberObject } from "../runtime/objects/numberObject";
-import { StringObject } from "../runtime/objects/stringObject";
-import { RuntimeError } from "../runtime/runtimeError";
-import { SemanticFieldNames } from "../runtime/semanticFieldNames";
+import { ExecutableListEntry } from "../runtime/ast/executableListEntry.js";
+import { ExecutableExpression } from "../runtime/ast/executableExpression.js";
+import { BaseObject } from "../runtime/objects/baseObject.js";
+import { BooleanObject } from "../runtime/objects/booleanObject.js";
+import { FullObject } from "../runtime/objects/fullObject.js";
+import { AbstractFunctionObject } from "../runtime/objects/functionObject.js";
+import { NumberObject } from "../runtime/objects/numberObject.js";
+import { StringObject } from "../runtime/objects/stringObject.js";
+import { RuntimeError } from "../runtime/runtimeError.js";
+import { SemanticFieldNames } from "../runtime/semanticFieldNames.js";
 
 /**
  * Helper to check that an object is a StringObject, throws an error if not

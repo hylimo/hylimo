@@ -1,8 +1,8 @@
 import { Bezier } from "bezier-js";
-import { Math2D } from "../../common/math";
-import { Point } from "../../common/point";
-import { BezierSegment } from "../model/bezierSegment";
-import { NearestPointResult, SegmentEngine } from "./segmentEngine";
+import { Math2D } from "../../common/math.js";
+import { Point } from "../../common/point.js";
+import { BezierSegment } from "../model/bezierSegment.js";
+import { NearestPointResult, SegmentEngine } from "./segmentEngine.js";
 
 /**
  * Segment engine for BezierSegment

@@ -1,7 +1,7 @@
-import { Point } from "../../../common/point";
-import { Element } from "../base/element";
-import { Marker, MarkerLayoutInformation } from "./marker";
-import { Math2D } from "../../../common/math";
+import { Point } from "../../../common/point.js";
+import { Element } from "../base/element.js";
+import { Marker, MarkerLayoutInformation } from "./marker.js";
+import { Math2D } from "../../../common/math.js";
 
 /**
  * Connection line segment

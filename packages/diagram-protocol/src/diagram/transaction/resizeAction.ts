@@ -1,4 +1,4 @@
-import { TransactionalAction } from "./transactionalAction";
+import { TransactionalAction } from "./transactionalAction.js";
 
 /**
  * Resize action to resize canvas elements by a factor

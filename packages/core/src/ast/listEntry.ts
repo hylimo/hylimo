@@ -1,4 +1,4 @@
-import { Expression } from "./expression";
+import { Expression } from "./expression.js";
 
 /**
  * A list entry either for function invokation or object expression

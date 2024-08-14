@@ -2,10 +2,10 @@ import { enumType, stringType } from "@hylimo/core";
 import { Size, Point, Element, Path, Stroke } from "@hylimo/diagram-common";
 import svgPath from "svgpath";
 import { svgPathBbox } from "@hylimo/diagram-common";
-import { ContentCardinality, LayoutElement, SizeConstraints } from "../layoutElement";
-import { Layout, LayoutedPath } from "../layoutEngine";
-import { ShapeLayoutConfig } from "./shapeLayoutConfig";
-import { elementType } from "../../module/types";
+import { ContentCardinality, LayoutElement, SizeConstraints } from "../layoutElement.js";
+import { Layout, LayoutedPath } from "../layoutEngine.js";
+import { ShapeLayoutConfig } from "./shapeLayoutConfig.js";
+import { elementType } from "../../module/types.js";
 
 /**
  * The maximum number of iterations

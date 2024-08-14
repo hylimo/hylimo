@@ -1,4 +1,4 @@
-import { FontConfig, FontFamilyConfig } from "./fontConfig";
+import { FontConfig, FontFamilyConfig } from "./fontConfig.js";
 
 /**
  * Converts a list of fonts to a css style string

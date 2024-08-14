@@ -1,7 +1,7 @@
-import { AssignmentExpression } from "../../ast/assignmentExpression";
-import { InterpreterContext } from "../interpreter";
-import { BaseObject, FieldEntry } from "../objects/baseObject";
-import { ExecutableExpression } from "./executableExpression";
+import { AssignmentExpression } from "../../ast/assignmentExpression.js";
+import { InterpreterContext } from "../interpreter.js";
+import { BaseObject, FieldEntry } from "../objects/baseObject.js";
+import { ExecutableExpression } from "./executableExpression.js";
 
 /**
  * Executable AssignmentExpression

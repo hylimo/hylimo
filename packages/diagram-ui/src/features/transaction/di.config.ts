@@ -1,6 +1,6 @@
 import { ContainerModule } from "inversify";
-import { TYPES } from "../types";
-import { TransactionIdProvider } from "./transactionIdProvider";
+import { TYPES } from "../types.js";
+import { TransactionIdProvider } from "./transactionIdProvider.js";
 
 /**
  * Transaction module
