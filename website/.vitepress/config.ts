@@ -35,5 +35,10 @@ export default defineConfig({
         },
 
         socialLinks: [{ icon: "github", link: "https://github.com/hylimo/hylimo" }]
+    },
+    vite: {
+        resolve: {
+            dedupe: ["vscode"]
+        }
     }
 });
