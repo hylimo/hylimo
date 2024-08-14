@@ -1,11 +1,11 @@
-import { SChildElement } from "sprotty";
+import { SChildElementImpl } from "sprotty";
 import { Element } from "@hylimo/diagram-common";
 import { SRoot } from "./sRoot.js";
 
 /**
  * Base class for all elements
  */
-export abstract class SElement extends SChildElement implements Element {
+export abstract class SElement extends SChildElementImpl implements Element {
     override children!: SElement[];
 
     /**

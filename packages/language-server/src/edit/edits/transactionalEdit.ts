@@ -81,7 +81,11 @@ export abstract class TransactionalEditEngine<A extends Action, T extends Transa
      * @param actionType the type of action which is handled
      * @param generatorRegistory the generator registry to use
      */
-    constructor(readonly type: string, readonly actionType: string, readonly generatorRegistory: GeneratorRegistry) {}
+    constructor(
+        readonly type: string,
+        readonly actionType: string,
+        readonly generatorRegistory: GeneratorRegistry
+    ) {}
 
     /**
      * Applies the action to the specified EditGenerator and returns the new string

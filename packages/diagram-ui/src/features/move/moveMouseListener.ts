@@ -6,8 +6,8 @@ import {
     isMoveable,
     isSelectable,
     MouseListener,
-    SModelElement,
-    SModelRoot
+    SModelElementImpl,
+    SModelRootImpl
 } from "sprotty";
 import { Action } from "sprotty-protocol";
 import { SAbsolutePoint } from "../../model/canvas/sAbsolutePoint.js";
@@ -65,7 +65,7 @@ export class MoveMouseListener extends MouseListener {
      */
     private sequenceNumber = 0;
 
-    override mouseDown(target: SModelElement, event: MouseEvent): Action[] {
+    override mouseDown(target: SModelElementImpl, event: MouseEvent): Action[] {
         if (event.button === 0) {
             const moveableTarget = findParentByFeature(target, isMoveable);
             if (moveableTarget != undefined) {
@@ -79,7 +79,7 @@ export class MoveMouseListener extends MouseListener {
         return [];
     }
 
-    override mouseMove(target: SModelElement, event: MouseEvent): Action[] {
+    override mouseMove(target: SModelElementImpl, event: MouseEvent): Action[] {
         if (this.startPosition) {
             const root = target.root as SRoot;
             if (this.moveHandler === undefined) {
@@ -103,11 +103,11 @@ export class MoveMouseListener extends MouseListener {
         return [];
     }
 
-    override mouseUp(target: SModelElement, event: MouseEvent): Action[] {
+    override mouseUp(target: SModelElementImpl, event: MouseEvent): Action[] {
         return this.commitMove(target, event);
     }
 
-    override mouseEnter(target: SModelElement, event: MouseEvent): Action[] {
+    override mouseEnter(target: SModelElementImpl, event: MouseEvent): Action[] {
         if (event.buttons === 0) {
             return this.commitMove(target, event);
         } else {
@@ -123,7 +123,7 @@ export class MoveMouseListener extends MouseListener {
      * @param target required for calculating the delta
      * @returns the generated actions
      */
-    private commitMove(target: SModelElement, event: MouseEvent): Action[] {
+    private commitMove(target: SModelElementImpl, event: MouseEvent): Action[] {
         if (this.moveHandler === undefined || this.moveHandler === null) {
             this.startPosition = undefined;
             this.moveHandler = undefined;
@@ -149,7 +149,7 @@ export class MoveMouseListener extends MouseListener {
      * @param target required for calculating the zoom level
      * @return the calculated translation
      */
-    private calculateTranslation(target: SModelElement, event: MouseEvent): Point {
+    private calculateTranslation(target: SModelElementImpl, event: MouseEvent): Point {
         if (this.startPosition == undefined) {
             throw new Error("Cannot calculate translation without a start position");
         }
@@ -167,7 +167,7 @@ export class MoveMouseListener extends MouseListener {
      * @param target the initial mouse down event
      * @returns the move handler if move is supported, otherwise null
      */
-    private createHandler(target: SModelElement, targetElement?: Element): MoveHandler | null {
+    private createHandler(target: SModelElementImpl, targetElement?: Element): MoveHandler | null {
         const classList = targetElement?.classList;
         if (target instanceof SCanvasElement && classList != undefined) {
             if (classList.contains(CanvasElementView.ROTATE_ICON_CLASS)) {
@@ -286,7 +286,7 @@ export class MoveMouseListener extends MouseListener {
      * @param target the element which was clicked
      * @returns the move handler if move is supported, otherwise null
      */
-    private createMoveHandler(target: SModelElement): MoveHandler | null {
+    private createMoveHandler(target: SModelElementImpl): MoveHandler | null {
         const index = target.root.index;
         const selected = this.getSelectedElements(target.root).filter(
             (element) => element instanceof SCanvasPoint || element instanceof SCanvasElement
@@ -537,7 +537,7 @@ export class MoveMouseListener extends MouseListener {
      * @param root the root element of the model
      * @returns all selected elements
      */
-    private getSelectedElements(root: SModelRoot): SModelElement[] {
+    private getSelectedElements(root: SModelRootImpl): SModelElementImpl[] {
         return [...root.index.all().filter((child) => isSelectable(child) && child.selected)];
     }
 }

@@ -64,7 +64,10 @@ export class InterpreterContext {
      *
      * @param maxExecutionSteps The maximum amount of execution steps
      */
-    constructor(readonly maxExecutionSteps: number, modules: string[]) {
+    constructor(
+        readonly maxExecutionSteps: number,
+        modules: string[]
+    ) {
         this.null = new NullObject();
         this.objectPrototype = new FullObject();
         this.numberPrototype = this.newObject();
@@ -294,7 +297,10 @@ export class Interpreter {
      * @param modules loaded modules
      * @param maxExecutionSteps the maximum number of steps the interpreter is allowed to execute
      */
-    constructor(modules: InterpreterModule[], private readonly maxExecutionSteps: number) {
+    constructor(
+        modules: InterpreterModule[],
+        private readonly maxExecutionSteps: number
+    ) {
         const markedModules = modules.map((module) => ({ module, mark: false, temporaryMark: false }));
         const moduleLookup = new Map<string, (typeof markedModules)[0]>();
         for (const module of markedModules) {

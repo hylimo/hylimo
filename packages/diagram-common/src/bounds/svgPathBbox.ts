@@ -152,7 +152,10 @@ class PathBBoxCalculator {
      * @param d the svg path string
      * @param styles the styles of the path
      */
-    constructor(d: string, private readonly styles: Styles) {
+    constructor(
+        d: string,
+        private readonly styles: Styles
+    ) {
         this.path = svgPath(d + "m 0 0")
             .abs()
             .unarc()

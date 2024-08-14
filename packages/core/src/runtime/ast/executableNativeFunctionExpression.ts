@@ -26,7 +26,10 @@ export class ExecutableNativeFunctionExpression extends ExecutableAbstractFuncti
      * @param callback the callback to call when the function is invoked
      * @param documentation the documentation of the function
      */
-    constructor(readonly callback: NativeFunctionType, documentation: FunctionDocumentation | undefined) {
+    constructor(
+        readonly callback: NativeFunctionType,
+        documentation: FunctionDocumentation | undefined
+    ) {
         super(undefined, documentation);
     }
 

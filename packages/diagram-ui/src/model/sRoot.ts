@@ -1,11 +1,11 @@
 import { FontFamilyConfig, convertFontsToCssStyle } from "@hylimo/diagram-common";
-import { ModelIndexImpl, ViewportRootElement } from "sprotty";
+import { ModelIndexImpl, ViewportRootElementImpl } from "sprotty";
 import { SCanvasAxisAlignedSegment } from "./canvas/sCanvasAxisAlignedSegment.js";
 
 /**
  * Root element.
  */
-export class SRoot extends ViewportRootElement {
+export class SRoot extends ViewportRootElementImpl {
     /**
      * The default point size
      */

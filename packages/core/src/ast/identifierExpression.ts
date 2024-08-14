@@ -13,7 +13,10 @@ export class IdentifierExpression extends Expression<CompletionExpressionMetadat
      * @param identifier the name of the identifier
      * @param metadata metadata for the expression
      */
-    constructor(readonly identifier: string, metadata: CompletionExpressionMetadata) {
+    constructor(
+        readonly identifier: string,
+        metadata: CompletionExpressionMetadata
+    ) {
         super(IdentifierExpression.TYPE, metadata);
     }
 }

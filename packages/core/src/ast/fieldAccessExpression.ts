@@ -15,7 +15,11 @@ export class FieldAccessExpression extends Expression<CompletionExpressionMetada
      * @param name name or index of the field to access
      * @param metadata metadata for the expression
      */
-    constructor(readonly name: string | number, readonly target: Expression, metadata: CompletionExpressionMetadata) {
+    constructor(
+        readonly name: string | number,
+        readonly target: Expression,
+        metadata: CompletionExpressionMetadata
+    ) {
         super(FieldAccessExpression.TYPE, metadata);
     }
 

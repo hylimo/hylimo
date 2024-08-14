@@ -14,7 +14,10 @@ export class ExecutableObjectExpression extends ExecutableExpression<ObjectExpre
      * @param expression the expression this represents
      * @param fieldExpressions evaluated to provide the fields
      */
-    constructor(expression: ObjectExpression | undefined, readonly fieldExpressions: ExecutableListEntry[]) {
+    constructor(
+        expression: ObjectExpression | undefined,
+        readonly fieldExpressions: ExecutableListEntry[]
+    ) {
         super(expression);
     }
 

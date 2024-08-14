@@ -1,4 +1,4 @@
-import { CommandExecutionContext, SModelElement, SModelRoot } from "sprotty";
+import { CommandExecutionContext, SModelElementImpl, SModelRootImpl } from "sprotty";
 import { CancelableAnimation } from "./cancelableAnimation.js";
 import { LinearAnimatable } from "./model.js";
 
@@ -14,14 +14,14 @@ export class LinearInterpolationAnimation extends CancelableAnimation {
      * @param context required context
      */
     constructor(
-        newModel: SModelRoot,
+        newModel: SModelRootImpl,
         public readonly elementAnimations: ElmentLinearInterpolationAnimation[],
         context: CommandExecutionContext
     ) {
         super(newModel, context);
     }
 
-    override tweenInternal(t: number, _context: CommandExecutionContext): SModelRoot {
+    override tweenInternal(t: number, _context: CommandExecutionContext): SModelRootImpl {
         for (const animation of this.elementAnimations) {
             animation.interpolations.forEach(([from, to], field) => {
                 let newValue = to;
@@ -42,7 +42,7 @@ export interface ElmentLinearInterpolationAnimation {
     /**
      * The element to animate
      */
-    element: SModelElement & LinearAnimatable;
+    element: SModelElementImpl & LinearAnimatable;
     /**
      * Animations, map of field name to [from, to] pair
      */

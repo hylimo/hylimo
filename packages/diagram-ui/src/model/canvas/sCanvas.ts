@@ -1,5 +1,5 @@
 import { Canvas, CanvasConnection, CanvasElement, CanvasLayoutEngine, CanvasPoint } from "@hylimo/diagram-common";
-import { SChildElement } from "sprotty";
+import { SChildElementImpl } from "sprotty";
 import { SLayoutedElement } from "../sLayoutedElement.js";
 import { PointVisibilityManager } from "./pointVisibilityManager.js";
 import { SCanvasPoint } from "./sCanvasPoint.js";
@@ -18,7 +18,7 @@ export class SCanvas extends SLayoutedElement implements Canvas {
     /**
      * Lookup of children by id
      */
-    private childrenById?: Map<string, SChildElement>;
+    private childrenById?: Map<string, SChildElementImpl>;
 
     /**
      * Internal cached version of the PointVisibilityManager

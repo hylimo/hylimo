@@ -4,7 +4,7 @@ import {
     CommandReturn,
     CommandStack as SprottyCommandStack,
     ICommand,
-    SModelRoot
+    SModelRootImpl
 } from "sprotty";
 import {
     CancelState,
@@ -41,7 +41,7 @@ export class CommandStack extends SprottyCommandStack {
         super.handleCommand(command, operation, beforeResolve);
     }
 
-    protected override createContext(currentModel: SModelRoot): CancelableCommandExecutionContext {
+    protected override createContext(currentModel: SModelRootImpl): CancelableCommandExecutionContext {
         const context = {
             ...super.createContext(currentModel),
             cancelState: CancelState.RUNNING

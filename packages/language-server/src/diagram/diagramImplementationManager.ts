@@ -13,7 +13,10 @@ export abstract class DiagramImplementationManager {
      * @param connection the connection to sent and receive messages
      * @param id the id of this language server
      */
-    constructor(private readonly connection: Connection, private readonly id: number) {
+    constructor(
+        private readonly connection: Connection,
+        private readonly id: number
+    ) {
         connection.onNotification(RemoteNotification.type, (message) => {
             this.handleNotification(message.payload, message.from);
         });

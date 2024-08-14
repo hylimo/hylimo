@@ -14,7 +14,10 @@ export class FunctionExpression extends Expression {
      * @param metadata metadata for the expression
      * @param types argument types to check on invocation
      */
-    constructor(readonly expressions: Expression[], metadata: ExpressionMetadata) {
+    constructor(
+        readonly expressions: Expression[],
+        metadata: ExpressionMetadata
+    ) {
         super(FunctionExpression.TYPE, metadata);
     }
 

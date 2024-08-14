@@ -15,7 +15,11 @@ export abstract class LiteralExpression<T> extends Expression {
      * @param metadata metadata for the expression
      * @param type used for serialization and debugging
      */
-    constructor(readonly value: T, type: string, metadata: ExpressionMetadata) {
+    constructor(
+        readonly value: T,
+        type: string,
+        metadata: ExpressionMetadata
+    ) {
         super(type, metadata);
     }
 }

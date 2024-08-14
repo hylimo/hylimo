@@ -12,8 +12,8 @@
         "build": "tsc"
     },
     "dependencies": {
-        "@hylimo/diagram": "^1.0.0",
-        "@hylimo/diagram-render-svg": "^1.0.0",
+        "@hylimo/diagram": "^1.1.2",
+        "@hylimo/diagram-render-svg": "^1.1.2",
         "pdfkit": "^0.13.0"
     },
     "devDependencies": {

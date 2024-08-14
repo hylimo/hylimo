@@ -12,10 +12,10 @@
         "build": "tsc"
     },
     "dependencies": {
-        "@hylimo/diagram": "^1.0.0",
-        "@hylimo/diagram-render-pdf": "^1.0.0",
-        "@hylimo/diagram-render-svg": "^1.0.0",
-        "commander": "^11.1.0"
+        "@hylimo/diagram": "^1.1.2",
+        "@hylimo/diagram-render-pdf": "^1.1.2",
+        "@hylimo/diagram-render-svg": "^1.1.2",
+        "commander": "^12.1.0"
     },
     "bin": "lib/index.js"
 }

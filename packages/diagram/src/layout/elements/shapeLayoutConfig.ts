@@ -45,6 +45,6 @@ export abstract class ShapeLayoutConfig extends StyledElementLayoutConfig {
      */
     normalizeStrokeWidth(element: LayoutElement): void {
         const styles = element.styles;
-        styles.strokeWidth = styles.stroke ? styles.strokeWidth ?? 1 : 0;
+        styles.strokeWidth = styles.stroke ? (styles.strokeWidth ?? 1) : 0;
     }
 }

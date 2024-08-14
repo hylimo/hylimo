@@ -14,7 +14,11 @@ export abstract class AbstractInvocationExpression<
      * @param metadata metadata for the expression
      * @param type used for serialization and debugging
      */
-    constructor(readonly argumentExpressions: ListEntry[], type: string, metadata: M) {
+    constructor(
+        readonly argumentExpressions: ListEntry[],
+        type: string,
+        metadata: M
+    ) {
         super(type, metadata);
     }
 

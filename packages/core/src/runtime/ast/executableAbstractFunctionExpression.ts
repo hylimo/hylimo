@@ -41,7 +41,10 @@ export abstract class ExecutableAbstractFunctionExpression<
      * @param expression the expression this represents
      * @param documentation the documentation of the function
      */
-    constructor(expression: T | undefined, readonly documentation: FunctionDocumentation | undefined) {
+    constructor(
+        expression: T | undefined,
+        readonly documentation: FunctionDocumentation | undefined
+    ) {
         super(expression);
     }
 

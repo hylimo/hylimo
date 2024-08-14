@@ -13,7 +13,10 @@ export class LiteralObject<T> extends SimpleObject {
      * @param value the js literal this the created object represents
      * @param proto the prototype of the literal
      */
-    constructor(readonly value: T, proto: FullObject) {
+    constructor(
+        readonly value: T,
+        proto: FullObject
+    ) {
         super(proto);
     }
 
