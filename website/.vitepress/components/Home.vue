@@ -64,7 +64,7 @@ function downloadSVG() {
 }
 
 async function downloadPDF() {
-    const pdf = await pdfRenderer.render(diagram.value!, isDark ? "#1e1e1e" : "#ffffff");
+    const pdf = await pdfRenderer.render(diagram.value!, isDark.value ? "#1e1e1e" : "#ffffff");
     fileSaver.saveAs(new Blob(pdf, { type: "application/pdf" }), "diagram.pdf");
 }
 

@@ -12,7 +12,7 @@
         "build": "tsc"
     },
     "dependencies": {
-        "@hylimo/diagram-common": "^1.0.0",
-        "xmlbuilder2": "^3.0.2"
+        "@hylimo/diagram-common": "^1.1.2",
+        "xmlbuilder2": "^3.1.1"
     }
 }

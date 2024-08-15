@@ -13,7 +13,10 @@ export class ExecutableIdentifierExpression extends ExecutableExpression<Identif
      * @param expression the expression this represents
      * @param identifier the identifier to access
      */
-    constructor(expression: IdentifierExpression | undefined, readonly identifier: string) {
+    constructor(
+        expression: IdentifierExpression | undefined,
+        readonly identifier: string
+    ) {
         super(expression);
     }
 

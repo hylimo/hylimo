@@ -17,7 +17,11 @@ export class InvocationExpression extends AbstractInvocationExpression {
      * @param argumentExpressions evaluated to provide arguments
      * @param metadata metadata for the expression
      */
-    constructor(readonly target: Expression, argumentExpressions: ListEntry[], metadata: ExpressionMetadata) {
+    constructor(
+        readonly target: Expression,
+        argumentExpressions: ListEntry[],
+        metadata: ExpressionMetadata
+    ) {
         super(argumentExpressions, InvocationExpression.TYPE, metadata);
     }
 

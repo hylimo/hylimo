@@ -31,7 +31,10 @@ export class LocalDiagramImplementationManager extends DiagramImplementationMana
      * @param utils required to layout diagrams
      * @param id the id of this language server
      */
-    constructor(private readonly utils: SharedDiagramUtils, id: number) {
+    constructor(
+        private readonly utils: SharedDiagramUtils,
+        id: number
+    ) {
         super(utils.connection, id);
         const registerMessage: RegisterRemoteLanguageServerMessage = {
             type: RegisterRemoteLanguageServerMessage.type

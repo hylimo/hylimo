@@ -24,7 +24,7 @@ export class Formatter {
      * @returns the transformed CST
      */
     private transformCst(cst: CstNode): Node {
-        let res: any = { name: cst.name, location: cst.location };
+        const res: any = { name: cst.name, location: cst.location };
         for (const key in cst.children) {
             res[key] = cst.children[key].map((child: CstNode | IToken) => {
                 if ("image" in child) {

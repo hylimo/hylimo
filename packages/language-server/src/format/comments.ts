@@ -13,7 +13,7 @@ const { join, hardline, lineSuffix } = doc.builders;
  */
 export function printDanglingComments(path: Path, options: Options): Doc {
     const node = path.node as Node;
-    const comments = (node as { comments?: Comment[]; }).comments;
+    const comments = (node as { comments?: Comment[] }).comments;
     if (Array.isArray(comments) && comments.length > 0) {
         const parts: Doc = [];
         path.each((comment) => {

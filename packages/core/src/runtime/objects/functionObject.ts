@@ -23,7 +23,12 @@ export abstract class AbstractFunctionObject<T extends ExecutableAbstractFunctio
      * @param proto the prototype of this object
      * @param docs the documentation of this function
      */
-    constructor(readonly definition: T, readonly parentScope: FullObject, proto: FullObject, public docs: BaseObject) {
+    constructor(
+        readonly definition: T,
+        readonly parentScope: FullObject,
+        proto: FullObject,
+        public docs: BaseObject
+    ) {
         super(proto);
     }
 

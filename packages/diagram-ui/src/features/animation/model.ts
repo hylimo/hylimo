@@ -1,9 +1,9 @@
-import { SModelElement, SModelExtension } from "sprotty";
+import { SModelElementImpl } from "sprotty";
 
 /**
  * Used to mark fields as animatable by linear interpolation
  */
-export interface LinearAnimatable extends SModelExtension {
+export interface LinearAnimatable {
     /**
      * The animated fields, must be number properties
      */
@@ -16,7 +16,7 @@ export interface LinearAnimatable extends SModelExtension {
  * @param element the element to check
  * @returns true if the element is linear animatable
  */
-export function isLinearAnimatable(element: SModelElement): element is SModelElement & LinearAnimatable {
+export function isLinearAnimatable(element: SModelElementImpl): element is SModelElementImpl & LinearAnimatable {
     return "animatedFields" in element;
 }
 

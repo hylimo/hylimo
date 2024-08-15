@@ -14,7 +14,10 @@ export abstract class ExecutableAbstractInvocationExpression<
      * @param expression the expression this represents
      * @param argumentExpressions the expressions to execute
      */
-    constructor(expression: T | undefined, readonly argumentExpressions: ExecutableListEntry[]) {
+    constructor(
+        expression: T | undefined,
+        readonly argumentExpressions: ExecutableListEntry[]
+    ) {
         super(expression);
     }
 }

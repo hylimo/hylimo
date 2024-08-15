@@ -12,10 +12,10 @@
         "build": "tsc"
     },
     "dependencies": {
-        "@hylimo/diagram-common": "^1.0.0",
-        "@hylimo/diagram-protocol": "^1.0.0",
-        "@hylimo/diagram-render-svg": "^1.0.0",
-        "sprotty": "^0.13.0",
-        "sprotty-protocol": "^0.13.0"
+        "@hylimo/diagram-common": "^1.1.2",
+        "@hylimo/diagram-protocol": "^1.1.2",
+        "@hylimo/diagram-render-svg": "^1.1.2",
+        "sprotty": "^1.3.0",
+        "sprotty-protocol": "^1.3.0"
     }
 }

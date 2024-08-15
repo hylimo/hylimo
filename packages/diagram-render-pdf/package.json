@@ -12,11 +12,11 @@
         "build": "tsc"
     },
     "dependencies": {
-        "@hylimo/diagram": "^1.0.0",
-        "@hylimo/diagram-render-svg": "^1.0.0",
-        "pdfkit": "^0.13.0"
+        "@hylimo/diagram": "^1.1.2",
+        "@hylimo/diagram-render-svg": "^1.1.2",
+        "pdfkit": "^0.15.0"
     },
     "devDependencies": {
-        "@types/pdfkit": "^0.12.8"
+        "@types/pdfkit": "^0.13.4"
     }
 }

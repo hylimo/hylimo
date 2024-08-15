@@ -13,7 +13,10 @@ export class ExecutableBracketExpression extends ExecutableExpression<BracketExp
      * @param expression the expression this represents
      * @param innerExpression evaluated to provide the value to return
      */
-    constructor(expression: BracketExpression | undefined, readonly innerExpression: ExecutableExpression<any>) {
+    constructor(
+        expression: BracketExpression | undefined,
+        readonly innerExpression: ExecutableExpression<any>
+    ) {
         super(expression);
     }
 

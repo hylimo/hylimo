@@ -1,4 +1,4 @@
-import { Animation, CommandExecutionContext, SModelRoot } from "sprotty";
+import { Animation, CommandExecutionContext, SModelRootImpl } from "sprotty";
 import { SRoot } from "../../model/sRoot.js";
 import { CancelableCommandExecutionContext } from "./cancelableCommandExecutionContext.js";
 
@@ -13,11 +13,14 @@ export abstract class CancelableAnimation extends Animation {
      * @param newModel the new model which is returned on cancel
      * @param context the context to pass to super
      */
-    constructor(protected readonly newModel: SModelRoot, context: CommandExecutionContext) {
+    constructor(
+        protected readonly newModel: SModelRootImpl,
+        context: CommandExecutionContext
+    ) {
         super(context);
     }
 
-    tween(t: number, context: CommandExecutionContext): SModelRoot {
+    tween(t: number, context: CommandExecutionContext): SModelRootImpl {
         if (CancelableCommandExecutionContext.isCanceled(context)) {
             if (CancelableCommandExecutionContext.isCanceledAndSkipped(context)) {
                 return this.tweenAndUpdateChangeRevision(1, context);
@@ -36,7 +39,7 @@ export abstract class CancelableAnimation extends Animation {
      * @param context provided context
      * @returns the new model
      */
-    private tweenAndUpdateChangeRevision(t: number, context: CommandExecutionContext): SModelRoot {
+    private tweenAndUpdateChangeRevision(t: number, context: CommandExecutionContext): SModelRootImpl {
         const newRoot = this.tweenInternal(t, context);
         (newRoot as SRoot).changeRevision++;
         return newRoot;
@@ -51,5 +54,5 @@ export abstract class CancelableAnimation extends Animation {
      * @param context provided context
      * @returns the new model
      */
-    abstract tweenInternal(t: number, context: CommandExecutionContext): SModelRoot;
+    abstract tweenInternal(t: number, context: CommandExecutionContext): SModelRootImpl;
 }

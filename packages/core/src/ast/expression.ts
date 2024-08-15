@@ -19,7 +19,10 @@ export abstract class Expression<M extends ExpressionMetadata = ExpressionMetada
      * @param type the type of the expression
      * @param metadata the metadata of the expression
      */
-    constructor(readonly type: string, readonly metadata: M) {}
+    constructor(
+        readonly type: string,
+        readonly metadata: M
+    ) {}
 
     /**
      * Marks the expression as not edxitable

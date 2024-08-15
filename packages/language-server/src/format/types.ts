@@ -9,8 +9,8 @@ export type Node = {
     [K in keyof CstChildrenDictionary]: CstChildrenDictionary[K] extends IToken[]
         ? IToken[]
         : CstChildrenDictionary[K] extends CstNode[]
-        ? Node[]
-        : never;
+          ? Node[]
+          : never;
 } & Pick<CstNode, "location"> & { name: Rules } & { comments?: Comment[] };
 
 /**

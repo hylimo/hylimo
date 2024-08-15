@@ -15,7 +15,11 @@ export class DestructuringExpression extends Expression {
      * @param value the right hand side, provides the values
      * @param metadata metadata for the expression
      */
-    constructor(readonly names: string[], readonly value: Expression, metadata: ExpressionMetadata) {
+    constructor(
+        readonly names: string[],
+        readonly value: Expression,
+        metadata: ExpressionMetadata
+    ) {
         super(DestructuringExpression.TYPE, metadata);
     }
 

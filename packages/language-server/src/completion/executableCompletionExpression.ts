@@ -26,7 +26,10 @@ export class ExecutableCompletionExpression extends ExecutableExpression<Express
      * @param expression the expression this represents
      * @param context evaluated and thrown as CompletionError, if undefined, the current scope is used
      */
-    constructor(expression: Expression<CompletionExpressionMetadata>, readonly context?: ExecutableExpression<any>) {
+    constructor(
+        expression: Expression<CompletionExpressionMetadata>,
+        readonly context?: ExecutableExpression<any>
+    ) {
         super(expression);
     }
 

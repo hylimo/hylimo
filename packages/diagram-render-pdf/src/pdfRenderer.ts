@@ -29,7 +29,10 @@ export class PDFRenderer {
      *
      * @param margin the margin to apply to the bounding box
      */
-    constructor(private readonly fontManager: FontManager = new FontManager(), private readonly margin = 10) {}
+    constructor(
+        private readonly fontManager: FontManager = new FontManager(),
+        private readonly margin = 10
+    ) {}
 
     /**
      * Renders the provided root to an svg string

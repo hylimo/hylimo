@@ -37,7 +37,10 @@ export abstract class ElementLayoutConfig implements LayoutConfig {
      * @param additionalAttributes additional non-style attributes
      * @param styleAttributes the supported style attributes
      */
-    constructor(additionalAttributes: AttributeConfig[], readonly styleAttributes: AttributeConfig[]) {
+    constructor(
+        additionalAttributes: AttributeConfig[],
+        readonly styleAttributes: AttributeConfig[]
+    ) {
         this.attributes.push(...additionalAttributes);
     }
 

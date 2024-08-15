@@ -7,10 +7,10 @@ import {
     forEachMatch,
     isSelectable,
     MatchResult,
-    SModelElement,
-    SModelRoot,
+    SModelElementImpl,
+    SModelRootImpl,
     UpdateModelCommand as BaseUpdateModelCommand,
-    ViewportRootElement
+    ViewportRootElementImpl
 } from "sprotty";
 import { SRoot } from "../../model/sRoot.js";
 import {
@@ -25,15 +25,18 @@ import { computeCommonAnimatableFields, isLinearAnimatable } from "../animation/
 @injectable()
 export class UpdateModelCommand extends BaseUpdateModelCommand {
     protected override computeAnimation(
-        newRoot: SModelRoot,
+        newRoot: SModelRootImpl,
         matchResult: MatchResult,
         context: CommandExecutionContext
-    ): SModelRoot | Animation {
+    ): SModelRootImpl | Animation {
         const remainingMatchResult: MatchResult = {};
         const elementAnimations: ElmentLinearInterpolationAnimation[] = [];
         forEachMatch(matchResult, (id, match) => {
             if (match.left !== undefined && match.right !== undefined) {
-                const animation = this._updateElement(match.left as SModelElement, match.right as SModelElement);
+                const animation = this._updateElement(
+                    match.left as SModelElementImpl,
+                    match.right as SModelElementImpl
+                );
                 if (animation !== undefined) {
                     elementAnimations.push(animation);
                 }
@@ -65,14 +68,17 @@ export class UpdateModelCommand extends BaseUpdateModelCommand {
      * @param right the new element
      * @returns an ElementLinearInterpolationAnimation or undefined
      */
-    private _updateElement(left: SModelElement, right: SModelElement): ElmentLinearInterpolationAnimation | undefined {
+    private _updateElement(
+        left: SModelElementImpl,
+        right: SModelElementImpl
+    ): ElmentLinearInterpolationAnimation | undefined {
         if (isSelectable(left) && isSelectable(right)) {
             right.selected = left.selected;
         }
-        if (left instanceof SModelRoot && right instanceof SModelRoot) {
+        if (left instanceof SModelRootImpl && right instanceof SModelRootImpl) {
             right.canvasBounds = left.canvasBounds;
         }
-        if (left instanceof ViewportRootElement && right instanceof ViewportRootElement) {
+        if (left instanceof ViewportRootElementImpl && right instanceof ViewportRootElementImpl) {
             right.scroll = left.scroll;
             right.zoom = left.zoom;
         }
@@ -97,8 +103,8 @@ export class UpdateModelCommand extends BaseUpdateModelCommand {
     }
 
     protected override performUpdate(
-        oldRoot: SModelRoot,
-        newRoot: SModelRoot,
+        oldRoot: SModelRootImpl,
+        newRoot: SModelRootImpl,
         context: CommandExecutionContext
     ): CommandReturn {
         (newRoot as SRoot).changeRevision = (oldRoot as SRoot).changeRevision + 1;

@@ -11,48 +11,18 @@
         "lint": "eslint --fix \"{website,packages/*}/src/**/*.{ts,js,tsx,jsx}\""
     },
     "devDependencies": {
-        "@typescript-eslint/eslint-plugin": "^5.50.0",
-        "@typescript-eslint/parser": "^5.50.0",
-        "eslint": "^8.33.0",
-        "eslint-config-prettier": "^8.6.0",
-        "eslint-plugin-prettier": "^4.2.1",
-        "prettier": "^2.7.2",
-        "typescript": "^5.5.4"
+        "@typescript-eslint/eslint-plugin": "^8.1.0",
+        "@typescript-eslint/parser": "^8.1.0",
+        "eslint": "^9.9.0",
+        "eslint-config-prettier": "^9.1.0",
+        "eslint-plugin-prettier": "^5.2.1",
+        "prettier": "^3.3.3",
+        "typescript": "^5.5.4",
+        "typescript-eslint": "^8.1.0"
     },
     "prettier": {
         "tabWidth": 4,
         "trailingComma": "none",
         "printWidth": 120
-    },
-    "eslintConfig": {
-        "env": {
-            "node": true
-        },
-        "parser": "@typescript-eslint/parser",
-        "root": true,
-        "extends": [
-            "prettier",
-            "eslint:recommended",
-            "plugin:@typescript-eslint/eslint-recommended",
-            "plugin:@typescript-eslint/recommended"
-        ],
-        "plugins": [
-            "@typescript-eslint",
-            "prettier"
-        ],
-        "rules": {
-            "prettier/prettier": "error",
-            "no-console": "error",
-            "@typescript-eslint/no-explicit-any": "off",
-            "@typescript-eslint/no-non-null-assertion": "off",
-            "@typescript-eslint/no-namespace": "off",
-            "@typescript-eslint/no-unused-vars": [
-                "error",
-                {
-                    "argsIgnorePattern": "^_"
-                }
-            ],
-            "no-async-promise-executor": "off"
-        }
     }
 }

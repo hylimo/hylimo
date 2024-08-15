@@ -12,11 +12,11 @@
         "build": "tsc"
     },
     "dependencies": {
-        "bezier-js": "^6.1.0",
-        "transformation-matrix": "^2.14.0",
+        "bezier-js": "^6.1.4",
+        "transformation-matrix": "^2.16.1",
         "svgpath": "^2.6.0"
     },
     "devDependencies": {
-        "@types/bezier-js": "^4.1.0"
+        "@types/bezier-js": "^4.1.3"
     }
 }

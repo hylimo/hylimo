@@ -120,9 +120,8 @@ export class ResizeEditEngine extends TransactionalEditEngine<ResizeAction, Resi
         edit: ResizeEdit,
         action: ResizeAction,
         generator: EditGenerator,
-        meta: any
+        meta: ResizeMetadata
     ): string {
-        meta as ResizeMetadata;
         if (meta === "width") {
             return this.generatorRegistory.generateEdit(action.factorX, generator);
         } else if (meta === "height") {

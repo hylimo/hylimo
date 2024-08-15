@@ -12,6 +12,6 @@
         "build": "tsc"
     },
     "dependencies": {
-        "chevrotain": "^10.4.2"
+        "chevrotain": "^11.0.3"
     }
 }

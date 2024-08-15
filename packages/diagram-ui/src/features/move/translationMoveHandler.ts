@@ -11,7 +11,10 @@ export class TranslationMoveHandler implements MoveHandler {
      * @param points the ids of the points to move
      * @param transactionId the id of the transaction
      */
-    constructor(readonly points: string[], readonly transactionId: string) {}
+    constructor(
+        readonly points: string[],
+        readonly transactionId: string
+    ) {}
 
     generateAction(
         dx: number,

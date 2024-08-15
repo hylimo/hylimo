@@ -14,7 +14,10 @@ export class ObjectExpression extends Expression {
      * @param fields the fields of the object
      * @param metadata metadata for the expression
      */
-    constructor(readonly fields: ListEntry[], metadata: ExpressionMetadata) {
+    constructor(
+        readonly fields: ListEntry[],
+        metadata: ExpressionMetadata
+    ) {
         super(ObjectExpression.TYPE, metadata);
     }
 

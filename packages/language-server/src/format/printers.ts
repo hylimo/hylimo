@@ -54,7 +54,7 @@ function printLiteral({ ctx }: PrintContext): Doc {
  * @returns the formatted function expression
  */
 function printFunction({ ctx, path, print, options }: PrintContext): Doc {
-    let children: Doc = [printDanglingComments(path, options)];
+    const children: Doc = [printDanglingComments(path, options)];
     let newLine: Doc = line;
     if (ctx.expressions != undefined) {
         const expressions = ctx.expressions?.[0];
@@ -279,5 +279,3 @@ function mapIfDefined(path: Path, print: Print, key: Rules): Doc[] {
     }
     return [];
 }
-
-

@@ -70,7 +70,7 @@ export const commonModule = InterpreterModule.create(
                     assertFunction(condition);
                     assertFunction(body);
                     let lastValue: FieldEntry = { value: context.null };
-                    // eslint-disable-next-line no-constant-condition
+
                     while (true) {
                         const conditionRes = condition.invoke([], context).value;
                         if (!assertBoolean(conditionRes, "result of the condition function")) {

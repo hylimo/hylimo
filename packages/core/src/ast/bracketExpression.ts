@@ -13,7 +13,10 @@ export class BracketExpression extends Expression {
      * @param expression the inner expression
      * @param metadata metadata for the expression
      */
-    constructor(readonly expression: Expression, metadata: ExpressionMetadata) {
+    constructor(
+        readonly expression: Expression,
+        metadata: ExpressionMetadata
+    ) {
         super(BracketExpression.TYPE, metadata);
     }
 
