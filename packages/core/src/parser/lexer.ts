@@ -15,10 +15,34 @@ export enum Modes {
 }
 
 /**
+ * Supported token types
+ */
+export enum TokenType {
+    WHITE_SPACE = "WhiteSpace",
+    NEW_LINE = "NewLine",
+    SKIPPED_NEW_LINE = "SkippedNewLine",
+    OPEN_ROUND_BRACKET = "OpenRoundBracket",
+    CLOSE_ROUND_BRACKET = "CloseRoundBracket",
+    OPEN_CURLY_BRACKET = "OpenCurlyBracket",
+    CLOSE_CURLY_BRACKET = "CloseCurlyBracket",
+    OPEN_SQUARE_BRACKET = "OpenSquareBracket",
+    CLOSE_SQUARE_BRACKET = "CloseSquareBracket",
+    DOT = "Dot",
+    COMMA = "Comma",
+    IDENTIFIER = "Identifier",
+    SIGN_MINUS = "SignMinus",
+    EQUAL = "Equal",
+    STRING = "String",
+    NUMBER = "Number",
+    SINGLE_LINE_COMMENT = "SingleLineComment",
+    MULTI_LINE_COMMENT = "MultiLineComment"
+}
+
+/**
  * Skipped whitespace token
  */
 export const WhiteSpace = createToken({
-    name: "WhiteSpace",
+    name: TokenType.WHITE_SPACE,
     pattern: /[^\S\n]+/,
     group: Lexer.SKIPPED
 });
@@ -27,7 +51,7 @@ export const WhiteSpace = createToken({
  * Not-skipped newline token
  */
 export const NewLine = createToken({
-    name: "NewLine",
+    name: TokenType.NEW_LINE,
     pattern: /\n/,
     line_breaks: true
 });
@@ -36,7 +60,7 @@ export const NewLine = createToken({
  * Skipped newline token
  */
 export const SkippedNewLine = createToken({
-    name: "SkippedNewLine",
+    name: TokenType.SKIPPED_NEW_LINE,
     pattern: /\n/,
     line_breaks: true,
     group: Lexer.SKIPPED
@@ -46,7 +70,7 @@ export const SkippedNewLine = createToken({
  * Left round bracket token
  */
 export const OpenRoundBracket = createToken({
-    name: "OpenRoundBracket",
+    name: TokenType.OPEN_ROUND_BRACKET,
     pattern: /\(/,
     push_mode: Modes.IGNORE_NEW_LINE
 });
@@ -55,7 +79,7 @@ export const OpenRoundBracket = createToken({
  * Right round bracket token
  */
 export const CloseRoundBracket = createToken({
-    name: "CloseRoundBracket",
+    name: TokenType.CLOSE_ROUND_BRACKET,
     pattern: /\)/,
     pop_mode: true
 });
@@ -64,7 +88,7 @@ export const CloseRoundBracket = createToken({
  * Left curly bracket token
  */
 export const OpenCurlyBracket = createToken({
-    name: "OpenCurlyBracket",
+    name: TokenType.OPEN_CURLY_BRACKET,
     pattern: /{/,
     push_mode: Modes.DEFAULT
 });
@@ -73,7 +97,7 @@ export const OpenCurlyBracket = createToken({
  * Right curly bracket token
  */
 export const CloseCurlyBracket = createToken({
-    name: "CloseCurlyBracket",
+    name: TokenType.CLOSE_CURLY_BRACKET,
     pattern: /}/,
     pop_mode: true
 });
@@ -82,7 +106,7 @@ export const CloseCurlyBracket = createToken({
  * Left square bracket token
  */
 export const OpenSquareBracket = createToken({
-    name: "OpenSquareBracket",
+    name: TokenType.OPEN_SQUARE_BRACKET,
     pattern: /\[/,
     push_mode: Modes.IGNORE_NEW_LINE
 });
@@ -91,7 +115,7 @@ export const OpenSquareBracket = createToken({
  * Right square bracket token
  */
 export const CloseSquareBracket = createToken({
-    name: "CloseSquareBracket",
+    name: TokenType.CLOSE_SQUARE_BRACKET,
     pattern: /]/,
     pop_mode: true
 });
@@ -100,7 +124,7 @@ export const CloseSquareBracket = createToken({
  * Dot token
  */
 export const Dot = createToken({
-    name: "Dot",
+    name: TokenType.DOT,
     pattern: /\.(?!\.)/
 });
 
@@ -108,7 +132,7 @@ export const Dot = createToken({
  * Comma token
  */
 export const Comma = createToken({
-    name: "Comma",
+    name: TokenType.COMMA,
     pattern: /,/
 });
 
@@ -131,7 +155,7 @@ export const Comma = createToken({
  *    - otherwise these are part of the next textual identifier
  */
 export const Identifier = createToken({
-    name: "Identifier",
+    name: TokenType.IDENTIFIER,
     pattern: /(([!#%&'+\-:;<=>?@\\^`|~]|\*(?!\/)|\/(?![/*])|\.{2,}|([_$](?![_$]*[a-z0-9])))+)|([a-z_$][a-z0-9_$]*)/i
 });
 
@@ -142,7 +166,7 @@ export const Identifier = createToken({
  * - a dot followed by a digit
  */
 export const SignMinus = createToken({
-    name: "SignMinus",
+    name: TokenType.SIGN_MINUS,
     pattern: /-(?=\.?[0-9])/,
     longer_alt: Identifier
 });
@@ -151,7 +175,7 @@ export const SignMinus = createToken({
  * Equal sign token
  */
 export const Equal = createToken({
-    name: "Equal",
+    name: TokenType.EQUAL,
     pattern: /=/,
     longer_alt: Identifier
 });
@@ -168,7 +192,7 @@ export const Equal = createToken({
  * - u followed by 4 hexadecimal digits (unicode character)
  */
 export const String = createToken({
-    name: "String",
+    name: TokenType.STRING,
     pattern: /"((\\([\\"nt]|u[0-9a-fA-F]{4}))|([a-zA-Z0-9!#$%&'()*+,\-./:;<=>?@[\]^_`{|}~ ]))*"/
 });
 
@@ -178,7 +202,7 @@ export const String = createToken({
  * Consists of a sequence of digits, optionally followed by a dot and another sequence of digits.
  */
 export const Number = createToken({
-    name: "Number",
+    name: TokenType.NUMBER,
     pattern: /[0-9]+(\.[0-9]+)?([eE]-?[0-9]+)?/
 });
 
@@ -186,7 +210,7 @@ export const Number = createToken({
  * Single line comment token
  */
 export const SingleLineComment = createToken({
-    name: "SingleLineComment ",
+    name: TokenType.SINGLE_LINE_COMMENT,
     pattern: /\/\/[^\n]*/,
     group: "comment"
 });
@@ -195,7 +219,7 @@ export const SingleLineComment = createToken({
  * Multi line comment token
  */
 export const MultiLineComment = createToken({
-    name: "MultiLineComment",
+    name: TokenType.MULTI_LINE_COMMENT,
     pattern: /\/\*[\s\S]*?\*\//,
     group: "comment"
 });
@@ -220,7 +244,7 @@ const standardTokens = [
     Number,
     SingleLineComment,
     MultiLineComment
-];
+] as const;
 
 /**
  * All supported token types of the base language
