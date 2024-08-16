@@ -5,6 +5,7 @@ import { FullObject } from "./objects/fullObject.js";
 import { NullObject } from "./objects/nullObject.js";
 import { NumberObject } from "./objects/numberObject.js";
 import { StringObject } from "./objects/stringObject.js";
+import { WrapperObject, WrapperObjectFieldRetriever } from "./objects/wrapperObject.js";
 import { RuntimeError } from "./runtimeError.js";
 import { SemanticFieldNames } from "./semanticFieldNames.js";
 
@@ -36,6 +37,10 @@ export class InterpreterContext {
      * Prototype for all created DSL functions, including native functions
      */
     readonly functionPrototype: FullObject;
+    /**
+     * Prototype for all created wrapper objects
+     */
+    readonly wrapperPrototype: FullObject;
     /**
      * The current amount of execution steps.
      * Should never get larger than maxExecutionSteps.
@@ -74,6 +79,7 @@ export class InterpreterContext {
         this.stringPrototype = this.newObject();
         this.booleanPrototype = this.newObject();
         this.functionPrototype = this.newObject();
+        this.wrapperPrototype = this.newObject();
         this.currentScope = this.newObject();
         this.currentScope.setFieldEntry(SemanticFieldNames.THIS, { value: this.currentScope }, this);
         this.globalScope = this.currentScope;
@@ -157,6 +163,17 @@ export class InterpreterContext {
         const instance = new FullObject();
         instance.setLocalField(SemanticFieldNames.PROTO, { value: this.objectPrototype }, this);
         return instance;
+    }
+
+    /**
+     * Creates a new WrapperObject with the provided wrapped object and entries
+     *
+     * @param wrapped the wrapped object
+     * @param entries entries function which compute the value of the fields
+     * @returns the created WrapperObject
+     */
+    newWrapperObject<T>(wrapped: T, entries: Map<string | number, WrapperObjectFieldRetriever<T>>): BaseObject {
+        return new WrapperObject(wrapped, this.objectPrototype, entries);
     }
 
     /**

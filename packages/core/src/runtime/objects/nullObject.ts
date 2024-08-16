@@ -14,19 +14,29 @@ export class NullObject extends BaseObject {
         return true;
     }
 
-    override getFieldEntry(key: string | number, _context: InterpreterContext): FieldEntry {
+    override getFieldEntry(key: string | number, _context: InterpreterContext, _self: BaseObject): FieldEntry {
         throw new RuntimeError(`Getting fields on null not supported: try to get ${key}`);
     }
 
-    override getFieldEntries(): Record<string, FieldEntry> {
+    override getFieldEntries(_context: InterpreterContext, _self: BaseObject): Record<string, FieldEntry> {
         return {};
     }
 
-    override setFieldEntry(key: string | number, _value: FieldEntry, _context: InterpreterContext): void {
+    override setFieldEntry(
+        key: string | number,
+        _value: FieldEntry,
+        _context: InterpreterContext,
+        _self: BaseObject
+    ): void {
         throw new RuntimeError(`Setting fields on null not supported: try to set ${key}`);
     }
 
-    override setLocalField(key: string | number, _value: FieldEntry): void {
+    override setLocalField(
+        key: string | number,
+        _value: FieldEntry,
+        _context: InterpreterContext,
+        _self: BaseObject
+    ): void {
         throw new RuntimeError(`Setting fields on null not supported: try to set ${key}`);
     }
 
