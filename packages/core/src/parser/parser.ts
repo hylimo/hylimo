@@ -95,6 +95,11 @@ export class Parser extends CstParser {
     private readonly visitor: ICstVisitor<never, any>;
 
     /**
+     * The tex to parse
+     */
+    private text: string = "";
+
+    /**
      * Creates a new parser
      *
      * @param faultTolerant whether the parser accepts slightly invalid inputs
@@ -275,8 +280,13 @@ export class Parser extends CstParser {
     private operatorExpression = this.RULE(Rules.OPERATOR_EXPRESSION, () => {
         this.SUBRULE1(this.fieldAccessExpression);
         this.MANY(() => {
-            this.SUBRULE(this.simpleFieldAccessExpression);
-            this.SUBRULE2(this.fieldAccessExpression);
+            const operator = this.SUBRULE(this.simpleFieldAccessExpression);
+            this.OR({
+                DEF: [
+                    { ALT: () => this.SUBRULE2(this.fieldAccessExpression) }
+                ],
+                ERR_MSG: `expression after operator ${this.getText(operator)}`
+            })
         });
         if (this.faultTolerant) {
             this.OPTION(() => this.SUBRULE3(this.simpleFieldAccessExpression));
@@ -323,6 +333,13 @@ export class Parser extends CstParser {
         ]);
     });
 
+    private getText(cstNode: CstNode | undefined): string {
+        if (cstNode == undefined || cstNode.location == undefined) {
+            return "";
+        }
+        return this.text.substring(cstNode.location.startOffset, cstNode.location.endOffset! + 1);
+    }
+
     /**
      * Generates the AST based on a CST
      *
@@ -341,6 +358,7 @@ export class Parser extends CstParser {
     public parse(text: string): CstResult {
         const lexerResult = this.lexer.tokenize(text);
         this.input = lexerResult.tokens;
+        this.text = text;
         const result = this.expressions();
         let ast = undefined;
         if (result != undefined) {
@@ -354,7 +372,11 @@ export class Parser extends CstParser {
             comments: lexerResult.groups.comment,
             lexingErrors: lexerResult.errors,
             parserErrors: this.errors.map((error) => ({
-                ...error,
+                name: error.name,
+                message: error.message,
+                token: error.token,
+                resyncedTokens: error.resyncedTokens,
+                context: error.context,
                 position: {
                     startOffset: error.token.startOffset,
                     endOffset: error.token.endOffset! + 1,
