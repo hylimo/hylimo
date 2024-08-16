@@ -51,7 +51,7 @@ export class ExecutableCompletionExpression extends ExecutableExpression<Express
      */
     private transformCompletionContext(value: BaseObject, context: InterpreterContext): CompletionItem[] {
         const items: CompletionItem[] = [];
-        for (const [key, entry] of Object.entries(value.getFieldEntries())) {
+        for (const [key, entry] of Object.entries(value.getFieldEntries(context))) {
             const value = entry.value;
             const docs = this.getDocsDescription(value, context) ?? this.getFieldDescription(value, context, key) ?? "";
             const snippet: string | undefined = this.getDocSnippet(value, context);

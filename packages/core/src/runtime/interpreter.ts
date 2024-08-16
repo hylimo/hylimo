@@ -155,7 +155,7 @@ export class InterpreterContext {
      */
     newObject(): FullObject {
         const instance = new FullObject();
-        instance.setLocalField(SemanticFieldNames.PROTO, { value: this.objectPrototype });
+        instance.setLocalField(SemanticFieldNames.PROTO, { value: this.objectPrototype }, this);
         return instance;
     }
 

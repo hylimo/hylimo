@@ -356,10 +356,14 @@ const scopeExpressions: ExecutableExpression[] = [
                 const callback = args.getField(0, context) as FunctionObject;
                 const wrapperFunctionCallback: NativeFunctionType = (args, context, staticScope, callExpression) => {
                     const result = callback.invoke(args, context);
-                    result.value.setLocalField("source", {
-                        value: result.value,
-                        source: callExpression
-                    });
+                    result.value.setLocalField(
+                        "source",
+                        {
+                            value: result.value,
+                            source: callExpression
+                        },
+                        context
+                    );
                     return result;
                 };
                 return new ExecutableNativeFunctionExpression(
