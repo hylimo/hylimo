@@ -1,5 +1,7 @@
 import { ExpressionMetadata } from "./expressionMetadata.js";
 import { Expression } from "./expression.js";
+import { InterpreterContext } from "../runtime/interpreter.js";
+import { WrapperObject } from "../runtime/objects/wrapperObject.js";
 
 /**
  * Normal function expression
@@ -7,6 +9,17 @@ import { Expression } from "./expression.js";
 
 export class FunctionExpression extends Expression {
     static readonly TYPE = "FunctionExpression";
+
+    private static readonly WRAPPER_ENTRIES = new Map([
+        ...Expression.expressionWrapperObjectEntries<FunctionExpression>(FunctionExpression.TYPE),
+        [
+            "expressions",
+            (wrapped, context) => {
+                return context.newListWrapperObject(wrapped.expressions, (element) => element.toWrapperObject(context));
+            }
+        ]
+    ]);
+
     /**
      * Creates a new FunctionExpression consisting of  a block which is executed.
      *
@@ -26,5 +39,9 @@ export class FunctionExpression extends Expression {
         for (const expression of this.expressions) {
             expression.markNoEdit();
         }
+    }
+
+    override toWrapperObject(context: InterpreterContext): WrapperObject<this> {
+        return context.newWrapperObject(this, FunctionExpression.WRAPPER_ENTRIES);
     }
 }

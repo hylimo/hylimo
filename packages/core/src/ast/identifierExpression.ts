@@ -1,5 +1,7 @@
 import { CompletionExpressionMetadata } from "./expressionMetadata.js";
 import { Expression } from "./expression.js";
+import { InterpreterContext } from "../runtime/interpreter.js";
+import { WrapperObject } from "../runtime/objects/wrapperObject.js";
 
 /**
  * Identifier expression
@@ -8,6 +10,12 @@ import { Expression } from "./expression.js";
 
 export class IdentifierExpression extends Expression<CompletionExpressionMetadata> {
     static readonly TYPE = "IdentifierExpression";
+
+    private static readonly WRAPPER_ENTRIES = new Map([
+        ...Expression.expressionWrapperObjectEntries<IdentifierExpression>(IdentifierExpression.TYPE),
+        ["identifier", (wrapped, context) => context.newString(wrapped.identifier)]
+    ]);
+
     /**
      * Creates a new IdentifierExpression consisting of an identifier
      * @param identifier the name of the identifier
@@ -18,5 +26,9 @@ export class IdentifierExpression extends Expression<CompletionExpressionMetadat
         metadata: CompletionExpressionMetadata
     ) {
         super(IdentifierExpression.TYPE, metadata);
+    }
+
+    override toWrapperObject(context: InterpreterContext): WrapperObject<this> {
+        return context.newWrapperObject(this, IdentifierExpression.WRAPPER_ENTRIES);
     }
 }

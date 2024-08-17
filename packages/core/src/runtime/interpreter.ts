@@ -1,7 +1,10 @@
+import { assertNumber } from "../stdlib/typeHelpers.js";
 import { ExecutableExpression } from "./ast/executableExpression.js";
+import { ExecutableNativeFunctionExpression } from "./ast/executableNativeFunctionExpression.js";
 import { BaseObject } from "./objects/baseObject.js";
 import { BooleanObject } from "./objects/booleanObject.js";
 import { FullObject } from "./objects/fullObject.js";
+import { NativeFunctionObject } from "./objects/functionObject.js";
 import { NullObject } from "./objects/nullObject.js";
 import { NumberObject } from "./objects/numberObject.js";
 import { StringObject } from "./objects/stringObject.js";
@@ -172,8 +175,34 @@ export class InterpreterContext {
      * @param entries entries function which compute the value of the fields
      * @returns the created WrapperObject
      */
-    newWrapperObject<T>(wrapped: T, entries: Map<string | number, WrapperObjectFieldRetriever<T>>): BaseObject {
+    newWrapperObject<T>(wrapped: T, entries: Map<string | number, WrapperObjectFieldRetriever<T>>): WrapperObject<T> {
         return new WrapperObject(wrapped, this.objectPrototype, entries);
+    }
+
+    /**
+     * Creates a new WrapperObject for a list with the provided wrapped object and entries
+     *
+     * @param wrapped the wrapped objects
+     * @param converter the converter to convert the wrapped object to a WrapperObject
+     * @returns the created WrapperObject
+     */
+    newListWrapperObject<T>(wrapped: T[], converter: WrapperObjectFieldRetriever<T>): WrapperObject<T[]> {
+        return this.newWrapperObject(
+            wrapped,
+            new Map<string | number, WrapperObjectFieldRetriever<T[]>>([
+                ["length", (wrapped, context) => context.newNumber(wrapped.length)],
+                [
+                    "get",
+                    (wrapped, context) => {
+                        return new ExecutableNativeFunctionExpression((args) => {
+                            const indexArg = args[0].value.evaluate(context).value;
+                            const index = assertNumber(indexArg, "0");
+                            return { value: converter(wrapped[index], context) };
+                        }, undefined).evaluate(context).value;
+                    }
+                ]
+            ])
+        );
     }
 
     /**

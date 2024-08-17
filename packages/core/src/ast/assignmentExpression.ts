@@ -1,5 +1,7 @@
 import { CompletionExpressionMetadata } from "./expressionMetadata.js";
 import { Expression } from "./expression.js";
+import { WrapperObject } from "../runtime/objects/wrapperObject.js";
+import { InterpreterContext } from "../runtime/interpreter.js";
 
 /**
  * Assignment Expression
@@ -8,6 +10,14 @@ import { Expression } from "./expression.js";
 
 export class AssignmentExpression extends Expression<CompletionExpressionMetadata> {
     static readonly TYPE = "AssignmentExpression";
+
+    private static readonly WRAPPER_ENTRIES = new Map([
+        ...Expression.expressionWrapperObjectEntries<AssignmentExpression>(AssignmentExpression.TYPE),
+        ["name", (wrapped, context) => context.newString(wrapped.name)],
+        ["target", (wrapped, context) => wrapped.target?.toWrapperObject(context) ?? context.null],
+        ["value", (wrapped, context) => wrapped.value.toWrapperObject(context)]
+    ]);
+
     /**
      * Creates a new AssignmentExpression consisting of a value, a field, and an optional target on which the
      * identifier is accessed.
@@ -32,5 +42,9 @@ export class AssignmentExpression extends Expression<CompletionExpressionMetadat
         if (this.target != undefined) {
             this.target.markNoEdit();
         }
+    }
+
+    override toWrapperObject(context: InterpreterContext): WrapperObject<this> {
+        return context.newWrapperObject(this, AssignmentExpression.WRAPPER_ENTRIES);
     }
 }

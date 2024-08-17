@@ -1,3 +1,5 @@
+import { InterpreterContext } from "../runtime/interpreter.js";
+import { WrapperObject } from "../runtime/objects/wrapperObject.js";
 import { Expression } from "./expression.js";
 import { ExpressionMetadata } from "./expressionMetadata.js";
 import { ListEntry } from "./listEntry.js";
@@ -7,6 +9,11 @@ import { ListEntry } from "./listEntry.js";
  */
 export class ObjectExpression extends Expression {
     static readonly TYPE = "ObjectExpression";
+
+    private static readonly WRAPPER_ENTRIES = new Map([
+        ...Expression.expressionWrapperObjectEntries<ObjectExpression>(ObjectExpression.TYPE),
+        ["fields", (wrapped, context) => context.newListWrapperObject(wrapped.fields, ListEntry.toWrapperObject)]
+    ]);
 
     /**
      * Creates a new ObjectExpression consisting of a set of fields
@@ -26,5 +33,9 @@ export class ObjectExpression extends Expression {
         for (const field of this.fields) {
             field.value.markNoEdit();
         }
+    }
+
+    override toWrapperObject(context: InterpreterContext): WrapperObject<this> {
+        return context.newWrapperObject(this, ObjectExpression.WRAPPER_ENTRIES);
     }
 }

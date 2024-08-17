@@ -142,7 +142,12 @@ export class FunctionObject extends AbstractFunctionObject<ExecutableFunctionExp
         super(definition, parentScope, proto, docs);
     }
 
-    override invoke(args: ExecutableListEntry[], context: InterpreterContext, scope?: FullObject): FieldEntry {
+    override invoke(
+        args: ExecutableListEntry[],
+        context: InterpreterContext,
+        scope?: FullObject,
+        callExpression?: AbstractInvocationExpression
+    ): FieldEntry {
         context.nextStep();
         const oldScope = context.currentScope;
         if (!scope) {
@@ -151,7 +156,7 @@ export class FunctionObject extends AbstractFunctionObject<ExecutableFunctionExp
         }
         scope.setLocalField(SemanticFieldNames.THIS, { value: scope }, context);
         const generatedArgs = generateArgs(args, context, this.definition.documentation);
-        scope.setLocalField(SemanticFieldNames.ARGS, { value: generatedArgs }, context);
+        scope.setLocalField(SemanticFieldNames.ARGS, { value: generatedArgs, source: callExpression }, context);
         scope.setLocalField(SemanticFieldNames.IT, generatedArgs.getFieldEntry(0, context), context);
         context.currentScope = scope;
         let lastValue: BaseObject = context.null;

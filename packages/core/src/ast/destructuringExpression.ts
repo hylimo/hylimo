@@ -1,5 +1,7 @@
 import { ExpressionMetadata } from "./expressionMetadata.js";
 import { Expression } from "./expression.js";
+import { InterpreterContext } from "../runtime/interpreter.js";
+import { WrapperObject } from "../runtime/objects/wrapperObject.js";
 
 /**
  * Destructuring expression
@@ -8,6 +10,13 @@ import { Expression } from "./expression.js";
 
 export class DestructuringExpression extends Expression {
     static readonly TYPE = "DestructuringExpression";
+
+    static readonly WRAPPER_ENTRIES = new Map([
+        ...Expression.expressionWrapperObjectEntries<DestructuringExpression>(DestructuringExpression.TYPE),
+        ["names", (wrapped, context) => context.newListWrapperObject(wrapped.names, context.newString)],
+        ["value", (wrapped, context) => wrapped.value.toWrapperObject(context)]
+    ]);
+
     /**
      * Creates a new DestructuringExpression consisting of a set of names to assign, and the value to destructure
      *
@@ -26,5 +35,9 @@ export class DestructuringExpression extends Expression {
     protected override markNoEditInternal(): void {
         super.markNoEditInternal();
         this.value.markNoEdit();
+    }
+
+    override toWrapperObject(context: InterpreterContext): WrapperObject<this> {
+        return context.newWrapperObject(this, DestructuringExpression.WRAPPER_ENTRIES);
     }
 }
