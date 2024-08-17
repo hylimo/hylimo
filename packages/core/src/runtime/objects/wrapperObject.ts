@@ -1,6 +1,6 @@
 import { AbstractInvocationExpression } from "../../ast/abstractInvocationExpression.js";
 import { ExecutableListEntry } from "../ast/executableListEntry.js";
-import { InterpreterContext } from "../interpreter.js";
+import { InterpreterContext } from "../interpreter/interpreterContext.js";
 import { RuntimeError } from "../runtimeError.js";
 import { SemanticFieldNames } from "../semanticFieldNames.js";
 import { BaseObject, FieldEntry } from "./baseObject.js";
@@ -85,8 +85,16 @@ export class WrapperObject<T> extends BaseObject {
         throw new RuntimeError("Invoke not supported");
     }
 
-    override toString(): string {
-        return `${this.wrapped}`;
+    override toString(context: InterpreterContext): string {
+        let res = "{\n";
+        for (const [name, value] of this.entries.entries()) {
+            if (name != SemanticFieldNames.THIS && name != SemanticFieldNames.PROTO) {
+                const escapedName = typeof name === "string" ? `"${name}"` : name.toString();
+                res += `  ${escapedName}: ${value(this.wrapped, context).toString(context).replaceAll("\n", "\n  ")}\n`;
+            }
+        }
+        res += "}";
+        return res;
     }
 
     override toNative(): T {

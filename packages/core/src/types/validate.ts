@@ -1,5 +1,5 @@
 import { Expression } from "../ast/expression.js";
-import { InterpreterContext } from "../runtime/interpreter.js";
+import { InterpreterContext } from "../runtime/interpreter/interpreterContext.js";
 import { BaseObject } from "../runtime/objects/baseObject.js";
 import { RuntimeError } from "../runtime/runtimeError.js";
 import { Type } from "./base.js";

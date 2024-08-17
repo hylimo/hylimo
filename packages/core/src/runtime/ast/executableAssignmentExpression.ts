@@ -1,5 +1,5 @@
 import { AssignmentExpression } from "../../ast/assignmentExpression.js";
-import { InterpreterContext } from "../interpreter.js";
+import { InterpreterContext } from "../interpreter/interpreterContext.js";
 import { BaseObject, FieldEntry } from "../objects/baseObject.js";
 import { ExecutableExpression } from "./executableExpression.js";
 

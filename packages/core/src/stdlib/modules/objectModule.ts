@@ -1,5 +1,5 @@
 import { DefaultModuleNames } from "../defaultModuleNames.js";
-import { InterpreterModule } from "../../runtime/interpreter.js";
+import { InterpreterModule } from "../../runtime/interpreter/interpreterModule.js";
 import { assign, fun, id, jsFun, native, num, str } from "../../runtime/executableAstHelper.js";
 import { SemanticFieldNames } from "../../runtime/semanticFieldNames.js";
 import { assertFunction, assertObject } from "../typeHelpers.js";
@@ -53,7 +53,7 @@ export const objectModule = InterpreterModule.create(
                 jsFun(
                     (args, context) => {
                         const self = args.getFieldEntry(SemanticFieldNames.SELF, context).value;
-                        return context.newString(self.toString());
+                        return context.newString(self.toString(context));
                     },
                     {
                         docs: "Creates and returns a string representation.",

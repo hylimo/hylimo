@@ -1,4 +1,4 @@
-import { InterpreterContext } from "../runtime/interpreter.js";
+import { InterpreterContext } from "../runtime/interpreter/interpreterContext.js";
 import { BaseObject } from "../runtime/objects/baseObject.js";
 
 /**

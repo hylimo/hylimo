@@ -1,7 +1,7 @@
 import { ExpressionMetadata } from "./expressionMetadata.js";
 import { ASTExpressionPosition } from "./astExpressionPosition.js";
 import { WrapperObject, WrapperObjectFieldRetriever } from "../runtime/objects/wrapperObject.js";
-import { InterpreterContext } from "../runtime/interpreter.js";
+import { InterpreterContext } from "../runtime/interpreter/interpreterContext.js";
 
 /**
  * Base interface for all expressions

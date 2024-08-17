@@ -1,7 +1,7 @@
 import { assign, fun, id, jsFun, native, num } from "../../runtime/executableAstHelper.js";
 import { ExecutableListEntry } from "../../runtime/ast/executableListEntry.js";
 import { ExecutableConstExpression } from "../../runtime/ast/executableConstExpression.js";
-import { InterpreterModule } from "../../runtime/interpreter.js";
+import { InterpreterModule } from "../../runtime/interpreter/interpreterModule.js";
 import { BaseObject, FieldEntry } from "../../runtime/objects/baseObject.js";
 import { FullObject } from "../../runtime/objects/fullObject.js";
 import { generateArgs } from "../../runtime/objects/functionObject.js";

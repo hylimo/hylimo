@@ -1,7 +1,7 @@
 import { AbstractInvocationExpression } from "../../ast/abstractInvocationExpression.js";
 import { Expression } from "../../ast/expression.js";
 import { ExecutableListEntry } from "../ast/executableListEntry.js";
-import { InterpreterContext } from "../interpreter.js";
+import { InterpreterContext } from "../interpreter/interpreterContext.js";
 import { RuntimeError } from "../runtimeError.js";
 import { SemanticFieldNames } from "../semanticFieldNames.js";
 import { FullObject } from "./fullObject.js";
@@ -106,9 +106,10 @@ export abstract class BaseObject {
     /**
      * Creates a readable string representation
      *
+     * @param context context in which this is performed
      * @returns a string representation
      */
-    abstract toString(): string;
+    abstract toString(context: InterpreterContext): string;
 
     /**
      * Transforms this to a js number/string/object

@@ -1,5 +1,5 @@
 import { NumberLiteralExpression } from "../../ast/numberLiteralExpression.js";
-import { InterpreterContext } from "../interpreter.js";
+import { InterpreterContext } from "../interpreter/interpreterContext.js";
 import { FieldEntry } from "../objects/baseObject.js";
 import { NumberObject } from "../objects/numberObject.js";
 import { ExecutableLiteralExpression } from "./executableLiteralExpression.js";

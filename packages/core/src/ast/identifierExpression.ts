@@ -1,6 +1,6 @@
 import { CompletionExpressionMetadata } from "./expressionMetadata.js";
 import { Expression } from "./expression.js";
-import { InterpreterContext } from "../runtime/interpreter.js";
+import { InterpreterContext } from "../runtime/interpreter/interpreterContext.js";
 import { WrapperObject } from "../runtime/objects/wrapperObject.js";
 
 /**

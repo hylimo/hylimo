@@ -1,6 +1,6 @@
 import { AbstractInvocationExpression } from "../../ast/abstractInvocationExpression.js";
 import { ExecutableListEntry } from "../ast/executableListEntry.js";
-import { InterpreterContext } from "../interpreter.js";
+import { InterpreterContext } from "../interpreter/interpreterContext.js";
 import { RuntimeError } from "../runtimeError.js";
 import { SemanticFieldNames } from "../semanticFieldNames.js";
 import { BaseObject, FieldEntry } from "./baseObject.js";
@@ -244,12 +244,12 @@ export class FullObject extends BaseObject {
         return this.fields.get(SemanticFieldNames.PROTO)?.value as FullObject | undefined;
     }
 
-    override toString(): string {
+    override toString(context: InterpreterContext): string {
         let res = "{\n";
         for (const [name, value] of this.fields.entries()) {
             if (name != SemanticFieldNames.THIS && name != SemanticFieldNames.PROTO) {
                 const escapedName = typeof name === "string" ? `"${name}"` : name.toString();
-                res += `  ${escapedName}: ${value.value.toString().replaceAll("\n", "\n  ")}\n`;
+                res += `  ${escapedName}: ${value.value.toString(context).replaceAll("\n", "\n  ")}\n`;
             }
         }
         res += "}";

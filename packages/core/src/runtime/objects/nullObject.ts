@@ -1,6 +1,6 @@
 import { AbstractInvocationExpression } from "../../ast/abstractInvocationExpression.js";
 import { ExecutableListEntry } from "../ast/executableListEntry.js";
-import { InterpreterContext } from "../interpreter.js";
+import { InterpreterContext } from "../interpreter/interpreterContext.js";
 import { RuntimeError } from "../runtimeError.js";
 import { BaseObject, FieldEntry } from "./baseObject.js";
 import { FullObject } from "./fullObject.js";

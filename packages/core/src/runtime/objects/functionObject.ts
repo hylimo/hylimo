@@ -7,7 +7,7 @@ import {
 import { ExecutableListEntry } from "../ast/executableListEntry.js";
 import { ExecutableFunctionExpression } from "../ast/executableFunctionExpression.js";
 import { ExecutableNativeFunctionExpression } from "../ast/executableNativeFunctionExpression.js";
-import { InterpreterContext } from "../interpreter.js";
+import { InterpreterContext } from "../interpreter/interpreterContext.js";
 import { SemanticFieldNames } from "../semanticFieldNames.js";
 import { BaseObject, FieldEntry, SimpleObject } from "./baseObject.js";
 import { FullObject } from "./fullObject.js";

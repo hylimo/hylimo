@@ -6,6 +6,7 @@ import { listModule } from "./modules/listModule.js";
 import { numberModule } from "./modules/numberModule.js";
 import { objectModule } from "./modules/objectModule.js";
 import { operatorModule } from "./modules/operatorModule.js";
+import { reflectionModule } from "./modules/reflectionModule.js";
 import { stringModule } from "./modules/stringModule.js";
 import { wrapperModule } from "./modules/wrapperModule.js";
 
@@ -22,5 +23,6 @@ export const defaultModules = [
     stringModule,
     listModule,
     functionModule,
-    wrapperModule
+    wrapperModule,
+    reflectionModule
 ];

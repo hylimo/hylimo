@@ -1,6 +1,6 @@
 import { assertFunction } from "../../stdlib/typeHelpers.js";
 import { ExecutableConstExpression } from "../ast/executableConstExpression.js";
-import { InterpreterContext } from "../interpreter.js";
+import { InterpreterContext } from "../interpreter/interpreterContext.js";
 import { BaseObject, FieldEntry } from "./baseObject.js";
 import { AbstractFunctionObject } from "./functionObject.js";
 

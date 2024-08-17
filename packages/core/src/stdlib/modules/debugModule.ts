@@ -1,5 +1,5 @@
 import { assign, fun, id, jsFun } from "../../runtime/executableAstHelper.js";
-import { InterpreterModule } from "../../runtime/interpreter.js";
+import { InterpreterModule } from "../../runtime/interpreter/interpreterModule.js";
 import { SemanticFieldNames } from "../../runtime/semanticFieldNames.js";
 import { stringType } from "../../types/string.js";
 import { DefaultModuleNames } from "../defaultModuleNames.js";

@@ -1,5 +1,5 @@
 import { DestructuringExpression } from "../../ast/destructuringExpression.js";
-import { InterpreterContext } from "../interpreter.js";
+import { InterpreterContext } from "../interpreter/interpreterContext.js";
 import { FieldEntry } from "../objects/baseObject.js";
 import { ExecutableExpression } from "./executableExpression.js";
 
