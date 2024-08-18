@@ -75,23 +75,29 @@ function createElementFunction(element: LayoutConfig): ExecutableExpression {
         ),
         jsFun(
             (args, context) => {
-                return context.getField("_evaluateElement").invoke(
+                const newElement = context.newObject();
+                newElement.setLocalField("type", { value: context.newString(element.type) }, context);
+                newElement.setLocalField("proto", { value: context.getField("elementProto") }, context);
+                for (const [key, value] of args.fields.entries()) {
+                    if (key !== "self" && key !== "proto") {
+                        newElement.setFieldEntry(key, value, context);
+                    }
+                }
+                context.getField("_evaluateElement").invoke(
                     [
+                        {
+                            value: new ExecutableConstExpression({ value: newElement })
+                        },
                         {
                             value: new ExecutableConstExpression({ value: args })
                         },
                         {
-                            value: new ExecutableStringLiteralExpression(undefined, element.type)
-                        },
-                        {
                             value: new ExecutableNumberLiteralExpression(undefined, cardinalityNumber)
-                        },
-                        {
-                            value: id("elementProto")
                         }
                     ],
                     context
                 );
+                return newElement;
             },
             {
                 docs: `Creates a new ${element.type} element`,
@@ -188,14 +194,7 @@ export const diagramModule = InterpreterModule.create(
                 "_evaluateElement",
                 fun(
                     `
-                        (elementArgs, type, contentsCardinality, elementProto) = args
-                        this.element = object(type = type, proto = elementProto)
-                        elementArgs.forEach {
-                            (value, key) = args
-                            if ((key != "self") && (key != "proto")) {
-                                this.element.set(key, value)
-                            }
-                        }
+                        (element, elementArgs, contentsCardinality) = args
                         
                         this.scope = elementArgs.self
                         if(contentsCardinality > 0) {
@@ -223,7 +222,6 @@ export const diagramModule = InterpreterModule.create(
                         if(scope.addContent != null) {
                             scope.addContent(element)
                         }
-                        element
                     `
                 )
             ),
