@@ -60,12 +60,66 @@ function computeAllStyleAttributes(): AttributeConfig[] {
 const allStyleAttributes = computeAllStyleAttributes();
 
 /**
- * Creates the function to create a specific element
+ * Creates a function which evaluates to the function to create a specific element
  *
  * @param element config of the element
- * @returns the function to create the element
+ * @returns the callback which provides the create element function
  */
 function createElementFunction(element: LayoutConfig): ExecutableExpression {
+    const { cardinalityNumber, contentAttributes } = extractContentAttributeAndCardinality(element);
+
+    return fun([
+        id(SemanticFieldNames.THIS).assignField(
+            "elementProto",
+            element.createPrototype().call(id(SemanticFieldNames.IT))
+        ),
+        jsFun(
+            (args, context) => {
+                context.getField("_evaluateElement").invoke(
+                    [
+                        {
+                            value: new ExecutableConstExpression({ value: args })
+                        },
+                        {
+                            value: new ExecutableStringLiteralExpression(undefined, element.type)
+                        },
+                        {
+                            value: new ExecutableNumberLiteralExpression(undefined, cardinalityNumber)
+                        },
+                        {
+                            value: id("elementProto")
+                        }
+                    ],
+                    context
+                );
+                return args;
+            },
+            {
+                docs: `Creates a new ${element.type} element`,
+                params: [
+                    ...element.attributes.map((attr) => [attr.name, attr.description, attr.type] as const),
+                    ...element.styleAttributes.map(
+                        (attr) => [attr.name, attr.description, or(nullType, attr.type, styleValueType)] as const
+                    ),
+                    ...contentAttributes.map((attr) => [attr.name, attr.description, optional(attr.type)] as const),
+                    [0, "builder scope function", optional(functionType)]
+                ],
+                returns: "the created element"
+            }
+        )
+    ]);
+}
+
+/**
+ * Extracts the content attribute and cardinality from the element
+ *
+ * @param element the element to extract the content attribute and cardinality from
+ * @returns the cardinality number and the content attributes
+ */
+function extractContentAttributeAndCardinality(element: LayoutConfig): {
+    cardinalityNumber: number;
+    contentAttributes: AttributeConfig[];
+} {
     const contentCardinality = element.contentCardinality;
     const contentAttributes: AttributeConfig[] = [];
     const isOneContent =
@@ -88,49 +142,13 @@ function createElementFunction(element: LayoutConfig): ExecutableExpression {
         });
         cardinalityNumber = Number.POSITIVE_INFINITY;
     }
-
-    return jsFun(
-        (args, context) => {
-            context.getField("_evaluateElement").invoke(
-                [
-                    {
-                        value: new ExecutableConstExpression({ value: args })
-                    },
-                    {
-                        value: new ExecutableStringLiteralExpression(undefined, element.type)
-                    },
-                    {
-                        value: new ExecutableNumberLiteralExpression(undefined, cardinalityNumber)
-                    }
-                ],
-                context
-            );
-            return args;
-        },
-        {
-            docs: `Creates a new ${element.type} element`,
-            params: [
-                ...element.attributes.map((attr) => [attr.name, attr.description, attr.type] as const),
-                ...element.styleAttributes.map(
-                    (attr) => [attr.name, attr.description, or(nullType, attr.type, styleValueType)] as const
-                ),
-                ...contentAttributes.map((attr) => [attr.name, attr.description, optional(attr.type)] as const),
-                [0, "test", optional(functionType)]
-            ],
-            returns: "the created element"
-        }
-    );
+    return { cardinalityNumber, contentAttributes };
 }
 
 /**
  * The name of the field containing the selector prototype
  */
 const selectorProto = "selectorProto";
-
-/**
- * The name of the field containing the element prototype
- */
-const elementProto = "elementProto";
 
 /**
  * Type for a font object
@@ -166,16 +184,16 @@ export const diagramModule = InterpreterModule.create(
     [],
     [
         fun([
-            assign(elementProto, id("object").call({ name: "_type", value: str("element") })),
+            assign("_elementProto", id("object").call({ name: "_type", value: str("element") })),
             assign(
                 "_evaluateElement",
                 fun(
                     `
-                        (element, type, contentsCardinality) = args
+                        (element, type, contentsCardinality, elementProto) = args
                         this.scope = element.self
                         element.self = null
                         element.type = type
-                        element.proto = ${elementProto}
+                        element.proto = elementProto
                         if(contentsCardinality > 0) {
                             this.callback = element.get(0)
                             if(callback != null) {
@@ -205,7 +223,10 @@ export const diagramModule = InterpreterModule.create(
                 )
             ),
             ...layouts.map((config) =>
-                id(SemanticFieldNames.IT).assignField(config.type, createElementFunction(config))
+                id(SemanticFieldNames.IT).assignField(
+                    config.type,
+                    createElementFunction(config).call(id("_elementProto"))
+                )
             )
         ]).call(id(SemanticFieldNames.THIS)),
         assign(

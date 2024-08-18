@@ -9,7 +9,7 @@ import { AbsolutePoint, LinePoint, RelativePoint } from "@hylimo/diagram-common"
  */
 export function elementType(...elements: string[]): Type {
     const fields: Map<string, Type> = new Map();
-    fields.set(SemanticFieldNames.PROTO, objectType(new Map([["_type", literal("element")]])));
+    fields.set("_type", literal("element"));
     if (elements.length > 0) {
         fields.set("type", or(...elements.map((element) => literal(element))));
     }

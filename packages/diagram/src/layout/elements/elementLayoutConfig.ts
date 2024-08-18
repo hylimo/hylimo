@@ -1,4 +1,13 @@
-import { Expression, ExpressionMetadata, Type, listType, optional, stringType } from "@hylimo/core";
+import {
+    ExecutableAbstractFunctionExpression,
+    Expression,
+    ExpressionMetadata,
+    Type,
+    fun,
+    listType,
+    optional,
+    stringType
+} from "@hylimo/core";
 import { ArcSegment, Element, Line, LineSegment, ModificationSpecification, Point, Size } from "@hylimo/diagram-common";
 import { LayoutElement, LayoutConfig, SizeConstraints, AttributeConfig, ContentCardinality } from "../layoutElement.js";
 import { Layout } from "../layoutEngine.js";
@@ -161,5 +170,15 @@ export abstract class ElementLayoutConfig implements LayoutConfig {
             radiusX: radius,
             radiusY: radius
         };
+    }
+
+    /**
+     * Called to provide a function which evaluates to the prototype of the element.
+     * The function will be called with the general element prototype as first argument.
+     *
+     * @returns the prototype generation function
+     */
+    createPrototype(): ExecutableAbstractFunctionExpression {
+        return fun("object(proto = it)");
     }
 }

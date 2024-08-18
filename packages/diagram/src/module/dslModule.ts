@@ -438,7 +438,7 @@ const scopeExpressions: ExecutableExpression[] = [
                 this.element = if(callbackOrElement._type == "element") {
                     canvasElement(content = callbackOrElement, scopes = object())
                 } {
-                    canvasElement(scopes = object(), callbackOrElement)
+                    canvasElement(content = callbackOrElement(), scopes = object())
                 }
                 scope.contents += this.element
                 this.element

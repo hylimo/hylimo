@@ -1,4 +1,4 @@
-import { FieldEntry, FullObject, Type } from "@hylimo/core";
+import { ExecutableAbstractFunctionExpression, FieldEntry, FullObject, Type } from "@hylimo/core";
 import { Element, Line, Point, Size } from "@hylimo/diagram-common";
 import { Layout } from "./layoutEngine.js";
 import { Bounds } from "@hylimo/diagram-common";
@@ -246,4 +246,11 @@ export interface LayoutConfig {
      * @returns the outline of the element
      */
     outline(layout: Layout, element: LayoutElement, position: Point, size: Size): Line;
+    /**
+     * Called to provide a function which evaluates to the prototype of the element.
+     * The function will be called with the general element prototype as first argument.
+     *
+     * @returns the prototype generation function
+     */
+    createPrototype(): ExecutableAbstractFunctionExpression;
 }
