@@ -1,4 +1,4 @@
-import { numberType } from "@hylimo/core";
+import { ExecutableAbstractFunctionExpression, fun, numberType } from "@hylimo/core";
 import { Size, AbsolutePoint, Element, Point } from "@hylimo/diagram-common";
 import { LayoutElement } from "../../layoutElement.js";
 import { Layout } from "../../layoutEngine.js";
@@ -29,8 +29,8 @@ export class AbsolutePointLayoutConfig extends CanvasPointLayoutConfig {
     }
 
     override layout(layout: Layout, element: LayoutElement, position: Point, size: Size, id: string): Element[] {
-        const xFieldEntry = element.element.getLocalFieldOrUndefined("x");
-        const yFieldEntry = element.element.getLocalFieldOrUndefined("y");
+        const xFieldEntry = element.element.getLocalFieldOrUndefined("_x");
+        const yFieldEntry = element.element.getLocalFieldOrUndefined("_y");
         const result: AbsolutePoint = {
             type: AbsolutePoint.TYPE,
             id,
@@ -40,5 +40,26 @@ export class AbsolutePointLayoutConfig extends CanvasPointLayoutConfig {
             children: []
         };
         return [result];
+    }
+
+    override createPrototype(): ExecutableAbstractFunctionExpression {
+        return fun(
+            `
+                elementProto = object(proto = it)
+
+                elementProto.defineProperty("x") {
+                    args.self._x
+                } {
+                    args.self._x = it
+                }
+                elementProto.defineProperty("y") {
+                    args.self._y
+                } {
+                    args.self._y = it
+                }
+                
+                elementProto
+            `
+        );
     }
 }

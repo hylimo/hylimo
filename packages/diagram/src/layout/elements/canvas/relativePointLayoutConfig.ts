@@ -1,4 +1,4 @@
-import { FullObject, numberType, or } from "@hylimo/core";
+import { ExecutableAbstractFunctionExpression, FullObject, fun, numberType, or } from "@hylimo/core";
 import { Size, Element, RelativePoint, Point, CanvasElement } from "@hylimo/diagram-common";
 import { canvasPointType, elementType } from "../../../module/types.js";
 import { LayoutElement } from "../../layoutElement.js";
@@ -35,8 +35,8 @@ export class RelativePointLayoutConfig extends CanvasPointLayoutConfig {
     }
 
     override layout(layout: Layout, element: LayoutElement, position: Point, size: Size, id: string): Element[] {
-        const offsetXFieldEntry = element.element.getLocalFieldOrUndefined("offsetX");
-        const offsetYFieldEntry = element.element.getLocalFieldOrUndefined("offsetY");
+        const offsetXFieldEntry = element.element.getLocalFieldOrUndefined("_offsetX");
+        const offsetYFieldEntry = element.element.getLocalFieldOrUndefined("_offsetY");
         const target = this.getContentId(
             element,
             element.element.getLocalFieldOrUndefined("target")!.value as FullObject
@@ -54,5 +54,26 @@ export class RelativePointLayoutConfig extends CanvasPointLayoutConfig {
             children: []
         };
         return [result];
+    }
+
+    override createPrototype(): ExecutableAbstractFunctionExpression {
+        return fun(
+            `
+                elementProto = object(proto = it)
+
+                elementProto.defineProperty("offsetX") {
+                    args.self._offsetX
+                } {
+                    args.self._offsetX = it
+                }
+                elementProto.defineProperty("offsetY") {
+                    args.self._offsetY
+                } {
+                    args.self._offsetY = it
+                }
+                
+                elementProto
+            `
+        );
     }
 }

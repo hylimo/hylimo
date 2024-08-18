@@ -1,4 +1,4 @@
-import { FullObject, numberType, optional, FunctionExpression } from "@hylimo/core";
+import { FullObject, numberType, optional, FunctionExpression, ExecutableAbstractFunctionExpression, fun } from "@hylimo/core";
 import { Size, Point, Element, CanvasElement, ModificationSpecification } from "@hylimo/diagram-common";
 import { canvasPointType, elementType } from "../../../module/types.js";
 import {
@@ -196,5 +196,31 @@ export class CanvasElementLayoutConfig extends EditableCanvasContentLayoutConfig
                 return null;
             }
         }
+    }
+
+    override createPrototype(): ExecutableAbstractFunctionExpression {
+        return fun(
+            `
+                elementProto = object(proto = it)
+
+                elementProto.defineProperty("width") {
+                    args.self._width
+                } {
+                    args.self._width = it
+                }
+                elementProto.defineProperty("height") {
+                    args.self._height
+                } {
+                    args.self._height = it
+                }
+                elementProto.defineProperty("rotation") {
+                    args.self._rotation
+                } {
+                    args.self._rotation = it
+                }
+                
+                elementProto
+            `
+        );
     }
 }

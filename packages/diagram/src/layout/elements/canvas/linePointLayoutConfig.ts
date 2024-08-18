@@ -1,4 +1,4 @@
-import { Expression, FullObject, numberType, optional } from "@hylimo/core";
+import { ExecutableAbstractFunctionExpression, Expression, FullObject, fun, numberType, optional } from "@hylimo/core";
 import { Size, Element, LinePoint, Point, CanvasConnection, CanvasElement } from "@hylimo/diagram-common";
 import { LayoutElement } from "../../layoutElement.js";
 import { Layout } from "../../layoutEngine.js";
@@ -41,9 +41,9 @@ export class LinePointLayoutConfig extends CanvasPointLayoutConfig {
     }
 
     override layout(layout: Layout, element: LayoutElement, position: Point, size: Size, id: string): Element[] {
-        const positionFieldEntry = element.element.getLocalFieldOrUndefined("pos");
-        const distanceFieldEntry = element.element.getLocalFieldOrUndefined("distance");
-        const segmentFieldEntry = element.element.getLocalFieldOrUndefined("segment");
+        const positionFieldEntry = element.element.getLocalFieldOrUndefined("_pos");
+        const distanceFieldEntry = element.element.getLocalFieldOrUndefined("_distance");
+        const segmentFieldEntry = element.element.getLocalFieldOrUndefined("_segment");
         const lineProvider = this.getContentId(
             element,
             element.element.getLocalFieldOrUndefined("lineProvider")!.value as FullObject
@@ -70,5 +70,31 @@ export class LinePointLayoutConfig extends CanvasPointLayoutConfig {
             children: []
         };
         return [result];
+    }
+
+    override createPrototype(): ExecutableAbstractFunctionExpression {
+        return fun(
+            `
+                elementProto = object(proto = it)
+
+                elementProto.defineProperty("pos") {
+                    args.self._pos
+                } {
+                    args.self._pos = it
+                }
+                elementProto.defineProperty("distance") {
+                    args.self._distance
+                } {
+                    args.self._distance = it
+                }
+                elementProto.defineProperty("segment") {
+                    args.self._segment
+                } {
+                    args.self._segment = it
+                }
+                
+                elementProto
+            `
+        );
     }
 }
