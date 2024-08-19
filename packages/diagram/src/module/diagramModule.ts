@@ -77,12 +77,12 @@ function createElementFunction(element: LayoutConfig): ExecutableExpression {
                 const newElement = context.newObject();
                 newElement.setLocalField("type", { value: context.newString(element.type) }, context);
                 newElement.setLocalField("proto", { value: context.getField("elementProto") }, context);
+                newElement.setLocalField("edits", { value: context.newObject() }, context);
                 for (const [key, value] of args.fields.entries()) {
                     if (key !== "self" && key !== "proto") {
                         newElement.setFieldEntry(key, value, context);
                     }
                 }
-                newElement.setLocalField("edits", { value: context.newObject() }, context);
                 context.getField("_evaluateElement").invoke(
                     [
                         {
@@ -185,7 +185,7 @@ function font(name: string, url: string): ExecutableListEntry {
  */
 export const diagramModule = InterpreterModule.create(
     "diagram",
-    [...Object.values(DefaultModuleNames)],
+    [...Object.values(DefaultModuleNames), "edit"],
     [],
     [
         fun([

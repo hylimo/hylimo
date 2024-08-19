@@ -51,13 +51,13 @@ export class AbsolutePointLayoutConfig extends CanvasPointLayoutConfig {
                     args.self._x
                 } {
                     args.self._x = it
-                    args.self.edits.set("${DefaultEditTypes.MOVE_TRANSLATE_X}", generateAdditiveEdit(it, "{ \\"var\\": \\"dx\\" }"))
+                    args.self.edits.set("${DefaultEditTypes.MOVE_TRANSLATE_X}", createAdditiveEdit(it, "{ \\"var\\": \\"dx\\" }"))
                 }
                 elementProto.defineProperty("y") {
                     args.self._y
                 } {
                     args.self._y = it
-                    args.self.edits.set("${DefaultEditTypes.MOVE_TRANSLATE_Y}", generateAdditiveEdit(it, "{ \\"var\\": \\"dy\\" }"))
+                    args.self.edits.set("${DefaultEditTypes.MOVE_TRANSLATE_Y}", createAdditiveEdit(it, "{ \\"var\\": \\"dy\\" }"))
                 }
                 
                 elementProto

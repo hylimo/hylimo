@@ -575,7 +575,7 @@ export class Layout {
                 const parsedTemplate: TemplateEntry[] = [];
                 const length = assertNumber(template.getLocalFieldOrUndefined("length")!.value);
                 for (let i = 0; i < length; i++) {
-                    const entry = template.getLocalFieldOrUndefined(i.toString())!.value;
+                    const entry = template.getLocalFieldOrUndefined(i)!.value;
                     if (isString(entry)) {
                         parsedTemplate.push(entry.value);
                     } else if (isWrapperObject(entry)) {
