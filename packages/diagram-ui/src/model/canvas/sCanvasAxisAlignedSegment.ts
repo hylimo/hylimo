@@ -1,4 +1,4 @@
-import { CanvasAxisAlignedSegment, ModificationSpecification, SegmentLayoutInformation } from "@hylimo/diagram-common";
+import { CanvasAxisAlignedSegment, DefaultEditTypes, EditSpecification, SegmentLayoutInformation } from "@hylimo/diagram-common";
 import { VNode } from "snabbdom";
 import { svg } from "sprotty";
 import { SCanvasConnectionSegment } from "./sCanvasConnectionSegment.js";
@@ -35,17 +35,13 @@ export class SCanvasAxisAlignedSegment
      * 0 being the end of the vertical segment and -1 being the start
      */
     pos!: number;
-    /**
-     * Defines if verticalPos is editable
-     */
-    editable!: ModificationSpecification;
 
     override get dependencies(): string[] {
         return [this.end];
     }
 
     override generateControlViewElements(layout: SegmentLayoutInformation): VNode[] {
-        if (this.editable != undefined) {
+        if (DefaultEditTypes.AXIS_ALIGNED_SEGMENT_POS in this.edits) {
             if (this.pos >= 0) {
                 const x = layout.start.x + this.pos * (layout.end.x - layout.start.x);
                 return [

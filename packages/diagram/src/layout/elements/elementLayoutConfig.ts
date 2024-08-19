@@ -8,7 +8,7 @@ import {
     optional,
     stringType
 } from "@hylimo/core";
-import { ArcSegment, Element, Line, LineSegment, ModificationSpecification, Point, Size } from "@hylimo/diagram-common";
+import { ArcSegment, Element, Line, LineSegment, EditSpecification, Point, Size } from "@hylimo/diagram-common";
 import { LayoutElement, LayoutConfig, SizeConstraints, AttributeConfig, ContentCardinality } from "../layoutElement.js";
 import { Layout } from "../layoutEngine.js";
 
@@ -74,26 +74,6 @@ export abstract class ElementLayoutConfig implements LayoutConfig {
      * @returns the rendered element
      */
     abstract layout(layout: Layout, element: LayoutElement, position: Point, size: Size, id: string): Element[];
-
-    /**
-     * Converts the expressions to a ModificationSpecification
-     *
-     * @param expressions expression with associated key
-     * @returns the generated ModificationSpecification
-     */
-    protected generateModificationSpecification(expressions: {
-        [key: string]: Expression | undefined;
-    }): ModificationSpecification {
-        const result: { [key: string]: [number, number] } = {};
-        for (const [key, expression] of Object.entries(expressions)) {
-            if (!ExpressionMetadata.isEditable(expression?.metadata)) {
-                return null;
-            }
-            const position = expression!.position;
-            result[key] = [position.startOffset, position.endOffset];
-        }
-        return result;
-    }
 
     /**
      * Called to create the outline of an element.

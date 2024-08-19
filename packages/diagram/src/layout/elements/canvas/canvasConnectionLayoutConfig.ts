@@ -88,7 +88,8 @@ export class CanvasConnectionLayoutConfig extends EditableCanvasContentLayoutCon
             children: contents.flatMap((content, i) =>
                 layout.layout(content, position, content.measuredSize!, `${id}_${i}`)
             ),
-            ...extractStrokeStyleAttributes(element.styles)
+            ...extractStrokeStyleAttributes(element.styles),
+            edits: element.edits
         };
         const startMarker = element.startMarker;
         if (element.startMarker != undefined) {

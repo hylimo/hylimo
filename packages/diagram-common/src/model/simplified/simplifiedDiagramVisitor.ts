@@ -200,7 +200,8 @@ export abstract class SimplifiedDiagramVisitor<C, O> {
             pos: Point.ORIGIN,
             id: `simplified_${this.idCounter++}`,
             children: [connectionPath],
-            bounds: connectionPath.bounds
+            bounds: connectionPath.bounds,
+            edits: {}
         });
         if (layout.startMarker != undefined) {
             elements.push(this.simplifyMarker(layout.startMarker));
@@ -252,6 +253,7 @@ export abstract class SimplifiedDiagramVisitor<C, O> {
             rotation: layout.rotation,
             children: marker.children.map(this.simplify.bind(this)),
             pos: layout.position,
+            edits: {},
             bounds: this.calculateCanvasElementBounds(
                 layout.position,
                 layout.rotation,

@@ -1,5 +1,5 @@
 import { ExecutableAbstractFunctionExpression, fun, numberType } from "@hylimo/core";
-import { Size, AbsolutePoint, Element, Point } from "@hylimo/diagram-common";
+import { Size, AbsolutePoint, Element, Point, DefaultEditTypes } from "@hylimo/diagram-common";
 import { LayoutElement } from "../../layoutElement.js";
 import { Layout } from "../../layoutEngine.js";
 import { CanvasPointLayoutConfig } from "./canvasPointLayoutConfig.js";
@@ -36,8 +36,8 @@ export class AbsolutePointLayoutConfig extends CanvasPointLayoutConfig {
             id,
             x: xFieldEntry?.value?.toNative() + position.x,
             y: yFieldEntry?.value.toNative() + position.y,
-            editable: this.generateModificationSpecification({ x: xFieldEntry?.source, y: yFieldEntry?.source }),
-            children: []
+            children: [],
+            edits: element.edits
         };
         return [result];
     }
@@ -51,11 +51,13 @@ export class AbsolutePointLayoutConfig extends CanvasPointLayoutConfig {
                     args.self._x
                 } {
                     args.self._x = it
+                    args.self.edits.set("${DefaultEditTypes.MOVE_TRANSLATE_X}", generateAdditiveEdit(it, "{ \\"var\\": \\"dx\\" }"))
                 }
                 elementProto.defineProperty("y") {
                     args.self._y
                 } {
                     args.self._y = it
+                    args.self.edits.set("${DefaultEditTypes.MOVE_TRANSLATE_Y}", generateAdditiveEdit(it, "{ \\"var\\": \\"dy\\" }"))
                 }
                 
                 elementProto

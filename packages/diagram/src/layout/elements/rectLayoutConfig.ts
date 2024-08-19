@@ -54,7 +54,8 @@ export class RectLayoutConfig extends ContentShapeLayoutConfig {
             ...size,
             ...this.extractShapeProperties(element),
             cornerRadius,
-            children: []
+            children: [],
+            edits: element.edits
         };
         if (element.content) {
             let contentSize = size;

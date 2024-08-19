@@ -30,7 +30,7 @@ export function assertString(value: BaseObject, description = ""): string {
  * @param value the value to check
  * @returns true iff it is a StringObject
  */
-export function isString(value: BaseObject): boolean {
+export function isString(value: BaseObject): value is StringObject {
     return value instanceof StringObject;
 }
 
@@ -68,7 +68,7 @@ export function assertBoolean(value: BaseObject, description = ""): boolean {
  * @param value the value to check
  * @returns true iff it is a NumberObject
  */
-export function isNumber(value: BaseObject): boolean {
+export function isNumber(value: BaseObject): value is NumberObject {
     return value instanceof NumberObject;
 }
 
@@ -106,6 +106,16 @@ export function assertWrapperObject(value: BaseObject, description = ""): assert
     if (!(value instanceof WrapperObject)) {
         throw new RuntimeError(`${description} is not a wrapper object`);
     }
+}
+
+/**
+ * Checks if a value is a WrapperObject
+ * 
+ * @param value the value to check
+ * @returns true iff it is a WrapperObject
+ */
+export function isWrapperObject(value: BaseObject): value is WrapperObject<any> {
+    return value instanceof WrapperObject;
 }
 
 /**

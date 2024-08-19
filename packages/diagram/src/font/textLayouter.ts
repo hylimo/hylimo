@@ -74,7 +74,8 @@ export class TextLayouter {
                 y: offsetY,
                 width: 0,
                 height: 0,
-                children: []
+                children: [],
+                edits: {}
             });
             lineEmpty = false;
             textOffset = offsetX;

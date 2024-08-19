@@ -1,15 +1,12 @@
 import { Element } from "../base/element.js";
 import { PositionedElement } from "../base/positionedElement.js";
-import { ModificationSpecification } from "../modificationSpecification.js";
+import { EditSpecification } from "../editSpecification.js";
 
 /**
  * Named point on a canvas
  */
 export interface CanvasPoint extends Element {
-    /**
-     * If present, this point is manipulatable
-     */
-    editable: ModificationSpecification;
+   
 }
 
 /**

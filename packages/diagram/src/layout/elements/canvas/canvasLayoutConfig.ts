@@ -77,7 +77,8 @@ export class CanvasLayoutConfig extends StyledElementLayoutConfig {
             id,
             ...position,
             ...size,
-            children: [...children, ...layoutChildren]
+            children: [...children, ...layoutChildren],
+            edits: element.edits
         };
         return [result];
     }

@@ -37,7 +37,8 @@ export class EllipseLayoutConfig extends ContentShapeLayoutConfig {
             ...position,
             ...size,
             ...this.extractShapeProperties(element),
-            children: []
+            children: [],
+            edits: element.edits
         };
         if (element.content) {
             const contentSize = this.calculateInnerSize(size, result.stroke?.width ?? 0);

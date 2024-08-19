@@ -1,7 +1,7 @@
 import { Line } from "../../../line/model/line.js";
 import { Element } from "../base/element.js";
 import { LayoutedElement } from "../base/layoutedElement.js";
-import { ModificationSpecification } from "../modificationSpecification.js";
+import { EditSpecification } from "../editSpecification.js";
 
 /**
  * Moveable and resizeable element in a canvas
@@ -16,22 +16,6 @@ export interface CanvasElement extends LayoutedElement {
      * The rotation in degrees
      */
     rotation: number;
-    /**
-     * Resizable in x-direction if present
-     */
-    xResizable: ModificationSpecification;
-    /**
-     * Resizable in y-direction if present
-     */
-    yResizable: ModificationSpecification;
-    /**
-     * Rotateable if present
-     */
-    rotateable: ModificationSpecification;
-    /**
-     * Moveable if present
-     */
-    moveable: ModificationSpecification;
     /**
      * The outline of the CanvasElement
      */

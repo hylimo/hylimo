@@ -1,4 +1,4 @@
-import { CanvasElement, Line, ModificationSpecification, Point, TransformedLine } from "@hylimo/diagram-common";
+import { CanvasElement, Line, EditSpecification, Point, TransformedLine } from "@hylimo/diagram-common";
 import { LinearAnimatable } from "../../features/animation/model.js";
 import { LineProvider } from "../../features/layout/lineProvider.js";
 import { PositionProvider } from "../../features/layout/positionProvider.js";
@@ -44,22 +44,6 @@ export class SCanvasElement
      * The rotation in degrees
      */
     rotation!: number;
-    /**
-     * Resizable in x-direction if present
-     */
-    xResizable!: ModificationSpecification;
-    /**
-     * Resizable in y-direction if present
-     */
-    yResizable!: ModificationSpecification;
-    /**
-     * Rotateable if present
-     */
-    rotateable!: ModificationSpecification;
-    /**
-     * Moveable if present
-     */
-    moveable!: ModificationSpecification;
     /**
      * The outline of the CanvasElement
      */

@@ -31,6 +31,13 @@ export abstract class Expression<M extends ExpressionMetadata = ExpressionMetada
     }
 
     /**
+     * Getter for the range from the position
+     */
+    get range(): [number, number] {
+        return [this.position.startOffset, this.position.endOffset];
+    }
+
+    /**
      * Creates a new Expression
      *
      * @param type the type of the expression

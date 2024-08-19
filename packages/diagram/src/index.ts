@@ -38,6 +38,7 @@ export * from "./layout/layouts.js";
 export * from "./module/classDiagramModule.js";
 export * from "./module/diagramModule.js";
 export * from "./module/dslModule.js";
+export * from "./module/editModule.js";
 export * from "./module/types.js";
 export * from "./diagramEngine.js";
 export * from "./styles.js";

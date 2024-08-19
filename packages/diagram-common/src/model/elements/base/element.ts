@@ -1,3 +1,5 @@
+import { EditSpecification } from "../editSpecification.js";
+
 /**
  * Base class for all elements
  */
@@ -14,4 +16,8 @@ export interface Element {
      * Child elementes
      */
     children: Element[];
+    /**
+     * The edit specification for the element
+     */
+    edits: EditSpecification;
 }

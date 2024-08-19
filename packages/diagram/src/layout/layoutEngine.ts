@@ -1,6 +1,18 @@
-import { BaseObject, FieldEntry, FullObject, nativeToList } from "@hylimo/core";
+import {
+    assertNumber,
+    assertObject,
+    assertWrapperObject,
+    BaseObject,
+    Expression,
+    FieldEntry,
+    FullObject,
+    isString,
+    isWrapperObject,
+    nativeToList,
+    SemanticFieldNames
+} from "@hylimo/core";
 import { assertString } from "@hylimo/core";
-import { Element, Size, Point, Stroke } from "@hylimo/diagram-common";
+import { Element, Size, Point, Stroke, EditSpecification, TemplateEntry } from "@hylimo/diagram-common";
 import { FontManager } from "../font/fontManager.js";
 import { TextLayoutResult, TextLayouter } from "../font/textLayouter.js";
 import { generateStyles, Selector, SelectorType, Style, StyleList } from "../styles.js";
@@ -164,7 +176,8 @@ export class LayoutEngine {
                 type: "root",
                 id: "root",
                 children: elements,
-                fonts: fontFamilyConfigs
+                fonts: fontFamilyConfigs,
+                edits: {}
             },
             elementLookup: layout.elementLookup,
             layoutElementLookup: layout.layoutElementLookup
@@ -367,7 +380,8 @@ export class Layout {
             styles: {},
             styleSources: new Map(),
             layoutConfig: this.engine.layoutConfigs.get(type)!,
-            class: new Set(cls)
+            class: new Set(cls),
+            edits: this.generateEdits(element)
         };
         this.applyStyles(layoutElement);
         const styles = layoutElement.styles;
@@ -540,5 +554,49 @@ export class Layout {
             y += layoutInformation.marginTop;
         }
         return { y, height };
+    }
+
+    /**
+     * Converts the element to a EditSpecification
+     *
+     * @param expressions expression with associated key
+     * @returns the generated EditSpecification
+     */
+    private generateEdits(element: FullObject): EditSpecification {
+        const edits = element.getLocalFieldOrUndefined("edits")!.value;
+        assertObject(edits);
+        const res: EditSpecification = {};
+        for (const [key, { value }] of edits.fields.entries()) {
+            if (key != SemanticFieldNames.PROTO) {
+                assertObject(value);
+                const type = assertString(value.getLocalFieldOrUndefined("type")!.value, "type");
+                const template = value.getLocalFieldOrUndefined("template")!.value;
+                assertObject(template);
+                let parsedTemplate: TemplateEntry[] = [];
+                const length = assertNumber(template.getLocalFieldOrUndefined("length")!.value);
+                for (let i = 0; i < length; i++) {
+                    const entry = template.getLocalFieldOrUndefined(i.toString())!.value;
+                    if (isString(entry)) {
+                        parsedTemplate.push(entry.value);
+                    } else if (isWrapperObject(entry)) {
+                        const expression = entry.wrapped as Expression;
+                        parsedTemplate.push({ range: expression.range });
+                    } else {
+                        assertObject(entry);
+                        const expression = assertString(entry.getLocalFieldOrUndefined("exp")!.value);
+                        parsedTemplate.push({ exp: expression });
+                    }
+                }
+                const target = value.getLocalFieldOrUndefined("target")!.value;
+                assertWrapperObject(target);
+                const targetExpression = target.wrapped as Expression;
+                res[key] = {
+                    type: type as "replace" | "add",
+                    range: targetExpression.range,
+                    template: parsedTemplate
+                };
+            }
+        }
+        return res;
     }
 }

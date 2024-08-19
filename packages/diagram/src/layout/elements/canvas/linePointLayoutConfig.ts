@@ -66,8 +66,8 @@ export class LinePointLayoutConfig extends CanvasPointLayoutConfig {
             distance,
             segment,
             lineProvider,
-            editable: this.generateModificationSpecification(editableExpressions),
-            children: []
+            children: [],
+            edits: element.edits
         };
         return [result];
     }

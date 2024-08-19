@@ -1,4 +1,4 @@
-import { CanvasPoint, ModificationSpecification, Point } from "@hylimo/diagram-common";
+import { CanvasPoint, Point } from "@hylimo/diagram-common";
 import { PositionProvider } from "../../features/layout/positionProvider.js";
 import { SCanvasContent } from "./sCanvasContent.js";
 
@@ -10,10 +10,6 @@ export abstract class SCanvasPoint extends SCanvasContent implements CanvasPoint
      * The provided position
      */
     position!: Point;
-    /**
-     * If present, this point is manipulatable
-     */
-    editable!: ModificationSpecification;
 
     /**
      * Evaluates if this point is visible

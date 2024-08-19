@@ -96,7 +96,8 @@ export class PathLayoutConfig extends ShapeLayoutConfig {
             ...size,
             ...element.shapeProperties,
             path: layoutedPath.path,
-            children: []
+            children: [],
+            edits: element.edits
         };
         return [result];
     }

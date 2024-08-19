@@ -1,5 +1,5 @@
 import { inject } from "inversify";
-import { LinePoint, Math2D, ModificationSpecification, Point } from "@hylimo/diagram-common";
+import { LinePoint, Math2D, EditSpecification, Point, DefaultEditTypes } from "@hylimo/diagram-common";
 import {
     findParentByFeature,
     IModelIndex,
@@ -225,7 +225,7 @@ export class MoveMouseListener extends MouseListener {
             (element) => element instanceof SCanvasElement
         ) as SCanvasElement[];
         let scaleX: number | undefined = undefined;
-        if (resizedElements.every((element) => element.xResizable != undefined)) {
+        if (resizedElements.every((element) => DefaultEditTypes.RESIZE_WIDTH in element.edits)) {
             if (classList.contains(ResizePosition.LEFT)) {
                 scaleX = target.width / target.x;
             } else if (classList.contains(ResizePosition.RIGHT)) {
@@ -236,7 +236,7 @@ export class MoveMouseListener extends MouseListener {
             }
         }
         let scaleY: number | undefined = undefined;
-        if (resizedElements.every((element) => element.yResizable != undefined)) {
+        if (resizedElements.every((element) => DefaultEditTypes.RESIZE_HEIGHT in element.edits)) {
             if (classList.contains(ResizePosition.TOP)) {
                 scaleY = target.height / target.y;
             } else if (classList.contains(ResizePosition.BOTTOM)) {
@@ -269,7 +269,7 @@ export class MoveMouseListener extends MouseListener {
      * @returns the move handler if rotation is supported, otherwise null
      */
     private createRotationHandler(target: SCanvasElement): MoveHandler | null {
-        if (target.rotateable == undefined) {
+        if (!(DefaultEditTypes.ROTATE in target.edits)) {
             return null;
         }
         const origin = target.position;
@@ -309,11 +309,12 @@ export class MoveMouseListener extends MouseListener {
             elements
         );
 
-        const modificationSpecifications = [
-            ...[...pointsToMove].map((point) => point.editable),
-            ...[...elementsToMove].map((element) => element.moveable)
-        ];
-        if (!ModificationSpecification.isConsistent(modificationSpecifications)) {
+        const editSpecifications = [...pointsToMove, ...elementsToMove].flatMap((element) => [
+            element.edits[DefaultEditTypes.MOVE_TRANSLATE_X],
+            element.edits[DefaultEditTypes.MOVE_TRANSLATE_Y]
+        ]);
+
+        if (!EditSpecification.isConsistent(editSpecifications)) {
             return null;
         }
         return this.createMoveHandlerForPointsAndElements(pointsToMove, elementsToMove);
@@ -388,7 +389,8 @@ export class MoveMouseListener extends MouseListener {
         do {
             const newPoints = new Set<SCanvasPoint>();
             for (const point of currentPoints) {
-                if (point instanceof SRelativePoint && point.editable == null) {
+                const editable = DefaultEditTypes.MOVE_TRANSLATE_X in point.edits && DefaultEditTypes.MOVE_TRANSLATE_Y in point.edits;
+                if (point instanceof SRelativePoint && !editable) {
                     let targetPoint: SCanvasPoint | undefined;
                     const target = index.getById(point.target) as SCanvasPoint | SCanvasElement;
                     if (target instanceof SCanvasPoint) {

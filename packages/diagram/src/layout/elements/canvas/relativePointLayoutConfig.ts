@@ -47,11 +47,8 @@ export class RelativePointLayoutConfig extends CanvasPointLayoutConfig {
             offsetX: offsetXFieldEntry?.value?.toNative(),
             offsetY: offsetYFieldEntry?.value.toNative(),
             target,
-            editable: this.generateModificationSpecification({
-                offsetX: offsetXFieldEntry?.source,
-                offsetY: offsetYFieldEntry?.source
-            }),
-            children: []
+            children: [],
+            edits: element.edits
         };
         return [result];
     }

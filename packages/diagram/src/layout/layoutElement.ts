@@ -1,5 +1,5 @@
 import { ExecutableAbstractFunctionExpression, FieldEntry, FullObject, Type } from "@hylimo/core";
-import { Element, Line, Point, Size } from "@hylimo/diagram-common";
+import { EditSpecification, Element, Line, Point, Size } from "@hylimo/diagram-common";
 import { Layout } from "./layoutEngine.js";
 import { Bounds } from "@hylimo/diagram-common";
 
@@ -115,9 +115,9 @@ export interface LayoutElement {
      */
     styles: Record<string, any>;
     /**
-     * Sources of the styles
+     * Edit specifications for the element
      */
-    styleSources: Map<string, FieldEntry>;
+    edits: EditSpecification;
     /**
      * After measure the computed size
      */

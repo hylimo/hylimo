@@ -83,6 +83,7 @@ function createElementFunction(element: LayoutConfig): ExecutableExpression {
                         newElement.setFieldEntry(key, value, context);
                     }
                 }
+                newElement.setLocalField("edits", { value: context.newObject() }, context);
                 context.getField("_evaluateElement").invoke(
                     [
                         {
@@ -185,7 +186,7 @@ function font(name: string, url: string): ExecutableListEntry {
  */
 export const diagramModule = InterpreterModule.create(
     "diagram",
-    [DefaultModuleNames.COMMON, DefaultModuleNames.LIST, DefaultModuleNames.OPERATOR],
+    [...Object.values(DefaultModuleNames)],
     [],
     [
         fun([
