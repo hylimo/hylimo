@@ -8,7 +8,7 @@ export interface EditSpecification {
      * Entries, consisting of a start and end
      */
     [key: string]: ModificationSpecificationEntry;
-};
+}
 
 /**
  * Template entry for a modification specification
@@ -71,7 +71,8 @@ export namespace EditSpecification {
                 }
                 if (
                     entry.type === "replace" &&
-                    (entry.range[1] !== lastEntry.range[1] || !isTemplateEqual(entry.template[0], lastEntry.template[0]))
+                    (entry.range[1] !== lastEntry.range[1] ||
+                        !isTemplateEqual(entry.template[0], lastEntry.template[0]))
                 ) {
                     return false;
                 }
@@ -84,8 +85,8 @@ export namespace EditSpecification {
 
     /**
      * Checks if two template entries are equal
-     * 
-     * @param a the first template entry 
+     *
+     * @param a the first template entry
      * @param b the second template entry
      * @returns true if the template entries are equal
      */

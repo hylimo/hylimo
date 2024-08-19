@@ -110,7 +110,7 @@ export function assertWrapperObject(value: BaseObject, description = ""): assert
 
 /**
  * Checks if a value is a WrapperObject
- * 
+ *
  * @param value the value to check
  * @returns true iff it is a WrapperObject
  */

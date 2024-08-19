@@ -389,7 +389,9 @@ export class MoveMouseListener extends MouseListener {
         do {
             const newPoints = new Set<SCanvasPoint>();
             for (const point of currentPoints) {
-                const editable = DefaultEditTypes.MOVE_TRANSLATE_X in point.edits && DefaultEditTypes.MOVE_TRANSLATE_Y in point.edits;
+                const editable =
+                    DefaultEditTypes.MOVE_TRANSLATE_X in point.edits &&
+                    DefaultEditTypes.MOVE_TRANSLATE_Y in point.edits;
                 if (point instanceof SRelativePoint && !editable) {
                     let targetPoint: SCanvasPoint | undefined;
                     const target = index.getById(point.target) as SCanvasPoint | SCanvasElement;

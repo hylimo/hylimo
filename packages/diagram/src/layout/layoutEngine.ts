@@ -572,7 +572,7 @@ export class Layout {
                 const type = assertString(value.getLocalFieldOrUndefined("type")!.value, "type");
                 const template = value.getLocalFieldOrUndefined("template")!.value;
                 assertObject(template);
-                let parsedTemplate: TemplateEntry[] = [];
+                const parsedTemplate: TemplateEntry[] = [];
                 const length = assertNumber(template.getLocalFieldOrUndefined("length")!.value);
                 for (let i = 0; i < length; i++) {
                     const entry = template.getLocalFieldOrUndefined(i.toString())!.value;

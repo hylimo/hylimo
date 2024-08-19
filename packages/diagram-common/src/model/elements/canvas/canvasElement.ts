@@ -1,7 +1,6 @@
 import { Line } from "../../../line/model/line.js";
 import { Element } from "../base/element.js";
 import { LayoutedElement } from "../base/layoutedElement.js";
-import { EditSpecification } from "../editSpecification.js";
 
 /**
  * Moveable and resizeable element in a canvas

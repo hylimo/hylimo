@@ -1,13 +1,10 @@
 import { Element } from "../base/element.js";
 import { PositionedElement } from "../base/positionedElement.js";
-import { EditSpecification } from "../editSpecification.js";
 
 /**
  * Named point on a canvas
  */
-export interface CanvasPoint extends Element {
-   
-}
+export type CanvasPoint = Element;
 
 /**
  * Absolute point on a canvas consisting of an x and y coordinate

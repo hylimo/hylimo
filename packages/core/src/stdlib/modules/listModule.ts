@@ -171,100 +171,102 @@ export const listModule = InterpreterModule.create(
                         returns: "The resulting new list."
                     }
                 )
-            )
-        ]).call(),
-        assign(
-            "list",
-            native(
-                (args, context, staticScope) => {
-                    const indexOnlyArgs = args.filter((value) => !value.name);
-                    const list = generateArgs(indexOnlyArgs, context, undefined);
-                    list.setLocalField(
-                        SemanticFieldNames.PROTO,
-                        staticScope.getFieldEntry(listProto, context),
-                        context
-                    );
-                    list.setLocalField(lengthField, { value: context.newNumber(indexOnlyArgs.length) }, context);
-                    return { value: list };
-                },
-                {
-                    docs: "Creates a new list with the defined elements",
-                    params: [[0, "all positional elements: the elements to add"]],
-                    returns: "The created list"
-                }
-            )
-        ),
-        assign(
-            "listWrapper",
-            fun(
-                [
-                    id(SemanticFieldNames.THIS).assignField("callback", id(SemanticFieldNames.IT)),
-                    native((args, context, staticScope) => {
-                        const listFunction = staticScope.getField("list", context);
-                        const list = listFunction.invoke(args, context);
-                        const callback = staticScope.getField("callback", context);
-                        const invokeArguments: ExecutableListEntry[] = [{ value: new ExecutableConstExpression(list) }];
-                        invokeArguments.push(...args.filter((arg) => arg.name !== undefined));
-                        return callback.invoke(invokeArguments, context);
-                    })
-                ],
-                {
-                    docs: "Creates a function which puts all indexed parameters in a list, and then calls callback with that list. Also provides all named arguments to the callback under the same name.",
-                    params: [[0, "the callback to use"]],
-                    returns: "The created function"
-                }
-            )
-        ),
-        assign(
-            "toList",
-            jsFun(
-                (args, context) => {
-                    const objectEntry = args.getFieldEntry(0, context);
-                    const object = objectEntry.value as FullObject;
-                    object.setLocalField(
-                        SemanticFieldNames.PROTO,
-                        context.currentScope.getFieldEntry(listProto, context),
-                        context
-                    );
-                    const maxKey =
-                        Math.max(
-                            -1,
-                            ...([...object.fields.keys()].filter((key) => typeof key === "number") as number[])
-                        ) + 1;
-                    object.setLocalField(lengthField, { value: context.newNumber(maxKey) }, context);
-                    return objectEntry;
-                },
-                {
-                    docs: "Modifies the provided object so that it is a list",
-                    params: [[0, "the object to modify", objectType()]],
-                    returns: "The modified provided object"
-                }
-            )
-        ),
-        assign(
-            "range",
-            fun(
-                `
-                    (n, step) = args
-                    step = step ?? 1
-                    res = list()
-                    i = 0
-                    while { i < n } {
-                        res.add(i)
-                        i = i + step
+            ),
+            id(SemanticFieldNames.IT).assignField(
+                "list",
+                native(
+                    (args, context, staticScope) => {
+                        const indexOnlyArgs = args.filter((value) => !value.name);
+                        const list = generateArgs(indexOnlyArgs, context, undefined);
+                        list.setLocalField(
+                            SemanticFieldNames.PROTO,
+                            staticScope.getFieldEntry(listProto, context),
+                            context
+                        );
+                        list.setLocalField(lengthField, { value: context.newNumber(indexOnlyArgs.length) }, context);
+                        return { value: list };
+                    },
+                    {
+                        docs: "Creates a new list with the defined elements",
+                        params: [[0, "all positional elements: the elements to add"]],
+                        returns: "The created list"
                     }
-                    res
-                `,
-                {
-                    docs: "Generates a list with a range of numbers from 0 up to n with n < the first parameter.",
-                    params: [
-                        [0, "the max value", numberType],
-                        [1, "optional step size, defaults to 1", optional(numberType)]
+                )
+            ),
+            id(SemanticFieldNames.IT).assignField(
+                "listWrapper",
+                fun(
+                    [
+                        id(SemanticFieldNames.THIS).assignField("callback", id(SemanticFieldNames.IT)),
+                        native((args, context, staticScope) => {
+                            const listFunction = staticScope.getField("list", context);
+                            const list = listFunction.invoke(args, context);
+                            const callback = staticScope.getField("callback", context);
+                            const invokeArguments: ExecutableListEntry[] = [
+                                { value: new ExecutableConstExpression(list) }
+                            ];
+                            invokeArguments.push(...args.filter((arg) => arg.name !== undefined));
+                            return callback.invoke(invokeArguments, context);
+                        })
                     ],
-                    returns: "A list with the generated numbers"
-                }
+                    {
+                        docs: "Creates a function which puts all indexed parameters in a list, and then calls callback with that list. Also provides all named arguments to the callback under the same name.",
+                        params: [[0, "the callback to use"]],
+                        returns: "The created function"
+                    }
+                )
+            ),
+            id(SemanticFieldNames.IT).assignField(
+                "toList",
+                jsFun(
+                    (args, context) => {
+                        const objectEntry = args.getFieldEntry(0, context);
+                        const object = objectEntry.value as FullObject;
+                        object.setLocalField(
+                            SemanticFieldNames.PROTO,
+                            context.currentScope.getFieldEntry(listProto, context),
+                            context
+                        );
+                        const maxKey =
+                            Math.max(
+                                -1,
+                                ...([...object.fields.keys()].filter((key) => typeof key === "number") as number[])
+                            ) + 1;
+                        object.setLocalField(lengthField, { value: context.newNumber(maxKey) }, context);
+                        return objectEntry;
+                    },
+                    {
+                        docs: "Modifies the provided object so that it is a list",
+                        params: [[0, "the object to modify", objectType()]],
+                        returns: "The modified provided object"
+                    }
+                )
+            ),
+            id(SemanticFieldNames.IT).assignField(
+                "range",
+                fun(
+                    `
+                        (n, step) = args
+                        step = step ?? 1
+                        res = list()
+                        i = 0
+                        while { i < n } {
+                            res.add(i)
+                            i = i + step
+                        }
+                        res
+                    `,
+                    {
+                        docs: "Generates a list with a range of numbers from 0 up to n with n < the first parameter.",
+                        params: [
+                            [0, "the max value", numberType],
+                            [1, "optional step size, defaults to 1", optional(numberType)]
+                        ],
+                        returns: "A list with the generated numbers"
+                    }
+                )
             )
-        )
+        ]).call(id(SemanticFieldNames.THIS))
     ]
 );
 

@@ -1,5 +1,5 @@
-import { FullObject, numberType, optional, FunctionExpression, ExecutableAbstractFunctionExpression, fun } from "@hylimo/core";
-import { Size, Point, Element, CanvasElement, EditSpecification } from "@hylimo/diagram-common";
+import { FullObject, numberType, optional, ExecutableAbstractFunctionExpression, fun } from "@hylimo/core";
+import { Size, Point, Element, CanvasElement } from "@hylimo/diagram-common";
 import { canvasPointType, elementType } from "../../../module/types.js";
 import {
     ContentCardinality,
@@ -103,7 +103,7 @@ export class CanvasElementLayoutConfig extends EditableCanvasContentLayoutConfig
         if (pos == undefined) {
             return undefined;
         } else {
-            return this.getContentId(element, pos)
+            return this.getContentId(element, pos);
         }
     }
 

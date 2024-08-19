@@ -1,4 +1,4 @@
-import { CanvasElement, Line, EditSpecification, Point, TransformedLine } from "@hylimo/diagram-common";
+import { CanvasElement, Line, Point, TransformedLine } from "@hylimo/diagram-common";
 import { LinearAnimatable } from "../../features/animation/model.js";
 import { LineProvider } from "../../features/layout/lineProvider.js";
 import { PositionProvider } from "../../features/layout/positionProvider.js";

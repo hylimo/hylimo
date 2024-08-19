@@ -1,4 +1,4 @@
-import { literal, namedType, objectType, or, SemanticFieldNames, Type } from "@hylimo/core";
+import { literal, namedType, objectType, or, Type } from "@hylimo/core";
 import { AbsolutePoint, LinePoint, RelativePoint } from "@hylimo/diagram-common";
 
 /**

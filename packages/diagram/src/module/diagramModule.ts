@@ -7,7 +7,6 @@ import {
     ExecutableExpression,
     ExecutableListEntry,
     ExecutableNumberLiteralExpression,
-    ExecutableStringLiteralExpression,
     fun,
     functionType,
     id,

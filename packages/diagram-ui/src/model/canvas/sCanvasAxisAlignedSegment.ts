@@ -1,4 +1,4 @@
-import { CanvasAxisAlignedSegment, DefaultEditTypes, EditSpecification, SegmentLayoutInformation } from "@hylimo/diagram-common";
+import { CanvasAxisAlignedSegment, DefaultEditTypes, SegmentLayoutInformation } from "@hylimo/diagram-common";
 import { VNode } from "snabbdom";
 import { svg } from "sprotty";
 import { SCanvasConnectionSegment } from "./sCanvasConnectionSegment.js";

@@ -1,14 +1,5 @@
-import {
-    ExecutableAbstractFunctionExpression,
-    Expression,
-    ExpressionMetadata,
-    Type,
-    fun,
-    listType,
-    optional,
-    stringType
-} from "@hylimo/core";
-import { ArcSegment, Element, Line, LineSegment, EditSpecification, Point, Size } from "@hylimo/diagram-common";
+import { ExecutableAbstractFunctionExpression, Type, fun, listType, optional, stringType } from "@hylimo/core";
+import { ArcSegment, Element, Line, LineSegment, Point, Size } from "@hylimo/diagram-common";
 import { LayoutElement, LayoutConfig, SizeConstraints, AttributeConfig, ContentCardinality } from "../layoutElement.js";
 import { Layout } from "../layoutEngine.js";
 
