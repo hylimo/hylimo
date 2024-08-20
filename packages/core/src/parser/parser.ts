@@ -208,7 +208,11 @@ export class Parser extends CstParser {
                         this.MANY_SEP({
                             SEP: Comma,
                             DEF: () =>
-                                this.withError(() => this.SUBRULE(this.listEntry), "Expected a function parameter", this.OR1)
+                                this.withError(
+                                    () => this.SUBRULE(this.listEntry),
+                                    "Expected a function parameter",
+                                    this.OR1
+                                )
                         });
                         this.CONSUME(CloseRoundBracket, { ERR_MSG: "Closing ')' of function call is missing" });
                     }
