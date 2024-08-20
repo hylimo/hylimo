@@ -204,12 +204,13 @@ export class Parser extends CstParser {
             DEF: [
                 {
                     ALT: () => {
-                        this.CONSUME(OpenRoundBracket);
+                        this.CONSUME(OpenRoundBracket, { ERR_MSG: "Opening '(' of function call is missing" });
                         this.MANY_SEP({
                             SEP: Comma,
-                            DEF: () => this.SUBRULE(this.listEntry)
+                            DEF: () =>
+                                this.withError(() => this.SUBRULE(this.listEntry), "Expected a function parameter", this.OR1)
                         });
-                        this.CONSUME(CloseRoundBracket);
+                        this.CONSUME(CloseRoundBracket, { ERR_MSG: "Closing ')' of function call is missing" });
                     }
                 },
                 { ALT: () => this.SUBRULE1(this.function) }
@@ -311,11 +312,13 @@ export class Parser extends CstParser {
      */
     private operatorExpression = this.RULE(Rules.OPERATOR_EXPRESSION, () => {
         const first = this.SUBRULE1(this.fieldAccessExpression);
+        let i = 0;
         this.MANY(() => {
+            i++;
             const operator = this.SUBRULE(this.simpleFieldAccessExpression);
             this.withError(
                 () => this.SUBRULE2(this.fieldAccessExpression),
-                `infix expression started with operand '${this.getText(first)}' and trailing operator '${this.getText(operator)}' is missing its terminal expression`
+                `infix expression started with operand '${this.getText(first)}' and${i > 1 ? " trailing" : ""} operator '${this.getText(operator)}' is missing its terminal expression`
             );
         });
         if (this.faultTolerant) {
