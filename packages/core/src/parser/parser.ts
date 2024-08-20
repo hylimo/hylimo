@@ -369,7 +369,8 @@ export class Parser extends CstParser {
                                 const equals = this.CONSUME(Equal);
                                 this.withError(
                                     () => this.SUBRULE2(this.operatorExpression),
-                                    `Assignment expression '${this.getText(leftSide)}${equals.image}' is missing the value you want to store`
+                                    `Assignment expression '${this.getText(leftSide)}${equals.image}' is missing the value you want to store`,
+                                    this.OR1
                                 );
                             }
                         });
@@ -392,7 +393,7 @@ export class Parser extends CstParser {
     }
 
     private withError<Type>(rule: () => Type, errorMessage: string, or?: typeof this.OR): Type {
-        return (or ?? this.OR)({
+        return (or ?? this.OR).call(this, {
             DEF: [{ ALT: rule }],
             ERR_MSG: errorMessage
         });
