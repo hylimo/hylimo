@@ -67,7 +67,7 @@ export function evaluateTemplate(
             if (typeof entry === "string") {
                 return entry;
             } else if ("exp" in entry) {
-                return apply(entry.exp, values).replace(/\n/g, "\n" + indentation);
+                return `${apply(entry.exp, values)}`.replace(/\n/g, "\n" + indentation);
             } else {
                 throw new Error("Unknown template entry type");
             }

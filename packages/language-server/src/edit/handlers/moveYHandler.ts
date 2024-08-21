@@ -10,7 +10,7 @@ export const moveYHandler: EditHandler<MoveEdit> = {
     type: DefaultEditTypes.MOVE_Y,
 
     predictActionDiff(layoutedDiagram, lastApplied, newest, elements) {
-        const deltaY = newest.values.dy - (lastApplied?.values?.dy ?? 0);
+        const deltaY = newest.dy - (lastApplied?.dy ?? 0);
         const updates: IncrementalUpdate[] = [];
         for (const element of elements) {
             if (AbsolutePoint.isAbsolutePoint(element)) {
@@ -36,7 +36,7 @@ export const moveYHandler: EditHandler<MoveEdit> = {
         return updates;
     },
 
-    transformAction(action, config) {
-        action.values.dy = roundToPrecision(action.values.dy, config.settings.translationPrecision);
+    transformEdit(edit, config) {
+        edit.values.dy = roundToPrecision(edit.values.dy, config.settings.translationPrecision);
     }
 };

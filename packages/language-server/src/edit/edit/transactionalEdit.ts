@@ -112,7 +112,7 @@ export class TransactionalEdit {
 
     /**
      * Predicts the action diff based on the layouted diagram and the last applied action
-     * 
+     *
      * @param layoutedDiagram the layouted diagram to apply the prediction to
      * @param lastApplied the last applied action
      * @param newest the newest action
@@ -124,33 +124,37 @@ export class TransactionalEdit {
         newest: TransactionalAction
     ): IncrementalUpdate[] {
         const res: IncrementalUpdate[] = [];
-        for (const edit of this.action.edits) {
+        this.action.edits.forEach((edit, index) => {
             const elements = edit.elements!.map((id) => layoutedDiagram.elementLookup[id]);
             for (const type of edit.types!) {
                 const handler = this.registry.getEditHandler(type);
                 if (handler != undefined) {
-                    res.push(...handler.predictActionDiff(layoutedDiagram, lastApplied, newest, elements));
+                    res.push(
+                        ...handler.predictActionDiff(
+                            layoutedDiagram,
+                            lastApplied?.edits?.[index]?.values,
+                            newest.edits[index].values,
+                            elements
+                        )
+                    );
                 }
             }
-        }
+        });
         return res;
     }
 
     /**
      * Transforms the action based on settings and other values
-     * 
+     *
      * @param action the action to transform
      * @param config the language server config
      */
-    transformEdit(
-        action: TransactionalAction,
-        config: DynamicLanguageServerConfig
-    ): void {
+    transformEdit(action: TransactionalAction, config: DynamicLanguageServerConfig): void {
         for (const edit of action.edits) {
             for (const type of edit.types!) {
                 const handler = this.registry.getEditHandler(type);
                 if (handler != undefined) {
-                    handler.transformAction(action, config);
+                    handler.transformEdit(edit, config);
                 }
             }
         }

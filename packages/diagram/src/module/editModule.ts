@@ -80,9 +80,9 @@ export const editModule = InterpreterModule.create(
                             operator instanceof IdentifierExpression &&
                             (operator.identifier === "+" || operator.identifier === "-") &&
                             target.argumentExpressions.length === 2 &&
-                            target.argumentExpressions[1] instanceof NumberLiteralExpression
+                            target.argumentExpressions[1].value instanceof NumberLiteralExpression
                         ) {
-                            const rightHandValue = target.argumentExpressions[1].value;
+                            const rightHandValue = target.argumentExpressions[1].value.value;
                             const replacedValue = operator.identifier === "+" ? rightHandValue : -rightHandValue;
                             const sum = `{ "+": [${replacedValue}, ${deltaExp}] }`;
                             const operatorAndSum = `{ "if": [{ ">=": [${sum}, 0] }, { "cat": [" + ", ${sum}] }, { "cat": [" - ", { "-": ${sum} }] }] }`;
