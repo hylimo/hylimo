@@ -1,11 +1,11 @@
-import { LineEngine, Point, TransformedLine } from "@hylimo/diagram-common";
-import { LineMoveAction } from "@hylimo/diagram-protocol";
+import {  Point, TransformedLine } from "@hylimo/diagram-common";
 import { MoveHandler } from "./moveHandler.js";
+import { Edit } from "@hylimo/diagram-protocol";
 
 /**
  * Move handler for line point moves
  */
-export class LineMoveHandler implements MoveHandler {
+export class LineMoveHandler extends MoveHandler {
     /**
      * Creats a new LineMoveHandler
      *
@@ -18,13 +18,16 @@ export class LineMoveHandler implements MoveHandler {
      */
     constructor(
         readonly point: string,
-        readonly transactionId: string,
+        transactionId: string,
         readonly initialPosition: Point,
         readonly onLine: boolean,
         readonly hasSegment: boolean,
         readonly line: TransformedLine
-    ) {}
+    ) {
+        super(transactionId);
+    }
 
+    /*
     generateAction(dx: number, dy: number, sequenceNumber: number, commited: boolean): LineMoveAction {
         const newPosition: Point = {
             x: this.initialPosition.x + dx,
@@ -51,5 +54,10 @@ export class LineMoveHandler implements MoveHandler {
             commited,
             sequenceNumber
         };
+    }
+        */
+
+    protected override generateEdits(dx: number, dy: number, event: MouseEvent): Edit[] {
+        throw new Error("Method not implemented.");
     }
 }

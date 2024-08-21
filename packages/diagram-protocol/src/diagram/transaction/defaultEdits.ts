@@ -30,4 +30,4 @@ export type AxisAlignedSegmentEdit = Edit<{ pos: number }, DefaultEditTypes.AXIS
 /**
  * Rotate edit
  */
-export type RotateEdit = Edit<{ angle: number }, DefaultEditTypes.ROTATE>;
+export type RotateEdit = Edit<{ rotation: number }, DefaultEditTypes.ROTATE>;

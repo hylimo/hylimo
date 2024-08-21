@@ -1,11 +1,11 @@
-import { Point } from "@hylimo/diagram-common";
-import { RotationAction } from "@hylimo/diagram-protocol";
+import { DefaultEditTypes, Point } from "@hylimo/diagram-common";
 import { MoveHandler } from "./moveHandler.js";
+import { Edit, RotateEdit } from "@hylimo/diagram-protocol";
 
 /**
  * Move handler for rotating CanvasElements
  */
-export class RotationHandler implements MoveHandler {
+export class RotationHandler extends MoveHandler {
     /**
      * Creates a new RotationHandler
      *
@@ -16,12 +16,14 @@ export class RotationHandler implements MoveHandler {
      */
     constructor(
         readonly element: string,
-        readonly transactionId: string,
+        transactionId: string,
         readonly origin: Point,
         readonly initialPosition: Point
-    ) {}
+    ) {
+        super(transactionId);
+    }
 
-    generateAction(dx: number, dy: number, sequenceNumber: number, commited: boolean): RotationAction {
+    protected override generateEdits(dx: number, dy: number, event: MouseEvent): Edit[] {
         const newPosition: Point = {
             x: this.initialPosition.x + dx,
             y: this.initialPosition.y + dy
@@ -31,13 +33,12 @@ export class RotationHandler implements MoveHandler {
         if (newRotation < 0) {
             newRotation += 360;
         }
-        return {
-            kind: RotationAction.KIND,
-            element: this.element,
-            rotation: newRotation,
-            transactionId: this.transactionId,
-            commited,
-            sequenceNumber
-        };
+        return [
+            {
+                types: [DefaultEditTypes.ROTATE],
+                values: { rotation: newRotation },
+                elements: [this.element]
+            } satisfies RotateEdit
+        ];
     }
 }

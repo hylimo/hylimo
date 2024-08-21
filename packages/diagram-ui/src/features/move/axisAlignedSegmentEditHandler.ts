@@ -1,10 +1,11 @@
-import { AxisAlignedSegmentEditAction } from "@hylimo/diagram-protocol";
+import { AxisAlignedSegmentEdit, Edit } from "@hylimo/diagram-protocol";
 import { MoveHandler } from "./moveHandler.js";
+import { DefaultEditTypes } from "@hylimo/diagram-common";
 
 /**
  * Move handler for moving the vertical segment of an axis aligned connection segment
  */
-export class AxisAligedSegmentEditHandler implements MoveHandler {
+export class AxisAligedSegmentEditHandler extends MoveHandler {
     /**
      * Creates a new AxisAligedSegmentEditHandler
      *
@@ -17,23 +18,24 @@ export class AxisAligedSegmentEditHandler implements MoveHandler {
      */
     constructor(
         readonly element: string,
-        readonly transactionId: string,
+        transactionId: string,
         readonly original: number,
         readonly start: number,
         readonly end: number,
         readonly vertical: boolean
-    ) {}
+    ) {
+        super(transactionId);
+    }
 
-    generateAction(dx: number, dy: number, sequenceNumber: number, commited: boolean): AxisAlignedSegmentEditAction {
+    protected override generateEdits(dx: number, dy: number, event: MouseEvent): Edit[] {
         const rawPos = (this.original + (this.vertical ? dx : dy) - this.start) / (this.end - this.start);
         const newPos = Math.min(1, Math.max(0, rawPos));
-        return {
-            kind: AxisAlignedSegmentEditAction.KIND,
-            element: this.element,
-            transactionId: this.transactionId,
-            commited,
-            pos: this.vertical ? newPos : newPos - 1,
-            sequenceNumber
-        };
+        return [
+            {
+                types: [DefaultEditTypes.AXIS_ALIGNED_SEGMENT_POS],
+                values: { pos: newPos },
+                elements: [this.element]
+            } satisfies AxisAlignedSegmentEdit
+        ];
     }
 }

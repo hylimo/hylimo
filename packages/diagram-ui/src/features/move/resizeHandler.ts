@@ -1,11 +1,11 @@
 import { Math2D } from "@hylimo/diagram-common";
-import { ResizeAction } from "@hylimo/diagram-protocol";
 import { MoveHandler } from "./moveHandler.js";
+import { Edit } from "@hylimo/diagram-protocol";
 
 /**
  * A move handler that resizes the elements.
  */
-export class ResizeHandler implements MoveHandler {
+export class ResizeHandler extends MoveHandler {
     /**
      * The rotation of the primary resize element, in radians.
      */
@@ -24,16 +24,18 @@ export class ResizeHandler implements MoveHandler {
      */
     constructor(
         readonly elements: string[],
-        readonly transactionId: string,
+        transactionId: string,
         readonly originalWidth: number,
         readonly originalHeight: number,
         rotation: number,
         readonly scaleX?: number,
         readonly scaleY?: number
     ) {
+        super(transactionId);
         this.rotation = rotation * (Math.PI / 180);
     }
 
+    /*
     generateAction(dx: number, dy: number, sequenceNumber: number, commited: boolean): ResizeAction {
         let factorX: number | undefined = undefined;
         let factorY: number | undefined = undefined;
@@ -55,4 +57,10 @@ export class ResizeHandler implements MoveHandler {
             sequenceNumber
         };
     }
+        */
+
+    protected override generateEdits(dx: number, dy: number, event: MouseEvent): Edit[] {
+        throw new Error("Method not implemented.");
+    }
+    
 }
