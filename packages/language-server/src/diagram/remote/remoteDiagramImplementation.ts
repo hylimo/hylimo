@@ -1,15 +1,9 @@
-import { TransactionalAction } from "@hylimo/diagram-protocol";
 import { CompletionItem, Position, Range } from "vscode-languageserver";
-import { TransactionalEdit } from "../../edit/handlers/transactionalEdit.js";
 import { DiagramImplementation, DiagramUpdateResult } from "../diagramImplementation.js";
 import {
     ReplyGenerateCompletionItemMessage,
     RequestGenerateCompletionItemMessage
 } from "./generateCompletionItemsMessage.js";
-import {
-    RequestGenerateTransactionalEditMessage,
-    ReplyGenerateTransactionalEditMessage
-} from "./generateTransactionalEditMessage.js";
 import { RemoteDiagramImplementationManager } from "./remoteDiagramImplementationManager.js";
 import { RequestUpdateDiagramMessage, ReplyUpdateDiagramMessage } from "./updateDiagramMessage.js";
 import { DiagramConfig } from "@hylimo/diagram-common";
@@ -48,22 +42,6 @@ export class RemoteDiagramImplementation extends DiagramImplementation {
         } else {
             throw new Error(
                 `Unexpected message type: expected: ${ReplyUpdateDiagramMessage.type}, actual: ${result.type}`
-            );
-        }
-    }
-
-    override async generateTransactionalEdit(action: TransactionalAction): Promise<TransactionalEdit> {
-        const request: RequestGenerateTransactionalEditMessage = {
-            type: RequestGenerateTransactionalEditMessage.type,
-            id: this.id,
-            action
-        };
-        const result = await this.layoutedDiagramManager.sendRequest(request, this.remoteId);
-        if (ReplyGenerateTransactionalEditMessage.is(result)) {
-            return result.edit;
-        } else {
-            throw new Error(
-                `Unexpected message type: expected: ${ReplyGenerateTransactionalEditMessage.type}, actual: ${result.type}`
             );
         }
     }

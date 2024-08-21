@@ -310,8 +310,8 @@ export class MoveMouseListener extends MouseListener {
         );
 
         const editSpecifications = [...pointsToMove, ...elementsToMove].flatMap((element) => [
-            element.edits[DefaultEditTypes.MOVE_TRANSLATE_X],
-            element.edits[DefaultEditTypes.MOVE_TRANSLATE_Y]
+            element.edits[DefaultEditTypes.MOVE_X],
+            element.edits[DefaultEditTypes.MOVE_Y]
         ]);
 
         if (!EditSpecification.isConsistent(editSpecifications)) {
@@ -390,8 +390,8 @@ export class MoveMouseListener extends MouseListener {
             const newPoints = new Set<SCanvasPoint>();
             for (const point of currentPoints) {
                 const editable =
-                    DefaultEditTypes.MOVE_TRANSLATE_X in point.edits &&
-                    DefaultEditTypes.MOVE_TRANSLATE_Y in point.edits;
+                    DefaultEditTypes.MOVE_X in point.edits &&
+                    DefaultEditTypes.MOVE_Y in point.edits;
                 if (point instanceof SRelativePoint && !editable) {
                     let targetPoint: SCanvasPoint | undefined;
                     const target = index.getById(point.target) as SCanvasPoint | SCanvasElement;

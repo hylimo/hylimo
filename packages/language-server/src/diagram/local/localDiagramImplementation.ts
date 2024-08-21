@@ -1,20 +1,6 @@
 import { LayoutedDiagram, RenderErrors } from "@hylimo/diagram";
-import {
-    TransactionalAction,
-    TranslationMoveAction,
-    RotationAction,
-    LineMoveAction,
-    ResizeAction,
-    AxisAlignedSegmentEditAction
-} from "@hylimo/diagram-protocol";
 import { Diagnostic, DiagnosticSeverity, uinteger, Range, CompletionItem, Position } from "vscode-languageserver";
 import { TextDocument } from "vscode-languageserver-textdocument";
-import { AxisAlignedSegmentEdit } from "../../edit/handlers/axisAlignedSegmentEdit.js";
-import { LineMoveEdit } from "../../edit/handlers/lineMoveEdit.js";
-import { ResizeEdit } from "../../edit/handlers/resizeEdit.js";
-import { RotationEdit } from "../../edit/handlers/rotationEdit.js";
-import { TransactionalEdit } from "../../edit/handlers/transactionalEdit.js";
-import { TranslationMoveEdit } from "../../edit/handlers/translationMoveEdit.js";
 import { DiagramImplementation, DiagramUpdateResult } from "../diagramImplementation.js";
 import { SharedDiagramUtils } from "../../sharedDiagramUtils.js";
 import { DiagramConfig } from "@hylimo/diagram-common";
@@ -129,26 +115,6 @@ export class LocalDiagramImplementation extends DiagramImplementation {
             range: Range.create(0, 0, uinteger.MAX_VALUE, uinteger.MAX_VALUE),
             message: `Error during layouting: ${error.message}`
         };
-    }
-
-    override async generateTransactionalEdit(action: TransactionalAction): Promise<TransactionalEdit> {
-        if (this.layoutResult == undefined) {
-            throw new Error("Diagram not yet initialized");
-        }
-
-        if (TranslationMoveAction.is(action)) {
-            return TranslationMoveEdit.create(action, this.layoutResult, this.document!);
-        } else if (RotationAction.is(action)) {
-            return RotationEdit.create(action, this.layoutResult, this.document!);
-        } else if (LineMoveAction.is(action)) {
-            return LineMoveEdit.create(action, this.layoutResult);
-        } else if (ResizeAction.is(action)) {
-            return ResizeEdit.create(action, this.layoutResult, this.document!);
-        } else if (AxisAlignedSegmentEditAction.is(action)) {
-            return AxisAlignedSegmentEdit.create(action, this.layoutResult);
-        } else {
-            throw new Error("Unknown action type");
-        }
     }
 
     override async generateCompletionItems(

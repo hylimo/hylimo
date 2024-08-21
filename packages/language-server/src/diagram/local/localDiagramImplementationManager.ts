@@ -1,10 +1,6 @@
 import { DiagramImplementation } from "../diagramImplementation.js";
 import { SharedDiagramUtils } from "../../sharedDiagramUtils.js";
 import { DiagramImplementationManager } from "../diagramImplementationManager.js";
-import {
-    RequestGenerateTransactionalEditMessage,
-    ReplyGenerateTransactionalEditMessage
-} from "../remote/generateTransactionalEditMessage.js";
 import { RegisterRemoteLanguageServerMessage } from "../remote/registerRemoteLanguageServerMessage.js";
 import { RemoteMessagePayload } from "@hylimo/diagram-protocol";
 import { RequestUpdateDiagramMessage, ReplyUpdateDiagramMessage } from "../remote/updateDiagramMessage.js";
@@ -52,8 +48,6 @@ export class LocalDiagramImplementationManager extends DiagramImplementationMana
     ): Promise<RemoteMessagePayload> {
         if (RequestUpdateDiagramMessage.is(message)) {
             return this.handleUpdateDiagramRequest(message);
-        } else if (RequestGenerateTransactionalEditMessage.is(message)) {
-            return this.handleGenerateTransactionalEditRequest(message);
         } else if (RequestGenerateCompletionItemMessage.is(message)) {
             return this.handleGenerateCompletionItemsRequest(message);
         } else if (RequestGetSourceRangeMessage.is(message)) {
@@ -61,23 +55,6 @@ export class LocalDiagramImplementationManager extends DiagramImplementationMana
         } else {
             throw new Error("Unexpected message type: " + message.type);
         }
-    }
-
-    /**
-     * Handles a request to generate a TransactionalEdit.
-     *
-     * @param message the message requesting the TransactionalEdit
-     * @returns the response message payload
-     */
-    private async handleGenerateTransactionalEditRequest(
-        message: RequestGenerateTransactionalEditMessage
-    ): Promise<ReplyGenerateTransactionalEditMessage> {
-        const implementation = this.getNewDiagramImplementation(message.id);
-        const result: ReplyGenerateTransactionalEditMessage = {
-            type: ReplyGenerateTransactionalEditMessage.type,
-            edit: await implementation.generateTransactionalEdit(message.action)
-        };
-        return result;
     }
 
     /**

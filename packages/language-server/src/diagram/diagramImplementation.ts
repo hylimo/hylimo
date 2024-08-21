@@ -1,6 +1,4 @@
-import { TransactionalAction } from "@hylimo/diagram-protocol";
 import { CompletionItem, Diagnostic, Position, Range } from "vscode-languageserver";
-import { TransactionalEdit } from "../edit/handlers/transactionalEdit.js";
 import { DiagramConfig, Root } from "@hylimo/diagram-common";
 
 /**
@@ -30,14 +28,6 @@ export abstract class DiagramImplementation {
      * @returns the result of the update
      */
     abstract updateDiagram(source: string, config: DiagramConfig): Promise<DiagramUpdateResult>;
-
-    /**
-     * Generates a transactional edit for the given transactional action.
-     *
-     * @param action the action to generate the edit for
-     * @returns the generated transactional edit
-     */
-    abstract generateTransactionalEdit(action: TransactionalAction): Promise<TransactionalEdit>;
 
     /**
      * Generates completion items for the given position.

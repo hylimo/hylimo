@@ -11,7 +11,6 @@ import { DiagramImplementation } from "./diagramImplementation.js";
 import { BaseLayoutedDiagram } from "@hylimo/diagram-common";
 import { defaultEditRegistry } from "../edit/handlers/editHandlerRegistry.js";
 import { DiagramImplementationManager } from "./diagramImplementationManager.js";
-import { TransactionalEdit } from "../edit/handlers/transactionalEdit.js";
 
 /**
  * Holds the state for a specific diagram
@@ -157,20 +156,6 @@ export class Diagram {
         this.utils.connection.workspace.applyEdit({
             documentChanges: [edit]
         });
-    }
-
-    /**
-     * Generates a transactional edit for the given transactional action.
-     * Throws an error if updateDiagram has not been called yet.
-     *
-     * @param action the action to generate the edit for
-     * @returns the generated transactional edit
-     */
-    async generateTransactionalEdit(action: TransactionalAction): Promise<TransactionalEdit> {
-        if (this.implementation == undefined) {
-            throw new Error("Cannot generate transactional edit without implementation");
-        }
-        return this.implementation.generateTransactionalEdit(action);
     }
 
     /**
