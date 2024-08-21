@@ -12,10 +12,6 @@
         "build": "tsc"
     },
     "dependencies": {
-        "chevrotain": "^11.0.3",
-        "json-logic-js": "^2.0.5"
-    },
-    "devDependencies": {
-        "@types/json-logic-js": "^2.0.7"
+        "chevrotain": "^11.0.3"
     }
 }

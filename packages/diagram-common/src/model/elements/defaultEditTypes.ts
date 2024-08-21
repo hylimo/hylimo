@@ -2,13 +2,16 @@
  * Default edit types
  */
 export enum DefaultEditTypes {
-    MOVE_TRANSLATE_X = "edit/moveTranslate/x",
-    MOVE_TRANSLATE_Y = "edit/moveTranslate/y",
+    MOVE_X = "update/move/x",
+    MOVE_Y = "update/move/y",
 
-    RESIZE_WIDTH = "edit/resize/width",
-    RESIZE_HEIGHT = "edit/resize/height",
+    MOVE_LPOS_POS = "update/moveLPos/pos",
+    MOVE_LPOS_DIST = "update/moveLPos/dist",
 
-    AXIS_ALIGNED_SEGMENT_POS = "edit/axisAlignedSegment/pos",
+    RESIZE_WIDTH = "update/resize/width",
+    RESIZE_HEIGHT = "update/resize/height",
 
-    ROTATE = "edit/rotate"
+    AXIS_ALIGNED_SEGMENT_POS = "update/axisAlignedSegment/pos",
+
+    ROTATE = "update/rotate"
 }

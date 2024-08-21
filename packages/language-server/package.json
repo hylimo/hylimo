@@ -18,6 +18,10 @@
         "prettier": "^3.3.3",
         "sprotty-protocol": "^1.3.0",
         "vscode-languageserver": "9.0.1",
-        "vscode-languageserver-textdocument": "^1.0.12"
+        "vscode-languageserver-textdocument": "^1.0.12",
+        "json-logic-js": "^2.0.5"
+    },
+    "devDependencies": {
+        "@types/json-logic-js": "^2.0.7"
     }
 }

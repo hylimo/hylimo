@@ -1,3 +1,5 @@
+import { Edit } from "./edit.js";
+
 /**
  * Transactional action with a transaction id
  */
@@ -5,7 +7,7 @@ export interface TransactionalAction {
     /**
      * The kind of the action
      */
-    kind: string;
+    kind: typeof TransactionalAction.KIND;
     /**
      * The id of the transaction
      */
@@ -19,9 +21,18 @@ export interface TransactionalAction {
      * and no further actions with the same transactionId are possible.
      */
     commited: boolean;
+    /**
+     * The edits to perform
+     */
+    edits: Edit[];
 }
 
 export namespace TransactionalAction {
+    /**
+     * Kind of TransactionalActions
+     */
+    export const KIND = "transactionalAction";
+
     /**
      * Evaluates if the provided action is a TransactionalAction
      *
@@ -29,6 +40,6 @@ export namespace TransactionalAction {
      * @returns true if the action is a TransactionalAction
      */
     export function isTransactionalAction(action: any): action is TransactionalAction {
-        return "transactionId" in action && "commited" in action;
+        return action.kind === KIND;
     }
 }

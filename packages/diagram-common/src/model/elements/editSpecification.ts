@@ -7,11 +7,11 @@ export interface EditSpecification {
     /**
      * Entries, consisting of a start and end
      */
-    [key: string]: ModificationSpecificationEntry;
+    [key: string]: EditSpecificationEntry;
 }
 
 /**
- * Template entry for a modification specification
+ * Template entry for a edit specification
  * Can be a string, an object with a JSON logic expression, or a range in the original document with the segnal [start, end]
  */
 export type TemplateEntry =
@@ -22,39 +22,56 @@ export type TemplateEntry =
     | { range: [number, number] };
 
 /**
- * Entry in a modification specification
+ * Base interface for entry in a edit specification
  */
-export interface ModificationSpecificationEntry {
+interface BaseEditSpecificationEntry {
     /**
-     * The type of modification
-     * - replace: replace the expression at the range
-     * - add: adds an expression to a function
-     */
-    type: "replace" | "add";
-    /**
-     * The template of the modification
+     * The template of the edit
      */
     template: TemplateEntry[];
     /**
-     * The range of the modification
-     * Used for consistency checks: overlaps between replace modifications with different signatures are NOT allowed
-     * Overlaps between replace and add modifications are not allowed
-     * Overlaps between add modifications NOT allowed
+     * The range of the edit
+     * Used for consistency checks: overlaps between replace edits with different signatures are NOT allowed
+     * Overlaps between replace and add edits are not allowed
+     * Overlaps between add edits NOT allowed
      */
     range: [number, number];
 }
+
+export interface AddEditSpecificationEntry extends BaseEditSpecificationEntry {
+    /**
+     * The type of edit
+     */
+    type: "add";
+    /**
+     * The range of the whole function
+     */
+    functionRange: [number, number];
+}
+
+export interface ReplaceEditSpecificationEntry extends BaseEditSpecificationEntry {
+    /**
+     * The type of edit
+     */
+    type: "replace";
+}
+
+/**
+ * entry in a edit specification
+ */
+export type EditSpecificationEntry = AddEditSpecificationEntry | ReplaceEditSpecificationEntry;
 
 export namespace EditSpecification {
     /**
      * Checks if the provided specification entries are consistent.
      * Not consistent if
-     * - two replace modifications with different signatures overlap
-     * - a replace and an add modification overlap
+     * - two replace edits with different signatures overlap
+     * - a replace and an add edit overlap
      *
-     * @param entries the ModificationSpecifications to check
-     * @return true if the modification can affect all specifications at the same time
+     * @param entries the EditSpecifications to check
+     * @return true if the edit can affect all specifications at the same time
      */
-    export function isConsistent(entries: (ModificationSpecificationEntry | undefined)[]): boolean {
+    export function isConsistent(entries: (EditSpecificationEntry | undefined)[]): boolean {
         const definedEntries = entries.filter((entry) => entry !== undefined);
         if (definedEntries.length != entries.length) {
             return false;

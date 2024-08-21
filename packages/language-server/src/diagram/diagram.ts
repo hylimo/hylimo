@@ -9,9 +9,9 @@ import {
 } from "@hylimo/diagram-protocol";
 import { DiagramImplementation } from "./diagramImplementation.js";
 import { BaseLayoutedDiagram } from "@hylimo/diagram-common";
-import { defaultEditRegistry } from "../edit/edits/transactionalEditRegistry.js";
+import { defaultEditRegistry } from "../edit/handlers/editHandlerRegistry.js";
 import { DiagramImplementationManager } from "./diagramImplementationManager.js";
-import { TransactionalEdit } from "../edit/edits/transactionalEdit.js";
+import { TransactionalEdit } from "../edit/handlers/transactionalEdit.js";
 
 /**
  * Holds the state for a specific diagram

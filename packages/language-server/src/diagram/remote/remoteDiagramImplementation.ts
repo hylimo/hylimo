@@ -1,6 +1,6 @@
 import { TransactionalAction } from "@hylimo/diagram-protocol";
 import { CompletionItem, Position, Range } from "vscode-languageserver";
-import { TransactionalEdit } from "../../edit/edits/transactionalEdit.js";
+import { TransactionalEdit } from "../../edit/handlers/transactionalEdit.js";
 import { DiagramImplementation, DiagramUpdateResult } from "../diagramImplementation.js";
 import {
     ReplyGenerateCompletionItemMessage,

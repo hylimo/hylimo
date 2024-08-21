@@ -6,13 +6,22 @@ import {
     Expression,
     FieldEntry,
     FullObject,
+    FunctionExpression,
     isString,
     isWrapperObject,
     nativeToList,
     SemanticFieldNames
 } from "@hylimo/core";
 import { assertString } from "@hylimo/core";
-import { Element, Size, Point, Stroke, EditSpecification, TemplateEntry } from "@hylimo/diagram-common";
+import {
+    Element,
+    Size,
+    Point,
+    Stroke,
+    EditSpecification,
+    TemplateEntry,
+    EditSpecificationEntry
+} from "@hylimo/diagram-common";
 import { FontManager } from "../font/fontManager.js";
 import { TextLayoutResult, TextLayouter } from "../font/textLayouter.js";
 import { generateStyles, Selector, SelectorType, Style, StyleList } from "../styles.js";
@@ -295,20 +304,17 @@ export class Layout {
                     if (typeof value === "object" && typeof value._type === "string") {
                         if (value._type === "unset") {
                             layoutElement.styles[attribute] = undefined;
-                            layoutElement.styleSources.set(attribute, entry);
                         } else if (value._type === "var") {
                             const [variableValue, variableSource] = this.extractVariableValue(
                                 matchingStyles,
                                 value.name
                             );
                             layoutElement.styles[attribute] = variableValue;
-                            layoutElement.styleSources.set(attribute, variableSource ?? entry);
                         } else {
                             throw new Error(`Unknown style value: ${value}`);
                         }
                     } else {
                         layoutElement.styles[attribute] = value;
-                        layoutElement.styleSources.set(attribute, entry);
                     }
                     break;
                 }
@@ -378,7 +384,6 @@ export class Layout {
             element,
             parent,
             styles: {},
-            styleSources: new Map(),
             layoutConfig: this.engine.layoutConfigs.get(type)!,
             class: new Set(cls),
             edits: this.generateEdits(element)
@@ -588,15 +593,51 @@ export class Layout {
                     }
                 }
                 const target = value.getLocalFieldOrUndefined("target")!.value;
-                assertWrapperObject(target);
-                const targetExpression = target.wrapped as Expression;
-                res[key] = {
-                    type: type as "replace" | "add",
-                    range: targetExpression.range,
-                    template: parsedTemplate
-                };
+                res[key] = this.generateEditSpecificationEntry(target, type, parsedTemplate);
             }
         }
         return res;
+    }
+
+    /**
+     * Generates an EditSpecificationEntry based on the provided target, type and parsed template
+     *
+     * @param target the target which is edited
+     * @param type the type of the edit
+     * @param parsedTemplate the parsed template
+     * @returns the generated EditSpecificationEntry
+     */
+    private generateEditSpecificationEntry(
+        target: BaseObject,
+        type: string,
+        parsedTemplate: TemplateEntry[]
+    ): EditSpecificationEntry {
+        assertWrapperObject(target);
+        const targetExpression = target.wrapped as Expression;
+        if (type === "add") {
+            if (!(targetExpression instanceof FunctionExpression)) {
+                throw new Error("Target must be a function expression");
+            }
+            let rangeStart: number;
+            if (targetExpression.expressions.length === 0) {
+                rangeStart = targetExpression.range[0] + 1;
+            } else {
+                rangeStart = targetExpression.expressions[targetExpression.expressions.length - 1].range[1];
+            }
+            return {
+                type,
+                range: [rangeStart, targetExpression.range[1]],
+                functionRange: targetExpression.range,
+                template: parsedTemplate
+            };
+        } else if (type === "replace") {
+            return {
+                type,
+                range: targetExpression.range,
+                template: parsedTemplate
+            };
+        } else {
+            throw new Error(`Unknown type ${type}`);
+        }
     }
 }
