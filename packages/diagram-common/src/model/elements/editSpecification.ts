@@ -58,27 +58,31 @@ export type EditSpecificationEntry = AddEditSpecificationEntry | ReplaceEditSpec
 
 export namespace EditSpecification {
     /**
-     * Checks if the provided specification entries are consistent.
+     * Checks if the provided grouped edit specification entries are consistent.
      * Not consistent if
-     * - two replace edits with different signatures overlap
+     * - two replace edits with different signatures or groups overlap
      * - a replace and an add edit overlap
      *
      * @param entries the EditSpecifications to check
      * @return true if the edit can affect all specifications at the same time
      */
-    export function isConsistent(entries: (EditSpecificationEntry | undefined)[]): boolean {
-        const definedEntries = entries.filter((entry) => entry !== undefined);
-        if (definedEntries.length != entries.length) {
+    export function isConsistent(entries: (EditSpecificationEntry | undefined)[][]): boolean {
+        const entriesWithGroup = entries.flatMap((group, groupIndex) => group.map((entry) => (entry ? { entry, group: groupIndex } : undefined)));
+        const definedEntries = entriesWithGroup.filter((entry) => entry !== undefined);
+        if (definedEntries.length != entriesWithGroup.length) {
             return false;
         }
-        definedEntries.sort((a, b) => a.range[0] - b.range[0]);
+        definedEntries.sort((a, b) => a.entry.range[0] - b.entry.range[0]);
         for (let i = 1; i < entries.length; i++) {
-            const entry = definedEntries[i];
-            const lastEntry = definedEntries[i - 1];
+            const { entry: entry, group} = definedEntries[i];
+            const { entry: lastEntry, group: lastGroup } = definedEntries[i - 1];
             const currentStart = entry.range[0];
             const lastStart = lastEntry.range[0];
             if (currentStart === lastStart) {
                 if (lastEntry.type != entry.type) {
+                    return false;
+                }
+                if (lastGroup != group) {
                     return false;
                 }
                 if (

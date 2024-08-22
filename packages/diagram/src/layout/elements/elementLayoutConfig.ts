@@ -152,4 +152,14 @@ export abstract class ElementLayoutConfig implements LayoutConfig {
     createPrototype(): ExecutableAbstractFunctionExpression {
         return fun("object(proto = it)");
     }
+
+    /**
+     * Extracts size information from the element which is not part of styles
+     * E.g. used for the canvas element
+     * 
+     * @param element the element to extract the size from
+     */
+    getSize(_element: LayoutElement): Partial<Size> | undefined {
+        return undefined;
+    }
 }

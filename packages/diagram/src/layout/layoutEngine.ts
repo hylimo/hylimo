@@ -390,12 +390,14 @@ export class Layout {
             edits: this.generateEdits(element)
         };
         this.applyStyles(layoutElement);
+        const size = layoutElement.layoutConfig.getSize(layoutElement);
+        layoutElement.size = size;
         const styles = layoutElement.styles;
         const layoutInformation = this.computeLayoutInformation(layoutElement.styles);
         layoutElement.layoutInformation = layoutInformation;
         const marginX = layoutInformation.marginLeft + layoutInformation.marginRight;
         const marginY = layoutInformation.marginTop + layoutInformation.marginBottom;
-        const computedConstraints: SizeConstraints = this.computeSizeConstraints(styles, constraints, marginX, marginY);
+        const computedConstraints = this.computeSizeConstraints(size, styles, constraints, marginX, marginY);
         const requestedSize = layoutElement.layoutConfig.measure(this, layoutElement, computedConstraints);
         const computedSize = addToSize(requestedSize, marginX, marginY);
         const realSize = matchToConstraints(computedSize, constraints);
@@ -407,6 +409,7 @@ export class Layout {
     /**
      * Computes size constraints for measure based on the provided styles and margin, and the constraints.
      *
+     * @param size the manually defined size of the element
      * @param styles styles providing min/max width/height
      * @param constraints constraints to further limit
      * @param marginX margin in x direction
@@ -414,6 +417,7 @@ export class Layout {
      * @returns the computed size constraints
      */
     private computeSizeConstraints(
+        size: Partial<Size> | undefined,
         styles: Record<string, any>,
         constraints: SizeConstraints,
         marginX: number,
@@ -429,17 +433,19 @@ export class Layout {
         }
         return {
             min: {
-                width: Math.max(styles.width ?? Math.max(styles.minWidth ?? 0, minWidth), 0),
-                height: Math.max(styles.height ?? Math.max(styles.minHeight ?? 0, minHeight), 0)
+                width: Math.max(size?.width ?? styles.width ?? Math.max(styles.minWidth ?? 0, minWidth), 0),
+                height: Math.max(size?.height ?? styles.height ?? Math.max(styles.minHeight ?? 0, minHeight), 0)
             },
             max: {
                 width: Math.max(
-                    styles.width ??
+                    size?.width ??
+                        styles.width ??
                         Math.min(styles.maxWidth ?? Number.POSITIVE_INFINITY, constraints.max.width - marginX),
                     0
                 ),
                 height: Math.max(
-                    styles.height ??
+                    size?.height ??
+                        styles.height ??
                         Math.min(styles.maxHeight ?? Number.POSITIVE_INFINITY, constraints.max.height - marginY),
                     0
                 )
@@ -509,6 +515,9 @@ export class Layout {
         if (styles.width != undefined) {
             width = styles.width;
         }
+        if (element.size?.width != undefined) {
+            width = element.size.width;
+        }
         if (horizontalAlignment === HorizontalAlignment.RIGHT) {
             x += size.width - (width + layoutInformation.marginRight);
         } else if (horizontalAlignment === HorizontalAlignment.CENTER) {
@@ -552,6 +561,9 @@ export class Layout {
         if (styles.height != undefined) {
             height = styles.height;
         }
+        if (element.size?.height != undefined) {
+            height = element.size.height;
+        }
         if (verticalAlignment === VerticalAlignment.BOTTOM) {
             y += size.height - (height + layoutInformation.marginBottom);
         } else if (verticalAlignment === VerticalAlignment.CENTER) {
@@ -587,7 +599,7 @@ export class Layout {
 
     /**
      * Parses a template used in an edit
-     * 
+     *
      * @param template the template to parse
      * @returns the parsed template
      */

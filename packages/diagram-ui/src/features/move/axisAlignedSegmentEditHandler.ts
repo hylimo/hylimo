@@ -33,7 +33,9 @@ export class AxisAligedSegmentEditHandler extends MoveHandler {
         return [
             {
                 types: [DefaultEditTypes.AXIS_ALIGNED_SEGMENT_POS],
-                values: { pos: newPos },
+                values: {
+                    pos: this.vertical ? newPos : newPos - 1
+                },
                 elements: [this.element]
             } satisfies AxisAlignedSegmentEdit
         ];

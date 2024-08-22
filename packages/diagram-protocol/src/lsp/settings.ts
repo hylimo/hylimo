@@ -7,6 +7,10 @@ export interface LanguageServerSettings {
      */
     translationPrecision?: number;
     /**
+     * The precision for resizing canvas elements
+     */
+    resizePrecision?: number;
+    /**
      * The precision for the pos of a line point
      */
     linePointPosPrecision?: number;

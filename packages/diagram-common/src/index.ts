@@ -6,6 +6,7 @@ export * from "./canvas/canvasLayoutEngine.js";
 export * from "./canvas/lineSegmentLayoutEngine.js";
 export * from "./canvas/segmentLayoutEngine.js";
 export * from "./common/bounds.js";
+export * from "./common/groupBy.js";
 export * from "./common/math.js";
 export * from "./common/point.js";
 export * from "./common/size.js";

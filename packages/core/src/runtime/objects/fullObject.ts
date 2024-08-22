@@ -90,7 +90,7 @@ export class FullObject extends BaseObject {
      * @returns the value of the field
      */
     getLocalField(key: string | number, context: InterpreterContext, self?: BaseObject): FieldEntry {
-        const property = this.properties.get(key);
+        const property = this.getProperty(key);
         if (property != undefined) {
             return property.get(self ?? this, context);
         }
@@ -172,12 +172,27 @@ export class FullObject extends BaseObject {
             this.fields.set(key, value);
             this.validateProto();
         } else {
-            const property = this.properties.get(key);
+            const property = this.getProperty(key);
             if (property != undefined) {
                 property.set(self ?? this, value, context);
             } else {
                 this.fields.set(key, value);
             }
+        }
+    }
+
+    /**
+     * Gets a property, respecting the proto field
+     * 
+     * @param key the key of the property
+     * @returns the property or undefined if not found
+     */
+    private getProperty(key: string | number): Property | undefined {
+        const property = this.properties.get(key);
+        if (property != undefined) {
+            return property;
+        } else {
+            return this.getProto()?.getProperty(key);
         }
     }
 

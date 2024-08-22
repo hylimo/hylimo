@@ -1,5 +1,5 @@
 import { ExecutableAbstractFunctionExpression, fun, numberType } from "@hylimo/core";
-import { CanvasAxisAlignedSegment, Point, Size, Element } from "@hylimo/diagram-common";
+import { CanvasAxisAlignedSegment, Point, Size, Element, DefaultEditTypes } from "@hylimo/diagram-common";
 import { LayoutElement } from "../../layoutElement.js";
 import { Layout } from "../../layoutEngine.js";
 import { CanvasConnectionSegmentLayoutConfig } from "./canvasConnectionSegmentLayoutConfig.js";
@@ -45,6 +45,7 @@ export class CanvasAxisAlignedSegmentLayoutConfig extends CanvasConnectionSegmen
                     args.self._verticalPos
                 } {
                     args.self._verticalPos = it
+                    args.self.edits.set("${DefaultEditTypes.AXIS_ALIGNED_SEGMENT_POS}", createReplaceEdit(it, "pos"))
                 }
                 
                 elementProto

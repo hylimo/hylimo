@@ -1,8 +1,10 @@
+import { axisAlignedSegmentPosHandler } from "./axisAlignedSegmentPosHandler.js";
 import { EditHandler } from "./editHandler.js";
 import { moveLineDistHandler } from "./moveLineDistHandler.js";
 import { moveLinePosHandler } from "./moveLinePosHandler.js";
 import { moveXHandler } from "./moveXHandler.js";
 import { moveYHandler } from "./moveYHandler.js";
+import { rotationhandler } from "./rotationHandler.js";
 
 
 /**
@@ -42,5 +44,7 @@ export const defaultEditRegistry = new EditHandlerRegistry([
     moveXHandler,
     moveYHandler,
     moveLinePosHandler,
-    moveLineDistHandler
+    moveLineDistHandler,
+    axisAlignedSegmentPosHandler,
+    rotationhandler
 ]);

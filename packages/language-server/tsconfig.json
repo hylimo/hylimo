@@ -15,6 +15,6 @@
             "path": "../diagram-protocol"
         }
     ],
-    "include": ["src/**/*.ts"],
+    "include": ["src/**/*.ts", "../diagram-common/src/common/groupBy.ts", "../diagram-common/src/common/groupBy.ts"],
     "exclude": ["lib", "node_modules"]
 }

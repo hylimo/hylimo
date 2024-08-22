@@ -32,6 +32,7 @@ const showDialog = ref(false);
 
 const names = {
     translationPrecision: "Absolute/relative point translation precision",
+    resizePrecision: "Resize precision",
     linePointPosPrecision: "Line point pos precision",
     linePointDistancePrecision: "Line point distance precision",
     axisAlignedPosPrecision: "Axis aligned pos precision",

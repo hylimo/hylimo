@@ -1,5 +1,5 @@
 import { FullObject, numberType, optional, ExecutableAbstractFunctionExpression, fun } from "@hylimo/core";
-import { Size, Point, Element, CanvasElement } from "@hylimo/diagram-common";
+import { Size, Point, Element, CanvasElement, DefaultEditTypes } from "@hylimo/diagram-common";
 import { canvasPointType, elementType } from "../../../module/base/types.js";
 import {
     ContentCardinality,
@@ -33,15 +33,15 @@ export class CanvasElementLayoutConfig extends EditableCanvasContentLayoutConfig
                     name: "pos",
                     description: "the position of the canvasElement",
                     type: optional(canvasPointType)
-                }
-            ],
-            [
-                ...alignStyleAttributes,
+                },
                 {
                     name: "rotation",
                     description: "the rotation in degrees",
-                    type: numberType
+                    type: optional(numberType)
                 },
+            ],
+            [
+                ...alignStyleAttributes,
                 ...sizeStyleAttributes
             ]
         );
@@ -78,7 +78,7 @@ export class CanvasElementLayoutConfig extends EditableCanvasContentLayoutConfig
             x,
             y,
             pos: this.extractPos(element),
-            rotation: element.styles.rotation ?? 0,
+            rotation: element.element.getLocalFieldOrUndefined("_rotation")?.value?.toNative() ?? 0,
             children: layout.layout(content, { x, y }, size, `${id}_0`),
             outline: content.layoutConfig.outline(
                 layout,
@@ -116,20 +116,30 @@ export class CanvasElementLayoutConfig extends EditableCanvasContentLayoutConfig
                     args.self._width
                 } {
                     args.self._width = it
+                    args.self.edits.set("${DefaultEditTypes.RESIZE_WIDTH}", createAdditiveEdit(it, "dw"))
                 }
                 elementProto.defineProperty("height") {
                     args.self._height
                 } {
                     args.self._height = it
+                    args.self.edits.set("${DefaultEditTypes.RESIZE_HEIGHT}", createAdditiveEdit(it, "dh"))
                 }
                 elementProto.defineProperty("rotation") {
                     args.self._rotation
                 } {
                     args.self._rotation = it
+                    args.self.edits.set("${DefaultEditTypes.ROTATE}", createReplaceEdit(it, "rotation"))
                 }
                 
                 elementProto
             `
         );
+    }
+
+    override getSize(element: LayoutElement): Partial<Size> {
+        return {
+            width: element.element.getLocalFieldOrUndefined("_width")?.value?.toNative(),
+            height: element.element.getLocalFieldOrUndefined("_height")?.value?.toNative()
+        }
     }
 }

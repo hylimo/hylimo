@@ -228,12 +228,18 @@ const scopeExpressions: ExecutableExpression[] = [
                 }
                 if(result.width != null) {
                     self.width = result.width
+                } {
+                    self.edits.set("${DefaultEditTypes.RESIZE_WIDTH}", createAddEdit(callback, "'width = ' & width"))
                 }
                 if(result.height != null) {
                     self.height = result.height
+                } {
+                    self.edits.set("${DefaultEditTypes.RESIZE_HEIGHT}", createAddEdit(callback, "'height = ' & height"))
                 }
                 if(result.rotation != null) {
                     self.rotation = result.rotation
+                } {
+                    self.edits.set("${DefaultEditTypes.ROTATE}", createAddEdit(callback, "'rotation = ' & rotation"))
                 }
                 self
             `,
@@ -242,8 +248,8 @@ const scopeExpressions: ExecutableExpression[] = [
                 params: [
                     [
                         0,
-                        "the CanvasElement or CanvasConnection to ally the layout to",
-                        elementType(CanvasElement.TYPE, CanvasConnection.TYPE)
+                        "the CanvasElement or CanvasConnection to aply the layout to",
+                        elementType(CanvasElement.TYPE)
                     ],
                     [1, "callback which provides the layout definition", functionType]
                 ],
@@ -312,6 +318,10 @@ const scopeExpressions: ExecutableExpression[] = [
                 startPoint = start
                 startProvider = if((start.type == "canvasElement") || (start.type == "canvasConnection")) {
                     startPoint = scope.lpos(start, 0)
+                    startPoint.edits.set(
+                        "${DefaultEditTypes.MOVE_LPOS_POS}",
+                        createAppendScopeEdit(target, "with", "'over = start(' & pos & ').axisAligned(0.5, end(0))'")
+                    )
                     { scope.lpos(start, it.get(0), seg = it.seg) }
                 } {
                     { start }
@@ -319,14 +329,25 @@ const scopeExpressions: ExecutableExpression[] = [
                 endPoint = end
                 endProvider = if ((end.type == "canvasElement") || (end.type == "canvasConnection")) {
                     endPoint = scope.lpos(end, 0)
+                    endPoint.edits.set(
+                        "${DefaultEditTypes.MOVE_LPOS_POS}",
+                        createAppendScopeEdit(target, "with", "'over = start(0).axisAligned(0.5, end(' & pos & '))'")
+                    )
                     { scope.lpos(end, it) }
                 } {
                     { end }
                 }
+                
+                this.segment = canvasAxisAlignedSegment(end = endPoint, verticalPos = 0.5)
+                segment.edits.set(
+                    "${DefaultEditTypes.AXIS_ALIGNED_SEGMENT_POS}",
+                    createAppendScopeEdit(target, "with", "'over = start(0).axisAligned(' & pos & ', end(0))'")
+                )
+
                 connection = canvasConnection(
                     start = startPoint,
                     contents = list(
-                        canvasAxisAlignedSegment(end = endPoint, verticalPos = 0.5)
+                        this.segment
                     ),
                     startMarker = if(args.startMarkerFactory != null) { startMarkerFactory() },
                     endMarker = if(args.endMarkerFactory != null) { endMarkerFactory() },
@@ -336,11 +357,6 @@ const scopeExpressions: ExecutableExpression[] = [
                 connection.startProvider = startProvider
                 connection.endProvider = endProvider
                 scope.contents += connection
-
-                startPoint.edits.set(
-                    "${DefaultEditTypes.MOVE_LPOS_POS}",
-                    createAppendScopeEdit(target, "with", "'over = start(' & pos & ').axisAligned(0.5, end(0))'")
-                )
 
                 connection
             `,
@@ -366,6 +382,14 @@ const scopeExpressions: ExecutableExpression[] = [
                     this.moveEdit = createAppendScopeEdit(source, "layout", "'pos = apos(' & dx & ', ' & dy & ')'")
                     element.edits.set("${DefaultEditTypes.MOVE_X}", this.moveEdit)
                     element.edits.set("${DefaultEditTypes.MOVE_Y}", this.moveEdit)
+                    element.edits.set("${DefaultEditTypes.ROTATE}", createAppendScopeEdit(source, "layout", "'rotation = ' & rotation"))
+                    this.resizeEdit = createAppendScopeEdit(
+                        source,
+                        "layout",
+                        "( $w := $exists(width) ? 'width = ' & width : []; $h := $exists(height) ? 'height = ' & height : []; $join($append($w, $h), '\\n') )"
+                    )
+                    element.edits.set("${DefaultEditTypes.RESIZE_WIDTH}", this.resizeEdit)
+                    element.edits.set("${DefaultEditTypes.RESIZE_HEIGHT}", this.resizeEdit)
 
                     element
                 `

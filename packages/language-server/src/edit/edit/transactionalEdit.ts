@@ -12,7 +12,7 @@ import {
     TextDocumentContentChangeEvent
 } from "vscode-languageserver";
 import { parseTemplate } from "./template.js";
-import { groupBy } from "../../util/groupBy.js";
+import { groupBy } from "@hylimo/diagram-common";
 import { AddEditEngine } from "./addEditEngine.js";
 import {
     AddEditSpecificationEntry,
