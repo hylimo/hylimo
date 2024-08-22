@@ -296,6 +296,7 @@ export class Layout {
         }
         matchingStyles.push(layoutElement.element);
         matchingStyles.reverse();
+        const styles: Record<string, any> = {};
         for (const attributeConfig of styleAttributes) {
             const attribute = attributeConfig.name;
             for (const style of matchingStyles) {
@@ -304,23 +305,21 @@ export class Layout {
                     const value = entry.value.toNative();
                     if (typeof value === "object" && typeof value._type === "string") {
                         if (value._type === "unset") {
-                            layoutElement.styles[attribute] = undefined;
+                            styles[attribute] = undefined;
                         } else if (value._type === "var") {
-                            const [variableValue, variableSource] = this.extractVariableValue(
-                                matchingStyles,
-                                value.name
-                            );
-                            layoutElement.styles[attribute] = variableValue;
+                            const variableValue = this.extractVariableValue(matchingStyles, value.name);
+                            styles[attribute] = variableValue;
                         } else {
                             throw new Error(`Unknown style value: ${value}`);
                         }
                     } else {
-                        layoutElement.styles[attribute] = value;
+                        styles[attribute] = value;
                     }
                     break;
                 }
             }
         }
+        layoutElement.styles = layoutElement.layoutConfig.postprocessStyles(layoutElement, styles);
     }
 
     /**
@@ -328,9 +327,9 @@ export class Layout {
      *
      * @param matchingStyles the matching styles
      * @param name the name of the variable
-     * @returns the value and source of the variable. if not found, undefined is returned for both
+     * @returns the value of the variable. if not found, undefined is returned
      */
-    private extractVariableValue(matchingStyles: FullObject[], name: string): [any, FieldEntry | undefined] {
+    private extractVariableValue(matchingStyles: FullObject[], name: string): any {
         for (const style of matchingStyles) {
             const variables = style.getLocalFieldOrUndefined("variables")?.value;
             if (variables instanceof FullObject) {
@@ -339,19 +338,19 @@ export class Layout {
                     const value = entry.value.toNative();
                     if (typeof value === "object" && typeof value._type === "string") {
                         if (value._type === "unset") {
-                            return [undefined, entry];
+                            return undefined;
                         } else if (value._type === "var") {
                             throw new Error("Variables cannot be set to other variables");
                         } else {
                             throw new Error(`Unknown style value: ${value}`);
                         }
                     } else {
-                        return [value, entry];
+                        return value;
                     }
                 }
             }
         }
-        return [undefined, undefined];
+        return undefined;
     }
 
     /**
@@ -390,14 +389,12 @@ export class Layout {
             edits: this.generateEdits(element)
         };
         this.applyStyles(layoutElement);
-        const size = layoutElement.layoutConfig.getSize(layoutElement);
-        layoutElement.size = size;
         const styles = layoutElement.styles;
         const layoutInformation = this.computeLayoutInformation(layoutElement.styles);
         layoutElement.layoutInformation = layoutInformation;
         const marginX = layoutInformation.marginLeft + layoutInformation.marginRight;
         const marginY = layoutInformation.marginTop + layoutInformation.marginBottom;
-        const computedConstraints = this.computeSizeConstraints(size, styles, constraints, marginX, marginY);
+        const computedConstraints = this.computeSizeConstraints(styles, constraints, marginX, marginY);
         const requestedSize = layoutElement.layoutConfig.measure(this, layoutElement, computedConstraints);
         const computedSize = addToSize(requestedSize, marginX, marginY);
         const realSize = matchToConstraints(computedSize, constraints);
@@ -409,7 +406,6 @@ export class Layout {
     /**
      * Computes size constraints for measure based on the provided styles and margin, and the constraints.
      *
-     * @param size the manually defined size of the element
      * @param styles styles providing min/max width/height
      * @param constraints constraints to further limit
      * @param marginX margin in x direction
@@ -417,7 +413,6 @@ export class Layout {
      * @returns the computed size constraints
      */
     private computeSizeConstraints(
-        size: Partial<Size> | undefined,
         styles: Record<string, any>,
         constraints: SizeConstraints,
         marginX: number,
@@ -433,19 +428,17 @@ export class Layout {
         }
         return {
             min: {
-                width: Math.max(size?.width ?? styles.width ?? Math.max(styles.minWidth ?? 0, minWidth), 0),
-                height: Math.max(size?.height ?? styles.height ?? Math.max(styles.minHeight ?? 0, minHeight), 0)
+                width: Math.max(styles.width ?? Math.max(styles.minWidth ?? 0, minWidth), 0),
+                height: Math.max(styles.height ?? Math.max(styles.minHeight ?? 0, minHeight), 0)
             },
             max: {
                 width: Math.max(
-                    size?.width ??
-                        styles.width ??
+                    styles.width ??
                         Math.min(styles.maxWidth ?? Number.POSITIVE_INFINITY, constraints.max.width - marginX),
                     0
                 ),
                 height: Math.max(
-                    size?.height ??
-                        styles.height ??
+                    styles.height ??
                         Math.min(styles.maxHeight ?? Number.POSITIVE_INFINITY, constraints.max.height - marginY),
                     0
                 )

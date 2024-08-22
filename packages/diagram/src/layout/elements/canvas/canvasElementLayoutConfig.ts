@@ -33,15 +33,15 @@ export class CanvasElementLayoutConfig extends EditableCanvasContentLayoutConfig
                     name: "pos",
                     description: "the position of the canvasElement",
                     type: optional(canvasPointType)
-                },
-                {
-                    name: "rotation",
-                    description: "the rotation in degrees",
-                    type: optional(numberType)
-                },
+                }
             ],
             [
                 ...alignStyleAttributes,
+                {
+                    name: "rotation",
+                    description: "the rotation in degrees",
+                    type: numberType
+                },
                 ...sizeStyleAttributes
             ]
         );
@@ -136,10 +136,19 @@ export class CanvasElementLayoutConfig extends EditableCanvasContentLayoutConfig
         );
     }
 
-    override getSize(element: LayoutElement): Partial<Size> {
-        return {
-            width: element.element.getLocalFieldOrUndefined("_width")?.value?.toNative(),
-            height: element.element.getLocalFieldOrUndefined("_height")?.value?.toNative()
+    override postprocessStyles(element: LayoutElement, styles: Record<string, any>): Record<string, any> {
+        const width = element.element.getLocalFieldOrUndefined("_width")?.value?.toNative();
+        if (width != undefined) {
+            styles.width = width;
         }
+        const height = element.element.getLocalFieldOrUndefined("_height")?.value?.toNative();
+        if (height != undefined) {
+            styles.height = height;
+        }
+        const rotation = element.element.getLocalFieldOrUndefined("_rotation")?.value?.toNative();
+        if (rotation != undefined) {
+            styles.rotation = rotation;
+        }
+        return styles;
     }
 }

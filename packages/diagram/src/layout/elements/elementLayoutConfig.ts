@@ -154,12 +154,13 @@ export abstract class ElementLayoutConfig implements LayoutConfig {
     }
 
     /**
-     * Extracts size information from the element which is not part of styles
-     * E.g. used for the canvas element
+     * Called to postprocess the extracted styles
      * 
-     * @param element the element to extract the size from
+     * @param _element the element to postprocess
+     * @param styles the extracted styles
+     * @returns the postprocessed styles
      */
-    getSize(_element: LayoutElement): Partial<Size> | undefined {
-        return undefined;
+    postprocessStyles(_element: LayoutElement, styles: Record<string, any>): Record<string, any> {
+        return styles;
     }
 }

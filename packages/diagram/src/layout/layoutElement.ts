@@ -123,10 +123,6 @@ export interface LayoutElement {
      */
     measuredSize?: Size;
     /**
-     * The size manually defined by the element
-     */
-    size?: Partial<Size>;
-    /**
      * The size the element requested
      */
     requestedSize?: Size;
@@ -258,10 +254,11 @@ export interface LayoutConfig {
      */
     createPrototype(): ExecutableAbstractFunctionExpression;
     /**
-     * Extracts size information from the element which is not part of styles
-     * E.g. used for the canvas element
+     * Called to postprocess the extracted styles
      * 
-     * @param element the element to extract the size from
+     * @param element the element to postprocess
+     * @param styles the extracted styles
+     * @returns the postprocessed styles
      */
-    getSize(element: LayoutElement): Partial<Size> | undefined;
+    postprocessStyles(element: LayoutElement, styles: Record<string, any>): Record<string, any>;
 }
