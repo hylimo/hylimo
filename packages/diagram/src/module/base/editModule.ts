@@ -115,7 +115,7 @@ export const editModule = InterpreterModule.create(
                     const deltaExp = (args.getField(1, context) as StringObject).value;
                     if (target instanceof NumberLiteralExpression) {
                         const expression = `${target.value} + ${deltaExp}`;
-                        return generateReplaceEdit(target, [context.newString(expression)], context);
+                        return generateEdit(target, { value: context.newString(expression) }, "replace", context);
                     }
 
                     if (target instanceof InvocationExpression) {
@@ -167,7 +167,7 @@ export const editModule = InterpreterModule.create(
                         target,
                         [
                             target.toWrapperObject(context),
-                            context.newString(`' ${assertString(scope)} {\n' & ${assertString(expression)} & '\n}'`)
+                            context.newString(`' ${assertString(scope)} {\n    ' & $replace(${assertString(expression)}, '\n', '\n    ') & '\n}'`)
                         ],
                         context
                     );

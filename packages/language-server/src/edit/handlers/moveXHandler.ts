@@ -29,8 +29,6 @@ export const moveXHandler: EditHandler<MoveEdit> = {
                         offsetX: element.offsetX
                     }
                 });
-            } else {
-                return [];
             }
         }
         return updates;

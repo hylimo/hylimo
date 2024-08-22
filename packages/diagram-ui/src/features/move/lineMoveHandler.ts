@@ -1,6 +1,6 @@
-import {  Point, TransformedLine } from "@hylimo/diagram-common";
+import { DefaultEditTypes, LineEngine, Point, TransformedLine } from "@hylimo/diagram-common";
 import { MoveHandler } from "./moveHandler.js";
-import { Edit } from "@hylimo/diagram-protocol";
+import { Edit, MoveLposEdit } from "@hylimo/diagram-protocol";
 
 /**
  * Move handler for line point moves
@@ -27,37 +27,28 @@ export class LineMoveHandler extends MoveHandler {
         super(transactionId);
     }
 
-    /*
-    generateAction(dx: number, dy: number, sequenceNumber: number, commited: boolean): LineMoveAction {
+    protected override generateEdits(dx: number, dy: number, event: MouseEvent): Edit[] {
         const newPosition: Point = {
             x: this.initialPosition.x + dx,
             y: this.initialPosition.y + dy
         };
         const nearest = LineEngine.DEFAULT.projectPoint(newPosition, this.line);
-        let posAndSegment;
+        let pos: number | [number, number];
         if (this.hasSegment) {
-            posAndSegment = {
-                pos: nearest.relativePos,
-                segment: nearest.segment
-            };
+            pos = [nearest.segment, nearest.relativePos];
         } else {
-            posAndSegment = {
-                pos: nearest.pos
-            };
+            pos = nearest.pos;
         }
-        return {
-            kind: LineMoveAction.KIND,
-            point: this.point,
-            ...posAndSegment,
-            distance: this.onLine ? undefined : nearest.distance,
-            transactionId: this.transactionId,
-            commited,
-            sequenceNumber
-        };
-    }
-        */
-
-    protected override generateEdits(dx: number, dy: number, event: MouseEvent): Edit[] {
-        throw new Error("Method not implemented.");
+        const types: MoveLposEdit["types"] = [DefaultEditTypes.MOVE_LPOS_POS];
+        if (!this.onLine) {
+            types.push(DefaultEditTypes.MOVE_LPOS_DIST);
+        }
+        return [
+            {
+                types,
+                values: { pos, dist: this.onLine ? 0 : nearest.distance },
+                elements: [this.point]
+            } satisfies MoveLposEdit
+        ];
     }
 }

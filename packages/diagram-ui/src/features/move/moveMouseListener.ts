@@ -1,5 +1,12 @@
 import { inject } from "inversify";
-import { LinePoint, Math2D, EditSpecification, Point, DefaultEditTypes } from "@hylimo/diagram-common";
+import {
+    LinePoint,
+    Math2D,
+    EditSpecification,
+    Point,
+    DefaultEditTypes,
+    EditSpecificationEntry
+} from "@hylimo/diagram-common";
 import {
     findParentByFeature,
     IModelIndex,
@@ -309,11 +316,18 @@ export class MoveMouseListener extends MouseListener {
             elements
         );
 
-        const editSpecifications = [...pointsToMove, ...elementsToMove].flatMap((element) => [
-            element.edits[DefaultEditTypes.MOVE_X],
-            element.edits[DefaultEditTypes.MOVE_Y]
-        ]);
-
+        const editSpecifications = [...pointsToMove, ...elementsToMove].flatMap((element) => {
+            const entries: EditSpecificationEntry[] = [];
+            if (element instanceof SLinePoint) {
+                entries.push(element.edits[DefaultEditTypes.MOVE_LPOS_POS]);
+                if (element.distance != undefined) {
+                    entries.push(element.edits[DefaultEditTypes.MOVE_LPOS_DIST]);
+                }
+            } else {
+                entries.push(element.edits[DefaultEditTypes.MOVE_X], element.edits[DefaultEditTypes.MOVE_Y]);
+            }
+            return entries;
+        });
         if (!EditSpecification.isConsistent(editSpecifications)) {
             return null;
         }
@@ -389,9 +403,7 @@ export class MoveMouseListener extends MouseListener {
         do {
             const newPoints = new Set<SCanvasPoint>();
             for (const point of currentPoints) {
-                const editable =
-                    DefaultEditTypes.MOVE_X in point.edits &&
-                    DefaultEditTypes.MOVE_Y in point.edits;
+                const editable = DefaultEditTypes.MOVE_X in point.edits && DefaultEditTypes.MOVE_Y in point.edits;
                 if (point instanceof SRelativePoint && !editable) {
                     let targetPoint: SCanvasPoint | undefined;
                     const target = index.getById(point.target) as SCanvasPoint | SCanvasElement;

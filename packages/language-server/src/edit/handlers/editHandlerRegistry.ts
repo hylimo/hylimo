@@ -1,4 +1,6 @@
 import { EditHandler } from "./editHandler.js";
+import { moveLineDistHandler } from "./moveLineDistHandler.js";
+import { moveLinePosHandler } from "./moveLinePosHandler.js";
 import { moveXHandler } from "./moveXHandler.js";
 import { moveYHandler } from "./moveYHandler.js";
 
@@ -38,5 +40,7 @@ export class EditHandlerRegistry {
  */
 export const defaultEditRegistry = new EditHandlerRegistry([
     moveXHandler,
-    moveYHandler
+    moveYHandler,
+    moveLinePosHandler,
+    moveLineDistHandler
 ]);

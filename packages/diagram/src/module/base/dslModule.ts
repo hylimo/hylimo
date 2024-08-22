@@ -2,14 +2,10 @@ import {
     assign,
     enumObject,
     ExecutableExpression,
-    ExecutableNativeFunctionExpression,
     fun,
-    FunctionObject,
     functionType,
     id,
     InterpreterModule,
-    jsFun,
-    NativeFunctionType,
     numberType,
     optional,
     or,
@@ -17,6 +13,7 @@ import {
 } from "@hylimo/core";
 import { canvasPointType, elementType } from "./types.js";
 import { CanvasConnection, CanvasElement, DefaultEditTypes } from "@hylimo/diagram-common";
+import { LinePointLayoutConfig } from "../../layout/elements/canvas/linePointLayoutConfig.js";
 
 /**
  * Identifier for the scope variable
@@ -93,13 +90,12 @@ const scopeExpressions: ExecutableExpression[] = [
                 docs: "Create a line point",
                 params: [
                     [0, "the line provider", elementType(CanvasElement.TYPE, CanvasConnection.TYPE)],
-                    [1, "the relative position on the line, number between 0 and 1", numberType],
-                    [2, "the distance from the line", optional(numberType)],
                     [
-                        "seg",
-                        "the segment to which the position is relative to, if not provided, the whole line is considered, should be an integer",
-                        optional(numberType)
-                    ]
+                        1,
+                        "the relative position on the line, number between 0 and 1, or a tuple of the segment and the relative position on the segment",
+                        LinePointLayoutConfig.POS_TYPE
+                    ],
+                    [2, "the distance from the line", optional(numberType)]
                 ],
                 returns: "The created line point"
             }
@@ -226,7 +222,7 @@ const scopeExpressions: ExecutableExpression[] = [
                 if(result.pos != null) {
                     self.pos = result.pos
                 } {
-                    this.moveEdit = createAddEdit(callback, list("'pos = apos(' & dx & ', ' & dy & ')'"))
+                    this.moveEdit = createAddEdit(callback, "'pos = apos(' & dx & ', ' & dy & ')'")
                     self.edits.set("${DefaultEditTypes.MOVE_X}", this.moveEdit)
                     self.edits.set("${DefaultEditTypes.MOVE_Y}", this.moveEdit)
                 }
@@ -310,7 +306,7 @@ const scopeExpressions: ExecutableExpression[] = [
         "_createConnection",
         fun(
             `
-                (start, end, class) = args
+                (start, end, class, target) = args
                 startMarkerFactory = args.startMarkerFactory
                 endMarkerFactory = args.endMarkerFactory
                 startPoint = start
@@ -330,7 +326,7 @@ const scopeExpressions: ExecutableExpression[] = [
                 connection = canvasConnection(
                     start = startPoint,
                     contents = list(
-                        canvasLineSegment(end = endPoint)
+                        canvasAxisAlignedSegment(end = endPoint, verticalPos = 0.5)
                     ),
                     startMarker = if(args.startMarkerFactory != null) { startMarkerFactory() },
                     endMarker = if(args.endMarkerFactory != null) { endMarkerFactory() },
@@ -340,6 +336,12 @@ const scopeExpressions: ExecutableExpression[] = [
                 connection.startProvider = startProvider
                 connection.endProvider = endProvider
                 scope.contents += connection
+
+                startPoint.edits.set(
+                    "${DefaultEditTypes.MOVE_LPOS_POS}",
+                    createAppendScopeEdit(target, "with", "'over = start(' & pos & ').axisAligned(0.5, end(0))'")
+                )
+
                 connection
             `,
             {
@@ -361,7 +363,7 @@ const scopeExpressions: ExecutableExpression[] = [
                     (element, source) = args
                     scope.contents += element
 
-                    this.moveEdit = createAppendScopeEdit(source, "layout", "'    pos = apos(' & dx & ', ' & dy & ')'")
+                    this.moveEdit = createAppendScopeEdit(source, "layout", "'pos = apos(' & dx & ', ' & dy & ')'")
                     element.edits.set("${DefaultEditTypes.MOVE_X}", this.moveEdit)
                     element.edits.set("${DefaultEditTypes.MOVE_Y}", this.moveEdit)
 
@@ -385,6 +387,7 @@ const scopeExpressions: ExecutableExpression[] = [
                         start,
                         end,
                         class,
+                        args,
                         startMarkerFactory = startMarkerFactory,
                         endMarkerFactory = endMarkerFactory
                     )

@@ -7,6 +7,7 @@ import {
     FieldEntry,
     FullObject,
     FunctionExpression,
+    isNull,
     isString,
     isWrapperObject,
     nativeToList,
@@ -572,29 +573,43 @@ export class Layout {
         assertObject(edits);
         const res: EditSpecification = {};
         for (const [key, { value }] of edits.fields.entries()) {
-            if (key != SemanticFieldNames.PROTO) {
+            if (key != SemanticFieldNames.PROTO && !isNull(value)) {
                 assertObject(value);
                 const type = assertString(value.getLocalFieldOrUndefined("type")!.value, "type");
                 const template = value.getLocalFieldOrUndefined("template")!.value;
-                assertObject(template);
-                const parsedTemplate: TemplateEntry[] = [];
-                const length = assertNumber(template.getLocalFieldOrUndefined("length")!.value);
-                for (let i = 0; i < length; i++) {
-                    const entry = template.getLocalFieldOrUndefined(i)!.value;
-                    if (isString(entry)) {
-                        parsedTemplate.push(entry.value);
-                    } else if (isWrapperObject(entry)) {
-                        const expression = entry.wrapped as Expression;
-                        parsedTemplate.push({ range: expression.range });
-                    } else {
-                        throw new Error("Invalid template entry");
-                    }
-                }
+                const parsedTemplate: TemplateEntry[] = this.parseTemplate(template);
                 const target = value.getLocalFieldOrUndefined("target")!.value;
                 res[key] = this.generateEditSpecificationEntry(target, type, parsedTemplate);
             }
         }
         return res;
+    }
+
+    /**
+     * Parses a template used in an edit
+     * 
+     * @param template the template to parse
+     * @returns the parsed template
+     */
+    private parseTemplate(template: BaseObject): TemplateEntry[] {
+        if (isString(template)) {
+            return [template.value];
+        }
+        assertObject(template);
+        const parsedTemplate: TemplateEntry[] = [];
+        const length = assertNumber(template.getLocalFieldOrUndefined("length")!.value);
+        for (let i = 0; i < length; i++) {
+            const entry = template.getLocalFieldOrUndefined(i)!.value;
+            if (isString(entry)) {
+                parsedTemplate.push(entry.value);
+            } else if (isWrapperObject(entry)) {
+                const expression = entry.wrapped as Expression;
+                parsedTemplate.push({ range: expression.range });
+            } else {
+                throw new Error("Invalid template entry");
+            }
+        }
+        return parsedTemplate;
     }
 
     /**

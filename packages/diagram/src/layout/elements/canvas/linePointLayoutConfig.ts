@@ -1,5 +1,17 @@
-import { ExecutableAbstractFunctionExpression, Expression, FullObject, fun, numberType, optional } from "@hylimo/core";
-import { Size, Element, LinePoint, Point, CanvasConnection, CanvasElement } from "@hylimo/diagram-common";
+import {
+    assertNumber,
+    assertObject,
+    ExecutableAbstractFunctionExpression,
+    Expression,
+    FullObject,
+    fun,
+    isNumber,
+    numberType,
+    objectType,
+    optional,
+    or
+} from "@hylimo/core";
+import { Size, Element, LinePoint, Point, CanvasConnection, CanvasElement, DefaultEditTypes } from "@hylimo/diagram-common";
 import { LayoutElement } from "../../layoutElement.js";
 import { Layout } from "../../layoutEngine.js";
 import { CanvasPointLayoutConfig } from "./canvasPointLayoutConfig.js";
@@ -9,6 +21,19 @@ import { elementType } from "../../../module/base/types.js";
  * Layout config for line points
  */
 export class LinePointLayoutConfig extends CanvasPointLayoutConfig {
+    /**
+     * The type of the pos field
+     */
+    static POS_TYPE = or(
+        numberType,
+        objectType(
+            new Map([
+                [0, numberType],
+                [1, numberType]
+            ])
+        )
+    );
+
     override type = LinePoint.TYPE;
 
     constructor() {
@@ -17,7 +42,7 @@ export class LinePointLayoutConfig extends CanvasPointLayoutConfig {
                 {
                     name: "pos",
                     description: "the relative offset on the line, must be between 0 and 1 (inclusive)",
-                    type: numberType
+                    type: LinePointLayoutConfig.POS_TYPE
                 },
                 {
                     name: "segment",
@@ -41,28 +66,27 @@ export class LinePointLayoutConfig extends CanvasPointLayoutConfig {
     }
 
     override layout(layout: Layout, element: LayoutElement, position: Point, size: Size, id: string): Element[] {
-        const positionFieldEntry = element.element.getLocalFieldOrUndefined("_pos");
+        const positionField = element.element.getLocalFieldOrUndefined("_pos")!.value;
         const distanceFieldEntry = element.element.getLocalFieldOrUndefined("_distance");
-        const segmentFieldEntry = element.element.getLocalFieldOrUndefined("_segment");
         const lineProvider = this.getContentId(
             element,
             element.element.getLocalFieldOrUndefined("lineProvider")!.value as FullObject
         );
+        let pos: number;
+        let segment: number | undefined;
+        if (isNumber(positionField)) {
+            pos = positionField.value;
+            segment = undefined;
+        } else {
+            assertObject(positionField);
+            segment = assertNumber(positionField.getLocalFieldOrUndefined(0)!.value);
+            pos = assertNumber(positionField.getLocalFieldOrUndefined(1)!.value);
+        }
         const distance = distanceFieldEntry?.value?.toNative();
-        const segment = segmentFieldEntry?.value?.toNative();
-        const editableExpressions: Record<string, Expression | undefined> = {
-            pos: positionFieldEntry?.source
-        };
-        if (distance != undefined) {
-            editableExpressions.distance = distanceFieldEntry?.source;
-        }
-        if (segment != undefined) {
-            editableExpressions.segment = segmentFieldEntry?.source;
-        }
         const result: LinePoint = {
             type: LinePoint.TYPE,
             id,
-            pos: Math.max(Math.min(positionFieldEntry?.value?.toNative(), 1), 0),
+            pos: Math.max(Math.min(pos, 1), 0),
             distance,
             segment,
             lineProvider,
@@ -81,16 +105,13 @@ export class LinePointLayoutConfig extends CanvasPointLayoutConfig {
                     args.self._pos
                 } {
                     args.self._pos = it
+                    args.self.edits.set("${DefaultEditTypes.MOVE_LPOS_POS}", createReplaceEdit(it, "$replace($string(pos), ',', ', ')"))
                 }
                 elementProto.defineProperty("distance") {
                     args.self._distance
                 } {
                     args.self._distance = it
-                }
-                elementProto.defineProperty("segment") {
-                    args.self._segment
-                } {
-                    args.self._segment = it
+                    args.self.edits.set("${DefaultEditTypes.MOVE_LPOS_DIST}", createReplaceEdit(it, "dist"))
                 }
                 
                 elementProto

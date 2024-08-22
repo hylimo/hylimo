@@ -9,6 +9,7 @@ import { StringObject } from "../runtime/objects/stringObject.js";
 import { RuntimeError } from "../runtime/runtimeError.js";
 import { SemanticFieldNames } from "../runtime/semanticFieldNames.js";
 import { WrapperObject } from "../runtime/objects/wrapperObject.js";
+import { NullObject } from "../runtime/objects/nullObject.js";
 
 /**
  * Helper to check that an object is a StringObject, throws an error if not
@@ -116,6 +117,16 @@ export function assertWrapperObject(value: BaseObject, description = ""): assert
  */
 export function isWrapperObject(value: BaseObject): value is WrapperObject<any> {
     return value instanceof WrapperObject;
+}
+
+/**
+ * Checks if a value is a FullObject
+ *
+ * @param value the value to check
+ * @returns true iff it is a FullObject
+ */
+export function isNull(value: BaseObject): value is NullObject {
+    return value instanceof NullObject;
 }
 
 /**

@@ -48,6 +48,12 @@ export class TransactionalEdit {
     readonly initialTextEdits: TextEdit[] = [];
 
     /**
+     * Element type lookup of the initial diagram
+     * Used to check if predictions are still valid
+     */
+    private readonly initialDiagramElementLookup: Map<string, string> = new Map();
+
+    /**
      * Creates a new transactional edit
      *
      * @param action the action this edit is based on
@@ -61,6 +67,9 @@ export class TransactionalEdit {
     ) {
         this.transactionId = action.transactionId;
         this.initialSequenceNumber = action.sequenceNumber;
+        for (const element of Object.values(diagram.currentDiagram!.elementLookup)) {
+            this.initialDiagramElementLookup.set(element.id, element.type);
+        }
         this.generateEngines();
     }
 
@@ -128,6 +137,9 @@ export class TransactionalEdit {
         lastApplied: TransactionalAction | undefined,
         newest: TransactionalAction
     ): IncrementalUpdate[] {
+        if (!this.checkIfPredictionsAreValid(layoutedDiagram)) {
+            return [];
+        }
         const res: IncrementalUpdate[] = [];
         this.action.edits.forEach((edit, index) => {
             const elements = edit.elements!.map((id) => layoutedDiagram.elementLookup[id]);
@@ -146,6 +158,23 @@ export class TransactionalEdit {
             }
         });
         return res;
+    }
+
+    /**
+     * Checks if predictions are still valid
+     * Predictions are not valid if the topology of the diagram has changed compared to the initial diagram
+     * 
+     * @param layoutedDiagram the layouted diagram to check
+     * @returns true if predictions are still valid
+     */
+    private checkIfPredictionsAreValid(layoutedDiagram: BaseLayoutedDiagram) {
+        let predictionsValid: boolean = true;
+        const elements = [...Object.values(layoutedDiagram.elementLookup)];
+        if (elements.length !== this.initialDiagramElementLookup.size ||
+            elements.some((element) => this.initialDiagramElementLookup.get(element.id) !== element.type)) {
+            predictionsValid = false;
+        }
+        return predictionsValid;
     }
 
     /**
