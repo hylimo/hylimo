@@ -24,7 +24,7 @@ export abstract class EditEngine {
      * @param values the variables to apply to each template
      * @returns the generated string
      */
-    abstract apply(values: Record<string, any>[]): string;
+    abstract apply(values: Record<string, any>[]): Promise<string>;
 }
 
 /**

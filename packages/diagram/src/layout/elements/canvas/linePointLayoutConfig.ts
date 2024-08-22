@@ -3,7 +3,7 @@ import { Size, Element, LinePoint, Point, CanvasConnection, CanvasElement } from
 import { LayoutElement } from "../../layoutElement.js";
 import { Layout } from "../../layoutEngine.js";
 import { CanvasPointLayoutConfig } from "./canvasPointLayoutConfig.js";
-import { elementType } from "../../../module/types.js";
+import { elementType } from "../../../module/base/types.js";
 
 /**
  * Layout config for line points

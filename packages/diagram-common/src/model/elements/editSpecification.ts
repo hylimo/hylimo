@@ -12,14 +12,9 @@ export interface EditSpecification {
 
 /**
  * Template entry for a edit specification
- * Can be a string, an object with a JSON logic expression, or a range in the original document with the segnal [start, end]
+ * Can be a template string, or a range in the original document with the segnal [start, end]
  */
-export type TemplateEntry =
-    | string
-    | {
-          exp: string;
-      }
-    | { range: [number, number] };
+export type TemplateEntry = string | { range: [number, number] };
 
 /**
  * Base interface for entry in a edit specification
@@ -89,7 +84,7 @@ export namespace EditSpecification {
                 if (
                     entry.type === "replace" &&
                     (entry.range[1] !== lastEntry.range[1] ||
-                        !isTemplateEqual(entry.template[0], lastEntry.template[0]))
+                        !isTemplateEqual(entry.template, lastEntry.template))
                 ) {
                     return false;
                 }
@@ -101,24 +96,45 @@ export namespace EditSpecification {
     }
 
     /**
-     * Checks if two template entries are equal
+     * Checks if two entries are equal
+     * 
+     * @param a the first entry
+     * @param b the second entry
+     * @returns true if the entries are equal
+     */
+    export function isEntryEqual(a: EditSpecificationEntry, b: EditSpecificationEntry): boolean {
+        if (a.type !== b.type || a.range[0] !== b.range[0] || a.range[1] !== b.range[1]) {
+            return false;
+        }
+        return isTemplateEqual(a.template, b.template);
+    }
+
+    /**
+     * Checks if two templates are equal
      *
-     * @param a the first template entry
-     * @param b the second template entry
+     * @param a the first template
+     * @param b the second template
      * @returns true if the template entries are equal
      */
-    function isTemplateEqual(a: TemplateEntry, b: TemplateEntry): boolean {
-        if (typeof a === "string" && typeof b === "string") {
-            return a === b;
+    function isTemplateEqual(a: TemplateEntry[], b: TemplateEntry[]): boolean {
+        if (a.length !== b.length) {
+            return false;
         }
-        if (typeof a === "object" && typeof b === "object") {
-            if ("exp" in a && "exp" in b) {
-                return a.exp === b.exp;
-            }
-            if ("range" in a && "range" in b) {
-                return a.range[0] === b.range[0] && a.range[1] === b.range[1];
+        for (let i = 0; i < a.length; i++) {
+            const first = a[i];
+            const second = b[i];
+            if (typeof first === "string" && typeof second === "string") {
+                if (first !== second) {
+                    return false;
+                }
+            } else if (typeof first !== "string" && typeof second !== "string") {
+                if (first.range[0] !== second.range[0] || first.range[1] !== second.range[1]) {
+                    return false;
+                }
+            } else {
+                return false;
             }
         }
-        return false;
+        return true;
     }
 }

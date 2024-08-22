@@ -1,6 +1,6 @@
 import { FullObject, numberType, optional, ExecutableAbstractFunctionExpression, fun } from "@hylimo/core";
 import { Size, Point, Element, CanvasElement } from "@hylimo/diagram-common";
-import { canvasPointType, elementType } from "../../../module/types.js";
+import { canvasPointType, elementType } from "../../../module/base/types.js";
 import {
     ContentCardinality,
     HorizontalAlignment,

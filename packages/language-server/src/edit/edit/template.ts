@@ -1,7 +1,7 @@
 import { TemplateEntry } from "@hylimo/diagram-common";
 import { TextDocument } from "vscode-languageserver-textdocument";
-import { apply, RulesLogic } from "json-logic-js";
-import { Range, uinteger } from "vscode-languageserver";
+import { Range } from "vscode-languageserver";
+import jsonata, { Expression } from "jsonata";
 
 /**
  * Parsed template entry
@@ -12,7 +12,7 @@ export type ParsedTemplateEntry = string | ParsedExpressionTemplateEntry;
  * JSON-Logic expression template entry
  */
 export interface ParsedExpressionTemplateEntry {
-    exp: RulesLogic;
+    exp: Expression;
 }
 
 /**
@@ -20,21 +20,17 @@ export interface ParsedExpressionTemplateEntry {
  *
  * @param template the template to parse
  * @param textDocument the text document to use for range entries
- * @param indentation the indentation to add to string entries after line breaks
  * @returns the parsed template
  */
 export function parseTemplate(
     template: TemplateEntry[],
-    textDocument: TextDocument,
-    indentation: string
+    textDocument: TextDocument
 ): ParsedTemplateEntry[] {
     const result: ParsedTemplateEntry[] = [];
     for (const entry of template) {
         if (typeof entry === "string") {
-            result.push(entry.replace(/\n/g, "\n" + indentation));
-        } else if ("exp" in entry) {
             result.push({
-                exp: JSON.parse(entry.exp)
+                exp: jsonata(entry)
             });
         } else if ("range" in entry) {
             result.push(
@@ -51,26 +47,27 @@ export function parseTemplate(
 
 /**
  * Evaluates a parsed template with the given values
- * 
+ *
  * @param template the parsed template
  * @param values the values for expressions
  * @param indentation the indentation to add to string entries after line breaks
  * @returns the evaluated template
  */
-export function evaluateTemplate(
+export async function evaluateTemplate(
     template: ParsedTemplateEntry[],
     values: Record<string, any>,
     indentation: string
-): string {
-    return template
-        .map((entry) => {
+): Promise<string> {
+    const parts = await Promise.all(
+        template.map(async (entry) => {
             if (typeof entry === "string") {
                 return entry;
             } else if ("exp" in entry) {
-                return `${apply(entry.exp, values)}`.replace(/\n/g, "\n" + indentation);
+                return `${await entry.exp.evaluate(values)}`.replace(/\n/g, "\n" + indentation);
             } else {
                 throw new Error("Unknown template entry type");
             }
         })
-        .join("");
+    );
+    return parts.join("");
 }

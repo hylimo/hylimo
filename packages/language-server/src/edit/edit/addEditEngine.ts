@@ -29,11 +29,12 @@ export class AddEditEngine extends EditEngine {
      * @param values the variables to apply to each template
      * @returns the generated string
      */
-    apply(values: Record<string, any>[]): string {
+    override async apply(values: Record<string, any>[]): Promise<string> {
         const newlineWithIndentation = "\n" + this.indentation;
-        const value = "\n" + this.templates.map((template) => {
-            return evaluateTemplate(template.template, values[template.valuesIndex], this.indentation);
-        }).join(newlineWithIndentation);
+        const evaluatedTemplates = await Promise.all(this.templates.map(async (template) => {
+            return await evaluateTemplate(template.template, values[template.valuesIndex], this.indentation);
+        }));
+        const value = newlineWithIndentation + evaluatedTemplates.join(newlineWithIndentation);
         return value.replace(/\n/g, "\n" + " ".repeat(4)) + newlineWithIndentation + "}";
     }
 }

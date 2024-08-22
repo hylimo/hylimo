@@ -18,7 +18,7 @@ export type MoveLposEdit = Edit<
  * Resize edit
  */
 export type ResizeEdit = Edit<
-    { width: number; height: number },
+    { width?: number; height?: number },
     DefaultEditTypes.RESIZE_WIDTH | DefaultEditTypes.RESIZE_HEIGHT
 >;
 

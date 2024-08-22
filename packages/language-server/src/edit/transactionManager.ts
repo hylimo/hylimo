@@ -77,14 +77,14 @@ export class TransactionManager {
         this.edit.transformEdit(action, this.utils.config);
         const result = this.createHandleActionResult(action);
         this.lastKnownAction = action;
-        this.updateTextDocumentIfPossible();
+        await this.updateTextDocumentIfPossible();
         return result;
     }
 
     /**
      * Updates the text document if possible, meaning if the last known action has not been applied yet.
      */
-    private updateTextDocumentIfPossible(): void {
+    private async updateTextDocumentIfPossible() {
         if (
             this.edit != undefined &&
             this.lastKnownAction != undefined &&
@@ -92,7 +92,7 @@ export class TransactionManager {
             this.hasUpdatedDiagram
         ) {
             this.hasUpdatedDiagram = false;
-            const textDocumentEdit = this.edit.applyAction(this.lastKnownAction);
+            const textDocumentEdit = await this.edit.applyAction(this.lastKnownAction);
             this.lastAppliedAction = this.lastKnownAction;
             this.diagram.applyEdit(textDocumentEdit);
             this.lastAppliedAction = this.lastKnownAction;

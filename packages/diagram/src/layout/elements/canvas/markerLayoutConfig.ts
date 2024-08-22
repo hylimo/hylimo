@@ -3,7 +3,7 @@ import { Size, Point, Element, Marker } from "@hylimo/diagram-common";
 import { ContentCardinality, LayoutElement, SizeConstraints } from "../../layoutElement.js";
 import { Layout } from "../../layoutEngine.js";
 import { StyledElementLayoutConfig } from "../styledElementLayoutConfig.js";
-import { elementType } from "../../../module/types.js";
+import { elementType } from "../../../module/base/types.js";
 
 /**
  * Layout config for marker

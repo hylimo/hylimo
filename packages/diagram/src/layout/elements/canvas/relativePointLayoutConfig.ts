@@ -1,6 +1,6 @@
 import { ExecutableAbstractFunctionExpression, FullObject, fun, numberType, or } from "@hylimo/core";
-import { Size, Element, RelativePoint, Point, CanvasElement } from "@hylimo/diagram-common";
-import { canvasPointType, elementType } from "../../../module/types.js";
+import { Size, Element, RelativePoint, Point, CanvasElement, DefaultEditTypes } from "@hylimo/diagram-common";
+import { canvasPointType, elementType } from "../../../module/base/types.js";
 import { LayoutElement } from "../../layoutElement.js";
 import { Layout } from "../../layoutEngine.js";
 import { CanvasPointLayoutConfig } from "./canvasPointLayoutConfig.js";
@@ -62,11 +62,13 @@ export class RelativePointLayoutConfig extends CanvasPointLayoutConfig {
                     args.self._offsetX
                 } {
                     args.self._offsetX = it
+                    args.self.edits.set("${DefaultEditTypes.MOVE_X}", createAdditiveEdit(it, "dx"))
                 }
                 elementProto.defineProperty("offsetY") {
                     args.self._offsetY
                 } {
                     args.self._offsetY = it
+                    args.self.edits.set("${DefaultEditTypes.MOVE_Y}", createAdditiveEdit(it, "dy"))
                 }
                 
                 elementProto

@@ -16,7 +16,7 @@ import {
     parse
 } from "@hylimo/core";
 import { canvasPointType, elementType } from "./types.js";
-import { CanvasConnection, CanvasElement } from "@hylimo/diagram-common";
+import { CanvasConnection, CanvasElement, DefaultEditTypes } from "@hylimo/diagram-common";
 
 /**
  * Identifier for the scope variable
@@ -225,6 +225,10 @@ const scopeExpressions: ExecutableExpression[] = [
                 callback.callWithScope(result)
                 if(result.pos != null) {
                     self.pos = result.pos
+                } {
+                    this.moveEdit = createAddEdit(callback, list("'pos = apos(' & dx & ', ' & dy & ')'"))
+                    self.edits.set("${DefaultEditTypes.MOVE_X}", this.moveEdit)
+                    self.edits.set("${DefaultEditTypes.MOVE_Y}", this.moveEdit)
                 }
                 if(result.width != null) {
                     self.width = result.width
@@ -351,26 +355,19 @@ const scopeExpressions: ExecutableExpression[] = [
     id(scope)
         .field("internal")
         .assignField(
-            "withRegisterSource",
-            jsFun((args, context) => {
-                const callback = args.getField(0, context) as FunctionObject;
-                const wrapperFunctionCallback: NativeFunctionType = (args, context, staticScope, callExpression) => {
-                    const result = callback.invoke(args, context);
-                    result.value.setLocalField(
-                        "source",
-                        {
-                            value: result.value,
-                            source: callExpression
-                        },
-                        context
-                    );
-                    return result;
-                };
-                return new ExecutableNativeFunctionExpression(
-                    wrapperFunctionCallback,
-                    callback.definition.documentation
-                ).evaluate(context);
-            })
+            "registerCanvasElement",
+            fun(
+                `
+                    (element, source) = args
+                    scope.contents += element
+
+                    this.moveEdit = createAppendScopeEdit(source, "layout", "'    pos = apos(' & dx & ', ' & dy & ')'")
+                    element.edits.set("${DefaultEditTypes.MOVE_X}", this.moveEdit)
+                    element.edits.set("${DefaultEditTypes.MOVE_Y}", this.moveEdit)
+
+                    element
+                `
+            )
         ),
     id(scope)
         .field("internal")
@@ -381,7 +378,8 @@ const scopeExpressions: ExecutableExpression[] = [
                 startMarkerFactory = args.startMarkerFactory
                 endMarkerFactory = args.endMarkerFactory
                 class = args.class
-                scope.internal.withRegisterSource {
+
+                {
                     (start, end) = args
                     _createConnection(
                         start,
@@ -433,15 +431,14 @@ const scopeExpressions: ExecutableExpression[] = [
     ),
     ...parse(
         `
-            scope.element = scope.internal.withRegisterSource {
+            scope.element = {
                 callbackOrElement = it
                 this.element = if(callbackOrElement._type == "element") {
                     canvasElement(content = callbackOrElement, scopes = object())
                 } {
                     canvasElement(content = callbackOrElement(), scopes = object())
                 }
-                scope.contents += this.element
-                this.element
+                scope.internal.registerCanvasElement(this.element, args)
             }
             scope.styles {
                 cls("label-element") {
@@ -489,7 +486,6 @@ export const dslModule = InterpreterModule.create(
                 ],
                 returns: "The diagram DSL function"
             })
-        ),
-        assign("diagram", id("generateDiagramEnvironment").call())
+        )
     ]
 );

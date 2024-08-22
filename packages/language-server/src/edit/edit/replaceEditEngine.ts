@@ -22,7 +22,7 @@ export class ReplaceEditEngine extends EditEngine {
         super(start, end);
     }
 
-    override apply(values: Record<string, any>[]): string {
+    override async apply(values: Record<string, any>[]): Promise<string> {
         return evaluateTemplate(this.template.template, values[this.template.valuesIndex], this.indentation);
     }
 }

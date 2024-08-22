@@ -5,7 +5,15 @@ import * as path from "path";
 import { program } from "commander";
 import { PDFRenderer } from "@hylimo/diagram-render-pdf";
 import { SVGRenderer } from "@hylimo/diagram-render-svg";
-import { DiagramEngine, LayoutEngine, classDiagramModule, diagramModule, dslModule, editModule } from "@hylimo/diagram";
+import {
+    DiagramEngine,
+    LayoutEngine,
+    baseDiagramModule,
+    classDiagramModule,
+    diagramModule,
+    dslModule,
+    editModule
+} from "@hylimo/diagram";
 import { Interpreter, Parser, defaultModules } from "@hylimo/core";
 import { DiagramConfig } from "@hylimo/diagram-common";
 
@@ -47,7 +55,10 @@ try {
 const layoutEngine = new LayoutEngine();
 const diagramEngine = new DiagramEngine(
     new Parser(false),
-    new Interpreter([...defaultModules, diagramModule, dslModule, editModule, classDiagramModule], maxExecutionSteps),
+    new Interpreter(
+        [...defaultModules, diagramModule, dslModule, editModule, baseDiagramModule, classDiagramModule],
+        maxExecutionSteps
+    ),
     layoutEngine
 );
 

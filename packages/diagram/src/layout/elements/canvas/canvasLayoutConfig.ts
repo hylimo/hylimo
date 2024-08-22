@@ -14,7 +14,7 @@ import { ContentCardinality, LayoutElement, SizeConstraints } from "../../layout
 import { Layout } from "../../layoutEngine.js";
 import { StyledElementLayoutConfig } from "../styledElementLayoutConfig.js";
 import { CanvasContentLayoutConfig } from "./canvasContentLayoutConfig.js";
-import { canvasPointType, elementType } from "../../../module/types.js";
+import { canvasPointType, elementType } from "../../../module/base/types.js";
 
 /**
  * Layout config for the canvas

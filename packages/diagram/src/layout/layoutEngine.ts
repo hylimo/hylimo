@@ -587,9 +587,7 @@ export class Layout {
                         const expression = entry.wrapped as Expression;
                         parsedTemplate.push({ range: expression.range });
                     } else {
-                        assertObject(entry);
-                        const expression = assertString(entry.getLocalFieldOrUndefined("exp")!.value);
-                        parsedTemplate.push({ exp: expression });
+                        throw new Error("Invalid template entry");
                     }
                 }
                 const target = value.getLocalFieldOrUndefined("target")!.value;

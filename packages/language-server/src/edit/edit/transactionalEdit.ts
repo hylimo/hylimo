@@ -14,7 +14,12 @@ import {
 import { parseTemplate } from "./template.js";
 import { groupBy } from "../../util/groupBy.js";
 import { AddEditEngine } from "./addEditEngine.js";
-import { AddEditSpecificationEntry, BaseLayoutedDiagram, EditSpecificationEntry } from "@hylimo/diagram-common";
+import {
+    AddEditSpecificationEntry,
+    BaseLayoutedDiagram,
+    EditSpecification,
+    EditSpecificationEntry
+} from "@hylimo/diagram-common";
 import { EditHandlerRegistry } from "../handlers/editHandlerRegistry.js";
 
 /**
@@ -65,14 +70,14 @@ export class TransactionalEdit {
      * @param action the action to apply
      * @returns the text document edit
      */
-    applyAction(action: TransactionalAction): TextDocumentEdit {
+    async applyAction(action: TransactionalAction): Promise<TextDocumentEdit> {
         const edits: TextEdit[] = [];
         if (action.sequenceNumber === this.initialSequenceNumber) {
             edits.push(...this.initialTextEdits);
         }
         const textDocument = this.diagram.document;
         for (const engine of this.engines) {
-            const text = engine.apply(action.edits.map((edit) => edit.values));
+            const text = await engine.apply(action.edits.map((edit) => edit.values));
             edits.push({
                 range: Range.create(textDocument.positionAt(engine.start), textDocument.positionAt(engine.end)),
                 newText: text
@@ -191,9 +196,20 @@ export class TransactionalEdit {
      */
     private generateReplaceEdits(edits: IndexedModificationSpecificationEntry[], textDocument: TextDocument) {
         const replaceEdits = edits.filter((e) => e.spec.type === "replace");
-        for (const edit of replaceEdits) {
+        for (let i = 0; i < replaceEdits.length; i++) {
+            const edit = replaceEdits[i];
+            if (i > 0) {
+                const prevEdit = replaceEdits[i - 1];
+                if (edit.spec.range[0] == prevEdit.spec.range[0]) {
+                    if (EditSpecification.isEntryEqual(prevEdit.spec, edit.spec)) {
+                        continue;
+                    } else {
+                        throw new Error("Overlapping replace edits with different signatures");
+                    }
+                }
+            }
             const indentation = this.extractIndentation(textDocument, edit.spec.range[0]);
-            const parsedTemplate = parseTemplate(edit.spec.template, textDocument, indentation);
+            const parsedTemplate = parseTemplate(edit.spec.template, textDocument);
             this.engines.push(
                 new ReplaceEditEngine(
                     edit.spec.range[0],
@@ -214,12 +230,15 @@ export class TransactionalEdit {
     private generateAddEdits(edits: IndexedModificationSpecificationEntry[], textDocument: TextDocument) {
         const addEdits = edits.filter((e) => e.spec.type === "add");
         for (const edits of groupBy(addEdits, (edit) => edit.spec.range[0]).values()) {
-            const firstSpec = edits[0].spec as AddEditSpecificationEntry;
+            const uniqueEdits = [
+                ...new Map(edits.map((edit) => [`${edit.index} ${edit.spec.template}`, edit] as const)).values()
+            ];
+            const firstSpec = uniqueEdits[0].spec as AddEditSpecificationEntry;
             const indentation = this.extractIndentation(textDocument, firstSpec.range[1]);
             this.generateAddInitialEdit(textDocument, firstSpec, indentation);
-            const parsedTemplates = edits.map((edit) => {
+            const parsedTemplates = uniqueEdits.map((edit) => {
                 return {
-                    template: parseTemplate(edit.spec.template, textDocument, indentation),
+                    template: parseTemplate(edit.spec.template, textDocument),
                     valuesIndex: edit.index
                 };
             });
@@ -250,13 +269,15 @@ export class TransactionalEdit {
                 Range.create(functionStartPos, Position.create(functionStartPos.line, uinteger.MAX_VALUE))
             );
             const lengthToReplace = functionStart.match(/^{[^\S\n]*/)![0].length;
-            this.initialTextEdits.push({
-                range: Range.create(
-                    functionStartPos,
-                    textDocument.positionAt(specification.functionRange[0] + lengthToReplace)
-                ),
-                newText: "{\n" + indentation
-            });
+            if (lengthToReplace + 1 < specification.range[0] - specification.functionRange[0]) {
+                this.initialTextEdits.push({
+                    range: Range.create(
+                        functionStartPos,
+                        textDocument.positionAt(specification.functionRange[0] + lengthToReplace)
+                    ),
+                    newText: "{\n" + indentation + " ".repeat(4)
+                });
+            }
         }
     }
 

@@ -12,6 +12,8 @@ import {
     InterpreterModule,
     InvocationExpression,
     jsFun,
+    listType,
+    optional,
     parse,
     RuntimeError,
     SemanticFieldNames,
@@ -217,7 +219,6 @@ const scopeExpressions: ExecutableExpression[] = [
                         )
                     )
                 )
-                scope.contents += packageElement
                 if(optionalCallback != null) {
                     optionalCallback()
                 }
@@ -253,7 +254,6 @@ const scopeExpressions: ExecutableExpression[] = [
                     ),
                     class = list("comment-element")
                 )
-                scope.contents += commentElement
                 commentElement
             `
         )
@@ -310,7 +310,6 @@ const scopeExpressions: ExecutableExpression[] = [
                 if(targetScope.get(name) == null) {
                     targetScope.set(name, classElement)
                 }
-                scope.contents += classElement
                 classElement
             `
         )
@@ -456,46 +455,96 @@ const scopeExpressions: ExecutableExpression[] = [
             ))
         `
     ),
-    ...parse(
-        `
-            scope.comment = scope.internal.withRegisterSource {
+    id(scope).assignField(
+        "comment",
+        fun(
+            `
                 (content) = args
-                _comment(content, self = args.self)
+                scope.internal.registerCanvasElement(
+                    _comment(content, self = args.self),
+                    args
+                )
+            `,
+            {
+                docs: "Creates a comment.",
+                params: [[0, "the content of the comment", stringType]],
+                snippet: `(\\"$1\\")`,
+                returns: "The created comment"
             }
-            scope.comment.docs = [
-                docs = "Creates a comment.",
-                snippet = "(\\"$1\\")"
-            ]
-            scope.package = scope.internal.withRegisterSource {
+        )
+    ),
+    id(scope).assignField(
+        "package",
+        fun(
+            `
                 (name, callback) = args
-                _package(name, callback, args.keywords, self = args.self)
+                scope.internal.registerCanvasElement(
+                    _package(name, callback, args.keywords, self = args.self),
+                    args
+                )
+            `,
+            {
+                docs: "Creates a package.",
+                params: [
+                    [0, "the name of the package", stringType],
+                    [1, "the callback function for the package", optional(functionType)],
+                    ["keywords", "the keywords of the package", optional(listType(stringType))],
+                ],
+                snippet: `(\\"$1\\") {\\n    $2\\n}`,
+                returns: "The created package"
             }
-            scope.package.docs = [
-                docs = "Creates a package.",
-                snippet = "(\\"$1\\") {\\n    $2\\n}"
-            ]
-            scope.class = scope.internal.withRegisterSource {
+        )
+    ),
+    
+    id(scope).assignField(
+        "class",
+        fun(
+            `
                 (name, callback) = args
-                _class(name, callback, args.keywords, args.abstract, self = args.self)
+                scope.internal.registerCanvasElement(
+                    _class(name, callback, args.keywords, args.abstract, self = args.self),
+                    args
+                )
+            `,
+            {
+                docs: "Creates a class.",
+                params: [
+                    [0, "the name of the class", stringType],
+                    [1, "the callback function for the class", optional(functionType)],
+                    ["keywords", "the keywords of the class", optional(listType(stringType))],
+                ],
+                snippet: `(\\"$1\\") {\\n    $2\\n}`,
+                returns: "The created class"
             }
-            scope.class.docs = [
-                docs = "Creates a class.",
-                snippet = "(\\"$1\\") {\\n    $2\\n}"
-            ]
-            scope.interface = scope.internal.withRegisterSource  {
+        )
+    ),
+    
+    id(scope).assignField(
+        "interface",
+        fun(
+            `
                 (name, callback) = args
                 keywords = list("interface")
                 otherKeywords = args.keywords
                 if(otherKeywords != null) {
                     keywords.addAll(otherKeywords)
                 }
-                _class(name, callback, keywords, args.abstract, self = args.self)
+                scope.internal.registerCanvasElement(
+                    _class(name, callback, keywords, args.abstract, self = args.self),
+                    args
+                )
+            `,
+            {
+                docs: "Creates an interface.",
+                params: [
+                    [0, "the name of the interface", stringType],
+                    [1, "the callback function for the interface", optional(functionType)],
+                    ["keywords", "the keywords of the interface", optional(listType(stringType))],
+                ],
+                snippet: `(\\"$1\\") {\\n    $2\\n}`,
+                returns: "The created interface"
             }
-            scope.interface.docs = [
-                docs = "Creates an interface.",
-                snippet = "(\\"$1\\") {\\n    $2\\n}"
-            ]
-        `
+        )
     ),
     id(scope).assignField(
         "readingLeft",
