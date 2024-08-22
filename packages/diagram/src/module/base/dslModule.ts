@@ -44,7 +44,7 @@ const scopeExpressions: ExecutableExpression[] = [
             `
                 (x, y) = args
                 point = absolutePoint(x = x, y = y)
-                scope.contents += point
+                scope.internal.registerCanvasContent(point, args)
                 point
             `,
             {
@@ -63,7 +63,7 @@ const scopeExpressions: ExecutableExpression[] = [
             `
                 (target, offsetX, offsetY) = args
                 point = relativePoint(target = target, offsetX = offsetX, offsetY = offsetY)
-                scope.contents += point
+                scope.internal.registerCanvasContent(point, args)
                 point
             `,
             {
@@ -83,7 +83,7 @@ const scopeExpressions: ExecutableExpression[] = [
             `
                 (lineProvider, pos, distance) = args
                 point = linePoint(lineProvider = lineProvider, pos = pos, distance = distance, segment = args.seg)
-                scope.contents += point
+                scope.internal.registerCanvasContent(point, args)
                 point
             `,
             {
@@ -278,7 +278,7 @@ const scopeExpressions: ExecutableExpression[] = [
                             scopes = object(),
                             class = list("label-element")
                         )
-                        scope.contents += labelCanvasElement
+                        scope.internal.registerCanvasElement(labelCanvasElement, args)
                         labelCanvasElement
                     }
                 )
@@ -352,7 +352,7 @@ const scopeExpressions: ExecutableExpression[] = [
                 )
                 connection.startProvider = startProvider
                 connection.endProvider = endProvider
-                scope.contents += connection
+                scope.internal.registerCanvasElement(connection, target)
 
                 connection
             `,
@@ -369,11 +369,24 @@ const scopeExpressions: ExecutableExpression[] = [
     id(scope)
         .field("internal")
         .assignField(
+            "registerCanvasContent",
+            fun(
+                `
+                    (content, source) = args
+                    scope.contents += content
+                    content.source = reflect(source)
+                    content
+                `
+            )
+        ),
+    id(scope)
+        .field("internal")
+        .assignField(
             "registerCanvasElement",
             fun(
                 `
                     (element, source) = args
-                    scope.contents += element
+                    scope.internal.registerCanvasContent(element, source)
 
                     this.moveEdit = createAppendScopeEdit(source, "layout", "'pos = apos(' & dx & ', ' & dy & ')'")
                     element.edits.set("${DefaultEditTypes.MOVE_X}", this.moveEdit)

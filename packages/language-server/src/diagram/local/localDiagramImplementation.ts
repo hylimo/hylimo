@@ -4,6 +4,7 @@ import { TextDocument } from "vscode-languageserver-textdocument";
 import { DiagramImplementation, DiagramUpdateResult } from "../diagramImplementation.js";
 import { SharedDiagramUtils } from "../../sharedDiagramUtils.js";
 import { DiagramConfig } from "@hylimo/diagram-common";
+import { Expression, isWrapperObject } from "@hylimo/core";
 
 /**
  * Local implementation of a diagram.
@@ -134,19 +135,16 @@ export class LocalDiagramImplementation extends DiagramImplementation {
     override async getSourceRange(element: string): Promise<Range | undefined> {
         if (this.layoutResult == undefined || this.document == undefined) {
             return undefined;
-        } else {
-            let targetElement = this.layoutResult.layoutElementLookup.get(element);
-            while (targetElement != undefined) {
-                const source = targetElement.element.getLocalFieldOrUndefined("source")?.source;
-                if (source != undefined) {
-                    return Range.create(
-                        this.document.positionAt(source.position.startOffset),
-                        this.document.positionAt(source.position.endOffset)
-                    );
-                }
-                targetElement = targetElement?.parent;
+        }
+        let targetElement = this.layoutResult.layoutElementLookup.get(element);
+        while (targetElement != undefined) {
+            const source = targetElement.element.getLocalFieldOrUndefined("source")?.value;
+            if (source != undefined && isWrapperObject(source)) {
+                const target = source.wrapped as Expression;
+                const [start, end] = target.range;
+                return Range.create(this.document.positionAt(start), this.document.positionAt(end));
             }
-            return undefined;
+            targetElement = targetElement?.parent;
         }
         return undefined;
     }
