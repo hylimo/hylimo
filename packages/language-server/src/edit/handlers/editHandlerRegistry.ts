@@ -6,7 +6,6 @@ import { moveXHandler } from "./moveXHandler.js";
 import { moveYHandler } from "./moveYHandler.js";
 import { rotationhandler } from "./rotationHandler.js";
 
-
 /**
  * Registry for all edit handlers
  */

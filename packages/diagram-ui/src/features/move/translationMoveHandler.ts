@@ -29,10 +29,12 @@ export class TranslationMoveHandler extends MoveHandler {
                 offsetX = 0;
             }
         }
-        return [{
-            types: [DefaultEditTypes.MOVE_X, DefaultEditTypes.MOVE_Y],
-            values: { dx: offsetX, dy: offsetY },
-            elements: this.elements
-        } satisfies MoveEdit]
+        return [
+            {
+                types: [DefaultEditTypes.MOVE_X, DefaultEditTypes.MOVE_Y],
+                values: { dx: offsetX, dy: offsetY },
+                elements: this.elements
+            } satisfies MoveEdit
+        ];
     }
 }

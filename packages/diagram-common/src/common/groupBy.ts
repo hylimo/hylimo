@@ -1,6 +1,6 @@
 /**
  * GroupBy replacement until we can use es2024
- * 
+ *
  * @param values the values to group
  * @param keyFn key extraction function
  * @returns the grouped values

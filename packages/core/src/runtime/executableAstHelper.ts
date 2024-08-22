@@ -99,7 +99,6 @@ const parser = new Parser();
 export function parse(expressions: string): ExecutableExpression[] {
     const parserResult = parser.parse(expressions);
     if (parserResult.lexingErrors.length > 0 || parserResult.parserErrors.length > 0) {
-        console.error(parserResult, expressions);
         throw new Error("Invalid fun to parse");
     }
     return toExecutable(parserResult.ast!, false);

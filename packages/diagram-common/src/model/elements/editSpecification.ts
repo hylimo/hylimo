@@ -67,14 +67,16 @@ export namespace EditSpecification {
      * @return true if the edit can affect all specifications at the same time
      */
     export function isConsistent(entries: (EditSpecificationEntry | undefined)[][]): boolean {
-        const entriesWithGroup = entries.flatMap((group, groupIndex) => group.map((entry) => (entry ? { entry, group: groupIndex } : undefined)));
+        const entriesWithGroup = entries.flatMap((group, groupIndex) =>
+            group.map((entry) => (entry ? { entry, group: groupIndex } : undefined))
+        );
         const definedEntries = entriesWithGroup.filter((entry) => entry !== undefined);
         if (definedEntries.length != entriesWithGroup.length) {
             return false;
         }
         definedEntries.sort((a, b) => a.entry.range[0] - b.entry.range[0]);
         for (let i = 1; i < entries.length; i++) {
-            const { entry: entry, group} = definedEntries[i];
+            const { entry: entry, group } = definedEntries[i];
             const { entry: lastEntry, group: lastGroup } = definedEntries[i - 1];
             const currentStart = entry.range[0];
             const lastStart = lastEntry.range[0];
@@ -87,8 +89,7 @@ export namespace EditSpecification {
                 }
                 if (
                     entry.type === "replace" &&
-                    (entry.range[1] !== lastEntry.range[1] ||
-                        !isTemplateEqual(entry.template, lastEntry.template))
+                    (entry.range[1] !== lastEntry.range[1] || !isTemplateEqual(entry.template, lastEntry.template))
                 ) {
                     return false;
                 }
@@ -101,7 +102,7 @@ export namespace EditSpecification {
 
     /**
      * Checks if two entries are equal
-     * 
+     *
      * @param a the first entry
      * @param b the second entry
      * @returns true if the entries are equal

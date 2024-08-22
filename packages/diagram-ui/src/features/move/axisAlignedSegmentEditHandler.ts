@@ -27,7 +27,7 @@ export class AxisAligedSegmentEditHandler extends MoveHandler {
         super(transactionId);
     }
 
-    protected override generateEdits(dx: number, dy: number, event: MouseEvent): Edit[] {
+    protected override generateEdits(dx: number, dy: number): Edit[] {
         const rawPos = (this.original + (this.vertical ? dx : dy) - this.start) / (this.end - this.start);
         const newPos = Math.min(1, Math.max(0, rawPos));
         return [

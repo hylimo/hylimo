@@ -5,10 +5,9 @@ import { evaluateTemplate } from "./template.js";
  * Edit engine for add edits
  */
 export class AddEditEngine extends EditEngine {
-
     /**
      * Creates a new add edit engine
-     * 
+     *
      * @param start the start of the edit
      * @param end the end of the edit
      * @param templates the templates for all expressions to add
@@ -25,18 +24,18 @@ export class AddEditEngine extends EditEngine {
 
     /**
      * Evaluate the templates and generates the addment string
-     * 
+     *
      * @param values the variables to apply to each template
      * @returns the generated string
      */
     override async apply(values: Record<string, any>[]): Promise<string> {
         const newlineWithIndentation = "\n" + this.indentation;
-        const evaluatedTemplates = await Promise.all(this.templates.map(async (template) => {
-            return await evaluateTemplate(template.template, values[template.valuesIndex], this.indentation);
-        }));
+        const evaluatedTemplates = await Promise.all(
+            this.templates.map(async (template) => {
+                return await evaluateTemplate(template.template, values[template.valuesIndex], this.indentation);
+            })
+        );
         const value = newlineWithIndentation + evaluatedTemplates.join(newlineWithIndentation);
         return value.replace(/\n/g, "\n" + " ".repeat(4)) + newlineWithIndentation + "}";
     }
 }
-
-

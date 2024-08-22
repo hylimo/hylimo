@@ -2,7 +2,6 @@ import {
     assertNumber,
     assertObject,
     ExecutableAbstractFunctionExpression,
-    Expression,
     FullObject,
     fun,
     isNumber,
@@ -11,7 +10,15 @@ import {
     optional,
     or
 } from "@hylimo/core";
-import { Size, Element, LinePoint, Point, CanvasConnection, CanvasElement, DefaultEditTypes } from "@hylimo/diagram-common";
+import {
+    Size,
+    Element,
+    LinePoint,
+    Point,
+    CanvasConnection,
+    CanvasElement,
+    DefaultEditTypes
+} from "@hylimo/diagram-common";
 import { LayoutElement } from "../../layoutElement.js";
 import { Layout } from "../../layoutEngine.js";
 import { CanvasPointLayoutConfig } from "./canvasPointLayoutConfig.js";

@@ -1,4 +1,4 @@
-import { InterpreterModule, assign, id, fun } from "@hylimo/core";
+import { InterpreterModule, assign, id } from "@hylimo/core";
 
 /**
  * Module for base diagrams

@@ -246,11 +246,7 @@ const scopeExpressions: ExecutableExpression[] = [
             {
                 docs: "Layout operator which can be applied either to a CanvasElement",
                 params: [
-                    [
-                        0,
-                        "the CanvasElement or CanvasConnection to aply the layout to",
-                        elementType(CanvasElement.TYPE)
-                    ],
+                    [0, "the CanvasElement or CanvasConnection to aply the layout to", elementType(CanvasElement.TYPE)],
                     [1, "callback which provides the layout definition", functionType]
                 ],
                 returns: "The provided element"

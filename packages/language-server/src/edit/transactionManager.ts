@@ -5,7 +5,6 @@ import { Diagram } from "../diagram/diagram.js";
 import { EditHandlerRegistry } from "./handlers/editHandlerRegistry.js";
 import { SharedDiagramUtils } from "../sharedDiagramUtils.js";
 import { TransactionalEdit } from "./edit/transactionalEdit.js";
-import { EditHandler } from "./handlers/editHandler.js";
 
 /**
  * Handles TransactionActions modifying the textdocument

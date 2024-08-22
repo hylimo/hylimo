@@ -43,9 +43,5 @@ export abstract class MoveHandler {
      * @param dy the absolute y offset
      * @param event the mouse event which triggered the move
      */
-    protected abstract generateEdits(
-        dx: number,
-        dy: number,
-        event: MouseEvent
-    ): Edit[];
+    protected abstract generateEdits(dx: number, dy: number, event: MouseEvent): Edit[];
 }

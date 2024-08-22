@@ -7,7 +7,6 @@ import { DynamicLanguageServerConfig, Edit, IncrementalUpdate } from "@hylimo/di
  * @param E the type of edit handled
  */
 export interface EditHandler<E extends Edit> {
-    
     /**
      * The type of the action
      */
@@ -15,7 +14,7 @@ export interface EditHandler<E extends Edit> {
 
     /**
      * Predicts the action diff based on the layouted diagram and the last applied action
-     * 
+     *
      * @param layoutedDiagram the layouted diagram
      * @param lastApplied the last applied values
      * @param newest the newest values
@@ -36,5 +35,4 @@ export interface EditHandler<E extends Edit> {
      * @param config the language server config
      */
     transformEdit(edit: E, config: DynamicLanguageServerConfig): void;
-
 }

@@ -23,7 +23,7 @@ export class RotationHandler extends MoveHandler {
         super(transactionId);
     }
 
-    protected override generateEdits(dx: number, dy: number, event: MouseEvent): Edit[] {
+    protected override generateEdits(dx: number, dy: number): Edit[] {
         const newPosition: Point = {
             x: this.initialPosition.x + dx,
             y: this.initialPosition.y + dy

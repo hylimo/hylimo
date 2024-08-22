@@ -255,7 +255,7 @@ export interface LayoutConfig {
     createPrototype(): ExecutableAbstractFunctionExpression;
     /**
      * Called to postprocess the extracted styles
-     * 
+     *
      * @param element the element to postprocess
      * @param styles the extracted styles
      * @returns the postprocessed styles

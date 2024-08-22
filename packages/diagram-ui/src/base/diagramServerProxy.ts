@@ -1,7 +1,4 @@
-import {
-    NavigateToSourceAction,
-    TransactionalAction,
-} from "@hylimo/diagram-protocol";
+import { NavigateToSourceAction, TransactionalAction } from "@hylimo/diagram-protocol";
 import { injectable } from "inversify";
 import { ActionHandlerRegistry, DiagramServerProxy as SprottyDiagramServerProxy } from "sprotty";
 

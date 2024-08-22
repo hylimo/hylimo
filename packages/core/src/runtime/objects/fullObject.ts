@@ -183,7 +183,7 @@ export class FullObject extends BaseObject {
 
     /**
      * Gets a property, respecting the proto field
-     * 
+     *
      * @param key the key of the property
      * @returns the property or undefined if not found
      */

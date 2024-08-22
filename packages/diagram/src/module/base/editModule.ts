@@ -167,7 +167,9 @@ export const editModule = InterpreterModule.create(
                         target,
                         [
                             target.toWrapperObject(context),
-                            context.newString(`' ${assertString(scope)} {\n    ' & $replace(${assertString(expression)}, '\n', '\n    ') & '\n}'`)
+                            context.newString(
+                                `' ${assertString(scope)} {\n    ' & $replace(${assertString(expression)}, '\n', '\n    ') & '\n}'`
+                            )
                         ],
                         context
                     );

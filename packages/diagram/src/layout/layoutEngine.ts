@@ -4,7 +4,6 @@ import {
     assertWrapperObject,
     BaseObject,
     Expression,
-    FieldEntry,
     FullObject,
     FunctionExpression,
     isNull,

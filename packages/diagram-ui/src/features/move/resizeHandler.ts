@@ -43,7 +43,7 @@ export class ResizeHandler extends MoveHandler {
         this.rotation = rotation * (Math.PI / 180);
     }
 
-    protected override generateEdits(dx: number, dy: number, event: MouseEvent): Edit[] {
+    protected override generateEdits(dx: number, dy: number): Edit[] {
         const edits: Edit[] = [];
         const normalizedDelta = Math2D.rotate({ x: dx, y: dy }, -this.rotation);
         for (const group of this.groupedElements) {

@@ -488,14 +488,14 @@ const scopeExpressions: ExecutableExpression[] = [
                 params: [
                     [0, "the name of the package", stringType],
                     [1, "the callback function for the package", optional(functionType)],
-                    ["keywords", "the keywords of the package", optional(listType(stringType))],
+                    ["keywords", "the keywords of the package", optional(listType(stringType))]
                 ],
                 snippet: `(\\"$1\\") {\\n    $2\\n}`,
                 returns: "The created package"
             }
         )
     ),
-    
+
     id(scope).assignField(
         "class",
         fun(
@@ -511,14 +511,14 @@ const scopeExpressions: ExecutableExpression[] = [
                 params: [
                     [0, "the name of the class", stringType],
                     [1, "the callback function for the class", optional(functionType)],
-                    ["keywords", "the keywords of the class", optional(listType(stringType))],
+                    ["keywords", "the keywords of the class", optional(listType(stringType))]
                 ],
                 snippet: `(\\"$1\\") {\\n    $2\\n}`,
                 returns: "The created class"
             }
         )
     ),
-    
+
     id(scope).assignField(
         "interface",
         fun(
@@ -539,7 +539,7 @@ const scopeExpressions: ExecutableExpression[] = [
                 params: [
                     [0, "the name of the interface", stringType],
                     [1, "the callback function for the interface", optional(functionType)],
-                    ["keywords", "the keywords of the interface", optional(listType(stringType))],
+                    ["keywords", "the keywords of the interface", optional(listType(stringType))]
                 ],
                 snippet: `(\\"$1\\") {\\n    $2\\n}`,
                 returns: "The created interface"

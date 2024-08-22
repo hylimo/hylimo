@@ -163,15 +163,17 @@ export class TransactionalEdit {
     /**
      * Checks if predictions are still valid
      * Predictions are not valid if the topology of the diagram has changed compared to the initial diagram
-     * 
+     *
      * @param layoutedDiagram the layouted diagram to check
      * @returns true if predictions are still valid
      */
     private checkIfPredictionsAreValid(layoutedDiagram: BaseLayoutedDiagram) {
         let predictionsValid: boolean = true;
         const elements = [...Object.values(layoutedDiagram.elementLookup)];
-        if (elements.length !== this.initialDiagramElementLookup.size ||
-            elements.some((element) => this.initialDiagramElementLookup.get(element.id) !== element.type)) {
+        if (
+            elements.length !== this.initialDiagramElementLookup.size ||
+            elements.some((element) => this.initialDiagramElementLookup.get(element.id) !== element.type)
+        ) {
             predictionsValid = false;
         }
         return predictionsValid;

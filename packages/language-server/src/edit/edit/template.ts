@@ -22,10 +22,7 @@ export interface ParsedExpressionTemplateEntry {
  * @param textDocument the text document to use for range entries
  * @returns the parsed template
  */
-export function parseTemplate(
-    template: TemplateEntry[],
-    textDocument: TextDocument
-): ParsedTemplateEntry[] {
+export function parseTemplate(template: TemplateEntry[], textDocument: TextDocument): ParsedTemplateEntry[] {
     const result: ParsedTemplateEntry[] = [];
     for (const entry of template) {
         if (typeof entry === "string") {

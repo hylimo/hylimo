@@ -258,7 +258,7 @@ export class MoveMouseListener extends MouseListener {
     /**
      * For a resize, computes the grouped entries for consistency check and the grouped elements passed to the resize handler.
      * Assumes that groupedElements are grouped by scaleX and/or scaleY, depending on which is/are defined.
-     * 
+     *
      * @param groupedElements the elements grouped by size
      * @param scaleX the scale factor in x direction
      * @param scaleY the scale factor in y direction

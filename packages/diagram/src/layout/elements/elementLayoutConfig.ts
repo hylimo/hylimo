@@ -155,7 +155,7 @@ export abstract class ElementLayoutConfig implements LayoutConfig {
 
     /**
      * Called to postprocess the extracted styles
-     * 
+     *
      * @param _element the element to postprocess
      * @param styles the extracted styles
      * @returns the postprocessed styles
