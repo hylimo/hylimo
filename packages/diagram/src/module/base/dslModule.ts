@@ -263,7 +263,7 @@ const scopeExpressions: ExecutableExpression[] = [
                     over = null,
                     end = self.endProvider,
                     start = {
-                        pos = self.startProvider(args)
+                        pos = self.startProvider(it)
                         object(proto = lineBuilderProto, segments = list(), start = pos)
                     },
                     label = {
@@ -318,7 +318,10 @@ const scopeExpressions: ExecutableExpression[] = [
                         "${DefaultEditTypes.MOVE_LPOS_POS}",
                         createAppendScopeEdit(target, "with", "'over = start(' & pos & ').axisAligned(0.5, end(0))'")
                     )
-                    { scope.lpos(start, it.get(0), seg = it.seg) }
+                    { 
+                        startPoint.pos = it
+                        startPoint
+                    }
                 } {
                     { start }
                 }
@@ -329,7 +332,10 @@ const scopeExpressions: ExecutableExpression[] = [
                         "${DefaultEditTypes.MOVE_LPOS_POS}",
                         createAppendScopeEdit(target, "with", "'over = start(0).axisAligned(0.5, end(' & pos & '))'")
                     )
-                    { scope.lpos(end, it) }
+                    {
+                        endPoint.pos = it
+                        endPoint
+                    }
                 } {
                     { end }
                 }
