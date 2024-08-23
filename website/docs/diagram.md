@@ -70,10 +70,11 @@ Layouted elements, including `vbox`, `hbox`, `stack`, `rect`, `ellipse` and `pat
 - `height`, `minHeight`, and `maxHeight` for defining its height, here `height` takes precedence over `minHeight` and `maxHeight`
 - `margin`, and its variants `marginTop`, `marginRight`, `marginBottom`, and `marginLeft` for defining the margin around the element
 - `vAlign` and `hAlign` for defining the vertical and horizontal alignment of the element within its parent
-  Style attributes can be set in two ways:
-  First, they can be defined directly on the element.
-  However, this makes styling more verbose and less reusable.
-  Therefore, styles can also be defined using the SCSS-inspired `styles` function:
+
+Style attributes can be set in two ways:
+First, they can be defined directly on the element.
+However, this makes styling more verbose and less reusable.
+Therefore, styles can also be defined using the SCSS-inspired `styles` function:
 
 ```
 styles {
@@ -195,7 +196,8 @@ Can be used to customize canvasConnections, by adding labels to the canvas conne
 ```
 aCanvasConnection with {
     over = start().line(apos(10, 20)).line(end())
-    label("the text of the label", 0.5, 100) // a label in the middle of the connection with distance 100
+    // a label in the middle of the connection with distance 100
+    label("the text of the label", 0.5, 100)
 }
 ```
 
