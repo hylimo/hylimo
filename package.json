@@ -8,7 +8,9 @@
         "build": "tsc -b tsconfig.build.json",
         "watch": "tsc -b tsconfig.build.json --watch",
         "format": "prettier --write .",
-        "lint": "eslint --fix"
+        "format:check": "prettier --check .",
+        "lint": "eslint --fix",
+        "lint:check": "eslint"
     },
     "devDependencies": {
         "@typescript-eslint/eslint-plugin": "^8.1.0",
