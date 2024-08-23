@@ -147,13 +147,12 @@ export class Parser extends CstParser {
             this.CONSUME1(NewLine, { LABEL: AdditionalToken.START_NEW_LINE });
         });
         this.OPTION1(() => {
-            this.withError(() => this.SUBRULE1(this.expression), "At least one expression is required");
+            this.SUBRULE1(this.expression);
             this.MANY2(() => {
                 this.AT_LEAST_ONE({
                     DEF: () => {
                         this.CONSUME2(NewLine);
-                    },
-                    ERR_MSG: "Each expression must be located on its own line"
+                    }
                 });
                 this.OPTION2(() => this.SUBRULE2(this.expression));
             });
@@ -283,7 +282,7 @@ export class Parser extends CstParser {
         this.MANY({
             DEF: () => {
                 this.CONSUME(Dot, { ERR_MSG: "Expected a '.' but found none" });
-                this.withError(() => this.SUBRULE2(this.simpleCallExpression), `Identifiers may not end with a '.'`);
+                this.withError(() => this.SUBRULE2(this.simpleCallExpression), `Missing identifier after '.'`);
             }
         });
         if (this.faultTolerant) {
@@ -301,9 +300,9 @@ export class Parser extends CstParser {
                 this.withError2(
                     () => this.CONSUME(Identifier),
                     () => this.CONSUME(SignMinus),
-                    `Expected an identifier or '-', but found neither`
+                    `Expected an identifier but didn't find one`
                 ),
-            ERR_MSG: "Identifier or '-' is missing"
+            ERR_MSG: "Identifier is missing"
         });
         if (this.faultTolerant) {
             this.OPTION(() => this.CONSUME2(Dot, { LABEL: AdditionalToken.FAULT_TOLERANT }));
@@ -335,7 +334,7 @@ export class Parser extends CstParser {
      * an Equal sign and an operatorExpression on the right side.
      */
     private destructuringExpression = this.RULE(Rules.DESTRUCTURING_EXPRESSION, () => {
-        const opening = this.CONSUME(OpenRoundBracket);
+        this.CONSUME(OpenRoundBracket);
         const elements: string[] = [];
         this.AT_LEAST_ONE_SEP({
             SEP: Comma,
@@ -343,15 +342,15 @@ export class Parser extends CstParser {
             ERR_MSG: "Destructuring expressions need at least one element inside them"
         });
         this.OPTION(() => this.CONSUME(Comma)); // Allow trailing commas
-        const closing = this.CONSUME(CloseRoundBracket, {
-            ERR_MSG: `Destructuring expression '${opening.image}${this.elementsToText(elements)}' is missing its ending ')'`
+        this.CONSUME(CloseRoundBracket, {
+            ERR_MSG: `Destructuring expression '(${this.elementsToText(elements)}' is missing its ending ')'`
         });
-        const equals = this.CONSUME(Equal, {
-            ERR_MSG: `Behind destructuring expression '${opening.image}${this.elementsToText(elements)}${closing.image}', a '=' is expected`
+        this.CONSUME(Equal, {
+            ERR_MSG: `Behind destructuring expression '(${this.elementsToText(elements)})', a '=' is expected`
         });
         this.withError(
             () => this.SUBRULE(this.operatorExpression),
-            `Assignment expression '${opening.image}${this.elementsToText(elements)}${closing.image}${equals.image}' is missing the value(s) you want to store`
+            `Assignment expression '(${this.elementsToText(elements)}' is missing the value(s) you want to store`
         );
     });
 
@@ -388,6 +387,12 @@ export class Parser extends CstParser {
         });
     });
 
+    /**
+     * Returns the orignal source code text contained within the node
+     *
+     * @param cstNode the node whose text to retrieve
+     * @returns the retrieved text
+     */
     private getText(cstNode: CstNode | undefined): string {
         if (cstNode == undefined || cstNode.location == undefined) {
             return "";
@@ -395,10 +400,22 @@ export class Parser extends CstParser {
         return this.text.substring(cstNode.location.startOffset, cstNode.location.endOffset! + 1);
     }
 
+    /**
+     * Joins the given elements ','-separated
+     *
+     * @param elements the elements to join
+     * @returns the concatenated string
+     */
     private elementsToText(elements: string[]): string {
         return elements.join(",");
     }
 
+    /**
+     * Helper method that let's us assign an error message when calling subrules
+     *
+     * @param rule the subrule to execute
+     * @returns the result returned by the subrule, so probably a CST Token or the literal token
+     */
     private withError<Type>(rule: () => Type, errorMessage: string, or?: typeof this.OR): Type {
         return (or ?? this.OR).call(this, {
             DEF: [{ ALT: rule }],
@@ -406,6 +423,13 @@ export class Parser extends CstParser {
         });
     }
 
+    /**
+     * Helper method that let's us assign an error message when we want to select one of two subrules
+     *
+     * @param rule1 the first option
+     * @param rule2 the second option
+     * @returns the result returned by the executed subrule, so probably a CST Token or the literal token
+     */
     private withError2<Type>(rule1: () => Type, rule2: () => Type, errorMessage: string): Type {
         return this.OR({
             DEF: [{ ALT: rule1 }, { ALT: rule2 }],
