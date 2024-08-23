@@ -7,10 +7,12 @@
  * @returns the rounded value
  */
 export function roundToPrecision(value: number, precision: number | undefined): number {
-    if (precision == undefined) {
-        return value;
+    let res: number;
+    if (precision === undefined) {
+        res = value;
+    } else {
+        res = Math.round(value / precision) * precision;
     }
-    const res = Math.round(value / precision) * precision;
     // the following code is required to to weird floating point rounding behavior when precision < 1
     const fullNumber = Math.round(res);
     const remainder = res - fullNumber;

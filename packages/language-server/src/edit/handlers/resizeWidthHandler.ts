@@ -1,23 +1,26 @@
 import { CanvasElement, DefaultEditTypes } from "@hylimo/diagram-common";
-import { IncrementalUpdate, RotateEdit } from "@hylimo/diagram-protocol";
+import { IncrementalUpdate, ResizeEdit } from "@hylimo/diagram-protocol";
 import { EditHandler } from "./editHandler.js";
 import { roundToPrecision } from "../../util/roundToPrecision.js";
 
 /**
- * Handler for axis aligned segment pos edits
+ * Handler for resize width edits
  */
-export const rotationHandler: EditHandler<RotateEdit> = {
-    type: DefaultEditTypes.ROTATE,
+export const resizeWidth: EditHandler<ResizeEdit> = {
+    type: DefaultEditTypes.RESIZE_WIDTH,
 
     predictActionDiff(layoutedDiagram, lastApplied, newest, elements) {
         const updates: IncrementalUpdate[] = [];
         for (const element of elements) {
             if (CanvasElement.isCanvasElement(element)) {
-                element.rotation = newest.rotation;
+                const sizeToPos = element.width / element.x;
+                element.width = newest.width!;
+                element.x = element.width / sizeToPos;
                 updates.push({
                     target: element.id,
                     changes: {
-                        rotation: element.rotation
+                        width: element.width,
+                        x: element.x
                     }
                 });
             }
@@ -26,6 +29,8 @@ export const rotationHandler: EditHandler<RotateEdit> = {
     },
 
     transformEdit(edit, config) {
-        edit.values.rotation = roundToPrecision(edit.values.rotation, config.settings.rotationPrecision);
+        const { width, dw } = edit.values;
+        edit.values.dw = roundToPrecision(dw!, config.settings.resizePrecision);
+        edit.values.width = roundToPrecision(width! - (dw! - edit.values.dw), undefined);
     }
 };

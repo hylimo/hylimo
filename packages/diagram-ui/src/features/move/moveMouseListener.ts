@@ -242,17 +242,25 @@ export class MoveMouseListener extends MouseListener {
                 if (scaleY != undefined) {
                     return `${element.width}x${element.height}`;
                 } else {
-                    return scaleX;
+                    return element.width;
                 }
             } else {
-                return scaleY;
+                return element.height;
             }
         });
         const { groupedEntries, elements } = this.computeResizeElements(groupedElements, scaleX, scaleY);
         if (!EditSpecification.isConsistent(groupedEntries)) {
             return null;
         }
-        return new ResizeHandler(this.transactionIdProvider.generateId(), target.rotation, scaleX, scaleY, elements);
+        return new ResizeHandler(
+            this.transactionIdProvider.generateId(),
+            target.rotation,
+            scaleX,
+            scaleY,
+            target.width,
+            target.height,
+            elements
+        );
     }
 
     /**

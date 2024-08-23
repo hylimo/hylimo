@@ -4,7 +4,9 @@ import { moveLineDistHandler } from "./moveLineDistHandler.js";
 import { moveLinePosHandler } from "./moveLinePosHandler.js";
 import { moveXHandler } from "./moveXHandler.js";
 import { moveYHandler } from "./moveYHandler.js";
-import { rotationhandler } from "./rotationHandler.js";
+import { resizeHeight } from "./resizeHeightHandler.js";
+import { resizeWidth } from "./resizeWidthHandler.js";
+import { rotationHandler } from "./rotationHandler.js";
 
 /**
  * Registry for all edit handlers
@@ -45,5 +47,7 @@ export const defaultEditRegistry = new EditHandlerRegistry([
     moveLinePosHandler,
     moveLineDistHandler,
     axisAlignedSegmentPosHandler,
-    rotationhandler
+    rotationHandler,
+    resizeWidth,
+    resizeHeight
 ]);

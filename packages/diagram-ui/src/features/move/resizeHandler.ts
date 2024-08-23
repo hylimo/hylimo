@@ -30,6 +30,8 @@ export class ResizeHandler extends MoveHandler {
      * @param rotation the rotation of the primary resize element, in degrees.
      * @param scaleX the scale factor in x direction. The resize is scaled by this to account for resize in the opposite direction.
      * @param scaleY the scale factor in y direction. The resize is scaled by this to account for resize in the opposite direction.
+     * @param originalWidth the original width of the primary resize element, used to calculate the resize factor.
+     * @param originalHeight the original height of the primary resize element, used to calculate the resize factor.
      * @param groupedElements the elements grouped by size.
      */
     constructor(
@@ -37,6 +39,8 @@ export class ResizeHandler extends MoveHandler {
         rotation: number,
         private readonly scaleX: number | undefined,
         private readonly scaleY: number | undefined,
+        private readonly originalWidth: number,
+        private readonly originalHeight: number,
         private readonly groupedElements: ElementsGroupedBySize[]
     ) {
         super(transactionId);
@@ -44,36 +48,36 @@ export class ResizeHandler extends MoveHandler {
     }
 
     protected override generateEdits(dx: number, dy: number): Edit[] {
-        const edits: Edit[] = [];
+        let factorX: number | undefined = undefined;
+        let factorY: number | undefined = undefined;
         const normalizedDelta = Math2D.rotate({ x: dx, y: dy }, -this.rotation);
+
+        if (this.scaleX !== undefined) {
+            factorX = Math.abs((normalizedDelta.x * this.scaleX + this.originalWidth) / this.originalWidth);
+        }
+        if (this.scaleY !== undefined) {
+            factorY = Math.abs((normalizedDelta.y * this.scaleY + this.originalHeight) / this.originalHeight);
+        }
+        const edits: Edit[] = [];
         for (const group of this.groupedElements) {
-            let dw: number | undefined = undefined;
-            let dh: number | undefined = undefined;
-            let width: number | undefined = undefined;
-            let height: number | undefined = undefined;
+            const values: ResizeEdit["values"] = {};
             const types: ResizeEdit["types"] = [];
-            if (this.scaleX != undefined) {
-                dw = normalizedDelta.x * this.scaleX;
-                width = group.originalWidth! + dw;
+            if (factorX != undefined) {
+                values.width = group.originalWidth! * factorX;
+                values.dw = values.width - group.originalWidth!;
                 types.push(DefaultEditTypes.RESIZE_WIDTH);
             }
-            if (this.scaleY != undefined) {
-                dh = normalizedDelta.y * this.scaleY;
-                height = group.originalHeight! + dh;
+            if (factorY != undefined) {
+                values.height = group.originalHeight! * factorY;
+                values.dh = values.height - group.originalHeight!;
                 types.push(DefaultEditTypes.RESIZE_HEIGHT);
             }
             edits.push({
                 types,
                 elements: group.elements,
-                values: {
-                    width,
-                    height,
-                    dw,
-                    dh
-                }
+                values
             } satisfies ResizeEdit);
         }
-
         return edits;
     }
 }
