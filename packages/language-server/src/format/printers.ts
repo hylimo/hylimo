@@ -117,7 +117,7 @@ function printCallBrackets(context: PrintContext): Doc {
         allBrackets.push(group(["(", indent([softline, printInnerListEntries(context)]), softline, ")"]));
     }
     if (ctx.function) {
-        allBrackets.push(path.map(print, Rules.FUNCTION));
+        allBrackets.push(...path.map(print, Rules.FUNCTION));
     }
     return join(" ", allBrackets);
 }
