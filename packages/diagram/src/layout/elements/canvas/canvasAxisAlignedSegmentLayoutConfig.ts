@@ -45,7 +45,7 @@ export class CanvasAxisAlignedSegmentLayoutConfig extends CanvasConnectionSegmen
                     args.self._verticalPos
                 } {
                     args.self._verticalPos = it
-                    args.self.edits.set("${DefaultEditTypes.AXIS_ALIGNED_SEGMENT_POS}", createReplaceEdit(it, "pos"))
+                    args.self.edits.set("${DefaultEditTypes.AXIS_ALIGNED_SEGMENT_POS}", createReplaceEdit(it, "$string(pos)"))
                 }
                 
                 elementProto

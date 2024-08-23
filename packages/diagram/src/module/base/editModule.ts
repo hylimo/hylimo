@@ -114,7 +114,7 @@ export const editModule = InterpreterModule.create(
                     }
                     const deltaExp = (args.getField(1, context) as StringObject).value;
                     if (target instanceof NumberLiteralExpression) {
-                        const expression = `${target.value} + ${deltaExp}`;
+                        const expression = `$string(${target.value} + ${deltaExp})`;
                         return generateEdit(target, { value: context.newString(expression) }, "replace", context);
                     }
 

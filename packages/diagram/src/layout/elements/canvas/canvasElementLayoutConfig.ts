@@ -128,7 +128,7 @@ export class CanvasElementLayoutConfig extends EditableCanvasContentLayoutConfig
                     args.self._rotation
                 } {
                     args.self._rotation = it
-                    args.self.edits.set("${DefaultEditTypes.ROTATE}", createReplaceEdit(it, "rotation"))
+                    args.self.edits.set("${DefaultEditTypes.ROTATE}", createReplaceEdit(it, "$string(rotation)"))
                 }
                 
                 elementProto
