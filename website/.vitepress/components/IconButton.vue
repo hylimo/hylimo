@@ -27,8 +27,8 @@ defineProps({
 }
 
 .icon-button:hover {
-  color: var(--vp-c-brand-1);
-  transition: color 0.25s;
+    color: var(--vp-c-brand-1);
+    transition: color 0.25s;
 }
 
 .icon-button span {

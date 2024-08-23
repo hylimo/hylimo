@@ -23,7 +23,6 @@ import { customDarkTheme, customLightTheme, languageConfiguration, monarchTokenP
 import { useData } from "vitepress";
 import { useLocalStorage } from "@vueuse/core";
 import { useWorkerFactory } from "monaco-editor-wrapper/workerFactory";
-// @ts-ignore
 import monacoEditorWorker from "monaco-editor/esm/vs/editor/editor.worker?worker";
 
 /**
