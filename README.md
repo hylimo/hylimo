@@ -4,6 +4,7 @@ HyLiMo is a textual DSL and hybrid editor for efficient modular diagramming.
 A deployed web-based version of our editor and documentation can be found at https://hylimo.github.io
 
 ## Important features
+
 - hybrid graphical-textual approach
 - live-synced editing
 - graphical edits manipulate the textual definition
@@ -14,6 +15,7 @@ A deployed web-based version of our editor and documentation can be found at htt
 - modular approach, with initial support for UML class diagrams
 
 ## Example diagram
+
 ```
 classDiagram {
     class("Movie")
@@ -31,18 +33,22 @@ classDiagram {
 ## Gettings started
 
 Setup the project:
+
 ```sh
 npm install
 ```
 
 Builing all modules:
+
 ```sh
 npm run build
 ```
 
 Depolying the web-based editor:
+
 ```
 cd website
 npm start
 ```
+
 This deploys the website at http://localhost:3000
