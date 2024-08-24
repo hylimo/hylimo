@@ -5,14 +5,20 @@ import { ParsedTemplateEntry } from "./template.js";
  */
 export abstract class EditEngine {
     /**
-     * Start position, inclusive
+     * Start of the range to replace, inclusive
      */
     start: number;
     /**
-     * End position, exclusive
+     * End of the range to replace, exclusive
      */
     end: number;
 
+    /**
+     * Creates a new edit engine
+     * 
+     * @param start start of the range to replace, inclusive
+     * @param end end of the range to replace, exclusive
+     */
     constructor(start: number, end: number) {
         this.start = start;
         this.end = end;

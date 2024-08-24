@@ -8,8 +8,8 @@ export class ReplaceEditEngine extends EditEngine {
     /**
      * Creates a new replace edit engine
      *
-     * @param start the start of the edit
-     * @param end the end of the edit
+     * @param start the start of the range to replace, inclusive
+     * @param end the end of the range to replace, exclusive
      * @param template the template to use
      * @param indentation the indentation to use
      */

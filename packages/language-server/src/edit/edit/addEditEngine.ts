@@ -8,8 +8,8 @@ export class AddEditEngine extends EditEngine {
     /**
      * Creates a new add edit engine
      *
-     * @param start the start of the edit
-     * @param end the end of the edit
+     * @param start the start of the range to replace, inclusive
+     * @param end the end of the range to replace, exclusive
      * @param templates the templates for all expressions to add
      * @param indentation the indentation to use
      */
