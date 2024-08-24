@@ -9,24 +9,22 @@ import { roundToPrecision } from "../../util/roundToPrecision.js";
 export const moveXHandler: EditHandler<MoveEdit> = {
     type: DefaultEditTypes.MOVE_X,
 
-    predictActionDiff(layoutedDiagram, lastApplied, newest, elements) {
+    predictActionDiff(lastApplied, newest, elements) {
         const deltaX = newest.dx - (lastApplied?.dx ?? 0);
         const updates: IncrementalUpdate[] = [];
         for (const element of elements) {
             if (AbsolutePoint.isAbsolutePoint(element)) {
-                element.x += deltaX;
                 updates.push({
                     target: element.id,
                     changes: {
-                        x: element.x
+                        x: element.x + deltaX
                     }
                 });
             } else if (RelativePoint.isRelativePoint(element)) {
-                element.offsetX += deltaX;
                 updates.push({
                     target: element.id,
                     changes: {
-                        offsetX: element.offsetX
+                        offsetX: element.offsetX + deltaX
                     }
                 });
             }

@@ -123,7 +123,7 @@ export class TransactionManager {
     private createHandleActionResult(action: TransactionalAction): IncrementalUpdate[] {
         const currentDiagram = this.diagram.currentDiagram;
         if (currentDiagram != undefined && this.edit != undefined) {
-            return this.edit.predictActionDiff(this.diagram.currentDiagram!, this.lastKnownAction, action);
+            return this.edit.predictActionDiff(this.diagram.currentDiagram!, this.lastAppliedAction, action);
         } else {
             return [];
         }
@@ -136,9 +136,20 @@ export class TransactionManager {
      * @param layoutedDiagram the layouted diagram
      */
     updateLayoutedDiagram(layoutedDiagram: BaseLayoutedDiagram): void {
-        if (this.lastKnownAction != undefined && this.lastAppliedAction != undefined && this.edit != undefined) {
-            if (this.lastKnownAction != this.lastAppliedAction) {
-                this.edit.predictActionDiff(layoutedDiagram, this.lastAppliedAction, this.lastKnownAction);
+        if (
+            this.lastKnownAction != undefined &&
+            this.lastAppliedAction != undefined &&
+            this.edit != undefined &&
+            this.lastKnownAction != this.lastAppliedAction
+        ) {
+            const incrementalUpdates = this.edit.predictActionDiff(
+                layoutedDiagram,
+                this.lastAppliedAction,
+                this.lastKnownAction
+            );
+            for (const incrementalUpdate of incrementalUpdates) {
+                const target = layoutedDiagram.elementLookup[incrementalUpdate.target];
+                Object.assign(target, incrementalUpdate.changes);
             }
         }
         this.hasUpdatedDiagram = true;
