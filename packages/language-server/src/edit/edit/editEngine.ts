@@ -25,7 +25,7 @@ export abstract class EditEngine {
     }
 
     /**
-     * Evaluate the templates and generates the addment string
+     * Evaluate the templates and generates the string which will replace the range [start, end)
      *
      * @param values the variables to apply to each template
      * @returns the generated string

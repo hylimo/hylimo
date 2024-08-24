@@ -116,7 +116,7 @@ export class Interpreter {
     }
 
     /**
-     * Evalutes a list of expressions with all modules loaded
+     * Evaluates a list of expressions with all modules loaded
      *
      * @param expressions the expressions to evaluate
      * @returns the result of the interpretation, consting of a scope or an error

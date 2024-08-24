@@ -22,12 +22,6 @@ export class AddEditEngine extends EditEngine {
         super(start, end);
     }
 
-    /**
-     * Evaluate the templates and generates the addment string
-     *
-     * @param values the variables to apply to each template
-     * @returns the generated string
-     */
     override async apply(values: Record<string, any>[]): Promise<string> {
         const newlineWithIndentation = "\n" + this.indentation;
         const evaluatedTemplates = await Promise.all(
