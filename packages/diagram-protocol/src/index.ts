@@ -1,5 +1,5 @@
 export * from "./diagram/navigation/navigateToSourceAction.js";
-export * from "./diagram/transaction/defaultEdits.js";
+export * from "./diagram/transaction/defaultEditTypes.js";
 export * from "./diagram/transaction/edit.js";
 export * from "./diagram/transaction/incrementalUpdateAction.js";
 export * from "./diagram/transaction/transactionalAction.js";
