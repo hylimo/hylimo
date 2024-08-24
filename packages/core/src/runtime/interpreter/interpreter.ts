@@ -132,11 +132,11 @@ export class Interpreter {
                     expression.evaluate(context);
                 }
             }
-            let lastRes: BaseObject = context.null;
+            let previousResult: BaseObject = context.null;
             for (const expression of expressions) {
-                lastRes = expression.evaluate(context).value;
+                previousResult = expression.evaluate(context).value;
             }
-            return { result: lastRes, globalScope: context.currentScope };
+            return { result: previousResult, globalScope: context.currentScope };
         } catch (e: any) {
             if (Array.isArray(e.interpretationStack)) {
                 return { error: e };
