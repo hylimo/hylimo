@@ -1,6 +1,7 @@
 ---
 layout: false
 ---
+
 <Home />
 
 <script setup>

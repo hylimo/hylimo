@@ -6,6 +6,7 @@ This documentation is still under construction, and thus currently focuses on th
 For technical aspects, we refer to the code documentation.
 
 ## Important features
+
 - Hybrid graphical-textual approach
 - Live-synced editing
 - Graphical edits manipulate the textual definition
@@ -16,6 +17,7 @@ For technical aspects, we refer to the code documentation.
 - Modular approach, with initial support for UML class diagrams
 
 ## Example diagrams
+
 ```hylimo
 classDiagram {
     class("Movie")
@@ -31,6 +33,7 @@ classDiagram {
 ```
 
 :::details Class diagram showcasing class, interface, package and comment
+
 ```hylimo
 classDiagram {
     package("Automotive") layout {
@@ -82,9 +85,11 @@ classDiagram {
     }
 }
 ```
+
 :::
 
 :::details Class diagram for the HyLiMo language server
+
 ```hylimo
 classDiagram {
 
@@ -229,13 +234,15 @@ classDiagram {
         over = start(Position.Bottom).line(end(Position.Top))
         label("1", 0.1851708018039814, -10.540206060919928)
         label("1", 0.7006360486994234, -10.14199564953438)
-    } 
+    }
 
 }
 ```
+
 :::
 
 :::details Package diagram of HyLiMo
+
 ```hylimo
 classDiagram {
     customPackage = {
@@ -436,4 +443,5 @@ classDiagram {
     }
 }
 ```
+
 :::

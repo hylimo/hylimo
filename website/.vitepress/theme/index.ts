@@ -8,7 +8,7 @@ import Settings from "../components/Settings.vue";
 
 export default {
     extends: DefaultTheme,
-    async enhanceApp({ app, router, siteData }) {
+    async enhanceApp({ app }) {
         app.component("EmbeddedHylimoEditor", EmbeddedHylimoEditor);
         app.component("NavTeleportTarget", NavTeleportTarget);
         app.component("Settings", Settings);
