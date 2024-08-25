@@ -26,13 +26,13 @@ export class ExecutableAssignmentExpression extends ExecutableExpression<Assignm
 
     override evaluateInternal(context: InterpreterContext): FieldEntry {
         let targetValue: BaseObject;
-        if (this.target) {
+        if (this.target !== undefined) {
             targetValue = this.target.evaluate(context).value;
         } else {
             targetValue = context.currentScope;
         }
         const valueValue = this.value.evaluateWithSource(context);
-        if (this.target) {
+        if (this.target !== undefined) {
             targetValue.setLocalField(this.name, valueValue, context);
         } else {
             targetValue.setFieldEntry(this.name, valueValue, context);

@@ -12,12 +12,18 @@ import { Property } from "./property.js";
  */
 export class FullObject extends BaseObject {
     readonly fields: Map<string | number, FieldEntry> = new Map();
-    readonly properties: Map<string | number, Property> = new Map();
+    properties?: Map<string | number, Property>;
 
     /**
      * If generated, the native object
      */
     private nativeObject?: { [key: string]: any };
+
+    /**
+     * The prototype of this object
+     * Must also be contained in the fields
+     */
+    private proto?: FullObject;
 
     override get isNull(): boolean {
         return false;
@@ -29,10 +35,13 @@ export class FullObject extends BaseObject {
     }
 
     override getFieldEntries(context: InterpreterContext, self?: BaseObject): Record<string, FieldEntry> {
-        const proto = this.getProto();
+        const proto = this.proto;
         const entries: Record<string, FieldEntry> = proto?.getFieldEntries(context, self ?? this) ?? {};
         for (const [key, value] of this.fields) {
             entries[key] = value;
+        }
+        if (this.properties == undefined) {
+            return entries;
         }
         for (const [key, value] of this.properties) {
             entries[key] = value.get(self ?? this, context);
@@ -52,16 +61,20 @@ export class FullObject extends BaseObject {
      * @returns the value of the field
      */
     private getFieldEntryInternal(key: string | number, context: InterpreterContext, self: BaseObject): FieldEntry {
-        const property = this.properties.get(key);
-        if (property != undefined) {
-            return property.get(self, context);
-        }
-        const value = this.fields.get(key);
-        if (value) {
-            return value;
-        }
-        const proto = this.getProto();
-        return proto?.getFieldEntryInternal(key, context, self) ?? { value: context.null };
+        // eslint-disable-next-line @typescript-eslint/no-this-alias
+        let target: FullObject | undefined = this;
+        do {
+            const property = target.properties?.get(key);
+            if (property !== undefined) {
+                return property.get(self, context);
+            }
+            const value = target.fields.get(key);
+            if (value !== undefined) {
+                return value;
+            }
+            target = target.proto;
+        } while (target !== undefined);
+        return { value: context.null };
     }
 
     /**
@@ -72,12 +85,15 @@ export class FullObject extends BaseObject {
      */
     hasField(key: string | number): boolean {
         this.checkValidKey(key);
-        if (this.fields.has(key) || this.properties.has(key)) {
-            return true;
-        } else {
-            const proto = this.getProto();
-            return proto?.hasField(key) ?? false;
-        }
+        // eslint-disable-next-line @typescript-eslint/no-this-alias
+        let target: FullObject | undefined = this;
+        do {
+            if (target.fields.has(key) || target.properties?.has(key)) {
+                return true;
+            }
+            target = target.proto;
+        } while (target !== undefined);
+        return false;
     }
 
     /**
@@ -91,11 +107,11 @@ export class FullObject extends BaseObject {
      */
     getLocalField(key: string | number, context: InterpreterContext, self?: BaseObject): FieldEntry {
         const property = this.getProperty(key);
-        if (property != undefined) {
+        if (property !== undefined) {
             return property.get(self ?? this, context);
         }
         const value = this.fields.get(key);
-        if (value != undefined) {
+        if (value !== undefined) {
             return value;
         }
         return { value: context.null };
@@ -111,7 +127,7 @@ export class FullObject extends BaseObject {
      */
     getLocalFieldOrUndefined(key: string | number): FieldEntry | undefined {
         const field = this.fields.get(key);
-        if (field == undefined || field.value.isNull) {
+        if (field === undefined || field.value.isNull) {
             return undefined;
         } else {
             return field;
@@ -145,11 +161,11 @@ export class FullObject extends BaseObject {
         context: InterpreterContext,
         self: BaseObject
     ): boolean {
-        if (this.fields.has(key) || this.properties.has(key)) {
+        if (this.fields.has(key) || this.properties?.has(key)) {
             this.setLocalField(key, value, context, self);
             return true;
         } else {
-            const proto = this.getProto();
+            const proto = this.proto;
             if (proto) {
                 return proto.setExistingField(key, value, context, self);
             } else {
@@ -169,11 +185,12 @@ export class FullObject extends BaseObject {
             if (!value.value.isNull && !(value.value instanceof FullObject)) {
                 throw new RuntimeError('"proto" must be set to an object or null');
             }
+            this.proto = value.value as FullObject;
             this.fields.set(key, value);
             this.validateProto();
         } else {
             const property = this.getProperty(key);
-            if (property != undefined) {
+            if (property !== undefined) {
                 property.set(self ?? this, value, context);
             } else {
                 this.fields.set(key, value);
@@ -188,18 +205,22 @@ export class FullObject extends BaseObject {
      * @returns the property or undefined if not found
      */
     private getProperty(key: string | number): Property | undefined {
-        const property = this.properties.get(key);
-        if (property != undefined) {
-            return property;
-        } else {
-            return this.getProto()?.getProperty(key);
-        }
+        // eslint-disable-next-line @typescript-eslint/no-this-alias
+        let target: FullObject | undefined = this;
+        do {
+            const property = target.properties?.get(key);
+            if (property !== undefined) {
+                return property;
+            }
+            target = target.proto;
+        } while (target !== undefined);
+        return undefined;
     }
 
     override deleteField(key: string | number): void {
         this.checkValidKey(key);
         this.fields.delete(key);
-        this.properties.delete(key);
+        this.properties?.delete(key);
     }
 
     /**
@@ -219,6 +240,9 @@ export class FullObject extends BaseObject {
             throw new RuntimeError("Cannot define property 'proto'");
         }
         this.deleteField(key);
+        if (this.properties == undefined) {
+            this.properties = new Map();
+        }
         this.properties.set(key, new Property(getter, setter));
     }
 
@@ -230,8 +254,8 @@ export class FullObject extends BaseObject {
     private validateProto(): void {
         // eslint-disable-next-line @typescript-eslint/no-this-alias
         let current: FullObject | undefined = this;
-        while (current != undefined) {
-            current = current.getProto();
+        while (current !== undefined) {
+            current = current.proto;
             if (current === this) {
                 throw new RuntimeError("Proto loop detected");
             }
@@ -245,18 +269,9 @@ export class FullObject extends BaseObject {
      * @param key the string or number to check
      */
     private checkValidKey(key: string | number) {
-        if (typeof key === "number" && !(Number.isInteger(key) || key >= 0)) {
+        if (typeof key === "number" && !(Number.isInteger(key) && key >= 0)) {
             throw new RuntimeError("Only Integers >= 0 are supported as numerical keys");
         }
-    }
-
-    /**
-     * Gets the proto field
-     *
-     * @returns the proto field or undefined if not defined
-     */
-    private getProto(): FullObject | undefined {
-        return this.fields.get(SemanticFieldNames.PROTO)?.value as FullObject | undefined;
     }
 
     override toString(context: InterpreterContext): string {
@@ -272,7 +287,7 @@ export class FullObject extends BaseObject {
     }
 
     override toNative(): any {
-        if (this.nativeObject == undefined) {
+        if (this.nativeObject === undefined) {
             const newObject: { [key: string]: any } = {};
             this.nativeObject = newObject;
             this.fields.forEach((value, key) => {
