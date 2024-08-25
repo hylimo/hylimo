@@ -1,5 +1,5 @@
 import { AssignmentExpression } from "../../ast/assignmentExpression.js";
-import { InterpreterContext } from "../interpreter.js";
+import { InterpreterContext } from "../interpreter/interpreterContext.js";
 import { BaseObject, FieldEntry } from "../objects/baseObject.js";
 import { ExecutableExpression } from "./executableExpression.js";
 
@@ -33,7 +33,7 @@ export class ExecutableAssignmentExpression extends ExecutableExpression<Assignm
         }
         const valueValue = this.value.evaluateWithSource(context);
         if (this.target) {
-            targetValue.setLocalField(this.name, valueValue);
+            targetValue.setLocalField(this.name, valueValue, context);
         } else {
             targetValue.setFieldEntry(this.name, valueValue, context);
         }

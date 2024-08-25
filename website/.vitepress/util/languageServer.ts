@@ -1,6 +1,6 @@
 import { createConnection, BrowserMessageReader, BrowserMessageWriter } from "vscode-languageserver/browser.js";
 import { LanguageServer } from "@hylimo/language-server";
-import { classDiagramModule } from "@hylimo/diagram";
+import { baseDiagramModule, classDiagramModule } from "@hylimo/diagram";
 
 const messageReader = new BrowserMessageReader(self);
 const messageWriter = new BrowserMessageWriter(self);
@@ -15,7 +15,7 @@ const languageServer = new LanguageServer({
         settings: {}
     },
     connection,
-    additionalInterpreterModules: [classDiagramModule],
+    additionalInterpreterModules: [baseDiagramModule, classDiagramModule],
     maxExecutionSteps: 1000000
 });
 languageServer.listen();

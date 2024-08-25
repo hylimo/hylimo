@@ -1,5 +1,5 @@
 import { AbstractInvocationExpression } from "../../ast/abstractInvocationExpression.js";
-import { InterpreterContext } from "../interpreter.js";
+import { InterpreterContext } from "../interpreter/interpreterContext.js";
 import { FieldEntry } from "../objects/baseObject.js";
 import { FullObject } from "../objects/fullObject.js";
 import { NativeFunctionObject } from "../objects/functionObject.js";

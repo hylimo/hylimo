@@ -1,6 +1,6 @@
 import { fun, id, jsFun, native } from "../../runtime/executableAstHelper.js";
 import { ExecutableConstExpression } from "../../runtime/ast/executableConstExpression.js";
-import { InterpreterModule } from "../../runtime/interpreter.js";
+import { InterpreterModule } from "../../runtime/interpreter/interpreterModule.js";
 import { RuntimeError } from "../../runtime/runtimeError.js";
 import { SemanticFieldNames } from "../../runtime/semanticFieldNames.js";
 import { DefaultModuleNames } from "../defaultModuleNames.js";

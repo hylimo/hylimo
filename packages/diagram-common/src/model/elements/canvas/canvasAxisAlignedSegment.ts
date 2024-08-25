@@ -1,7 +1,6 @@
 import { calculateMarkerRenderInformationInternal, CanvasConnectionSegment } from "./canvasConnectionSegment.js";
 import { Element } from "../base/element.js";
 import { Marker, MarkerLayoutInformation } from "./marker.js";
-import { ModificationSpecification } from "../modificationSpecification.js";
 import { Point } from "../../../common/point.js";
 
 /**
@@ -18,10 +17,6 @@ export interface CanvasAxisAlignedSegment extends CanvasConnectionSegment {
      * 0 being the end of the vertical segment and -1 being the start
      */
     pos: number;
-    /**
-     * Defines if verticalPos is editable
-     */
-    editable: ModificationSpecification;
 }
 
 export namespace CanvasAxisAlignedSegment {

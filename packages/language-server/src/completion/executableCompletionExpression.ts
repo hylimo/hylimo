@@ -51,7 +51,7 @@ export class ExecutableCompletionExpression extends ExecutableExpression<Express
      */
     private transformCompletionContext(value: BaseObject, context: InterpreterContext): CompletionItem[] {
         const items: CompletionItem[] = [];
-        for (const [key, entry] of Object.entries(value.getFieldEntries())) {
+        for (const [key, entry] of Object.entries(value.getFieldEntries(context))) {
             const value = entry.value;
             const docs = this.getDocsDescription(value, context) ?? this.getFieldDescription(value, context, key) ?? "";
             const snippet: string | undefined = this.getDocSnippet(value, context);
@@ -104,7 +104,7 @@ export class ExecutableCompletionExpression extends ExecutableExpression<Express
         }
         const description = docs.getField("docs", context);
         return (
-            description.toString() +
+            description.toString(context) +
             "\n\n" +
             ["Fields", "Params", "Returns", "Snippet"]
                 .map((field) => [field, this.getDocField(docs, field.toLowerCase(), context)])
@@ -130,7 +130,7 @@ export class ExecutableCompletionExpression extends ExecutableExpression<Express
         if (snippet.isNull) {
             return undefined;
         }
-        return snippet.toString();
+        return snippet.toString(context);
     }
 
     /**
@@ -154,7 +154,7 @@ export class ExecutableCompletionExpression extends ExecutableExpression<Express
         if (fieldDocs.isNull) {
             return undefined;
         }
-        return fieldDocs.toString();
+        return fieldDocs.toString(context);
     }
 
     /**
@@ -174,10 +174,10 @@ export class ExecutableCompletionExpression extends ExecutableExpression<Express
         if (docField instanceof FullObject) {
             return [...docField.fields.entries()]
                 .filter(([key, entry]) => key !== SemanticFieldNames.PROTO && !entry.value.isNull)
-                .map(([key, entry]) => `- ${key}: ${entry.value.toString()}`)
+                .map(([key, entry]) => `- ${key}: ${entry.value.toString(context)}`)
                 .join("\n");
         } else {
-            return docField.toString();
+            return docField.toString(context);
         }
     }
 

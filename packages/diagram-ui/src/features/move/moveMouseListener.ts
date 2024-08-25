@@ -1,5 +1,13 @@
 import { inject } from "inversify";
-import { LinePoint, Math2D, ModificationSpecification, Point } from "@hylimo/diagram-common";
+import {
+    LinePoint,
+    Math2D,
+    EditSpecification,
+    Point,
+    DefaultEditTypes,
+    EditSpecificationEntry,
+    groupBy
+} from "@hylimo/diagram-common";
 import {
     findParentByFeature,
     IModelIndex,
@@ -27,7 +35,7 @@ import { RotationHandler } from "./rotationHandler.js";
 import { SCanvasConnection } from "../../model/canvas/sCanvasConnection.js";
 import { SCanvasContent } from "../../model/canvas/sCanvasContent.js";
 import { SRoot } from "../../model/sRoot.js";
-import { ResizeHandler } from "./resizeHandler.js";
+import { ElementsGroupedBySize, ResizeHandler } from "./resizeHandler.js";
 import { SCanvasAxisAlignedSegment } from "../../model/canvas/sCanvasAxisAlignedSegment.js";
 import { AxisAligedSegmentEditHandler } from "./axisAlignedSegmentEditHandler.js";
 
@@ -224,43 +232,136 @@ export class MoveMouseListener extends MouseListener {
         const resizedElements = this.getSelectedElements(target.root).filter(
             (element) => element instanceof SCanvasElement
         ) as SCanvasElement[];
-        let scaleX: number | undefined = undefined;
-        if (resizedElements.every((element) => element.xResizable != undefined)) {
-            if (classList.contains(ResizePosition.LEFT)) {
-                scaleX = target.width / target.x;
-            } else if (classList.contains(ResizePosition.RIGHT)) {
-                scaleX = target.width / (target.width + target.x);
-            }
-            if (scaleX != undefined && Math.abs(scaleX) > maxResizeScale) {
-                scaleX = Math.sign(scaleX) * -1;
-            }
-        }
-        let scaleY: number | undefined = undefined;
-        if (resizedElements.every((element) => element.yResizable != undefined)) {
-            if (classList.contains(ResizePosition.TOP)) {
-                scaleY = target.height / target.y;
-            } else if (classList.contains(ResizePosition.BOTTOM)) {
-                scaleY = target.height / (target.height + target.y);
-            }
-            if (scaleY != undefined && Math.abs(scaleY) > maxResizeScale) {
-                scaleY = Math.sign(scaleY) * -1;
-            }
-        }
-        if (scaleX != undefined || scaleY != undefined) {
-            return new ResizeHandler(
-                resizedElements.map((element) => element.id),
-                this.transactionIdProvider.generateId(),
-                target.width,
-                target.height,
-                target.rotation,
-                scaleX,
-                scaleY
-            );
-        } else {
+        const scaleX = this.computeXResizeFactor(resizedElements, classList, target);
+        const scaleY = this.computeYResizeFactor(resizedElements, classList, target);
+        if (scaleX == undefined && scaleY == undefined) {
             return null;
         }
+        const groupedElements = groupBy(resizedElements, (element) => {
+            if (scaleX != undefined) {
+                if (scaleY != undefined) {
+                    return `${element.width}x${element.height}`;
+                } else {
+                    return element.width;
+                }
+            } else {
+                return element.height;
+            }
+        });
+        const { groupedEntries, elements } = this.computeResizeElements(groupedElements, scaleX, scaleY);
+        if (!EditSpecification.isConsistent(groupedEntries)) {
+            return null;
+        }
+        return new ResizeHandler(
+            this.transactionIdProvider.generateId(),
+            target.rotation,
+            scaleX,
+            scaleY,
+            target.width,
+            target.height,
+            elements
+        );
     }
 
+    /**
+     * For a resize, computes the grouped entries for consistency check and the grouped elements passed to the resize handler.
+     * Assumes that groupedElements are grouped by scaleX and/or scaleY, depending on which is/are defined.
+     *
+     * @param groupedElements the elements grouped by size
+     * @param scaleX the scale factor in x direction
+     * @param scaleY the scale factor in y direction
+     * @returns the grouped entries for consistency check and the grouped elements passed to the resize handler
+     */
+    private computeResizeElements(
+        groupedElements: Map<string | number | undefined, SCanvasElement[]>,
+        scaleX: number | undefined,
+        scaleY: number | undefined
+    ): { groupedEntries: EditSpecificationEntry[][]; elements: ElementsGroupedBySize[] } {
+        const groupedEntries: EditSpecificationEntry[][] = [];
+        const elements: ElementsGroupedBySize[] = [];
+        for (const group of groupedElements.values()) {
+            const entries: EditSpecificationEntry[] = [];
+            let originalWidth: number | undefined = undefined;
+            let originalHeight: number | undefined = undefined;
+            if (scaleX != undefined) {
+                entries.push(...group.map((element) => element.edits[DefaultEditTypes.RESIZE_WIDTH]));
+                originalWidth = group[0].width;
+            }
+            if (scaleY != undefined) {
+                entries.push(...group.map((element) => element.edits[DefaultEditTypes.RESIZE_HEIGHT]));
+                originalHeight = group[0].height;
+            }
+            groupedEntries.push(entries);
+            elements.push({
+                elements: group.map((element) => element.id),
+                originalWidth,
+                originalHeight
+            });
+        }
+        return { groupedEntries, elements };
+    }
+
+    /**
+     * Computes the resize factor for the x direction.
+     *
+     * @param resizedElements the elements which are resized
+     * @param classList classes of the svg element on which the resize was triggered
+     * @param target the primary target of the resize
+     * @returns the resize factor in x direction if possible, otherwise undefined
+     */
+    private computeXResizeFactor(
+        resizedElements: SCanvasElement[],
+        classList: DOMTokenList,
+        target: SCanvasElement
+    ): number | undefined {
+        if (!resizedElements.every((element) => DefaultEditTypes.RESIZE_WIDTH in element.edits)) {
+            return undefined;
+        }
+        let scaleX: number | undefined = undefined;
+        if (classList.contains(ResizePosition.LEFT)) {
+            scaleX = target.width / target.x;
+        } else if (classList.contains(ResizePosition.RIGHT)) {
+            scaleX = target.width / (target.width + target.x);
+        }
+        if (scaleX == undefined) {
+            return undefined;
+        }
+        if (Math.abs(scaleX) > maxResizeScale) {
+            scaleX = Math.sign(scaleX) * -1;
+        }
+        return scaleX;
+    }
+
+    /**
+     * Computes the resize factor for the y direction.
+     *
+     * @param resizedElements the elements which are resized
+     * @param classList classes of the svg element on which the resize was triggered
+     * @param target the primary target of the resize
+     * @returns the resize factor in y direction if possible, otherwise undefined
+     */
+    private computeYResizeFactor(
+        resizedElements: SCanvasElement[],
+        classList: DOMTokenList,
+        target: SCanvasElement
+    ): number | undefined {
+        if (!resizedElements.every((element) => DefaultEditTypes.RESIZE_HEIGHT in element.edits)) {
+            return undefined;
+        }
+        let scaleY: number | undefined = undefined;
+        if (classList.contains(ResizePosition.TOP)) {
+            scaleY = target.height / target.y;
+        } else if (classList.contains(ResizePosition.BOTTOM)) {
+            scaleY = target.height / (target.height + target.y);
+        }
+        if (scaleY == undefined) {
+            return undefined;
+        }
+        if (Math.abs(scaleY) > maxResizeScale) {
+            scaleY = Math.sign(scaleY) * -1;
+        }
+        return scaleY;
+    }
     /**
      * Creates the handler for the current move based on the target.
      * Handles rotation events, meaning rotating CanvasElements.
@@ -269,7 +370,7 @@ export class MoveMouseListener extends MouseListener {
      * @returns the move handler if rotation is supported, otherwise null
      */
     private createRotationHandler(target: SCanvasElement): MoveHandler | null {
-        if (target.rotateable == undefined) {
+        if (!(DefaultEditTypes.ROTATE in target.edits)) {
             return null;
         }
         const origin = target.position;
@@ -309,11 +410,19 @@ export class MoveMouseListener extends MouseListener {
             elements
         );
 
-        const modificationSpecifications = [
-            ...[...pointsToMove].map((point) => point.editable),
-            ...[...elementsToMove].map((element) => element.moveable)
-        ];
-        if (!ModificationSpecification.isConsistent(modificationSpecifications)) {
+        const editSpecifications = [...pointsToMove, ...elementsToMove].flatMap((element) => {
+            const entries: EditSpecificationEntry[] = [];
+            if (element instanceof SLinePoint) {
+                entries.push(element.edits[DefaultEditTypes.MOVE_LPOS_POS]);
+                if (element.distance != undefined) {
+                    entries.push(element.edits[DefaultEditTypes.MOVE_LPOS_DIST]);
+                }
+            } else {
+                entries.push(element.edits[DefaultEditTypes.MOVE_X], element.edits[DefaultEditTypes.MOVE_Y]);
+            }
+            return entries;
+        });
+        if (!EditSpecification.isConsistent([editSpecifications])) {
             return null;
         }
         return this.createMoveHandlerForPointsAndElements(pointsToMove, elementsToMove);
@@ -388,7 +497,8 @@ export class MoveMouseListener extends MouseListener {
         do {
             const newPoints = new Set<SCanvasPoint>();
             for (const point of currentPoints) {
-                if (point instanceof SRelativePoint && point.editable == null) {
+                const editable = DefaultEditTypes.MOVE_X in point.edits && DefaultEditTypes.MOVE_Y in point.edits;
+                if (point instanceof SRelativePoint && !editable) {
                     let targetPoint: SCanvasPoint | undefined;
                     const target = index.getById(point.target) as SCanvasPoint | SCanvasElement;
                     if (target instanceof SCanvasPoint) {

@@ -1,6 +1,27 @@
-import { BaseObject, FieldEntry, FullObject, nativeToList } from "@hylimo/core";
+import {
+    assertNumber,
+    assertObject,
+    assertWrapperObject,
+    BaseObject,
+    Expression,
+    FullObject,
+    FunctionExpression,
+    isNull,
+    isString,
+    isWrapperObject,
+    nativeToList,
+    SemanticFieldNames
+} from "@hylimo/core";
 import { assertString } from "@hylimo/core";
-import { Element, Size, Point, Stroke } from "@hylimo/diagram-common";
+import {
+    Element,
+    Size,
+    Point,
+    Stroke,
+    EditSpecification,
+    TemplateEntry,
+    EditSpecificationEntry
+} from "@hylimo/diagram-common";
 import { FontManager } from "../font/fontManager.js";
 import { TextLayoutResult, TextLayouter } from "../font/textLayouter.js";
 import { generateStyles, Selector, SelectorType, Style, StyleList } from "../styles.js";
@@ -164,7 +185,8 @@ export class LayoutEngine {
                 type: "root",
                 id: "root",
                 children: elements,
-                fonts: fontFamilyConfigs
+                fonts: fontFamilyConfigs,
+                edits: {}
             },
             elementLookup: layout.elementLookup,
             layoutElementLookup: layout.layoutElementLookup
@@ -273,6 +295,7 @@ export class Layout {
         }
         matchingStyles.push(layoutElement.element);
         matchingStyles.reverse();
+        const styles: Record<string, any> = {};
         for (const attributeConfig of styleAttributes) {
             const attribute = attributeConfig.name;
             for (const style of matchingStyles) {
@@ -281,26 +304,21 @@ export class Layout {
                     const value = entry.value.toNative();
                     if (typeof value === "object" && typeof value._type === "string") {
                         if (value._type === "unset") {
-                            layoutElement.styles[attribute] = undefined;
-                            layoutElement.styleSources.set(attribute, entry);
+                            styles[attribute] = undefined;
                         } else if (value._type === "var") {
-                            const [variableValue, variableSource] = this.extractVariableValue(
-                                matchingStyles,
-                                value.name
-                            );
-                            layoutElement.styles[attribute] = variableValue;
-                            layoutElement.styleSources.set(attribute, variableSource ?? entry);
+                            const variableValue = this.extractVariableValue(matchingStyles, value.name);
+                            styles[attribute] = variableValue;
                         } else {
                             throw new Error(`Unknown style value: ${value}`);
                         }
                     } else {
-                        layoutElement.styles[attribute] = value;
-                        layoutElement.styleSources.set(attribute, entry);
+                        styles[attribute] = value;
                     }
                     break;
                 }
             }
         }
+        layoutElement.styles = layoutElement.layoutConfig.postprocessStyles(layoutElement, styles);
     }
 
     /**
@@ -308,9 +326,9 @@ export class Layout {
      *
      * @param matchingStyles the matching styles
      * @param name the name of the variable
-     * @returns the value and source of the variable. if not found, undefined is returned for both
+     * @returns the value of the variable. if not found, undefined is returned
      */
-    private extractVariableValue(matchingStyles: FullObject[], name: string): [any, FieldEntry | undefined] {
+    private extractVariableValue(matchingStyles: FullObject[], name: string): any {
         for (const style of matchingStyles) {
             const variables = style.getLocalFieldOrUndefined("variables")?.value;
             if (variables instanceof FullObject) {
@@ -319,19 +337,19 @@ export class Layout {
                     const value = entry.value.toNative();
                     if (typeof value === "object" && typeof value._type === "string") {
                         if (value._type === "unset") {
-                            return [undefined, entry];
+                            return undefined;
                         } else if (value._type === "var") {
                             throw new Error("Variables cannot be set to other variables");
                         } else {
                             throw new Error(`Unknown style value: ${value}`);
                         }
                     } else {
-                        return [value, entry];
+                        return value;
                     }
                 }
             }
         }
-        return [undefined, undefined];
+        return undefined;
     }
 
     /**
@@ -365,9 +383,9 @@ export class Layout {
             element,
             parent,
             styles: {},
-            styleSources: new Map(),
             layoutConfig: this.engine.layoutConfigs.get(type)!,
-            class: new Set(cls)
+            class: new Set(cls),
+            edits: this.generateEdits(element)
         };
         this.applyStyles(layoutElement);
         const styles = layoutElement.styles;
@@ -375,7 +393,7 @@ export class Layout {
         layoutElement.layoutInformation = layoutInformation;
         const marginX = layoutInformation.marginLeft + layoutInformation.marginRight;
         const marginY = layoutInformation.marginTop + layoutInformation.marginBottom;
-        const computedConstraints: SizeConstraints = this.computeSizeConstraints(styles, constraints, marginX, marginY);
+        const computedConstraints = this.computeSizeConstraints(styles, constraints, marginX, marginY);
         const requestedSize = layoutElement.layoutConfig.measure(this, layoutElement, computedConstraints);
         const computedSize = addToSize(requestedSize, marginX, marginY);
         const realSize = matchToConstraints(computedSize, constraints);
@@ -489,6 +507,9 @@ export class Layout {
         if (styles.width != undefined) {
             width = styles.width;
         }
+        if (element.size?.width != undefined) {
+            width = element.size.width;
+        }
         if (horizontalAlignment === HorizontalAlignment.RIGHT) {
             x += size.width - (width + layoutInformation.marginRight);
         } else if (horizontalAlignment === HorizontalAlignment.CENTER) {
@@ -532,6 +553,9 @@ export class Layout {
         if (styles.height != undefined) {
             height = styles.height;
         }
+        if (element.size?.height != undefined) {
+            height = element.size.height;
+        }
         if (verticalAlignment === VerticalAlignment.BOTTOM) {
             y += size.height - (height + layoutInformation.marginBottom);
         } else if (verticalAlignment === VerticalAlignment.CENTER) {
@@ -540,5 +564,97 @@ export class Layout {
             y += layoutInformation.marginTop;
         }
         return { y, height };
+    }
+
+    /**
+     * Converts the element to a EditSpecification
+     *
+     * @param expressions expression with associated key
+     * @returns the generated EditSpecification
+     */
+    private generateEdits(element: FullObject): EditSpecification {
+        const edits = element.getLocalFieldOrUndefined("edits")!.value;
+        assertObject(edits);
+        const res: EditSpecification = {};
+        for (const [key, { value }] of edits.fields.entries()) {
+            if (key != SemanticFieldNames.PROTO && !isNull(value)) {
+                assertObject(value);
+                const type = assertString(value.getLocalFieldOrUndefined("type")!.value, "type");
+                const template = value.getLocalFieldOrUndefined("template")!.value;
+                const parsedTemplate: TemplateEntry[] = this.parseTemplate(template);
+                const target = value.getLocalFieldOrUndefined("target")!.value;
+                res[key] = this.generateEditSpecificationEntry(target, type, parsedTemplate);
+            }
+        }
+        return res;
+    }
+
+    /**
+     * Parses a template used in an edit
+     *
+     * @param template the template to parse
+     * @returns the parsed template
+     */
+    private parseTemplate(template: BaseObject): TemplateEntry[] {
+        if (isString(template)) {
+            return [template.value];
+        }
+        assertObject(template);
+        const parsedTemplate: TemplateEntry[] = [];
+        const length = assertNumber(template.getLocalFieldOrUndefined("length")!.value);
+        for (let i = 0; i < length; i++) {
+            const entry = template.getLocalFieldOrUndefined(i)!.value;
+            if (isString(entry)) {
+                parsedTemplate.push(entry.value);
+            } else if (isWrapperObject(entry)) {
+                const expression = entry.wrapped as Expression;
+                parsedTemplate.push({ range: expression.range });
+            } else {
+                throw new Error("Invalid template entry");
+            }
+        }
+        return parsedTemplate;
+    }
+
+    /**
+     * Generates an EditSpecificationEntry based on the provided target, type and parsed template
+     *
+     * @param target the target which is edited
+     * @param type the type of the edit
+     * @param parsedTemplate the parsed template
+     * @returns the generated EditSpecificationEntry
+     */
+    private generateEditSpecificationEntry(
+        target: BaseObject,
+        type: string,
+        parsedTemplate: TemplateEntry[]
+    ): EditSpecificationEntry {
+        assertWrapperObject(target);
+        const targetExpression = target.wrapped as Expression;
+        if (type === "add") {
+            if (!(targetExpression instanceof FunctionExpression)) {
+                throw new Error("Target must be a function expression");
+            }
+            let rangeStart: number;
+            if (targetExpression.expressions.length === 0) {
+                rangeStart = targetExpression.range[0] + 1;
+            } else {
+                rangeStart = targetExpression.expressions[targetExpression.expressions.length - 1].range[1];
+            }
+            return {
+                type,
+                range: [rangeStart, targetExpression.range[1]],
+                functionRange: targetExpression.range,
+                template: parsedTemplate
+            };
+        } else if (type === "replace") {
+            return {
+                type,
+                range: targetExpression.range,
+                template: parsedTemplate
+            };
+        } else {
+            throw new Error(`Unknown type ${type}`);
+        }
     }
 }

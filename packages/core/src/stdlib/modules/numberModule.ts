@@ -1,6 +1,6 @@
 import { ExecutableNativeExpression } from "../../runtime/ast/executableNativeExpression.js";
 import { assign, fun, id, jsFun } from "../../runtime/executableAstHelper.js";
-import { InterpreterModule } from "../../runtime/interpreter.js";
+import { InterpreterModule } from "../../runtime/interpreter/interpreterModule.js";
 import { NumberObject } from "../../runtime/objects/numberObject.js";
 import { SemanticFieldNames } from "../../runtime/semanticFieldNames.js";
 import { numberType } from "../../types/number.js";

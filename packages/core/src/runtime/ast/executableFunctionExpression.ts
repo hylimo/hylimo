@@ -1,5 +1,5 @@
 import { FunctionExpression } from "../../ast/functionExpression.js";
-import { InterpreterContext } from "../interpreter.js";
+import { InterpreterContext } from "../interpreter/interpreterContext.js";
 import { FieldEntry } from "../objects/baseObject.js";
 import { FunctionObject } from "../objects/functionObject.js";
 import { ExecutableAbstractFunctionExpression, FunctionDocumentation } from "./executableAbstractFunctionExpression.js";

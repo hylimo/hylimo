@@ -10,5 +10,7 @@ export enum DefaultModuleNames {
     COMMON = "baselib/common",
     BOOLEAN = "baselib/boolean",
     LIST = "baselib/list",
-    FUNCTION = "baselib/function"
+    FUNCTION = "baselib/function",
+    WRAPPER = "baselib/wrapper",
+    REFLECTION = "baselib/reflection"
 }

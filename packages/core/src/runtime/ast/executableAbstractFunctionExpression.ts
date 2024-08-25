@@ -1,6 +1,6 @@
 import { Expression } from "../../ast/expression.js";
 import { Type } from "../../types/base.js";
-import { InterpreterContext } from "../interpreter.js";
+import { InterpreterContext } from "../interpreter/interpreterContext.js";
 import { BaseObject } from "../objects/baseObject.js";
 import { ExecutableExpression } from "./executableExpression.js";
 
@@ -53,16 +53,16 @@ export abstract class ExecutableAbstractFunctionExpression<
             return context.null;
         }
         const result = context.newObject();
-        result.setLocalField("docs", { value: context.newString(this.documentation.docs) });
-        result.setLocalField("returns", { value: context.newString(this.documentation.returns) });
+        result.setLocalField("docs", { value: context.newString(this.documentation.docs) }, context);
+        result.setLocalField("returns", { value: context.newString(this.documentation.returns) }, context);
         if (this.documentation.snippet !== undefined) {
-            result.setLocalField("snippet", { value: context.newString(this.documentation.snippet) });
+            result.setLocalField("snippet", { value: context.newString(this.documentation.snippet) }, context);
         }
         const params = context.newObject();
         for (const param of this.documentation.params) {
-            params.setLocalField(param[0], { value: context.newString(param[1]) });
+            params.setLocalField(param[0], { value: context.newString(param[1]) }, context);
         }
-        result.setLocalField("params", { value: params });
+        result.setLocalField("params", { value: params }, context);
         return result;
     }
 }

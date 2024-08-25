@@ -6,7 +6,7 @@ import { ExecutableIdentifierExpression } from "./ast/executableIdentifierExpres
 import { ExecutableNativeFunctionExpression, NativeFunctionType } from "./ast/executableNativeFunctionExpression.js";
 import { ExecutableNumberLiteralExpression } from "./ast/executableNumberLiteralExpression.js";
 import { ExecutableStringLiteralExpression } from "./ast/executableStringLiteralExpression.js";
-import { InterpreterContext } from "./interpreter.js";
+import { InterpreterContext } from "./interpreter/interpreterContext.js";
 import { BaseObject, FieldEntry } from "./objects/baseObject.js";
 import { FullObject } from "./objects/fullObject.js";
 import { generateArgs } from "./objects/functionObject.js";
@@ -180,9 +180,9 @@ export function enumObject(entries: Record<string, string | number>): Executable
         const object = context.newObject();
         for (const [key, value] of Object.entries(entries)) {
             if (typeof value === "string") {
-                object.setLocalField(key, { value: context.newString(value) });
+                object.setLocalField(key, { value: context.newString(value) }, context);
             } else {
-                object.setLocalField(key, { value: context.newNumber(value) });
+                object.setLocalField(key, { value: context.newNumber(value) }, context);
             }
         }
         return { value: object };

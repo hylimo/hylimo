@@ -1,5 +1,7 @@
 import { ExpressionMetadata } from "./expressionMetadata.js";
 import { Expression } from "./expression.js";
+import { InterpreterContext } from "../runtime/interpreter/interpreterContext.js";
+import { WrapperObject } from "../runtime/objects/wrapperObject.js";
 
 /**
  * Expression which evaluates and returns an inner expression
@@ -7,6 +9,12 @@ import { Expression } from "./expression.js";
 
 export class BracketExpression extends Expression {
     static readonly TYPE = "BracketExpression";
+
+    private static readonly WRAPPER_ENTRIES = new Map([
+        ...Expression.expressionWrapperObjectEntries<BracketExpression>(BracketExpression.TYPE),
+        ["expression", (wrapped, context) => wrapped.expression.toWrapperObject(context)]
+    ]);
+
     /**
      * Creates a new BracketExpression consisting of an inner expression
      *
@@ -23,5 +31,9 @@ export class BracketExpression extends Expression {
     protected override markNoEditInternal(): void {
         super.markNoEditInternal();
         this.expression.markNoEdit();
+    }
+
+    override toWrapperObject(context: InterpreterContext): WrapperObject<this> {
+        return context.newWrapperObject(this, BracketExpression.WRAPPER_ENTRIES);
     }
 }

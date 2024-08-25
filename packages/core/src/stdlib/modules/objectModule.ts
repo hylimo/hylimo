@@ -1,5 +1,5 @@
 import { DefaultModuleNames } from "../defaultModuleNames.js";
-import { InterpreterModule } from "../../runtime/interpreter.js";
+import { InterpreterModule } from "../../runtime/interpreter/interpreterModule.js";
 import { assign, fun, id, jsFun, native, num, str } from "../../runtime/executableAstHelper.js";
 import { SemanticFieldNames } from "../../runtime/semanticFieldNames.js";
 import { assertFunction, assertObject } from "../typeHelpers.js";
@@ -53,7 +53,7 @@ export const objectModule = InterpreterModule.create(
                 jsFun(
                     (args, context) => {
                         const self = args.getFieldEntry(SemanticFieldNames.SELF, context).value;
-                        return context.newString(self.toString());
+                        return context.newString(self.toString(context));
                     },
                     {
                         docs: "Creates and returns a string representation.",
@@ -135,7 +135,7 @@ export const objectModule = InterpreterModule.create(
                         const self = args.getField(SemanticFieldNames.SELF, context);
                         assertObject(self);
                         const value = args.getFieldEntry(1, context);
-                        self.setLocalField(assertIndex(args.getField(0, context)), value);
+                        self.setLocalField(assertIndex(args.getField(0, context)), value, context);
                         return value;
                     },
                     {
@@ -150,6 +150,32 @@ export const objectModule = InterpreterModule.create(
                             [SemanticFieldNames.SELF, "object on which to set the field", objectType()]
                         ],
                         returns: "The assigned value"
+                    }
+                )
+            ),
+            id(objectProto).assignField(
+                "defineProperty",
+                jsFun(
+                    (args, context) => {
+                        const self = args.getField(SemanticFieldNames.SELF, context);
+                        assertObject(self);
+                        const key = assertIndex(args.getField(0, context));
+                        const getter = args.getField(1, context);
+                        const setter = args.getField(2, context);
+                        assertFunction(getter, "getter");
+                        assertFunction(setter, "setter");
+                        self.defineProperty(key, getter, setter);
+                        return context.null;
+                    },
+                    {
+                        docs: "Defines a property on the object. Only supported on objects, and does NOT take the proto chain into account.",
+                        params: [
+                            [0, "the key of the property"],
+                            [1, "the getter function", functionType],
+                            [2, "the setter function", functionType],
+                            [SemanticFieldNames.SELF, "object on which to define the property", objectType()]
+                        ],
+                        returns: "null"
                     }
                 )
             ),

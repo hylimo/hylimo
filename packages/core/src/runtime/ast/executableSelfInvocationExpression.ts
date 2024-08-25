@@ -1,5 +1,5 @@
 import { SelfInvocationExpression } from "../../ast/selfInvocationExpression.js";
-import { InterpreterContext } from "../interpreter.js";
+import { InterpreterContext } from "../interpreter/interpreterContext.js";
 import { FieldEntry } from "../objects/baseObject.js";
 import { SemanticFieldNames } from "../semanticFieldNames.js";
 import { ExecutableAbstractInvocationExpression } from "./executableAbstractInvocationExpression.js";

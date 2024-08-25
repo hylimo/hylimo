@@ -1,5 +1,5 @@
 import { Expression } from "../../ast/expression.js";
-import { InterpreterContext } from "../interpreter.js";
+import { InterpreterContext } from "../interpreter/interpreterContext.js";
 import { FieldEntry } from "../objects/baseObject.js";
 // DO NOT CHANGE!
 // These classes must not be imported from their originating file directly.

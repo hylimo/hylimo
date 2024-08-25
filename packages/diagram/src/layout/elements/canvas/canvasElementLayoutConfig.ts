@@ -1,6 +1,6 @@
-import { FullObject, numberType, optional, FunctionExpression } from "@hylimo/core";
-import { Size, Point, Element, CanvasElement, ModificationSpecification } from "@hylimo/diagram-common";
-import { canvasPointType, elementType } from "../../../module/types.js";
+import { FullObject, numberType, optional, ExecutableAbstractFunctionExpression, fun } from "@hylimo/core";
+import { Size, Point, Element, CanvasElement, DefaultEditTypes } from "@hylimo/diagram-common";
+import { canvasPointType, elementType } from "../../../module/base/types.js";
 import {
     ContentCardinality,
     HorizontalAlignment,
@@ -77,124 +77,78 @@ export class CanvasElementLayoutConfig extends EditableCanvasContentLayoutConfig
             ...size,
             x,
             y,
-            ...this.extractPosAndMoveable(element),
-            ...this.extractRotationAndRotateable(element),
-            ...this.extractResizable(element),
+            pos: this.extractPos(element),
+            rotation: element.element.getLocalFieldOrUndefined("_rotation")?.value?.toNative() ?? 0,
             children: layout.layout(content, { x, y }, size, `${id}_0`),
             outline: content.layoutConfig.outline(
                 layout,
                 content,
                 content.layoutBounds!.position,
                 content.layoutBounds!.size
-            )
+            ),
+            edits: element.edits
         };
         return [result];
     }
 
     /**
-     * Extracts the size spezification from the element.
-     * For both width and height, if not present, a modification specification is generated for the layout scope.
+     * Extracts the position from the element
+     * If the element has a pos field, the position is extracted.
      *
-     * @param element the element to extract the size specification from
-     * @returns the size specification, consisting of x and y resizable
+     * @param element the element from which the position should be extracted
+     * @returns the extracted position
      */
-    private extractResizable(element: LayoutElement): Record<"xResizable" | "yResizable", ModificationSpecification> {
-        let xResizable: ModificationSpecification;
-        let yResizable: ModificationSpecification;
-        if (element.styles.width != undefined) {
-            const widthSource = element.styleSources.get("width")?.source;
-            xResizable = this.generateModificationSpecification({ width: widthSource });
-        } else {
-            xResizable = this.generateModificationSpecificationForScopeField("layout", element);
-        }
-        if (element.styles.height != undefined) {
-            const heightSource = element.styleSources.get("height")?.source;
-            yResizable = this.generateModificationSpecification({ height: heightSource });
-        } else {
-            yResizable = this.generateModificationSpecificationForScopeField("layout", element);
-        }
-        return {
-            xResizable,
-            yResizable
-        };
-    }
-
-    /**
-     * Extracts the position and the moveable specification from the element.
-     * If the element has a pos field, the position is extracted and the moveable specification is null.
-     * Otherwise the moveable specification is generated for the layout scope.
-     *
-     * @param element the element from which the position and the moveable specification should be extracted
-     * @returns the extracted position and the moveable specification
-     */
-    private extractPosAndMoveable(element: LayoutElement): { pos?: string; moveable: ModificationSpecification } {
+    private extractPos(element: LayoutElement): string | undefined {
         const pos = element.element.getLocalFieldOrUndefined("pos")?.value as FullObject | undefined;
         if (pos == undefined) {
-            return {
-                pos: undefined,
-                moveable: this.generateModificationSpecificationForScopeField("layout", element)
-            };
+            return undefined;
         } else {
-            return {
-                pos: this.getContentId(element, pos),
-                moveable: null
-            };
+            return this.getContentId(element, pos);
         }
     }
 
-    /**
-     * Extracts the rotation and the rotateable specification from the element.
-     * If the element has a rotation field, the rotation is extracted and the rotation specification is generated based on its source.
-     * Otherwise the rotation is 0 and the rotateable specification is generated for the layout scope.
-     *
-     * @param element the element from which the rotation and the rotateable specification should be extracted
-     * @returns the extracted rotation and the rotateable specification
-     */
-    private extractRotationAndRotateable(element: LayoutElement): {
-        rotation: number;
-        rotateable: ModificationSpecification;
-    } {
-        const rotation = element.styles.rotation;
-        if (rotation == undefined) {
-            return {
-                rotation: 0,
-                rotateable: this.generateModificationSpecificationForScopeField("layout", element)
-            };
-        } else {
-            return {
-                rotation: rotation,
-                rotateable: this.generateModificationSpecification({
-                    rotation: element.styleSources.get("rotation")?.source
-                })
-            };
-        }
+    override createPrototype(): ExecutableAbstractFunctionExpression {
+        return fun(
+            `
+                elementProto = object(proto = it)
+
+                elementProto.defineProperty("width") {
+                    args.self._width
+                } {
+                    args.self._width = it
+                    args.self.edits.set("${DefaultEditTypes.RESIZE_WIDTH}", createAdditiveEdit(it, "dw"))
+                }
+                elementProto.defineProperty("height") {
+                    args.self._height
+                } {
+                    args.self._height = it
+                    args.self.edits.set("${DefaultEditTypes.RESIZE_HEIGHT}", createAdditiveEdit(it, "dh"))
+                }
+                elementProto.defineProperty("rotation") {
+                    args.self._rotation
+                } {
+                    args.self._rotation = it
+                    args.self.edits.set("${DefaultEditTypes.ROTATE}", createReplaceEdit(it, "$string(rotation)"))
+                }
+                
+                elementProto
+            `
+        );
     }
 
-    /**
-     * Generates a modification specification for adding a field by adding it to an already existing scope or creating a new scope
-     *
-     * @param scopeName the name of the scope where the field should be added
-     * @param element the element to which the field should be added
-     * @returns the generated modification specification
-     */
-    private generateModificationSpecificationForScopeField(
-        scopeName: string,
-        element: LayoutElement
-    ): ModificationSpecification {
-        const scopes = element.element.getLocalFieldOrUndefined("scopes")!.value as FullObject;
-        const scope = scopes.getLocalFieldOrUndefined(scopeName)?.source;
-        if (scope != undefined) {
-            if (!(scope instanceof FunctionExpression)) {
-                return null;
-            }
-            return this.generateModificationSpecification({ scope: scope });
-        } else {
-            const source = element.element.getLocalFieldOrUndefined("source")?.source;
-            if (source != undefined) {
-                return this.generateModificationSpecification({ source: source });
-            } else {
-                return null;
-            }
+    override postprocessStyles(element: LayoutElement, styles: Record<string, any>): Record<string, any> {
+        const width = element.element.getLocalFieldOrUndefined("_width")?.value?.toNative();
+        if (width != undefined) {
+            styles.width = width;
         }
+        const height = element.element.getLocalFieldOrUndefined("_height")?.value?.toNative();
+        if (height != undefined) {
+            styles.height = height;
+        }
+        const rotation = element.element.getLocalFieldOrUndefined("_rotation")?.value?.toNative();
+        if (rotation != undefined) {
+            styles.rotation = rotation;
+        }
+        return styles;
     }
 }

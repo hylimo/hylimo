@@ -1,5 +1,7 @@
 import { CompletionExpressionMetadata } from "./expressionMetadata.js";
 import { Expression } from "./expression.js";
+import { InterpreterContext } from "../runtime/interpreter/interpreterContext.js";
+import { WrapperObject } from "../runtime/objects/wrapperObject.js";
 
 /**
  * Field access expression
@@ -8,6 +10,22 @@ import { Expression } from "./expression.js";
 
 export class FieldAccessExpression extends Expression<CompletionExpressionMetadata> {
     static readonly TYPE = "FieldAccessExpression";
+
+    private static readonly WRAPPER_ENTRIES = new Map([
+        ...Expression.expressionWrapperObjectEntries<FieldAccessExpression>(FieldAccessExpression.TYPE),
+        [
+            "name",
+            (wrapped, context) => {
+                if (typeof wrapped.name === "string") {
+                    return context.newString(wrapped.name);
+                } else {
+                    return context.newNumber(wrapped.name);
+                }
+            }
+        ],
+        ["target", (wrapped, context) => wrapped.target.toWrapperObject(context)]
+    ]);
+
     /**
      * Creates a new IdentifierExpression consisting of a target and a field to access
      *
@@ -26,5 +44,9 @@ export class FieldAccessExpression extends Expression<CompletionExpressionMetada
     protected override markNoEditInternal(): void {
         super.markNoEditInternal();
         this.target.markNoEdit();
+    }
+
+    override toWrapperObject(context: InterpreterContext): WrapperObject<this> {
+        return context.newWrapperObject(this, FieldAccessExpression.WRAPPER_ENTRIES);
     }
 }

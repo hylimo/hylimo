@@ -1,23 +1,10 @@
 import { LayoutedDiagram, RenderErrors } from "@hylimo/diagram";
-import {
-    TransactionalAction,
-    TranslationMoveAction,
-    RotationAction,
-    LineMoveAction,
-    ResizeAction,
-    AxisAlignedSegmentEditAction
-} from "@hylimo/diagram-protocol";
 import { Diagnostic, DiagnosticSeverity, uinteger, Range, CompletionItem, Position } from "vscode-languageserver";
 import { TextDocument } from "vscode-languageserver-textdocument";
-import { AxisAlignedSegmentEdit } from "../../edit/edits/axisAlignedSegmentEdit.js";
-import { LineMoveEdit } from "../../edit/edits/lineMoveEdit.js";
-import { ResizeEdit } from "../../edit/edits/resizeEdit.js";
-import { RotationEdit } from "../../edit/edits/rotationEdit.js";
-import { TransactionalEdit } from "../../edit/edits/transactionalEdit.js";
-import { TranslationMoveEdit } from "../../edit/edits/translationMoveEdit.js";
 import { DiagramImplementation, DiagramUpdateResult } from "../diagramImplementation.js";
 import { SharedDiagramUtils } from "../../sharedDiagramUtils.js";
 import { DiagramConfig } from "@hylimo/diagram-common";
+import { Expression, isWrapperObject } from "@hylimo/core";
 
 /**
  * Local implementation of a diagram.
@@ -131,26 +118,6 @@ export class LocalDiagramImplementation extends DiagramImplementation {
         };
     }
 
-    override async generateTransactionalEdit(action: TransactionalAction): Promise<TransactionalEdit> {
-        if (this.layoutResult == undefined) {
-            throw new Error("Diagram not yet initialized");
-        }
-
-        if (TranslationMoveAction.is(action)) {
-            return TranslationMoveEdit.create(action, this.layoutResult, this.document!);
-        } else if (RotationAction.is(action)) {
-            return RotationEdit.create(action, this.layoutResult, this.document!);
-        } else if (LineMoveAction.is(action)) {
-            return LineMoveEdit.create(action, this.layoutResult);
-        } else if (ResizeAction.is(action)) {
-            return ResizeEdit.create(action, this.layoutResult, this.document!);
-        } else if (AxisAlignedSegmentEditAction.is(action)) {
-            return AxisAlignedSegmentEdit.create(action, this.layoutResult);
-        } else {
-            throw new Error("Unknown action type");
-        }
-    }
-
     override async generateCompletionItems(
         source: string,
         config: DiagramConfig,
@@ -168,19 +135,16 @@ export class LocalDiagramImplementation extends DiagramImplementation {
     override async getSourceRange(element: string): Promise<Range | undefined> {
         if (this.layoutResult == undefined || this.document == undefined) {
             return undefined;
-        } else {
-            let targetElement = this.layoutResult.layoutElementLookup.get(element);
-            while (targetElement != undefined) {
-                const source = targetElement.element.getLocalFieldOrUndefined("source")?.source;
-                if (source != undefined) {
-                    return Range.create(
-                        this.document.positionAt(source.position.startOffset),
-                        this.document.positionAt(source.position.endOffset)
-                    );
-                }
-                targetElement = targetElement?.parent;
+        }
+        let targetElement = this.layoutResult.layoutElementLookup.get(element);
+        while (targetElement != undefined) {
+            const source = targetElement.element.getLocalFieldOrUndefined("source")?.value;
+            if (source != undefined && isWrapperObject(source)) {
+                const target = source.wrapped as Expression;
+                const [start, end] = target.range;
+                return Range.create(this.document.positionAt(start), this.document.positionAt(end));
             }
-            return undefined;
+            targetElement = targetElement?.parent;
         }
         return undefined;
     }

@@ -1,15 +1,18 @@
 import { AbstractInvocationExpression } from "../../ast/abstractInvocationExpression.js";
 import { ExecutableListEntry } from "../ast/executableListEntry.js";
-import { InterpreterContext } from "../interpreter.js";
+import { InterpreterContext } from "../interpreter/interpreterContext.js";
 import { RuntimeError } from "../runtimeError.js";
 import { SemanticFieldNames } from "../semanticFieldNames.js";
 import { BaseObject, FieldEntry } from "./baseObject.js";
+import { AbstractFunctionObject } from "./functionObject.js";
+import { Property } from "./property.js";
 
 /**
  * Object with full support for both number (integer) and
  */
 export class FullObject extends BaseObject {
     readonly fields: Map<string | number, FieldEntry> = new Map();
+    readonly properties: Map<string | number, Property> = new Map();
 
     /**
      * If generated, the native object
@@ -20,16 +23,19 @@ export class FullObject extends BaseObject {
         return false;
     }
 
-    override getFieldEntry(key: string | number, context: InterpreterContext): FieldEntry {
+    override getFieldEntry(key: string | number, context: InterpreterContext, self?: BaseObject): FieldEntry {
         this.checkValidKey(key);
-        return this.getFieldEntryInternal(key, context);
+        return this.getFieldEntryInternal(key, context, self ?? this);
     }
 
-    override getFieldEntries(): Record<string, FieldEntry> {
+    override getFieldEntries(context: InterpreterContext, self?: BaseObject): Record<string, FieldEntry> {
         const proto = this.getProto();
-        const entries: Record<string, FieldEntry> = proto?.getFieldEntries() ?? {};
+        const entries: Record<string, FieldEntry> = proto?.getFieldEntries(context, self ?? this) ?? {};
         for (const [key, value] of this.fields) {
             entries[key] = value;
+        }
+        for (const [key, value] of this.properties) {
+            entries[key] = value.get(self ?? this, context);
         }
         return entries;
     }
@@ -42,16 +48,20 @@ export class FullObject extends BaseObject {
      *
      * @param key the identifier of the field
      * @param context context in which this is performed
+     * @param self the object to get the field from
      * @returns the value of the field
      */
-    private getFieldEntryInternal(key: string | number, context: InterpreterContext): FieldEntry {
+    private getFieldEntryInternal(key: string | number, context: InterpreterContext, self: BaseObject): FieldEntry {
+        const property = this.properties.get(key);
+        if (property != undefined) {
+            return property.get(self, context);
+        }
         const value = this.fields.get(key);
         if (value) {
             return value;
-        } else {
-            const proto = this.getProto();
-            return proto?.getFieldEntryInternal(key, context) ?? { value: context.null };
         }
+        const proto = this.getProto();
+        return proto?.getFieldEntryInternal(key, context, self) ?? { value: context.null };
     }
 
     /**
@@ -62,7 +72,7 @@ export class FullObject extends BaseObject {
      */
     hasField(key: string | number): boolean {
         this.checkValidKey(key);
-        if (this.fields.has(key)) {
+        if (this.fields.has(key) || this.properties.has(key)) {
             return true;
         } else {
             const proto = this.getProto();
@@ -76,20 +86,25 @@ export class FullObject extends BaseObject {
      *
      * @param key the identifier of the field
      * @param context context in which this is performed
+     * @param self the object to get the field from
      * @returns the value of the field
      */
-    getLocalField(key: string | number, context: InterpreterContext): FieldEntry {
+    getLocalField(key: string | number, context: InterpreterContext, self?: BaseObject): FieldEntry {
+        const property = this.getProperty(key);
+        if (property != undefined) {
+            return property.get(self ?? this, context);
+        }
         const value = this.fields.get(key);
         if (value != undefined) {
             return value;
-        } else {
-            return { value: context.null };
         }
+        return { value: context.null };
     }
 
     /**
      * Gets the value of a local field without performing any checks.
      * If the field is not found or contains null, returns undefined.
+     * Does NOT support properties.
      *
      * @param key the identifier of the field
      * @returns the value of the field or undefined
@@ -103,10 +118,15 @@ export class FullObject extends BaseObject {
         }
     }
 
-    override setFieldEntry(key: string | number, value: FieldEntry, context: InterpreterContext): void {
+    override setFieldEntry(
+        key: string | number,
+        value: FieldEntry,
+        context: InterpreterContext,
+        self?: BaseObject
+    ): void {
         this.checkValidKey(key);
-        if (!this.setExistingField(key, value, context)) {
-            this.setLocalField(key, value);
+        if (!this.setExistingField(key, value, context, self ?? this)) {
+            this.setLocalField(key, value, context, self);
         }
     }
 
@@ -116,38 +136,90 @@ export class FullObject extends BaseObject {
      * @param key the identifier of the field
      * @param value the new value of the field
      * @param context context in which this is performed
+     * @param self the object to set the field on
      * @returns true if the field was found and its value set, otherwise false
      */
-    private setExistingField(key: string | number, value: FieldEntry, context: InterpreterContext): boolean {
-        if (this.fields.has(key)) {
-            this.setLocalField(key, value);
+    private setExistingField(
+        key: string | number,
+        value: FieldEntry,
+        context: InterpreterContext,
+        self: BaseObject
+    ): boolean {
+        if (this.fields.has(key) || this.properties.has(key)) {
+            this.setLocalField(key, value, context, self);
             return true;
         } else {
             const proto = this.getProto();
             if (proto) {
-                return proto.setExistingField(key, value, context);
+                return proto.setExistingField(key, value, context, self);
             } else {
                 return false;
             }
         }
     }
 
-    override setLocalField(key: string | number, value: FieldEntry): void {
+    override setLocalField(
+        key: string | number,
+        value: FieldEntry,
+        context: InterpreterContext,
+        self?: BaseObject
+    ): void {
         const isProto = key === SemanticFieldNames.PROTO;
         if (isProto) {
             if (!value.value.isNull && !(value.value instanceof FullObject)) {
                 throw new RuntimeError('"proto" must be set to an object or null');
             }
-        }
-        this.fields.set(key, value);
-        if (isProto) {
+            this.fields.set(key, value);
             this.validateProto();
+        } else {
+            const property = this.getProperty(key);
+            if (property != undefined) {
+                property.set(self ?? this, value, context);
+            } else {
+                this.fields.set(key, value);
+            }
+        }
+    }
+
+    /**
+     * Gets a property, respecting the proto field
+     *
+     * @param key the key of the property
+     * @returns the property or undefined if not found
+     */
+    private getProperty(key: string | number): Property | undefined {
+        const property = this.properties.get(key);
+        if (property != undefined) {
+            return property;
+        } else {
+            return this.getProto()?.getProperty(key);
         }
     }
 
     override deleteField(key: string | number): void {
         this.checkValidKey(key);
         this.fields.delete(key);
+        this.properties.delete(key);
+    }
+
+    /**
+     * Defines a property on this object
+     *
+     * @param key the key of the property
+     * @param getter the getter
+     * @param setter the setter
+     */
+    defineProperty(
+        key: string | number,
+        getter: AbstractFunctionObject<any>,
+        setter: AbstractFunctionObject<any>
+    ): void {
+        this.checkValidKey(key);
+        if (key === SemanticFieldNames.PROTO) {
+            throw new RuntimeError("Cannot define property 'proto'");
+        }
+        this.deleteField(key);
+        this.properties.set(key, new Property(getter, setter));
     }
 
     /**
@@ -187,12 +259,12 @@ export class FullObject extends BaseObject {
         return this.fields.get(SemanticFieldNames.PROTO)?.value as FullObject | undefined;
     }
 
-    override toString(): string {
+    override toString(context: InterpreterContext): string {
         let res = "{\n";
         for (const [name, value] of this.fields.entries()) {
             if (name != SemanticFieldNames.THIS && name != SemanticFieldNames.PROTO) {
                 const escapedName = typeof name === "string" ? `"${name}"` : name.toString();
-                res += `  ${escapedName}: ${value.value.toString().replaceAll("\n", "\n  ")}\n`;
+                res += `  ${escapedName}: ${value.value.toString(context).replaceAll("\n", "\n  ")}\n`;
             }
         }
         res += "}";

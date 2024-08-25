@@ -8,6 +8,8 @@ import { NumberObject } from "../runtime/objects/numberObject.js";
 import { StringObject } from "../runtime/objects/stringObject.js";
 import { RuntimeError } from "../runtime/runtimeError.js";
 import { SemanticFieldNames } from "../runtime/semanticFieldNames.js";
+import { WrapperObject } from "../runtime/objects/wrapperObject.js";
+import { NullObject } from "../runtime/objects/nullObject.js";
 
 /**
  * Helper to check that an object is a StringObject, throws an error if not
@@ -29,7 +31,7 @@ export function assertString(value: BaseObject, description = ""): string {
  * @param value the value to check
  * @returns true iff it is a StringObject
  */
-export function isString(value: BaseObject): boolean {
+export function isString(value: BaseObject): value is StringObject {
     return value instanceof StringObject;
 }
 
@@ -67,7 +69,7 @@ export function assertBoolean(value: BaseObject, description = ""): boolean {
  * @param value the value to check
  * @returns true iff it is a NumberObject
  */
-export function isNumber(value: BaseObject): boolean {
+export function isNumber(value: BaseObject): value is NumberObject {
     return value instanceof NumberObject;
 }
 
@@ -93,6 +95,38 @@ export function assertObject(value: BaseObject, description = ""): asserts value
     if (!(value instanceof FullObject)) {
         throw new RuntimeError(`${description} is not an object`);
     }
+}
+
+/**
+ * Helper to check that an object is a WrapperObject, throws an error if not
+ *
+ * @param value the value to check
+ * @param description the description of the value, part of the error message
+ */
+export function assertWrapperObject(value: BaseObject, description = ""): asserts value is WrapperObject<any> {
+    if (!(value instanceof WrapperObject)) {
+        throw new RuntimeError(`${description} is not a wrapper object`);
+    }
+}
+
+/**
+ * Checks if a value is a WrapperObject
+ *
+ * @param value the value to check
+ * @returns true iff it is a WrapperObject
+ */
+export function isWrapperObject(value: BaseObject): value is WrapperObject<any> {
+    return value instanceof WrapperObject;
+}
+
+/**
+ * Checks if a value is a FullObject
+ *
+ * @param value the value to check
+ * @returns true iff it is a FullObject
+ */
+export function isNull(value: BaseObject): value is NullObject {
+    return value instanceof NullObject;
 }
 
 /**

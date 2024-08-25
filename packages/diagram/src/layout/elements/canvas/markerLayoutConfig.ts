@@ -3,7 +3,7 @@ import { Size, Point, Element, Marker } from "@hylimo/diagram-common";
 import { ContentCardinality, LayoutElement, SizeConstraints } from "../../layoutElement.js";
 import { Layout } from "../../layoutEngine.js";
 import { StyledElementLayoutConfig } from "../styledElementLayoutConfig.js";
-import { elementType } from "../../../module/types.js";
+import { elementType } from "../../../module/base/types.js";
 
 /**
  * Layout config for marker
@@ -48,7 +48,8 @@ export class MarkerLayoutConfig extends StyledElementLayoutConfig {
             ...size,
             lineStart: element.styles.lineStart ?? 0,
             children: layout.layout(content, { x: -size.width, y: -size.height / 2 }, size, `${id}_0`),
-            pos: element.position
+            pos: element.position,
+            edits: element.edits
         };
         return [result];
     }

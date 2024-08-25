@@ -1,6 +1,6 @@
 import { AttributeConfig, ContentCardinality } from "../layoutElement.js";
 import { ShapeLayoutConfig } from "./shapeLayoutConfig.js";
-import { elementType } from "../../module/types.js";
+import { elementType } from "../../module/base/types.js";
 
 /**
  * Base class for all shape layout configs with a content

@@ -1,7 +1,7 @@
 import { assign, fun, id, jsFun, native, num } from "../../runtime/executableAstHelper.js";
 import { ExecutableListEntry } from "../../runtime/ast/executableListEntry.js";
 import { ExecutableConstExpression } from "../../runtime/ast/executableConstExpression.js";
-import { InterpreterModule } from "../../runtime/interpreter.js";
+import { InterpreterModule } from "../../runtime/interpreter/interpreterModule.js";
 import { BaseObject, FieldEntry } from "../../runtime/objects/baseObject.js";
 import { FullObject } from "../../runtime/objects/fullObject.js";
 import { generateArgs } from "../../runtime/objects/functionObject.js";
@@ -41,7 +41,7 @@ export const listModule = InterpreterModule.create(
                     (args, context) => {
                         const self = args.getField(SemanticFieldNames.SELF, context);
                         const length = assertNumber(self.getField(lengthField, context));
-                        self.setLocalField(length, args.getFieldEntry(0, context));
+                        self.setLocalField(length, args.getFieldEntry(0, context), context);
                         self.setFieldEntry(lengthField, { value: context.newNumber(length + 1) }, context);
                         return context.null;
                     },
@@ -172,14 +172,46 @@ export const listModule = InterpreterModule.create(
                     }
                 )
             ),
+            id(listProto).assignField(
+                "filter",
+                fun(
+                    `
+                        callback = it
+                        res = list()
+                        args.self.forEach {
+                            (value, index) = args
+                            if(callback(value, index)) {
+                                res.add(value)
+                            }
+                        }
+                        res
+                    `,
+                    {
+                        docs: "Filters a list to a new list, with the order being preserved",
+                        params: [
+                            [SemanticFieldNames.SELF, "the list on which all fields are filtered", listType()],
+                            [
+                                0,
+                                "the predicate whether to keep the entry, called with the two positional parameters value and index",
+                                functionType
+                            ]
+                        ],
+                        returns: "The resulting new list"
+                    }
+                )
+            ),
             id(SemanticFieldNames.IT).assignField(
                 "list",
                 native(
                     (args, context, staticScope) => {
                         const indexOnlyArgs = args.filter((value) => !value.name);
                         const list = generateArgs(indexOnlyArgs, context, undefined);
-                        list.setLocalField(SemanticFieldNames.PROTO, staticScope.getFieldEntry(listProto, context));
-                        list.setLocalField(lengthField, { value: context.newNumber(indexOnlyArgs.length) });
+                        list.setLocalField(
+                            SemanticFieldNames.PROTO,
+                            staticScope.getFieldEntry(listProto, context),
+                            context
+                        );
+                        list.setLocalField(lengthField, { value: context.newNumber(indexOnlyArgs.length) }, context);
                         return { value: list };
                     },
                     {
@@ -220,14 +252,15 @@ export const listModule = InterpreterModule.create(
                         const object = objectEntry.value as FullObject;
                         object.setLocalField(
                             SemanticFieldNames.PROTO,
-                            context.currentScope.getFieldEntry(listProto, context)
+                            context.currentScope.getFieldEntry(listProto, context),
+                            context
                         );
                         const maxKey =
                             Math.max(
                                 -1,
                                 ...([...object.fields.keys()].filter((key) => typeof key === "number") as number[])
                             ) + 1;
-                        object.setLocalField(lengthField, { value: context.newNumber(maxKey) });
+                        object.setLocalField(lengthField, { value: context.newNumber(maxKey) }, context);
                         return objectEntry;
                     },
                     {

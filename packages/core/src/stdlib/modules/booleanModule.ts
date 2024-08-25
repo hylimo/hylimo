@@ -1,6 +1,6 @@
 import { ExecutableNativeExpression } from "../../runtime/ast/executableNativeExpression.js";
 import { assign, fun, id, jsFun, native } from "../../runtime/executableAstHelper.js";
-import { InterpreterModule } from "../../runtime/interpreter.js";
+import { InterpreterModule } from "../../runtime/interpreter/interpreterModule.js";
 import { BooleanObject } from "../../runtime/objects/booleanObject.js";
 import { FullObject } from "../../runtime/objects/fullObject.js";
 import { SemanticFieldNames } from "../../runtime/semanticFieldNames.js";

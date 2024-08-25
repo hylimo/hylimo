@@ -5,7 +5,7 @@ import { svgPathBbox } from "@hylimo/diagram-common";
 import { ContentCardinality, LayoutElement, SizeConstraints } from "../layoutElement.js";
 import { Layout, LayoutedPath } from "../layoutEngine.js";
 import { ShapeLayoutConfig } from "./shapeLayoutConfig.js";
-import { elementType } from "../../module/types.js";
+import { elementType } from "../../module/base/types.js";
 
 /**
  * The maximum number of iterations
@@ -96,7 +96,8 @@ export class PathLayoutConfig extends ShapeLayoutConfig {
             ...size,
             ...element.shapeProperties,
             path: layoutedPath.path,
-            children: []
+            children: [],
+            edits: element.edits
         };
         return [result];
     }

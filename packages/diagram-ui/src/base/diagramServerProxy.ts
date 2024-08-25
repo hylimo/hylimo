@@ -1,11 +1,4 @@
-import {
-    AxisAlignedSegmentEditAction,
-    LineMoveAction,
-    NavigateToSourceAction,
-    ResizeAction,
-    RotationAction,
-    TranslationMoveAction
-} from "@hylimo/diagram-protocol";
+import { NavigateToSourceAction, TransactionalAction } from "@hylimo/diagram-protocol";
 import { injectable } from "inversify";
 import { ActionHandlerRegistry, DiagramServerProxy as SprottyDiagramServerProxy } from "sprotty";
 
@@ -17,11 +10,7 @@ export abstract class DiagramServerProxy extends SprottyDiagramServerProxy {
     override initialize(registry: ActionHandlerRegistry): void {
         super.initialize(registry);
 
-        registry.register(TranslationMoveAction.KIND, this);
-        registry.register(LineMoveAction.KIND, this);
-        registry.register(RotationAction.KIND, this);
-        registry.register(ResizeAction.KIND, this);
-        registry.register(AxisAlignedSegmentEditAction.KIND, this);
+        registry.register(TransactionalAction.KIND, this);
         registry.register(NavigateToSourceAction.KIND, this);
     }
 }

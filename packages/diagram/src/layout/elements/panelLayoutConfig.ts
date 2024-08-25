@@ -1,7 +1,7 @@
 import { FullObject, objectToList } from "@hylimo/core";
 import { AttributeConfig, ContentCardinality, LayoutElement } from "../layoutElement.js";
 import { StyledElementLayoutConfig } from "./styledElementLayoutConfig.js";
-import { elementType } from "../../module/types.js";
+import { elementType } from "../../module/base/types.js";
 
 /**
  * Base class for all layout configs which contain contents

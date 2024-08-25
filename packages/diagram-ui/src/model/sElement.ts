@@ -1,5 +1,5 @@
 import { SChildElementImpl } from "sprotty";
-import { Element } from "@hylimo/diagram-common";
+import { EditSpecification, Element } from "@hylimo/diagram-common";
 import { SRoot } from "./sRoot.js";
 
 /**
@@ -7,6 +7,11 @@ import { SRoot } from "./sRoot.js";
  */
 export abstract class SElement extends SChildElementImpl implements Element {
     override children!: SElement[];
+
+    /**
+     * The edit specification for this element
+     */
+    edits!: EditSpecification;
 
     /**
      * Creats a cached property on this element

@@ -1,5 +1,5 @@
-import { Expression, ExpressionMetadata, Type, listType, optional, stringType } from "@hylimo/core";
-import { ArcSegment, Element, Line, LineSegment, ModificationSpecification, Point, Size } from "@hylimo/diagram-common";
+import { ExecutableAbstractFunctionExpression, Type, fun, listType, optional, stringType } from "@hylimo/core";
+import { ArcSegment, Element, Line, LineSegment, Point, Size } from "@hylimo/diagram-common";
 import { LayoutElement, LayoutConfig, SizeConstraints, AttributeConfig, ContentCardinality } from "../layoutElement.js";
 import { Layout } from "../layoutEngine.js";
 
@@ -65,26 +65,6 @@ export abstract class ElementLayoutConfig implements LayoutConfig {
      * @returns the rendered element
      */
     abstract layout(layout: Layout, element: LayoutElement, position: Point, size: Size, id: string): Element[];
-
-    /**
-     * Converts the expressions to a ModificationSpecification
-     *
-     * @param expressions expression with associated key
-     * @returns the generated ModificationSpecification
-     */
-    protected generateModificationSpecification(expressions: {
-        [key: string]: Expression | undefined;
-    }): ModificationSpecification {
-        const result: { [key: string]: [number, number] } = {};
-        for (const [key, expression] of Object.entries(expressions)) {
-            if (!ExpressionMetadata.isEditable(expression?.metadata)) {
-                return null;
-            }
-            const position = expression!.position;
-            result[key] = [position.startOffset, position.endOffset];
-        }
-        return result;
-    }
 
     /**
      * Called to create the outline of an element.
@@ -161,5 +141,26 @@ export abstract class ElementLayoutConfig implements LayoutConfig {
             radiusX: radius,
             radiusY: radius
         };
+    }
+
+    /**
+     * Called to provide a function which evaluates to the prototype of the element.
+     * The function will be called with the general element prototype as first argument.
+     *
+     * @returns the prototype generation function
+     */
+    createPrototype(): ExecutableAbstractFunctionExpression {
+        return fun("object(proto = it)");
+    }
+
+    /**
+     * Called to postprocess the extracted styles
+     *
+     * @param _element the element to postprocess
+     * @param styles the extracted styles
+     * @returns the postprocessed styles
+     */
+    postprocessStyles(_element: LayoutElement, styles: Record<string, any>): Record<string, any> {
+        return styles;
     }
 }

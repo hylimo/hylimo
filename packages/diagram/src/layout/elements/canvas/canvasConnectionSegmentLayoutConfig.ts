@@ -1,6 +1,6 @@
 import { FullObject, RuntimeError, nullType } from "@hylimo/core";
 import { Size } from "@hylimo/diagram-common";
-import { canvasPointType } from "../../../module/types.js";
+import { canvasPointType } from "../../../module/base/types.js";
 import { AttributeConfig, ContentCardinality, LayoutElement, SizeConstraints } from "../../layoutElement.js";
 import { Layout } from "../../layoutEngine.js";
 import { ElementLayoutConfig } from "../elementLayoutConfig.js";

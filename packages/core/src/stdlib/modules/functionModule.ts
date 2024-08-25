@@ -1,6 +1,6 @@
 import { ExecutableNativeExpression } from "../../runtime/ast/executableNativeExpression.js";
 import { assign, fun, id, jsFun } from "../../runtime/executableAstHelper.js";
-import { InterpreterModule } from "../../runtime/interpreter.js";
+import { InterpreterModule } from "../../runtime/interpreter/interpreterModule.js";
 import { SemanticFieldNames } from "../../runtime/semanticFieldNames.js";
 import { functionType } from "../../types/function.js";
 import { objectType } from "../../types/object.js";
@@ -30,11 +30,11 @@ export const functionModule = InterpreterModule.create(
                         const scope = args.getField(0, context);
                         assertFunction(self);
                         assertObject(scope);
-                        scope.setLocalField(SemanticFieldNames.PROTO, { value: self.parentScope });
+                        scope.setLocalField(SemanticFieldNames.PROTO, { value: self.parentScope }, context);
                         const res = self.invoke([], context, scope);
-                        scope.setLocalField(SemanticFieldNames.ARGS, { value: context.null });
-                        scope.setLocalField(SemanticFieldNames.IT, { value: context.null });
-                        scope.setLocalField(SemanticFieldNames.THIS, { value: context.null });
+                        scope.setLocalField(SemanticFieldNames.ARGS, { value: context.null }, context);
+                        scope.setLocalField(SemanticFieldNames.IT, { value: context.null }, context);
+                        scope.setLocalField(SemanticFieldNames.THIS, { value: context.null }, context);
                         return res;
                     },
                     {

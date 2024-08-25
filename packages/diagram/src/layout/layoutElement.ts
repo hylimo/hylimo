@@ -1,5 +1,5 @@
-import { FieldEntry, FullObject, Type } from "@hylimo/core";
-import { Element, Line, Point, Size } from "@hylimo/diagram-common";
+import { ExecutableAbstractFunctionExpression, FullObject, Type } from "@hylimo/core";
+import { EditSpecification, Element, Line, Point, Size } from "@hylimo/diagram-common";
 import { Layout } from "./layoutEngine.js";
 import { Bounds } from "@hylimo/diagram-common";
 
@@ -115,9 +115,9 @@ export interface LayoutElement {
      */
     styles: Record<string, any>;
     /**
-     * Sources of the styles
+     * Edit specifications for the element
      */
-    styleSources: Map<string, FieldEntry>;
+    edits: EditSpecification;
     /**
      * After measure the computed size
      */
@@ -246,4 +246,19 @@ export interface LayoutConfig {
      * @returns the outline of the element
      */
     outline(layout: Layout, element: LayoutElement, position: Point, size: Size): Line;
+    /**
+     * Called to provide a function which evaluates to the prototype of the element.
+     * The function will be called with the general element prototype as first argument.
+     *
+     * @returns the prototype generation function
+     */
+    createPrototype(): ExecutableAbstractFunctionExpression;
+    /**
+     * Called to postprocess the extracted styles
+     *
+     * @param element the element to postprocess
+     * @param styles the extracted styles
+     * @returns the postprocessed styles
+     */
+    postprocessStyles(element: LayoutElement, styles: Record<string, any>): Record<string, any>;
 }

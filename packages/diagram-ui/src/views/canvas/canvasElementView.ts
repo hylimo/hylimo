@@ -1,4 +1,4 @@
-import { Point } from "@hylimo/diagram-common";
+import { DefaultEditTypes, Point } from "@hylimo/diagram-common";
 import { injectable } from "inversify";
 import { VNode } from "snabbdom";
 import { IView, IViewArgs, RenderingContext, svg } from "sprotty";
@@ -53,7 +53,7 @@ export class CanvasElementView implements IView {
         const children = context.renderChildren(model);
         if (model.selected) {
             children.push(this.generateSelectedRect(model));
-            if (model.rotateable != undefined) {
+            if (DefaultEditTypes.ROTATE in model.edits) {
                 children.push(this.generateRotationIcon(model));
             }
             children.push(...this.generateResizeBorder(model));
@@ -145,15 +145,17 @@ export class CanvasElementView implements IView {
     private generateResizeBorder(model: Readonly<SCanvasElement>): VNode[] {
         const result: VNode[] = [];
         const iconOffset = Math.round((model.rotation / 45) % 8);
-        if (model.xResizable != undefined) {
+        const isXResizable = DefaultEditTypes.RESIZE_WIDTH in model.edits;
+        const isYResizable = DefaultEditTypes.RESIZE_HEIGHT in model.edits;
+        if (isXResizable) {
             result.push(this.generateResizeLine(model, 1, 2, iconOffset, ResizePosition.RIGHT));
             result.push(this.generateResizeLine(model, 3, 4, iconOffset, ResizePosition.LEFT));
         }
-        if (model.yResizable != undefined) {
+        if (isYResizable) {
             result.push(this.generateResizeLine(model, 0, 1, iconOffset, ResizePosition.TOP));
             result.push(this.generateResizeLine(model, 2, 3, iconOffset, ResizePosition.BOTTOM));
         }
-        if (model.xResizable != undefined && model.yResizable != undefined) {
+        if (isXResizable && isYResizable) {
             result.push(this.generateResizeLine(model, 0, 0, iconOffset, ResizePosition.TOP, ResizePosition.LEFT));
             result.push(this.generateResizeLine(model, 1, 1, iconOffset, ResizePosition.TOP, ResizePosition.RIGHT));
             result.push(this.generateResizeLine(model, 2, 2, iconOffset, ResizePosition.BOTTOM, ResizePosition.RIGHT));

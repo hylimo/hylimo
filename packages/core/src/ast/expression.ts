@@ -1,5 +1,7 @@
 import { ExpressionMetadata } from "./expressionMetadata.js";
 import { ASTExpressionPosition } from "./astExpressionPosition.js";
+import { WrapperObject, WrapperObjectFieldRetriever } from "../runtime/objects/wrapperObject.js";
+import { InterpreterContext } from "../runtime/interpreter/interpreterContext.js";
 
 /**
  * Base interface for all expressions
@@ -7,10 +9,32 @@ import { ASTExpressionPosition } from "./astExpressionPosition.js";
 
 export abstract class Expression<M extends ExpressionMetadata = ExpressionMetadata> {
     /**
+     * Creates the common entries for subclass wrapper objects
+     *
+     * @param type the type of the subclass
+     * @returns the common entries for the subclass wrapper object
+     */
+    static expressionWrapperObjectEntries<T extends Expression>(
+        type: string
+    ): [string | number, WrapperObjectFieldRetriever<T>][] {
+        return [
+            ["type", (_wrapped, context) => context.newString(type)],
+            ["isEditable", (wrapped, context) => context.newBoolean(wrapped.metadata.isEditable)]
+        ];
+    }
+
+    /**
      * Getter for the position from the metadata
      */
     get position(): ASTExpressionPosition {
         return this.metadata.position;
+    }
+
+    /**
+     * Getter for the range from the position
+     */
+    get range(): [number, number] {
+        return [this.position.startOffset, this.position.endOffset];
     }
 
     /**
@@ -25,7 +49,7 @@ export abstract class Expression<M extends ExpressionMetadata = ExpressionMetada
     ) {}
 
     /**
-     * Marks the expression as not edxitable
+     * Marks the expression as not editable
      * If the expression is already not editable, this method does nothing
      */
     markNoEdit(): void {
@@ -41,4 +65,12 @@ export abstract class Expression<M extends ExpressionMetadata = ExpressionMetada
     protected markNoEditInternal(): void {
         this.metadata.isEditable = false;
     }
+
+    /**
+     * Converts the expression to a wrapper object
+     *
+     * @param context the context in which the expression is evaluated
+     * @returns the wrapper object representing the expression
+     */
+    abstract toWrapperObject(context: InterpreterContext): WrapperObject<any>;
 }

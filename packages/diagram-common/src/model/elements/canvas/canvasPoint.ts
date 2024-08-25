@@ -1,16 +1,10 @@
 import { Element } from "../base/element.js";
 import { PositionedElement } from "../base/positionedElement.js";
-import { ModificationSpecification } from "../modificationSpecification.js";
 
 /**
  * Named point on a canvas
  */
-export interface CanvasPoint extends Element {
-    /**
-     * If present, this point is manipulatable
-     */
-    editable: ModificationSpecification;
-}
+export type CanvasPoint = Element;
 
 /**
  * Absolute point on a canvas consisting of an x and y coordinate

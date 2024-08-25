@@ -18,7 +18,8 @@ export class CanvasLineSegmentLayoutConfig extends CanvasConnectionSegmentLayout
             id,
             type: CanvasLineSegment.TYPE,
             children: [],
-            end: this.getContentId(element, "end")
+            end: this.getContentId(element, "end"),
+            edits: element.edits
         };
         return [result];
     }

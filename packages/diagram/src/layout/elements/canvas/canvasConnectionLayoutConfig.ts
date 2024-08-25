@@ -9,7 +9,7 @@ import {
     CanvasLineSegment,
     CanvasAxisAlignedSegment
 } from "@hylimo/diagram-common";
-import { canvasPointType, elementType } from "../../../module/types.js";
+import { canvasPointType, elementType } from "../../../module/base/types.js";
 import { ContentCardinality, LayoutElement, SizeConstraints } from "../../layoutElement.js";
 import { Layout } from "../../layoutEngine.js";
 import { extractStrokeStyleAttributes, strokeStyleAttributes } from "../attributes.js";
@@ -88,7 +88,8 @@ export class CanvasConnectionLayoutConfig extends EditableCanvasContentLayoutCon
             children: contents.flatMap((content, i) =>
                 layout.layout(content, position, content.measuredSize!, `${id}_${i}`)
             ),
-            ...extractStrokeStyleAttributes(element.styles)
+            ...extractStrokeStyleAttributes(element.styles),
+            edits: element.edits
         };
         const startMarker = element.startMarker;
         if (element.startMarker != undefined) {
