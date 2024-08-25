@@ -15,7 +15,7 @@ export abstract class EditEngine {
 
     /**
      * Creates a new edit engine
-     * 
+     *
      * @param start start of the range to replace, inclusive
      * @param end end of the range to replace, exclusive
      */

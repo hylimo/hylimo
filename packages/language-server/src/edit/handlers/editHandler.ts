@@ -1,4 +1,4 @@
-import { BaseLayoutedDiagram, Element } from "@hylimo/diagram-common";
+import { Element } from "@hylimo/diagram-common";
 import { DynamicLanguageServerConfig, Edit, IncrementalUpdate } from "@hylimo/diagram-protocol";
 
 /**
