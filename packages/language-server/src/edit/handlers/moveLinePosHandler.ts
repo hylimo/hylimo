@@ -9,28 +9,25 @@ import { roundToPrecision } from "../../util/roundToPrecision.js";
 export const moveLinePosHandler: EditHandler<MoveLposEdit> = {
     type: DefaultEditTypes.MOVE_LPOS_POS,
 
-    predictActionDiff(layoutedDiagram, lastApplied, newest, elements) {
-        let pos: number;
-        let segment: number | undefined;
+    predictActionDiff(lastApplied, newest, elements) {
+        let changes: { pos: number; segment?: number };
         const newestPos = newest.pos;
         if (Array.isArray(newestPos)) {
-            segment = newestPos[0];
-            pos = newestPos[1];
+            changes = {
+                pos: newestPos[1],
+                segment: newestPos[0]
+            };
         } else {
-            pos = newestPos;
-            segment = undefined;
+            changes = {
+                pos: newestPos
+            };
         }
         const updates: IncrementalUpdate[] = [];
         for (const element of elements) {
             if (LinePoint.isLinePoint(element)) {
-                element.pos = pos;
-                element.segment = segment;
                 updates.push({
                     target: element.id,
-                    changes: {
-                        pos: element.pos,
-                        segment: element.segment
-                    }
+                    changes
                 });
             }
         }

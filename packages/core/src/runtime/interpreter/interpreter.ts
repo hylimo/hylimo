@@ -116,7 +116,7 @@ export class Interpreter {
     }
 
     /**
-     * Evalutes a list of expressions with all modules loaded
+     * Evaluates a list of expressions with all modules loaded
      *
      * @param expressions the expressions to evaluate
      * @returns the result of the interpretation, consting of a scope or an error
@@ -132,11 +132,11 @@ export class Interpreter {
                     expression.evaluate(context);
                 }
             }
-            let lastRes: BaseObject = context.null;
+            let previousResult: BaseObject = context.null;
             for (const expression of expressions) {
-                lastRes = expression.evaluate(context).value;
+                previousResult = expression.evaluate(context).value;
             }
-            return { result: lastRes, globalScope: context.currentScope };
+            return { result: previousResult, globalScope: context.currentScope };
         } catch (e: any) {
             if (Array.isArray(e.interpretationStack)) {
                 return { error: e };

@@ -4,8 +4,7 @@
     </div>
 </template>
 <script setup lang="ts">
-import { defineClientComponent } from 'vitepress';
-
+import { defineClientComponent } from "vitepress";
 
 const HylimoEditor = defineClientComponent(() => import("./HylimoEditor.vue"));
 
@@ -14,8 +13,7 @@ defineProps({
         type: String,
         required: true
     }
-})
-
+});
 </script>
 <style scoped>
 .wrapper {

@@ -9,15 +9,14 @@ import { roundToPrecision } from "../../util/roundToPrecision.js";
 export const rotationHandler: EditHandler<RotateEdit> = {
     type: DefaultEditTypes.ROTATE,
 
-    predictActionDiff(layoutedDiagram, lastApplied, newest, elements) {
+    predictActionDiff(lastApplied, newest, elements) {
         const updates: IncrementalUpdate[] = [];
         for (const element of elements) {
             if (CanvasElement.isCanvasElement(element)) {
-                element.rotation = newest.rotation;
                 updates.push({
                     target: element.id,
                     changes: {
-                        rotation: element.rotation
+                        rotation: newest.rotation
                     }
                 });
             }

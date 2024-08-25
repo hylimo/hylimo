@@ -190,9 +190,13 @@ export const listModule = InterpreterModule.create(
                         docs: "Filters a list to a new list, with the order being preserved",
                         params: [
                             [SemanticFieldNames.SELF, "the list on which all fields are filtered", listType()],
-                            [0, "the callback, called with two positional parameters (value and index)", functionType]
+                            [
+                                0,
+                                "the predicate whether to keep the entry, called with the two positional parameters value and index",
+                                functionType
+                            ]
                         ],
-                        returns: "The resulting new list."
+                        returns: "The resulting new list"
                     }
                 )
             ),

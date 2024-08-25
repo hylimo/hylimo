@@ -9,18 +9,16 @@ import { roundToPrecision } from "../../util/roundToPrecision.js";
 export const resizeHeight: EditHandler<ResizeEdit> = {
     type: DefaultEditTypes.RESIZE_HEIGHT,
 
-    predictActionDiff(layoutedDiagram, lastApplied, newest, elements) {
+    predictActionDiff(lastApplied, newest, elements) {
         const updates: IncrementalUpdate[] = [];
         for (const element of elements) {
             if (CanvasElement.isCanvasElement(element)) {
-                const sizeToPos = element.height / element.y;
-                element.height = newest.height!;
-                element.y = element.height / sizeToPos;
                 updates.push({
                     target: element.id,
                     changes: {
-                        height: element.height,
-                        y: element.y
+                        height: newest.height,
+                        // scale the relative y position according to the new height
+                        y: (newest.height! / element.height) * element.y
                     }
                 });
             }

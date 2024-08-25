@@ -1,4 +1,4 @@
 declare module "pdfkit/js/pdfkit.standalone.js" {
-    var doc: PDFKit.PDFDocument;
+    const doc: PDFKit.PDFDocument;
     export = doc;
 }
