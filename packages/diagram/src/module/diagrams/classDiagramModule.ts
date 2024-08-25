@@ -232,7 +232,7 @@ const scopeExpressions: ExecutableExpression[] = [
                         Enum literals can be provided both as identifiers and as strings.
                         Example: \`ENUM_ENTRY\`
                     `,
-                    params: [[0, "the function which defines the enum literals", functionType]],
+                    params: [[0, "the function whose expressions will be used as enum literals", functionType]],
                     returns: "null"
                 }
             )
