@@ -40,7 +40,7 @@ export const wrapperModule = InterpreterModule.create(
                     {
                         docs: "Compares self to another value, returns true if they are the same.",
                         params: [
-                            [SemanticFieldNames.SELF, "one value for the comparison"],
+                            [SemanticFieldNames.SELF, "first value for the comparison"],
                             [0, "other value for the comparison"]
                         ],
                         returns: "true iff both values are the same"

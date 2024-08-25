@@ -8,10 +8,10 @@ export class AddEditEngine extends EditEngine {
     /**
      * Creates a new add edit engine
      *
-     * @param start the start of the edit
-     * @param end the end of the edit
+     * @param start the start of the range to replace, inclusive
+     * @param end the end of the range to replace, exclusive
      * @param templates the templates for all expressions to add
-     * @param indentation the indentation to use
+     * @param indentation the indentation of the function itself, without the increased indentation for the body
      */
     constructor(
         start: number,
@@ -22,12 +22,6 @@ export class AddEditEngine extends EditEngine {
         super(start, end);
     }
 
-    /**
-     * Evaluate the templates and generates the addment string
-     *
-     * @param values the variables to apply to each template
-     * @returns the generated string
-     */
     override async apply(values: Record<string, any>[]): Promise<string> {
         const newlineWithIndentation = "\n" + this.indentation;
         const evaluatedTemplates = await Promise.all(
@@ -35,7 +29,10 @@ export class AddEditEngine extends EditEngine {
                 return await evaluateTemplate(template.template, values[template.valuesIndex], this.indentation);
             })
         );
-        const value = newlineWithIndentation + evaluatedTemplates.join(newlineWithIndentation);
-        return value.replace(/\n/g, "\n" + " ".repeat(4)) + newlineWithIndentation + "}";
+        // join the expressions with a newline and the current indentation
+        const expressions = newlineWithIndentation + evaluatedTemplates.join(newlineWithIndentation);
+        // increase the indentation as these are in the body of the function
+        const indentedExpressions = expressions.replace(/\n/g, "\n" + " ".repeat(4));
+        return indentedExpressions + newlineWithIndentation + "}";
     }
 }

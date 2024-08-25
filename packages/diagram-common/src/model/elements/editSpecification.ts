@@ -12,7 +12,7 @@ export interface EditSpecification {
 
 /**
  * Template entry for a edit specification
- * Can be a template string, or a range in the original document with the segnal [start, end]
+ * Can be a template string, or a range in the original document with the signature [start, end]
  */
 export type TemplateEntry = string | { range: [number, number] };
 

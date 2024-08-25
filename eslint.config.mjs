@@ -4,12 +4,15 @@ import prettierRecommended from "eslint-plugin-prettier/recommended";
 import eslint from "@eslint/js";
 
 export default tseslint.config(
+    {
+        ignores: ["packages/*/lib/", "website/.vitepress/dist/", "website/.vitepress/cache/"]
+    },
     eslint.configs.recommended,
     prettierRecommended,
     ...tseslint.configs.recommended,
     {
         plugins: {
-            prettier,
+            prettier
         },
         rules: {
             "prettier/prettier": "error",
@@ -18,11 +21,14 @@ export default tseslint.config(
             "@typescript-eslint/no-non-null-assertion": "off",
             "@typescript-eslint/no-namespace": "off",
 
-            "@typescript-eslint/no-unused-vars": ["error", {
-                argsIgnorePattern: "^_",
-            }],
+            "@typescript-eslint/no-unused-vars": [
+                "error",
+                {
+                    argsIgnorePattern: "^_"
+                }
+            ],
 
-            "no-async-promise-executor": "off",
-        },
+            "no-async-promise-executor": "off"
+        }
     }
-)
+);

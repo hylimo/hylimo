@@ -9,15 +9,14 @@ import { roundToPrecision } from "../../util/roundToPrecision.js";
 export const axisAlignedSegmentPosHandler: EditHandler<AxisAlignedSegmentEdit> = {
     type: DefaultEditTypes.AXIS_ALIGNED_SEGMENT_POS,
 
-    predictActionDiff(layoutedDiagram, lastApplied, newest, elements) {
+    predictActionDiff(lastApplied, newest, elements) {
         const updates: IncrementalUpdate[] = [];
         for (const element of elements) {
             if (CanvasAxisAlignedSegment.isCanvasAxisAlignedSegment(element)) {
-                element.pos = newest.pos;
                 updates.push({
                     target: element.id,
                     changes: {
-                        pos: element.pos
+                        pos: newest.pos
                     }
                 });
             }

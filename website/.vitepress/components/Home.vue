@@ -119,7 +119,9 @@ onBeforeMount(() => {
     font-size: 14px;
     font-weight: 500;
     color: var(--vp-c-text-1);
-    transition: background-color 0.25s, color 0.25s;
+    transition:
+        background-color 0.25s,
+        color 0.25s;
 }
 
 .menu-button:hover {

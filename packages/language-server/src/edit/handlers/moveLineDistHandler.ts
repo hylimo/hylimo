@@ -9,15 +9,14 @@ import { roundToPrecision } from "../../util/roundToPrecision.js";
 export const moveLineDistHandler: EditHandler<MoveLposEdit> = {
     type: DefaultEditTypes.MOVE_LPOS_DIST,
 
-    predictActionDiff(layoutedDiagram, lastApplied, newest, elements) {
+    predictActionDiff(lastApplied, newest, elements) {
         const updates: IncrementalUpdate[] = [];
         for (const element of elements) {
             if (LinePoint.isLinePoint(element)) {
-                element.distance = newest.dist;
                 updates.push({
                     target: element.id,
                     changes: {
-                        distance: element.distance
+                        distance: newest.dist
                     }
                 });
             }
