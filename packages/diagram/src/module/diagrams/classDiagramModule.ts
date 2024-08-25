@@ -3,6 +3,7 @@ import {
     assign,
     ExecutableConstExpression,
     ExecutableExpression,
+    ExecutableNumberLiteralExpression,
     Expression,
     fun,
     FunctionObject,
@@ -109,12 +110,26 @@ function convertFieldsAndFunctions(expressions: Expression[]): [string[], string
 }
 
 /**
+ * Converts the given expressions to enum literals
+ *
+ * @param expressions the expressions to convert
+ * @returns the enum literals
+ */
+function convertEnumLiterals(expressions: Expression[]): string[] {
+    const literals: string[] = [];
+    for (const expression of expressions) {
+        literals.push(convertStringOrIdentifier(expression));
+    }
+    return literals;
+}
+
+/**
  * Expressions for the callback provided to generateDiagramEnvironment
  */
 const scopeExpressions: ExecutableExpression[] = [
     assign(scope, id(SemanticFieldNames.IT)),
     assign(
-        "_classEntryScopeGenerator",
+        "_classifierEntryScopeGenerator",
         fun([
             ...parse(
                 `
@@ -143,14 +158,13 @@ const scopeExpressions: ExecutableExpression[] = [
                                     })),
                                     {
                                         name: "section",
-                                        value: new ExecutableConstExpression({ value: context.newNumber(index) })
+                                        value: new ExecutableNumberLiteralExpression(undefined, index)
                                     }
                                 ],
                                 context
                             );
                         }
                     }
-
                     addEntriesToScope(fields, 0);
                     addEntriesToScope(functions, 1);
 
@@ -169,6 +183,56 @@ const scopeExpressions: ExecutableExpression[] = [
                         Example: \`point(x : int, y : int) : Point\`
                     `,
                     params: [[0, "the function which defines the fields and functions", functionType]],
+                    returns: "null"
+                }
+            )
+        ])
+    ),
+    assign(
+        "_literalsScopeGenerator",
+        fun([
+            ...parse(
+                `
+                    (scope) = args
+                `
+            ),
+            jsFun(
+                (args, context) => {
+                    const scopeFunction = args.getLocalFieldOrUndefined(0)!.value;
+                    if (!(scopeFunction instanceof FunctionObject)) {
+                        throw new Error("scope is not a function");
+                    }
+                    const expressions = scopeFunction.definition.expressions.map((expression) => expression.expression);
+                    const scope = context.getField("scope");
+                    const enumLiterals = convertEnumLiterals(expressions);
+
+                    if (enumLiterals.length > 0) {
+                        scope.invoke(
+                            [
+                                ...enumLiterals.map((entry) => ({
+                                    value: new ExecutableConstExpression({
+                                        value: context.newString(entry)
+                                    })
+                                })),
+                                {
+                                    name: "section",
+                                    value: new ExecutableNumberLiteralExpression(undefined, 2)
+                                }
+                            ],
+                            context
+                        );
+                    }
+
+                    return context.null;
+                },
+                {
+                    docs: `
+                        Function to take a function in which enum literals can be declared declaratively.
+                        The content of the function is not executed, but analyzed on the AST level.
+                        Enum literals can be provided both as identifiers and as strings.
+                        Example: \`ENUM_ENTRY\`
+                    `,
+                    params: [[0, "the function whose expressions will be used as enum literals", functionType]],
                     returns: "null"
                 }
             )
@@ -259,7 +323,7 @@ const scopeExpressions: ExecutableExpression[] = [
         )
     ),
     assign(
-        "_class",
+        "_classifier",
         fun(
             `
                 (name, optionalCallback, keywords, abstract) = args
@@ -272,25 +336,34 @@ const scopeExpressions: ExecutableExpression[] = [
                         result.sections += newSection
                     } {
                         while { result.sections.length <= sectionIndex } {
-                            result.sections += list()
+                            result.sections += null
+                        }
+                        if(result.sections.get(sectionIndex) == null) {
+                            result.sections.set(sectionIndex, list())
                         }
                         result.sections.get(sectionIndex).addAll(newSection)
                     }
                 }
-                result.public = _classEntryScopeGenerator("+ ", result.section)
-                result.protected = _classEntryScopeGenerator("# ", result.section)
-                result.private = _classEntryScopeGenerator("- ", result.section)
-                result.package = _classEntryScopeGenerator("~ ", result.section)
-                result.default = _classEntryScopeGenerator("", result.section)
+                result.public = _classifierEntryScopeGenerator("+ ", result.section)
+                result.protected = _classifierEntryScopeGenerator("# ", result.section)
+                result.private = _classifierEntryScopeGenerator("- ", result.section)
+                result.package = _classifierEntryScopeGenerator("~ ", result.section)
+                result.default = _classifierEntryScopeGenerator("", result.section)
+                if(args.hasEntries == true) {
+                    result.entries = _literalsScopeGenerator(result.section)
+                }
 
                 callback.callWithScope(result)
                 classContents = list()
                 classContents += _title(name, keywords)
 
                 result.sections.forEach {
-                    classContents += path(path = "M 0 0 L 1 0", class = list("separator"))
-                    it.forEach {
-                        classContents += text(contents = list(span(text = it)))
+                    this.section = it
+                    if (section != null) {
+                        classContents += path(path = "M 0 0 L 1 0", class = list("separator"))
+                        section.forEach {
+                            classContents += text(contents = list(span(text = it)))
+                        }
                     }
                 }
 
@@ -501,7 +574,7 @@ const scopeExpressions: ExecutableExpression[] = [
             `
                 (name, callback) = args
                 scope.internal.registerCanvasElement(
-                    _class(name, callback, args.keywords, args.abstract, self = args.self),
+                    _classifier(name, callback, args.keywords, args.abstract, self = args.self),
                     args
                 )
             `,
@@ -528,7 +601,7 @@ const scopeExpressions: ExecutableExpression[] = [
                     keywords.addAll(otherKeywords)
                 }
                 scope.internal.registerCanvasElement(
-                    _class(name, callback, keywords, args.abstract, self = args.self),
+                    _classifier(name, callback, keywords, args.abstract, self = args.self),
                     args
                 )
             `,
@@ -541,6 +614,33 @@ const scopeExpressions: ExecutableExpression[] = [
                 ],
                 snippet: `("$1") {\n    $2\n}`,
                 returns: "The created interface"
+            }
+        )
+    ),
+    id(scope).assignField(
+        "enum",
+        fun(
+            `
+                (name, callback) = args
+                keywords = list("enumeration")
+                otherKeywords = args.keywords
+                if(otherKeywords != null) {
+                    keywords.addAll(otherKeywords)
+                }
+                scope.internal.registerCanvasElement(
+                    _classifier(name, callback, keywords, args.abstract, self = args.self, hasEntries = true),
+                    args
+                )
+            `,
+            {
+                docs: "Creates an enum.",
+                params: [
+                    [0, "the name of the enum", stringType],
+                    [1, "the callback function for the enum", optional(functionType)],
+                    ["keywords", "the keywords of the enum", optional(listType(stringType))]
+                ],
+                snippet: `("$1") {\n    entries {\n        $2\n    }\n}`,
+                returns: "The created enum"
             }
         )
     ),

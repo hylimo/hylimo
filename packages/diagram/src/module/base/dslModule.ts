@@ -8,10 +8,9 @@ import {
     InterpreterModule,
     numberType,
     optional,
-    or,
     parse
 } from "@hylimo/core";
-import { canvasPointType, elementType } from "./types.js";
+import { canvasContentType, elementType } from "./types.js";
 import { CanvasConnection, CanvasElement, DefaultEditTypes } from "@hylimo/diagram-common";
 import { LinePointLayoutConfig } from "../../layout/elements/canvas/linePointLayoutConfig.js";
 
@@ -365,8 +364,8 @@ const scopeExpressions: ExecutableExpression[] = [
             {
                 docs: "Helper which creates a CanvasConnection between two elements",
                 params: [
-                    [0, "the start element", or(canvasPointType, elementType(CanvasElement.TYPE))],
-                    [1, "the end element", or(canvasPointType, elementType(CanvasElement.TYPE))]
+                    [0, "the start element", canvasContentType],
+                    [1, "the end element", canvasContentType]
                 ],
                 returns: "The created CanvasConnection"
             }
