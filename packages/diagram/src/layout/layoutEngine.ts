@@ -1,4 +1,5 @@
 import {
+    AbstractInvocationExpression,
     assertNumber,
     assertObject,
     assertWrapperObject,
@@ -10,6 +11,8 @@ import {
     isString,
     isWrapperObject,
     nativeToList,
+    ParenthesisExpressionMetadata,
+    Range,
     SemanticFieldNames
 } from "@hylimo/core";
 import { assertString } from "@hylimo/core";
@@ -20,7 +23,10 @@ import {
     Stroke,
     EditSpecification,
     TemplateEntry,
-    EditSpecificationEntry
+    EditSpecificationEntry,
+    ReplaceEditSpecificationEntry,
+    AddEditSpecificationEntry,
+    AddArgEditSpecificationEntry
 } from "@hylimo/diagram-common";
 import { FontManager } from "../font/fontManager.js";
 import { TextLayoutResult, TextLayouter } from "../font/textLayouter.js";
@@ -583,7 +589,7 @@ export class Layout {
                 const template = value.getLocalFieldOrUndefined("template")!.value;
                 const parsedTemplate: TemplateEntry[] = this.parseTemplate(template);
                 const target = value.getLocalFieldOrUndefined("target")!.value;
-                res[key] = this.generateEditSpecificationEntry(target, type, parsedTemplate);
+                res[key] = this.generateEditSpecificationEntry(target, type, parsedTemplate, value);
             }
         }
         return res;
@@ -627,7 +633,8 @@ export class Layout {
     private generateEditSpecificationEntry(
         target: BaseObject,
         type: string,
-        parsedTemplate: TemplateEntry[]
+        parsedTemplate: TemplateEntry[],
+        value: FullObject
     ): EditSpecificationEntry {
         assertWrapperObject(target);
         const targetExpression = target.wrapped as Expression;
@@ -646,13 +653,57 @@ export class Layout {
                 range: [rangeStart, targetExpression.range[1]],
                 functionRange: targetExpression.range,
                 template: parsedTemplate
-            };
+            } satisfies AddEditSpecificationEntry;
+        } else if (type == "add-arg") {
+            const key = value.getLocalFieldOrUndefined("key")?.value?.toNative();
+            if (typeof key !== "string" && typeof key !== "number") {
+                throw new Error("Key must be a string or number");
+            }
+            if (!(targetExpression instanceof AbstractInvocationExpression)) {
+                throw new Error("Target must be an invocation expression");
+            }
+            const listEntries = targetExpression.innerArgumentExpressions;
+            let targetPos = -1;
+            if (typeof key === "string") {
+                targetPos = listEntries.length;
+            } else {
+                let foundIndexArgs = 0;
+                while (targetPos < listEntries.length && foundIndexArgs < key) {
+                    if (listEntries[targetPos].name != undefined) {
+                        foundIndexArgs++;
+                    }
+                    targetPos++;
+                }
+            }
+            // TODO more extensive validation
+            const parenthesisRange = (targetExpression.metadata as ParenthesisExpressionMetadata).parenthesisRange;
+            let range: Range;
+            if (targetPos < 0) {
+                if (listEntries.length === 0) {
+                    range = parenthesisRange;
+                } else {
+                    range = [parenthesisRange[0], listEntries[0].value.range[0]];
+                }
+            } else if (targetPos >= listEntries.length) {
+                range = [listEntries.at(-1)!.value.range[1], parenthesisRange[1]];
+            } else {
+                range = [listEntries[targetPos].value.range[0], listEntries[targetPos].value.range[1]];
+            }
+            return {
+                type,
+                key,
+                template: parsedTemplate,
+                range,
+                listRange: parenthesisRange,
+                isFirst: targetPos < 0,
+                isLast: targetPos >= listEntries.length
+            } satisfies AddArgEditSpecificationEntry;
         } else if (type === "replace") {
             return {
                 type,
                 range: targetExpression.range,
                 template: parsedTemplate
-            };
+            } satisfies ReplaceEditSpecificationEntry;
         } else {
             throw new Error(`Unknown type ${type}`);
         }

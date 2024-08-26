@@ -1,4 +1,4 @@
-import { ExpressionMetadata } from "./expressionMetadata.js";
+import { ParenthesisExpressionMetadata } from "./expressionMetadata.js";
 import { Expression } from "./expression.js";
 import { AbstractInvocationExpression } from "./abstractInvocationExpression.js";
 import { ListEntry } from "./listEntry.js";
@@ -26,15 +26,17 @@ export class InvocationExpression extends AbstractInvocationExpression {
      * and a set of optionally named expressions as arguments
      *
      * @param target evaluated to provide the function to invoke
-     * @param argumentExpressions evaluated to provide arguments
+     * @param innerArgumentExpressions the inner argument expressions (inside the parentheses)
+     * @param trailingArgumentExpressions the trailing argument expressions (functions after the parentheses)
      * @param metadata metadata for the expression
      */
     constructor(
         readonly target: Expression,
-        argumentExpressions: ListEntry[],
-        metadata: ExpressionMetadata
+        innerArgumentExpressions: ListEntry[],
+        trailingArgumentExpressions: ListEntry[],
+        metadata: ParenthesisExpressionMetadata
     ) {
-        super(argumentExpressions, InvocationExpression.TYPE, metadata);
+        super(innerArgumentExpressions, trailingArgumentExpressions, InvocationExpression.TYPE, metadata);
     }
 
     protected override markNoEditInternal(): void {

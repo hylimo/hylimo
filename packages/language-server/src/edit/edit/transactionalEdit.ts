@@ -12,7 +12,7 @@ import {
     TextDocumentContentChangeEvent
 } from "vscode-languageserver";
 import { parseTemplate } from "./template.js";
-import { groupBy } from "@hylimo/diagram-common";
+import { AddArgEditSpecificationEntry, groupBy } from "@hylimo/diagram-common";
 import { AddEditEngine } from "./addEditEngine.js";
 import {
     AddEditSpecificationEntry,
@@ -21,6 +21,7 @@ import {
     EditSpecificationEntry
 } from "@hylimo/diagram-common";
 import { EditHandlerRegistry } from "../handlers/editHandlerRegistry.js";
+import { AddArgEditEngine } from "./addArgEditEngine.js";
 
 /**
  * Transaction edit handling transaction actions
@@ -215,6 +216,7 @@ export class TransactionalEdit {
         edits.sort((a, b) => a.spec.range[0] - b.spec.range[0]);
         this.generateReplaceEdits(edits, textDocument);
         this.generateAddEdits(edits, textDocument);
+        this.generateAddArgEdits(edits, textDocument);
     }
 
     /**
@@ -224,7 +226,7 @@ export class TransactionalEdit {
      * @param textDocument the text document to use
      */
     private generateReplaceEdits(edits: IndexedModificationSpecificationEntry[], textDocument: TextDocument) {
-        const replaceEdits = edits.filter((e) => e.spec.type === "replace");
+        const replaceEdits = edits.filter((e) => IndexedModificationSpecificationEntry.is(e, "replace"));
         for (let i = 0; i < replaceEdits.length; i++) {
             const edit = replaceEdits[i];
             if (i > 0) {
@@ -241,8 +243,7 @@ export class TransactionalEdit {
             const parsedTemplate = parseTemplate(edit.spec.template, textDocument);
             this.engines.push(
                 new ReplaceEditEngine(
-                    edit.spec.range[0],
-                    edit.spec.range[1],
+                    ...edit.spec.range,
                     { template: parsedTemplate, valuesIndex: edit.index },
                     indentation
                 )
@@ -257,12 +258,12 @@ export class TransactionalEdit {
      * @param textDocument the text document to use
      */
     private generateAddEdits(edits: IndexedModificationSpecificationEntry[], textDocument: TextDocument) {
-        const addEdits = edits.filter((e) => e.spec.type === "add");
+        const addEdits = edits.filter((e) => IndexedModificationSpecificationEntry.is(e, "add"));
         for (const edits of groupBy(addEdits, (edit) => edit.spec.range[0]).values()) {
             const uniqueEdits = [
                 ...new Map(edits.map((edit) => [`${edit.index} ${edit.spec.template}`, edit] as const)).values()
             ];
-            const firstSpec = uniqueEdits[0].spec as AddEditSpecificationEntry;
+            const firstSpec = uniqueEdits[0].spec;
             const indentation = this.extractIndentation(textDocument, firstSpec.range[1]);
             this.generateAddInitialEdit(textDocument, firstSpec, indentation);
             const parsedTemplates = uniqueEdits.map((edit) => {
@@ -271,9 +272,7 @@ export class TransactionalEdit {
                     valuesIndex: edit.index
                 };
             });
-            this.engines.push(
-                new AddEditEngine(edits[0].spec.range[0], edits[0].spec.range[1], parsedTemplates, indentation)
-            );
+            this.engines.push(new AddEditEngine(...firstSpec.range, parsedTemplates, indentation));
         }
     }
 
@@ -311,6 +310,74 @@ export class TransactionalEdit {
     }
 
     /**
+     * Generates add list entry edit engines for the given edits
+     *
+     * @param edits the sorted edits to generate engines for
+     * @param textDocument the text document to use
+     */
+    private generateAddArgEdits(edits: IndexedModificationSpecificationEntry[], textDocument: TextDocument) {
+        const addEdits = edits.filter((e) => IndexedModificationSpecificationEntry.is(e, "add-arg"));
+        for (const edits of groupBy(addEdits, (edit) => edit.spec.range[0]).values()) {
+            const sortedEdits = this.computeSortedUniqueAddArgEdits(edits);
+            const firstSpec = sortedEdits[0].spec;
+            const indentation = this.extractIndentation(textDocument, firstSpec.listRange[0]);
+            const parsedTemplates = sortedEdits.map((edit) => {
+                const key = edit.spec.key;
+                return {
+                    template: parseTemplate(edit.spec.template, textDocument),
+                    valuesIndex: edit.index,
+                    key: typeof key === "string" ? key : undefined
+                };
+            });
+            const isMultiline =
+                textDocument.positionAt(firstSpec.listRange[0]).line !==
+                textDocument.positionAt(firstSpec.listRange[1]).line;
+            this.engines.push(
+                new AddArgEditEngine(
+                    ...firstSpec.range,
+                    parsedTemplates,
+                    indentation,
+                    isMultiline,
+                    firstSpec.isFirst,
+                    firstSpec.isLast
+                )
+            );
+        }
+    }
+
+    /**
+     * Computes the sorted unique add list entry edits
+     * Removes duplicates (same index, key and template) and sorts the edits with numeric keys
+     *
+     * @param edits the edits to filter and sort
+     * @returns the sorted unique add list entry edits
+     */
+    private computeSortedUniqueAddArgEdits(
+        edits: IndexedModificationSpecificationEntry<AddArgEditSpecificationEntry>[]
+    ): IndexedModificationSpecificationEntry<AddArgEditSpecificationEntry>[] {
+        const uniqueEdits = [
+            ...new Map(
+                edits.map((edit) => {
+                    const spec = edit.spec;
+                    return [`${edit.index} ${spec.key} ${spec.template}`, edit] as const;
+                })
+            ).values()
+        ];
+        const namedEdits = [];
+        const indexedEdits = [];
+        for (const edit of uniqueEdits) {
+            if (typeof edit.spec.key === "string") {
+                namedEdits.push(edit);
+            } else {
+                indexedEdits.push(edit);
+            }
+        }
+        indexedEdits.sort((a, b) => (a.spec.key as number) - (b.spec.key as number));
+        const sortedEdits = [...indexedEdits, ...namedEdits];
+        return sortedEdits;
+    }
+
+    /**
      * Extracts the indentation of the given line and returns it as a string.
      *
      * @param document the document from whicht to extract the line
@@ -331,8 +398,32 @@ export class TransactionalEdit {
 
 /**
  * Modification specification entry with an index
+ *
+ * @param T the type of the specification
  */
-interface IndexedModificationSpecificationEntry {
+interface IndexedModificationSpecificationEntry<T extends EditSpecificationEntry = EditSpecificationEntry> {
+    /**
+     * The index of the used values when evaluating the template
+     */
     index: number;
-    spec: EditSpecificationEntry;
+    /**
+     * The edit specification entry
+     */
+    spec: T;
+}
+
+namespace IndexedModificationSpecificationEntry {
+    /**
+     * Checks if the provided entry is of the given type
+     *
+     * @param entry the entry to check
+     * @param type the type to check for
+     * @returns true if the entry is of the given type
+     */
+    export function is<K extends EditSpecificationEntry["type"]>(
+        entry: IndexedModificationSpecificationEntry,
+        type: K
+    ): entry is IndexedModificationSpecificationEntry<EditSpecificationEntry & { type: K }> {
+        return entry.spec.type === type;
+    }
 }

@@ -11,6 +11,7 @@ import { InterpreterContext } from "../interpreter/interpreterContext.js";
 import { SemanticFieldNames } from "../semanticFieldNames.js";
 import { BaseObject, FieldEntry, SimpleObject } from "./baseObject.js";
 import { FullObject } from "./fullObject.js";
+import { OperatorExpression } from "../../ast/operatorExpression.js";
 
 /**
  * Base class for js functions and normal functions
@@ -146,7 +147,7 @@ export class FunctionObject extends AbstractFunctionObject<ExecutableFunctionExp
         args: ExecutableListEntry[],
         context: InterpreterContext,
         scope?: FullObject,
-        callExpression?: AbstractInvocationExpression
+        callExpression?: AbstractInvocationExpression | OperatorExpression
     ): FieldEntry {
         context.nextStep();
         const oldScope = context.currentScope;
@@ -198,7 +199,7 @@ export class NativeFunctionObject extends AbstractFunctionObject<ExecutableNativ
         args: ExecutableListEntry[],
         context: InterpreterContext,
         _scope?: FullObject,
-        callExpression?: AbstractInvocationExpression
+        callExpression?: AbstractInvocationExpression | OperatorExpression
     ): FieldEntry {
         context.nextStep();
         const res = this.definition.callback(args, context, this.parentScope, callExpression);

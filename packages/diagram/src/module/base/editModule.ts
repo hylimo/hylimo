@@ -1,4 +1,5 @@
 import {
+    AbstractInvocationExpression,
     assertString,
     assign,
     BaseObject,
@@ -26,7 +27,7 @@ import {
 function generateEdit(
     target: Expression<any>,
     template: FieldEntry,
-    type: "replace" | "add",
+    type: "replace" | "add" | "add-arg",
     context: InterpreterContext
 ): BaseObject {
     const edit = context.newObject();
@@ -37,7 +38,7 @@ function generateEdit(
 }
 
 /**
- * Geneates an replace edit
+ * Generates an replace edit
  *
  * @param target the target to replace
  * @param template the template to replace the target with
@@ -51,6 +52,25 @@ function generateReplaceEdit(target: Expression<any>, template: BaseObject[], co
         templateObject.setLocalField(index, { value: field }, context);
     });
     return generateEdit(target, { value: templateObject }, "replace", context);
+}
+
+/**
+ * Generates an add arg edit
+ *
+ * @param target the target invocation expression where the argument should be added
+ * @param template the template to add as argument
+ * @param key the key of the argument
+ * @param context the interpreter context
+ */
+function generateAddArgEdit(
+    target: AbstractInvocationExpression,
+    template: FieldEntry,
+    key: FieldEntry,
+    context: InterpreterContext
+): BaseObject {
+    const edit = generateEdit(target, template, "add-arg", context);
+    edit.setLocalField("key", key, context);
+    return edit;
 }
 
 /**
@@ -98,6 +118,29 @@ export const editModule = InterpreterModule.create(
                     params: [
                         [0, "the target to add to"],
                         [1, "the template to add"]
+                    ],
+                    returns: "the created edit or null if the target is not editable"
+                }
+            )
+        ),
+        assign(
+            "createAddArgEdit",
+            jsFun(
+                (args, context) => {
+                    const target = args.getFieldEntry(0, context).source;
+                    if (!(target instanceof AbstractInvocationExpression) || !target.metadata.isEditable) {
+                        return context.null;
+                    }
+                    const template = args.getFieldEntry(2, context);
+                    const key = args.getFieldEntry(1, context);
+                    return generateAddArgEdit(target, template, key, context);
+                },
+                {
+                    docs: "Creates an add argument edit",
+                    params: [
+                        [0, "the target invocation expression where the argument should be added"],
+                        [1, "the key of the argument"],
+                        [2, "the template to add as argument"]
                     ],
                     returns: "the created edit or null if the target is not editable"
                 }

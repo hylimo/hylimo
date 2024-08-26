@@ -23,16 +23,15 @@ export class AddEditEngine extends EditEngine {
     }
 
     override async apply(values: Record<string, any>[]): Promise<string> {
-        const newlineWithIndentation = "\n" + this.indentation;
+        const increasedIndentation = this.indentation + " ".repeat(4);
+        const newlineWithIndentation = "\n" + increasedIndentation;
         const evaluatedTemplates = await Promise.all(
             this.templates.map(async (template) => {
-                return await evaluateTemplate(template.template, values[template.valuesIndex], this.indentation);
+                return await evaluateTemplate(template.template, values[template.valuesIndex], increasedIndentation);
             })
         );
-        // join the expressions with a newline and the current indentation
+        // join the expressions with a newline and the increased indentation
         const expressions = newlineWithIndentation + evaluatedTemplates.join(newlineWithIndentation);
-        // increase the indentation as these are in the body of the function
-        const indentedExpressions = expressions.replace(/\n/g, "\n" + " ".repeat(4));
-        return indentedExpressions + newlineWithIndentation + "}";
+        return expressions + "\n" + this.indentation + "}";
     }
 }

@@ -1,6 +1,6 @@
 import { CstNode, CstParser, ICstVisitor, ILexingError, IRecognitionException, IToken, Lexer } from "chevrotain";
 import { Expression } from "../ast/expression.js";
-import { ASTExpressionPosition } from "../ast/astExpressionPosition.js";
+import { Range } from "../ast/range.js";
 import { generateCstToAstTransfromer } from "./cstToAstTransformer.js";
 import {
     CloseCurlyBracket,
@@ -52,7 +52,7 @@ export interface CstResult {
     /**
      * Errors during parsing
      */
-    parserErrors: (IRecognitionException & { position: ASTExpressionPosition })[];
+    parserErrors: (IRecognitionException & { range: Range })[];
     /**
      * Resulting CST
      */
@@ -474,14 +474,7 @@ export class Parser extends CstParser {
                 token: error.token,
                 resyncedTokens: error.resyncedTokens,
                 context: error.context,
-                position: {
-                    startOffset: error.token.startOffset,
-                    endOffset: error.token.endOffset! + 1,
-                    startLine: error.token.startLine! - 1,
-                    endLine: error.token.endLine! - 1,
-                    startColumn: error.token.startColumn! - 1,
-                    endColumn: error.token.endColumn!
-                }
+                range: [error.token.startOffset, error.token.endOffset! + 1]
             })),
             cst: result,
             ast: ast

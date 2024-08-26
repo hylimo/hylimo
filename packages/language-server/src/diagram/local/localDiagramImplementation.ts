@@ -1,5 +1,13 @@
 import { LayoutedDiagram, RenderErrors } from "@hylimo/diagram";
-import { Diagnostic, DiagnosticSeverity, uinteger, Range, CompletionItem, Position } from "vscode-languageserver";
+import {
+    Diagnostic,
+    DiagnosticSeverity,
+    uinteger,
+    Range,
+    CompletionItem,
+    Position,
+    TextEdit
+} from "vscode-languageserver";
 import { TextDocument } from "vscode-languageserver-textdocument";
 import { DiagramImplementation, DiagramUpdateResult } from "../diagramImplementation.js";
 import { SharedDiagramUtils } from "../../sharedDiagramUtils.js";
@@ -65,10 +73,10 @@ export class LocalDiagramImplementation extends DiagramImplementation {
      * @returns the created diagnostic item
      */
     private convertParserError(error: RenderErrors["parserErrors"][0]) {
-        const pos = error.position;
+        const range = error.range;
         let location: Range;
         if (!Number.isNaN(error.token.startLine)) {
-            location = Range.create(pos.startLine, pos.startColumn, pos.endLine, pos.endColumn);
+            location = this.convertRange(range);
         } else {
             location = Range.create(0, 0, uinteger.MAX_VALUE, uinteger.MAX_VALUE);
         }
@@ -87,14 +95,10 @@ export class LocalDiagramImplementation extends DiagramImplementation {
         console.error(error.interpretationStack);
         /* eslint-enable no-console */
         //TODO do sth else with error
-        const pos = error.findFirstPosition();
+        const range = error.findFirstRange();
         const message = error.message || "[no message provided]";
-        if (pos != undefined) {
-            return Diagnostic.create(
-                Range.create(pos.startLine, pos.startColumn, pos.endLine, pos.endColumn),
-                message,
-                DiagnosticSeverity.Error
-            );
+        if (range != undefined) {
+            return Diagnostic.create(this.convertRange(range), message, DiagnosticSeverity.Error);
         } else {
             return Diagnostic.create(
                 Range.create(0, 0, uinteger.MAX_VALUE, uinteger.MAX_VALUE),
@@ -129,7 +133,12 @@ export class LocalDiagramImplementation extends DiagramImplementation {
             this.utils.diagramEngine.convertConfig(config),
             this.document.offsetAt(position)
         );
-        return items;
+        return items?.map((item) => {
+            return {
+                ...item,
+                textEdit: TextEdit.replace(this.convertRange(item.textEdit.range), item.textEdit.text)
+            };
+        });
     }
 
     override async getSourceRange(element: string): Promise<Range | undefined> {
@@ -147,5 +156,19 @@ export class LocalDiagramImplementation extends DiagramImplementation {
             targetElement = targetElement?.parent;
         }
         return undefined;
+    }
+
+    /**
+     * Converts an AST range to a LSP range
+     *
+     * @param range the range to convert
+     * @returns the converted range
+     */
+    private convertRange(range: [number, number]): Range {
+        if (this.document == undefined) {
+            throw new Error("Document not set");
+        }
+        const [start, end] = range;
+        return Range.create(this.document.positionAt(start), this.document.positionAt(end));
     }
 }

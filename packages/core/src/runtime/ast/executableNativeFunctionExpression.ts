@@ -1,4 +1,5 @@
 import { AbstractInvocationExpression } from "../../ast/abstractInvocationExpression.js";
+import { OperatorExpression } from "../../ast/operatorExpression.js";
 import { InterpreterContext } from "../interpreter/interpreterContext.js";
 import { FieldEntry } from "../objects/baseObject.js";
 import { FullObject } from "../objects/fullObject.js";
@@ -13,7 +14,7 @@ export type NativeFunctionType = (
     args: ExecutableListEntry[],
     context: InterpreterContext,
     staticScope: FullObject,
-    callExpression: AbstractInvocationExpression | undefined
+    callExpression: AbstractInvocationExpression | OperatorExpression | undefined
 ) => FieldEntry;
 
 /**

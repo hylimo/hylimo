@@ -1,4 +1,4 @@
-import { CompletionItem } from "vscode-languageserver";
+import { CompletionItem } from "./completionItem.js";
 
 /**
  * An error which aborts the execution of the program and provides the context for completion

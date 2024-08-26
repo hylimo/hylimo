@@ -1,4 +1,4 @@
-import { CompletionExpressionMetadata } from "./expressionMetadata.js";
+import { CompletionExpressionMetadata, ParenthesisExpressionMetadata } from "./expressionMetadata.js";
 import { Expression } from "./expression.js";
 import { AbstractInvocationExpression } from "./abstractInvocationExpression.js";
 import { ListEntry } from "./listEntry.js";
@@ -10,7 +10,9 @@ import { WrapperObject } from "../runtime/objects/wrapperObject.js";
  * Accesses the field name on target, invokes it and provides target as self
  */
 
-export class SelfInvocationExpression extends AbstractInvocationExpression<CompletionExpressionMetadata> {
+export class SelfInvocationExpression extends AbstractInvocationExpression<
+    CompletionExpressionMetadata & ParenthesisExpressionMetadata
+> {
     static readonly TYPE = "SelfInvocationExpression";
 
     private static readonly WRAPPER_ENTRIES = new Map([
@@ -38,16 +40,18 @@ export class SelfInvocationExpression extends AbstractInvocationExpression<Compl
      *
      * @param target evaluated to provide the function to invoke
      * @param name the name or index to access on target
-     * @param argumentExpressions evaluated to provide arguments
+     * @param innerArgumentExpressions the inner argument expressions (inside the parentheses)
+     * @param trailingArgumentExpressions the trailing argument expressions (functions after the parentheses)
      * @param metadata metadata for the expression
      */
     constructor(
         readonly name: string | number,
         readonly target: Expression,
-        argumentExpressions: ListEntry[],
-        metadata: CompletionExpressionMetadata
+        innerArgumentExpressions: ListEntry[],
+        trailingArgumentExpressions: ListEntry[],
+        metadata: CompletionExpressionMetadata & ParenthesisExpressionMetadata
     ) {
-        super(argumentExpressions, SelfInvocationExpression.TYPE, metadata);
+        super(innerArgumentExpressions, trailingArgumentExpressions, SelfInvocationExpression.TYPE, metadata);
     }
 
     protected override markNoEditInternal(): void {

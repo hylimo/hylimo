@@ -1,5 +1,5 @@
 import { ExpressionMetadata } from "./expressionMetadata.js";
-import { ASTExpressionPosition } from "./astExpressionPosition.js";
+import { Range } from "./range.js";
 import { WrapperObject, WrapperObjectFieldRetriever } from "../runtime/objects/wrapperObject.js";
 import { InterpreterContext } from "../runtime/interpreter/interpreterContext.js";
 
@@ -24,17 +24,10 @@ export abstract class Expression<M extends ExpressionMetadata = ExpressionMetada
     }
 
     /**
-     * Getter for the position from the metadata
+     * Getter for the range from the metadata
      */
-    get position(): ASTExpressionPosition {
-        return this.metadata.position;
-    }
-
-    /**
-     * Getter for the range from the position
-     */
-    get range(): [number, number] {
-        return [this.position.startOffset, this.position.endOffset];
+    get range(): Range {
+        return this.metadata.range;
     }
 
     /**

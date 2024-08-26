@@ -16,6 +16,7 @@ import { ExecutableFunctionExpression } from "./ast/executableFunctionExpression
 import { ExecutableNativeExpression } from "./ast/executableNativeExpression.js";
 import { ListEntry } from "../ast/listEntry.js";
 import { FunctionDocumentation } from "./ast/executableAbstractFunctionExpression.js";
+import { OperatorExpression } from "../ast/operatorExpression.js";
 
 /**
  * Helper function to create an IdentifierExpression without a position
@@ -136,7 +137,7 @@ export function jsFun(
     callback: (
         args: FullObject,
         context: InterpreterContext,
-        callExpression: AbstractInvocationExpression | undefined
+        callExpression: AbstractInvocationExpression | OperatorExpression | undefined
     ) => BaseObject | FieldEntry,
     documentation?: FunctionDocumentation
 ): ExecutableNativeFunctionExpression {

@@ -12,15 +12,35 @@ import { DestructuringExpression } from "../ast/destructuringExpression.js";
 import { BracketExpression } from "../ast/bracketExpression.js";
 import { AssignmentExpression } from "../ast/assignmentExpression.js";
 import { Expression } from "../ast/expression.js";
-import { ASTExpressionPosition } from "../ast/astExpressionPosition.js";
+import { Range } from "../ast/range.js";
 import { CompletionExpressionMetadata, ExpressionMetadata } from "../ast/expressionMetadata.js";
 import { Parser } from "./parser.js";
 import { ObjectExpression } from "../ast/objectExpression.js";
+import { OperatorExpression } from "../ast/operatorExpression.js";
+import { NoopExpression } from "../ast/noopExpression.js";
 
 /**
  * Defines a function invocation
  */
-type CallBracketsDefinition = [ListEntry[], ASTExpressionPosition];
+interface CallBracketsDefinition {
+    /**
+     * The inner arguments
+     */
+    inner: ListEntry[];
+    /**
+     * The trailing arguments
+     */
+    trailing: ListEntry[];
+    /**
+     * The end position of the invocation
+     */
+    endPos: Range;
+    /**
+     * The range of the parentheses
+     * Undefined if no parentheses are present
+     */
+    parenthesisRange?: Range;
+}
 
 /**
  * Defines an access with multiple possible call brackets
@@ -31,9 +51,9 @@ interface AccessDefinition {
      */
     identifier: string;
     /**
-     * Position of the identifier
+     * Range of the identifier
      */
-    identifierPosition: ASTExpressionPosition;
+    identifierRange: Range;
     /**
      * Defines applied function invocations (0..n)
      */
@@ -42,43 +62,40 @@ interface AccessDefinition {
 
 export function generateCstToAstTransfromer(parser: Parser): ICstVisitor<never, any> {
     /**
-     * Helper which wraps generatePosition in metadata and optionalPosition.
+     * Helper which wraps generateRange in metadata and optionalRange.
      * Takes the
      * Also returns undefined if start or end is undefined.
      *
-     * @param start the start position
-     * @param end the end position
-     * @returns the combined start and end position or undefined
+     * @param start the start range
+     * @param end the end range
+     * @returns the combined start and end range or undefined
      */
-    function generateMetadata(
-        start: ASTExpressionPosition | IToken,
-        end: ASTExpressionPosition | IToken
-    ): ExpressionMetadata {
-        const position = generatePosition(start, end);
+    function generateMetadata(start: Range | IToken, end: Range | IToken): ExpressionMetadata {
+        const range = generateRange(start, end);
 
         return {
-            position,
+            range: range,
             isEditable: true
         };
     }
 
     /**
-     * Calls generateMetadata. Also adds the completionPosition and identifierPosition based on the provided identifier
+     * Calls generateMetadata. Also adds the completionRange and identifierRange based on the provided identifier
      *
-     * @param start the start position
-     * @param end the end position
-     * @returns the combined start and end position or undefined
+     * @param start the start range
+     * @param end the end range
+     * @returns the combined start and end range or undefined
      */
     function generateCompletionMetadata(
-        start: ASTExpressionPosition | IToken,
-        end: ASTExpressionPosition | IToken,
-        identifierPosition: IToken | ASTExpressionPosition
+        start: Range | IToken,
+        end: Range | IToken,
+        identifierRange: IToken | Range
     ): CompletionExpressionMetadata {
-        const position = generatePosition(identifierPosition, identifierPosition);
+        const range = generateRange(identifierRange, identifierRange);
         return {
             ...generateMetadata(start, end),
-            completionPosition: position,
-            identifierPosition: position
+            completionRange: range,
+            identifierRange: range
         };
     }
 
@@ -167,20 +184,29 @@ export function generateCstToAstTransfromer(parser: Parser): ICstVisitor<never, 
          * Maps the brackets part of a function invocation
          *
          * @param ctx the children of the current CST node
-         * @returns all invocation arguments and the end position of the call expression
+         * @returns all invocation arguments and the end range of the call expression
          */
         private callBrackets(ctx: any): CallBracketsDefinition {
             const normalArguments = (ctx.listEntry ?? []).map((argument: CstNode) => this.visit(argument));
             const functions = (ctx.function ?? []).map((func: CstNode) => ({
                 value: this.visit(func)
             }));
-            let endPosition;
+            let endRange;
             if (functions.length > 0) {
-                endPosition = functions.at(-1).value.position;
+                endRange = functions.at(-1).value.range;
             } else {
-                endPosition = ctx.CloseRoundBracket[0];
+                endRange = ctx.CloseRoundBracket[0];
             }
-            return [[...normalArguments, ...functions], endPosition];
+            let parenthesisRange: Range | undefined = undefined;
+            if (ctx.OpenRoundBracket) {
+                parenthesisRange = generateRange(ctx.OpenRoundBracket[0], ctx.CloseRoundBracket[0]);
+            }
+            return {
+                inner: normalArguments,
+                trailing: functions,
+                endPos: endRange,
+                parenthesisRange
+            };
         }
 
         /**
@@ -221,12 +247,33 @@ export function generateCstToAstTransfromer(parser: Parser): ICstVisitor<never, 
          */
         private applyCallBrackets(baseExpression: Expression, callBrackets: CallBracketsDefinition[]): Expression {
             let expression = baseExpression;
-            const startPos = baseExpression.position;
+            const startPos = baseExpression.range;
+            let currentEndPos = startPos;
             for (let i = 0; i < callBrackets.length; i++) {
-                const [args, endPos] = callBrackets[i];
-                expression = new InvocationExpression(expression, args, generateMetadata(startPos, endPos));
+                const { inner, trailing, endPos } = callBrackets[i];
+                expression = new InvocationExpression(expression, inner, trailing, {
+                    ...generateMetadata(startPos, endPos),
+                    parenthesisRange: this.calculateParenthesisRange(callBrackets[i], currentEndPos)
+                });
+                currentEndPos = endPos;
             }
             return expression;
+        }
+
+        /**
+         * Calculates the range of the parenthesis of a call expression based on the definition
+         * If there are no call brackets, falls back to a length 0 range directly after the target of the call
+         *
+         * @param callBacketsDefinition definition of the call brackets
+         * @param targetRange range of the target of the call
+         * @returns the range of the parenthesis
+         */
+        private calculateParenthesisRange(callBacketsDefinition: CallBracketsDefinition, targetRange: Range): Range {
+            if (callBacketsDefinition.parenthesisRange) {
+                return callBacketsDefinition.parenthesisRange;
+            } else {
+                return [targetRange[1], targetRange[1]];
+            }
         }
 
         /**
@@ -239,7 +286,7 @@ export function generateCstToAstTransfromer(parser: Parser): ICstVisitor<never, 
             const token = ctx.Identifier[0];
             return {
                 identifier: token.image,
-                identifierPosition: generatePosition(token, token),
+                identifierRange: generateRange(token, token),
                 callBrackets: (ctx.callBrackets ?? []).map((brackets: CstNode) => this.visit(brackets))
             };
         }
@@ -266,20 +313,27 @@ export function generateCstToAstTransfromer(parser: Parser): ICstVisitor<never, 
          */
         private fieldAccessExpression(ctx: any): Expression {
             let baseExpression = this.visit(ctx.callExpression);
-            const startPos = baseExpression.position;
+            const startPos = baseExpression.range;
             if (ctx.simpleCallExpression) {
-                const accessDefininitions: AccessDefinition[] = ctx.simpleCallExpression.map((exp: CstNode) =>
+                const accessDefinitions: AccessDefinition[] = ctx.simpleCallExpression.map((exp: CstNode) =>
                     this.visit(exp)
                 );
-                for (const accessDefinition of accessDefininitions) {
+                for (const accessDefinition of accessDefinitions) {
                     if (accessDefinition.callBrackets.length > 0) {
                         const [first, ...remaining] = accessDefinition.callBrackets;
-                        const [args, endPos] = first;
+                        const { inner, trailing, endPos: endRange } = first;
                         baseExpression = new SelfInvocationExpression(
                             accessDefinition.identifier,
                             baseExpression,
-                            args,
-                            generateCompletionMetadata(startPos, endPos, accessDefinition.identifierPosition)
+                            inner,
+                            trailing,
+                            {
+                                ...generateCompletionMetadata(startPos, endRange, accessDefinition.identifierRange),
+                                parenthesisRange: this.calculateParenthesisRange(
+                                    first,
+                                    accessDefinition.identifierRange
+                                )
+                            }
                         );
                         baseExpression = this.applyCallBrackets(baseExpression, remaining);
                     } else {
@@ -288,8 +342,8 @@ export function generateCstToAstTransfromer(parser: Parser): ICstVisitor<never, 
                             baseExpression,
                             generateCompletionMetadata(
                                 startPos,
-                                accessDefinition.identifierPosition,
-                                accessDefinition.identifierPosition
+                                accessDefinition.identifierRange,
+                                accessDefinition.identifierRange
                             )
                         );
                     }
@@ -319,7 +373,7 @@ export function generateCstToAstTransfromer(parser: Parser): ICstVisitor<never, 
                     expression = new FieldAccessExpression(
                         identifier.image,
                         expression,
-                        generateCompletionMetadata(expression.position, identifier, identifier)
+                        generateCompletionMetadata(expression.range, identifier, identifier)
                     );
                 } else {
                     expression = new IdentifierExpression(
@@ -343,18 +397,11 @@ export function generateCstToAstTransfromer(parser: Parser): ICstVisitor<never, 
          * @returns the generated FieldAccessExpression
          */
         private generateFieldAccessExpressionForOnlyDot(baseExpression: Expression, dotToken: IToken): Expression {
-            const dotPosition = generatePosition(dotToken, dotToken);
+            const dotRange = generateRange(dotToken, dotToken);
             return new FieldAccessExpression("", baseExpression, {
-                ...generateMetadata(baseExpression.position, dotToken),
-                completionPosition: dotPosition,
-                identifierPosition: {
-                    startOffset: dotPosition.endOffset,
-                    startLine: dotPosition.endLine,
-                    startColumn: dotPosition.endColumn,
-                    endOffset: dotPosition.endOffset,
-                    endLine: dotPosition.endLine,
-                    endColumn: dotPosition.endColumn
-                }
+                ...generateMetadata(baseExpression.range, dotToken),
+                completionRange: dotRange,
+                identifierRange: [dotRange[1], dotRange[1]]
             });
         }
 
@@ -367,15 +414,16 @@ export function generateCstToAstTransfromer(parser: Parser): ICstVisitor<never, 
         private operatorExpression(ctx: any): Expression {
             const expressions = ctx.fieldAccessExpression.map((exp: CstNode) => this.visit(exp));
             let expression = expressions[0];
-            const startPos = expression.position;
+            const startPos = expression.range;
             const operators = (ctx.simpleFieldAccessExpression ?? []).map((operator: CstNode) => this.visit(operator));
             for (let i = 0; i < operators.length; i++) {
                 const operator = operators[i];
                 const rightHandSide = expressions[i + 1];
-                expression = new InvocationExpression(
+                expression = new OperatorExpression(
                     operator,
-                    [{ value: expression }, { value: rightHandSide }].filter((arg) => arg.value != undefined),
-                    generateMetadata(startPos, rightHandSide?.position ?? operator.position)
+                    expression,
+                    rightHandSide ?? new NoopExpression(),
+                    generateMetadata(startPos, rightHandSide?.range ?? operator.range)
                 );
             }
             return expression;
@@ -392,7 +440,7 @@ export function generateCstToAstTransfromer(parser: Parser): ICstVisitor<never, 
             return new DestructuringExpression(
                 ctx.Identifier.map((identifier: IToken) => identifier.image),
                 expression,
-                generateMetadata(ctx.OpenRoundBracket[0], expression.position)
+                generateMetadata(ctx.OpenRoundBracket[0], expression.range)
             );
         }
 
@@ -412,9 +460,9 @@ export function generateCstToAstTransfromer(parser: Parser): ICstVisitor<never, 
                     const value = expressions[1];
                     const targetMeta = target.metadata as CompletionExpressionMetadata;
                     const meta: CompletionExpressionMetadata = {
-                        ...generateMetadata(target.position, value.position),
-                        completionPosition: targetMeta.completionPosition,
-                        identifierPosition: targetMeta.identifierPosition
+                        ...generateMetadata(target.range, value.range),
+                        completionRange: targetMeta.completionRange,
+                        identifierRange: targetMeta.identifierRange
                     };
                     if (target instanceof IdentifierExpression) {
                         return new AssignmentExpression(target.identifier, undefined, value, meta);
@@ -483,42 +531,24 @@ function parseNumber(value: string): number {
 }
 
 /**
- * Generates a new position from a start and end position
+ * Generates a new range from a start and end range
  *
- * @param start the start position
- * @param end the end position
- * @returns the combined start and end position
+ * @param start the start range
+ * @param end the end range
+ * @returns the combined start and end range
  */
-function generatePosition(
-    start: ASTExpressionPosition | IToken,
-    end: ASTExpressionPosition | IToken
-): ASTExpressionPosition {
-    let startPos: Pick<ASTExpressionPosition, "startOffset" | "startLine" | "startColumn">;
+function generateRange(start: Range | IToken, end: Range | IToken): Range {
+    let startPos: number;
     if ("image" in start) {
-        startPos = {
-            startOffset: start.startOffset,
-            startLine: start.startLine! - 1,
-            startColumn: start.startColumn! - 1
-        };
+        startPos = start.startOffset;
     } else {
-        startPos = start;
+        startPos = start[0];
     }
-    let endPos: Pick<ASTExpressionPosition, "endOffset" | "endLine" | "endColumn">;
+    let endPos: number;
     if ("image" in end) {
-        endPos = {
-            endOffset: end.endOffset! + 1,
-            endLine: end.endLine! - 1,
-            endColumn: end.endColumn!
-        };
+        endPos = end.endOffset! + 1;
     } else {
-        endPos = end;
+        endPos = end[1];
     }
-    return {
-        startOffset: startPos.startOffset,
-        startLine: startPos.startLine,
-        startColumn: startPos.startColumn,
-        endOffset: endPos.endOffset,
-        endLine: endPos.endLine,
-        endColumn: endPos.endColumn
-    };
+    return [startPos, endPos];
 }

@@ -1,4 +1,5 @@
 import { AbstractInvocationExpression } from "../../ast/abstractInvocationExpression.js";
+import { OperatorExpression } from "../../ast/operatorExpression.js";
 import { ExecutableListEntry } from "../ast/executableListEntry.js";
 import { InterpreterContext } from "../interpreter/interpreterContext.js";
 import { RuntimeError } from "../runtimeError.js";
@@ -48,7 +49,7 @@ export class NullObject extends BaseObject {
         _args: ExecutableListEntry[],
         _context: InterpreterContext,
         _scope?: FullObject,
-        _callExpression?: AbstractInvocationExpression
+        _callExpression?: AbstractInvocationExpression | OperatorExpression
     ): FieldEntry {
         throw new RuntimeError("Invoking null is not supported");
     }

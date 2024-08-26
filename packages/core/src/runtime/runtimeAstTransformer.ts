@@ -25,6 +25,8 @@ import { ExecutableSelfInvocationExpression } from "./ast/executableSelfInvocati
 import { ExecutableStringLiteralExpression } from "./ast/executableStringLiteralExpression.js";
 import { ObjectExpression } from "../ast/objectExpression.js";
 import { ExecutableObjectExpression } from "./ast/executableObjectExpression.js";
+import { OperatorExpression } from "../ast/operatorExpression.js";
+import { ExecutableOperatorExpression } from "./ast/executableOperatorExpression.js";
 
 /**
  * Transforms the AST into an executable AST
@@ -110,6 +112,18 @@ export class RuntimeAstTransformer extends ASTVisitor<undefined, ExecutableExpre
             this.optionalExpression(expression),
             this.generateListEntries(expression.fields)
         );
+    }
+
+    override visitOperatorExpression(expression: OperatorExpression): ExecutableExpression<any> {
+        return new ExecutableOperatorExpression(
+            this.optionalExpression(expression),
+            this.generateListEntries([{ value: expression.left }, { value: expression.right }]),
+            this.visit(expression.operator)
+        );
+    }
+
+    override visitNoopExpression(): ExecutableExpression<any> {
+        throw new Error("NoopExpression cannot be transformed to executable expression.");
     }
 
     override visit(expression: Expression): ExecutableExpression<any> {

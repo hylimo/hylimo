@@ -33,6 +33,9 @@ interface BaseEditSpecificationEntry {
     range: [number, number];
 }
 
+/**
+ * An entry in an edit specification which adds an expression to a function body
+ */
 export interface AddEditSpecificationEntry extends BaseEditSpecificationEntry {
     /**
      * The type of edit
@@ -44,6 +47,9 @@ export interface AddEditSpecificationEntry extends BaseEditSpecificationEntry {
     functionRange: [number, number];
 }
 
+/**
+ * An entry in an edit specification which replaces an expression
+ */
 export interface ReplaceEditSpecificationEntry extends BaseEditSpecificationEntry {
     /**
      * The type of edit
@@ -52,9 +58,38 @@ export interface ReplaceEditSpecificationEntry extends BaseEditSpecificationEntr
 }
 
 /**
+ * An entry in an edit specification which adds an argument to a function call
+ */
+export interface AddArgEditSpecificationEntry extends BaseEditSpecificationEntry {
+    /**
+     * The type of edit
+     */
+    type: "add-arg";
+    /**
+     * The key of the list entry
+     */
+    key: string | number;
+    /**
+     * The range of the list, this includes the brackets
+     */
+    listRange: [number, number];
+    /**
+     * Will this be the first entry in the list
+     */
+    isFirst: boolean;
+    /**
+     * Will this be the last entry in the list
+     */
+    isLast: boolean;
+}
+
+/**
  * entry in a edit specification
  */
-export type EditSpecificationEntry = AddEditSpecificationEntry | ReplaceEditSpecificationEntry;
+export type EditSpecificationEntry =
+    | AddEditSpecificationEntry
+    | ReplaceEditSpecificationEntry
+    | AddArgEditSpecificationEntry;
 
 export namespace EditSpecification {
     /**

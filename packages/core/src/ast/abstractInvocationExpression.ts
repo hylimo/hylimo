@@ -1,4 +1,4 @@
-import { ExpressionMetadata } from "./expressionMetadata.js";
+import { ParenthesisExpressionMetadata } from "./expressionMetadata.js";
 import { Expression } from "./expression.js";
 import { ListEntry } from "./listEntry.js";
 
@@ -7,19 +7,29 @@ import { ListEntry } from "./listEntry.js";
  */
 
 export abstract class AbstractInvocationExpression<
-    M extends ExpressionMetadata = ExpressionMetadata
+    M extends ParenthesisExpressionMetadata = ParenthesisExpressionMetadata
 > extends Expression<M> {
     /**
+     * all argument expressions
+     */
+    readonly argumentExpressions: ListEntry[];
+
+    /**
      * Base constructor for all AbstractInvocationExpressions
+     *
+     * @param innerArgumentExpressions the inner argument expressions (inside the parentheses)
+     * @param trailingArgumentExpressions the trailing argument expressions (functions after the parentheses)
      * @param metadata metadata for the expression
      * @param type used for serialization and debugging
      */
     constructor(
-        readonly argumentExpressions: ListEntry[],
+        readonly innerArgumentExpressions: ListEntry[],
+        readonly trailingArgumentExpressions: ListEntry[],
         type: string,
         metadata: M
     ) {
         super(type, metadata);
+        this.argumentExpressions = [...innerArgumentExpressions, ...trailingArgumentExpressions];
     }
 
     protected override markNoEditInternal(): void {

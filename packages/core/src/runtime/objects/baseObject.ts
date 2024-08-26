@@ -1,5 +1,6 @@
 import { AbstractInvocationExpression } from "../../ast/abstractInvocationExpression.js";
 import { Expression } from "../../ast/expression.js";
+import { OperatorExpression } from "../../ast/operatorExpression.js";
 import { ExecutableListEntry } from "../ast/executableListEntry.js";
 import { InterpreterContext } from "../interpreter/interpreterContext.js";
 import { RuntimeError } from "../runtimeError.js";
@@ -100,7 +101,7 @@ export abstract class BaseObject {
         args: ExecutableListEntry[],
         context: InterpreterContext,
         scope?: FullObject,
-        callExpression?: AbstractInvocationExpression
+        callExpression?: AbstractInvocationExpression | OperatorExpression
     ): FieldEntry;
 
     /**

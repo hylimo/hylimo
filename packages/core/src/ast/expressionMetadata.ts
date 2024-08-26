@@ -1,14 +1,14 @@
-import { ASTExpressionPosition } from "./astExpressionPosition.js";
+import { Range } from "./range.js";
 
 /**
  * Metadata for Expressions
- * Provides the optional position, and an isEditable flag
+ * Provides the optional range, and an isEditable flag
  */
 export interface ExpressionMetadata {
     /**
-     * The position of the expression
+     * The range of the expression
      */
-    readonly position: ASTExpressionPosition;
+    readonly range: Range;
     /**
      * If false, the expression should not be edited
      */
@@ -20,10 +20,10 @@ export namespace ExpressionMetadata {
      * Checks if a ExpressionMetadata is editable
      *
      * @param metadata the metadata to check
-     * @returns true if metadata is undefined, its position is undefined and isEditable is true
+     * @returns true if metadata is undefined, its range is undefined and isEditable is true
      */
     export function isEditable(metadata?: ExpressionMetadata): boolean {
-        return metadata?.isEditable === true && metadata?.position != undefined;
+        return metadata?.isEditable === true && metadata?.range != undefined;
     }
 }
 
@@ -32,12 +32,23 @@ export namespace ExpressionMetadata {
  */
 export interface CompletionExpressionMetadata extends ExpressionMetadata {
     /**
-     * The position of the part of the expression which is affected by complete.
-     * E.g. for an FieldAccessExpression, this would be the position of the dot and the field name
+     * The range of the part of the expression which is affected by complete.
+     * E.g. for an FieldAccessExpression, this would be the range of the dot and the field name
      */
-    completionPosition: ASTExpressionPosition;
+    completionRange: Range;
     /**
-     * The position of the identifier of the expression (the identifier which should be replaced on complete)
+     * The range of the identifier of the expression (the identifier which should be replaced on complete)
      */
-    identifierPosition: ASTExpressionPosition;
+    identifierRange: Range;
+}
+
+/**
+ * Metadata for Expressions with additional data for parentheses
+ */
+export interface ParenthesisExpressionMetadata extends ExpressionMetadata {
+    /**
+     * The range of the part of the expression which is contained in the parentheses (including the parentheses)
+     * e.g. the call brackets of a function invocation
+     */
+    parenthesisRange: Range;
 }
