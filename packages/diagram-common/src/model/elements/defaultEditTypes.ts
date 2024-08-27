@@ -13,5 +13,7 @@ export enum DefaultEditTypes {
 
     AXIS_ALIGNED_SEGMENT_POS = "update/axis-aligned-segment/pos",
 
-    ROTATE = "update/rotate"
+    ROTATE = "update/rotate",
+
+    SPLIT_CANVAS_SEGMENT = "update/split-canvas-segment"
 }

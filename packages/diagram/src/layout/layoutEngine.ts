@@ -10,6 +10,7 @@ import {
     isNull,
     isString,
     isWrapperObject,
+    ListEntry,
     nativeToList,
     ParenthesisExpressionMetadata,
     Range,
@@ -639,65 +640,9 @@ export class Layout {
         assertWrapperObject(target);
         const targetExpression = target.wrapped as Expression;
         if (type === "add") {
-            if (!(targetExpression instanceof FunctionExpression)) {
-                throw new Error("Target must be a function expression");
-            }
-            let rangeStart: number;
-            if (targetExpression.expressions.length === 0) {
-                rangeStart = targetExpression.range[0] + 1;
-            } else {
-                rangeStart = targetExpression.expressions[targetExpression.expressions.length - 1].range[1];
-            }
-            return {
-                type,
-                range: [rangeStart, targetExpression.range[1]],
-                functionRange: targetExpression.range,
-                template: parsedTemplate
-            } satisfies AddEditSpecificationEntry;
+            return this.generateAddEditSpecificationEntry(targetExpression, parsedTemplate);
         } else if (type == "add-arg") {
-            const key = value.getLocalFieldOrUndefined("key")?.value?.toNative();
-            if (typeof key !== "string" && typeof key !== "number") {
-                throw new Error("Key must be a string or number");
-            }
-            if (!(targetExpression instanceof AbstractInvocationExpression)) {
-                throw new Error("Target must be an invocation expression");
-            }
-            const listEntries = targetExpression.innerArgumentExpressions;
-            let targetPos = -1;
-            if (typeof key === "string") {
-                targetPos = listEntries.length;
-            } else {
-                let foundIndexArgs = 0;
-                while (targetPos < listEntries.length && foundIndexArgs < key) {
-                    if (listEntries[targetPos].name != undefined) {
-                        foundIndexArgs++;
-                    }
-                    targetPos++;
-                }
-            }
-            // TODO more extensive validation
-            const parenthesisRange = (targetExpression.metadata as ParenthesisExpressionMetadata).parenthesisRange;
-            let range: Range;
-            if (targetPos < 0) {
-                if (listEntries.length === 0) {
-                    range = parenthesisRange;
-                } else {
-                    range = [parenthesisRange[0], listEntries[0].value.range[0]];
-                }
-            } else if (targetPos >= listEntries.length) {
-                range = [listEntries.at(-1)!.value.range[1], parenthesisRange[1]];
-            } else {
-                range = [listEntries[targetPos].value.range[0], listEntries[targetPos].value.range[1]];
-            }
-            return {
-                type,
-                key,
-                template: parsedTemplate,
-                range,
-                listRange: parenthesisRange,
-                isFirst: targetPos < 0,
-                isLast: targetPos >= listEntries.length
-            } satisfies AddArgEditSpecificationEntry;
+            return this.generateAddArgExitSpecificationEntry(value, targetExpression, parsedTemplate);
         } else if (type === "replace") {
             return {
                 type,
@@ -707,5 +652,125 @@ export class Layout {
         } else {
             throw new Error(`Unknown type ${type}`);
         }
+    }
+
+    /**
+     * Generates an AddEditSpecificationEntry based on the provided target expression and parsed template
+     *
+     * @param targetExpression the target expression
+     * @param parsedTemplate the parsed template
+     * @returns the generated AddEditSpecificationEntry
+     */
+    private generateAddEditSpecificationEntry(
+        targetExpression: Expression,
+        parsedTemplate: TemplateEntry[]
+    ): AddEditSpecificationEntry {
+        if (!(targetExpression instanceof FunctionExpression)) {
+            throw new Error("Target must be a function expression");
+        }
+        let rangeStart: number;
+        if (targetExpression.expressions.length === 0) {
+            rangeStart = targetExpression.range[0] + 1;
+        } else {
+            rangeStart = targetExpression.expressions[targetExpression.expressions.length - 1].range[1];
+        }
+        return {
+            type: "add",
+            range: [rangeStart, targetExpression.range[1]],
+            functionRange: targetExpression.range,
+            template: parsedTemplate
+        };
+    }
+
+    /**
+     * Generates an AddArgEditSpecificationEntry based on the provided value, target expression and parsed template
+     *
+     * @param value the original edit object
+     * @param targetExpression the target expression
+     * @param parsedTemplate the parsed template
+     * @returns the generated AddArgEditSpecificationEntry
+     */
+    private generateAddArgExitSpecificationEntry(
+        value: FullObject,
+        targetExpression: Expression,
+        parsedTemplate: TemplateEntry[]
+    ): AddArgEditSpecificationEntry {
+        const key = value.getLocalFieldOrUndefined("key")?.value?.toNative();
+        if (typeof key !== "string" && typeof key !== "number") {
+            throw new Error("Key must be a string or number");
+        }
+        if (!(targetExpression instanceof AbstractInvocationExpression)) {
+            throw new Error("Target must be an invocation expression");
+        }
+        const listEntries = targetExpression.innerArgumentExpressions;
+        let targetPos = this.calculateAddArgPos(
+            key,
+            listEntries,
+            targetExpression.trailingArgumentExpressions.length > 0
+        );
+        const parenthesisRange = (targetExpression.metadata as ParenthesisExpressionMetadata).parenthesisRange;
+        const range = this.calculateAddArgRange(targetPos, listEntries, parenthesisRange);
+        return {
+            type: "add-arg",
+            key,
+            template: parsedTemplate,
+            range,
+            listRange: parenthesisRange,
+            isFirst: targetPos <= 0,
+            isLast: targetPos >= listEntries.length
+        };
+    }
+
+    /**
+     * Calculates the range which should be replaced when inserting an argument
+     *
+     * @param targetPos the position where the argument should be inserted
+     * @param listEntries the inner argument expressions
+     * @param parenthesisRange the range of the whole parenthesis
+     * @returns the range which should be replaced
+     */
+    private calculateAddArgRange(targetPos: number, listEntries: ListEntry[], parenthesisRange: Range): Range {
+        if (targetPos <= 0) {
+            if (listEntries.length === 0) {
+                return parenthesisRange;
+            } else {
+                return [parenthesisRange[0], listEntries[0].value.range[0]];
+            }
+        } else if (targetPos >= listEntries.length) {
+            return [listEntries.at(-1)!.value.range[1], parenthesisRange[1]];
+        } else {
+            return [listEntries[targetPos - 1].value.range[1], listEntries[targetPos].value.range[0]];
+        }
+    }
+
+    /**
+     * Calculates the position where an argument should be added.
+     * Semantics: Index where the argument should be inserted (e.g. 0 for the first)
+     *
+     * @param key the key of the argument
+     * @param listEntries the inner argument expressions
+     * @param hasTrailingArg true if the call expression has a trailing argument
+     * @returns the position where the argument should be added
+     */
+    private calculateAddArgPos(key: string | number, listEntries: ListEntry[], hasTrailingArg: boolean): number {
+        if (typeof key === "string") {
+            return listEntries.length;
+        }
+        let foundIndexArgs = 0;
+        let targetPos = 0;
+        for (const entry of listEntries) {
+            if (entry.name == undefined) {
+                foundIndexArgs++;
+            }
+            if (foundIndexArgs >= key + 1) {
+                break;
+            }
+            targetPos++;
+        }
+        if (key + 1 > foundIndexArgs && hasTrailingArg) {
+            throw new Error("Cannot add argument after or in between trailing function expressions");
+        }
+
+        return targetPos;
     }
 }

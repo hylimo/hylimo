@@ -31,3 +31,8 @@ export type AxisAlignedSegmentEdit = Edit<{ pos: number }, DefaultEditTypes.AXIS
  * Rotate edit
  */
 export type RotateEdit = Edit<{ rotation: number }, DefaultEditTypes.ROTATE>;
+
+/**
+ * Split canvas segment edit
+ */
+export type SplitCanvasSegmentEdit = Edit<{ x: number; y: number }, DefaultEditTypes.SPLIT_CANVAS_SEGMENT>;

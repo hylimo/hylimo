@@ -1,6 +1,7 @@
-import { FontFamilyConfig, convertFontsToCssStyle } from "@hylimo/diagram-common";
+import { FontFamilyConfig, Point, convertFontsToCssStyle } from "@hylimo/diagram-common";
 import { ModelIndexImpl, ViewportRootElementImpl } from "sprotty";
 import { SCanvasAxisAlignedSegment } from "./canvas/sCanvasAxisAlignedSegment.js";
+import { Matrix } from "transformation-matrix";
 
 /**
  * Root element.
@@ -28,6 +29,20 @@ export class SRoot extends ViewportRootElementImpl {
 
     constructor(index = new ModelIndexImpl()) {
         super(index);
+    }
+
+    /**
+     * Gets the coordinates of a mouse event
+     * 
+     * @param event the mouse event
+     * @returns the coordinates of the event
+     */
+    getEventCoordinates(event: MouseEvent): Point {
+        const rect = this.canvasBounds;
+        return {
+            x: (event.clientX - rect.x) / this.zoom + this.scroll.x,
+            y: (event.clientY - rect.y) / this.zoom + this.scroll.y
+        };
     }
 
     /**

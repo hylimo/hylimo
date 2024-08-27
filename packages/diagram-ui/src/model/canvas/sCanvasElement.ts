@@ -5,6 +5,7 @@ import { PositionProvider } from "../../features/layout/positionProvider.js";
 import { SLayoutedElement } from "../sLayoutedElement.js";
 import { SCanvasContent } from "./sCanvasContent.js";
 import { SCanvasPoint } from "./sCanvasPoint.js";
+import { compose, rotateDEG, translate, Matrix } from "transformation-matrix";
 
 /**
  * Anbimated fields for SCanvasElement
@@ -71,6 +72,15 @@ export class SCanvasElement
         this.cachedProperty<TransformedLine>("line", () => {
             return this.parent.layoutEngine.layoutLine(this);
         });
+        this.cachedProperty<Matrix>("parentToLocalMatrix", () => {
+            const position = this.position;
+            return compose(translate(position.x, position.y), rotateDEG(this.rotation))
+        });
+        this.cachedProperty<Matrix>("localToParentMatrix", () => {
+            const position = this.position;
+            return compose(rotateDEG(-this.rotation), translate(-position.x, -position.y));
+        });
+
     }
 
     override get dependencies(): string[] {

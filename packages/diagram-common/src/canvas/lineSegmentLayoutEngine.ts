@@ -32,7 +32,8 @@ export class LineSegmentLayoutEngine extends SegmentLayoutEngine<CanvasLineSegme
         return [
             {
                 type: LineSegment.TYPE,
-                end: layout.end
+                end: layout.end,
+                origin: segment.id
             }
         ];
     }

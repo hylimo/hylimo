@@ -12,4 +12,8 @@ export interface Segment {
      * End position
      */
     end: Point;
+    /**
+     * The id of the element this segment originates from
+     */
+    origin: string;
 }

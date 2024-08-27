@@ -42,7 +42,8 @@ export class BezierSegmentLayoutEngine extends SegmentLayoutEngine<CanvasBezierS
                 type: BezierSegment.TYPE,
                 end: layout.end,
                 startControlPoint: this.engine.getPoint(segment.startControlPoint),
-                endControlPoint: this.engine.getPoint(segment.endControlPoint)
+                endControlPoint: this.engine.getPoint(segment.endControlPoint),
+                origin: segment.id
             }
         ];
     }

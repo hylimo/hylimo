@@ -115,6 +115,7 @@ export class LocalDiagramImplementation extends DiagramImplementation {
      * @returns the created diagnostic item
      */
     private convertLayoutError(error: RenderErrors["layoutErrors"][0]): Diagnostic {
+        console.log(error)
         return {
             severity: DiagnosticSeverity.Error,
             range: Range.create(0, 0, uinteger.MAX_VALUE, uinteger.MAX_VALUE),

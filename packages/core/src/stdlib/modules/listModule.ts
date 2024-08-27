@@ -226,19 +226,24 @@ export const listModule = InterpreterModule.create(
                 fun(
                     [
                         id(SemanticFieldNames.THIS).assignField("callback", id(SemanticFieldNames.IT)),
-                        native((args, context, staticScope) => {
-                            const listFunction = staticScope.getField("list", context);
-                            const list = listFunction.invoke(args, context);
+                        native((args, context, staticScope, callExpression) => {
+                            const indexOnlyArgCount = args.filter((value) => !value.name).length;
+                            const list = generateArgs(args, context, undefined);
+                            list.setLocalField(
+                                SemanticFieldNames.PROTO,
+                                staticScope.getFieldEntry(listProto, context),
+                                context
+                            );
+                            list.setLocalField(lengthField, { value: context.newNumber(indexOnlyArgCount) }, context);
                             const callback = staticScope.getField("callback", context);
-                            const invokeArguments: ExecutableListEntry[] = [
-                                { value: new ExecutableConstExpression(list) }
-                            ];
-                            invokeArguments.push(...args.filter((arg) => arg.name !== undefined));
-                            return callback.invoke(invokeArguments, context);
+                            return callback.invoke(
+                                [{ value: new ExecutableConstExpression({ value: list, source: callExpression }) }],
+                                context
+                            );
                         })
                     ],
                     {
-                        docs: "Creates a function which puts all indexed parameters in a list, and then calls callback with that list. Also provides all named arguments to the callback under the same name.",
+                        docs: "Creates a function which automatically converts args into a list by setting the list prototype and length field, and then calls the provided callback with the list as first argument.",
                         params: [[0, "the callback to use"]],
                         returns: "The created function"
                     }

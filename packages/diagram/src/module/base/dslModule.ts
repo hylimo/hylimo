@@ -146,27 +146,39 @@ const scopeExpressions: ExecutableExpression[] = [
         `
             lineBuilderProto = object()
             lineBuilderProto.line = listWrapper {
-                segments = args.self.segments
-                it.forEach {
-                    segments += canvasLineSegment(end = it)
+                positions = it
+                segments = positions.self.segments
+                positions.forEach {
+                    (point, index) = args
+                    segment = canvasLineSegment(end = point)
+                    segment.edits.set(
+                        "${DefaultEditTypes.SPLIT_CANVAS_SEGMENT}",
+                        createAddArgEdit(positions, index - 0.5, "'apos(' & x & ', ' & y & ')'")
+                    )
+                    segments += segment
                 }
-                args.self
+                it.self
             }
             lineBuilderProto.axisAligned = listWrapper {
-                segments = args.self.segments
                 positions = it
+                segments = positions.self.segments
                 range(positions.length / 2).forEach {
-                    segments += canvasAxisAlignedSegment(
+                    segment = canvasAxisAlignedSegment(
                         end = positions.get(2 * it + 1),
                         verticalPos = positions.get(2 * it)
                     )
+                    segment.edits.set(
+                        "${DefaultEditTypes.SPLIT_CANVAS_SEGMENT}",
+                        createAddArgEdit(positions, 2 * it - 0.5, "'0.5, apos(' & x & ', ' & y & ')'")
+                    )
+                    segments += this.segment
                 }
-                args.self
+                it.self
             }
             lineBuilderProto.bezier = listWrapper {
-                self = args.self
-                segments = self.segments
                 positions = it
+                self = positions.self
+                segments = self.segments
                 segmentCount = (positions.length - 2) / 3
                 startPoint = if(segments.length > 0) {
                     segments.get(segments.length - 1).end
@@ -176,7 +188,7 @@ const scopeExpressions: ExecutableExpression[] = [
 
                 range(segmentCount - 1).forEach {
                     endPoint = positions.get(3 * it + 2)
-                    segments += canvasBezierSegment(
+                    segment = canvasBezierSegment(
                         startControlPoint = scope.rpos(
                             startPoint,
                             positions.get(3 * it),
@@ -189,11 +201,16 @@ const scopeExpressions: ExecutableExpression[] = [
                         ),
                         end = endPoint
                     )
+                    segment.edits.set(
+                        "${DefaultEditTypes.SPLIT_CANVAS_SEGMENT}",
+                        createAddArgEdit(positions, 3 * it + 1.5, "'apos(' & x & ', ' & y & '), 100, 100'")
+                    )
+                    segments += segment
                     startPoint = endPoint
                 }
 
                 endPoint = positions.get(3 * segmentCount - 1)
-                segments += canvasBezierSegment(
+                segment = canvasBezierSegment(
                     startControlPoint = scope.rpos(
                         startPoint,
                         positions.get(3 * segmentCount - 3),
@@ -206,7 +223,12 @@ const scopeExpressions: ExecutableExpression[] = [
                     ),
                     end = endPoint
                 )
-                self
+                segment.edits.set(
+                    "${DefaultEditTypes.SPLIT_CANVAS_SEGMENT}",
+                    createAddArgEdit(positions, 3 * segmentCount - 1.5, "'apos(' & x & ', ' & y & '), 100, 100'")
+                )
+                segments += segment
+                it.self
             }
         `
     ),

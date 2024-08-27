@@ -1,4 +1,4 @@
-import { Selectable } from "sprotty";
+import { Selectable } from "sprotty-protocol";
 import { SElement } from "../sElement.js";
 import { SCanvas } from "./sCanvas.js";
 

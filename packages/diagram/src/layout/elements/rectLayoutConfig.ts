@@ -80,18 +80,25 @@ export class RectLayoutConfig extends ContentShapeLayoutConfig {
                 y: y + height / 2
             };
             const segments: (LineSegment | ArcSegment)[] = [
-                this.lineSegment(x + width, y + height - radius),
-                this.arcSegment(x + width - radius, y + height - radius, x + width - radius, y + height, radius),
-                this.lineSegment(x + width / 2, y + height),
-                this.lineSegment(x + radius, y + height),
-                this.arcSegment(x + radius, y + height - radius, x, y + height - radius, radius),
-                this.lineSegment(x, y + height / 2),
-                this.lineSegment(x, y + radius),
-                this.arcSegment(x + radius, y + radius, x + radius, y, radius),
-                this.lineSegment(x + width / 2, y),
-                this.lineSegment(x + width - radius, y),
-                this.arcSegment(x + width - radius, y + radius, x + width, y + radius, radius),
-                this.lineSegment(startPos.x, startPos.y)
+                this.lineSegment(x + width, y + height - radius, element),
+                this.arcSegment(
+                    x + width - radius,
+                    y + height - radius,
+                    x + width - radius,
+                    y + height,
+                    radius,
+                    element
+                ),
+                this.lineSegment(x + width / 2, y + height, element),
+                this.lineSegment(x + radius, y + height, element),
+                this.arcSegment(x + radius, y + height - radius, x, y + height - radius, radius, element),
+                this.lineSegment(x, y + height / 2, element),
+                this.lineSegment(x, y + radius, element),
+                this.arcSegment(x + radius, y + radius, x + radius, y, radius, element),
+                this.lineSegment(x + width / 2, y, element),
+                this.lineSegment(x + width - radius, y, element),
+                this.arcSegment(x + width - radius, y + radius, x + width, y + radius, radius, element),
+                this.lineSegment(startPos.x, startPos.y, element)
             ];
             return {
                 start: startPos,

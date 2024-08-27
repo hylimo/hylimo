@@ -84,14 +84,14 @@ export abstract class ElementLayoutConfig implements LayoutConfig {
             y: y + height / 2
         };
         const segments: LineSegment[] = [
-            this.lineSegment(x + width, y + height),
-            this.lineSegment(x + width / 2, y + height),
-            this.lineSegment(x, y + height),
-            this.lineSegment(x, y + height / 2),
-            this.lineSegment(x, y),
-            this.lineSegment(x + width / 2, y),
-            this.lineSegment(x + width, y),
-            this.lineSegment(startPos.x, startPos.y)
+            this.lineSegment(x + width, y + height, element),
+            this.lineSegment(x + width / 2, y + height, element),
+            this.lineSegment(x, y + height, element),
+            this.lineSegment(x, y + height / 2, element),
+            this.lineSegment(x, y, element),
+            this.lineSegment(x + width / 2, y, element),
+            this.lineSegment(x + width, y, element),
+            this.lineSegment(startPos.x, startPos.y, element)
         ];
         return {
             start: startPos,
@@ -104,15 +104,17 @@ export abstract class ElementLayoutConfig implements LayoutConfig {
      *
      * @param x the end x coordinate
      * @param y the end y coordiate
+     * @param element the element this segment originates from
      * @returns the generated line segment
      */
-    protected lineSegment(x: number, y: number): LineSegment {
+    protected lineSegment(x: number, y: number, element: LayoutElement): LineSegment {
         return {
             type: LineSegment.TYPE,
             end: {
                 x,
                 y
-            }
+            },
+            origin: element.id
         };
     }
 
@@ -124,9 +126,10 @@ export abstract class ElementLayoutConfig implements LayoutConfig {
      * @param endX x coordinate of the end
      * @param endY y coordinate of the end
      * @param radius both x and y radius
+     * @param element the element this segment originates from
      * @returns the created arc segment
      */
-    protected arcSegment(cx: number, cy: number, endX: number, endY: number, radius: number): ArcSegment {
+    protected arcSegment(cx: number, cy: number, endX: number, endY: number, radius: number, element: LayoutElement): ArcSegment {
         return {
             type: ArcSegment.TYPE,
             clockwise: true,
@@ -139,7 +142,8 @@ export abstract class ElementLayoutConfig implements LayoutConfig {
                 y: cy
             },
             radiusX: radius,
-            radiusY: radius
+            radiusY: radius,
+            origin: element.id
         };
     }
 

@@ -40,13 +40,13 @@ export class AddArgEditEngine extends EditEngine {
                 return entry.key ? `${entry.key} = ${evaluatedTemplate}` : evaluatedTemplate;
             })
         );
-        const entrySpacing = this.isMultiline ? "\n" + this.indentation : " ";
+        const entrySpacing = this.isMultiline ? "\n" + increasedIndentation : " ";
         const argSpacing = "," + entrySpacing;
         const joinedEntries = evaluatedEntries.join(argSpacing);
         let res = "";
         if (this.isFirst) {
             res += "(";
-            res += this.isMultiline ? this.indentation : "";
+            res += this.isMultiline ? "\n" + increasedIndentation : "";
         } else {
             res += argSpacing;
         }
@@ -56,6 +56,7 @@ export class AddArgEditEngine extends EditEngine {
             res += ")";
         } else {
             res += ",";
+            res += this.isMultiline ? "\n" + increasedIndentation : " ";
         }
         return res;
     }

@@ -65,7 +65,8 @@ export class EllipseLayoutConfig extends ContentShapeLayoutConfig {
             radiusY: height / 2,
             center,
             clockwise: true,
-            end: endPos
+            end: endPos,
+            origin: element.id
         }));
         return {
             start: startPos,
