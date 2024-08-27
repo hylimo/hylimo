@@ -337,7 +337,7 @@ const scopeExpressions: ExecutableExpression[] = [
                     startPoint = scope.lpos(start, 0)
                     startPoint.edits.set(
                         "${DefaultEditTypes.MOVE_LPOS_POS}",
-                        createAppendScopeEdit(target, "with", "'over = start(' & pos & ').axisAligned(0.5, end(0))'")
+                        createAppendScopeEdit(target, "with", "'over = start(' & pos & ').axisAligned(0.5, end(0.5))'")
                     )
                     { 
                         startPoint.pos = it
@@ -348,7 +348,7 @@ const scopeExpressions: ExecutableExpression[] = [
                 }
                 endPoint = end
                 endProvider = if ((end.type == "canvasElement") || (end.type == "canvasConnection")) {
-                    endPoint = scope.lpos(end, 0)
+                    endPoint = scope.lpos(end, 0.5)
                     endPoint.edits.set(
                         "${DefaultEditTypes.MOVE_LPOS_POS}",
                         createAppendScopeEdit(target, "with", "'over = start(0).axisAligned(0.5, end(' & pos & '))'")
@@ -364,7 +364,11 @@ const scopeExpressions: ExecutableExpression[] = [
                 this.segment = canvasAxisAlignedSegment(end = endPoint, verticalPos = 0.5)
                 segment.edits.set(
                     "${DefaultEditTypes.AXIS_ALIGNED_SEGMENT_POS}",
-                    createAppendScopeEdit(target, "with", "'over = start(0).axisAligned(' & pos & ', end(0))'")
+                    createAppendScopeEdit(target, "with", "'over = start(0).axisAligned(' & pos & ', end(0.5))'")
+                )
+                segment.edits.set(
+                    "${DefaultEditTypes.SPLIT_CANVAS_SEGMENT}",
+                    createAppendScopeEdit(target, "with", "'over = start(0).axisAligned(0.5, apos(' & x & ', ' & y & '), 0.5, end(0.5))'")
                 )
 
                 connection = canvasConnection(
