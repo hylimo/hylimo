@@ -2,7 +2,6 @@ import { OperatorExpression } from "../../ast/operatorExpression.js";
 import { InterpreterContext } from "../interpreter/interpreterContext.js";
 import { FieldEntry } from "../objects/baseObject.js";
 import { SemanticFieldNames } from "../semanticFieldNames.js";
-import { ExecutableListEntry } from "./executableListEntry.js";
 import { ExecutableConstExpression } from "./executableConstExpression.js";
 import { ExecutableExpression } from "./executableExpression.js";
 
@@ -11,16 +10,17 @@ import { ExecutableExpression } from "./executableExpression.js";
  */
 export class ExecutableOperatorExpression extends ExecutableExpression<OperatorExpression> {
     /**
-     * Creates a new OperatorExpression consisting of an expression of which the result should be invoked,
-     * and a set of optionally named expressions as arguments
+     * Creates a new OperatorExpression consisting of an operator expression, and a left and right side expression.
      *
      * @param expression the expression this represents
-     * @param argumentExpressions evaluated to provide arguments (left and right side)
+     * @param left the left side of the operator
+     * @param right the right side of the operator
      * @param target evaluated to provide the function to invoke
      */
     constructor(
         expression: OperatorExpression | undefined,
-        readonly argumentExpressions: ExecutableListEntry[],
+        readonly left: ExecutableExpression<any>,
+        readonly right: ExecutableExpression<any>,
         readonly target: ExecutableExpression<any>
     ) {
         super(expression);
@@ -34,7 +34,12 @@ export class ExecutableOperatorExpression extends ExecutableExpression<OperatorE
                     value: new ExecutableConstExpression({ value: context.currentScope }),
                     name: SemanticFieldNames.SELF
                 },
-                ...this.argumentExpressions
+                {
+                    value: this.left
+                },
+                {
+                    value: this.right
+                }
             ],
             context,
             undefined,

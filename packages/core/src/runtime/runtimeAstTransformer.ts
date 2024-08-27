@@ -117,7 +117,8 @@ export class RuntimeAstTransformer extends ASTVisitor<undefined, ExecutableExpre
     override visitOperatorExpression(expression: OperatorExpression): ExecutableExpression<any> {
         return new ExecutableOperatorExpression(
             this.optionalExpression(expression),
-            this.generateListEntries([{ value: expression.left }, { value: expression.right }]),
+            this.visit(expression.left),
+            this.visit(expression.right),
             this.visit(expression.operator)
         );
     }
