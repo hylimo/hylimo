@@ -205,9 +205,13 @@ export class TransactionalEdit {
             for (const elementId of edit.elements!) {
                 const element = this.diagram.currentDiagram!.elementLookup[elementId];
                 for (const type of edit.types!) {
+                    const spec = element.edits[type];
+                    if (spec == undefined) {
+                        throw new Error(`Edit specification for type ${type} not found on element ${elementId}`);
+                    }
                     res.push({
                         index,
-                        spec: element.edits[type]
+                        spec
                     });
                 }
             }

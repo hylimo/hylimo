@@ -243,9 +243,10 @@ export interface LayoutConfig {
      * @param element the element to get the outline of
      * @param position offset in current context
      * @param size the size of the element
+     * @param id the id of the element
      * @returns the outline of the element
      */
-    outline(layout: Layout, element: LayoutElement, position: Point, size: Size): Line;
+    outline(layout: Layout, element: LayoutElement, position: Point, size: Size, id: string): Line;
     /**
      * Called to provide a function which evaluates to the prototype of the element.
      * The function will be called with the general element prototype as first argument.

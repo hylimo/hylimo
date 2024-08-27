@@ -1,4 +1,4 @@
-import { Size, Point, Element, Ellipse, Math2D, Line, ArcSegment } from "@hylimo/diagram-common";
+import { Size, Point, Element, Ellipse, Math2D, Line, ArcSegment, Segment } from "@hylimo/diagram-common";
 import { LayoutElement, SizeConstraints } from "../layoutElement.js";
 import { Layout } from "../layoutEngine.js";
 import { ContentShapeLayoutConfig } from "./contentShapeLayoutConfig.js";
@@ -51,7 +51,7 @@ export class EllipseLayoutConfig extends ContentShapeLayoutConfig {
         return [result];
     }
 
-    override outline(layout: Layout, element: LayoutElement, position: Point, size: Size): Line {
+    override outline(layout: Layout, element: LayoutElement, position: Point, size: Size, id: string): Line {
         const { width, height } = size;
         const { x, y } = position;
         const startPos = {
@@ -59,14 +59,14 @@ export class EllipseLayoutConfig extends ContentShapeLayoutConfig {
             y: y + height / 2
         };
         const center = { x: x + width / 2, y: y + height / 2 };
-        const segments = [{ x, y: center.y }, startPos].map((endPos) => ({
+        const segments: Segment[] = [{ x, y: center.y }, startPos].map((endPos, index) => ({
             type: ArcSegment.TYPE,
             radiusX: width / 2,
             radiusY: height / 2,
             center,
             clockwise: true,
             end: endPos,
-            origin: element.id
+            origin: [id, index]
         }));
         return {
             start: startPos,

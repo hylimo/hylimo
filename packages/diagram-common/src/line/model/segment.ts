@@ -13,7 +13,8 @@ export interface Segment {
      */
     end: Point;
     /**
-     * The id of the element this segment originates from
+     * The id of the element this segment originates from and which segment of the original element it is
+     * (e.g. an axis-aligned segment of a canvas line consists of 3 segments)
      */
-    origin: string;
+    origin: [string, number];
 }

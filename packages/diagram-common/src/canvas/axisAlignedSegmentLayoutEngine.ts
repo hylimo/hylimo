@@ -44,16 +44,16 @@ export class AxisAlignedSegmentLayoutEngine extends SegmentLayoutEngine<CanvasAx
         if (segment.pos >= 0) {
             const verticalX = start.x + (end.x - start.x) * segment.pos;
             return [
-                this.createLineSegment(verticalX, start.y, segment.id),
-                this.createLineSegment(verticalX, end.y, segment.id),
-                this.createLineSegment(end.x, end.y, segment.id)
+                this.createLineSegment(verticalX, start.y, [segment.id, 0]),
+                this.createLineSegment(verticalX, end.y, [segment.id, 1]),
+                this.createLineSegment(end.x, end.y, [segment.id, 2])
             ];
         } else {
             const horizontalY = end.y + (end.y - start.y) * segment.pos;
             return [
-                this.createLineSegment(start.x, horizontalY, segment.id),
-                this.createLineSegment(end.x, horizontalY, segment.id),
-                this.createLineSegment(end.x, end.y, segment.id)
+                this.createLineSegment(start.x, horizontalY, [segment.id, 0]),
+                this.createLineSegment(end.x, horizontalY, [segment.id, 1]),
+                this.createLineSegment(end.x, end.y, [segment.id, 2])
             ];
         }
     }
@@ -66,7 +66,7 @@ export class AxisAlignedSegmentLayoutEngine extends SegmentLayoutEngine<CanvasAx
      * @param origin the id of the element this segment originates from
      * @returns the created line segment
      */
-    private createLineSegment(endX: number, endY: number, origin: string): LineSegment {
+    private createLineSegment(endX: number, endY: number, origin: [string, number]): LineSegment {
         return {
             type: LineSegment.TYPE,
             end: {

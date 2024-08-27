@@ -33,6 +33,22 @@ export type AxisAlignedSegmentEdit = Edit<{ pos: number }, DefaultEditTypes.AXIS
 export type RotateEdit = Edit<{ rotation: number }, DefaultEditTypes.ROTATE>;
 
 /**
- * Split canvas segment edit
+ * Split canvas line segment edit
  */
-export type SplitCanvasSegmentEdit = Edit<{ x: number; y: number }, DefaultEditTypes.SPLIT_CANVAS_SEGMENT>;
+export type SplitCanvasLineSegmentEdit = Edit<{ x: number; y: number }, DefaultEditTypes.SPLIT_CANVAS_LINE_SEGMENT>;
+
+/**
+ * Split canvas axis aligned segment edit
+ */
+export type SplitCanvasAxisAlignedSegmentEdit = Edit<
+    { x: number; y: number; pos: number; nextPos: number },
+    DefaultEditTypes.SPLIT_CANVAS_AXIS_ALIGNED_SEGMENT
+>;
+
+/**
+ * Split canvas bezier segment edit
+ */
+export type SplitCanvasBezierSegmentEdit = Edit<
+    { x: number; y: number; cx1: number; cy1: number; cx2: number; cy2: number },
+    DefaultEditTypes.SPLIT_CANVAS_BEZIER_SEGMENT
+>;

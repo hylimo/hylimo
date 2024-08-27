@@ -152,7 +152,7 @@ const scopeExpressions: ExecutableExpression[] = [
                     (point, index) = args
                     segment = canvasLineSegment(end = point)
                     segment.edits.set(
-                        "${DefaultEditTypes.SPLIT_CANVAS_SEGMENT}",
+                        "${DefaultEditTypes.SPLIT_CANVAS_LINE_SEGMENT}",
                         createAddArgEdit(positions, index - 0.5, "'apos(' & x & ', ' & y & ')'")
                     )
                     segments += segment
@@ -168,8 +168,8 @@ const scopeExpressions: ExecutableExpression[] = [
                         verticalPos = positions.get(2 * it)
                     )
                     segment.edits.set(
-                        "${DefaultEditTypes.SPLIT_CANVAS_SEGMENT}",
-                        createAddArgEdit(positions, 2 * it - 0.5, "'0.5, apos(' & x & ', ' & y & ')'")
+                        "${DefaultEditTypes.SPLIT_CANVAS_AXIS_ALIGNED_SEGMENT}",
+                        createAddArgEdit(positions, 2 * it - 0.5, "pos & ', apos(' & x & ', ' & y & ')'")
                     )
                     segments += this.segment
                 }
@@ -202,8 +202,8 @@ const scopeExpressions: ExecutableExpression[] = [
                         end = endPoint
                     )
                     segment.edits.set(
-                        "${DefaultEditTypes.SPLIT_CANVAS_SEGMENT}",
-                        createAddArgEdit(positions, 3 * it + 1.5, "'apos(' & x & ', ' & y & '), 100, 100'")
+                        "${DefaultEditTypes.SPLIT_CANVAS_BEZIER_SEGMENT}",
+                        createAddArgEdit(positions, 3 * it + 1.5, "'apos(' & x & ', ' & y & '), ' & cx1 & ', ' & cy1")
                     )
                     segments += segment
                     startPoint = endPoint
@@ -224,8 +224,8 @@ const scopeExpressions: ExecutableExpression[] = [
                     end = endPoint
                 )
                 segment.edits.set(
-                    "${DefaultEditTypes.SPLIT_CANVAS_SEGMENT}",
-                    createAddArgEdit(positions, 3 * segmentCount - 1.5, "'apos(' & x & ', ' & y & '), 100, 100'")
+                    "${DefaultEditTypes.SPLIT_CANVAS_BEZIER_SEGMENT}",
+                    createAddArgEdit(positions, 3 * segmentCount - 1.5, "'apos(' & x & ', ' & y & '), ' & cx1 & ', ' & cy1")
                 )
                 segments += segment
                 it.self
@@ -311,6 +311,26 @@ const scopeExpressions: ExecutableExpression[] = [
                     }
                     self.start = result.over.start
                     self.contents = result.over.segments
+                } {
+                    if (self.contents.length == 1) {
+                        segment = self.contents.get(0)
+                        self.start.edits.set(
+                            "${DefaultEditTypes.MOVE_LPOS_POS}",
+                            createAddEdit(callback, "'over = start(' & pos & ').axisAligned(0.5, end(0.5))'")
+                        )
+                        segment.end.edits.set(
+                            "${DefaultEditTypes.MOVE_LPOS_POS}",
+                            createAddEdit(callback, "'over = start(0).axisAligned(0.5, end(' & pos & '))'")
+                        )
+                        segment.edits.set(
+                            "${DefaultEditTypes.AXIS_ALIGNED_SEGMENT_POS}",
+                            createAddEdit(callback, "'over = start(0).axisAligned(' & pos & ', end(0.5))'")
+                        )
+                        segment.edits.set(
+                            "${DefaultEditTypes.SPLIT_CANVAS_AXIS_ALIGNED_SEGMENT}",
+                            createAddEdit(callback, "'over = start(0).axisAligned(' & pos & ', apos(' & x & ', ' & y & '), ' & nextPos & ', end(0.5))'")
+                        )
+                    }
                 }
                 self
             `,
@@ -367,8 +387,8 @@ const scopeExpressions: ExecutableExpression[] = [
                     createAppendScopeEdit(target, "with", "'over = start(0).axisAligned(' & pos & ', end(0.5))'")
                 )
                 segment.edits.set(
-                    "${DefaultEditTypes.SPLIT_CANVAS_SEGMENT}",
-                    createAppendScopeEdit(target, "with", "'over = start(0).axisAligned(0.5, apos(' & x & ', ' & y & '), 0.5, end(0.5))'")
+                    "${DefaultEditTypes.SPLIT_CANVAS_AXIS_ALIGNED_SEGMENT}",
+                    createAppendScopeEdit(target, "with", "'over = start(0).axisAligned(' & pos & ', apos(' & x & ', ' & y & '), ' & nextPos & ', end(0.5))'")
                 )
 
                 connection = canvasConnection(

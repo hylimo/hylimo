@@ -15,5 +15,7 @@ export enum DefaultEditTypes {
 
     ROTATE = "update/rotate",
 
-    SPLIT_CANVAS_SEGMENT = "update/split-canvas-segment"
+    SPLIT_CANVAS_LINE_SEGMENT = "update/split-canvas-line-segment",
+    SPLIT_CANVAS_AXIS_ALIGNED_SEGMENT = "update/split-canvas-axis-aligned-segment",
+    SPLIT_CANVAS_BEZIER_SEGMENT = "update/split-canvas-bezier-segment"
 }
