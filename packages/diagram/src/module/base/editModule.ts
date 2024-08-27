@@ -70,7 +70,7 @@ function generateAddArgEdit(
 ): BaseObject {
     const keyValue = key.value.toNative();
     if (typeof keyValue === "number" && target.trailingArgumentExpressions.length > 0) {
-        const indexExpressionCount = target.innerArgumentExpressions.filter(entry => entry.name == undefined).length;
+        const indexExpressionCount = target.innerArgumentExpressions.filter((entry) => entry.name == undefined).length;
         if (keyValue + 1 > indexExpressionCount) {
             // the edit is impossible because it would be inserted after / in between trailing function arguments
             return context.null;

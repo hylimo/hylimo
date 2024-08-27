@@ -129,7 +129,14 @@ export abstract class ElementLayoutConfig implements LayoutConfig {
      * @param element the element this segment originates from
      * @returns the created arc segment
      */
-    protected arcSegment(cx: number, cy: number, endX: number, endY: number, radius: number, element: LayoutElement): ArcSegment {
+    protected arcSegment(
+        cx: number,
+        cy: number,
+        endX: number,
+        endY: number,
+        radius: number,
+        element: LayoutElement
+    ): ArcSegment {
         return {
             type: ArcSegment.TYPE,
             clockwise: true,

@@ -703,7 +703,7 @@ export class Layout {
             throw new Error("Target must be an invocation expression");
         }
         const listEntries = targetExpression.innerArgumentExpressions;
-        let targetPos = this.calculateAddArgPos(
+        const targetPos = this.calculateAddArgPos(
             key,
             listEntries,
             targetExpression.trailingArgumentExpressions.length > 0

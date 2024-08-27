@@ -74,13 +74,12 @@ export class SCanvasElement
         });
         this.cachedProperty<Matrix>("parentToLocalMatrix", () => {
             const position = this.position;
-            return compose(translate(position.x, position.y), rotateDEG(this.rotation))
+            return compose(translate(position.x, position.y), rotateDEG(this.rotation));
         });
         this.cachedProperty<Matrix>("localToParentMatrix", () => {
             const position = this.position;
             return compose(rotateDEG(-this.rotation), translate(-position.x, -position.y));
         });
-
     }
 
     override get dependencies(): string[] {
