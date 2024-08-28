@@ -331,7 +331,7 @@ const scopeExpressions: ExecutableExpression[] = [
                 callback = optionalCallback ?? {}
                 result = object(sections = list())
                 result.section = listWrapper {
-                    sectionIndex = it.section
+                    sectionIndex = args.section
                     newSection = it
                     if(sectionIndex == null) {
                         result.sections += newSection

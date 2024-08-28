@@ -147,7 +147,7 @@ const scopeExpressions: ExecutableExpression[] = [
             lineBuilderProto = object()
             lineBuilderProto.line = listWrapper {
                 positions = it
-                segments = positions.self.segments
+                segments = args.self.segments
                 positions.forEach {
                     (point, index) = args
                     segment = canvasLineSegment(end = point)
@@ -161,7 +161,7 @@ const scopeExpressions: ExecutableExpression[] = [
             }
             lineBuilderProto.axisAligned = listWrapper {
                 positions = it
-                segments = positions.self.segments
+                segments = args.self.segments
                 range(positions.length / 2).forEach {
                     segment = canvasAxisAlignedSegment(
                         end = positions.get(2 * it + 1),
@@ -177,7 +177,7 @@ const scopeExpressions: ExecutableExpression[] = [
             }
             lineBuilderProto.bezier = listWrapper {
                 positions = it
-                self = positions.self
+                self = args.self
                 segments = self.segments
                 segmentCount = (positions.length - 2) / 3
                 startPoint = if(segments.length > 0) {
