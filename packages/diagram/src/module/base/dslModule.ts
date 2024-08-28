@@ -69,8 +69,8 @@ const scopeExpressions: ExecutableExpression[] = [
                 docs: "Create a relative point",
                 params: [
                     [0, "the target to which the point is relative", elementType()],
-                    [1, "the x coordinate", numberType],
-                    [2, "the y coordinate", numberType]
+                    [1, "the x coordinate", optional(numberType)],
+                    [2, "the y coordinate", optional(numberType)]
                 ],
                 returns: "The created relative point"
             }

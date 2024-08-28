@@ -203,6 +203,10 @@ export const editModule = InterpreterModule.create(
                         const expression = `$string(${target.value} + ${deltaExp})`;
                         return generateEdit(target, { value: context.newString(expression) }, "replace", context);
                     }
+                    if (target instanceof MissingArgumentSource) {
+                        const expression = `$string(${deltaExp})`;
+                        return generateReplaceOrAddArgEdit(target, { value: context.newString(expression) }, context);
+                    }
 
                     if (target instanceof InvocationExpression) {
                         const operator = target.target;

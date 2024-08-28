@@ -118,7 +118,7 @@ export namespace EditSpecification {
             return false;
         }
         definedEntries.sort((a, b) => a.spec.range[0] - b.spec.range[0]);
-        for (let i = 1; i < entries.length; i++) {
+        for (let i = 1; i < definedEntries.length; i++) {
             const { spec, index } = definedEntries[i];
             const { spec: lastSpec, index: lastIndex } = definedEntries[i - 1];
             const currentStart = spec.range[0];

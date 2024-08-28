@@ -12,14 +12,9 @@ import {
     TextDocumentContentChangeEvent
 } from "vscode-languageserver";
 import { parseTemplate } from "./template.js";
-import { AddArgEditSpecificationEntry, groupBy, IndexedModificationSpecificationEntry } from "@hylimo/diagram-common";
+import { groupBy, IndexedModificationSpecificationEntry } from "@hylimo/diagram-common";
 import { AddEditEngine } from "./addEditEngine.js";
-import {
-    AddEditSpecificationEntry,
-    BaseLayoutedDiagram,
-    EditSpecification,
-    EditSpecificationEntry
-} from "@hylimo/diagram-common";
+import { AddEditSpecificationEntry, BaseLayoutedDiagram, EditSpecification } from "@hylimo/diagram-common";
 import { EditHandlerRegistry } from "../handlers/editHandlerRegistry.js";
 import { AddArgEditEngine } from "./addArgEditEngine.js";
 
@@ -115,7 +110,7 @@ export class TransactionalEdit {
             const end = textDocument.offsetAt(change.range.end);
             const delta = change.text.length - (end - start);
             for (const entry of this.engines) {
-                if (entry.start > end) {
+                if (entry.start >= end) {
                     entry.start += delta;
                     entry.end += delta;
                 } else if (entry.start >= start) {

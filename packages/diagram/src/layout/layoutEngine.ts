@@ -613,7 +613,7 @@ export class Layout {
             const entry = template.getLocalFieldOrUndefined(i)!.value;
             if (isString(entry)) {
                 parsedTemplate.push(entry.value);
-            } else if (isWrapperObject(entry)) {
+            } else if (isWrapperObject(entry) && entry.wrapped instanceof Expression) {
                 const expression = entry.wrapped as Expression;
                 parsedTemplate.push({ range: expression.range });
             } else {
