@@ -147,20 +147,22 @@ const scopeExpressions: ExecutableExpression[] = [
             lineBuilderProto = object()
             lineBuilderProto.line = listWrapper {
                 positions = it
+                target = args
                 segments = args.self.segments
                 positions.forEach {
                     (point, index) = args
                     segment = canvasLineSegment(end = point)
                     segment.edits.set(
                         "${DefaultEditTypes.SPLIT_CANVAS_LINE_SEGMENT}",
-                        createAddArgEdit(positions, index - 0.5, "'apos(' & x & ', ' & y & ')'")
+                        createAddArgEdit(target, index - 0.5, "'apos(' & x & ', ' & y & ')'")
                     )
                     segments += segment
                 }
-                it.self
+                args.self
             }
             lineBuilderProto.axisAligned = listWrapper {
                 positions = it
+                target = args
                 segments = args.self.segments
                 range(positions.length / 2).forEach {
                     segment = canvasAxisAlignedSegment(
@@ -169,14 +171,15 @@ const scopeExpressions: ExecutableExpression[] = [
                     )
                     segment.edits.set(
                         "${DefaultEditTypes.SPLIT_CANVAS_AXIS_ALIGNED_SEGMENT}",
-                        createAddArgEdit(positions, 2 * it - 0.5, "pos & ', apos(' & x & ', ' & y & ')'")
+                        createAddArgEdit(target, 2 * it - 0.5, "pos & ', apos(' & x & ', ' & y & ')'")
                     )
                     segments += this.segment
                 }
-                it.self
+                args.self
             }
             lineBuilderProto.bezier = listWrapper {
                 positions = it
+                target = args
                 self = args.self
                 segments = self.segments
                 segmentCount = (positions.length - 2) / 3
@@ -203,7 +206,7 @@ const scopeExpressions: ExecutableExpression[] = [
                     )
                     segment.edits.set(
                         "${DefaultEditTypes.SPLIT_CANVAS_BEZIER_SEGMENT}",
-                        createAddArgEdit(positions, 3 * it + 1.5, "'apos(' & x & ', ' & y & '), ' & cx1 & ', ' & cy1")
+                        createAddArgEdit(target, 3 * it + 1.5, "'apos(' & x & ', ' & y & '), ' & cx1 & ', ' & cy1")
                     )
                     segments += segment
                     startPoint = endPoint
@@ -225,10 +228,10 @@ const scopeExpressions: ExecutableExpression[] = [
                 )
                 segment.edits.set(
                     "${DefaultEditTypes.SPLIT_CANVAS_BEZIER_SEGMENT}",
-                    createAddArgEdit(positions, 3 * segmentCount - 1.5, "'apos(' & x & ', ' & y & '), ' & cx1 & ', ' & cy1")
+                    createAddArgEdit(target, 3 * segmentCount - 1.5, "'apos(' & x & ', ' & y & '), ' & cx1 & ', ' & cy1")
                 )
                 segments += segment
-                it.self
+                args.self
             }
         `
     ),
