@@ -1,4 +1,4 @@
-import { DefaultEditTypes, Point } from "@hylimo/diagram-common";
+import { DefaultEditTypes, EditSpecification, Point } from "@hylimo/diagram-common";
 import { injectable } from "inversify";
 import { VNode } from "snabbdom";
 import { IView, IViewArgs, RenderingContext, svg } from "sprotty";
@@ -53,7 +53,10 @@ export class CanvasElementView implements IView {
         const children = context.renderChildren(model);
         if (model.selected) {
             children.push(this.generateSelectedRect(model));
-            if (DefaultEditTypes.ROTATE in model.edits) {
+            if (
+                DefaultEditTypes.ROTATE in model.edits &&
+                EditSpecification.isConsistent([[model.edits[DefaultEditTypes.ROTATE]]])
+            ) {
                 children.push(this.generateRotationIcon(model));
             }
             children.push(...this.generateResizeBorder(model));

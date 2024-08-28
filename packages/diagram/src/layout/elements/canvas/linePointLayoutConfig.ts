@@ -121,7 +121,7 @@ export class LinePointLayoutConfig extends CanvasPointLayoutConfig {
                     args.self._distance
                 } {
                     args.self._distance = it
-                    args.self.edits.set("${DefaultEditTypes.MOVE_LPOS_DIST}", createReplaceEdit(it, "dist"))
+                    args.self.edits.set("${DefaultEditTypes.MOVE_LPOS_DIST}", createReplaceEdit(it, "$string(dist)"))
                 }
                 
                 elementProto

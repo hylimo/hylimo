@@ -4,9 +4,9 @@ import { DefaultEditTypes } from "@hylimo/diagram-common";
 import { roundToPrecision } from "../../util/roundToPrecision.js";
 
 /**
- * Handler for splitCanvasSegment edits
+ * Handler for splitCanvasLineSegment edits
  */
-export const splitCanvasSegmentHandler: EditHandler<SplitCanvasLineSegmentEdit> = {
+export const splitCanvasLineSegmentHandler: EditHandler<SplitCanvasLineSegmentEdit> = {
     type: DefaultEditTypes.SPLIT_CANVAS_LINE_SEGMENT,
 
     predictActionDiff() {

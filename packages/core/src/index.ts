@@ -48,6 +48,7 @@ export * from "./runtime/objects/baseObject.js";
 export * from "./runtime/objects/booleanObject.js";
 export * from "./runtime/objects/fullObject.js";
 export * from "./runtime/objects/functionObject.js";
+export * from "./runtime/objects/generateArgs.js";
 export * from "./runtime/objects/labeledValue.js";
 export * from "./runtime/objects/literalObject.js";
 export * from "./runtime/objects/nullObject.js";

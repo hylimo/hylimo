@@ -82,7 +82,7 @@ export class FullObject extends BaseObject {
     /**
      * Gets the default value for a field
      * By default, null with no source is returned
-     * 
+     *
      * @param key the key of the field
      * @param context the context in which this is performed
      * @returns the default value

@@ -31,7 +31,7 @@ export * from "./edit/handlers/moveYHandler.js";
 export * from "./edit/handlers/resizeHeightHandler.js";
 export * from "./edit/handlers/resizeWidthHandler.js";
 export * from "./edit/handlers/rotationHandler.js";
-export * from "./edit/handlers/splitCanvasSegmentHandler.js";
+export * from "./edit/handlers/splitCanvasLineSegmentHandler.js";
 export * from "./edit/diagramServer.js";
 export * from "./edit/transactionManager.js";
 export * from "./format/comments.js";

@@ -12,7 +12,7 @@ import {
     TextDocumentContentChangeEvent
 } from "vscode-languageserver";
 import { parseTemplate } from "./template.js";
-import { AddArgEditSpecificationEntry, groupBy } from "@hylimo/diagram-common";
+import { AddArgEditSpecificationEntry, groupBy, IndexedModificationSpecificationEntry } from "@hylimo/diagram-common";
 import { AddEditEngine } from "./addEditEngine.js";
 import {
     AddEditSpecificationEntry,
@@ -322,7 +322,7 @@ export class TransactionalEdit {
     private generateAddArgEdits(edits: IndexedModificationSpecificationEntry[], textDocument: TextDocument) {
         const addEdits = edits.filter((e) => IndexedModificationSpecificationEntry.is(e, "add-arg"));
         for (const edits of groupBy(addEdits, (edit) => edit.spec.range[0]).values()) {
-            const sortedEdits = this.computeSortedUniqueAddArgEdits(edits);
+            const sortedEdits = IndexedModificationSpecificationEntry.computeSortedUniqueAddArgEdits(edits);
             const firstSpec = sortedEdits[0].spec;
             const indentation = this.extractIndentation(textDocument, firstSpec.listRange[0]);
             const parsedTemplates = sortedEdits.map((edit) => {
@@ -350,38 +350,6 @@ export class TransactionalEdit {
     }
 
     /**
-     * Computes the sorted unique add list entry edits
-     * Removes duplicates (same index, key and template) and sorts the edits with numeric keys
-     *
-     * @param edits the edits to filter and sort
-     * @returns the sorted unique add list entry edits
-     */
-    private computeSortedUniqueAddArgEdits(
-        edits: IndexedModificationSpecificationEntry<AddArgEditSpecificationEntry>[]
-    ): IndexedModificationSpecificationEntry<AddArgEditSpecificationEntry>[] {
-        const uniqueEdits = [
-            ...new Map(
-                edits.map((edit) => {
-                    const spec = edit.spec;
-                    return [`${edit.index} ${spec.key} ${spec.template}`, edit] as const;
-                })
-            ).values()
-        ];
-        const namedEdits = [];
-        const indexedEdits = [];
-        for (const edit of uniqueEdits) {
-            if (typeof edit.spec.key === "string") {
-                namedEdits.push(edit);
-            } else {
-                indexedEdits.push(edit);
-            }
-        }
-        indexedEdits.sort((a, b) => (a.spec.key as number) - (b.spec.key as number));
-        const sortedEdits = [...indexedEdits, ...namedEdits];
-        return sortedEdits;
-    }
-
-    /**
      * Extracts the indentation of the given line and returns it as a string.
      *
      * @param document the document from whicht to extract the line
@@ -397,37 +365,5 @@ export class TransactionalEdit {
         } else {
             return match[0];
         }
-    }
-}
-
-/**
- * Modification specification entry with an index
- *
- * @param T the type of the specification
- */
-interface IndexedModificationSpecificationEntry<T extends EditSpecificationEntry = EditSpecificationEntry> {
-    /**
-     * The index of the used values when evaluating the template
-     */
-    index: number;
-    /**
-     * The edit specification entry
-     */
-    spec: T;
-}
-
-namespace IndexedModificationSpecificationEntry {
-    /**
-     * Checks if the provided entry is of the given type
-     *
-     * @param entry the entry to check
-     * @param type the type to check for
-     * @returns true if the entry is of the given type
-     */
-    export function is<K extends EditSpecificationEntry["type"]>(
-        entry: IndexedModificationSpecificationEntry,
-        type: K
-    ): entry is IndexedModificationSpecificationEntry<EditSpecificationEntry & { type: K }> {
-        return entry.spec.type === type;
     }
 }

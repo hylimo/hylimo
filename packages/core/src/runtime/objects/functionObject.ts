@@ -1,6 +1,5 @@
 import { AbstractInvocationExpression } from "../../ast/abstractInvocationExpression.js";
-import {
-    ExecutableAbstractFunctionExpression} from "../ast/executableAbstractFunctionExpression.js";
+import { ExecutableAbstractFunctionExpression } from "../ast/executableAbstractFunctionExpression.js";
 import { ExecutableListEntry } from "../ast/executableListEntry.js";
 import { ExecutableFunctionExpression } from "../ast/executableFunctionExpression.js";
 import { ExecutableNativeFunctionExpression } from "../ast/executableNativeFunctionExpression.js";

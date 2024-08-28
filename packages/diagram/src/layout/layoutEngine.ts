@@ -703,7 +703,7 @@ export class Layout {
             throw new Error("Target must be an invocation expression");
         }
         const listEntries = targetExpression.innerArgumentExpressions;
-        const targetPos = this.calculateAddArgPos(
+        const [targetPos, requiredPreceeding] = this.calculateAddArgPos(
             key,
             listEntries,
             targetExpression.trailingArgumentExpressions.length > 0
@@ -717,7 +717,8 @@ export class Layout {
             range,
             listRange: parenthesisRange,
             isFirst: targetPos <= 0,
-            isLast: targetPos >= listEntries.length
+            isLast: targetPos >= listEntries.length,
+            requiredPreceeding
         };
     }
 
@@ -750,11 +751,15 @@ export class Layout {
      * @param key the key of the argument
      * @param listEntries the inner argument expressions
      * @param hasTrailingArg true if the call expression has a trailing argument
-     * @returns the position where the argument should be added
+     * @returns the position where the argument should be added, and the amount of required before-inserted arguments
      */
-    private calculateAddArgPos(key: string | number, listEntries: ListEntry[], hasTrailingArg: boolean): number {
+    private calculateAddArgPos(
+        key: string | number,
+        listEntries: ListEntry[],
+        hasTrailingArg: boolean
+    ): [number, number | undefined] {
         if (typeof key === "string") {
-            return listEntries.length;
+            return [listEntries.length, undefined];
         }
         let foundIndexArgs = 0;
         let targetPos = 0;
@@ -770,7 +775,13 @@ export class Layout {
         if (key + 1 > foundIndexArgs && hasTrailingArg) {
             throw new Error("Cannot add argument after or in between trailing function expressions");
         }
-
-        return targetPos;
+        if (Number.isInteger(key) && key >= 0) {
+            if (foundIndexArgs >= key + 1) {
+                throw new Error("Cannot add argument at index " + key + " as it is already occupied");
+            }
+            return [targetPos, key - foundIndexArgs];
+        } else {
+            return [targetPos, undefined];
+        }
     }
 }
