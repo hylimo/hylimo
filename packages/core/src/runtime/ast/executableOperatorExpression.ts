@@ -1,6 +1,6 @@
 import { OperatorExpression } from "../../ast/operatorExpression.js";
 import { InterpreterContext } from "../interpreter/interpreterContext.js";
-import { FieldEntry } from "../objects/baseObject.js";
+import { LabeledValue } from "../objects/labeledValue.js";
 import { SemanticFieldNames } from "../semanticFieldNames.js";
 import { ExecutableConstExpression } from "./executableConstExpression.js";
 import { ExecutableExpression } from "./executableExpression.js";
@@ -26,7 +26,7 @@ export class ExecutableOperatorExpression extends ExecutableExpression<OperatorE
         super(expression);
     }
 
-    override evaluateInternal(context: InterpreterContext): FieldEntry {
+    override evaluateInternal(context: InterpreterContext): LabeledValue {
         const targetValue = this.target.evaluate(context).value;
         return targetValue.invoke(
             [

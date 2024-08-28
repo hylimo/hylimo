@@ -4,7 +4,8 @@ import { ExecutableListEntry } from "../ast/executableListEntry.js";
 import { InterpreterContext } from "../interpreter/interpreterContext.js";
 import { RuntimeError } from "../runtimeError.js";
 import { SemanticFieldNames } from "../semanticFieldNames.js";
-import { BaseObject, FieldEntry } from "./baseObject.js";
+import { BaseObject } from "./baseObject.js";
+import { LabeledValue } from "./labeledValue.js";
 import { FullObject } from "./fullObject.js";
 
 /**
@@ -32,7 +33,7 @@ export class WrapperObject<T> extends BaseObject {
         super();
     }
 
-    override getFieldEntry(key: string | number, context: InterpreterContext, self?: BaseObject): FieldEntry {
+    override getField(key: string | number, context: InterpreterContext, self?: BaseObject): LabeledValue {
         if (key === SemanticFieldNames.PROTO) {
             return { value: this.proto };
         }
@@ -40,33 +41,28 @@ export class WrapperObject<T> extends BaseObject {
         if (value != undefined) {
             return { value: value(this.wrapped, context) };
         }
-        return this.proto.getFieldEntry(key, context, self ?? this);
+        return this.proto.getField(key, context, self ?? this);
     }
 
-    override getFieldEntries(context: InterpreterContext, self?: BaseObject): Record<string, FieldEntry> {
-        const entries: Record<string, FieldEntry> = this.proto.getFieldEntries(context, self ?? this);
+    override getFields(context: InterpreterContext, self?: BaseObject): Record<string, LabeledValue> {
+        const entries: Record<string, LabeledValue> = this.proto.getFields(context, self ?? this);
         for (const [key, value] of this.entries) {
             entries[key] = { value: value(this.wrapped, context) };
         }
         return entries;
     }
 
-    override setFieldEntry(
-        key: string | number,
-        value: FieldEntry,
-        context: InterpreterContext,
-        self?: BaseObject
-    ): void {
+    override setField(key: string | number, value: LabeledValue, context: InterpreterContext, self?: BaseObject): void {
         if (key === SemanticFieldNames.PROTO) {
             throw new RuntimeError("Cannot set field proto of a wrapped Object");
         } else {
-            this.proto.setFieldEntry(key, value, context, self ?? this);
+            this.proto.setField(key, value, context, self ?? this);
         }
     }
 
     override setLocalField(
         _key: string | number,
-        _value: FieldEntry,
+        _value: LabeledValue,
         _context: InterpreterContext,
         _self?: BaseObject
     ): void {
@@ -82,7 +78,7 @@ export class WrapperObject<T> extends BaseObject {
         _context: InterpreterContext,
         _scope?: FullObject,
         _callExpression?: AbstractInvocationExpression | OperatorExpression
-    ): FieldEntry {
+    ): LabeledValue {
         throw new RuntimeError("Invoke not supported");
     }
 

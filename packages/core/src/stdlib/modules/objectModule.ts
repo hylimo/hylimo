@@ -3,11 +3,12 @@ import { InterpreterModule } from "../../runtime/interpreter/interpreterModule.j
 import { assign, fun, id, jsFun, native, num, str } from "../../runtime/executableAstHelper.js";
 import { SemanticFieldNames } from "../../runtime/semanticFieldNames.js";
 import { assertFunction, assertObject } from "../typeHelpers.js";
-import { BaseObject, FieldEntry } from "../../runtime/objects/baseObject.js";
+import { BaseObject } from "../../runtime/objects/baseObject.js";
+import { LabeledValue } from "../../runtime/objects/labeledValue.js";
 import { StringObject } from "../../runtime/objects/stringObject.js";
 import { NumberObject } from "../../runtime/objects/numberObject.js";
 import { RuntimeError } from "../../runtime/runtimeError.js";
-import { generateArgs } from "../../runtime/objects/functionObject.js";
+import { generateArgs } from "../../runtime/objects/generateArgs.js";
 import { or } from "../../types/or.js";
 import { stringType } from "../../types/string.js";
 import { numberType } from "../../types/number.js";
@@ -52,7 +53,7 @@ export const objectModule = InterpreterModule.create(
                 "toString",
                 jsFun(
                     (args, context) => {
-                        const self = args.getFieldEntry(SemanticFieldNames.SELF, context).value;
+                        const self = args.getField(SemanticFieldNames.SELF, context).value;
                         return context.newString(self.toString(context));
                     },
                     {
@@ -66,8 +67,8 @@ export const objectModule = InterpreterModule.create(
                 "get",
                 jsFun(
                     (args, context) => {
-                        const self = args.getField(SemanticFieldNames.SELF, context);
-                        return self.getFieldEntry(assertIndex(args.getField(0, context)), context);
+                        const self = args.getFieldValue(SemanticFieldNames.SELF, context);
+                        return self.getField(assertIndex(args.getFieldValue(0, context)), context);
                     },
                     {
                         docs: "Gets the field at the defined index. Takes the proto chain into account.",
@@ -87,9 +88,9 @@ export const objectModule = InterpreterModule.create(
                 "rawGet",
                 jsFun(
                     (args, context) => {
-                        const self = args.getField(SemanticFieldNames.SELF, context);
+                        const self = args.getFieldValue(SemanticFieldNames.SELF, context);
                         assertObject(self);
-                        return self.getLocalField(assertIndex(args.getField(0, context)), context);
+                        return self.getLocalField(assertIndex(args.getFieldValue(0, context)), context);
                     },
                     {
                         docs: "Gets the value of the field at the defined index. Only supported on objects, and does NOT take the proto chain into account.",
@@ -109,9 +110,9 @@ export const objectModule = InterpreterModule.create(
                 "delete",
                 jsFun(
                     (args, context) => {
-                        const self = args.getField(SemanticFieldNames.SELF, context);
+                        const self = args.getFieldValue(SemanticFieldNames.SELF, context);
                         assertObject(self);
-                        self.deleteField(assertIndex(args.getField(0, context)));
+                        self.deleteField(assertIndex(args.getFieldValue(0, context)));
                         return context.null;
                     },
                     {
@@ -132,10 +133,10 @@ export const objectModule = InterpreterModule.create(
                 "set",
                 jsFun(
                     (args, context) => {
-                        const self = args.getField(SemanticFieldNames.SELF, context);
+                        const self = args.getFieldValue(SemanticFieldNames.SELF, context);
                         assertObject(self);
-                        const value = args.getFieldEntry(1, context);
-                        self.setLocalField(assertIndex(args.getField(0, context)), value, context);
+                        const value = args.getField(1, context);
+                        self.setLocalField(assertIndex(args.getFieldValue(0, context)), value, context);
                         return value;
                     },
                     {
@@ -157,11 +158,11 @@ export const objectModule = InterpreterModule.create(
                 "defineProperty",
                 jsFun(
                     (args, context) => {
-                        const self = args.getField(SemanticFieldNames.SELF, context);
+                        const self = args.getFieldValue(SemanticFieldNames.SELF, context);
                         assertObject(self);
-                        const key = assertIndex(args.getField(0, context));
-                        const getter = args.getField(1, context);
-                        const setter = args.getField(2, context);
+                        const key = assertIndex(args.getFieldValue(0, context));
+                        const getter = args.getFieldValue(1, context);
+                        const setter = args.getFieldValue(2, context);
                         assertFunction(getter, "getter");
                         assertFunction(setter, "setter");
                         self.defineProperty(key, getter, setter);
@@ -183,11 +184,11 @@ export const objectModule = InterpreterModule.create(
                 "forEach",
                 jsFun(
                     (args, context) => {
-                        const self = args.getField(SemanticFieldNames.SELF, context);
-                        const callback = args.getField(0, context);
+                        const self = args.getFieldValue(SemanticFieldNames.SELF, context);
+                        const callback = args.getFieldValue(0, context);
                         assertFunction(callback, "first positional argument of forEach");
                         assertObject(self, "self argument of forEach");
-                        let lastValue: FieldEntry = { value: context.null };
+                        let lastValue: LabeledValue = { value: context.null };
                         self.fields.forEach((value, key) => {
                             const keyExpression = typeof key === "string" ? str(key) : num(key);
                             lastValue = callback.invoke(
@@ -211,8 +212,8 @@ export const objectModule = InterpreterModule.create(
                 "==",
                 jsFun(
                     (args, context) => {
-                        const self = args.getField(SemanticFieldNames.SELF, context);
-                        const other = args.getField(0, context);
+                        const self = args.getFieldValue(SemanticFieldNames.SELF, context);
+                        const other = args.getFieldValue(0, context);
                         return context.newBoolean(self === other);
                     },
                     {
@@ -229,9 +230,9 @@ export const objectModule = InterpreterModule.create(
         assign(
             "object",
             native(
-                (args, context) => {
+                (args, context, _staticScope, callExpression) => {
                     args.shift();
-                    const evaluatedArgs = generateArgs(args, context, undefined);
+                    const evaluatedArgs = generateArgs(args, context, undefined, callExpression);
                     return { value: evaluatedArgs };
                 },
                 {

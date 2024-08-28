@@ -1,4 +1,4 @@
-import { optional, objectType } from "@hylimo/core";
+import { optional } from "@hylimo/core";
 import { AttributeConfig } from "../../layoutElement.js";
 import { CanvasContentLayoutConfig } from "./canvasContentLayoutConfig.js";
 import { elementType } from "../../../module/base/types.js";
@@ -21,11 +21,6 @@ export abstract class EditableCanvasContentLayoutConfig extends CanvasContentLay
                     description:
                         "the CanvasContent itself, used for the metadata, should be assigned to an expression where infix functions can be added",
                     type: optional(elementType())
-                },
-                {
-                    name: "scopes",
-                    description: "function expressions which can be modified",
-                    type: objectType()
                 },
                 ...additionalAttributes
             ],

@@ -20,7 +20,7 @@ export function objectType(types: Map<string | number, Type> = new Map()): Type 
                 };
             }
             for (const [key, entryType] of types.entries()) {
-                const entryValue = value.getField(key, context);
+                const entryValue = value.getFieldValue(key, context);
                 const entryRes = entryType.matches(entryValue, context);
                 if (entryRes !== true) {
                     entryRes.path.unshift(key.toString());

@@ -24,13 +24,13 @@ export class CanvasAxisAlignedSegmentLayoutConfig extends CanvasConnectionSegmen
     }
 
     override layout(layout: Layout, element: LayoutElement, position: Point, size: Size, id: string): Element[] {
-        const verticalPosFieldEntry = element.element.getLocalFieldOrUndefined("_verticalPos");
+        const verticalPosValue = element.element.getLocalFieldOrUndefined("_verticalPos");
         const result: CanvasAxisAlignedSegment = {
             id,
             type: CanvasAxisAlignedSegment.TYPE,
             children: [],
             end: this.getContentId(element, "end"),
-            pos: verticalPosFieldEntry?.value?.toNative(),
+            pos: verticalPosValue?.value?.toNative(),
             edits: element.edits
         };
         return [result];

@@ -1,6 +1,6 @@
 import { DestructuringExpression } from "../../ast/destructuringExpression.js";
 import { InterpreterContext } from "../interpreter/interpreterContext.js";
-import { FieldEntry } from "../objects/baseObject.js";
+import { LabeledValue } from "../objects/labeledValue.js";
 import { ExecutableExpression } from "./executableExpression.js";
 
 /**
@@ -22,10 +22,10 @@ export class ExecutableDestructuringExpression extends ExecutableExpression<Dest
         super(expression);
     }
 
-    override evaluateInternal(context: InterpreterContext): FieldEntry {
+    override evaluateInternal(context: InterpreterContext): LabeledValue {
         const valueValue = this.value.evaluateWithSource(context);
         for (let i = 0; i < this.names.length; i++) {
-            context.currentScope.setLocalField(this.names[i], valueValue.value.getFieldEntry(i, context), context);
+            context.currentScope.setLocalField(this.names[i], valueValue.value.getField(i, context), context);
         }
         return valueValue;
     }

@@ -35,8 +35,8 @@ export class RelativePointLayoutConfig extends CanvasPointLayoutConfig {
     }
 
     override layout(layout: Layout, element: LayoutElement, position: Point, size: Size, id: string): Element[] {
-        const offsetXFieldEntry = element.element.getLocalFieldOrUndefined("_offsetX");
-        const offsetYFieldEntry = element.element.getLocalFieldOrUndefined("_offsetY");
+        const offsetXValue = element.element.getLocalFieldOrUndefined("_offsetX");
+        const offsetYValue = element.element.getLocalFieldOrUndefined("_offsetY");
         const target = this.getContentId(
             element,
             element.element.getLocalFieldOrUndefined("target")!.value as FullObject
@@ -44,8 +44,8 @@ export class RelativePointLayoutConfig extends CanvasPointLayoutConfig {
         const result: RelativePoint = {
             type: RelativePoint.TYPE,
             id,
-            offsetX: offsetXFieldEntry?.value?.toNative(),
-            offsetY: offsetYFieldEntry?.value.toNative(),
+            offsetX: offsetXValue?.value?.toNative(),
+            offsetY: offsetYValue?.value.toNative(),
             target,
             children: [],
             edits: element.edits

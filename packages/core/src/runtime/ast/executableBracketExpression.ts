@@ -1,6 +1,6 @@
 import { BracketExpression } from "../../ast/bracketExpression.js";
 import { InterpreterContext } from "../interpreter/interpreterContext.js";
-import { FieldEntry } from "../objects/baseObject.js";
+import { LabeledValue } from "../objects/labeledValue.js";
 import { ExecutableExpression } from "./executableExpression.js";
 
 /**
@@ -20,11 +20,11 @@ export class ExecutableBracketExpression extends ExecutableExpression<BracketExp
         super(expression);
     }
 
-    override evaluateInternal(context: InterpreterContext): FieldEntry {
+    override evaluateInternal(context: InterpreterContext): LabeledValue {
         return this.innerExpression.evaluate(context);
     }
 
-    override evaluateWithSource(context: InterpreterContext): FieldEntry {
+    override evaluateWithSource(context: InterpreterContext): LabeledValue {
         return this.innerExpression.evaluateWithSource(context);
     }
 }

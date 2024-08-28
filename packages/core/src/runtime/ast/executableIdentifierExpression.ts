@@ -1,6 +1,6 @@
 import { IdentifierExpression } from "../../ast/identifierExpression.js";
 import { InterpreterContext } from "../interpreter/interpreterContext.js";
-import { FieldEntry } from "../objects/baseObject.js";
+import { LabeledValue } from "../objects/labeledValue.js";
 import { ExecutableExpression } from "./executableExpression.js";
 
 /**
@@ -20,7 +20,7 @@ export class ExecutableIdentifierExpression extends ExecutableExpression<Identif
         super(expression);
     }
 
-    override evaluateInternal(context: InterpreterContext): FieldEntry {
-        return context.currentScope.getFieldEntry(this.identifier, context);
+    override evaluateInternal(context: InterpreterContext): LabeledValue {
+        return context.currentScope.getField(this.identifier, context);
     }
 }

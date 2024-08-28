@@ -92,7 +92,7 @@ const scopeExpressions: ExecutableExpression[] = [
                     [
                         1,
                         "the relative position on the line, number between 0 and 1, or a tuple of the segment and the relative position on the segment",
-                        LinePointLayoutConfig.POS_TYPE
+                        optional(LinePointLayoutConfig.POS_TYPE)
                     ],
                     [2, "the distance from the line", optional(numberType)]
                 ],
@@ -113,7 +113,6 @@ const scopeExpressions: ExecutableExpression[] = [
                     } {
                         first.class += className
                     }
-                    first.scopes.styles = second
                     scope.styles {
                         cls(className) {
                             this.any = any
@@ -240,7 +239,6 @@ const scopeExpressions: ExecutableExpression[] = [
         fun(
             `
                 (self, callback) = args
-                self.scopes.layout = callback
                 result = object(pos = null, width = null, height = null, rotation = null)
                 callback.callWithScope(result)
                 if(result.pos != null) {
@@ -282,7 +280,6 @@ const scopeExpressions: ExecutableExpression[] = [
         fun(
             `
                 (self, callback) = args
-                self.scopes.with = callback
                 result = object(
                     over = null,
                     end = self.endProvider,
@@ -297,12 +294,11 @@ const scopeExpressions: ExecutableExpression[] = [
                         }
                         labelCanvasElement = canvasElement(
                             content = text(contents = labelContent, class = list("label")),
-                            pos = scope.lpos(self, pos ?? 0, distance, seg = args.seg),
-                            rotation = rotation,
-                            scopes = object(),
+                            pos = scope.lpos(self, pos, distance, seg = args.seg),
                             class = list("label-element")
                         )
                         scope.internal.registerCanvasElement(labelCanvasElement, args)
+                        labelCanvasElement.rotation = rotation
                         labelCanvasElement
                     }
                 )
@@ -401,7 +397,6 @@ const scopeExpressions: ExecutableExpression[] = [
                     ),
                     startMarker = if(args.startMarkerFactory != null) { startMarkerFactory() },
                     endMarker = if(args.endMarkerFactory != null) { endMarkerFactory() },
-                    scopes = object(),
                     class = class
                 )
                 connection.startProvider = startProvider
@@ -524,9 +519,9 @@ const scopeExpressions: ExecutableExpression[] = [
             scope.element = {
                 callbackOrElement = it
                 this.element = if(callbackOrElement._type == "element") {
-                    canvasElement(content = callbackOrElement, scopes = object())
+                    canvasElement(content = callbackOrElement)
                 } {
-                    canvasElement(content = callbackOrElement(), scopes = object())
+                    canvasElement(content = callbackOrElement())
                 }
                 scope.internal.registerCanvasElement(this.element, args)
             }

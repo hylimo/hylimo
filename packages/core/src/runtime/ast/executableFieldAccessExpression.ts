@@ -1,6 +1,6 @@
 import { FieldAccessExpression } from "../../ast/fieldAccessExpression.js";
 import { InterpreterContext } from "../interpreter/interpreterContext.js";
-import { FieldEntry } from "../objects/baseObject.js";
+import { LabeledValue } from "../objects/labeledValue.js";
 import { ExecutableExpression } from "./executableExpression.js";
 
 /**
@@ -22,8 +22,8 @@ export class ExecutableFieldAccessExpression extends ExecutableExpression<FieldA
         super(expression);
     }
 
-    override evaluateInternal(context: InterpreterContext): FieldEntry {
+    override evaluateInternal(context: InterpreterContext): LabeledValue {
         const targetValue = this.target.evaluate(context).value;
-        return targetValue.getFieldEntry(this.name, context);
+        return targetValue.getField(this.name, context);
     }
 }

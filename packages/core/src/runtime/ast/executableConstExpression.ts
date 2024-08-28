@@ -1,5 +1,5 @@
 import { InterpreterContext } from "../interpreter/interpreterContext.js";
-import { FieldEntry } from "../objects/baseObject.js";
+import { LabeledValue } from "../objects/labeledValue.js";
 import { ExecutableExpression } from "./executableExpression.js";
 
 /**
@@ -11,11 +11,11 @@ export class ExecutableConstExpression extends ExecutableExpression {
      *
      * @param value the value to wrap
      */
-    constructor(readonly value: FieldEntry) {
+    constructor(readonly value: LabeledValue) {
         super(undefined);
     }
 
-    override evaluateInternal(_context: InterpreterContext): FieldEntry {
+    override evaluateInternal(_context: InterpreterContext): LabeledValue {
         return this.value;
     }
 }

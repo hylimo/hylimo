@@ -1,5 +1,5 @@
 import { InterpreterContext } from "../interpreter/interpreterContext.js";
-import { FieldEntry } from "../objects/baseObject.js";
+import { LabeledValue } from "../objects/labeledValue.js";
 import { ExecutableExpression } from "./executableExpression.js";
 
 /**
@@ -12,11 +12,11 @@ export class ExecutableNativeExpression extends ExecutableExpression {
      * @param expression the expression this represents
      * @param callback the callback to evaluate
      */
-    constructor(readonly callback: (context: InterpreterContext) => FieldEntry) {
+    constructor(readonly callback: (context: InterpreterContext) => LabeledValue) {
         super(undefined);
     }
 
-    override evaluateInternal(context: InterpreterContext): FieldEntry {
+    override evaluateInternal(context: InterpreterContext): LabeledValue {
         return this.callback(context);
     }
 }

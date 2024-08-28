@@ -265,7 +265,6 @@ const scopeExpressions: ExecutableExpression[] = [
             `
                 (name, optionalCallback, keywords) = args
                 packageElement = canvasElement(
-                    scopes = object(),
                     class = list("package-element"),
                     content = vbox(
                         contents = list(
@@ -297,7 +296,6 @@ const scopeExpressions: ExecutableExpression[] = [
             `
                 textContent = it
                 commentElement = canvasElement(
-                    scopes = object(),
                     content = stack(
                         contents = list(
                             path(path = "M0 0 H 1", vAlign = "top", class = list("comment-top")),
@@ -377,7 +375,6 @@ const scopeExpressions: ExecutableExpression[] = [
                 }
                 classElement = canvasElement(
                     content = renderedClass,
-                    scopes = object(default = callback),
                     class = list("class-element")
                 )
                 targetScope = args.self

@@ -1,17 +1,16 @@
 import { AbstractInvocationExpression } from "../../ast/abstractInvocationExpression.js";
-import { validate } from "../../types/validate.js";
 import {
-    ExecutableAbstractFunctionExpression,
-    FunctionDocumentation
-} from "../ast/executableAbstractFunctionExpression.js";
+    ExecutableAbstractFunctionExpression} from "../ast/executableAbstractFunctionExpression.js";
 import { ExecutableListEntry } from "../ast/executableListEntry.js";
 import { ExecutableFunctionExpression } from "../ast/executableFunctionExpression.js";
 import { ExecutableNativeFunctionExpression } from "../ast/executableNativeFunctionExpression.js";
 import { InterpreterContext } from "../interpreter/interpreterContext.js";
 import { SemanticFieldNames } from "../semanticFieldNames.js";
-import { BaseObject, FieldEntry, SimpleObject } from "./baseObject.js";
+import { BaseObject, SimpleObject } from "./baseObject.js";
+import { LabeledValue } from "./labeledValue.js";
 import { FullObject } from "./fullObject.js";
 import { OperatorExpression } from "../../ast/operatorExpression.js";
+import { generateArgs } from "./generateArgs.js";
 
 /**
  * Base class for js functions and normal functions
@@ -33,18 +32,18 @@ export abstract class AbstractFunctionObject<T extends ExecutableAbstractFunctio
         super(proto);
     }
 
-    override getFieldEntry(key: string | number, context: InterpreterContext): FieldEntry {
+    override getField(key: string | number, context: InterpreterContext): LabeledValue {
         if (key === SemanticFieldNames.DOCS) {
             return {
                 value: this.docs
             };
         } else {
-            return super.getFieldEntry(key, context);
+            return super.getField(key, context);
         }
     }
 
-    override getFieldEntries(context: InterpreterContext): Record<string, FieldEntry> {
-        const result = super.getFieldEntries(context);
+    override getFields(context: InterpreterContext): Record<string, LabeledValue> {
+        const result = super.getFields(context);
         if (this.docs !== undefined) {
             result[SemanticFieldNames.DOCS] = {
                 value: this.docs
@@ -53,15 +52,15 @@ export abstract class AbstractFunctionObject<T extends ExecutableAbstractFunctio
         return result;
     }
 
-    override setFieldEntry(key: string | number, value: FieldEntry, context: InterpreterContext): void {
+    override setField(key: string | number, value: LabeledValue, context: InterpreterContext): void {
         if (key === SemanticFieldNames.DOCS) {
             this.docs = value.value;
         } else {
-            super.setFieldEntry(key, value, context, this);
+            super.setField(key, value, context, this);
         }
     }
 
-    override setLocalField(key: string | number, value: FieldEntry, context: InterpreterContext) {
+    override setLocalField(key: string | number, value: LabeledValue, context: InterpreterContext) {
         if (key === SemanticFieldNames.DOCS) {
             this.docs = value.value;
         } else {
@@ -80,46 +79,6 @@ export abstract class AbstractFunctionObject<T extends ExecutableAbstractFunctio
     override toNative(): any {
         return null;
     }
-}
-
-/**
- * * Generates the arguments map based on argumentExpressions
- *
- * @param context context in which this is performed
- * @param args arguments to evaluate
- * @param types optional types for type checking
- * @returns the generated args
- * @throws RuntimeError when the provided arguments to not match provided types
- */
-export function generateArgs(
-    args: ExecutableListEntry[],
-    context: InterpreterContext,
-    documentation: FunctionDocumentation | undefined
-): FullObject {
-    const argsObject = context.newObject();
-    let indexCounter = 0;
-    for (const argumentExpression of args) {
-        const value = argumentExpression.value.evaluateWithSource(context);
-        argsObject.setLocalField(argumentExpression.name ?? indexCounter++, value, context, undefined);
-    }
-    for (const entry of documentation?.params ?? []) {
-        const [key, description, type] = entry;
-        if (type != undefined) {
-            const argValue = argsObject.getLocalField(key, context, undefined).value;
-            validate(type, `Invalid value for parameter ${key}: ${description}`, argValue, context, () => {
-                if (typeof key === "number") {
-                    const indexArguments = args.filter((arg) => arg.name == undefined);
-                    if (indexArguments[key]) {
-                        return indexArguments[key].value.expression;
-                    }
-                } else if (typeof key === "string") {
-                    return [...args].reverse().find((arg) => arg.name === key)?.value?.expression;
-                }
-                return undefined;
-            });
-        }
-    }
-    return argsObject;
 }
 
 /**
@@ -148,7 +107,7 @@ export class FunctionObject extends AbstractFunctionObject<ExecutableFunctionExp
         context: InterpreterContext,
         scope?: FullObject,
         callExpression?: AbstractInvocationExpression | OperatorExpression
-    ): FieldEntry {
+    ): LabeledValue {
         context.nextStep();
         const oldScope = context.currentScope;
         if (!scope) {
@@ -156,9 +115,9 @@ export class FunctionObject extends AbstractFunctionObject<ExecutableFunctionExp
             scope.setLocalField(SemanticFieldNames.PROTO, { value: this.parentScope }, context);
         }
         scope.setLocalField(SemanticFieldNames.THIS, { value: scope }, context);
-        const generatedArgs = generateArgs(args, context, this.definition.documentation);
+        const generatedArgs = generateArgs(args, context, this.definition.documentation, callExpression);
         scope.setLocalField(SemanticFieldNames.ARGS, { value: generatedArgs, source: callExpression }, context);
-        scope.setLocalField(SemanticFieldNames.IT, generatedArgs.getFieldEntry(0, context), context);
+        scope.setLocalField(SemanticFieldNames.IT, generatedArgs.getField(0, context), context);
         context.currentScope = scope;
         let lastValue: BaseObject = context.null;
         for (const expression of this.definition.expressions) {
@@ -200,7 +159,7 @@ export class NativeFunctionObject extends AbstractFunctionObject<ExecutableNativ
         context: InterpreterContext,
         _scope?: FullObject,
         callExpression?: AbstractInvocationExpression | OperatorExpression
-    ): FieldEntry {
+    ): LabeledValue {
         context.nextStep();
         const res = this.definition.callback(args, context, this.parentScope, callExpression);
         return res;

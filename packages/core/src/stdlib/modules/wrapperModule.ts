@@ -26,9 +26,9 @@ export const wrapperModule = InterpreterModule.create(
                 "==",
                 jsFun(
                     (args, context) => {
-                        const self = args.getField(SemanticFieldNames.SELF, context);
+                        const self = args.getFieldValue(SemanticFieldNames.SELF, context);
                         assertWrapperObject(self, "self");
-                        const other = args.getField(0, context);
+                        const other = args.getFieldValue(0, context);
                         let res: boolean;
                         if (other instanceof WrapperObject) {
                             res = self.wrapped === other.wrapped;

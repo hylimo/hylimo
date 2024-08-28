@@ -7,9 +7,10 @@ import { ExecutableNativeFunctionExpression, NativeFunctionType } from "./ast/ex
 import { ExecutableNumberLiteralExpression } from "./ast/executableNumberLiteralExpression.js";
 import { ExecutableStringLiteralExpression } from "./ast/executableStringLiteralExpression.js";
 import { InterpreterContext } from "./interpreter/interpreterContext.js";
-import { BaseObject, FieldEntry } from "./objects/baseObject.js";
+import { BaseObject } from "./objects/baseObject.js";
+import { LabeledValue } from "./objects/labeledValue.js";
 import { FullObject } from "./objects/fullObject.js";
-import { generateArgs } from "./objects/functionObject.js";
+import { generateArgs } from "./objects/generateArgs.js";
 import { RuntimeAstTransformer } from "./runtimeAstTransformer.js";
 import { Parser } from "../parser/parser.js";
 import { ExecutableFunctionExpression } from "./ast/executableFunctionExpression.js";
@@ -138,11 +139,11 @@ export function jsFun(
         args: FullObject,
         context: InterpreterContext,
         callExpression: AbstractInvocationExpression | OperatorExpression | undefined
-    ) => BaseObject | FieldEntry,
+    ) => BaseObject | LabeledValue,
     documentation?: FunctionDocumentation
 ): ExecutableNativeFunctionExpression {
     return new ExecutableNativeFunctionExpression((args, context, staticScope, callExpression) => {
-        const evaluatedArgs = generateArgs(args, context, documentation);
+        const evaluatedArgs = generateArgs(args, context, documentation, callExpression);
         const oldScope = context.currentScope;
         context.currentScope = staticScope;
         const res = callback(evaluatedArgs, context, callExpression);

@@ -3,7 +3,8 @@ import { OperatorExpression } from "../../ast/operatorExpression.js";
 import { ExecutableListEntry } from "../ast/executableListEntry.js";
 import { InterpreterContext } from "../interpreter/interpreterContext.js";
 import { RuntimeError } from "../runtimeError.js";
-import { BaseObject, FieldEntry } from "./baseObject.js";
+import { BaseObject } from "./baseObject.js";
+import { LabeledValue } from "./labeledValue.js";
 import { FullObject } from "./fullObject.js";
 
 /**
@@ -15,17 +16,17 @@ export class NullObject extends BaseObject {
         return true;
     }
 
-    override getFieldEntry(key: string | number, _context: InterpreterContext, _self: BaseObject): FieldEntry {
+    override getField(key: string | number, _context: InterpreterContext, _self: BaseObject): LabeledValue {
         throw new RuntimeError(`Getting fields on null not supported: try to get ${key}`);
     }
 
-    override getFieldEntries(_context: InterpreterContext, _self: BaseObject): Record<string, FieldEntry> {
+    override getFields(_context: InterpreterContext, _self: BaseObject): Record<string, LabeledValue> {
         return {};
     }
 
-    override setFieldEntry(
+    override setField(
         key: string | number,
-        _value: FieldEntry,
+        _value: LabeledValue,
         _context: InterpreterContext,
         _self: BaseObject
     ): void {
@@ -34,7 +35,7 @@ export class NullObject extends BaseObject {
 
     override setLocalField(
         key: string | number,
-        _value: FieldEntry,
+        _value: LabeledValue,
         _context: InterpreterContext,
         _self: BaseObject
     ): void {
@@ -50,7 +51,7 @@ export class NullObject extends BaseObject {
         _context: InterpreterContext,
         _scope?: FullObject,
         _callExpression?: AbstractInvocationExpression | OperatorExpression
-    ): FieldEntry {
+    ): LabeledValue {
         throw new RuntimeError("Invoking null is not supported");
     }
 

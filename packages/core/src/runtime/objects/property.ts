@@ -1,7 +1,8 @@
 import { assertFunction } from "../../stdlib/typeHelpers.js";
 import { ExecutableConstExpression } from "../ast/executableConstExpression.js";
 import { InterpreterContext } from "../interpreter/interpreterContext.js";
-import { BaseObject, FieldEntry } from "./baseObject.js";
+import { BaseObject } from "./baseObject.js";
+import { LabeledValue } from "./labeledValue.js";
 import { AbstractFunctionObject } from "./functionObject.js";
 
 /**
@@ -29,7 +30,7 @@ export class Property {
      * @param context the context in which this is performed
      * @returns the value of the property
      */
-    get(self: BaseObject, context: InterpreterContext): FieldEntry {
+    get(self: BaseObject, context: InterpreterContext): LabeledValue {
         return this.getter.invoke([{ value: new ExecutableConstExpression({ value: self }), name: "self" }], context);
     }
 
@@ -41,7 +42,7 @@ export class Property {
      * @param context the context in which this is performed
      * @returns the new value of the property
      */
-    set(self: BaseObject, value: FieldEntry, context: InterpreterContext): FieldEntry {
+    set(self: BaseObject, value: LabeledValue, context: InterpreterContext): LabeledValue {
         return this.setter.invoke(
             [
                 { value: new ExecutableConstExpression({ value: self }), name: "self" },

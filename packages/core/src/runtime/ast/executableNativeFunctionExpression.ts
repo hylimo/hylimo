@@ -1,7 +1,7 @@
 import { AbstractInvocationExpression } from "../../ast/abstractInvocationExpression.js";
 import { OperatorExpression } from "../../ast/operatorExpression.js";
 import { InterpreterContext } from "../interpreter/interpreterContext.js";
-import { FieldEntry } from "../objects/baseObject.js";
+import { LabeledValue } from "../objects/labeledValue.js";
 import { FullObject } from "../objects/fullObject.js";
 import { NativeFunctionObject } from "../objects/functionObject.js";
 import { ExecutableAbstractFunctionExpression, FunctionDocumentation } from "./executableAbstractFunctionExpression.js";
@@ -15,7 +15,7 @@ export type NativeFunctionType = (
     context: InterpreterContext,
     staticScope: FullObject,
     callExpression: AbstractInvocationExpression | OperatorExpression | undefined
-) => FieldEntry;
+) => LabeledValue;
 
 /**
  * Exeutable NativeFunctionExpression
@@ -34,7 +34,7 @@ export class ExecutableNativeFunctionExpression extends ExecutableAbstractFuncti
         super(undefined, documentation);
     }
 
-    override evaluateInternal(context: InterpreterContext): FieldEntry {
+    override evaluateInternal(context: InterpreterContext): LabeledValue {
         return {
             value: new NativeFunctionObject(
                 this,
