@@ -49,6 +49,9 @@ export class SplitCanvasSegmentMouseListener extends MouseListener {
                 projectedPoint,
                 target
             });
+            if (edits.length == 0) {
+                return [];
+            }
             const action: TransactionalAction = {
                 kind: TransactionalAction.KIND,
                 transactionId: this.transactionIdProvider.generateId(),
@@ -71,7 +74,7 @@ export class SplitCanvasSegmentMouseListener extends MouseListener {
     private computeSegmentEdits(originSegment: SCanvasConnectionSegment, context: SplitSegmentEditContext): Edit[] {
         if (originSegment instanceof SCanvasLineSegment) {
             const edit = originSegment.edits[DefaultEditTypes.SPLIT_CANVAS_LINE_SEGMENT];
-            if (edit != undefined) {
+            if (edit != undefined && EditSpecification.isConsistent([[edit]])) {
                 return [
                     {
                         types: [DefaultEditTypes.SPLIT_CANVAS_LINE_SEGMENT],
@@ -102,7 +105,7 @@ export class SplitCanvasSegmentMouseListener extends MouseListener {
         { target, projectedPoint, projectedCoordinates, originSegmentId }: SplitSegmentEditContext
     ): Edit[] {
         const edit = originSegment.edits[DefaultEditTypes.SPLIT_CANVAS_BEZIER_SEGMENT];
-        if (edit != undefined) {
+        if (edit != undefined && EditSpecification.isConsistent([[edit]])) {
             const index = target.segments.indexOf(originSegment);
             const layout = target.layout.segments[index];
             const curve = new Bezier(
@@ -143,7 +146,7 @@ export class SplitCanvasSegmentMouseListener extends MouseListener {
     ): Edit[] {
         const edit = originSegment.edits[DefaultEditTypes.SPLIT_CANVAS_AXIS_ALIGNED_SEGMENT];
         const edits: Edit[] = [];
-        if (edit != undefined) {
+        if (edit != undefined && EditSpecification.isConsistent([[edit]])) {
             const { pos, nextPos } = this.calculatePosAndNextPos(originSegmentId[1], originSegment, projectedPoint);
             edits.push({
                 types: [DefaultEditTypes.SPLIT_CANVAS_AXIS_ALIGNED_SEGMENT],
