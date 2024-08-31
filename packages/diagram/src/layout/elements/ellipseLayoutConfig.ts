@@ -66,7 +66,8 @@ export class EllipseLayoutConfig extends ContentShapeLayoutConfig {
             center,
             clockwise: true,
             end: endPos,
-            origin: [id, index]
+            origin: id,
+            originSegment: index
         }));
         return {
             start: startPos,
