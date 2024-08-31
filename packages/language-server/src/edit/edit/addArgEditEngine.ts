@@ -2,7 +2,8 @@ import { EditEngine, ParsedTemplate } from "./editEngine.js";
 import { evaluateTemplate } from "./template.js";
 
 /**
- * Edit engine for add list entry edits
+ * Edit engine for add arg edits.
+ * Allows adding/inserting arguments (named or positional) to/in a function call.
  */
 export class AddArgEditEngine extends EditEngine {
     /**

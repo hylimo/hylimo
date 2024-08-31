@@ -2,7 +2,8 @@ import { EditEngine, ParsedTemplate } from "./editEngine.js";
 import { evaluateTemplate } from "./template.js";
 
 /**
- * Edit engine for add edits
+ * Edit engine for add edits.
+ * Allows adding additional expressions to a function body.
  */
 export class AddEditEngine extends EditEngine {
     /**

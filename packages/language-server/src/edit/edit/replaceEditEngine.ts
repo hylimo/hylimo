@@ -2,7 +2,8 @@ import { EditEngine, ParsedTemplate } from "./editEngine.js";
 import { evaluateTemplate } from "./template.js";
 
 /**
- * Edit engine for replace edits
+ * Edit engine for replace edits.
+ * Allows replacing an expression with another one.
  */
 export class ReplaceEditEngine extends EditEngine {
     /**
