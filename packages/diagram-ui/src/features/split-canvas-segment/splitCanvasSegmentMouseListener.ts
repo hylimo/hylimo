@@ -36,7 +36,7 @@ export class SplitCanvasSegmentMouseListener extends MouseListener {
     @inject(TYPES.TransactionIdProvider) transactionIdProvider!: TransactionIdProvider;
 
     override mouseDown(target: SModelElementImpl, event: MouseEvent): Action[] {
-        if (event.shiftKey && target instanceof SCanvasConnection) {
+        if (event.shiftKey && target instanceof SCanvasConnection && !(event.ctrlKey || event.altKey)) {
             const canvas = target.parent;
             const coordinates = canvas.getEventCoordinates(event);
             const projectedPoint = LineEngine.DEFAULT.projectPoint(coordinates, target.line);
