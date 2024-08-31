@@ -63,7 +63,6 @@ interface AccessDefinition {
 export function generateCstToAstTransfromer(parser: Parser): ICstVisitor<never, any> {
     /**
      * Helper which wraps generateRange in metadata and optionalRange.
-     * Takes the
      * Also returns undefined if start or end is undefined.
      *
      * @param start the start range
