@@ -34,6 +34,7 @@ import { LocalDiagramImplementationManager } from "./diagram/local/localDiagramI
 import { DiagramImplementationManager } from "./diagram/diagramImplementationManager.js";
 import { RemoteDiagramImplementationManager } from "./diagram/remote/remoteDiagramImplementationManager.js";
 import { CompletionEngine } from "./completion/completionEngine.js";
+import { Config } from "./config.js";
 
 /**
  * Config for creating a new language server
@@ -120,7 +121,7 @@ export class LanguageServer {
         const interpreter = new Interpreter(interpreterModules, config.maxExecutionSteps);
         const parser = new Parser();
         this.diagramUtils = {
-            config: config.defaultConfig,
+            config: new Config(config.defaultConfig),
             connection: this.connection,
             interpreter,
             parser,
@@ -295,7 +296,7 @@ export class LanguageServer {
      * @param params the new config
      */
     private onUpdateConfig(params: DynamicLanguageServerConfig): void {
-        this.diagramUtils.config = params;
+        this.diagramUtils.config = new Config(params);
         for (const diagram of this.diagrams.values()) {
             diagram.onDidChangeConfig();
         }

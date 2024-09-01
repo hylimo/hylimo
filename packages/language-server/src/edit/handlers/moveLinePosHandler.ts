@@ -1,7 +1,6 @@
 import { IncrementalUpdate, MoveLposEdit } from "@hylimo/diagram-protocol";
 import { EditHandler } from "./editHandler.js";
 import { DefaultEditTypes, LinePoint } from "@hylimo/diagram-common";
-import { roundToPrecision } from "../../util/roundToPrecision.js";
 
 /**
  * Handler for lpos pos edits
@@ -37,9 +36,9 @@ export const moveLinePosHandler: EditHandler<MoveLposEdit> = {
     transformEdit(edit, config) {
         const pos = edit.values.pos;
         if (Array.isArray(pos)) {
-            pos[1] = roundToPrecision(pos[1], config.settings.linePointPosPrecision);
+            pos[1] = config.roundToLinePointPosPrecision(pos[1]);
         } else {
-            edit.values.pos = roundToPrecision(pos, config.settings.linePointPosPrecision);
+            edit.values.pos = config.roundToLinePointPosPrecision(pos);
         }
     }
 };

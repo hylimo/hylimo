@@ -1,7 +1,6 @@
 import { CanvasElement, DefaultEditTypes } from "@hylimo/diagram-common";
 import { IncrementalUpdate, ResizeEdit } from "@hylimo/diagram-protocol";
 import { EditHandler } from "./editHandler.js";
-import { roundToPrecision } from "../../util/roundToPrecision.js";
 
 /**
  * Handler for resize width edits
@@ -28,7 +27,7 @@ export const resizeWidth: EditHandler<ResizeEdit> = {
 
     transformEdit(edit, config) {
         const { width, dw } = edit.values;
-        edit.values.dw = roundToPrecision(dw!, config.settings.resizePrecision);
-        edit.values.width = roundToPrecision(width! - (dw! - edit.values.dw), undefined);
+        edit.values.dw = config.roundToResizePrecision(dw!);
+        edit.values.width = width! - (dw! - edit.values.dw);
     }
 };

@@ -1,7 +1,6 @@
 import { SplitCanvasBezierSegmentEdit } from "@hylimo/diagram-protocol";
 import { EditHandler } from "./editHandler.js";
 import { DefaultEditTypes } from "@hylimo/diagram-common";
-import { roundToPrecision } from "../../util/roundToPrecision.js";
 
 /**
  * Handler for splitCanvasBezierSegment edits
@@ -14,11 +13,11 @@ export const splitCanvasBezierSegmentHandler: EditHandler<SplitCanvasBezierSegme
     },
 
     transformEdit(edit, config) {
-        edit.values.x = roundToPrecision(edit.values.x, config.settings.translationPrecision);
-        edit.values.y = roundToPrecision(edit.values.y, config.settings.translationPrecision);
-        edit.values.cx1 = roundToPrecision(edit.values.cx1, config.settings.translationPrecision);
-        edit.values.cy1 = roundToPrecision(edit.values.cy1, config.settings.translationPrecision);
-        edit.values.cx2 = roundToPrecision(edit.values.cx2, config.settings.translationPrecision);
-        edit.values.cy2 = roundToPrecision(edit.values.cy2, config.settings.translationPrecision);
+        edit.values.x = config.roundToTranslationPrecision(edit.values.x);
+        edit.values.y = config.roundToTranslationPrecision(edit.values.y);
+        edit.values.cx1 = config.roundToTranslationPrecision(edit.values.cx1);
+        edit.values.cy1 = config.roundToTranslationPrecision(edit.values.cy1);
+        edit.values.cx2 = config.roundToTranslationPrecision(edit.values.cx2);
+        edit.values.cy2 = config.roundToTranslationPrecision(edit.values.cy2);
     }
 };

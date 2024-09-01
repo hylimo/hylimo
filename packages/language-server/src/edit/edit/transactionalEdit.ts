@@ -17,6 +17,7 @@ import { AddEditEngine } from "./addEditEngine.js";
 import { AddEditSpecificationEntry, BaseLayoutedDiagram, EditSpecification } from "@hylimo/diagram-common";
 import { EditHandlerRegistry } from "../handlers/editHandlerRegistry.js";
 import { AddArgEditEngine } from "./addArgEditEngine.js";
+import { Config } from "../../config.js";
 
 /**
  * Transaction edit handling transaction actions
@@ -179,7 +180,7 @@ export class TransactionalEdit {
      * @param action the action to transform
      * @param config the language server config
      */
-    transformEdit(action: TransactionalAction, config: DynamicLanguageServerConfig): void {
+    transformEdit(action: TransactionalAction, config: Config): void {
         for (const edit of action.edits) {
             for (const type of edit.types!) {
                 const handler = this.registry.getEditHandler(type);

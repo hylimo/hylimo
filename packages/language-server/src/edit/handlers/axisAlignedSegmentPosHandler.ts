@@ -1,7 +1,6 @@
 import { CanvasAxisAlignedSegment, DefaultEditTypes } from "@hylimo/diagram-common";
 import { AxisAlignedSegmentEdit, IncrementalUpdate } from "@hylimo/diagram-protocol";
 import { EditHandler } from "./editHandler.js";
-import { roundToPrecision } from "../../util/roundToPrecision.js";
 
 /**
  * Handler for axis aligned segment pos edits
@@ -25,6 +24,6 @@ export const axisAlignedSegmentPosHandler: EditHandler<AxisAlignedSegmentEdit> =
     },
 
     transformEdit(edit, config) {
-        edit.values.pos = roundToPrecision(edit.values.pos, config.settings.axisAlignedPosPrecision);
+        edit.values.pos = config.roundToAxisAlignedPosPrecision(edit.values.pos);
     }
 };

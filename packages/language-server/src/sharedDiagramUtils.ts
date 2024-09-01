@@ -2,8 +2,8 @@ import { Interpreter, Parser } from "@hylimo/core";
 import { DiagramEngine } from "@hylimo/diagram";
 import { Connection } from "vscode-languageserver";
 import { DiagramServerManager } from "./diagramServerManager.js";
-import { DynamicLanguageServerConfig } from "@hylimo/diagram-protocol";
 import { CompletionEngine } from "./completion/completionEngine.js";
+import { Config } from "./config.js";
 
 /**
  * Shared utils for each diagram
@@ -12,7 +12,7 @@ export interface SharedDiagramUtils {
     /**
      * The current config to use
      */
-    config: DynamicLanguageServerConfig;
+    config: Config;
     /**
      * The connection to use
      */

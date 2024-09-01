@@ -1,7 +1,6 @@
 import { SplitCanvasAxisAlignedSegmentEdit } from "@hylimo/diagram-protocol";
 import { EditHandler } from "./editHandler.js";
 import { DefaultEditTypes } from "@hylimo/diagram-common";
-import { roundToPrecision } from "../../util/roundToPrecision.js";
 
 /**
  * Handler for splitCanvasAxisAlignedSegment edits
@@ -14,9 +13,9 @@ export const splitCanvasAxisAlignedSegmentHandler: EditHandler<SplitCanvasAxisAl
     },
 
     transformEdit(edit, config) {
-        edit.values.x = roundToPrecision(edit.values.x, config.settings.translationPrecision);
-        edit.values.y = roundToPrecision(edit.values.y, config.settings.translationPrecision);
-        edit.values.pos = roundToPrecision(edit.values.pos, config.settings.axisAlignedPosPrecision);
-        edit.values.nextPos = roundToPrecision(edit.values.nextPos, config.settings.axisAlignedPosPrecision);
+        edit.values.x = config.roundToTranslationPrecision(edit.values.x);
+        edit.values.y = config.roundToTranslationPrecision(edit.values.y);
+        edit.values.pos = config.roundToAxisAlignedPosPrecision(edit.values.pos);
+        edit.values.nextPos = config.roundToAxisAlignedPosPrecision(edit.values.nextPos);
     }
 };
