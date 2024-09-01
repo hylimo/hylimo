@@ -1,5 +1,5 @@
 import { Element } from "@hylimo/diagram-common";
-import { DynamicLanguageServerConfig, Edit, IncrementalUpdate } from "@hylimo/diagram-protocol";
+import { Edit, IncrementalUpdate } from "@hylimo/diagram-protocol";
 import { Config } from "../../config.js";
 
 /**

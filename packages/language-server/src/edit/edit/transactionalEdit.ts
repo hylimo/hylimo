@@ -1,4 +1,4 @@
-import { DynamicLanguageServerConfig, IncrementalUpdate, TransactionalAction } from "@hylimo/diagram-protocol";
+import { IncrementalUpdate, TransactionalAction } from "@hylimo/diagram-protocol";
 import { EditEngine } from "./editEngine.js";
 import { ReplaceEditEngine } from "./replaceEditEngine.js";
 import { Diagram } from "../../diagram/diagram.js";
