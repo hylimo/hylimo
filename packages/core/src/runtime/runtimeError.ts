@@ -1,5 +1,5 @@
 import { Expression } from "../ast/expression.js";
-import { ASTExpressionPosition } from "../ast/astExpressionPosition.js";
+import { Range } from "../ast/range.js";
 
 /**
  * Error thrown during interpretation of a program
@@ -24,14 +24,14 @@ export class RuntimeError extends Error {
     }
 
     /**
-     * Finds the first position in the stack
+     * Finds the first range in the stack
      *
-     * @returns the found position of undefined if none was found
+     * @returns the found range of undefined if none was found
      */
-    findFirstPosition(): ASTExpressionPosition | undefined {
+    findFirstRange(): Range | undefined {
         for (const stackEntry of this.interpretationStack) {
-            if (stackEntry?.position != undefined) {
-                return stackEntry.position;
+            if (stackEntry?.range != undefined) {
+                return stackEntry.range;
             }
         }
         return undefined;

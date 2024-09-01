@@ -1,7 +1,6 @@
 import { IncrementalUpdate, MoveEdit } from "@hylimo/diagram-protocol";
 import { EditHandler } from "./editHandler.js";
 import { AbsolutePoint, DefaultEditTypes, RelativePoint } from "@hylimo/diagram-common";
-import { roundToPrecision } from "../../util/roundToPrecision.js";
 
 /**
  * Handler for moveX edits
@@ -33,6 +32,6 @@ export const moveXHandler: EditHandler<MoveEdit> = {
     },
 
     transformEdit(edit, config) {
-        edit.values.dx = roundToPrecision(edit.values.dx, config.settings.translationPrecision);
+        edit.values.dx = config.roundToTranslationPrecision(edit.values.dx);
     }
 };

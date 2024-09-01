@@ -1,4 +1,4 @@
-import { ExecutableAbstractFunctionExpression, FullObject, fun, numberType, or } from "@hylimo/core";
+import { ExecutableAbstractFunctionExpression, FullObject, fun, numberType, optional, or } from "@hylimo/core";
 import { Size, Element, RelativePoint, Point, CanvasElement, DefaultEditTypes } from "@hylimo/diagram-common";
 import { canvasPointType, elementType } from "../../../module/base/types.js";
 import { LayoutElement } from "../../layoutElement.js";
@@ -17,12 +17,12 @@ export class RelativePointLayoutConfig extends CanvasPointLayoutConfig {
                 {
                     name: "offsetX",
                     description: "the x offset",
-                    type: numberType
+                    type: optional(numberType)
                 },
                 {
                     name: "offsetY",
                     description: "the y offset",
-                    type: numberType
+                    type: optional(numberType)
                 },
                 {
                     name: "target",
@@ -35,8 +35,8 @@ export class RelativePointLayoutConfig extends CanvasPointLayoutConfig {
     }
 
     override layout(layout: Layout, element: LayoutElement, position: Point, size: Size, id: string): Element[] {
-        const offsetXFieldEntry = element.element.getLocalFieldOrUndefined("_offsetX");
-        const offsetYFieldEntry = element.element.getLocalFieldOrUndefined("_offsetY");
+        const offsetXValue = element.element.getLocalFieldOrUndefined("_offsetX");
+        const offsetYValue = element.element.getLocalFieldOrUndefined("_offsetY");
         const target = this.getContentId(
             element,
             element.element.getLocalFieldOrUndefined("target")!.value as FullObject
@@ -44,8 +44,8 @@ export class RelativePointLayoutConfig extends CanvasPointLayoutConfig {
         const result: RelativePoint = {
             type: RelativePoint.TYPE,
             id,
-            offsetX: offsetXFieldEntry?.value?.toNative(),
-            offsetY: offsetYFieldEntry?.value.toNative(),
+            offsetX: offsetXValue?.value?.toNative() ?? 0,
+            offsetY: offsetYValue?.value?.toNative() ?? 0,
             target,
             children: [],
             edits: element.edits

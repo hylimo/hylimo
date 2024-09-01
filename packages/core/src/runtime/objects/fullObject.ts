@@ -1,9 +1,11 @@
 import { AbstractInvocationExpression } from "../../ast/abstractInvocationExpression.js";
+import { OperatorExpression } from "../../ast/operatorExpression.js";
 import { ExecutableListEntry } from "../ast/executableListEntry.js";
 import { InterpreterContext } from "../interpreter/interpreterContext.js";
 import { RuntimeError } from "../runtimeError.js";
 import { SemanticFieldNames } from "../semanticFieldNames.js";
-import { BaseObject, FieldEntry } from "./baseObject.js";
+import { BaseObject } from "./baseObject.js";
+import { LabeledValue } from "./labeledValue.js";
 import { AbstractFunctionObject } from "./functionObject.js";
 import { Property } from "./property.js";
 
@@ -11,7 +13,7 @@ import { Property } from "./property.js";
  * Object with full support for both number (integer) and
  */
 export class FullObject extends BaseObject {
-    readonly fields: Map<string | number, FieldEntry> = new Map();
+    readonly fields: Map<string | number, LabeledValue> = new Map();
     properties?: Map<string | number, Property>;
 
     /**
@@ -29,14 +31,14 @@ export class FullObject extends BaseObject {
         return false;
     }
 
-    override getFieldEntry(key: string | number, context: InterpreterContext, self?: BaseObject): FieldEntry {
+    override getField(key: string | number, context: InterpreterContext, self?: BaseObject): LabeledValue {
         this.checkValidKey(key);
-        return this.getFieldEntryInternal(key, context, self ?? this);
+        return this.getFieldInternal(key, context, self ?? this);
     }
 
-    override getFieldEntries(context: InterpreterContext, self?: BaseObject): Record<string, FieldEntry> {
+    override getFields(context: InterpreterContext, self?: BaseObject): Record<string, LabeledValue> {
         const proto = this.proto;
-        const entries: Record<string, FieldEntry> = proto?.getFieldEntries(context, self ?? this) ?? {};
+        const entries: Record<string, LabeledValue> = proto?.getFields(context, self ?? this) ?? {};
         for (const [key, value] of this.fields) {
             entries[key] = value;
         }
@@ -60,7 +62,7 @@ export class FullObject extends BaseObject {
      * @param self the object to get the field from
      * @returns the value of the field
      */
-    private getFieldEntryInternal(key: string | number, context: InterpreterContext, self: BaseObject): FieldEntry {
+    private getFieldInternal(key: string | number, context: InterpreterContext, self: BaseObject): LabeledValue {
         // eslint-disable-next-line @typescript-eslint/no-this-alias
         let target: FullObject | undefined = this;
         do {
@@ -74,6 +76,18 @@ export class FullObject extends BaseObject {
             }
             target = target.proto;
         } while (target !== undefined);
+        return this.getDefaultValue(key, context);
+    }
+
+    /**
+     * Gets the default value for a field
+     * By default, null with no source is returned
+     *
+     * @param key the key of the field
+     * @param context the context in which this is performed
+     * @returns the default value
+     */
+    protected getDefaultValue(key: string | number, context: InterpreterContext): LabeledValue {
         return { value: context.null };
     }
 
@@ -105,7 +119,7 @@ export class FullObject extends BaseObject {
      * @param self the object to get the field from
      * @returns the value of the field
      */
-    getLocalField(key: string | number, context: InterpreterContext, self?: BaseObject): FieldEntry {
+    getLocalField(key: string | number, context: InterpreterContext, self?: BaseObject): LabeledValue {
         const property = this.getProperty(key);
         if (property !== undefined) {
             return property.get(self ?? this, context);
@@ -114,7 +128,7 @@ export class FullObject extends BaseObject {
         if (value !== undefined) {
             return value;
         }
-        return { value: context.null };
+        return this.getDefaultValue(key, context);
     }
 
     /**
@@ -125,7 +139,7 @@ export class FullObject extends BaseObject {
      * @param key the identifier of the field
      * @returns the value of the field or undefined
      */
-    getLocalFieldOrUndefined(key: string | number): FieldEntry | undefined {
+    getLocalFieldOrUndefined(key: string | number): LabeledValue | undefined {
         const field = this.fields.get(key);
         if (field === undefined || field.value.isNull) {
             return undefined;
@@ -134,12 +148,7 @@ export class FullObject extends BaseObject {
         }
     }
 
-    override setFieldEntry(
-        key: string | number,
-        value: FieldEntry,
-        context: InterpreterContext,
-        self?: BaseObject
-    ): void {
+    override setField(key: string | number, value: LabeledValue, context: InterpreterContext, self?: BaseObject): void {
         this.checkValidKey(key);
         if (!this.setExistingField(key, value, context, self ?? this)) {
             this.setLocalField(key, value, context, self);
@@ -157,7 +166,7 @@ export class FullObject extends BaseObject {
      */
     private setExistingField(
         key: string | number,
-        value: FieldEntry,
+        value: LabeledValue,
         context: InterpreterContext,
         self: BaseObject
     ): boolean {
@@ -176,7 +185,7 @@ export class FullObject extends BaseObject {
 
     override setLocalField(
         key: string | number,
-        value: FieldEntry,
+        value: LabeledValue,
         context: InterpreterContext,
         self?: BaseObject
     ): void {
@@ -303,8 +312,8 @@ export class FullObject extends BaseObject {
         _args: ExecutableListEntry[],
         _context: InterpreterContext,
         _scope?: FullObject,
-        _callExpression?: AbstractInvocationExpression
-    ): FieldEntry {
+        _callExpression?: AbstractInvocationExpression | OperatorExpression
+    ): LabeledValue {
         throw new RuntimeError("Invoke not supported");
     }
 }

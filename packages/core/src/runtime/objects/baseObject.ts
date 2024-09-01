@@ -1,10 +1,11 @@
 import { AbstractInvocationExpression } from "../../ast/abstractInvocationExpression.js";
-import { Expression } from "../../ast/expression.js";
+import { OperatorExpression } from "../../ast/operatorExpression.js";
 import { ExecutableListEntry } from "../ast/executableListEntry.js";
 import { InterpreterContext } from "../interpreter/interpreterContext.js";
 import { RuntimeError } from "../runtimeError.js";
 import { SemanticFieldNames } from "../semanticFieldNames.js";
 import { FullObject } from "./fullObject.js";
+import { LabeledValue } from "./labeledValue.js";
 
 /**
  * Base class for all runtime objects
@@ -23,7 +24,7 @@ export abstract class BaseObject {
      * @param self the object to get the field from
      * @returns the field entry
      */
-    abstract getFieldEntry(key: string | number, context: InterpreterContext, self?: BaseObject): FieldEntry;
+    abstract getField(key: string | number, context: InterpreterContext, self?: BaseObject): LabeledValue;
 
     /**
      * Gets all field entries
@@ -32,18 +33,18 @@ export abstract class BaseObject {
      * @param self the object to get the fields from
      * @returns all field entries
      */
-    abstract getFieldEntries(context: InterpreterContext, self?: BaseObject): Record<string, FieldEntry>;
+    abstract getFields(context: InterpreterContext, self?: BaseObject): Record<string, LabeledValue>;
 
     /**
-     * Wrapper for getFieldEntry which only returns the value
+     * Wrapper for getField which only returns the value
      *
      * @param key the identifier of the field
      * @param context context in which this is performed
      * @param self the object to get the field from
      * @returns the value of the field
      */
-    getField(key: string | number, context: InterpreterContext, self?: BaseObject): BaseObject {
-        return this.getFieldEntry(key, context, self).value;
+    getFieldValue(key: string | number, context: InterpreterContext, self?: BaseObject): BaseObject {
+        return this.getField(key, context, self).value;
     }
 
     /**
@@ -55,12 +56,7 @@ export abstract class BaseObject {
      * @param context context in which this is performed
      * @param self the object to set the field on
      */
-    abstract setFieldEntry(
-        key: string | number,
-        value: FieldEntry,
-        context: InterpreterContext,
-        self?: BaseObject
-    ): void;
+    abstract setField(key: string | number, value: LabeledValue, context: InterpreterContext, self?: BaseObject): void;
 
     /**
      * Sets a field locally
@@ -72,7 +68,7 @@ export abstract class BaseObject {
      */
     abstract setLocalField(
         key: string | number,
-        value: FieldEntry,
+        value: LabeledValue,
         context: InterpreterContext,
         self?: BaseObject
     ): void;
@@ -100,8 +96,8 @@ export abstract class BaseObject {
         args: ExecutableListEntry[],
         context: InterpreterContext,
         scope?: FullObject,
-        callExpression?: AbstractInvocationExpression
-    ): FieldEntry;
+        callExpression?: AbstractInvocationExpression | OperatorExpression
+    ): LabeledValue;
 
     /**
      * Creates a readable string representation
@@ -132,36 +128,31 @@ export abstract class SimpleObject extends BaseObject {
         super();
     }
 
-    override getFieldEntry(key: string | number, context: InterpreterContext, self?: BaseObject): FieldEntry {
+    override getField(key: string | number, context: InterpreterContext, self?: BaseObject): LabeledValue {
         if (key === SemanticFieldNames.PROTO) {
             return {
                 value: this.proto
             };
         } else {
-            return this.proto.getFieldEntry(key, context, self ?? this);
+            return this.proto.getField(key, context, self ?? this);
         }
     }
 
-    override getFieldEntries(context: InterpreterContext, self?: BaseObject): Record<string, FieldEntry> {
-        return this.proto.getFieldEntries(context, self ?? this);
+    override getFields(context: InterpreterContext, self?: BaseObject): Record<string, LabeledValue> {
+        return this.proto.getFields(context, self ?? this);
     }
 
-    override setFieldEntry(
-        key: string | number,
-        value: FieldEntry,
-        context: InterpreterContext,
-        self?: BaseObject
-    ): void {
+    override setField(key: string | number, value: LabeledValue, context: InterpreterContext, self?: BaseObject): void {
         if (key === SemanticFieldNames.PROTO) {
             throw new RuntimeError("Cannot set field proto of a non-Object");
         } else {
-            this.proto.setFieldEntry(key, value, context, self ?? this);
+            this.proto.setField(key, value, context, self ?? this);
         }
     }
 
     override setLocalField(
         _key: string | number,
-        _value: FieldEntry,
+        _value: LabeledValue,
         _context: InterpreterContext,
         _self?: BaseObject
     ) {
@@ -177,21 +168,7 @@ export abstract class SimpleObject extends BaseObject {
         _context: InterpreterContext,
         _scope?: FullObject,
         _callExpression?: AbstractInvocationExpression
-    ): FieldEntry {
+    ): LabeledValue {
         throw new RuntimeError("Invoke not supported");
     }
-}
-
-/**
- * Entry of a field
- */
-export interface FieldEntry {
-    /**
-     * The value of the field
-     */
-    value: BaseObject;
-    /**
-     *
-     */
-    source?: Expression;
 }

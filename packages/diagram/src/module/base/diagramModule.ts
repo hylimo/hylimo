@@ -80,7 +80,7 @@ function createElementFunction(element: LayoutConfig): ExecutableExpression {
                 newElement.setLocalField("edits", { value: context.newObject() }, context);
                 for (const [key, value] of args.fields.entries()) {
                     if (key !== "self" && key !== "proto") {
-                        newElement.setFieldEntry(key, value, context);
+                        newElement.setField(key, value, context);
                     }
                 }
                 context.getField("_evaluateElement").invoke(
@@ -254,8 +254,8 @@ export const diagramModule = InterpreterModule.create(
                 assign(
                     "validateSelector",
                     jsFun((args, context) => {
-                        const value = args.getField(0, context);
-                        const createFunction = args.getField(1, context);
+                        const value = args.getFieldValue(0, context);
+                        const createFunction = args.getFieldValue(1, context);
                         assertObject(value);
                         assertFunction(createFunction);
                         for (const attribute of allStyleAttributes) {

@@ -2,7 +2,7 @@ import { FunctionExpression } from "../../ast/functionExpression.js";
 import { ExecutableConstExpression } from "../../runtime/ast/executableConstExpression.js";
 import { assign, jsFun, native } from "../../runtime/executableAstHelper.js";
 import { InterpreterModule } from "../../runtime/interpreter/interpreterModule.js";
-import { FieldEntry } from "../../runtime/objects/baseObject.js";
+import { LabeledValue } from "../../runtime/objects/labeledValue.js";
 import { RuntimeError } from "../../runtime/runtimeError.js";
 import { SemanticFieldNames } from "../../runtime/semanticFieldNames.js";
 import { booleanType } from "../../types/boolean.js";
@@ -32,12 +32,12 @@ export const commonModule = InterpreterModule.create(
             "if",
             jsFun(
                 (args, context) => {
-                    if (assertBoolean(args.getField(0, context))) {
-                        const ifBranch = args.getField(1, context);
+                    if (assertBoolean(args.getFieldValue(0, context))) {
+                        const ifBranch = args.getFieldValue(1, context);
                         assertFunction(ifBranch);
                         return ifBranch.invoke([], context);
                     } else {
-                        const elseBranch = args.getField(2, context);
+                        const elseBranch = args.getFieldValue(2, context);
                         if (elseBranch.isNull) {
                             return context.null;
                         } else {
@@ -65,11 +65,11 @@ export const commonModule = InterpreterModule.create(
             "while",
             jsFun(
                 (args, context) => {
-                    const condition = args.getField(0, context);
-                    const body = args.getField(1, context);
+                    const condition = args.getFieldValue(0, context);
+                    const body = args.getFieldValue(1, context);
                     assertFunction(condition);
                     assertFunction(body);
-                    let lastValue: FieldEntry = { value: context.null };
+                    let lastValue: LabeledValue = { value: context.null };
 
                     while (true) {
                         const conditionRes = condition.invoke([], context).value;
@@ -95,11 +95,11 @@ export const commonModule = InterpreterModule.create(
             "toStr",
             jsFun(
                 (args, context) => {
-                    const value = args.getFieldEntry(0, context);
+                    const value = args.getField(0, context);
                     if (value.value.isNull) {
                         return context.newString("null");
                     } else {
-                        const toString = value.value.getField("toString", context);
+                        const toString = value.value.getFieldValue("toString", context);
                         return toString.invoke(
                             [
                                 {
@@ -122,7 +122,7 @@ export const commonModule = InterpreterModule.create(
             "error",
             jsFun(
                 (args, context) => {
-                    throw new RuntimeError(assertString(args.getField(0, context)));
+                    throw new RuntimeError(assertString(args.getFieldValue(0, context)));
                 },
                 {
                     docs: "Throws an error with the specified message.",

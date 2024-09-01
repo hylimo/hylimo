@@ -84,7 +84,7 @@ export class InterpreterContext {
         this.functionPrototype = this.newObject();
         this.wrapperPrototype = this.newObject();
         this.currentScope = this.newObject();
-        this.currentScope.setFieldEntry(SemanticFieldNames.THIS, { value: this.currentScope }, this);
+        this.currentScope.setField(SemanticFieldNames.THIS, { value: this.currentScope }, this);
         this.globalScope = this.currentScope;
         for (const module of modules) {
             this.moduleValues.set(module, new Map());
@@ -211,7 +211,7 @@ export class InterpreterContext {
     private createListWrapperGetterFunction<T>(converter: WrapperObjectFieldRetriever<T>, wrapped: T[]): BaseObject {
         return jsFun(
             (args) => {
-                const indexArg = args.getField(0, this);
+                const indexArg = args.getFieldValue(0, this);
                 const index = assertNumber(indexArg, "0");
                 return { value: converter(wrapped[index], this) };
             },
@@ -230,7 +230,7 @@ export class InterpreterContext {
      * @returns the value of the field
      */
     getGlobalField(key: string | number): BaseObject {
-        return this.globalScope.getField(key, this);
+        return this.globalScope.getFieldValue(key, this);
     }
 
     /**
@@ -240,7 +240,7 @@ export class InterpreterContext {
      * @returns the value of the field
      */
     getField(key: string | number): BaseObject {
-        return this.currentScope.getField(key, this);
+        return this.currentScope.getFieldValue(key, this);
     }
 
     /**

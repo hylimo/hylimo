@@ -1,10 +1,10 @@
 import { assign, fun, id, jsFun, native, num } from "../../runtime/executableAstHelper.js";
-import { ExecutableListEntry } from "../../runtime/ast/executableListEntry.js";
 import { ExecutableConstExpression } from "../../runtime/ast/executableConstExpression.js";
 import { InterpreterModule } from "../../runtime/interpreter/interpreterModule.js";
-import { BaseObject, FieldEntry } from "../../runtime/objects/baseObject.js";
+import { BaseObject } from "../../runtime/objects/baseObject.js";
+import { LabeledValue } from "../../runtime/objects/labeledValue.js";
 import { FullObject } from "../../runtime/objects/fullObject.js";
-import { generateArgs } from "../../runtime/objects/functionObject.js";
+import { generateArgs } from "../../runtime/objects/generateArgs.js";
 import { RuntimeError } from "../../runtime/runtimeError.js";
 import { SemanticFieldNames } from "../../runtime/semanticFieldNames.js";
 import { functionType } from "../../types/function.js";
@@ -14,6 +14,7 @@ import { DefaultModuleNames } from "../defaultModuleNames.js";
 import { assertFunction, assertNumber } from "../typeHelpers.js";
 import { numberType } from "../../types/number.js";
 import { optional } from "../../types/null.js";
+import { ExecutableListEntry } from "../../runtime/ast/executableListEntry.js";
 
 /**
  * Name of the temporary field where the list prototype is assigned
@@ -39,10 +40,10 @@ export const listModule = InterpreterModule.create(
                 "add",
                 jsFun(
                     (args, context) => {
-                        const self = args.getField(SemanticFieldNames.SELF, context);
-                        const length = assertNumber(self.getField(lengthField, context));
-                        self.setLocalField(length, args.getFieldEntry(0, context), context);
-                        self.setFieldEntry(lengthField, { value: context.newNumber(length + 1) }, context);
+                        const self = args.getFieldValue(SemanticFieldNames.SELF, context);
+                        const length = assertNumber(self.getFieldValue(lengthField, context));
+                        self.setLocalField(length, args.getField(0, context), context);
+                        self.setField(lengthField, { value: context.newNumber(length + 1) }, context);
                         return context.null;
                     },
                     {
@@ -100,12 +101,12 @@ export const listModule = InterpreterModule.create(
                 "remove",
                 jsFun(
                     (args, context) => {
-                        const self = args.getField(SemanticFieldNames.SELF, context);
-                        const length = assertNumber(self.getField(lengthField, context));
+                        const self = args.getFieldValue(SemanticFieldNames.SELF, context);
+                        const length = assertNumber(self.getFieldValue(lengthField, context));
                         if (length > 0) {
-                            const value = self.getFieldEntry(length - 1, context);
-                            self.setFieldEntry(length - 1, { value: context.null }, context);
-                            self.setFieldEntry(lengthField, { value: context.newNumber(length - 1) }, context);
+                            const value = self.getField(length - 1, context);
+                            self.setField(length - 1, { value: context.null }, context);
+                            self.setField(lengthField, { value: context.newNumber(length - 1) }, context);
                             return value;
                         } else {
                             throw new RuntimeError("List empty, nothing to remove");
@@ -124,15 +125,15 @@ export const listModule = InterpreterModule.create(
                 "forEach",
                 jsFun(
                     (args, context) => {
-                        const self = args.getField(SemanticFieldNames.SELF, context);
-                        const callback = args.getField(0, context);
+                        const self = args.getFieldValue(SemanticFieldNames.SELF, context);
+                        const callback = args.getFieldValue(0, context);
                         assertFunction(callback, "first positional argument of forEach");
-                        const length = assertNumber(self.getField(lengthField, context), "length field of a list");
-                        let lastValue: FieldEntry = { value: context.null };
+                        const length = assertNumber(self.getFieldValue(lengthField, context), "length field of a list");
+                        let lastValue: LabeledValue = { value: context.null };
                         for (let i = 0; i < length; i++) {
                             lastValue = callback.invoke(
                                 [
-                                    { value: new ExecutableConstExpression(self.getFieldEntry(i, context)) },
+                                    { value: new ExecutableConstExpression(self.getField(i, context)) },
                                     { value: num(i) }
                                 ],
                                 context
@@ -203,14 +204,10 @@ export const listModule = InterpreterModule.create(
             id(SemanticFieldNames.IT).assignField(
                 "list",
                 native(
-                    (args, context, staticScope) => {
+                    (args, context, staticScope, callExpression) => {
                         const indexOnlyArgs = args.filter((value) => !value.name);
-                        const list = generateArgs(indexOnlyArgs, context, undefined);
-                        list.setLocalField(
-                            SemanticFieldNames.PROTO,
-                            staticScope.getFieldEntry(listProto, context),
-                            context
-                        );
+                        const list = generateArgs(indexOnlyArgs, context, undefined, callExpression);
+                        list.setLocalField(SemanticFieldNames.PROTO, staticScope.getField(listProto, context), context);
                         list.setLocalField(lengthField, { value: context.newNumber(indexOnlyArgs.length) }, context);
                         return { value: list };
                     },
@@ -226,15 +223,15 @@ export const listModule = InterpreterModule.create(
                 fun(
                     [
                         id(SemanticFieldNames.THIS).assignField("callback", id(SemanticFieldNames.IT)),
-                        native((args, context, staticScope) => {
-                            const listFunction = staticScope.getField("list", context);
+                        native((args, context, staticScope, callExpression) => {
+                            const listFunction = staticScope.getFieldValue("list", context);
                             const list = listFunction.invoke(args, context);
-                            const callback = staticScope.getField("callback", context);
+                            const callback = staticScope.getFieldValue("callback", context);
                             const invokeArguments: ExecutableListEntry[] = [
                                 { value: new ExecutableConstExpression(list) }
                             ];
                             invokeArguments.push(...args.filter((arg) => arg.name !== undefined));
-                            return callback.invoke(invokeArguments, context);
+                            return callback.invoke(invokeArguments, context, undefined, callExpression);
                         })
                     ],
                     {
@@ -248,11 +245,11 @@ export const listModule = InterpreterModule.create(
                 "toList",
                 jsFun(
                     (args, context) => {
-                        const objectEntry = args.getFieldEntry(0, context);
+                        const objectEntry = args.getField(0, context);
                         const object = objectEntry.value as FullObject;
                         object.setLocalField(
                             SemanticFieldNames.PROTO,
-                            context.currentScope.getFieldEntry(listProto, context),
+                            context.currentScope.getField(listProto, context),
                             context
                         );
                         const maxKey =

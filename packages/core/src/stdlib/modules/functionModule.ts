@@ -26,8 +26,8 @@ export const functionModule = InterpreterModule.create(
                 "callWithScope",
                 jsFun(
                     (args, context) => {
-                        const self = args.getField(SemanticFieldNames.SELF, context);
-                        const scope = args.getField(0, context);
+                        const self = args.getFieldValue(SemanticFieldNames.SELF, context);
+                        const scope = args.getFieldValue(0, context);
                         assertFunction(self);
                         assertObject(scope);
                         scope.setLocalField(SemanticFieldNames.PROTO, { value: self.parentScope }, context);
@@ -51,8 +51,8 @@ export const functionModule = InterpreterModule.create(
                 "==",
                 jsFun(
                     (args, context) => {
-                        const self = args.getField(SemanticFieldNames.SELF, context);
-                        const other = args.getField(0, context);
+                        const self = args.getFieldValue(SemanticFieldNames.SELF, context);
+                        const other = args.getFieldValue(0, context);
                         return context.newBoolean(self === other);
                     },
                     {

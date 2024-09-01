@@ -74,7 +74,7 @@ export class MoveMouseListener extends MouseListener {
     private sequenceNumber = 0;
 
     override mouseDown(target: SModelElementImpl, event: MouseEvent): Action[] {
-        if (event.button === 0) {
+        if (event.button === 0 && !(event.ctrlKey || event.altKey)) {
             const moveableTarget = findParentByFeature(target, isMoveable);
             if (moveableTarget != undefined) {
                 this.startPosition = { x: event.pageX, y: event.pageY };
@@ -468,7 +468,7 @@ export class MoveMouseListener extends MouseListener {
                 linePoint.id,
                 this.transactionIdProvider.generateId(),
                 linePoint.position,
-                linePoint.distance == undefined,
+                linePoint.edits[DefaultEditTypes.MOVE_LPOS_DIST] == undefined,
                 linePoint.segment != undefined,
                 linePoint.line
             );

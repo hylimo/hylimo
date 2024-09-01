@@ -3,7 +3,7 @@ import { ExecutableExpression } from "@hylimo/core";
 import { Interpreter } from "@hylimo/core";
 import { CompletionAstTransformer } from "./completionAstTransformer.js";
 import { CompletionError } from "./completionError.js";
-import { CompletionItem } from "vscode-languageserver";
+import { CompletionItem } from "./completionItem.js";
 
 /**
  * Completion engine which can generate completion items by executing the given code

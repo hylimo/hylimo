@@ -1,5 +1,6 @@
 import { Element } from "@hylimo/diagram-common";
-import { DynamicLanguageServerConfig, Edit, IncrementalUpdate } from "@hylimo/diagram-protocol";
+import { Edit, IncrementalUpdate } from "@hylimo/diagram-protocol";
+import { Config } from "../../config.js";
 
 /**
  * Handles transactional edits to a TextDocument
@@ -33,5 +34,5 @@ export interface EditHandler<E extends Edit> {
      * @param edit the action to transform
      * @param config the language server config
      */
-    transformEdit(edit: E, config: DynamicLanguageServerConfig): void;
+    transformEdit(edit: E, config: Config): void;
 }

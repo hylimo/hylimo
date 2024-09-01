@@ -14,6 +14,7 @@ import {
     InvocationExpression,
     jsFun,
     listType,
+    OperatorExpression,
     optional,
     parse,
     RuntimeError,
@@ -56,10 +57,9 @@ function convertFunctionInvocation(expression: InvocationExpression): string {
         .filter((argument) => argument.name === undefined)
         .map((argument) => {
             const value = argument.value;
-            if (value instanceof InvocationExpression && isColonInvocation(value)) {
-                const [left, right] = value.argumentExpressions
-                    .filter((argument) => argument.name === undefined)
-                    .map((argument) => argument.value);
+            if (value instanceof OperatorExpression && isColonOperator(value)) {
+                const left = value.left;
+                const right = value.right;
                 return convertStringOrIdentifier(left) + " : " + convertStringOrIdentifier(right);
             } else {
                 return convertStringOrIdentifier(value);
@@ -69,13 +69,13 @@ function convertFunctionInvocation(expression: InvocationExpression): string {
 }
 
 /**
- * Checks if the invocation expression is an operator expression with a colon as operator
+ * Checks if the operator expression is an operator expression with a colon as operator
  *
  * @param expression the expression to check
- * @returns true if the expression is a colon invocation, false otherwise
+ * @returns true if the expression is a colon operator, false otherwise
  */
-function isColonInvocation(expression: InvocationExpression): boolean {
-    return expression.target instanceof IdentifierExpression && expression.target.identifier === ":";
+function isColonOperator(expression: OperatorExpression): boolean {
+    return expression.operator instanceof IdentifierExpression && expression.operator.identifier === ":";
 }
 
 /**
@@ -88,11 +88,10 @@ function convertFieldsAndFunctions(expressions: Expression[]): [string[], string
     const fields: string[] = [];
     const functions: string[] = [];
     for (const expression of expressions) {
-        if (expression instanceof InvocationExpression) {
-            if (isColonInvocation(expression)) {
-                const [left, right] = expression.argumentExpressions
-                    .filter((argument) => argument.name === undefined)
-                    .map((argument) => argument.value);
+        if (expression instanceof OperatorExpression) {
+            if (isColonOperator(expression)) {
+                const left = expression.left;
+                const right = expression.right;
                 const type = convertStringOrIdentifier(right);
                 if (left instanceof InvocationExpression) {
                     functions.push(convertFunctionInvocation(left) + " : " + type);
@@ -100,8 +99,10 @@ function convertFieldsAndFunctions(expressions: Expression[]): [string[], string
                     fields.push(convertStringOrIdentifier(left) + " : " + type);
                 }
             } else {
-                functions.push(convertFunctionInvocation(expression));
+                throw new RuntimeError("Unexpected operator", expression);
             }
+        } else if (expression instanceof InvocationExpression) {
+            functions.push(convertFunctionInvocation(expression));
         } else {
             fields.push(convertStringOrIdentifier(expression));
         }
@@ -264,7 +265,6 @@ const scopeExpressions: ExecutableExpression[] = [
             `
                 (name, optionalCallback, keywords) = args
                 packageElement = canvasElement(
-                    scopes = object(),
                     class = list("package-element"),
                     content = vbox(
                         contents = list(
@@ -296,7 +296,6 @@ const scopeExpressions: ExecutableExpression[] = [
             `
                 textContent = it
                 commentElement = canvasElement(
-                    scopes = object(),
                     content = stack(
                         contents = list(
                             path(path = "M0 0 H 1", vAlign = "top", class = list("comment-top")),
@@ -376,7 +375,6 @@ const scopeExpressions: ExecutableExpression[] = [
                 }
                 classElement = canvasElement(
                     content = renderedClass,
-                    scopes = object(default = callback),
                     class = list("class-element")
                 )
                 targetScope = args.self

@@ -1,6 +1,6 @@
 import { ObjectExpression } from "../../ast/objectExpression.js";
 import { InterpreterContext } from "../interpreter/interpreterContext.js";
-import { FieldEntry } from "../objects/baseObject.js";
+import { LabeledValue } from "../objects/labeledValue.js";
 import { ExecutableListEntry } from "./executableListEntry.js";
 import { ExecutableExpression } from "./executableExpression.js";
 
@@ -21,7 +21,7 @@ export class ExecutableObjectExpression extends ExecutableExpression<ObjectExpre
         super(expression);
     }
 
-    override evaluateInternal(context: InterpreterContext): FieldEntry {
+    override evaluateInternal(context: InterpreterContext): LabeledValue {
         const result = context.newObject();
         let indexCounter = 0;
         for (const fieldExpression of this.fieldExpressions) {

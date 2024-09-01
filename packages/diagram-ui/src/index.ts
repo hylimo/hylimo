@@ -20,6 +20,8 @@ export * from "./features/move/rotationHandler.js";
 export * from "./features/move/translationMoveHandler.js";
 export * from "./features/navigation/di.config.js";
 export * from "./features/navigation/navigationMouseListener.js";
+export * from "./features/split-canvas-segment/di.config.js";
+export * from "./features/split-canvas-segment/splitCanvasSegmentMouseListener.js";
 export * from "./features/transaction/di.config.js";
 export * from "./features/transaction/transactionIdProvider.js";
 export * from "./features/update/di.config.js";

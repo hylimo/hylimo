@@ -1,6 +1,7 @@
 import {
     AssignmentExpression,
     CompletionExpressionMetadata,
+    ExecutableNumberLiteralExpression,
     Expression,
     FieldAccessExpression,
     IdentifierExpression,
@@ -64,6 +65,10 @@ export class CompletionAstTransformer extends RuntimeAstTransformer {
         }
     }
 
+    override visitNoopExpression(): ExecutableExpression<any> {
+        return new ExecutableNumberLiteralExpression(undefined, 0);
+    }
+
     /**
      * Checks if the given expression is in the completion range
      *
@@ -71,10 +76,10 @@ export class CompletionAstTransformer extends RuntimeAstTransformer {
      * @returns true if the expression is in the completion range
      */
     private isInCompletionRange(expression: Expression<CompletionExpressionMetadata>): boolean {
-        const range = expression.metadata.completionPosition;
+        const range = expression.metadata.completionRange;
         if (range == undefined) {
             return false;
         }
-        return range.startOffset < this.position && this.position <= range.endOffset;
+        return range[0] < this.position && this.position <= range[1];
     }
 }

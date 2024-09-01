@@ -74,9 +74,10 @@ export abstract class ElementLayoutConfig implements LayoutConfig {
      * @param element the element to get the outline of
      * @param position offset in current context
      * @param size the size of the element
+     * @param id the id of the element
      * @returns the outline of the element
      */
-    outline(layout: Layout, element: LayoutElement, position: Point, size: Size): Line {
+    outline(layout: Layout, element: LayoutElement, position: Point, size: Size, id: string): Line {
         const { x, y } = position;
         const { width, height } = size;
         const startPos = {
@@ -84,14 +85,14 @@ export abstract class ElementLayoutConfig implements LayoutConfig {
             y: y + height / 2
         };
         const segments: LineSegment[] = [
-            this.lineSegment(x + width, y + height),
-            this.lineSegment(x + width / 2, y + height),
-            this.lineSegment(x, y + height),
-            this.lineSegment(x, y + height / 2),
-            this.lineSegment(x, y),
-            this.lineSegment(x + width / 2, y),
-            this.lineSegment(x + width, y),
-            this.lineSegment(startPos.x, startPos.y)
+            this.lineSegment(x + width, y + height, id, 0),
+            this.lineSegment(x + width / 2, y + height, id, 1),
+            this.lineSegment(x, y + height, id, 2),
+            this.lineSegment(x, y + height / 2, id, 3),
+            this.lineSegment(x, y, id, 4),
+            this.lineSegment(x + width / 2, y, id, 5),
+            this.lineSegment(x + width, y, id, 6),
+            this.lineSegment(startPos.x, startPos.y, id, 7)
         ];
         return {
             start: startPos,
@@ -104,15 +105,19 @@ export abstract class ElementLayoutConfig implements LayoutConfig {
      *
      * @param x the end x coordinate
      * @param y the end y coordiate
+     * @param origin the origin of the segment
+     * @param originSegment the index of the segment of {@link origin} this segment originates from
      * @returns the generated line segment
      */
-    protected lineSegment(x: number, y: number): LineSegment {
+    protected lineSegment(x: number, y: number, origin: string, originSegment: number): LineSegment {
         return {
             type: LineSegment.TYPE,
             end: {
                 x,
                 y
-            }
+            },
+            origin,
+            originSegment
         };
     }
 
@@ -124,9 +129,19 @@ export abstract class ElementLayoutConfig implements LayoutConfig {
      * @param endX x coordinate of the end
      * @param endY y coordinate of the end
      * @param radius both x and y radius
+     * @param origin the origin of the segment
+     * @param originSegment the index of the segment of {@link origin} this segment originates from
      * @returns the created arc segment
      */
-    protected arcSegment(cx: number, cy: number, endX: number, endY: number, radius: number): ArcSegment {
+    protected arcSegment(
+        cx: number,
+        cy: number,
+        endX: number,
+        endY: number,
+        radius: number,
+        origin: string,
+        originSegment: number
+    ): ArcSegment {
         return {
             type: ArcSegment.TYPE,
             clockwise: true,
@@ -139,7 +154,9 @@ export abstract class ElementLayoutConfig implements LayoutConfig {
                 y: cy
             },
             radiusX: radius,
-            radiusY: radius
+            radiusY: radius,
+            origin,
+            originSegment
         };
     }
 

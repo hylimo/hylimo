@@ -7,6 +7,9 @@ import { moveYHandler } from "./moveYHandler.js";
 import { resizeHeight } from "./resizeHeightHandler.js";
 import { resizeWidth } from "./resizeWidthHandler.js";
 import { rotationHandler } from "./rotationHandler.js";
+import { splitCanvasAxisAlignedSegmentHandler } from "./splitCanvasAxisAlignedSegmentHandler.js";
+import { splitCanvasBezierSegmentHandler } from "./splitCanvasBezierSegmentHandler.js";
+import { splitCanvasLineSegmentHandler } from "./splitCanvasLineSegmentHandler.js";
 
 /**
  * Registry for all edit handlers
@@ -49,5 +52,8 @@ export const defaultEditRegistry = new EditHandlerRegistry([
     axisAlignedSegmentPosHandler,
     rotationHandler,
     resizeWidth,
-    resizeHeight
+    resizeHeight,
+    splitCanvasLineSegmentHandler,
+    splitCanvasAxisAlignedSegmentHandler,
+    splitCanvasBezierSegmentHandler
 ]);

@@ -1,6 +1,7 @@
 import { AssignmentExpression } from "../../ast/assignmentExpression.js";
 import { InterpreterContext } from "../interpreter/interpreterContext.js";
-import { BaseObject, FieldEntry } from "../objects/baseObject.js";
+import { BaseObject } from "../objects/baseObject.js";
+import { LabeledValue } from "../objects/labeledValue.js";
 import { ExecutableExpression } from "./executableExpression.js";
 
 /**
@@ -24,7 +25,7 @@ export class ExecutableAssignmentExpression extends ExecutableExpression<Assignm
         super(expression);
     }
 
-    override evaluateInternal(context: InterpreterContext): FieldEntry {
+    override evaluateInternal(context: InterpreterContext): LabeledValue {
         let targetValue: BaseObject;
         if (this.target !== undefined) {
             targetValue = this.target.evaluate(context).value;
@@ -35,7 +36,7 @@ export class ExecutableAssignmentExpression extends ExecutableExpression<Assignm
         if (this.target !== undefined) {
             targetValue.setLocalField(this.name, valueValue, context);
         } else {
-            targetValue.setFieldEntry(this.name, valueValue, context);
+            targetValue.setField(this.name, valueValue, context);
         }
         return valueValue;
     }

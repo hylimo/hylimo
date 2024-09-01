@@ -10,6 +10,8 @@ import { BracketExpression } from "./bracketExpression.js";
 import { AssignmentExpression } from "./assignmentExpression.js";
 import { Expression } from "./expression.js";
 import { ObjectExpression } from "./objectExpression.js";
+import { OperatorExpression } from "./operatorExpression.js";
+import { NoopExpression } from "./noopExpression.js";
 
 /**
  * Visitor to transform an AST.
@@ -50,6 +52,10 @@ export abstract class ASTVisitor<C, O> {
                 return this.visistStringLiteralExpression(expression as StringLiteralExpression, context);
             case ObjectExpression.TYPE:
                 return this.visitObjectExpression(expression as ObjectExpression, context);
+            case OperatorExpression.TYPE:
+                return this.visitOperatorExpression(expression as OperatorExpression, context);
+            case NoopExpression.TYPE:
+                return this.visitNoopExpression(expression as NoopExpression, context);
             default:
                 throw new Error(`Unknown expression type ${expression.type}`);
         }
@@ -66,4 +72,6 @@ export abstract class ASTVisitor<C, O> {
     abstract visitSelfInvocationExpression(expression: SelfInvocationExpression, context: C): O;
     abstract visistStringLiteralExpression(expression: StringLiteralExpression, context: C): O;
     abstract visitObjectExpression(expression: ObjectExpression, context: C): O;
+    abstract visitOperatorExpression(expression: OperatorExpression, context: C): O;
+    abstract visitNoopExpression(expression: NoopExpression, context: C): O;
 }

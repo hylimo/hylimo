@@ -26,13 +26,13 @@ export const booleanModule = InterpreterModule.create(
             assign(booleanProto, new ExecutableNativeExpression((context) => ({ value: context.booleanPrototype }))),
             id(SemanticFieldNames.PROTO).assignField(
                 "true",
-                jsFun((args, context) => new BooleanObject(true, args.getField(0, context) as FullObject)).call(
+                jsFun((args, context) => new BooleanObject(true, args.getFieldValue(0, context) as FullObject)).call(
                     id(booleanProto)
                 )
             ),
             id(SemanticFieldNames.PROTO).assignField(
                 "false",
-                jsFun((args, context) => new BooleanObject(false, args.getField(0, context) as FullObject)).call(
+                jsFun((args, context) => new BooleanObject(false, args.getFieldValue(0, context) as FullObject)).call(
                     id(booleanProto)
                 )
             ),
@@ -97,8 +97,8 @@ export const booleanModule = InterpreterModule.create(
                 jsFun(
                     (args, context) => {
                         return context.newBoolean(
-                            assertBoolean(args.getField(SemanticFieldNames.SELF, context)) <
-                                assertBoolean(args.getField(0, context))
+                            assertBoolean(args.getFieldValue(SemanticFieldNames.SELF, context)) <
+                                assertBoolean(args.getFieldValue(0, context))
                         );
                     },
                     {
@@ -120,8 +120,8 @@ export const booleanModule = InterpreterModule.create(
                 jsFun(
                     (args, context) => {
                         return context.newBoolean(
-                            assertBoolean(args.getField(SemanticFieldNames.SELF, context)) >
-                                assertBoolean(args.getField(0, context))
+                            assertBoolean(args.getFieldValue(SemanticFieldNames.SELF, context)) >
+                                assertBoolean(args.getFieldValue(0, context))
                         );
                     },
                     {
@@ -143,8 +143,8 @@ export const booleanModule = InterpreterModule.create(
                 jsFun(
                     (args, context) => {
                         return context.newBoolean(
-                            assertBoolean(args.getField(SemanticFieldNames.SELF, context)) <=
-                                assertBoolean(args.getField(0, context))
+                            assertBoolean(args.getFieldValue(SemanticFieldNames.SELF, context)) <=
+                                assertBoolean(args.getFieldValue(0, context))
                         );
                     },
                     {
@@ -166,8 +166,8 @@ export const booleanModule = InterpreterModule.create(
                 jsFun(
                     (args, context) => {
                         return context.newBoolean(
-                            assertBoolean(args.getField(SemanticFieldNames.SELF, context)) >=
-                                assertBoolean(args.getField(0, context))
+                            assertBoolean(args.getFieldValue(SemanticFieldNames.SELF, context)) >=
+                                assertBoolean(args.getFieldValue(0, context))
                         );
                     },
                     {
@@ -188,8 +188,8 @@ export const booleanModule = InterpreterModule.create(
                 "==",
                 jsFun(
                     (args, context) => {
-                        const self = assertBoolean(args.getField(SemanticFieldNames.SELF, context));
-                        const other = args.getField(0, context);
+                        const self = assertBoolean(args.getFieldValue(SemanticFieldNames.SELF, context));
+                        const other = args.getFieldValue(0, context);
                         let res: boolean;
                         if (other instanceof BooleanObject) {
                             res = self === other.value;
@@ -213,7 +213,7 @@ export const booleanModule = InterpreterModule.create(
             "!",
             jsFun(
                 (args, context) => {
-                    return context.newBoolean(!assertBoolean(args.getField(0, context)));
+                    return context.newBoolean(!assertBoolean(args.getFieldValue(0, context)));
                 },
                 {
                     docs: "Negates a boolean",

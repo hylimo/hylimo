@@ -34,3 +34,4 @@ It provides the following features:
 - Moving elements and points using drag and drop
 - Resizing diagram elements by dragging its border
 - Rotating diagram elements by dragging the rotate symbol
+- Splitting canvas connections by inserting a new point by shift + click on a canvas connection

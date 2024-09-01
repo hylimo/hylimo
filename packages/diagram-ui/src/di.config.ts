@@ -59,11 +59,12 @@ import { SLinePoint } from "./model/canvas/sLinePoint.js";
 import { LinePointView } from "./views/canvas/linePointView.js";
 import { SPath } from "./model/sPath.js";
 import { PathView } from "./views/pathView.js";
-import { resetCanvasBoundsModule } from "./features/canvas-bounds/di.config.js";
 import { SCanvasAxisAlignedSegment } from "./model/canvas/sCanvasAxisAlignedSegment.js";
 import { SEllipse } from "./model/sEllipse.js";
 import { EllipseView } from "./views/ellipseView.js";
 import { navigationModule } from "./features/navigation/di.config.js";
+import { splitCanvasSegmentModule } from "./features/split-canvas-segment/di.config.js";
+import { resetCanvasBoundsModule } from "./features/canvas-bounds/di.config.js";
 
 /**
  * The module used
@@ -117,7 +118,8 @@ export function createContainer(widgetId: string): Container {
         transactionModule,
         moveModule,
         resetCanvasBoundsModule,
-        navigationModule
+        navigationModule,
+        splitCanvasSegmentModule
     );
     container.load(diagramModule);
 

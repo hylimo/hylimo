@@ -1,3 +1,5 @@
+import { groupBy } from "../../common/groupBy.js";
+
 /**
  * Specifies how an element can be modified.
  * If multiple elements are modified at the same time, these have to be checked for consistency.
@@ -33,6 +35,9 @@ interface BaseEditSpecificationEntry {
     range: [number, number];
 }
 
+/**
+ * An entry in an edit specification which adds an expression to a function body
+ */
 export interface AddEditSpecificationEntry extends BaseEditSpecificationEntry {
     /**
      * The type of edit
@@ -44,6 +49,9 @@ export interface AddEditSpecificationEntry extends BaseEditSpecificationEntry {
     functionRange: [number, number];
 }
 
+/**
+ * An entry in an edit specification which replaces an expression
+ */
 export interface ReplaceEditSpecificationEntry extends BaseEditSpecificationEntry {
     /**
      * The type of edit
@@ -52,49 +60,107 @@ export interface ReplaceEditSpecificationEntry extends BaseEditSpecificationEntr
 }
 
 /**
+ * An entry in an edit specification which adds an argument to a function call
+ */
+export interface AddArgEditSpecificationEntry extends BaseEditSpecificationEntry {
+    /**
+     * The type of edit
+     */
+    type: "add-arg";
+    /**
+     * The key of the list entry
+     */
+    key: string | number;
+    /**
+     * The range of the list, this includes the brackets
+     */
+    listRange: [number, number];
+    /**
+     * Will this be the first entry in the list
+     */
+    isFirst: boolean;
+    /**
+     * Will this be the last entry in the list
+     */
+    isLast: boolean;
+    /**
+     * The number of edits necessary to insert entries before this one
+     */
+    requiredPreceeding: number | undefined;
+}
+
+/**
  * entry in a edit specification
  */
-export type EditSpecificationEntry = AddEditSpecificationEntry | ReplaceEditSpecificationEntry;
+export type EditSpecificationEntry =
+    | AddEditSpecificationEntry
+    | ReplaceEditSpecificationEntry
+    | AddArgEditSpecificationEntry;
 
 export namespace EditSpecification {
     /**
      * Checks if the provided grouped edit specification entries are consistent.
      * Not consistent if
+     * - any provided entry is undefined
+     * - two entries of different type overlap
      * - two replace edits with different signatures or groups overlap
-     * - a replace and an add edit overlap
+     * - an add arg edit has not the exact required amount of preceeding entries
      *
      * @param entries the EditSpecifications to check
      * @return true if the edit can affect all specifications at the same time
      */
     export function isConsistent(entries: (EditSpecificationEntry | undefined)[][]): boolean {
-        const entriesWithGroup = entries.flatMap((group, groupIndex) =>
-            group.map((entry) => (entry ? { entry, group: groupIndex } : undefined))
+        const entriesWithGroup: (IndexedModificationSpecificationEntry | undefined)[] = entries.flatMap(
+            (group, groupIndex) => group.map((entry) => (entry ? { spec: entry, index: groupIndex } : undefined))
         );
         const definedEntries = entriesWithGroup.filter((entry) => entry !== undefined);
         if (definedEntries.length != entriesWithGroup.length) {
             return false;
         }
-        definedEntries.sort((a, b) => a.entry.range[0] - b.entry.range[0]);
-        for (let i = 1; i < entries.length; i++) {
-            const { entry: entry, group } = definedEntries[i];
-            const { entry: lastEntry, group: lastGroup } = definedEntries[i - 1];
-            const currentStart = entry.range[0];
-            const lastStart = lastEntry.range[0];
+        definedEntries.sort((a, b) => a.spec.range[0] - b.spec.range[0]);
+        for (let i = 1; i < definedEntries.length; i++) {
+            const { spec, index } = definedEntries[i];
+            const { spec: lastSpec, index: lastIndex } = definedEntries[i - 1];
+            const currentStart = spec.range[0];
+            const lastStart = lastSpec.range[0];
             if (currentStart === lastStart) {
-                if (lastEntry.type != entry.type) {
+                if (lastSpec.type != spec.type) {
                     return false;
                 }
-                if (lastGroup != group) {
+                if (lastIndex != index) {
                     return false;
                 }
                 if (
-                    entry.type === "replace" &&
-                    (entry.range[1] !== lastEntry.range[1] || !isTemplateEqual(entry.template, lastEntry.template))
+                    spec.type === "replace" &&
+                    (spec.range[1] !== lastSpec.range[1] || !isTemplateEqual(spec.template, lastSpec.template))
                 ) {
                     return false;
                 }
-            } else if (currentStart < lastEntry.range[1]) {
+            } else if (currentStart < lastSpec.range[1]) {
                 return false;
+            }
+        }
+        return isAddArgEditsConsistent(definedEntries);
+    }
+
+    /**
+     * Checks that exactly the amount of required preceeding entries are present for all add argument edits
+     *
+     * @param entries the entries to check
+     * @returns true if the required preceeding entries are consistent
+     */
+    function isAddArgEditsConsistent(entries: IndexedModificationSpecificationEntry[]): boolean {
+        const addArgEdits = entries.filter((entry) => IndexedModificationSpecificationEntry.is(entry, "add-arg"));
+        const groupedEntries = groupBy(addArgEdits, (entry) => entry.spec.listRange[0]);
+        for (const group of groupedEntries.values()) {
+            const uniqueEdits = IndexedModificationSpecificationEntry.computeSortedUniqueAddArgEdits(group);
+            for (let i = 0; i < uniqueEdits.length; i++) {
+                if (
+                    uniqueEdits[i].spec.requiredPreceeding != undefined &&
+                    uniqueEdits[i].spec.requiredPreceeding != i
+                ) {
+                    return false;
+                }
             }
         }
         return true;
@@ -141,5 +207,69 @@ export namespace EditSpecification {
             }
         }
         return true;
+    }
+}
+
+/**
+ * Modification specification entry with an index
+ *
+ * @param T the type of the specification
+ */
+export interface IndexedModificationSpecificationEntry<T extends EditSpecificationEntry = EditSpecificationEntry> {
+    /**
+     * The index of the used values when evaluating the template
+     */
+    index: number;
+    /**
+     * The edit specification entry
+     */
+    spec: T;
+}
+
+export namespace IndexedModificationSpecificationEntry {
+    /**
+     * Computes the sorted unique add list entry edits
+     * Removes duplicates (same index, key and template) and sorts the edits with numeric keys
+     *
+     * @param edits the edits to filter and sort
+     * @returns the sorted unique add list entry edits
+     */
+    export function computeSortedUniqueAddArgEdits(
+        edits: IndexedModificationSpecificationEntry<AddArgEditSpecificationEntry>[]
+    ): IndexedModificationSpecificationEntry<AddArgEditSpecificationEntry>[] {
+        const uniqueEdits = [
+            ...new Map(
+                edits.map((edit) => {
+                    const spec = edit.spec;
+                    return [`${edit.index} ${spec.key} ${spec.template}`, edit] as const;
+                })
+            ).values()
+        ];
+        const namedEdits = [];
+        const indexedEdits = [];
+        for (const edit of uniqueEdits) {
+            if (typeof edit.spec.key === "string") {
+                namedEdits.push(edit);
+            } else {
+                indexedEdits.push(edit);
+            }
+        }
+        indexedEdits.sort((a, b) => (a.spec.key as number) - (b.spec.key as number));
+        const sortedEdits = [...indexedEdits, ...namedEdits];
+        return sortedEdits;
+    }
+
+    /**
+     * Checks if the provided entry is of the given type
+     *
+     * @param entry the entry to check
+     * @param type the type to check for
+     * @returns true if the entry is of the given type
+     */
+    export function is<K extends EditSpecificationEntry["type"]>(
+        entry: IndexedModificationSpecificationEntry,
+        type: K
+    ): entry is IndexedModificationSpecificationEntry<EditSpecificationEntry & { type: K }> {
+        return entry.spec.type === type;
     }
 }

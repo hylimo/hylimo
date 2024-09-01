@@ -1,17 +1,21 @@
 import {
+    AbstractInvocationExpression,
     assertString,
     assign,
     BaseObject,
     DefaultModuleNames,
     Expression,
-    FieldEntry,
+    LabeledValue,
     IdentifierExpression,
     InterpreterContext,
     InterpreterModule,
     InvocationExpression,
     jsFun,
     NumberLiteralExpression,
-    StringObject
+    StringObject,
+    FunctionExpression,
+    RuntimeError,
+    MissingArgumentSource
 } from "@hylimo/core";
 
 /**
@@ -25,8 +29,8 @@ import {
  */
 function generateEdit(
     target: Expression<any>,
-    template: FieldEntry,
-    type: "replace" | "add",
+    template: LabeledValue,
+    type: "replace" | "add" | "add-arg",
     context: InterpreterContext
 ): BaseObject {
     const edit = context.newObject();
@@ -37,20 +41,76 @@ function generateEdit(
 }
 
 /**
- * Geneates an replace edit
+ * Generates a replace or add argument edit
+ *
+ * @param target the target to replace or add to
+ * @param template the template to replace or add
+ * @param context the interpreter context
+ * @returns the generated replace or add argument edit
+ */
+function generateReplaceOrAddArgEdit(
+    target: Expression<any> | MissingArgumentSource,
+    template: LabeledValue,
+    context: InterpreterContext
+): BaseObject {
+    if (target instanceof MissingArgumentSource) {
+        return generateAddArgEdit(
+            target.expression,
+            template,
+            { value: typeof target.key === "number" ? context.newNumber(target.key) : context.newString(target.key) },
+            context
+        );
+    } else {
+        return generateEdit(target, template, "replace", context);
+    }
+}
+
+/**
+ * Generates an replace edit
  *
  * @param target the target to replace
  * @param template the template to replace the target with
  * @param context the interpreter context
  * @returns the generated replace edit
  */
-function generateReplaceEdit(target: Expression<any>, template: BaseObject[], context: InterpreterContext): BaseObject {
+function generateReplaceEdit(
+    target: Expression<any> | MissingArgumentSource,
+    template: BaseObject[],
+    context: InterpreterContext
+): BaseObject {
     const templateObject = context.newObject();
     templateObject.setLocalField("length", { value: context.newNumber(template.length) }, context);
     template.forEach((field, index) => {
         templateObject.setLocalField(index, { value: field }, context);
     });
-    return generateEdit(target, { value: templateObject }, "replace", context);
+    return generateReplaceOrAddArgEdit(target, { value: templateObject }, context);
+}
+
+/**
+ * Generates an add arg edit
+ *
+ * @param target the target invocation expression where the argument should be added
+ * @param template the template to add as argument
+ * @param key the key of the argument
+ * @param context the interpreter context
+ */
+function generateAddArgEdit(
+    target: AbstractInvocationExpression,
+    template: LabeledValue,
+    key: LabeledValue,
+    context: InterpreterContext
+): BaseObject {
+    const keyValue = key.value.toNative();
+    if (typeof keyValue === "number" && target.trailingArgumentExpressions.length > 0) {
+        const indexExpressionCount = target.innerArgumentExpressions.filter((entry) => entry.name == undefined).length;
+        if (keyValue + 1 > indexExpressionCount) {
+            // the edit is impossible because it would be inserted after / in between trailing function arguments
+            return context.null;
+        }
+    }
+    const edit = generateEdit(target, template, "add-arg", context);
+    edit.setLocalField("key", key, context);
+    return edit;
 }
 
 /**
@@ -65,12 +125,12 @@ export const editModule = InterpreterModule.create(
             "createReplaceEdit",
             jsFun(
                 (args, context) => {
-                    const target = args.getFieldEntry(0, context).source;
+                    const target = args.getField(0, context).source;
                     if (!target?.metadata?.isEditable) {
                         return context.null;
                     }
-                    const template = args.getFieldEntry(1, context);
-                    return generateEdit(target, template, "replace", context);
+                    const template = args.getField(1, context);
+                    return generateReplaceOrAddArgEdit(target, template, context);
                 },
                 {
                     docs: "Creates a replace edit",
@@ -86,11 +146,14 @@ export const editModule = InterpreterModule.create(
             "createAddEdit",
             jsFun(
                 (args, context) => {
-                    const target = args.getFieldEntry(0, context).source;
+                    const target = args.getField(0, context).source;
                     if (!target?.metadata?.isEditable) {
                         return context.null;
                     }
-                    const template = args.getFieldEntry(1, context);
+                    if (!(target instanceof FunctionExpression)) {
+                        throw new RuntimeError("Target must be a function expression");
+                    }
+                    const template = args.getField(1, context);
                     return generateEdit(target, template, "add", context);
                 },
                 {
@@ -104,18 +167,45 @@ export const editModule = InterpreterModule.create(
             )
         ),
         assign(
+            "createAddArgEdit",
+            jsFun(
+                (args, context) => {
+                    const target = args.getField(0, context).source;
+                    if (!(target instanceof AbstractInvocationExpression) || !target.metadata.isEditable) {
+                        return context.null;
+                    }
+                    const template = args.getField(2, context);
+                    const key = args.getField(1, context);
+                    return generateAddArgEdit(target, template, key, context);
+                },
+                {
+                    docs: "Creates an add argument edit",
+                    params: [
+                        [0, "the target invocation expression where the argument should be added"],
+                        [1, "the key of the argument"],
+                        [2, "the template to add as argument"]
+                    ],
+                    returns: "the created edit or null if the target is not editable"
+                }
+            )
+        ),
+        assign(
             "createAdditiveEdit",
             jsFun(
                 (args, context) => {
-                    const value = args.getFieldEntry(0, context);
+                    const value = args.getField(0, context);
                     const target = value.source;
                     if (!target?.metadata?.isEditable) {
                         return context.null;
                     }
-                    const deltaExp = (args.getField(1, context) as StringObject).value;
+                    const deltaExp = (args.getFieldValue(1, context) as StringObject).value;
                     if (target instanceof NumberLiteralExpression) {
                         const expression = `$string(${target.value} + ${deltaExp})`;
                         return generateEdit(target, { value: context.newString(expression) }, "replace", context);
+                    }
+                    if (target instanceof MissingArgumentSource) {
+                        const expression = `$string(${deltaExp})`;
+                        return generateReplaceOrAddArgEdit(target, { value: context.newString(expression) }, context);
                     }
 
                     if (target instanceof InvocationExpression) {
@@ -156,13 +246,13 @@ export const editModule = InterpreterModule.create(
             "createAppendScopeEdit",
             jsFun(
                 (args, context) => {
-                    const value = args.getFieldEntry(0, context);
+                    const value = args.getField(0, context);
                     const target = value.source;
                     if (!target?.metadata?.isEditable) {
                         return context.null;
                     }
-                    const scope = args.getFieldEntry(1, context).value;
-                    const expression = args.getFieldEntry(2, context).value;
+                    const scope = args.getField(1, context).value;
+                    const expression = args.getField(2, context).value;
                     return generateReplaceEdit(
                         target,
                         [

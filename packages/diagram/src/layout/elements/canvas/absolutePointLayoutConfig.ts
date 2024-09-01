@@ -29,13 +29,13 @@ export class AbsolutePointLayoutConfig extends CanvasPointLayoutConfig {
     }
 
     override layout(layout: Layout, element: LayoutElement, position: Point, size: Size, id: string): Element[] {
-        const xFieldEntry = element.element.getLocalFieldOrUndefined("_x");
-        const yFieldEntry = element.element.getLocalFieldOrUndefined("_y");
+        const xValue = element.element.getLocalFieldOrUndefined("_x");
+        const yValue = element.element.getLocalFieldOrUndefined("_y");
         const result: AbsolutePoint = {
             type: AbsolutePoint.TYPE,
             id,
-            x: xFieldEntry?.value?.toNative() + position.x,
-            y: yFieldEntry?.value.toNative() + position.y,
+            x: xValue?.value?.toNative() + position.x,
+            y: yValue?.value.toNative() + position.y,
             children: [],
             edits: element.edits
         };

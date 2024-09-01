@@ -1,6 +1,6 @@
 import { SelfInvocationExpression } from "../../ast/selfInvocationExpression.js";
 import { InterpreterContext } from "../interpreter/interpreterContext.js";
-import { FieldEntry } from "../objects/baseObject.js";
+import { LabeledValue } from "../objects/labeledValue.js";
 import { SemanticFieldNames } from "../semanticFieldNames.js";
 import { ExecutableAbstractInvocationExpression } from "./executableAbstractInvocationExpression.js";
 import { ExecutableListEntry } from "./executableListEntry.js";
@@ -29,9 +29,9 @@ export class ExecutableSelfInvocationExpression extends ExecutableAbstractInvoca
         super(expression, argumentExpressions);
     }
 
-    override evaluateInternal(context: InterpreterContext): FieldEntry {
+    override evaluateInternal(context: InterpreterContext): LabeledValue {
         const targetValue = this.target.evaluateWithSource(context);
-        const fieldValue = targetValue.value.getField(this.name, context);
+        const fieldValue = targetValue.value.getFieldValue(this.name, context);
         return fieldValue.invoke(
             [
                 { value: new ExecutableConstExpression(targetValue), name: SemanticFieldNames.SELF },

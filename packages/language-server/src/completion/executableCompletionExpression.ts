@@ -1,20 +1,12 @@
-import { ASTExpressionPosition, Expression, FullObject, SemanticFieldNames } from "@hylimo/core";
+import { Range, Expression, FullObject, SemanticFieldNames } from "@hylimo/core";
 import { CompletionExpressionMetadata } from "@hylimo/core";
 import { ExecutableExpression } from "@hylimo/core";
 import { InterpreterContext } from "@hylimo/core";
 import { BaseObject } from "@hylimo/core";
 import { AbstractFunctionObject } from "@hylimo/core";
 import { CompletionError } from "./completionError.js";
-import {
-    CompletionItem,
-    CompletionItemKind,
-    Position,
-    TextEdit,
-    Range,
-    InsertTextFormat,
-    InsertTextMode,
-    MarkupKind
-} from "vscode-languageserver";
+import { CompletionItemKind, InsertTextFormat, InsertTextMode, MarkupKind } from "vscode-languageserver";
+import { CompletionItem } from "./completionItem.js";
 
 /**
  * An expression which throws an CompletionError on evaluation
@@ -51,7 +43,7 @@ export class ExecutableCompletionExpression extends ExecutableExpression<Express
      */
     private transformCompletionContext(value: BaseObject, context: InterpreterContext): CompletionItem[] {
         const items: CompletionItem[] = [];
-        for (const [key, entry] of Object.entries(value.getFieldEntries(context))) {
+        for (const [key, entry] of Object.entries(value.getFields(context))) {
             const value = entry.value;
             const docs = this.getDocsDescription(value, context) ?? this.getFieldDescription(value, context, key) ?? "";
             const snippet: string | undefined = this.getDocSnippet(value, context);
@@ -62,7 +54,7 @@ export class ExecutableCompletionExpression extends ExecutableExpression<Express
             } else {
                 kind = isFunction ? CompletionItemKind.Function : CompletionItemKind.Variable;
             }
-            const range = this.expression!.metadata.identifierPosition;
+            const range = this.expression!.metadata.identifierRange;
             items.push(this.createCompletionItem(key, docs, range, kind));
             if (snippet != undefined) {
                 items.push(this.createSnippetCompletionItem(key, docs, snippet, range));
@@ -82,7 +74,7 @@ export class ExecutableCompletionExpression extends ExecutableExpression<Express
         if (value.isNull) {
             return undefined;
         }
-        const docs = value.getField(SemanticFieldNames.DOCS, context);
+        const docs = value.getFieldValue(SemanticFieldNames.DOCS, context);
         if (docs instanceof FullObject) {
             return docs;
         } else {
@@ -102,7 +94,7 @@ export class ExecutableCompletionExpression extends ExecutableExpression<Express
         if (docs == undefined) {
             return undefined;
         }
-        const description = docs.getField("docs", context);
+        const description = docs.getFieldValue("docs", context);
         return (
             description.toString(context) +
             "\n\n" +
@@ -126,7 +118,7 @@ export class ExecutableCompletionExpression extends ExecutableExpression<Express
         if (docs == undefined) {
             return undefined;
         }
-        const snippet = docs.getField("snippet", context);
+        const snippet = docs.getFieldValue("snippet", context);
         if (snippet.isNull) {
             return undefined;
         }
@@ -150,7 +142,7 @@ export class ExecutableCompletionExpression extends ExecutableExpression<Express
         if (!(fields instanceof FullObject)) {
             return undefined;
         }
-        const fieldDocs = fields.getField(field, context);
+        const fieldDocs = fields.getFieldValue(field, context);
         if (fieldDocs.isNull) {
             return undefined;
         }
@@ -167,7 +159,7 @@ export class ExecutableCompletionExpression extends ExecutableExpression<Express
      * @returns the field as string or undefined if not found
      */
     private getDocField(docs: FullObject, field: string, context: InterpreterContext): string | undefined {
-        const docField = docs.getField(field, context);
+        const docField = docs.getFieldValue(field, context);
         if (docField.isNull) {
             return undefined;
         }
@@ -190,12 +182,7 @@ export class ExecutableCompletionExpression extends ExecutableExpression<Express
      * @param kind the kind of the completion item
      * @returns the completion item
      */
-    private createCompletionItem(
-        key: string,
-        docs: string,
-        range: ASTExpressionPosition,
-        kind: CompletionItemKind
-    ): CompletionItem {
+    private createCompletionItem(key: string, docs: string, range: Range, kind: CompletionItemKind): CompletionItem {
         return {
             label: key,
             detail: key,
@@ -203,13 +190,10 @@ export class ExecutableCompletionExpression extends ExecutableExpression<Express
                 kind: MarkupKind.Markdown,
                 value: docs
             },
-            textEdit: TextEdit.replace(
-                Range.create(
-                    Position.create(range.startLine, range.startColumn),
-                    Position.create(range.endLine, range.endColumn)
-                ),
-                key
-            ),
+            textEdit: {
+                range,
+                text: key
+            },
             kind
         };
     }
@@ -223,12 +207,7 @@ export class ExecutableCompletionExpression extends ExecutableExpression<Express
      * @param range the range to replace
      * @returns the completion item
      */
-    private createSnippetCompletionItem(
-        key: string,
-        docs: string,
-        snippet: string,
-        range: ASTExpressionPosition
-    ): CompletionItem {
+    private createSnippetCompletionItem(key: string, docs: string, snippet: string, range: Range): CompletionItem {
         const snippetCode = key + snippet;
         return {
             label: key,
@@ -237,13 +216,10 @@ export class ExecutableCompletionExpression extends ExecutableExpression<Express
                 kind: MarkupKind.Markdown,
                 value: docs
             },
-            textEdit: TextEdit.replace(
-                Range.create(
-                    Position.create(range.startLine, range.startColumn),
-                    Position.create(range.endLine, range.endColumn)
-                ),
-                snippetCode
-            ),
+            textEdit: {
+                range,
+                text: snippetCode
+            },
             kind: CompletionItemKind.Snippet,
             insertTextFormat: InsertTextFormat.Snippet,
             insertTextMode: InsertTextMode.adjustIndentation

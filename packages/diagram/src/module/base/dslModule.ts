@@ -69,8 +69,8 @@ const scopeExpressions: ExecutableExpression[] = [
                 docs: "Create a relative point",
                 params: [
                     [0, "the target to which the point is relative", elementType()],
-                    [1, "the x coordinate", numberType],
-                    [2, "the y coordinate", numberType]
+                    [1, "the x coordinate", optional(numberType)],
+                    [2, "the y coordinate", optional(numberType)]
                 ],
                 returns: "The created relative point"
             }
@@ -92,7 +92,7 @@ const scopeExpressions: ExecutableExpression[] = [
                     [
                         1,
                         "the relative position on the line, number between 0 and 1, or a tuple of the segment and the relative position on the segment",
-                        LinePointLayoutConfig.POS_TYPE
+                        optional(LinePointLayoutConfig.POS_TYPE)
                     ],
                     [2, "the distance from the line", optional(numberType)]
                 ],
@@ -113,7 +113,6 @@ const scopeExpressions: ExecutableExpression[] = [
                     } {
                         first.class += className
                     }
-                    first.scopes.styles = second
                     scope.styles {
                         cls(className) {
                             this.any = any
@@ -146,27 +145,42 @@ const scopeExpressions: ExecutableExpression[] = [
         `
             lineBuilderProto = object()
             lineBuilderProto.line = listWrapper {
+                positions = it
+                target = args
                 segments = args.self.segments
-                it.forEach {
-                    segments += canvasLineSegment(end = it)
+                positions.forEach {
+                    (point, index) = args
+                    segment = canvasLineSegment(end = point)
+                    segment.edits.set(
+                        "${DefaultEditTypes.SPLIT_CANVAS_LINE_SEGMENT}",
+                        createAddArgEdit(target, index - 0.5, "'apos(' & x & ', ' & y & ')'")
+                    )
+                    segments += segment
                 }
                 args.self
             }
             lineBuilderProto.axisAligned = listWrapper {
-                segments = args.self.segments
                 positions = it
+                target = args
+                segments = args.self.segments
                 range(positions.length / 2).forEach {
-                    segments += canvasAxisAlignedSegment(
+                    segment = canvasAxisAlignedSegment(
                         end = positions.get(2 * it + 1),
                         verticalPos = positions.get(2 * it)
                     )
+                    segment.edits.set(
+                        "${DefaultEditTypes.SPLIT_CANVAS_AXIS_ALIGNED_SEGMENT}",
+                        createAddArgEdit(target, 2 * it - 0.5, "pos & ', apos(' & x & ', ' & y & ')'")
+                    )
+                    segments += this.segment
                 }
                 args.self
             }
             lineBuilderProto.bezier = listWrapper {
+                positions = it
+                target = args
                 self = args.self
                 segments = self.segments
-                positions = it
                 segmentCount = (positions.length - 2) / 3
                 startPoint = if(segments.length > 0) {
                     segments.get(segments.length - 1).end
@@ -176,7 +190,7 @@ const scopeExpressions: ExecutableExpression[] = [
 
                 range(segmentCount - 1).forEach {
                     endPoint = positions.get(3 * it + 2)
-                    segments += canvasBezierSegment(
+                    segment = canvasBezierSegment(
                         startControlPoint = scope.rpos(
                             startPoint,
                             positions.get(3 * it),
@@ -189,11 +203,16 @@ const scopeExpressions: ExecutableExpression[] = [
                         ),
                         end = endPoint
                     )
+                    segment.edits.set(
+                        "${DefaultEditTypes.SPLIT_CANVAS_BEZIER_SEGMENT}",
+                        createAddArgEdit(target, 3 * it + 1.5, "'apos(' & x & ', ' & y & '), ' & cx1 & ', ' & cy1")
+                    )
+                    segments += segment
                     startPoint = endPoint
                 }
 
                 endPoint = positions.get(3 * segmentCount - 1)
-                segments += canvasBezierSegment(
+                segment = canvasBezierSegment(
                     startControlPoint = scope.rpos(
                         startPoint,
                         positions.get(3 * segmentCount - 3),
@@ -206,7 +225,12 @@ const scopeExpressions: ExecutableExpression[] = [
                     ),
                     end = endPoint
                 )
-                self
+                segment.edits.set(
+                    "${DefaultEditTypes.SPLIT_CANVAS_BEZIER_SEGMENT}",
+                    createAddArgEdit(target, 3 * segmentCount - 1.5, "'apos(' & x & ', ' & y & '), ' & cx1 & ', ' & cy1")
+                )
+                segments += segment
+                args.self
             }
         `
     ),
@@ -215,7 +239,6 @@ const scopeExpressions: ExecutableExpression[] = [
         fun(
             `
                 (self, callback) = args
-                self.scopes.layout = callback
                 result = object(pos = null, width = null, height = null, rotation = null)
                 callback.callWithScope(result)
                 if(result.pos != null) {
@@ -257,7 +280,6 @@ const scopeExpressions: ExecutableExpression[] = [
         fun(
             `
                 (self, callback) = args
-                self.scopes.with = callback
                 result = object(
                     over = null,
                     end = self.endProvider,
@@ -272,12 +294,11 @@ const scopeExpressions: ExecutableExpression[] = [
                         }
                         labelCanvasElement = canvasElement(
                             content = text(contents = labelContent, class = list("label")),
-                            pos = scope.lpos(self, pos ?? 0, distance, seg = args.seg),
-                            rotation = rotation,
-                            scopes = object(),
+                            pos = scope.lpos(self, pos, distance, seg = args.seg),
                             class = list("label-element")
                         )
                         scope.internal.registerCanvasElement(labelCanvasElement, args)
+                        labelCanvasElement.rotation = rotation
                         labelCanvasElement
                     }
                 )
@@ -289,6 +310,26 @@ const scopeExpressions: ExecutableExpression[] = [
                     }
                     self.start = result.over.start
                     self.contents = result.over.segments
+                } {
+                    if (self.contents.length == 1) {
+                        segment = self.contents.get(0)
+                        self.start.edits.set(
+                            "${DefaultEditTypes.MOVE_LPOS_POS}",
+                            createAddEdit(callback, "'over = start(' & pos & ').axisAligned(0.5, end(0.5))'")
+                        )
+                        segment.end.edits.set(
+                            "${DefaultEditTypes.MOVE_LPOS_POS}",
+                            createAddEdit(callback, "'over = start(0).axisAligned(0.5, end(' & pos & '))'")
+                        )
+                        segment.edits.set(
+                            "${DefaultEditTypes.AXIS_ALIGNED_SEGMENT_POS}",
+                            createAddEdit(callback, "'over = start(0).axisAligned(' & pos & ', end(0.5))'")
+                        )
+                        segment.edits.set(
+                            "${DefaultEditTypes.SPLIT_CANVAS_AXIS_ALIGNED_SEGMENT}",
+                            createAddEdit(callback, "'over = start(0).axisAligned(' & pos & ', apos(' & x & ', ' & y & '), ' & nextPos & ', end(0.5))'")
+                        )
+                    }
                 }
                 self
             `,
@@ -315,7 +356,7 @@ const scopeExpressions: ExecutableExpression[] = [
                     startPoint = scope.lpos(start, 0)
                     startPoint.edits.set(
                         "${DefaultEditTypes.MOVE_LPOS_POS}",
-                        createAppendScopeEdit(target, "with", "'over = start(' & pos & ').axisAligned(0.5, end(0))'")
+                        createAppendScopeEdit(target, "with", "'over = start(' & pos & ').axisAligned(0.5, end(0.5))'")
                     )
                     { 
                         startPoint.pos = it
@@ -326,7 +367,7 @@ const scopeExpressions: ExecutableExpression[] = [
                 }
                 endPoint = end
                 endProvider = if ((end.type == "canvasElement") || (end.type == "canvasConnection")) {
-                    endPoint = scope.lpos(end, 0)
+                    endPoint = scope.lpos(end, 0.5)
                     endPoint.edits.set(
                         "${DefaultEditTypes.MOVE_LPOS_POS}",
                         createAppendScopeEdit(target, "with", "'over = start(0).axisAligned(0.5, end(' & pos & '))'")
@@ -342,7 +383,11 @@ const scopeExpressions: ExecutableExpression[] = [
                 this.segment = canvasAxisAlignedSegment(end = endPoint, verticalPos = 0.5)
                 segment.edits.set(
                     "${DefaultEditTypes.AXIS_ALIGNED_SEGMENT_POS}",
-                    createAppendScopeEdit(target, "with", "'over = start(0).axisAligned(' & pos & ', end(0))'")
+                    createAppendScopeEdit(target, "with", "'over = start(0).axisAligned(' & pos & ', end(0.5))'")
+                )
+                segment.edits.set(
+                    "${DefaultEditTypes.SPLIT_CANVAS_AXIS_ALIGNED_SEGMENT}",
+                    createAppendScopeEdit(target, "with", "'over = start(0).axisAligned(' & pos & ', apos(' & x & ', ' & y & '), ' & nextPos & ', end(0.5))'")
                 )
 
                 connection = canvasConnection(
@@ -352,7 +397,6 @@ const scopeExpressions: ExecutableExpression[] = [
                     ),
                     startMarker = if(args.startMarkerFactory != null) { startMarkerFactory() },
                     endMarker = if(args.endMarkerFactory != null) { endMarkerFactory() },
-                    scopes = object(),
                     class = class
                 )
                 connection.startProvider = startProvider
@@ -475,9 +519,9 @@ const scopeExpressions: ExecutableExpression[] = [
             scope.element = {
                 callbackOrElement = it
                 this.element = if(callbackOrElement._type == "element") {
-                    canvasElement(content = callbackOrElement, scopes = object())
+                    canvasElement(content = callbackOrElement)
                 } {
-                    canvasElement(content = callbackOrElement(), scopes = object())
+                    canvasElement(content = callbackOrElement())
                 }
                 scope.internal.registerCanvasElement(this.element, args)
             }

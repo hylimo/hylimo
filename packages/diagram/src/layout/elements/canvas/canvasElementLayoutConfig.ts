@@ -84,7 +84,8 @@ export class CanvasElementLayoutConfig extends EditableCanvasContentLayoutConfig
                 layout,
                 content,
                 content.layoutBounds!.position,
-                content.layoutBounds!.size
+                content.layoutBounds!.size,
+                id
             ),
             edits: element.edits
         };

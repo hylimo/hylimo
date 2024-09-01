@@ -70,7 +70,7 @@ export class RectLayoutConfig extends ContentShapeLayoutConfig {
         return [result];
     }
 
-    override outline(layout: Layout, element: LayoutElement, position: Point, size: Size): Line {
+    override outline(layout: Layout, element: LayoutElement, position: Point, size: Size, id: string): Line {
         if (element.cornerRadius) {
             const radius: number = element.cornerRadius;
             const { x, y } = position;
@@ -80,25 +80,25 @@ export class RectLayoutConfig extends ContentShapeLayoutConfig {
                 y: y + height / 2
             };
             const segments: (LineSegment | ArcSegment)[] = [
-                this.lineSegment(x + width, y + height - radius),
-                this.arcSegment(x + width - radius, y + height - radius, x + width - radius, y + height, radius),
-                this.lineSegment(x + width / 2, y + height),
-                this.lineSegment(x + radius, y + height),
-                this.arcSegment(x + radius, y + height - radius, x, y + height - radius, radius),
-                this.lineSegment(x, y + height / 2),
-                this.lineSegment(x, y + radius),
-                this.arcSegment(x + radius, y + radius, x + radius, y, radius),
-                this.lineSegment(x + width / 2, y),
-                this.lineSegment(x + width - radius, y),
-                this.arcSegment(x + width - radius, y + radius, x + width, y + radius, radius),
-                this.lineSegment(startPos.x, startPos.y)
+                this.lineSegment(x + width, y + height - radius, id, 0),
+                this.arcSegment(x + width - radius, y + height - radius, x + width - radius, y + height, radius, id, 1),
+                this.lineSegment(x + width / 2, y + height, id, 2),
+                this.lineSegment(x + radius, y + height, id, 3),
+                this.arcSegment(x + radius, y + height - radius, x, y + height - radius, radius, id, 4),
+                this.lineSegment(x, y + height / 2, id, 5),
+                this.lineSegment(x, y + radius, id, 6),
+                this.arcSegment(x + radius, y + radius, x + radius, y, radius, id, 7),
+                this.lineSegment(x + width / 2, y, id, 8),
+                this.lineSegment(x + width - radius, y, id, 9),
+                this.arcSegment(x + width - radius, y + radius, x + width, y + radius, radius, id, 10),
+                this.lineSegment(startPos.x, startPos.y, id, 11)
             ];
             return {
                 start: startPos,
                 segments
             };
         } else {
-            return super.outline(layout, element, position, size);
+            return super.outline(layout, element, position, size, id);
         }
     }
 }

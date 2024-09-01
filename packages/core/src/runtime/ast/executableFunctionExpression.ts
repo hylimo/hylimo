@@ -1,6 +1,6 @@
 import { FunctionExpression } from "../../ast/functionExpression.js";
 import { InterpreterContext } from "../interpreter/interpreterContext.js";
-import { FieldEntry } from "../objects/baseObject.js";
+import { LabeledValue } from "../objects/labeledValue.js";
 import { FunctionObject } from "../objects/functionObject.js";
 import { ExecutableAbstractFunctionExpression, FunctionDocumentation } from "./executableAbstractFunctionExpression.js";
 import { ExecutableExpression } from "./executableExpression.js";
@@ -24,7 +24,7 @@ export class ExecutableFunctionExpression extends ExecutableAbstractFunctionExpr
         super(expression, documentation);
     }
 
-    override evaluateInternal(context: InterpreterContext): FieldEntry {
+    override evaluateInternal(context: InterpreterContext): LabeledValue {
         return {
             value: new FunctionObject(
                 this,

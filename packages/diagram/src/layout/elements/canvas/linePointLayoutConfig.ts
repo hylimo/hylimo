@@ -49,7 +49,7 @@ export class LinePointLayoutConfig extends CanvasPointLayoutConfig {
                 {
                     name: "pos",
                     description: "the relative offset on the line, must be between 0 and 1 (inclusive)",
-                    type: LinePointLayoutConfig.POS_TYPE
+                    type: optional(LinePointLayoutConfig.POS_TYPE)
                 },
                 {
                     name: "segment",
@@ -73,15 +73,18 @@ export class LinePointLayoutConfig extends CanvasPointLayoutConfig {
     }
 
     override layout(layout: Layout, element: LayoutElement, position: Point, size: Size, id: string): Element[] {
-        const positionField = element.element.getLocalFieldOrUndefined("_pos")!.value;
-        const distanceFieldEntry = element.element.getLocalFieldOrUndefined("_distance");
+        const positionField = element.element.getLocalFieldOrUndefined("_pos")?.value;
+        const distanceValue = element.element.getLocalFieldOrUndefined("_distance");
         const lineProvider = this.getContentId(
             element,
             element.element.getLocalFieldOrUndefined("lineProvider")!.value as FullObject
         );
         let pos: number;
         let segment: number | undefined;
-        if (isNumber(positionField)) {
+        if (positionField == undefined) {
+            pos = 0;
+            segment = undefined;
+        } else if (isNumber(positionField)) {
             pos = positionField.value;
             segment = undefined;
         } else {
@@ -89,7 +92,7 @@ export class LinePointLayoutConfig extends CanvasPointLayoutConfig {
             segment = assertNumber(positionField.getLocalFieldOrUndefined(0)!.value);
             pos = assertNumber(positionField.getLocalFieldOrUndefined(1)!.value);
         }
-        const distance = distanceFieldEntry?.value?.toNative();
+        const distance = distanceValue?.value?.toNative();
         const result: LinePoint = {
             type: LinePoint.TYPE,
             id,
@@ -118,7 +121,7 @@ export class LinePointLayoutConfig extends CanvasPointLayoutConfig {
                     args.self._distance
                 } {
                     args.self._distance = it
-                    args.self.edits.set("${DefaultEditTypes.MOVE_LPOS_DIST}", createReplaceEdit(it, "dist"))
+                    args.self.edits.set("${DefaultEditTypes.MOVE_LPOS_DIST}", createReplaceEdit(it, "$string(dist)"))
                 }
                 
                 elementProto

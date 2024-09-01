@@ -1,6 +1,6 @@
 import { Expression } from "../../ast/expression.js";
 import { InterpreterContext } from "../interpreter/interpreterContext.js";
-import { FieldEntry } from "../objects/baseObject.js";
+import { LabeledValue } from "../objects/labeledValue.js";
 // DO NOT CHANGE!
 // These classes must not be imported from their originating file directly.
 // Otherwise circular imports will cause runtime errors.
@@ -32,7 +32,7 @@ export abstract class ExecutableExpression<T extends Expression = Expression> {
      * @param context context in which this is performed
      * @returns the evaluation result
      */
-    evaluate(context: InterpreterContext): FieldEntry {
+    evaluate(context: InterpreterContext): LabeledValue {
         try {
             return this.evaluateInternal(context);
         } catch (e: any) {
@@ -50,7 +50,7 @@ export abstract class ExecutableExpression<T extends Expression = Expression> {
      * @param context context in which this is performed
      * @returns the evaluation result
      */
-    abstract evaluateInternal(context: InterpreterContext): FieldEntry;
+    abstract evaluateInternal(context: InterpreterContext): LabeledValue;
 
     /**
      * Evaluates this expression, also provides the source of the result.
@@ -60,23 +60,23 @@ export abstract class ExecutableExpression<T extends Expression = Expression> {
      * @param context context in which this is performed
      * @returns the evaluation result
      */
-    evaluateWithSource(context: InterpreterContext): FieldEntry {
+    evaluateWithSource(context: InterpreterContext): LabeledValue {
         return this.ensureSource(this.evaluate(context));
     }
 
     /**
-     * Ensures that fieldEntry has a source.
-     * If source is not set, creates a new FieldEntry with the same value and this as source
+     * Ensures that labeledValue has a source.
+     * If source is not set, creates a new LabeledValue with the same value and this as source
      *
-     * @param fieldEntry the field entry to check
-     * @returns fieldEntry or the new FieldEntry with the same value
+     * @param labeledValue the field entry to check
+     * @returns labeledValue or the new LabeledValue with the same value
      */
-    protected ensureSource(fieldEntry: FieldEntry): FieldEntry {
-        if (fieldEntry.source) {
-            return fieldEntry;
+    protected ensureSource(labeledValue: LabeledValue): LabeledValue {
+        if (labeledValue.source) {
+            return labeledValue;
         } else {
             return {
-                value: fieldEntry.value,
+                value: labeledValue.value,
                 source: this.expression
             };
         }
