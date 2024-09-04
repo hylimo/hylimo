@@ -289,6 +289,7 @@ const scopeExpressions: ExecutableExpression[] = [
                         )
                     )
                 )
+                scope.internal.registerInDiagramScope(name, packageElement)
                 packageElement
             `
         )
@@ -381,9 +382,7 @@ const scopeExpressions: ExecutableExpression[] = [
                     class = list("class-element")
                 )
                 targetScope = args.self
-                if(targetScope.get(name) == null) {
-                    targetScope.set(name, classElement)
-                }
+                scope.internal.registerInDiagramScope(name, classElement)
                 classElement
             `
         )

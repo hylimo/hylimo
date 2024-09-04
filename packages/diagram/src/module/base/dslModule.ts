@@ -32,8 +32,7 @@ const scopeExpressions: ExecutableExpression[] = [
                 internal = object(
                     classCounter = 0,
                     styles = styles({ })
-                ),
-                protos = object()
+                )
             )
         `
     ),
@@ -483,6 +482,19 @@ const scopeExpressions: ExecutableExpression[] = [
                     ],
                     returns: "The generated connection operator function"
                 }
+            )
+        ),
+    id(scope)
+        .field("internal")
+        .assignField(
+            "registerInDiagramScope",
+            fun(
+                `
+                    (name, value) = args
+                    if(scope.get(name) == null) {
+                        scope.set(name, value)
+                    }
+                `
             )
         ),
     id(scope).assignField(
