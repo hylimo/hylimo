@@ -96,7 +96,7 @@ onBeforeMount(() => {
 </script>
 <style scoped>
 .main {
-    height: 100lvh;
+    height: 100svh;
     display: flex;
     flex-direction: column;
 }
