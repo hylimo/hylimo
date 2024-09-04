@@ -1,7 +1,7 @@
 import { ExecutableAbstractFunctionExpression, fun, numberType } from "@hylimo/core";
 import { CanvasAxisAlignedSegment, Point, Size, Element, DefaultEditTypes } from "@hylimo/diagram-common";
 import { LayoutElement } from "../../layoutElement.js";
-import { Layout } from "../../layoutEngine.js";
+import { Layout } from "../../engine/layout.js";
 import { CanvasConnectionSegmentLayoutConfig } from "./canvasConnectionSegmentLayoutConfig.js";
 
 /**
@@ -29,7 +29,7 @@ export class CanvasAxisAlignedSegmentLayoutConfig extends CanvasConnectionSegmen
             id,
             type: CanvasAxisAlignedSegment.TYPE,
             children: [],
-            end: this.getContentId(element, "end"),
+            end: this.getContentId(layout, element, "end"),
             pos: verticalPosValue?.value?.toNative(),
             edits: element.edits
         };

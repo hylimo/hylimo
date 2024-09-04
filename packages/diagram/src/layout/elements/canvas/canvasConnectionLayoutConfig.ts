@@ -11,7 +11,7 @@ import {
 } from "@hylimo/diagram-common";
 import { canvasPointType, elementType } from "../../../module/base/types.js";
 import { ContentCardinality, LayoutElement, SizeConstraints } from "../../layoutElement.js";
-import { Layout } from "../../layoutEngine.js";
+import { Layout } from "../../engine/layout.js";
 import { extractStrokeStyleAttributes, strokeStyleAttributes } from "../attributes.js";
 import { EditableCanvasContentLayoutConfig } from "./editableCanvasContentLayoutConfig.js";
 
@@ -84,21 +84,19 @@ export class CanvasConnectionLayoutConfig extends EditableCanvasContentLayoutCon
         const result: CanvasConnection = {
             id,
             type: CanvasConnection.TYPE,
-            start: this.getContentId(element, element.element.getLocalFieldOrUndefined("start")!.value as FullObject),
-            children: contents.flatMap((content, i) =>
-                layout.layout(content, position, content.measuredSize!, `${id}_${i}`)
-            ),
+            start: layout.getElementId(element.element.getLocalFieldOrUndefined("start")!.value as FullObject),
+            children: contents.flatMap((content) => layout.layout(content, position, content.measuredSize!)),
             ...extractStrokeStyleAttributes(element.styles),
             edits: element.edits
         };
         const startMarker = element.startMarker;
         if (element.startMarker != undefined) {
-            const marker = layout.layout(startMarker, position, startMarker.measuredSize, `${id}_s`)[0] as Marker;
+            const marker = layout.layout(startMarker, position, startMarker.measuredSize)[0] as Marker;
             result.children.push(marker);
         }
         const endMarker = element.endMarker;
         if (element.endMarker != undefined) {
-            const marker = layout.layout(endMarker, position, endMarker.measuredSize, `${id}_e`)[0] as Marker;
+            const marker = layout.layout(endMarker, position, endMarker.measuredSize)[0] as Marker;
             result.children.push(marker);
         }
         return [result];

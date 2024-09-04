@@ -1,27 +1,26 @@
 import {
-    AbstractInvocationExpression,
-    assertNumber,
-    assertObject,
-    assertWrapperObject,
-    BaseObject,
-    Expression,
     FullObject,
-    FunctionExpression,
-    isNull,
-    isString,
-    isWrapperObject,
-    ListEntry,
+    assertString,
     nativeToList,
+    assertObject,
+    SemanticFieldNames,
+    isNull,
+    BaseObject,
+    isString,
+    assertNumber,
+    isWrapperObject,
+    Expression,
+    assertWrapperObject,
+    FunctionExpression,
+    AbstractInvocationExpression,
     ParenthesisExpressionMetadata,
+    ListEntry,
     Range,
-    SemanticFieldNames
+    RuntimeError
 } from "@hylimo/core";
-import { assertString } from "@hylimo/core";
 import {
-    Element,
-    Size,
     Point,
-    Stroke,
+    Size,
     EditSpecification,
     TemplateEntry,
     EditSpecificationEntry,
@@ -29,195 +28,25 @@ import {
     AddEditSpecificationEntry,
     AddArgEditSpecificationEntry
 } from "@hylimo/diagram-common";
-import { FontManager } from "../font/fontManager.js";
-import { TextLayoutResult, TextLayouter } from "../font/textLayouter.js";
-import { generateStyles, Selector, SelectorType, Style, StyleList } from "../styles.js";
-import { LayoutedDiagram } from "./diagramLayoutResult.js";
+import { FontCollection } from "../../font/fontCollection.js";
+import { FontFamily } from "../../font/fontFamily.js";
+import { StyleList, Selector, SelectorType, Style } from "../../styles.js";
 import {
-    addToSize,
-    HorizontalAlignment,
     LayoutElement,
-    LayoutConfig,
     LayoutInformation,
-    matchToConstraints,
     SizeConstraints,
+    addToSize,
+    matchToConstraints,
+    HorizontalAlignment,
     VerticalAlignment
-} from "./layoutElement.js";
-import { layouts } from "./layouts.js";
-import { FontCollection } from "../font/fontCollection.js";
-import { LayoutCache } from "./layoutCache.js";
-import { StretchMode } from "./elements/pathLayoutConfig.js";
-import { FontFamily } from "../font/fontFamily.js";
-
-/**
- * The amount of iterations which are cached
- */
-const CACHE_TTL = 3;
-
-/**
- * Key of the text cache
- */
-interface TextCacheKey {
-    /**
-     * the max width provided to layout
-     */
-    maxWidth: number;
-    /**
-     * The styles of the spans the text consists of
-     */
-    spans: Record<string, any>[];
-}
-
-/**
- * Cache key for path layouting
- */
-interface PathCacheKey {
-    /**
-     * The path to layout
-     */
-    path: string;
-    /**
-     * The stroke required for layouting
-     */
-    stroke: Stroke | undefined;
-    /**
-     * The size constraints
-     */
-    constraints: SizeConstraints;
-    /**
-     * The stretch mode
-     */
-    stretch: StretchMode;
-}
-
-/**
- * Cache entry of layouted paths
- */
-export interface LayoutedPath {
-    /**
-     * The layouted path
-     */
-    path: string;
-    /**
-     * The size of the layouted path
-     */
-    size: Size;
-}
-
-/**
- * Performs layout, generates a model as a result
- */
-export class LayoutEngine {
-    /**
-     * Lookup for layout configs
-     */
-    readonly layoutConfigs: Map<string, LayoutConfig> = new Map();
-
-    /**
-     * Used to get fonts
-     */
-    readonly fontManager = new FontManager();
-
-    /**
-     * Text layout engine
-     */
-    readonly textLayouter = new TextLayouter();
-
-    /**
-     * Cache used for text layouting
-     */
-    readonly textCache = new LayoutCache<TextCacheKey, TextLayoutResult>(CACHE_TTL);
-
-    /**
-     * Cache for path layouting
-     */
-    readonly pathCache = new LayoutCache<PathCacheKey, LayoutedPath>(CACHE_TTL);
-
-    /**
-     * Creates a new layout engine
-     */
-    constructor() {
-        for (const config of layouts) {
-            this.layoutConfigs.set(config.type, config);
-        }
-    }
-
-    /**
-     * Layouts a diagram defined using syncscript
-     *
-     * @param diagram the diagram to layout
-     * @returns the layouted diagram
-     */
-    async layout(diagram: BaseObject): Promise<LayoutedDiagram> {
-        this.assertDiagram(diagram);
-        const nativeFonts = diagram.getLocalFieldOrUndefined("fonts")?.value?.toNative();
-        let cacheMiss = false;
-        const fontFamilies = await Promise.all(
-            nativeToList(nativeFonts).map(async (config) => {
-                const { fontFamily, cacheHit } = await this.fontManager.getFontFamily(config);
-                cacheMiss = cacheMiss || !cacheHit;
-                return fontFamily;
-            })
-        );
-        if (cacheMiss) {
-            this.textCache.clear();
-        } else {
-            this.textCache.nextIteration();
-        }
-        this.pathCache.nextIteration();
-        const fontFamilyConfigs = fontFamilies.map((family) => family.config);
-        const layout = new Layout(
-            this,
-            generateStyles(diagram.getLocalFieldOrUndefined("styles")?.value as FullObject),
-            new FontCollection(fontFamilies),
-            fontFamilies[0]
-        );
-        const layoutElement = layout.measure(
-            diagram.getLocalFieldOrUndefined("element")?.value as FullObject,
-            undefined,
-            {
-                min: {
-                    width: 0,
-                    height: 0
-                },
-                max: {
-                    width: Number.POSITIVE_INFINITY,
-                    height: Number.POSITIVE_INFINITY
-                }
-            }
-        );
-        const elements = layout.layout(layoutElement, Point.ORIGIN, layoutElement.measuredSize!, "0");
-        return {
-            rootElement: {
-                type: "root",
-                id: "root",
-                children: elements,
-                fonts: fontFamilyConfigs,
-                edits: {}
-            },
-            elementLookup: layout.elementLookup,
-            layoutElementLookup: layout.layoutElementLookup
-        };
-    }
-
-    /**
-     * Asserts that the provided diagram is a valid diagram
-     *
-     * @param diagram the diagram to check
-     */
-    private assertDiagram(diagram: BaseObject): asserts diagram is FullObject {
-        if (!(diagram instanceof FullObject)) {
-            throw new Error("A Diagram must be an Object");
-        }
-        if (!diagram.hasField("element") || !diagram.hasField("fonts") || !diagram.hasField("styles")) {
-            throw new Error("A Diagram must have an element, fonts and styles fields");
-        }
-    }
-}
+} from "../layoutElement.js";
+import { LayoutEngine } from "./layoutEngine.js";
+import { Element } from "@hylimo/diagram-common";
 
 /**
  * Performs the layout, uses a layout engine to do so
  */
+
 export class Layout {
     /**
      * Lookup for layout elements
@@ -227,6 +56,15 @@ export class Layout {
      * Lookup for layouted elements
      */
     readonly elementLookup: Record<string, Element> = {};
+    /**
+     * Lookop for element id based on syncscript object
+     */
+    readonly elementIdLookup: Map<FullObject, string> = new Map();
+
+    /**
+     * Counter to provide child ids
+     */
+    private readonly elementIdCounter: Map<string, number> = new Map();
 
     /**
      * Creates a new layout
@@ -386,7 +224,9 @@ export class Layout {
     measure(element: FullObject, parent: LayoutElement | undefined, constraints: SizeConstraints): LayoutElement {
         const type = assertString(element.getLocalFieldOrUndefined("type")!.value, "type");
         const cls = nativeToList(element.getLocalFieldOrUndefined("class")?.value?.toNative() ?? {});
+        const id = this.generateId(parent);
         const layoutElement: LayoutElement = {
+            id,
             element,
             parent,
             styles: {},
@@ -394,6 +234,8 @@ export class Layout {
             class: new Set(cls),
             edits: this.generateEdits(element)
         };
+        this.elementIdLookup.set(element, id);
+        this.layoutElementLookup.set(id, layoutElement);
         this.applyStyles(layoutElement);
         const styles = layoutElement.styles;
         const layoutInformation = this.computeLayoutInformation(layoutElement.styles);
@@ -407,6 +249,20 @@ export class Layout {
         layoutElement.measuredSize = realSize;
         layoutElement.requestedSize = requestedSize;
         return layoutElement;
+    }
+
+    /**
+     * Generates a new id based on the parent element
+     *
+     * @param parent the parent element
+     * @returns the generated id
+     */
+    private generateId(parent: LayoutElement | undefined): string {
+        const parentId = parent?.id ?? "";
+        const counter = this.elementIdCounter.get(parentId) ?? 0;
+        const id = `${parentId}_${counter}`;
+        this.elementIdCounter.set(parentId, counter + 1);
+        return id;
     }
 
     /**
@@ -461,7 +317,7 @@ export class Layout {
      * @param id the id of the element
      * @returns the layouted element
      */
-    layout(element: LayoutElement, position: Point, size: Size, id: string): Element[] {
+    layout(element: LayoutElement, position: Point, size: Size): Element[] {
         const styles = element.styles;
 
         const layoutInformation = element.layoutInformation!;
@@ -469,14 +325,12 @@ export class Layout {
         const { x, width } = this.layoutX(styles, layoutInformation, element, size, position);
         const { y, height } = this.layoutY(styles, layoutInformation, element, size, position);
 
-        this.layoutElementLookup.set(id, element);
-
         const bounds = {
             position: { x, y },
             size: { width, height }
         };
         element.layoutBounds = bounds;
-        const results = element.layoutConfig.layout(this, element, bounds.position, bounds.size, id);
+        const results = element.layoutConfig.layout(this, element, bounds.position, bounds.size, element.id);
         results.forEach((result) => (this.elementLookup[result.id] = result));
         return results;
     }
@@ -783,5 +637,19 @@ export class Layout {
         } else {
             return [targetPos, undefined];
         }
+    }
+
+    /**
+     * Gets the id of an element
+     *
+     * @param element the element to get the id of
+     * @returns the id of the content element
+     */
+    getElementId(element: FullObject): string {
+        const elementId = this.elementIdLookup.get(element);
+        if (!elementId) {
+            throw new RuntimeError("Id of element not found");
+        }
+        return elementId;
     }
 }

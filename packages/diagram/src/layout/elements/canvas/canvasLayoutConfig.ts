@@ -11,7 +11,7 @@ import {
     LinePoint
 } from "@hylimo/diagram-common";
 import { ContentCardinality, LayoutElement, SizeConstraints } from "../../layoutElement.js";
-import { Layout } from "../../layoutEngine.js";
+import { Layout } from "../../engine/layout.js";
 import { StyledElementLayoutConfig } from "../styledElementLayoutConfig.js";
 import { CanvasContentLayoutConfig } from "./canvasContentLayoutConfig.js";
 import { canvasPointType, elementType } from "../../../module/base/types.js";
@@ -54,22 +54,13 @@ export class CanvasLayoutConfig extends StyledElementLayoutConfig {
 
     override layout(layout: Layout, element: LayoutElement, position: Point, size: Size, id: string): Element[] {
         const contents = element.contents as LayoutElement[];
-        const contentIdLookup = new Map<FullObject, string>();
-        for (let i = 0; i < contents.length; i++) {
-            contentIdLookup.set(contents[i].element, `${id}_${i}`);
-        }
-        element.contentIdLookup = contentIdLookup;
         const children: Element[] = [];
         const layoutChildren: Element[] = [];
         for (const content of contents) {
             if ((content.layoutConfig as CanvasContentLayoutConfig).isLayoutContent) {
-                layoutChildren.push(
-                    ...layout.layout(content, position, content.measuredSize!, contentIdLookup.get(content.element)!)
-                );
+                layoutChildren.push(...layout.layout(content, position, content.measuredSize!));
             } else {
-                children.push(
-                    ...layout.layout(content, position, content.measuredSize!, contentIdLookup.get(content.element)!)
-                );
+                children.push(...layout.layout(content, position, content.measuredSize!));
             }
         }
         const result: Canvas = {

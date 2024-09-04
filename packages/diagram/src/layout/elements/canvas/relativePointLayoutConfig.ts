@@ -2,7 +2,7 @@ import { ExecutableAbstractFunctionExpression, FullObject, fun, numberType, opti
 import { Size, Element, RelativePoint, Point, CanvasElement, DefaultEditTypes } from "@hylimo/diagram-common";
 import { canvasPointType, elementType } from "../../../module/base/types.js";
 import { LayoutElement } from "../../layoutElement.js";
-import { Layout } from "../../layoutEngine.js";
+import { Layout } from "../../engine/layout.js";
 import { CanvasPointLayoutConfig } from "./canvasPointLayoutConfig.js";
 
 /**
@@ -37,10 +37,7 @@ export class RelativePointLayoutConfig extends CanvasPointLayoutConfig {
     override layout(layout: Layout, element: LayoutElement, position: Point, size: Size, id: string): Element[] {
         const offsetXValue = element.element.getLocalFieldOrUndefined("_offsetX");
         const offsetYValue = element.element.getLocalFieldOrUndefined("_offsetY");
-        const target = this.getContentId(
-            element,
-            element.element.getLocalFieldOrUndefined("target")!.value as FullObject
-        );
+        const target = layout.getElementId(element.element.getLocalFieldOrUndefined("target")!.value as FullObject);
         const result: RelativePoint = {
             type: RelativePoint.TYPE,
             id,

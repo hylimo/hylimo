@@ -1,7 +1,7 @@
 import { ExecutableAbstractFunctionExpression, Type, fun, listType, optional, stringType } from "@hylimo/core";
 import { ArcSegment, Element, Line, LineSegment, Point, Size } from "@hylimo/diagram-common";
 import { LayoutElement, LayoutConfig, SizeConstraints, AttributeConfig, ContentCardinality } from "../layoutElement.js";
-import { Layout } from "../layoutEngine.js";
+import { Layout } from "../engine/layout.js";
 
 /**
  * Base class for all layout element configs

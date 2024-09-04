@@ -1,6 +1,6 @@
 import { ExecutableAbstractFunctionExpression, FullObject, Type } from "@hylimo/core";
 import { EditSpecification, Element, Line, Point, Size } from "@hylimo/diagram-common";
-import { Layout } from "./layoutEngine.js";
+import { Layout } from "./engine/layout.js";
 import { Bounds } from "@hylimo/diagram-common";
 
 /**
@@ -102,6 +102,10 @@ export interface LayoutInformation {
  * The element to layout
  */
 export interface LayoutElement {
+    /**
+     * The id of the element
+     */
+    id: string;
     /**
      * The element to layout
      */

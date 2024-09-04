@@ -1,5 +1,3 @@
-import { FullObject, RuntimeError } from "@hylimo/core";
-import { LayoutElement } from "../../layoutElement.js";
 import { ElementLayoutConfig } from "../elementLayoutConfig.js";
 
 /**
@@ -10,23 +8,4 @@ export abstract class CanvasContentLayoutConfig extends ElementLayoutConfig {
      * True if is a layout element which should not be included in the final diagram
      */
     abstract isLayoutContent: boolean;
-
-    /**
-     * Gets the id of a content element of the canvas
-     *
-     * @param element the current element, its parent must be a point provider (e.g. Canvas)
-     * @param contentElement the content element to get the id of
-     * @returns the id of the content element
-     */
-    getContentId(element: LayoutElement, contentElement: FullObject): string {
-        const parent = element.parent;
-        if (!parent || !parent.contentIdLookup) {
-            throw new RuntimeError("CanvasConnections and CanvasElements can only be used as contents of a Canvas");
-        }
-        const elementId = (parent.contentIdLookup as Map<FullObject, string>).get(contentElement);
-        if (!elementId) {
-            throw new RuntimeError("Point not found");
-        }
-        return elementId;
-    }
 }

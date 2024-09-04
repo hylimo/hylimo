@@ -3,7 +3,8 @@ import { Size, Point, Element, Path, Stroke } from "@hylimo/diagram-common";
 import svgPath from "svgpath";
 import { svgPathBbox } from "@hylimo/diagram-common";
 import { ContentCardinality, LayoutElement, SizeConstraints } from "../layoutElement.js";
-import { Layout, LayoutedPath } from "../layoutEngine.js";
+import { LayoutedPath } from "../engine/layoutEngine.js";
+import { Layout } from "../engine/layout.js";
 import { ShapeLayoutConfig } from "./shapeLayoutConfig.js";
 import { elementType } from "../../module/base/types.js";
 

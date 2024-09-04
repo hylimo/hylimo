@@ -8,7 +8,7 @@ import {
     SizeConstraints,
     VerticalAlignment
 } from "../../layoutElement.js";
-import { Layout } from "../../layoutEngine.js";
+import { Layout } from "../../engine/layout.js";
 import { alignStyleAttributes, sizeStyleAttributes } from "../attributes.js";
 import { EditableCanvasContentLayoutConfig } from "./editableCanvasContentLayoutConfig.js";
 
@@ -77,9 +77,9 @@ export class CanvasElementLayoutConfig extends EditableCanvasContentLayoutConfig
             ...size,
             x,
             y,
-            pos: this.extractPos(element),
+            pos: this.extractPos(layout, element),
             rotation: element.element.getLocalFieldOrUndefined("_rotation")?.value?.toNative() ?? 0,
-            children: layout.layout(content, { x, y }, size, `${id}_0`),
+            children: layout.layout(content, { x, y }, size),
             outline: content.layoutConfig.outline(
                 layout,
                 content,
@@ -96,15 +96,16 @@ export class CanvasElementLayoutConfig extends EditableCanvasContentLayoutConfig
      * Extracts the position from the element
      * If the element has a pos field, the position is extracted.
      *
+     * @param layout the layout engine
      * @param element the element from which the position should be extracted
      * @returns the extracted position
      */
-    private extractPos(element: LayoutElement): string | undefined {
+    private extractPos(layout: Layout, element: LayoutElement): string | undefined {
         const pos = element.element.getLocalFieldOrUndefined("pos")?.value as FullObject | undefined;
         if (pos == undefined) {
             return undefined;
         } else {
-            return this.getContentId(element, pos);
+            return layout.getElementId(pos);
         }
     }
 

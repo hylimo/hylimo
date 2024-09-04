@@ -1,7 +1,7 @@
 import { enumType, nullType, numberType, stringType } from "@hylimo/core";
 import { Element, FontStyle, FontWeight, Point, Size } from "@hylimo/diagram-common";
 import { ContentCardinality, LayoutElement, SizeConstraints } from "../layoutElement.js";
-import { Layout } from "../layoutEngine.js";
+import { Layout } from "../engine/layout.js";
 import { ElementLayoutConfig } from "./elementLayoutConfig.js";
 import { fillStyleAttributes } from "./attributes.js";
 

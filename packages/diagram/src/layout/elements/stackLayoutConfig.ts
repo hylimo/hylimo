@@ -1,6 +1,6 @@
 import { Size, Point, Element } from "@hylimo/diagram-common";
 import { LayoutElement, SizeConstraints } from "../layoutElement.js";
-import { Layout } from "../layoutEngine.js";
+import { Layout } from "../engine/layout.js";
 import { PanelLayoutConfig } from "./panelLayoutConfig.js";
 
 /**
@@ -34,12 +34,12 @@ export class StackLayoutConfig extends PanelLayoutConfig {
         }
     }
 
-    override layout(layout: Layout, element: LayoutElement, position: Point, size: Size, id: string): Element[] {
+    override layout(layout: Layout, element: LayoutElement, position: Point, size: Size): Element[] {
         const elements: Element[] = [];
         const contents = element.contents as LayoutElement[];
         for (let i = 0; i < contents.length; i++) {
             const content = contents[i];
-            elements.push(...layout.layout(content, position, size, `${id}_${i}`));
+            elements.push(...layout.layout(content, position, size));
         }
         return elements;
     }

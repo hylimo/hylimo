@@ -1,7 +1,7 @@
 import { FullObject, numberType } from "@hylimo/core";
 import { Element, Size, Rect, Point, Line, ArcSegment, LineSegment } from "@hylimo/diagram-common";
 import { LayoutElement, SizeConstraints, addToConstraints, addToSize } from "../layoutElement.js";
-import { Layout } from "../layoutEngine.js";
+import { Layout } from "../engine/layout.js";
 import { ContentShapeLayoutConfig } from "./contentShapeLayoutConfig.js";
 
 /**
@@ -65,7 +65,7 @@ export class RectLayoutConfig extends ContentShapeLayoutConfig {
                 contentSize = addToSize(contentSize, -2 * strokeWidth, -2 * strokeWidth);
                 contentPosition = { x: position.x + strokeWidth, y: position.y + strokeWidth };
             }
-            result.children.push(...layout.layout(element.content, contentPosition, contentSize, `${id}_0`));
+            result.children.push(...layout.layout(element.content, contentPosition, contentSize));
         }
         return [result];
     }

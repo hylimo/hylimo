@@ -1,7 +1,7 @@
 import { ExecutableAbstractFunctionExpression, fun, numberType } from "@hylimo/core";
 import { Size, AbsolutePoint, Element, Point, DefaultEditTypes } from "@hylimo/diagram-common";
 import { LayoutElement } from "../../layoutElement.js";
-import { Layout } from "../../layoutEngine.js";
+import { Layout } from "../../engine/layout.js";
 import { CanvasPointLayoutConfig } from "./canvasPointLayoutConfig.js";
 
 /**
