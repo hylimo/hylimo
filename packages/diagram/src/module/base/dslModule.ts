@@ -422,7 +422,7 @@ const scopeExpressions: ExecutableExpression[] = [
             fun(
                 `
                     (content, source) = args
-                    scope.contents += content
+                    source.self.contents += content
                     content.source = reflect(source)
                     content
                 `

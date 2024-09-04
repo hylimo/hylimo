@@ -264,6 +264,11 @@ const scopeExpressions: ExecutableExpression[] = [
         fun(
             `
                 (name, optionalCallback, keywords) = args
+
+                callback = optionalCallback ?? {}
+                result = object(contents = list())
+                callback.callWithScope(result)
+
                 packageElement = canvasElement(
                     class = list("package-element"),
                     content = vbox(
@@ -278,14 +283,12 @@ const scopeExpressions: ExecutableExpression[] = [
                                 class = list("package")
                             ),
                             rect(
+                                content = canvas(contents = result.contents),
                                 class = list("package-body")
                             )
                         )
                     )
                 )
-                if(optionalCallback != null) {
-                    optionalCallback()
-                }
                 packageElement
             `
         )
