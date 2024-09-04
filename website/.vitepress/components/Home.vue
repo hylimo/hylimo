@@ -157,3 +157,9 @@ onBeforeMount(() => {
     margin-right: -4px;
 }
 </style>
+<style>
+body {
+    height: 100svh;
+    min-height: unset;
+}
+</style>
