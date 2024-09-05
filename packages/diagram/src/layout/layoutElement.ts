@@ -2,6 +2,7 @@ import { ExecutableAbstractFunctionExpression, FullObject, Type } from "@hylimo/
 import { EditSpecification, Element, Line, Point, Size } from "@hylimo/diagram-common";
 import { Layout } from "./engine/layout.js";
 import { Bounds } from "@hylimo/diagram-common";
+import { Matrix } from "transformation-matrix"
 
 /**
  * Size constraints from min to max size
@@ -266,4 +267,12 @@ export interface LayoutConfig {
      * @returns the postprocessed styles
      */
     postprocessStyles(element: LayoutElement, styles: Record<string, any>): Record<string, any>;
+    /**
+     * Creates a matrix which transforms from the local to the parent coordinate system
+     * Can return undefined if the element does not have a parent or if the transformation is the identity matrix
+     * 
+     * @param element the element to transform
+     * @returns the transformation matrix
+     */
+    localToParent(element: LayoutElement): Matrix | undefined
 }

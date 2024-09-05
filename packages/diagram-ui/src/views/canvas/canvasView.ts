@@ -9,6 +9,14 @@ import { SCanvas } from "../../model/canvas/sCanvas.js";
 @injectable()
 export class CanvasView implements IView {
     render(model: Readonly<SCanvas>, context: RenderingContext, _args?: IViewArgs | undefined): VNode | undefined {
-        return svg("g", null, ...context.renderChildren(model));
+        return svg(
+            "g",
+            {
+                attrs: {
+                    transform: `translate(${model.dx}, ${model.dy})`
+                }
+            },
+            ...context.renderChildren(model)
+        );
     }
 }

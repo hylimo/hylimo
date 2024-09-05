@@ -319,9 +319,9 @@ export class MoveMouseListener extends MouseListener {
         }
         let scaleX: number | undefined = undefined;
         if (classList.contains(ResizePosition.LEFT)) {
-            scaleX = target.width / target.x;
+            scaleX = target.width / target.dx;
         } else if (classList.contains(ResizePosition.RIGHT)) {
-            scaleX = target.width / (target.width + target.x);
+            scaleX = target.width / (target.width + target.dx);
         }
         if (scaleX == undefined) {
             return undefined;
@@ -350,9 +350,9 @@ export class MoveMouseListener extends MouseListener {
         }
         let scaleY: number | undefined = undefined;
         if (classList.contains(ResizePosition.TOP)) {
-            scaleY = target.height / target.y;
+            scaleY = target.height / target.dy;
         } else if (classList.contains(ResizePosition.BOTTOM)) {
-            scaleY = target.height / (target.height + target.y);
+            scaleY = target.height / (target.height + target.dy);
         }
         if (scaleY == undefined) {
             return undefined;
@@ -376,7 +376,7 @@ export class MoveMouseListener extends MouseListener {
         const origin = target.position;
         const distance = CanvasElementView.ROTATE_ICON_DISTANCE / findViewportZoom(target);
         const angleRad = (target.rotation / 180) * Math.PI;
-        const handlePosition = Math2D.add(origin, Math2D.rotate({ x: 0, y: target.y - distance }, angleRad));
+        const handlePosition = Math2D.add(origin, Math2D.rotate({ x: 0, y: target.dy - distance }, angleRad));
         return new RotationHandler(target.id, this.transactionIdProvider.generateId(), origin, handlePosition);
     }
 
@@ -388,7 +388,7 @@ export class MoveMouseListener extends MouseListener {
      * @returns the move handler if move is supported, otherwise null
      */
     private createMoveHandler(target: SModelElementImpl): MoveHandler | null {
-        const index = target.root.index;
+        const index = target.index;
         const selected = this.getSelectedElements(target.root).filter(
             (element) => element instanceof SCanvasPoint || element instanceof SCanvasElement
         ) as (SCanvasPoint | SCanvasElement)[];

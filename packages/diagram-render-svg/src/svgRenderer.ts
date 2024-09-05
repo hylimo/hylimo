@@ -5,7 +5,6 @@ import {
     Text,
     Canvas,
     Element,
-    WithBounds,
     convertFontsToCssStyle,
     Ellipse
 } from "@hylimo/diagram-common";
@@ -109,7 +108,7 @@ class SVGDiagramVisitor extends SimplifiedDiagramVisitor<undefined, SVGNode[]> {
         super();
     }
 
-    override visitRoot(element: WithBounds<Root>): SVGNode[] {
+    override visitRoot(element: Root): SVGNode[] {
         const viewBox = element.bounds;
         const x = viewBox.position.x - this.margin;
         const y = viewBox.position.y - this.margin;
@@ -145,7 +144,7 @@ class SVGDiagramVisitor extends SimplifiedDiagramVisitor<undefined, SVGNode[]> {
         return [result, ...this.visitChildren(element)];
     }
 
-    override visitEllipse(element: WithBounds<Ellipse>): SVGNode[] {
+    override visitEllipse(element: Ellipse): SVGNode[] {
         const strokeWidth = element.stroke?.width ?? 0;
         const result: SVGNode = {
             type: "ellipse",

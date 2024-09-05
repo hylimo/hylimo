@@ -35,7 +35,7 @@ export class SRelativePoint extends SCanvasPoint implements RelativePoint, Linea
     constructor() {
         super();
         this.cachedProperty<Point>("targetPosition", () => {
-            const target = this.root.index.getById(this.target) as SModelElementImpl;
+            const target = this.index.getById(this.target) as SModelElementImpl;
             if (isPositionProvider(target)) {
                 return target.position;
             } else {

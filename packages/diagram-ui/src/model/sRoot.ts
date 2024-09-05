@@ -1,6 +1,7 @@
 import { FontFamilyConfig, Point, convertFontsToCssStyle } from "@hylimo/diagram-common";
 import { ModelIndexImpl, ViewportRootElementImpl } from "sprotty";
 import { SCanvasAxisAlignedSegment } from "./canvas/sCanvasAxisAlignedSegment.js";
+import { SCanvasLayoutEngine } from "./canvas/sCanvasLayoutEngine.js";
 
 /**
  * Root element.
@@ -26,8 +27,28 @@ export class SRoot extends ViewportRootElementImpl {
      */
     sequenceNumber = 0;
 
+    /**
+     * The layout engine for the canvases
+     */
+    private currentLayoutEngine: SCanvasLayoutEngine | undefined;
+    /**
+     * The version of the layout engine
+     */
+    private layoutEngineVersion = -1;
+
     constructor(index = new ModelIndexImpl()) {
         super(index);
+    }
+
+    /**
+     * Gets the current layout engine
+     */
+    get layoutEngine(): SCanvasLayoutEngine {
+        if (this.currentLayoutEngine == undefined || this.layoutEngineVersion != this.changeRevision) {
+            this.currentLayoutEngine = new SCanvasLayoutEngine(this);
+            this.layoutEngineVersion = this.changeRevision;
+        }
+        return this.currentLayoutEngine;
     }
 
     /**

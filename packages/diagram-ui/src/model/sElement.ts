@@ -1,7 +1,7 @@
 import { SChildElementImpl } from "sprotty";
 import { EditSpecification, Element, Point } from "@hylimo/diagram-common";
 import { SRoot } from "./sRoot.js";
-import { Matrix, applyToPoint } from "transformation-matrix";
+import { applyToPoint, inverse } from "transformation-matrix";
 
 /**
  * Base class for all elements
@@ -14,17 +14,9 @@ export abstract class SElement extends SChildElementImpl implements Element {
      */
     edits!: EditSpecification;
 
-    /**
-     * A matrix that transforms the local coordinates of this element to the parent's coordinates
-     * If undefined, the identity matrix is assumed
-     */
-    localToParentMatrix?: Matrix;
-
-    /**
-     * A matrix that transforms the parent's coordinates to the local coordinates of this element
-     * If undefined, the identity matrix is assumed
-     */
-    parentToLocalMatrix?: Matrix;
+    override get root(): SRoot {
+        return super.root as SRoot;
+    }
 
     /**
      * Creats a cached property on this element
@@ -38,7 +30,7 @@ export abstract class SElement extends SChildElementImpl implements Element {
         Object.defineProperty(this, name, {
             enumerable: true,
             get: () => {
-                const revision = (this.root as SRoot).changeRevision;
+                const revision = this.root.changeRevision;
                 if (currentValue === undefined || revision != currentVersion) {
                     currentVersion = revision;
                     currentValue = initializer();
@@ -55,12 +47,9 @@ export abstract class SElement extends SChildElementImpl implements Element {
      * @returns the coordinates of the event
      */
     getEventCoordinates(event: MouseEvent): Point {
-        const point = (this.parent as SRoot | SElement).getEventCoordinates(event);
-        const parentToLocal = this.parentToLocalMatrix;
-        if (parentToLocal != undefined) {
-            return applyToPoint(parentToLocal, point);
-        } else {
-            return point;
-        }
+        const rootCoordinates = this.root.getEventCoordinates(event);
+        const localToParent = this.root.layoutEngine.localToAncestor(this.id, this.root.id);
+        const parentToLocal = inverse(localToParent);
+        return applyToPoint(parentToLocal, rootCoordinates);
     }
 }

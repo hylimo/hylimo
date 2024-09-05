@@ -1,5 +1,5 @@
 import { BaseObject, FullObject, nativeToList } from "@hylimo/core";
-import { Size, Point, Stroke } from "@hylimo/diagram-common";
+import { Size, Point, Stroke, Canvas, Bounds } from "@hylimo/diagram-common";
 import { FontManager } from "../../font/fontManager.js";
 import { TextLayoutResult, TextLayouter } from "../../font/textLayouter.js";
 import { generateStyles } from "../../styles.js";
@@ -149,13 +149,23 @@ export class LayoutEngine {
             }
         );
         const elements = layout.layout(layoutElement, Point.ORIGIN, layoutElement.measuredSize!);
+        let bounds: Bounds;
+        if (elements.length == 1 && elements[0].type == Canvas.TYPE) {
+            const canvas = elements[0] as Canvas;
+            bounds = { position: { x: -canvas.dx, y: -canvas.dy }, size: layoutElement.measuredSize! };
+            canvas.dx = 0;
+            canvas.dy = 0;
+        } else {
+            bounds = { position: Point.ORIGIN, size: layoutElement.measuredSize! };
+        }
         return {
             rootElement: {
                 type: "root",
                 id: "root",
                 children: elements,
                 fonts: fontFamilyConfigs,
-                edits: {}
+                edits: {},
+                bounds
             },
             elementLookup: layout.elementLookup,
             layoutElementLookup: layout.layoutElementLookup

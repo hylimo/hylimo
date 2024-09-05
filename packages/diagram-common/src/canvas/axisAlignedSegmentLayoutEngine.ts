@@ -13,9 +13,10 @@ export class AxisAlignedSegmentLayoutEngine extends SegmentLayoutEngine<CanvasAx
     override calculateMarkerRenderInformation(
         segment: CanvasAxisAlignedSegment,
         marker: Marker,
-        start: Point
+        start: Point,
+        context: string
     ): MarkerLayoutInformation {
-        const end = this.engine.getPoint(segment.end);
+        const end = this.engine.getPoint(segment.end, context);
         if (marker.pos == "start") {
             return CanvasAxisAlignedSegment.calculateMarkerRenderInformation(start, end, segment.pos, marker);
         } else {

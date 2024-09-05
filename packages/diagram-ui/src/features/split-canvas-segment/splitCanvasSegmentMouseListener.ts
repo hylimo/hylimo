@@ -42,7 +42,7 @@ export class SplitCanvasSegmentMouseListener extends MouseListener {
             const projectedPoint = LineEngine.DEFAULT.projectPoint(coordinates, target.line);
             const projectedCoordinates = LineEngine.DEFAULT.getPoint(projectedPoint.pos, undefined, 0, target.line);
             const segment = target.line.line.segments[projectedPoint.segment];
-            const originSegment = target.root.index.getById(segment.origin) as SCanvasConnectionSegment;
+            const originSegment = target.index.getById(segment.origin) as SCanvasConnectionSegment;
             const edits = this.computeSegmentEdits(originSegment, {
                 projectedCoordinates,
                 segmentIndex: segment.originSegment,

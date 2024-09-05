@@ -2,7 +2,6 @@ import { CanvasElement, Line, Point, TransformedLine } from "@hylimo/diagram-com
 import { LinearAnimatable } from "../../features/animation/model.js";
 import { LineProvider } from "../../features/layout/lineProvider.js";
 import { PositionProvider } from "../../features/layout/positionProvider.js";
-import { SLayoutedElement } from "../sLayoutedElement.js";
 import { SCanvasContent } from "./sCanvasContent.js";
 import { SCanvasPoint } from "./sCanvasPoint.js";
 import { compose, rotateDEG, translate, Matrix } from "transformation-matrix";
@@ -10,7 +9,7 @@ import { compose, rotateDEG, translate, Matrix } from "transformation-matrix";
 /**
  * Anbimated fields for SCanvasElement
  */
-const canvasElementAnimatedFields = new Set(SLayoutedElement.defaultAnimatedFields);
+const canvasElementAnimatedFields = new Set(["width", "height", "dx", "dy", "rotation"]);
 
 /**
  * Model for CanvasElement
@@ -31,11 +30,11 @@ export class SCanvasElement
     /**
      * The x offset
      */
-    x!: number;
+    dx!: number;
     /**
      * The y offset
      */
-    y!: number;
+    dy!: number;
     readonly animatedFields = canvasElementAnimatedFields;
     /**
      * The id of the CanvasPoint which is used as start
@@ -63,22 +62,14 @@ export class SCanvasElement
 
         this.cachedProperty<Point>("position", () => {
             if (this.pos != undefined) {
-                const target = this.root.index.getById(this.pos) as SCanvasPoint;
+                const target = this.index.getById(this.pos) as SCanvasPoint;
                 return target.position;
             } else {
                 return Point.ORIGIN;
             }
         });
         this.cachedProperty<TransformedLine>("line", () => {
-            return this.parent.layoutEngine.layoutLine(this);
-        });
-        this.cachedProperty<Matrix>("parentToLocalMatrix", () => {
-            const position = this.position;
-            return compose(translate(position.x, position.y), rotateDEG(this.rotation));
-        });
-        this.cachedProperty<Matrix>("localToParentMatrix", () => {
-            const position = this.position;
-            return compose(rotateDEG(-this.rotation), translate(-position.x, -position.y));
+            return this.root.layoutEngine.layoutLine(this);
         });
     }
 

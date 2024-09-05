@@ -17,7 +17,7 @@ export const resizeWidth: EditHandler<ResizeEdit> = {
                     changes: {
                         width: newest.width,
                         // scale the relative x position according to the new width
-                        x: (newest.width! / element.width) * element.x
+                        x: (newest.width! / element.width) * element.dx
                     }
                 });
             }

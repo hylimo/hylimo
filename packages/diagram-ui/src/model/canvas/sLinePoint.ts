@@ -42,7 +42,7 @@ export class SLinePoint extends SCanvasPoint implements LinePoint, LinearAnimata
         super();
 
         this.cachedProperty<TransformedLine>("line", () => {
-            const lineProvider = this.root.index.getById(this.lineProvider) as SModelElementImpl;
+            const lineProvider = this.index.getById(this.lineProvider) as SModelElementImpl;
             if (isLineProvider(lineProvider)) {
                 return lineProvider.line;
             } else {

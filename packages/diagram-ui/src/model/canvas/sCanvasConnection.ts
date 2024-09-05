@@ -58,7 +58,7 @@ export class SCanvasConnection extends SCanvasContent implements CanvasConnectio
         super();
 
         this.cachedProperty<Point>("startPosition", () => {
-            const target = this.root.index.getById(this.start) as SCanvasPoint;
+            const target = this.index.getById(this.start) as SCanvasPoint;
             return target.position;
         });
         this.cachedProperty<SMarker | null>("startMarker", () => {
@@ -75,10 +75,10 @@ export class SCanvasConnection extends SCanvasContent implements CanvasConnectio
             ) as SCanvasConnectionSegment[];
         });
         this.cachedProperty<CanvasConnectionLayout>("layout", () => {
-            return this.parent.layoutEngine.layoutConnection(this);
+            return this.root.layoutEngine.layoutConnection(this);
         });
         this.cachedProperty<TransformedLine>("line", () => {
-            return this.parent.layoutEngine.layoutLine(this);
+            return this.root.layoutEngine.layoutLine(this);
         });
     }
 

@@ -12,37 +12,46 @@ export class BezierSegmentLayoutEngine extends SegmentLayoutEngine<CanvasBezierS
     override calculateMarkerRenderInformation(
         segment: CanvasBezierSegment,
         marker: Marker,
-        start: Point
+        start: Point,
+        context: string
     ): MarkerLayoutInformation {
         if (marker.pos == "start") {
             return CanvasBezierSegment.calculateMarkerRenderInformation(
                 start,
-                this.engine.getPoint(segment.startControlPoint),
+                this.engine.getPoint(segment.startControlPoint, context),
                 marker
             );
         } else {
             return CanvasBezierSegment.calculateMarkerRenderInformation(
-                this.engine.getPoint(segment.end),
-                this.engine.getPoint(segment.endControlPoint),
+                this.engine.getPoint(segment.end, context),
+                this.engine.getPoint(segment.endControlPoint, context),
                 marker
             );
         }
     }
 
-    override generatePathString(segment: CanvasBezierSegment, layout: SegmentLayoutInformation): string {
-        const c1 = this.engine.getPoint(segment.startControlPoint);
-        const c2 = this.engine.getPoint(segment.endControlPoint);
+    override generatePathString(
+        segment: CanvasBezierSegment,
+        layout: SegmentLayoutInformation,
+        context: string
+    ): string {
+        const c1 = this.engine.getPoint(segment.startControlPoint, context);
+        const c2 = this.engine.getPoint(segment.endControlPoint, context);
         const end = layout.end;
         return `C ${c1.x} ${c1.y} ${c2.x} ${c2.y} ${end.x} ${end.y}`;
     }
 
-    override generateSegments(segment: CanvasBezierSegment, layout: SegmentLayoutInformation): BezierSegment[] {
+    override generateSegments(
+        segment: CanvasBezierSegment,
+        layout: SegmentLayoutInformation,
+        context: string
+    ): BezierSegment[] {
         return [
             {
                 type: BezierSegment.TYPE,
                 end: layout.end,
-                startControlPoint: this.engine.getPoint(segment.startControlPoint),
-                endControlPoint: this.engine.getPoint(segment.endControlPoint),
+                startControlPoint: this.engine.getPoint(segment.startControlPoint, context),
+                endControlPoint: this.engine.getPoint(segment.endControlPoint, context),
                 origin: segment.id,
                 originSegment: 0
             }

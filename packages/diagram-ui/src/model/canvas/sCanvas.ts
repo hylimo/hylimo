@@ -1,20 +1,29 @@
-import { Canvas, CanvasConnection, CanvasElement, CanvasLayoutEngine, CanvasPoint } from "@hylimo/diagram-common";
+import { Canvas, CanvasLayoutEngine } from "@hylimo/diagram-common";
 import { SChildElementImpl } from "sprotty";
 import { SLayoutedElement } from "../sLayoutedElement.js";
 import { PointVisibilityManager } from "./pointVisibilityManager.js";
-import { SCanvasPoint } from "./sCanvasPoint.js";
-import { SCanvasConnection } from "./sCanvasConnection.js";
-import { SCanvasElement } from "./sCanvasElement.js";
+import { LinearAnimatable } from "../../features/animation/model.js";
+import { SCanvasLayoutEngine } from "./sCanvasLayoutEngine.js";
+
+/**
+ * Animated fields for SCanvas
+ */
+const canvasAnimatedFields = new Set(["dx", "dy"]);
 
 /**
  * Canvas model element
  */
-export class SCanvas extends SLayoutedElement implements Canvas {
+export class SCanvas extends SLayoutedElement implements Canvas, LinearAnimatable {
     override type!: typeof Canvas.TYPE;
     /**
-     * CanvasConnectionlayoutEngine children can use
+     * The x offset applied to its coordinate system
      */
-    readonly layoutEngine!: CanvasLayoutEngine;
+    dx!: number;
+    /**
+     * The y offset applied to its coordinate system
+     */
+    dy!: number;
+    readonly animatedFields = canvasAnimatedFields;
     /**
      * Lookup of children by id
      */
@@ -37,24 +46,7 @@ export class SCanvas extends SLayoutedElement implements Canvas {
 
     constructor() {
         super();
-        this.cachedProperty<CanvasLayoutEngine>("layoutEngine", () => new SCanvasLayoutEngine(this));
     }
 }
 
-/**
- * CanvasLayoutEngine implementation for SCanvas
- */
-class SCanvasLayoutEngine extends CanvasLayoutEngine {
-    /**
-     * Creates a new SCanvasLayoutEngine based on the given canvas
-     *
-     * @param canvas the canvas to layout elements of
-     */
-    constructor(private readonly canvas: SCanvas) {
-        super();
-    }
 
-    override getElement(id: string): CanvasPoint | CanvasElement | CanvasConnection {
-        return this.canvas.index.getById(id) as SCanvasPoint | SCanvasElement | SCanvasConnection;
-    }
-}

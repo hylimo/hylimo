@@ -32,11 +32,11 @@ export class SCanvasBezierSegment extends SCanvasConnectionSegment implements Ca
         super();
 
         this.cachedProperty<Point>("startControlPointPosition", () => {
-            const target = this.root.index.getById(this.startControlPoint) as SCanvasPoint;
+            const target = this.index.getById(this.startControlPoint) as SCanvasPoint;
             return target.position;
         });
         this.cachedProperty<Point>("endControlPointPosition", () => {
-            const target = this.root.index.getById(this.endControlPoint) as SCanvasPoint;
+            const target = this.index.getById(this.endControlPoint) as SCanvasPoint;
             return target.position;
         });
     }

@@ -10,7 +10,6 @@ import {
     SimplifiedCanvasElement,
     SimplifiedDiagramVisitor,
     Text,
-    WithBounds
 } from "@hylimo/diagram-common";
 import PDFDocument from "pdfkit/js/pdfkit.standalone.js";
 import {
@@ -79,7 +78,7 @@ export class PDFDiagramVisitor extends SimplifiedDiagramVisitor<PDFKit.PDFDocume
         super();
     }
 
-    override visitRoot(element: WithBounds<Root>, context: PDFKit.PDFDocument): void {
+    override visitRoot(element: Root, context: PDFKit.PDFDocument): void {
         const [width, height] = [
             element.bounds.size.width + 2 * this.margin,
             element.bounds.size.height + 2 * this.margin
@@ -92,14 +91,14 @@ export class PDFDiagramVisitor extends SimplifiedDiagramVisitor<PDFKit.PDFDocume
         this.visitChildren(element, context);
     }
 
-    override visitRect(element: WithBounds<Rect>, context: PDFKit.PDFDocument): void {
+    override visitRect(element: Rect, context: PDFKit.PDFDocument): void {
         if (this.isShapeVisible(element)) {
             const shapeAttributes = extractOutlinedShapeAttributes(element);
             if (element.cornerRadius) {
                 const radius = Math.min(
                     element.cornerRadius,
-                    element.bounds.size.width / 2,
-                    element.bounds.size.height / 2
+                    element.width / 2,
+                    element.height / 2
                 );
                 context.roundedRect(
                     shapeAttributes.x,
@@ -116,7 +115,7 @@ export class PDFDiagramVisitor extends SimplifiedDiagramVisitor<PDFKit.PDFDocume
         this.visitChildren(element, context);
     }
 
-    override visitEllipse(element: WithBounds<Ellipse>, context: PDFKit.PDFDocument): void {
+    override visitEllipse(element: Ellipse, context: PDFKit.PDFDocument): void {
         if (this.isShapeVisible(element)) {
             const shapeAttributes = extractShapeStyleAttributes(element);
             const strokeWidth = element.stroke?.width ?? 0;
@@ -131,7 +130,7 @@ export class PDFDiagramVisitor extends SimplifiedDiagramVisitor<PDFKit.PDFDocume
         this.visitChildren(element, context);
     }
 
-    override visitPath(element: WithBounds<Path>, context: PDFKit.PDFDocument): void {
+    override visitPath(element: Path, context: PDFKit.PDFDocument): void {
         if (this.isShapeVisible(element)) {
             const shapeAttributes = extractShapeStyleAttributes(element);
             context.save();
@@ -142,7 +141,7 @@ export class PDFDiagramVisitor extends SimplifiedDiagramVisitor<PDFKit.PDFDocume
         }
     }
 
-    override visitText(element: WithBounds<Text>, context: PDFKit.PDFDocument): void {
+    override visitText(element: Text, context: PDFKit.PDFDocument): void {
         const font = this.fontCollection.getFont(element.fontFamily, element.fontWeight, element.fontStyle);
         const scalingFactor = element.fontSize / font.unitsPerEm;
         const glyphRun = font.layout(element.text);
@@ -163,11 +162,11 @@ export class PDFDiagramVisitor extends SimplifiedDiagramVisitor<PDFKit.PDFDocume
         context.restore();
     }
 
-    override visitCanvas(element: WithBounds<Canvas>, context: PDFKit.PDFDocument): void {
+    override visitCanvas(element: Canvas, context: PDFKit.PDFDocument): void {
         this.visitChildren(element, context);
     }
 
-    override visitCanvasElement(element: WithBounds<SimplifiedCanvasElement>, context: PDFKit.PDFDocument): void {
+    override visitCanvasElement(element: SimplifiedCanvasElement, context: PDFKit.PDFDocument): void {
         context.save();
         context.translate(element.pos.x, element.pos.y);
         context.rotate(element.rotation);

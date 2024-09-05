@@ -88,8 +88,8 @@ export class CanvasElementView implements IView {
                 "selected-rect": true
             },
             attrs: {
-                x: model.x,
-                y: model.y,
+                x: model.dx,
+                y: model.dy,
                 width: model.width,
                 height: model.height
             }
@@ -105,7 +105,7 @@ export class CanvasElementView implements IView {
      */
     private generateRotationIcon(model: Readonly<SCanvasElement>): VNode {
         const zoom = findViewportZoom(model);
-        const y = model.y - CanvasElementView.ROTATE_ICON_DISTANCE / zoom;
+        const y = model.dy - CanvasElementView.ROTATE_ICON_DISTANCE / zoom;
         return svg(
             "g",
             {
@@ -217,7 +217,7 @@ export class CanvasElementView implements IView {
         pos = pos % 4;
         const x = pos === 1 || pos === 2 ? model.width : 0;
         const y = pos < 2 ? 0 : model.height;
-        return { x: model.x + x, y: model.y + y };
+        return { x: model.dx + x, y: model.dy + y };
     }
 }
 

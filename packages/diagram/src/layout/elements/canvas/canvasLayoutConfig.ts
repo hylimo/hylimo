@@ -8,7 +8,13 @@ import {
     CanvasConnection,
     AbsolutePoint,
     RelativePoint,
-    LinePoint
+    LinePoint,
+    Math2D,
+    Bounds,
+    CanvasConnectionLayout,
+    svgPathBbox,
+    MarkerLayoutInformation,
+    Marker
 } from "@hylimo/diagram-common";
 import { ContentCardinality, LayoutElement, SizeConstraints } from "../../layoutElement.js";
 import { Layout } from "../../engine/layout.js";
@@ -44,34 +50,154 @@ export class CanvasLayoutConfig extends StyledElementLayoutConfig {
     }
 
     override measure(layout: Layout, element: LayoutElement, constraints: SizeConstraints): Size {
-        // TODO (maybe) better size calculation
         const contents = this.getContents(element);
-        element.contents = contents.map((content) =>
+        const layoutedContents = contents.map((content) =>
             layout.measure(content, element, { min: { width: 0, height: 0 }, max: constraints.max })
         );
-        return constraints.max;
+        element.contents = layoutedContents;
+
+        const children: Element[] = [];
+        for (const content of layoutedContents) {
+            children.push(...layout.layout(content, Point.ORIGIN, content.measuredSize!));   
+        }
+        const childBounds: Bounds[] = [];
+        for (const child of children) {
+            if (child.type == CanvasElement.TYPE) {
+                childBounds.push(this.calculateCanvasElementBounds(child as CanvasElement, layout));
+            } else if (child.type == CanvasConnection.TYPE) {
+                childBounds.push(...this.calculateConnectionBounds(child as CanvasConnection, layout));
+            }
+        }
+        const bounds = Math2D.mergeBounds(...childBounds)
+        element.children = children;
+        element.canvasBounds = bounds;
+
+        return bounds.size;
     }
 
     override layout(layout: Layout, element: LayoutElement, position: Point, size: Size, id: string): Element[] {
-        const contents = element.contents as LayoutElement[];
-        const children: Element[] = [];
-        const layoutChildren: Element[] = [];
-        for (const content of contents) {
-            if ((content.layoutConfig as CanvasContentLayoutConfig).isLayoutContent) {
-                layoutChildren.push(...layout.layout(content, position, content.measuredSize!));
-            } else {
-                children.push(...layout.layout(content, position, content.measuredSize!));
-            }
-        }
+        const bounds = element.canvasBounds as Bounds;
+        const children = element.children as Element[];
         const result: Canvas = {
             type: Canvas.TYPE,
             id,
             ...position,
             ...size,
-            children: [...children, ...layoutChildren],
+            dx: position.x - bounds.position.x,
+            dy: position.y - bounds.position.y,
+            children: children,
             edits: element.edits
         };
         return [result];
+    }
+
+    /**
+     * Calculates the bounds of a rotated rectangle
+     * Model:
+     * A rectangle is located at pos (where pos is the top left corner).
+     * The rectangle has the given width and height.
+     * The rectangle is then moved by x and y relative to pos, and then rotated by rotation around pos.
+     * The model was chosen as it maps relatively well to the bounding box of a canvas element and marker.
+     *
+     * @param pos the position of the element
+     * @param rotation the rotation of the element
+     * @param x the relative x position
+     * @param y the relative y position
+     * @param width the width of the element
+     * @param height the height of the element
+     * @returns the bounds of the element
+     */
+    private calculateRotatedRectangleBounds(
+        pos: Point,
+        rotation: number,
+        x: number,
+        y: number,
+        width: number,
+        height: number
+    ): Bounds {
+        const bounds = Math2D.rotateBounds(
+            { position: { x: x, y: y }, size: { width, height } },
+            (rotation * Math.PI) / 180
+        );
+        return {
+            position: {
+                x: bounds.position.x + pos.x,
+                y: bounds.position.y + pos.y
+            },
+            size: bounds.size
+        };
+    }
+
+    /**
+     * Calculates the bounds for the given canvas element
+     *
+     * @param element the element to calculate the bounds for
+     * @param layout the layout providing the canvas layout engine
+     * @returns the bounds of the element
+     */
+    private calculateCanvasElementBounds(element: CanvasElement, layout: Layout): Bounds {
+        const pos = layout.layoutEngine.layoutElement(element);
+        return this.calculateRotatedRectangleBounds(
+            pos,
+            element.rotation,
+            element.dx,
+            element.dy,
+            element.width,
+            element.height
+        );
+    }
+
+    /**
+     * Calculates the bounds for the given canvas connection
+     *
+     * @param connection the connection to calculate the bounds for
+     * @param layout the layout providing the canvas layout engine
+     * @returns the bounds of the connection (and if existing, the markers)
+     */
+    private calculateConnectionBounds(connection: CanvasConnection, layout: Layout): Bounds[] {
+        const connectionLayout = layout.layoutEngine.layoutConnection(connection);
+        //TODO performance: cache path bounds
+        const pathBounds = svgPathBbox(connectionLayout.path, connection.stroke);
+        const bounds: Bounds[] = [
+            {
+                position: {
+                    x: pathBounds.x - pathBounds.overflow.left,
+                    y: pathBounds.y - pathBounds.overflow.top
+                },
+                size: {
+                    width: pathBounds.width + pathBounds.overflow.left + pathBounds.overflow.right,
+                    height: pathBounds.height + pathBounds.overflow.top + pathBounds.overflow.bottom
+                }
+            }
+        ];
+        if (connectionLayout.startMarker != undefined) {
+            bounds.push(this.calculateMarkerBounds(connectionLayout.startMarker, layout));
+        }
+        if (connectionLayout.endMarker != undefined) {
+            bounds.push(this.calculateMarkerBounds(connectionLayout.endMarker, layout));
+        }
+        return bounds;
+    }
+
+    /**
+     * Calculates the bounds for the given marker
+     * 
+     * @param markerLayout the layout information of the marker
+     * @param layout the layout providing the canvas layout engine
+     * @returns the bounds of the marker
+     */
+    private calculateMarkerBounds(markerLayout: MarkerLayoutInformation, layout: Layout): Bounds {
+        const marker = markerLayout.marker;
+        const x = -marker.width;
+        const y = -marker.height / 2;
+        return this.calculateRotatedRectangleBounds(
+            markerLayout.position,
+            markerLayout.rotation,
+            x,
+            y,
+            marker.width,
+            marker.height
+        );
     }
 
     /**

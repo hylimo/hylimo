@@ -13,9 +13,10 @@ export class LineSegmentLayoutEngine extends SegmentLayoutEngine<CanvasLineSegme
     override calculateMarkerRenderInformation(
         segment: CanvasLineSegment,
         marker: Marker,
-        start: Point
+        start: Point,
+        context: string
     ): MarkerLayoutInformation {
-        const end = this.engine.getPoint(segment.end);
+        const end = this.engine.getPoint(segment.end, context);
         if (marker.pos == "start") {
             return CanvasLineSegment.calculateMarkerRenderInformation(start, end, marker);
         } else {
