@@ -1,9 +1,8 @@
-import { Canvas, CanvasLayoutEngine } from "@hylimo/diagram-common";
+import { Canvas } from "@hylimo/diagram-common";
 import { SChildElementImpl } from "sprotty";
 import { SLayoutedElement } from "../sLayoutedElement.js";
 import { PointVisibilityManager } from "./pointVisibilityManager.js";
 import { LinearAnimatable } from "../../features/animation/model.js";
-import { SCanvasLayoutEngine } from "./sCanvasLayoutEngine.js";
 
 /**
  * Animated fields for SCanvas
@@ -48,5 +47,3 @@ export class SCanvas extends SLayoutedElement implements Canvas, LinearAnimatabl
         super();
     }
 }
-
-

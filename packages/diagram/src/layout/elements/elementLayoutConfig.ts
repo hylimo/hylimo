@@ -185,11 +185,11 @@ export abstract class ElementLayoutConfig implements LayoutConfig {
     /**
      * Creates a matrix which transforms from the local to the parent coordinate system
      * Can return undefined if the element does not have a parent or if the transformation is the identity matrix
-     * 
-     * @param element the element to transform
+     *
+     * @param _element the element to transform
      * @returns the transformation matrix
      */
-    localToParent(element: LayoutElement): Matrix | undefined {
+    localToParent(_element: LayoutElement): Matrix | undefined {
         return undefined;
     }
 }

@@ -97,7 +97,6 @@ export class DiagramSimplifier {
         return {
             ...canvas,
             children
-            // bounds: Math2D.mergeBounds(...children.map((child) => child.bounds))
         };
     }
 
@@ -160,8 +159,6 @@ export class DiagramSimplifier {
      */
     private simplifyMarker(layout: MarkerLayoutInformation): SimplifiedCanvasElement {
         const marker = layout.marker;
-        const x = -marker.width;
-        const y = -marker.height / 2;
         return {
             type: CanvasElement.TYPE,
             id: marker.id,

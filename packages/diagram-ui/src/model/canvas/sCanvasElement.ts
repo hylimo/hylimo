@@ -3,8 +3,6 @@ import { LinearAnimatable } from "../../features/animation/model.js";
 import { LineProvider } from "../../features/layout/lineProvider.js";
 import { PositionProvider } from "../../features/layout/positionProvider.js";
 import { SCanvasContent } from "./sCanvasContent.js";
-import { SCanvasPoint } from "./sCanvasPoint.js";
-import { compose, rotateDEG, translate, Matrix } from "transformation-matrix";
 
 /**
  * Anbimated fields for SCanvasElement
@@ -62,8 +60,7 @@ export class SCanvasElement
 
         this.cachedProperty<Point>("position", () => {
             if (this.pos != undefined) {
-                const target = this.index.getById(this.pos) as SCanvasPoint;
-                return target.position;
+                return this.root.layoutEngine.layoutElement(this);
             } else {
                 return Point.ORIGIN;
             }

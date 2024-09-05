@@ -283,7 +283,7 @@ const scopeExpressions: ExecutableExpression[] = [
                                 class = list("package")
                             ),
                             rect(
-                                content = canvas(contents = result.contents),
+                                content = canvas(contents = result.contents, margin = 15),
                                 class = list("package-body")
                             )
                         )
@@ -535,7 +535,8 @@ const scopeExpressions: ExecutableExpression[] = [
                 (content) = args
                 scope.internal.registerCanvasElement(
                     _comment(content, self = args.self),
-                    args
+                    args,
+                    args.self
                 )
             `,
             {
@@ -553,7 +554,8 @@ const scopeExpressions: ExecutableExpression[] = [
                 (name, callback) = args
                 scope.internal.registerCanvasElement(
                     _package(name, callback, args.keywords, self = args.self),
-                    args
+                    args,
+                    args.self
                 )
             `,
             {
@@ -575,7 +577,8 @@ const scopeExpressions: ExecutableExpression[] = [
                 (name, callback) = args
                 scope.internal.registerCanvasElement(
                     _classifier(name, callback, args.keywords, args.abstract, self = args.self),
-                    args
+                    args,
+                    args.self
                 )
             `,
             {
@@ -602,7 +605,8 @@ const scopeExpressions: ExecutableExpression[] = [
                 }
                 scope.internal.registerCanvasElement(
                     _classifier(name, callback, keywords, args.abstract, self = args.self),
-                    args
+                    args,
+                    args.self
                 )
             `,
             {
@@ -629,7 +633,8 @@ const scopeExpressions: ExecutableExpression[] = [
                 }
                 scope.internal.registerCanvasElement(
                     _classifier(name, callback, keywords, args.abstract, self = args.self, hasEntries = true),
-                    args
+                    args,
+                    args.self
                 )
             `,
             {

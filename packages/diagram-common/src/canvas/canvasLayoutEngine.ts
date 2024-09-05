@@ -14,7 +14,7 @@ import { BezierSegmentLayoutEngine } from "./bezierSegmentLayoutEngine.js";
 import { CanvasConnectionLayout, SegmentLayoutInformation } from "./canvasConnectionLayout.js";
 import { LineSegmentLayoutEngine } from "./lineSegmentLayoutEngine.js";
 import { SegmentLayoutEngine } from "./segmentLayoutEngine.js";
-import { AbsolutePoint, CanvasPoint, LinePoint, RelativePoint } from "../model/elements/canvas/canvasPoint.js";
+import { AbsolutePoint, LinePoint, RelativePoint } from "../model/elements/canvas/canvasPoint.js";
 import { LineEngine } from "../line/engine/lineEngine.js";
 import { Element } from "../model/elements/base/element.js";
 import { Canvas } from "../model/elements/canvas/canvas.js";
@@ -112,7 +112,7 @@ export abstract class CanvasLayoutEngine {
 
     /**
      * Layouts a CanvasElement. Is cached.
-     * 
+     *
      * @param element the element to layout
      * @returns the position of the element
      */
@@ -238,7 +238,12 @@ export abstract class CanvasLayoutEngine {
     private layoutStartMarker(connection: Connection, context: string): MarkerLayoutInformation | null {
         if (connection.startMarker != null) {
             const startSegment = connection.segments[0];
-            return this.calculateMarkerRenderInformation(startSegment, connection.startMarker, connection.start, context);
+            return this.calculateMarkerRenderInformation(
+                startSegment,
+                connection.startMarker,
+                connection.start,
+                context
+            );
         } else {
             return null;
         }
@@ -260,7 +265,12 @@ export abstract class CanvasLayoutEngine {
             } else {
                 endStartPosition = this.getPoint(segments.at(-2)!.end, context);
             }
-            return this.calculateMarkerRenderInformation(segments.at(-1)!, connection.endMarker, endStartPosition, context);
+            return this.calculateMarkerRenderInformation(
+                segments.at(-1)!,
+                connection.endMarker,
+                endStartPosition,
+                context
+            );
         } else {
             return null;
         }
@@ -298,26 +308,29 @@ export abstract class CanvasLayoutEngine {
         if (element == null) {
             throw new Error(`Point with id ${pointId} not found`);
         }
-        let point: Point;
         if (AbsolutePoint.isAbsolutePoint(element)) {
-            point = { x: element.x, y: element.y };
+            return [{ x: element.x, y: element.y }, context];
         } else if (RelativePoint.isRelativePoint(element)) {
             const target = this.getPoint(element.target, context);
-            point = { x: target.x + element.offsetX, y: target.y + element.offsetY };
+            const targetContext = this.points.get(element.target)![1];
+            return [{ x: target.x + element.offsetX, y: target.y + element.offsetY }, targetContext];
         } else if (LinePoint.isLinePoint(element)) {
             const lineProvider = this.getElement(element.lineProvider);
             const line = this.layoutLine(lineProvider as CanvasConnection | CanvasElement);
-            point = LineEngine.DEFAULT.getPoint(element.pos, element.segment, element.distance ?? 0, line);
+            const targetContext = this.getParentElement(element.lineProvider);
+            return [
+                LineEngine.DEFAULT.getPoint(element.pos, element.segment, element.distance ?? 0, line),
+                targetContext
+            ];
         } else if (CanvasElement.isCanvasElement(element)) {
             if (element.pos != undefined) {
-                point = this.getPoint(element.pos, context);
+                return [this.getPoint(element.pos, context), context];
             } else {
-                point = Point.ORIGIN;
+                return [Point.ORIGIN, context];
             }
         } else {
             throw new Error(`Unknown point type: ${element.type}`);
         }
-        return [point, context];
     }
 
     /**
@@ -345,7 +358,11 @@ export abstract class CanvasLayoutEngine {
      * @param context the context of which coordinate system to use
      * @return the generated path string
      */
-    private generatePathString(segment: CanvasConnectionSegment, layout: SegmentLayoutInformation, context: string): string {
+    private generatePathString(
+        segment: CanvasConnectionSegment,
+        layout: SegmentLayoutInformation,
+        context: string
+    ): string {
         return this.segmentEngines.get(segment.type)!.generatePathString(segment, layout, context);
     }
 
@@ -357,13 +374,17 @@ export abstract class CanvasLayoutEngine {
      * @param context the context of which coordinate system to use
      * @return the generated line segments
      */
-    private generateSegments(segment: CanvasConnectionSegment, layout: SegmentLayoutInformation, context: string): Segment[] {
+    private generateSegments(
+        segment: CanvasConnectionSegment,
+        layout: SegmentLayoutInformation,
+        context: string
+    ): Segment[] {
         return this.segmentEngines.get(segment.type)!.generateSegments(segment, layout, context);
     }
 
     /**
      * Calculates a transformation matrix to transform from the local coordinate system of the element to the parent coordinate system
-     * 
+     *
      * @param element the element to transform from
      * @returns the transformation matrix or undefined if no transformation is needed
      */
@@ -372,10 +393,7 @@ export abstract class CanvasLayoutEngine {
             case CanvasElement.TYPE: {
                 const pos = this.layoutElement(element as CanvasElement);
                 const canvasElement = element as CanvasElement;
-                return compose(
-                    rotateDEG(-canvasElement.rotation),
-                    translate(-pos.x - canvasElement.dx, -pos.y - canvasElement.dy)
-                );
+                return compose(translate(pos.x, pos.y), rotateDEG(canvasElement.rotation));
             }
             case Marker.TYPE: {
                 const marker = element as Marker;
@@ -383,13 +401,13 @@ export abstract class CanvasLayoutEngine {
                 const connection = this.layoutConnection(parent);
                 const layoutInformation = marker.pos == "start" ? connection.startMarker! : connection.endMarker!;
                 return compose(
-                    rotateDEG(-layoutInformation.rotation),
-                    translate(-layoutInformation.position.x, -layoutInformation.position.y)
+                    translate(layoutInformation.position.x, layoutInformation.position.y),
+                    rotateDEG(layoutInformation.rotation)
                 );
             }
             case Canvas.TYPE: {
                 const canvas = element as Canvas;
-                return translate(-canvas.dx, -canvas.dy);
+                return translate(canvas.dx, canvas.dy);
             }
             default: {
                 return undefined;
@@ -399,7 +417,7 @@ export abstract class CanvasLayoutEngine {
 
     /**
      * Calculates a transformation matrix to transform from the local coordinate system of the element to the ancestor coordinate system
-     * 
+     *
      * @param from the id of the element to transform from
      * @param to the id of the element to transform to
      * @returns the transformation matrix
@@ -424,6 +442,7 @@ export abstract class CanvasLayoutEngine {
             }
             current = this.getElement(this.getParentElement(current.id));
         }
+        matrices.reverse();
         const result = matrices.length > 0 ? compose(...matrices) : identity();
         fromEntry.set(to, result);
         return result;

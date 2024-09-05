@@ -9,7 +9,7 @@ import {
     Shape,
     SimplifiedCanvasElement,
     SimplifiedDiagramVisitor,
-    Text,
+    Text
 } from "@hylimo/diagram-common";
 import PDFDocument from "pdfkit/js/pdfkit.standalone.js";
 import {
@@ -95,11 +95,7 @@ export class PDFDiagramVisitor extends SimplifiedDiagramVisitor<PDFKit.PDFDocume
         if (this.isShapeVisible(element)) {
             const shapeAttributes = extractOutlinedShapeAttributes(element);
             if (element.cornerRadius) {
-                const radius = Math.min(
-                    element.cornerRadius,
-                    element.width / 2,
-                    element.height / 2
-                );
+                const radius = Math.min(element.cornerRadius, element.width / 2, element.height / 2);
                 context.roundedRect(
                     shapeAttributes.x,
                     shapeAttributes.y,

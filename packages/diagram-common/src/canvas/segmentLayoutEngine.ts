@@ -23,7 +23,12 @@ export abstract class SegmentLayoutEngine<T extends CanvasConnectionSegment> {
      * @param context the id of the canvas containing the canvas connection
      * @return the calculated MarkerRenderInformation
      */
-    abstract calculateMarkerRenderInformation(segment: T, marker: Marker, start: Point, context: string): MarkerLayoutInformation;
+    abstract calculateMarkerRenderInformation(
+        segment: T,
+        marker: Marker,
+        start: Point,
+        context: string
+    ): MarkerLayoutInformation;
 
     /**
      * Generates an svg path string with absolute positions for this segment

@@ -26,10 +26,12 @@ export class Layout {
      * Lookup for layout elements
      */
     readonly layoutElementLookup = new Map<string, LayoutElement>();
+
     /**
      * Lookup for layouted elements
      */
     readonly elementLookup: Record<string, Element> = {};
+
     /**
      * Lookop for element id based on syncscript object
      */
@@ -310,7 +312,9 @@ export class Layout {
         };
         element.layoutBounds = bounds;
         const results = element.layoutConfig.layout(this, element, bounds.position, bounds.size, element.id);
-        results.forEach((result) => (this.elementLookup[result.id] = result));
+        results.forEach((result) => {
+            this.elementLookup[result.id] = result;
+        });
         return results;
     }
 

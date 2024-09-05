@@ -1,13 +1,4 @@
-import {
-    Root,
-    Rect,
-    Path,
-    Text,
-    Canvas,
-    Element,
-    convertFontsToCssStyle,
-    Ellipse
-} from "@hylimo/diagram-common";
+import { Root, Rect, Path, Text, Canvas, Element, convertFontsToCssStyle, Ellipse } from "@hylimo/diagram-common";
 import { SimplifiedDiagramVisitor } from "@hylimo/diagram-common";
 import {
     extractFillAttributes,

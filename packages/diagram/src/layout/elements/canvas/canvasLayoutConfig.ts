@@ -11,15 +11,12 @@ import {
     LinePoint,
     Math2D,
     Bounds,
-    CanvasConnectionLayout,
     svgPathBbox,
-    MarkerLayoutInformation,
-    Marker
+    MarkerLayoutInformation
 } from "@hylimo/diagram-common";
 import { ContentCardinality, LayoutElement, SizeConstraints } from "../../layoutElement.js";
 import { Layout } from "../../engine/layout.js";
 import { StyledElementLayoutConfig } from "../styledElementLayoutConfig.js";
-import { CanvasContentLayoutConfig } from "./canvasContentLayoutConfig.js";
 import { canvasPointType, elementType } from "../../../module/base/types.js";
 
 /**
@@ -58,7 +55,7 @@ export class CanvasLayoutConfig extends StyledElementLayoutConfig {
 
         const children: Element[] = [];
         for (const content of layoutedContents) {
-            children.push(...layout.layout(content, Point.ORIGIN, content.measuredSize!));   
+            children.push(...layout.layout(content, Point.ORIGIN, content.measuredSize!));
         }
         const childBounds: Bounds[] = [];
         for (const child of children) {
@@ -68,7 +65,7 @@ export class CanvasLayoutConfig extends StyledElementLayoutConfig {
                 childBounds.push(...this.calculateConnectionBounds(child as CanvasConnection, layout));
             }
         }
-        const bounds = Math2D.mergeBounds(...childBounds)
+        const bounds = Math2D.mergeBounds(...childBounds);
         element.children = children;
         element.canvasBounds = bounds;
 
@@ -171,22 +168,21 @@ export class CanvasLayoutConfig extends StyledElementLayoutConfig {
             }
         ];
         if (connectionLayout.startMarker != undefined) {
-            bounds.push(this.calculateMarkerBounds(connectionLayout.startMarker, layout));
+            bounds.push(this.calculateMarkerBounds(connectionLayout.startMarker));
         }
         if (connectionLayout.endMarker != undefined) {
-            bounds.push(this.calculateMarkerBounds(connectionLayout.endMarker, layout));
+            bounds.push(this.calculateMarkerBounds(connectionLayout.endMarker));
         }
         return bounds;
     }
 
     /**
      * Calculates the bounds for the given marker
-     * 
+     *
      * @param markerLayout the layout information of the marker
-     * @param layout the layout providing the canvas layout engine
      * @returns the bounds of the marker
      */
-    private calculateMarkerBounds(markerLayout: MarkerLayoutInformation, layout: Layout): Bounds {
+    private calculateMarkerBounds(markerLayout: MarkerLayoutInformation): Bounds {
         const marker = markerLayout.marker;
         const x = -marker.width;
         const y = -marker.height / 2;

@@ -15,7 +15,7 @@ export class CanvasLayoutEngine extends CanvasLayoutEngineBase {
     }
 
     override getElement(id: string): Element {
-        return this.layout.elementLookup[id];
+        return this.layout.elementLookup[id] ?? { id, type: "virtual" };
     }
 
     override getParentElement(element: string): string {
