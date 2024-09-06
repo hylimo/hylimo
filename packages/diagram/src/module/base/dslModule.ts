@@ -294,10 +294,10 @@ const scopeExpressions: ExecutableExpression[] = [
                         }
                         labelCanvasElement = canvasElement(
                             content = text(contents = labelContent, class = list("label")),
-                            pos = canvasScope.lpos(self, pos, distance, seg = args.seg),
+                            pos = self.canvasScope.lpos(self, pos, distance, seg = args.seg),
                             class = list("label-element")
                         )
-                        scope.internal.registerCanvasElement(labelCanvasElement, args, canvasScope)
+                        scope.internal.registerCanvasElement(labelCanvasElement, args, self.canvasScope)
                         labelCanvasElement.rotation = rotation
                         labelCanvasElement
                     }

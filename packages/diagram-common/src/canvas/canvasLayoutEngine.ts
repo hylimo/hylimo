@@ -288,10 +288,38 @@ export abstract class CanvasLayoutEngine {
             this.points.set(id, this.getPointInternal(id));
         }
         const [point, pointContext] = this.points.get(id)!;
-        if (pointContext == context) {
+        return this.handleContextChange(point, pointContext, context);
+    }
+
+    /**
+     * Gets the root position of a line point
+     * This is NOT cached
+     *
+     * @param point the line point to get the root position of
+     * @param context the context of which coordinate system to use
+     * @returns the root position of the line point
+     */
+    getLinePointRootPosition(point: LinePoint, context: string): Point {
+        const lineProvider = this.getElement(point.lineProvider);
+        const line = this.layoutLine(lineProvider as CanvasConnection | CanvasElement);
+        const targetContext = this.getParentElement(point.lineProvider);
+        const pos = LineEngine.DEFAULT.getPoint(point.pos, point.segment, 0, line);
+        return this.handleContextChange(pos, targetContext, context);
+    }
+
+    /**
+     * Handles a context change for a point
+     *
+     * @param point the point to transform
+     * @param pointContext the context of the point
+     * @param targetContext the target context
+     * @returns the transformed point
+     */
+    private handleContextChange(point: Point, pointContext: string, targetContext: string): Point {
+        if (pointContext == targetContext) {
             return point;
         }
-        const matrix = this.localToAncestor(pointContext, context);
+        const matrix = this.localToAncestor(pointContext, targetContext);
         return applyToPoint(matrix, point);
     }
 

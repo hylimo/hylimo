@@ -49,7 +49,7 @@ export class SLinePoint extends SCanvasPoint implements LinePoint, LinearAnimata
             }
         });
         this.cachedProperty<Point>("rootPosition", () => {
-            return this.root.layoutEngine.getPoint(this.lineProvider, this.parent.id);
+            return this.root.layoutEngine.getLinePointRootPosition(this, this.parent.id);
         });
     }
 

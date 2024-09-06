@@ -13,6 +13,7 @@ export * from "./features/layout/positionProvider.js";
 export * from "./features/move/axisAlignedSegmentEditHandler.js";
 export * from "./features/move/di.config.js";
 export * from "./features/move/lineMoveHandler.js";
+export * from "./features/move/movedElementsSelector.js";
 export * from "./features/move/moveHandler.js";
 export * from "./features/move/moveMouseListener.js";
 export * from "./features/move/resizeHandler.js";
