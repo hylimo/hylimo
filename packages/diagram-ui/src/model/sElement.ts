@@ -1,7 +1,7 @@
 import { SChildElementImpl } from "sprotty";
-import { EditSpecification, Element, Point } from "@hylimo/diagram-common";
+import { EditSpecification, Element } from "@hylimo/diagram-common";
 import { SRoot } from "./sRoot.js";
-import { applyToPoint, inverse } from "transformation-matrix";
+import { inverse, compose, Matrix } from "transformation-matrix";
 
 /**
  * Base class for all elements
@@ -41,15 +41,14 @@ export abstract class SElement extends SChildElementImpl implements Element {
     }
 
     /**
-     * Gets the coordinates of a mouse event
+     * Gets a transformation matrix which can be applied to mouse events
      *
-     * @param event the mouse event
-     * @returns the coordinates of the event
+     * @returns the transformation matrix
      */
-    getEventCoordinates(event: MouseEvent): Point {
-        const rootCoordinates = this.root.getEventCoordinates(event);
+    getMouseTransformationMatrix(): Matrix {
+        const rootMatrix = this.root.getZoomScrollTransformationMatrix();
         const localToParent = this.root.layoutEngine.localToAncestor(this.id, this.root.id);
         const parentToLocal = inverse(localToParent);
-        return applyToPoint(parentToLocal, rootCoordinates);
+        return compose(parentToLocal, rootMatrix);
     }
 }

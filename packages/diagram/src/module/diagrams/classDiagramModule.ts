@@ -283,7 +283,7 @@ const scopeExpressions: ExecutableExpression[] = [
                                 class = list("package")
                             ),
                             rect(
-                                content = canvas(contents = result.contents, margin = 15),
+                                content = canvas(contents = result.contents, class = list("package-canvas")),
                                 class = list("package-body")
                             )
                         )
@@ -737,6 +737,9 @@ const scopeExpressions: ExecutableExpression[] = [
                     minHeight = 50
                     stroke = var("primary")
                     strokeWidth = var("strokeWidth")
+                }
+                cls("package-canvas") {
+                    margin = 40
                 }
                 cls("package") {
                     type("vbox") {

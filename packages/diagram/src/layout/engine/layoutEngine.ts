@@ -7,7 +7,7 @@ import { LayoutedDiagram } from "../diagramLayoutResult.js";
 import { LayoutConfig, SizeConstraints } from "../layoutElement.js";
 import { layouts } from "../layouts.js";
 import { FontCollection } from "../../font/fontCollection.js";
-import { LayoutCache } from "../layoutCache.js";
+import { LayoutCache } from "./layoutCache.js";
 import { StretchMode } from "../elements/pathLayoutConfig.js";
 import { Layout } from "./layout.js";
 

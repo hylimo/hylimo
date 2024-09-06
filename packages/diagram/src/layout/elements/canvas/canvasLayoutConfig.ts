@@ -153,7 +153,6 @@ export class CanvasLayoutConfig extends StyledElementLayoutConfig {
      */
     private calculateConnectionBounds(connection: CanvasConnection, layout: Layout): Bounds[] {
         const connectionLayout = layout.layoutEngine.layoutConnection(connection);
-        //TODO performance: cache path bounds
         const pathBounds = svgPathBbox(connectionLayout.path, connection.stroke);
         const bounds: Bounds[] = [
             {

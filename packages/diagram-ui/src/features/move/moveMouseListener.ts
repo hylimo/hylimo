@@ -38,6 +38,7 @@ import { SRoot } from "../../model/sRoot.js";
 import { ElementsGroupedBySize, ResizeHandler } from "./resizeHandler.js";
 import { SCanvasAxisAlignedSegment } from "../../model/canvas/sCanvasAxisAlignedSegment.js";
 import { AxisAligedSegmentEditHandler } from "./axisAlignedSegmentEditHandler.js";
+import { Matrix, compose, translate, applyToPoint } from "transformation-matrix";
 
 /**
  * The maximum number of updates that can be performed on the same revision.
@@ -56,9 +57,9 @@ export class MoveMouseListener extends MouseListener {
     @inject(TYPES.TransactionIdProvider) transactionIdProvider!: TransactionIdProvider;
 
     /**
-     * Position where mouseDown occured
+     * A transformation matrix which directly outputs dx/dy in the parent canvas coordinate system.
      */
-    private startPosition?: Point;
+    private transformationMatrix?: Matrix;
     /**
      * The target of the initial event
      */
@@ -77,10 +78,16 @@ export class MoveMouseListener extends MouseListener {
         if (event.button === 0 && !(event.ctrlKey || event.altKey)) {
             const moveableTarget = findParentByFeature(target, isMoveable);
             if (moveableTarget != undefined) {
-                this.startPosition = { x: event.pageX, y: event.pageY };
+                const parentCanvas = findParentByFeature(target, (element) => element instanceof SCanvas);
+                if (parentCanvas == undefined) {
+                    throw new Error("Cannot move an element without a parent canvas");
+                }
+                const matrix = parentCanvas.getMouseTransformationMatrix();
+                const initialPoint = applyToPoint(matrix, { x: event.pageX, y: event.pageY });
+                this.transformationMatrix = compose(translate(-initialPoint.x, -initialPoint.y), matrix);
                 this.targetElement = event.target as Element | undefined;
             } else {
-                this.startPosition = undefined;
+                this.transformationMatrix = undefined;
                 this.targetElement = undefined;
             }
         }
@@ -88,7 +95,7 @@ export class MoveMouseListener extends MouseListener {
     }
 
     override mouseMove(target: SModelElementImpl, event: MouseEvent): Action[] {
-        if (this.startPosition) {
+        if (this.transformationMatrix != undefined) {
             const root = target.root as SRoot;
             if (this.moveHandler === undefined) {
                 this.moveHandler = this.createHandler(target, this.targetElement);
@@ -133,7 +140,7 @@ export class MoveMouseListener extends MouseListener {
      */
     private commitMove(target: SModelElementImpl, event: MouseEvent): Action[] {
         if (this.moveHandler === undefined || this.moveHandler === null) {
-            this.startPosition = undefined;
+            this.transformationMatrix = undefined;
             this.moveHandler = undefined;
             return [];
         }
@@ -146,7 +153,7 @@ export class MoveMouseListener extends MouseListener {
             event
         );
         this.moveHandler = undefined;
-        this.startPosition = undefined;
+        this.transformationMatrix = undefined;
         return [result];
     }
 
@@ -158,14 +165,10 @@ export class MoveMouseListener extends MouseListener {
      * @return the calculated translation
      */
     private calculateTranslation(target: SModelElementImpl, event: MouseEvent): Point {
-        if (this.startPosition == undefined) {
+        if (this.transformationMatrix == undefined) {
             throw new Error("Cannot calculate translation without a start position");
         }
-        const zoom = findViewportZoom(target);
-        return {
-            x: (event.pageX - this.startPosition.x) / zoom,
-            y: (event.pageY - this.startPosition.y) / zoom
-        };
+        return applyToPoint(this.transformationMatrix, { x: event.pageX, y: event.pageY });
     }
 
     /**

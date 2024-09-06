@@ -297,10 +297,10 @@ export abstract class CanvasLayoutEngine {
 
     /**
      * Gets the point a canvas point is positioned at.
-     * Always uses the parent canvas of the point as context.
+     * Can use the parent canvas of the point, or an arbitrary subcanvas as context.
      *
      * @param id the id of the point or canvas element to get
-     * @returns the point the canvas point is positioned at
+     * @returns the point and the id of the canvas to which the point is relative to
      */
     private getPointInternal(pointId: string): [Point, string] {
         const element = this.getElement(pointId);
@@ -312,8 +312,7 @@ export abstract class CanvasLayoutEngine {
             return [{ x: element.x, y: element.y }, context];
         } else if (RelativePoint.isRelativePoint(element)) {
             const target = this.getPoint(element.target, context);
-            const targetContext = this.points.get(element.target)![1];
-            return [{ x: target.x + element.offsetX, y: target.y + element.offsetY }, targetContext];
+            return [{ x: target.x + element.offsetX, y: target.y + element.offsetY }, context];
         } else if (LinePoint.isLinePoint(element)) {
             const lineProvider = this.getElement(element.lineProvider);
             const line = this.layoutLine(lineProvider as CanvasConnection | CanvasElement);

@@ -159,7 +159,10 @@ export class PDFDiagramVisitor extends SimplifiedDiagramVisitor<PDFKit.PDFDocume
     }
 
     override visitCanvas(element: Canvas, context: PDFKit.PDFDocument): void {
+        context.save();
+        context.translate(element.dx, element.dy);
         this.visitChildren(element, context);
+        context.restore();
     }
 
     override visitCanvasElement(element: SimplifiedCanvasElement, context: PDFKit.PDFDocument): void {

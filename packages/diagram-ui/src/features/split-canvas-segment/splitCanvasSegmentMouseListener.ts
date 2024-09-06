@@ -25,6 +25,7 @@ import { SCanvasLineSegment } from "../../model/canvas/sCanvasLineSegment.js";
 import { SCanvasAxisAlignedSegment } from "../../model/canvas/sCanvasAxisAlignedSegment.js";
 import { SCanvasBezierSegment } from "../../model/canvas/sCanvasBezierSegment.js";
 import { Bezier } from "bezier-js";
+import { applyToPoint } from "transformation-matrix";
 
 /**
  * Listener for splitting canvas connection segments by shift-clicking on them
@@ -38,7 +39,8 @@ export class SplitCanvasSegmentMouseListener extends MouseListener {
     override mouseDown(target: SModelElementImpl, event: MouseEvent): Action[] {
         if (event.shiftKey && target instanceof SCanvasConnection && !(event.ctrlKey || event.altKey)) {
             const canvas = target.parent;
-            const coordinates = canvas.getEventCoordinates(event);
+            const matrix = canvas.getMouseTransformationMatrix();
+            const coordinates = applyToPoint(matrix, { x: event.clientX, y: event.clientY });
             const projectedPoint = LineEngine.DEFAULT.projectPoint(coordinates, target.line);
             const projectedCoordinates = LineEngine.DEFAULT.getPoint(projectedPoint.pos, undefined, 0, target.line);
             const segment = target.line.line.segments[projectedPoint.segment];
@@ -188,7 +190,7 @@ export class SplitCanvasSegmentMouseListener extends MouseListener {
         const relativePos = projectedPoint.relativePos;
         const invPos = originalPos + 1;
         if (segmentIndex == 0) {
-            if (originalPos > 0) {
+            if (originalPos >= 0) {
                 return {
                     pos: 1,
                     nextPos: (originalPos - relativePos * originalPos) / (1 - relativePos * originalPos)
@@ -200,7 +202,7 @@ export class SplitCanvasSegmentMouseListener extends MouseListener {
                 };
             }
         } else if (segmentIndex == 1) {
-            if (originalPos > 0) {
+            if (originalPos >= 0) {
                 return {
                     pos: 1,
                     nextPos: 0
@@ -212,7 +214,7 @@ export class SplitCanvasSegmentMouseListener extends MouseListener {
                 };
             }
         } else {
-            if (originalPos > 0) {
+            if (originalPos >= 0) {
                 return {
                     pos: originalPos / (originalPos + relativePos * (1 - originalPos)),
                     nextPos: 0

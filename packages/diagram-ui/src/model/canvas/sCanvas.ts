@@ -3,6 +3,7 @@ import { SChildElementImpl } from "sprotty";
 import { SLayoutedElement } from "../sLayoutedElement.js";
 import { PointVisibilityManager } from "./pointVisibilityManager.js";
 import { LinearAnimatable } from "../../features/animation/model.js";
+import { decomposeTSR } from "transformation-matrix";
 
 /**
  * Animated fields for SCanvas
@@ -23,10 +24,6 @@ export class SCanvas extends SLayoutedElement implements Canvas, LinearAnimatabl
      */
     dy!: number;
     readonly animatedFields = canvasAnimatedFields;
-    /**
-     * Lookup of children by id
-     */
-    private childrenById?: Map<string, SChildElementImpl>;
 
     /**
      * Internal cached version of the PointVisibilityManager
@@ -43,7 +40,18 @@ export class SCanvas extends SLayoutedElement implements Canvas, LinearAnimatabl
         return this._pointVisibilityManager;
     }
 
+    /**
+     * The global rotation of the canvas
+     * (used for UI elements which depend on global roation, e.g. cursor icons)
+     */
+    globalRotation!: number;
+
     constructor() {
         super();
+        this.cachedProperty<number>("globalRotation", () => {
+            const localToRoot = this.root.layoutEngine.localToAncestor(this.id, this.root.id);
+            const { rotation } = decomposeTSR(localToRoot);
+            return rotation.angle * (180 / Math.PI);
+        });
     }
 }

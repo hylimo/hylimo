@@ -34,8 +34,8 @@ export class AbsolutePointLayoutConfig extends CanvasPointLayoutConfig {
         const result: AbsolutePoint = {
             type: AbsolutePoint.TYPE,
             id,
-            x: xValue?.value?.toNative() + position.x,
-            y: yValue?.value.toNative() + position.y,
+            x: xValue?.value?.toNative(),
+            y: yValue?.value.toNative(),
             children: [],
             edits: element.edits
         };

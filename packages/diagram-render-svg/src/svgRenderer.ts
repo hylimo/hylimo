@@ -175,7 +175,12 @@ class SVGDiagramVisitor extends SimplifiedDiagramVisitor<undefined, SVGNode[]> {
     }
 
     override visitCanvas(element: Canvas): SVGNode[] {
-        return this.visitChildren(element);
+        const result: SVGNode = {
+            type: "g",
+            transform: `translate(${element.dx}, ${element.dy})`,
+            children: this.visitChildren(element)
+        };
+        return [result];
     }
 
     override visitCanvasElement(element: SimplifiedCanvasElement): SVGNode[] {

@@ -39,6 +39,7 @@ export * from "./model/canvas/sCanvasConnection.js";
 export * from "./model/canvas/sCanvasConnectionSegment.js";
 export * from "./model/canvas/sCanvasContent.js";
 export * from "./model/canvas/sCanvasElement.js";
+export * from "./model/canvas/sCanvasLayoutEngine.js";
 export * from "./model/canvas/sCanvasLineSegment.js";
 export * from "./model/canvas/sCanvasPoint.js";
 export * from "./model/canvas/sLinePoint.js";

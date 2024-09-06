@@ -1,7 +1,8 @@
-import { FontFamilyConfig, Point, convertFontsToCssStyle } from "@hylimo/diagram-common";
+import { FontFamilyConfig, convertFontsToCssStyle } from "@hylimo/diagram-common";
 import { ModelIndexImpl, ViewportRootElementImpl } from "sprotty";
 import { SCanvasAxisAlignedSegment } from "./canvas/sCanvasAxisAlignedSegment.js";
 import { SCanvasLayoutEngine } from "./canvas/sCanvasLayoutEngine.js";
+import { Matrix, compose, translate, scale } from "transformation-matrix";
 
 /**
  * Root element.
@@ -52,17 +53,14 @@ export class SRoot extends ViewportRootElementImpl {
     }
 
     /**
-     * Gets the coordinates of a mouse event
+     * Gets a transformation matrix which converts from the global coordinate system
+     * to the coordinate system with the scroll and zoom applied.
      *
-     * @param event the mouse event
-     * @returns the coordinates of the event
+     * @returns the transformation matrix
      */
-    getEventCoordinates(event: MouseEvent): Point {
+    getZoomScrollTransformationMatrix(): Matrix {
         const rect = this.canvasBounds;
-        return {
-            x: (event.clientX - rect.x) / this.zoom + this.scroll.x,
-            y: (event.clientY - rect.y) / this.zoom + this.scroll.y
-        };
+        return compose(translate(this.scroll.x, this.scroll.y), scale(1 / this.zoom), translate(-rect.x, -rect.y));
     }
 
     /**
