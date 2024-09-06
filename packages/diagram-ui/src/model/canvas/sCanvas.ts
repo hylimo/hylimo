@@ -1,5 +1,4 @@
 import { Canvas } from "@hylimo/diagram-common";
-import { SChildElementImpl } from "sprotty";
 import { SLayoutedElement } from "../sLayoutedElement.js";
 import { PointVisibilityManager } from "./pointVisibilityManager.js";
 import { LinearAnimatable } from "../../features/animation/model.js";

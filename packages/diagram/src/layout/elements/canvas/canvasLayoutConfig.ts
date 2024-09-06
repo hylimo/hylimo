@@ -18,6 +18,7 @@ import { ContentCardinality, LayoutElement, SizeConstraints } from "../../layout
 import { Layout } from "../../engine/layout.js";
 import { StyledElementLayoutConfig } from "../styledElementLayoutConfig.js";
 import { canvasPointType, elementType } from "../../../module/base/types.js";
+import { CanvasContentLayoutConfig } from "./canvasContentLayoutConfig.js";
 
 /**
  * Layout config for the canvas
@@ -54,8 +55,14 @@ export class CanvasLayoutConfig extends StyledElementLayoutConfig {
         element.contents = layoutedContents;
 
         const children: Element[] = [];
+        const layoutChildren: Element[] = [];
         for (const content of layoutedContents) {
-            children.push(...layout.layout(content, Point.ORIGIN, content.measuredSize!));
+            const newChildren = layout.layout(content, Point.ORIGIN, content.measuredSize!);
+            if ((content.layoutConfig as CanvasContentLayoutConfig).isLayoutContent) {
+                layoutChildren.push(...newChildren);
+            } else {
+                children.push(...newChildren);
+            }
         }
         const childBounds: Bounds[] = [];
         for (const child of children) {
@@ -66,7 +73,7 @@ export class CanvasLayoutConfig extends StyledElementLayoutConfig {
             }
         }
         const bounds = Math2D.mergeBounds(...childBounds);
-        element.children = children;
+        element.children = [...children, ...layoutChildren];
         element.canvasBounds = bounds;
 
         return bounds.size;
