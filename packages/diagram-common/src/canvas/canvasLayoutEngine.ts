@@ -1,4 +1,4 @@
-import { compose, identity, Matrix, rotateDEG, translate, applyToPoint } from "transformation-matrix";
+import { compose, identity, Matrix, rotateDEG, translate, applyToPoint, inverse } from "transformation-matrix";
 import { Point } from "../common/point.js";
 import { Line, TransformedLine } from "../line/model/line.js";
 import { Segment } from "../line/model/segment.js";
@@ -128,26 +128,33 @@ export abstract class CanvasLayoutEngine {
      * Always uses the parent canvas of the element as context.
      *
      * @param element the element of which to generate the line of
+     * @param context the context of which coordinate system to use
      * @returns the generated line
      */
-    layoutLine(element: CanvasConnection | CanvasElement): TransformedLine {
+    layoutLine(element: CanvasConnection | CanvasElement, context: string): TransformedLine {
+        const elementContext = this.getParentElement(element.id);
+        const contextTransformation =
+            context != elementContext ? this.localToAncestor(elementContext, context) : identity();
         if (CanvasConnection.isCanvasConnection(element)) {
             const layout = this.layoutConnection(element);
             return {
                 line: layout.line,
-                transform: identity()
+                transform: contextTransformation
             };
         } else {
             let position: Point;
             if (element.pos != undefined) {
-                const context = this.getParentElement(element.id);
-                position = this.getPoint(element.pos, context);
+                position = this.getPoint(element.pos, elementContext);
             } else {
                 position = Point.ORIGIN;
             }
             return {
                 line: element.outline,
-                transform: compose(translate(position.x, position.y), rotateDEG(element.rotation))
+                transform: compose(
+                    contextTransformation,
+                    translate(position.x, position.y),
+                    rotateDEG(element.rotation)
+                )
             };
         }
     }
@@ -288,38 +295,10 @@ export abstract class CanvasLayoutEngine {
             this.points.set(id, this.getPointInternal(id));
         }
         const [point, pointContext] = this.points.get(id)!;
-        return this.handleContextChange(point, pointContext, context);
-    }
-
-    /**
-     * Gets the root position of a line point
-     * This is NOT cached
-     *
-     * @param point the line point to get the root position of
-     * @param context the context of which coordinate system to use
-     * @returns the root position of the line point
-     */
-    getLinePointRootPosition(point: LinePoint, context: string): Point {
-        const lineProvider = this.getElement(point.lineProvider);
-        const line = this.layoutLine(lineProvider as CanvasConnection | CanvasElement);
-        const targetContext = this.getParentElement(point.lineProvider);
-        const pos = LineEngine.DEFAULT.getPoint(point.pos, point.segment, 0, line);
-        return this.handleContextChange(pos, targetContext, context);
-    }
-
-    /**
-     * Handles a context change for a point
-     *
-     * @param point the point to transform
-     * @param pointContext the context of the point
-     * @param targetContext the target context
-     * @returns the transformed point
-     */
-    private handleContextChange(point: Point, pointContext: string, targetContext: string): Point {
-        if (pointContext == targetContext) {
+        if (pointContext == context) {
             return point;
         }
-        const matrix = this.localToAncestor(pointContext, targetContext);
+        const matrix = this.localToAncestor(pointContext, context);
         return applyToPoint(matrix, point);
     }
 
@@ -333,31 +312,29 @@ export abstract class CanvasLayoutEngine {
     private getPointInternal(pointId: string): [Point, string] {
         const element = this.getElement(pointId);
         const context = this.getParentElement(pointId);
+        let point: Point;
         if (element == null) {
             throw new Error(`Point with id ${pointId} not found`);
         }
         if (AbsolutePoint.isAbsolutePoint(element)) {
-            return [{ x: element.x, y: element.y }, context];
+            point = { x: element.x, y: element.y };
         } else if (RelativePoint.isRelativePoint(element)) {
             const target = this.getPoint(element.target, context);
-            return [{ x: target.x + element.offsetX, y: target.y + element.offsetY }, context];
+            point = { x: target.x + element.offsetX, y: target.y + element.offsetY };
         } else if (LinePoint.isLinePoint(element)) {
             const lineProvider = this.getElement(element.lineProvider);
-            const line = this.layoutLine(lineProvider as CanvasConnection | CanvasElement);
-            const targetContext = this.getParentElement(element.lineProvider);
-            return [
-                LineEngine.DEFAULT.getPoint(element.pos, element.segment, element.distance ?? 0, line),
-                targetContext
-            ];
+            const line = this.layoutLine(lineProvider as CanvasConnection | CanvasElement, context);
+            point = LineEngine.DEFAULT.getPoint(element.pos, element.segment, element.distance ?? 0, line);
         } else if (CanvasElement.isCanvasElement(element)) {
             if (element.pos != undefined) {
-                return [this.getPoint(element.pos, context), context];
+                point = this.getPoint(element.pos, context);
             } else {
-                return [Point.ORIGIN, context];
+                point = Point.ORIGIN;
             }
         } else {
             throw new Error(`Unknown point type: ${element.type}`);
         }
+        return [point, context];
     }
 
     /**

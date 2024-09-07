@@ -1,6 +1,5 @@
-import { CanvasElement, Line, Point, TransformedLine } from "@hylimo/diagram-common";
+import { CanvasElement, Line, Point } from "@hylimo/diagram-common";
 import { LinearAnimatable } from "../../features/animation/model.js";
-import { LineProvider } from "../../features/layout/lineProvider.js";
 import { PositionProvider } from "../../features/layout/positionProvider.js";
 import { SCanvasContent } from "./sCanvasContent.js";
 
@@ -12,10 +11,7 @@ const canvasElementAnimatedFields = new Set(["width", "height", "dx", "dy", "rot
 /**
  * Model for CanvasElement
  */
-export class SCanvasElement
-    extends SCanvasContent
-    implements CanvasElement, PositionProvider, LineProvider, LinearAnimatable
-{
+export class SCanvasElement extends SCanvasContent implements CanvasElement, PositionProvider, LinearAnimatable {
     override type!: typeof CanvasElement.TYPE;
     /**
      * The width of the element
@@ -47,10 +43,6 @@ export class SCanvasElement
      */
     outline!: Line;
     /**
-     * The provided line, cached
-     */
-    line!: TransformedLine;
-    /**
      * Position of this CanvasElement
      */
     position!: Point;
@@ -64,9 +56,6 @@ export class SCanvasElement
             } else {
                 return Point.ORIGIN;
             }
-        });
-        this.cachedProperty<TransformedLine>("line", () => {
-            return this.root.layoutEngine.layoutLine(this);
         });
     }
 

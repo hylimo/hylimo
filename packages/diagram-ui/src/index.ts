@@ -8,7 +8,6 @@ export * from "./features/animation/model.js";
 export * from "./features/canvas-bounds/di.config.js";
 export * from "./features/canvas-bounds/resetCanvasBoundsAction.js";
 export * from "./features/canvas-bounds/resetCanvasBoundsCommand.js";
-export * from "./features/layout/lineProvider.js";
 export * from "./features/layout/positionProvider.js";
 export * from "./features/move/axisAlignedSegmentEditHandler.js";
 export * from "./features/move/di.config.js";

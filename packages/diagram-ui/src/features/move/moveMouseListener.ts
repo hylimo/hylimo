@@ -35,7 +35,7 @@ import { SRoot } from "../../model/sRoot.js";
 import { ElementsGroupedBySize, ResizeHandler } from "./resizeHandler.js";
 import { SCanvasAxisAlignedSegment } from "../../model/canvas/sCanvasAxisAlignedSegment.js";
 import { AxisAligedSegmentEditHandler } from "./axisAlignedSegmentEditHandler.js";
-import { Matrix, compose, translate, applyToPoint } from "transformation-matrix";
+import { Matrix, compose, translate, applyToPoint, inverse } from "transformation-matrix";
 import { MovedElementsSelector } from "./movedElementsSelector.js";
 
 /**
@@ -55,13 +55,23 @@ export class MoveMouseListener extends MouseListener {
     @inject(TYPES.TransactionIdProvider) transactionIdProvider!: TransactionIdProvider;
 
     /**
-     * A transformation matrix which directly outputs dx/dy in the parent canvas coordinate system.
+     * The context of the current move
      */
-    private transformationMatrix?: Matrix;
-    /**
-     * The target of the initial event
-     */
-    private targetElement?: Element;
+    private context?: {
+        /**
+         * A transformation matrix which directly outputs dx/dy in the parent canvas coordinate system.
+         */
+        transformationMatrix: Matrix;
+        /**
+         * The target of the initial event
+         */
+        targetElement: Element;
+        /**
+         * The id of the canvas in which the edit is performed
+         */
+        canvasContext: string;
+    };
+
     /**
      * Current moveHandler.
      * If null, creating a handler for the current move is not possible.
@@ -82,21 +92,23 @@ export class MoveMouseListener extends MouseListener {
                 }
                 const matrix = parentCanvas.getMouseTransformationMatrix();
                 const initialPoint = applyToPoint(matrix, { x: event.pageX, y: event.pageY });
-                this.transformationMatrix = compose(translate(-initialPoint.x, -initialPoint.y), matrix);
-                this.targetElement = event.target as Element | undefined;
+                this.context = {
+                    transformationMatrix: compose(translate(-initialPoint.x, -initialPoint.y), matrix),
+                    targetElement: event.target as Element,
+                    canvasContext: parentCanvas.id
+                };
             } else {
-                this.transformationMatrix = undefined;
-                this.targetElement = undefined;
+                this.context = undefined;
             }
         }
         return [];
     }
 
     override mouseMove(target: SModelElementImpl, event: MouseEvent): Action[] {
-        if (this.transformationMatrix != undefined) {
+        if (this.context != undefined) {
             const root = target.root as SRoot;
             if (this.moveHandler === undefined) {
-                this.moveHandler = this.createHandler(target, this.targetElement);
+                this.moveHandler = this.createHandler(target, this.context.targetElement);
                 root.sequenceNumber = 0;
                 this.sequenceNumber = 0;
             }
@@ -138,7 +150,7 @@ export class MoveMouseListener extends MouseListener {
      */
     private commitMove(target: SModelElementImpl, event: MouseEvent): Action[] {
         if (this.moveHandler === undefined || this.moveHandler === null) {
-            this.transformationMatrix = undefined;
+            this.context = undefined;
             this.moveHandler = undefined;
             return [];
         }
@@ -151,7 +163,7 @@ export class MoveMouseListener extends MouseListener {
             event
         );
         this.moveHandler = undefined;
-        this.transformationMatrix = undefined;
+        this.context = undefined;
         return [result];
     }
 
@@ -163,10 +175,10 @@ export class MoveMouseListener extends MouseListener {
      * @return the calculated translation
      */
     private calculateTranslation(target: SModelElementImpl, event: MouseEvent): Point {
-        if (this.transformationMatrix == undefined) {
+        if (this.context == undefined) {
             throw new Error("Cannot calculate translation without a start position");
         }
-        return applyToPoint(this.transformationMatrix, { x: event.pageX, y: event.pageY });
+        return applyToPoint(this.context.transformationMatrix, { x: event.pageX, y: event.pageY });
     }
 
     /**
@@ -454,13 +466,17 @@ export class MoveMouseListener extends MouseListener {
                 return null;
             }
             const [linePoint] = pointsToMove as Set<SLinePoint>;
+            const root = linePoint.root as SRoot;
             return new LineMoveHandler(
                 linePoint.id,
                 this.transactionIdProvider.generateId(),
-                linePoint.position,
+                root.layoutEngine.getPoint(linePoint.id, this.context!.canvasContext),
                 linePoint.edits[DefaultEditTypes.MOVE_LPOS_DIST] == undefined,
                 linePoint.segment != undefined,
-                linePoint.line
+                root.layoutEngine.layoutLine(
+                    root.index.getById(linePoint.lineProvider) as SCanvasConnection | SCanvasElement,
+                    this.context!.canvasContext
+                )
             );
         } else {
             return null;
