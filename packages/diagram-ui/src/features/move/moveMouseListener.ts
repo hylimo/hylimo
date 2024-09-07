@@ -35,7 +35,7 @@ import { SRoot } from "../../model/sRoot.js";
 import { ElementsGroupedBySize, ResizeHandler } from "./resizeHandler.js";
 import { SCanvasAxisAlignedSegment } from "../../model/canvas/sCanvasAxisAlignedSegment.js";
 import { AxisAligedSegmentEditHandler } from "./axisAlignedSegmentEditHandler.js";
-import { Matrix, compose, translate, applyToPoint, inverse } from "transformation-matrix";
+import { Matrix, compose, translate, applyToPoint, inverse, decomposeTSR, scale, rotate } from "transformation-matrix";
 import { MovedElementsSelector } from "./movedElementsSelector.js";
 
 /**
@@ -408,79 +408,119 @@ export class MoveMouseListener extends MouseListener {
             return null;
         }
 
-        const { movedPoints, movedElements, hasConflict } = new MovedElementsSelector(selected, target.index);
+        const { movedElements, hasConflict } = new MovedElementsSelector(selected, target.index);
         if (hasConflict) {
             return null;
         }
-        const editSpecifications = [...movedPoints, ...movedElements].flatMap((element) => {
-            const entries: EditSpecificationEntry[] = [];
+        const linePoints: SLinePoint[] = [];
+        const translateableElements: (SCanvasElement | SRelativePoint | SAbsolutePoint)[] = [];
+        for (const element of movedElements) {
             if (element instanceof SLinePoint) {
-                entries.push(element.edits[DefaultEditTypes.MOVE_LPOS_POS]);
-                if (element.distance != undefined) {
-                    entries.push(element.edits[DefaultEditTypes.MOVE_LPOS_DIST]);
-                }
+                linePoints.push(element);
             } else {
-                entries.push(element.edits[DefaultEditTypes.MOVE_X], element.edits[DefaultEditTypes.MOVE_Y]);
+                translateableElements.push(element as SCanvasElement | SRelativePoint | SAbsolutePoint);
             }
-            return entries;
-        });
-        if (!EditSpecification.isConsistent([editSpecifications])) {
-            return null;
         }
-        return this.createMoveHandlerForPointsAndElements(movedPoints, movedElements);
+        if (linePoints.length > 0) {
+            if (linePoints.length > 1 || translateableElements.length > 0) {
+                return null;
+            }
+            return this.createLineMoveHandler(linePoints[0]);
+        }
+        return this.createTranslationMoveHandler(translateableElements);
     }
 
     /**
-     * Creates the move handler for moving the given points and elements.
-     * If both line points and translateable elements (absolute & relative points, canvas elements) are given, null is returned.
-     * If multiple line points are given, null is returned.
-     * Otherwise, the corresponding handler is created and returned.
+     * Creates the line move handler for the given line point.
      *
-     * @param pointsToMove the points to move
+     * @param linePoint the point to move
+     * @returns the created move handler or null if no handler could be created
+     */
+    private createLineMoveHandler(linePoint: SLinePoint): MoveHandler | null {
+        const editSpecifications: EditSpecificationEntry[] = [];
+        editSpecifications.push(linePoint.edits[DefaultEditTypes.MOVE_LPOS_POS]);
+        if (linePoint.distance != undefined) {
+            editSpecifications.push(linePoint.edits[DefaultEditTypes.MOVE_LPOS_DIST]);
+        }
+        if (!EditSpecification.isConsistent([editSpecifications])) {
+            return null;
+        }
+        const root = linePoint.root as SRoot;
+        return new LineMoveHandler(
+            linePoint.id,
+            this.transactionIdProvider.generateId(),
+            root.layoutEngine.getPoint(linePoint.id, this.context!.canvasContext),
+            linePoint.edits[DefaultEditTypes.MOVE_LPOS_DIST] == undefined,
+            linePoint.segment != undefined,
+            root.layoutEngine.layoutLine(
+                root.index.getById(linePoint.lineProvider) as SCanvasConnection | SCanvasElement,
+                this.context!.canvasContext
+            )
+        );
+    }
+
+    /**
+     * Creates the translation move handler for the given points and elements.
+     *
      * @param elements the elements to move
      * @returns the created move handler or null if no handler could be created
      */
-    private createMoveHandlerForPointsAndElements(
-        pointsToMove: Set<SCanvasPoint>,
-        elements: Set<SCanvasElement>
+    private createTranslationMoveHandler(
+        elements: (SCanvasElement | SAbsolutePoint | SRelativePoint)[]
     ): MoveHandler | null {
-        let hasTranslatablePoint = elements.size > 0;
-        let hasLinePoint = false;
-        for (const point of pointsToMove) {
-            if (point instanceof SRelativePoint || point instanceof SAbsolutePoint) {
-                hasTranslatablePoint = true;
-            } else if (point instanceof SLinePoint) {
-                hasLinePoint = true;
-            }
-        }
-        if (hasLinePoint && hasTranslatablePoint) {
+        if (elements.length == 0) {
             return null;
         }
-        if (hasTranslatablePoint) {
-            return new TranslationMoveHandler(
-                [...pointsToMove, ...elements].map((point) => point.id),
-                this.transactionIdProvider.generateId()
-            );
-        } else if (hasLinePoint) {
-            if (pointsToMove.size !== 1) {
-                return null;
-            }
-            const [linePoint] = pointsToMove as Set<SLinePoint>;
-            const root = linePoint.root as SRoot;
-            return new LineMoveHandler(
-                linePoint.id,
-                this.transactionIdProvider.generateId(),
-                root.layoutEngine.getPoint(linePoint.id, this.context!.canvasContext),
-                linePoint.edits[DefaultEditTypes.MOVE_LPOS_DIST] == undefined,
-                linePoint.segment != undefined,
-                root.layoutEngine.layoutLine(
-                    root.index.getById(linePoint.lineProvider) as SCanvasConnection | SCanvasElement,
-                    this.context!.canvasContext
-                )
-            );
-        } else {
+        const entries = this.computeTRanslationMoveEntries(elements);
+        const editSpecifications = entries.map((entry) => {
+            return entry.elements.flatMap((element) => {
+                return [element.edits[DefaultEditTypes.MOVE_X], element.edits[DefaultEditTypes.MOVE_Y]];
+            });
+        });
+        if (!EditSpecification.isConsistent(editSpecifications)) {
             return null;
         }
+        return new TranslationMoveHandler(
+            entries.map((entry) => ({
+                transformation: entry.transformation,
+                elements: entry.elements.map((element) => element.id)
+            })),
+            this.transactionIdProvider.generateId()
+        );
+    }
+
+    /**
+     * Computes the translation move entries for the given elements.
+     * Groups the elements by their transformation matrix (ignoring translation).
+     *
+     * @param elements the elements to move
+     * @returns the translation move entries
+     */
+    private computeTRanslationMoveEntries(
+        elements: (SCanvasElement | SRelativePoint | SAbsolutePoint)[]
+    ): TranslationMoveEntry[] {
+        const entries = new Map<string, TranslationMoveEntry>();
+        const root = elements[0].root as SRoot;
+        const currentMatrix = root.layoutEngine.localToAncestor(this.context!.canvasContext, root.id);
+        const transformationLookup = new Map<string, string>();
+        for (const element of elements) {
+            const parentCanvas = findParentByFeature(element, (element) => element instanceof SCanvas) as SCanvas;
+            if (!transformationLookup.has(parentCanvas.id)) {
+                const transformationMatrix = root.layoutEngine.localToAncestor(parentCanvas.id, root.id);
+                const matrix = compose(inverse(transformationMatrix), currentMatrix);
+                const { scale: tsrScale, rotation: tsrRotation } = decomposeTSR(matrix);
+                const key = `${tsrRotation.angle} ${tsrScale.sx} ${tsrScale.sy}`;
+                transformationLookup.set(parentCanvas.id, key);
+                if (!entries.has(key)) {
+                    entries.set(key, {
+                        transformation: compose(scale(tsrScale.sx, tsrScale.sy), rotate(tsrRotation.angle)),
+                        elements: []
+                    });
+                }
+            }
+            entries.get(transformationLookup.get(parentCanvas.id)!)!.elements.push(element);
+        }
+        return [...entries.values()];
     }
 
     /**
@@ -492,4 +532,18 @@ export class MoveMouseListener extends MouseListener {
     private getSelectedElements(root: SModelRootImpl): SModelElementImpl[] {
         return [...root.index.all().filter((child) => isSelectable(child) && child.selected)];
     }
+}
+
+/**
+ * Entry for a translation move operation
+ */
+export interface TranslationMoveEntry {
+    /**
+     * The transformation applied to the dx and dy values
+     */
+    transformation: Matrix;
+    /**
+     * The elements to move
+     */
+    elements: (SCanvasElement | SRelativePoint | SAbsolutePoint)[];
 }

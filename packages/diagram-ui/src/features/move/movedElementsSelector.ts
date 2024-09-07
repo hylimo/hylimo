@@ -17,19 +17,13 @@ import { SCanvasBezierSegment } from "../../model/canvas/sCanvasBezierSegment.js
  * If a relative point is not editable, it tries to move the target instead.
  * After initialization the result can be found in the following fields:
  * - movedElements: Elements which are moved.
- * - movedPoints: Points which are moved.
  * - hasConflict: True if there is any conflict that prevents the move.
  */
 export class MovedElementsSelector {
     /**
-     * Elements which are moved.
+     * Elements (canvas elements and points) which are moved.
      */
-    movedElements: Set<SCanvasElement> = new Set();
-
-    /**
-     * Points which are moved
-     */
-    movedPoints: Set<SCanvasPoint> = new Set();
+    movedElements: Set<SCanvasElement | SCanvasPoint> = new Set();
 
     /**
      * True if there is any conflict that prevents the move
@@ -75,12 +69,12 @@ export class MovedElementsSelector {
                 } else if (element instanceof SRelativePoint) {
                     const editable =
                         DefaultEditTypes.MOVE_X in element.edits && DefaultEditTypes.MOVE_Y in element.edits;
-                    this.movedPoints.add(element);
+                    this.movedElements.add(element);
                     if (!editable) {
                         newElements.add(this.index.getById(element.target) as SCanvasPoint | SCanvasElement);
                     }
                 } else {
-                    this.movedPoints.add(element);
+                    this.movedElements.add(element);
                 }
             }
             currentElements = newElements;
@@ -91,28 +85,19 @@ export class MovedElementsSelector {
      * Prunes the moved elements and points to remove implicitely moved elements.
      */
     private pruneMovedElements() {
-        const elementsToRemove = new Set<SCanvasElement>();
-        const pointsToRemove = new Set<SCanvasPoint>();
+        const elementsToRemove = new Set<SCanvasElement | SCanvasPoint>();
         for (const element of this.movedElements) {
             if (this.isElementImplicitelyMoved(element)) {
                 elementsToRemove.add(element);
             }
         }
-        for (const point of this.movedPoints) {
-            if (this.isPointImplicitelyMoved(point)) {
-                pointsToRemove.add(point);
-            }
-        }
         for (const element of elementsToRemove) {
             this.movedElements.delete(element);
-        }
-        for (const point of pointsToRemove) {
-            this.movedPoints.delete(point);
         }
     }
 
     /**
-     * Checks if a point or canvas element is moved.
+     * Checks if an element is moved.
      *
      * @param elementId the id of the element to check
      * @returns true if the element is moved, otherwise false
@@ -123,12 +108,8 @@ export class MovedElementsSelector {
             return fromLookup;
         }
         const element = this.index.getById(elementId);
-        if (element instanceof SCanvasElement) {
+        if (element instanceof SCanvasElement || element instanceof SCanvasPoint) {
             const isMoved = this.isElementMoved(element);
-            this.isMovedLookup.set(elementId, isMoved);
-            return isMoved;
-        } else if (element instanceof SCanvasPoint) {
-            const isMoved = this.isPointMoved(element);
             this.isMovedLookup.set(elementId, isMoved);
             return isMoved;
         } else {
@@ -137,26 +118,12 @@ export class MovedElementsSelector {
     }
 
     /**
-     * Checks if a point is moved.
-     *
-     * @param point the point to check
-     * @returns true if the point is moved, otherwise false
-     */
-    private isPointMoved(point: SCanvasPoint): boolean {
-        if (this.movedPoints.has(point)) {
-            return true;
-        }
-        return this.isPointImplicitelyMoved(point);
-    }
-
-    /**
      * Checks if an element is moved.
-     * An element is moved if it has a position and the position is moved, or if it is in the set of moved elements.
      *
      * @param element the element to check
      * @returns true if the element is moved, otherwise false
      */
-    private isElementMoved(element: SCanvasElement): boolean {
+    private isElementMoved(element: SCanvasElement | SCanvasPoint): boolean {
         if (this.movedElements.has(element)) {
             return true;
         }
@@ -165,43 +132,34 @@ export class MovedElementsSelector {
 
     /**
      * Checks if an element is implicitely moved.
-     * If the element has a position, it is moved if the target is moved.
-     * Otherwise, it is moved if the parent canvas is moved.
-     *
-     * @param element the element to check
-     * @returns true if the element is implicitely moved, otherwise false
-     */
-    private isElementImplicitelyMoved(element: SCanvasElement): boolean {
-        if (element.pos != undefined) {
-            return this.isMoved(element.pos);
-        }
-        return this.isParentCanvasImplicitelyMoved(element);
-    }
-
-    /**
-     * Checks if a point is implicitely moved.
+     * - A canvas element is moved if its position is moved, if it is moved explicitly, or if the parent canvas is moved.
      * - A relative point is moved if the target is moved.
      * - A line point is moved if the (relevant segment of the) line provider is moved.
      * - An absolute point is moved if the parent canvas is moved.
      *
-     * @param point the point to check
-     * @returns true if the point is implicitely moved, otherwise false
+     * @param element the element to check
+     * @returns true if the element is implicitely moved, otherwise false
      */
-    private isPointImplicitelyMoved(point: SCanvasPoint): boolean {
-        if (point instanceof SRelativePoint) {
-            return this.isMoved(point.target);
-        } else if (point instanceof SLinePoint) {
-            const lineProviderId = point.lineProvider;
+    private isElementImplicitelyMoved(element: SCanvasElement | SCanvasPoint): boolean {
+        if (element instanceof SCanvasElement) {
+            if (element.pos != undefined) {
+                return this.isMoved(element.pos);
+            }
+            return this.isParentCanvasImplicitelyMoved(element);
+        } else if (element instanceof SRelativePoint) {
+            return this.isMoved(element.target);
+        } else if (element instanceof SLinePoint) {
+            const lineProviderId = element.lineProvider;
             const lineProvider = this.index.getById(lineProviderId) as SCanvasContent;
             if (lineProvider instanceof SCanvasElement) {
                 return this.isMoved(lineProviderId);
             }
             if (lineProvider instanceof SCanvasConnection) {
-                const affectedSegment = LinePoint.calcSegmentIndex(point.pos, lineProvider.segments.length);
+                const affectedSegment = LinePoint.calcSegmentIndex(element.pos, lineProvider.segments.length);
                 return this.isCanvasConnectionSegmentMoved(lineProvider, affectedSegment);
             }
-        } else if (point instanceof SAbsolutePoint) {
-            return this.isParentCanvasImplicitelyMoved(point);
+        } else if (element instanceof SAbsolutePoint) {
+            return this.isParentCanvasImplicitelyMoved(element);
         }
         return false;
     }

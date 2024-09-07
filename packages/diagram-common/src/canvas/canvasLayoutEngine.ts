@@ -1,4 +1,4 @@
-import { compose, identity, Matrix, rotateDEG, translate, applyToPoint, inverse } from "transformation-matrix";
+import { compose, identity, Matrix, rotateDEG, translate, applyToPoint } from "transformation-matrix";
 import { Point } from "../common/point.js";
 import { Line, TransformedLine } from "../line/model/line.js";
 import { Segment } from "../line/model/segment.js";

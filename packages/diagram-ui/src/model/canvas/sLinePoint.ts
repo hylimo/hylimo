@@ -1,4 +1,4 @@
-import { LineEngine, LinePoint, Point, TransformedLine } from "@hylimo/diagram-common";
+import { LineEngine, LinePoint, Point } from "@hylimo/diagram-common";
 import { LinearAnimatable } from "../../features/animation/model.js";
 import { SCanvasPoint } from "./sCanvasPoint.js";
 import { SCanvasConnection } from "./sCanvasConnection.js";

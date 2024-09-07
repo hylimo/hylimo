@@ -1,6 +1,21 @@
 import { Edit, MoveEdit } from "@hylimo/diagram-protocol";
 import { MoveHandler } from "./moveHandler.js";
 import { DefaultEditTypes } from "@hylimo/diagram-common";
+import { Matrix, applyToPoint } from "transformation-matrix";
+
+/**
+ * Entry for a translation move operation
+ */
+export interface ElementsGroupedByTransformation {
+    /**
+     * The transformation applied to the dx and dy values
+     */
+    transformation: Matrix;
+    /**
+     * The elements to move
+     */
+    elements: string[];
+}
 
 /**
  * Move handler for translations of absolute and relative points
@@ -13,7 +28,7 @@ export class TranslationMoveHandler extends MoveHandler {
      * @param transactionId the id of the transaction
      */
     constructor(
-        readonly elements: string[],
+        readonly elements: ElementsGroupedByTransformation[],
         transactionId: string
     ) {
         super(transactionId);
@@ -29,12 +44,13 @@ export class TranslationMoveHandler extends MoveHandler {
                 offsetX = 0;
             }
         }
-        return [
-            {
+        return this.elements.map(({ elements, transformation }) => {
+            const transformed = applyToPoint(transformation, { x: offsetX, y: offsetY });
+            return {
                 types: [DefaultEditTypes.MOVE_X, DefaultEditTypes.MOVE_Y],
-                values: { dx: offsetX, dy: offsetY },
-                elements: this.elements
-            } satisfies MoveEdit
-        ];
+                values: { dx: transformed.x, dy: transformed.y },
+                elements
+            } satisfies MoveEdit;
+        });
     }
 }
