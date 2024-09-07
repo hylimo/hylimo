@@ -471,7 +471,7 @@ export class MoveMouseListener extends MouseListener {
         if (elements.length == 0) {
             return null;
         }
-        const entries = this.computeTRanslationMoveEntries(elements);
+        const entries = this.computeTranslationMoveEntries(elements);
         const editSpecifications = entries.map((entry) => {
             return entry.elements.flatMap((element) => {
                 return [element.edits[DefaultEditTypes.MOVE_X], element.edits[DefaultEditTypes.MOVE_Y]];
@@ -496,7 +496,7 @@ export class MoveMouseListener extends MouseListener {
      * @param elements the elements to move
      * @returns the translation move entries
      */
-    private computeTRanslationMoveEntries(
+    private computeTranslationMoveEntries(
         elements: (SCanvasElement | SRelativePoint | SAbsolutePoint)[]
     ): TranslationMoveEntry[] {
         const entries = new Map<string, TranslationMoveEntry>();
