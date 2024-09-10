@@ -1,4 +1,4 @@
-import { FullObject, assertString, nativeToList, RuntimeError } from "@hylimo/core";
+import { FullObject, assertString, nativeToList, RuntimeError, BaseObject } from "@hylimo/core";
 import { Point, Size } from "@hylimo/diagram-common";
 import { FontCollection } from "../../font/fontCollection.js";
 import { FontFamily } from "../../font/fontFamily.js";
@@ -124,24 +124,35 @@ export class Layout {
             for (const style of matchingStyles) {
                 const entry = style.getLocalFieldOrUndefined(attribute);
                 if (entry != undefined) {
-                    const value = entry.value.toNative();
-                    if (typeof value === "object" && typeof value._type === "string") {
-                        if (value._type === "unset") {
-                            styles[attribute] = undefined;
-                        } else if (value._type === "var") {
-                            const variableValue = this.extractVariableValue(matchingStyles, value.name);
-                            styles[attribute] = variableValue;
-                        } else {
-                            throw new Error(`Unknown style value: ${value}`);
-                        }
-                    } else {
-                        styles[attribute] = value;
-                    }
+                    styles[attribute] = this.applyStyle(entry.value, matchingStyles);
                     break;
                 }
             }
         }
         layoutElement.styles = layoutElement.layoutConfig.postprocessStyles(layoutElement, styles);
+    }
+
+    /**
+     * Applies a style rule to an element
+     * The value can either be a primitive value, a variable reference, or unset
+     *
+     * @param value the value to set the attribute to
+     * @param matchingStyles matching styles to extract variable values from
+     */
+    private applyStyle(value: BaseObject, matchingStyles: FullObject[]): number | string | boolean | undefined {
+        const parsedValue = value.toNative();
+        if (typeof value === "object" && typeof parsedValue._type === "string") {
+            if (parsedValue._type === "unset") {
+                return undefined;
+            } else if (parsedValue._type === "var") {
+                const variableValue = this.extractVariableValue(matchingStyles, parsedValue.name);
+                return variableValue;
+            } else {
+                throw new Error(`Unknown style value: ${value}`);
+            }
+        } else {
+            return parsedValue;
+        }
     }
 
     /**
