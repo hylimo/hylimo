@@ -139,7 +139,7 @@ export class Layout {
      * @param value the value to set the attribute to
      * @param matchingStyles matching styles to extract variable values from
      */
-    private applyStyle(value: BaseObject, matchingStyles: FullObject[]): number | string | boolean | undefined {
+    private applyStyle(value: BaseObject, matchingStyles: FullObject[]): any {
         const parsedValue = value.toNative();
         if (typeof value === "object" && typeof parsedValue._type === "string") {
             if (parsedValue._type === "unset") {
@@ -168,22 +168,32 @@ export class Layout {
             if (variables instanceof FullObject) {
                 const entry = variables.getLocalFieldOrUndefined(name);
                 if (entry != undefined) {
-                    const value = entry.value.toNative();
-                    if (typeof value === "object" && typeof value._type === "string") {
-                        if (value._type === "unset") {
-                            return undefined;
-                        } else if (value._type === "var") {
-                            throw new Error("Variables cannot be set to other variables");
-                        } else {
-                            throw new Error(`Unknown style value: ${value}`);
-                        }
-                    } else {
-                        return value;
-                    }
+                    return this.parseVariableValue(entry.value);
                 }
             }
         }
         return undefined;
+    }
+
+    /**
+     * Parses a variable value
+     *
+     * @param value the value to parse
+     * @returns the parsed value
+     */
+    private parseVariableValue(value: BaseObject): any {
+        const parsedValue = value.toNative();
+        if (typeof parsedValue === "object" && typeof parsedValue._type === "string") {
+            if (parsedValue._type === "unset") {
+                return undefined;
+            } else if (parsedValue._type === "var") {
+                throw new Error("Variables cannot be set to other variables");
+            } else {
+                throw new Error(`Unknown style value: ${parsedValue}`);
+            }
+        } else {
+            return parsedValue;
+        }
     }
 
     /**
