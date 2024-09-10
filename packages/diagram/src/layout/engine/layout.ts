@@ -73,11 +73,8 @@ export class Layout {
             return element.class.has(selector.value);
         } else if (selector.type === SelectorType.TYPE) {
             return element.layoutConfig.type === selector.value;
-        } else if (selector.type === SelectorType.ANY) {
-            return true;
-        } else {
-            return false;
-        }
+        } 
+        return selector.type === SelectorType.ANY;
     }
 
     /**
