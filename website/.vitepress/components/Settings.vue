@@ -3,8 +3,8 @@
     <ClientOnly>
         <Teleport to="body">
             <Transition name="modal">
-                <div v-show="showDialog" class="modal-mask" @click="showDialog = false">
-                    <div class="modal-container" @click.stop="">
+                <div v-show="showDialog" class="modal-mask">
+                    <div ref="dialog" class="modal-container">
                         <p class="title">Settings</p>
                         <div>
                             <div v-for="(name, key) in names" :key="key">
@@ -27,8 +27,14 @@ import { ref, watch } from "vue";
 import IconButton from "./IconButton.vue";
 import { useLocalStorage } from "@vueuse/core";
 import { mapObject } from "../util/mapObject.js";
+import { onClickOutside } from "@vueuse/core";
 
 const showDialog = ref(false);
+const dialog = ref<HTMLElement | null>(null);
+
+onClickOutside(dialog, () => {
+    showDialog.value = false;
+});
 
 const names = {
     translationPrecision: "Absolute/relative point translation precision",
