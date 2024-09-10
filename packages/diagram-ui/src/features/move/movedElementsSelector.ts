@@ -52,7 +52,7 @@ export class MovedElementsSelector {
 
     /**
      * Registers the points and elements which are required to move so that elements are moved as a whole.
-     * Does not perform pruning of implicitely moved elements
+     * Does not perform pruning of implicitly moved elements
      *
      * @param points the points to move
      */
@@ -79,12 +79,12 @@ export class MovedElementsSelector {
     }
 
     /**
-     * Prunes the moved elements and points to remove implicitely moved elements.
+     * Prunes the moved elements and points to remove implicitly moved elements.
      */
     private pruneMovedElements() {
         const elementsToRemove = new Set<SCanvasElement | SCanvasPoint>();
         for (const element of this.movedElements) {
-            if (this.isElementImplicitelyMoved(element)) {
+            if (this.isElementImplicitlyMoved(element)) {
                 elementsToRemove.add(element);
             }
         }
@@ -124,25 +124,25 @@ export class MovedElementsSelector {
         if (this.movedElements.has(element)) {
             return true;
         }
-        return this.isElementImplicitelyMoved(element);
+        return this.isElementImplicitlyMoved(element);
     }
 
     /**
-     * Checks if an element is implicitely moved.
+     * Checks if an element is implicitly moved.
      * - A canvas element is moved if its position is moved, if it is moved explicitly, or if the parent canvas is moved.
      * - A relative point is moved if the target is moved.
      * - A line point is moved if the (relevant segment of the) line provider is moved.
      * - An absolute point is moved if the parent canvas is moved.
      *
      * @param element the element to check
-     * @returns true if the element is implicitely moved, otherwise false
+     * @returns true if the element is implicitly moved, otherwise false
      */
-    private isElementImplicitelyMoved(element: SCanvasElement | SCanvasPoint): boolean {
+    private isElementImplicitlyMoved(element: SCanvasElement | SCanvasPoint): boolean {
         if (element instanceof SCanvasElement) {
             if (element.pos != undefined) {
                 return this.isMoved(element.pos);
             }
-            return this.isParentCanvasImplicitelyMoved(element);
+            return this.isParentCanvasImplicitlyMoved(element);
         } else if (element instanceof SRelativePoint) {
             return this.isMoved(element.target);
         } else if (element instanceof SLinePoint) {
@@ -156,7 +156,7 @@ export class MovedElementsSelector {
                 return this.isCanvasConnectionSegmentMoved(lineProvider, affectedSegment);
             }
         } else if (element instanceof SAbsolutePoint) {
-            return this.isParentCanvasImplicitelyMoved(element);
+            return this.isParentCanvasImplicitlyMoved(element);
         }
         return false;
     }
@@ -198,7 +198,7 @@ export class MovedElementsSelector {
      * @param element the element to check
      * @returns true if the element is moved implicitly by a parent canvas, otherwise false
      */
-    private isParentCanvasImplicitelyMoved(element: SCanvasElement | SAbsolutePoint): boolean {
+    private isParentCanvasImplicitlyMoved(element: SCanvasElement | SAbsolutePoint): boolean {
         const canvas = element.parent as SCanvas;
         const isCanvasMoved = this.isMovedLookup.get(canvas.id);
         if (isCanvasMoved != undefined) {
