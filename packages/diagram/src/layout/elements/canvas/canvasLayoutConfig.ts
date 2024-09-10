@@ -104,7 +104,7 @@ export class CanvasLayoutConfig extends StyledElementLayoutConfig {
      * The model was chosen as it maps relatively well to the bounding box of a canvas element and marker.
      *
      * @param pos the position of the element
-     * @param rotation the rotation of the element
+     * @param rotation the rotation of the element in degrees
      * @param x the relative x position
      * @param y the relative y position
      * @param width the width of the element
