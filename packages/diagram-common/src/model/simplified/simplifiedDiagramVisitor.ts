@@ -15,7 +15,9 @@ import { Ellipse } from "../elements/ellipse.js";
 
 /**
  * Helper class to simplify a diagram.
- * Removes elements only required for graphical interaction.
+ * A simplified diagram is a diagram where the canvas layout is evaluated,
+ * connections and markers are converted to canvas elements,
+ * and all canvas points are removed.
  */
 export class DiagramSimplifier {
     /**
