@@ -96,7 +96,7 @@ onBeforeMount(() => {
 </script>
 <style scoped>
 .main {
-    height: 100vh;
+    height: 100svh;
     display: flex;
     flex-direction: column;
 }
@@ -155,5 +155,11 @@ onBeforeMount(() => {
 
 .download-flyout {
     margin-right: -4px;
+}
+</style>
+<style>
+body {
+    height: 100svh;
+    min-height: unset;
 }
 </style>
