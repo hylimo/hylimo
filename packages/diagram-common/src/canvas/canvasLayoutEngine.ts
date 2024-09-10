@@ -42,6 +42,20 @@ interface Connection {
 }
 
 /**
+ * A point with a context
+ */
+interface PointWithContext {
+    /**
+     * The point
+     */
+    point: Point;
+    /**
+     * The context of the point
+     */
+    context: string;
+}
+
+/**
  * Helper to layout elements of a canvas
  */
 export abstract class CanvasLayoutEngine {
@@ -49,7 +63,7 @@ export abstract class CanvasLayoutEngine {
      * Cache of points
      * Each entry contains the point and the id of the canvas it is part of
      */
-    private readonly points: Map<string, [Point, string]> = new Map();
+    private readonly points: Map<string, PointWithContext> = new Map();
 
     /**
      * Segment engines to use
@@ -294,7 +308,7 @@ export abstract class CanvasLayoutEngine {
         if (!this.points.has(id)) {
             this.points.set(id, this.getPointInternal(id));
         }
-        const [point, pointContext] = this.points.get(id)!;
+        const { point, context: pointContext } = this.points.get(id)!;
         if (pointContext == context) {
             return point;
         }
@@ -304,12 +318,11 @@ export abstract class CanvasLayoutEngine {
 
     /**
      * Gets the point a canvas point is positioned at.
-     * Can use the parent canvas of the point, or an arbitrary subcanvas as context.
      *
      * @param id the id of the point or canvas element to get
      * @returns the point and the id of the canvas to which the point is relative to
      */
-    private getPointInternal(pointId: string): [Point, string] {
+    private getPointInternal(pointId: string): PointWithContext {
         const element = this.getElement(pointId);
         const context = this.getParentElement(pointId);
         let point: Point;
@@ -334,7 +347,7 @@ export abstract class CanvasLayoutEngine {
         } else {
             throw new Error(`Unknown point type: ${element.type}`);
         }
-        return [point, context];
+        return { point, context };
     }
 
     /**
