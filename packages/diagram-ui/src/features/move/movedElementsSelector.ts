@@ -61,20 +61,17 @@ export class MovedElementsSelector {
         while (currentElements.size > 0) {
             const newElements = new Set<SCanvasPoint | SCanvasElement>();
             for (const element of currentElements) {
+                this.movedElements.add(element);
                 if (element instanceof SCanvasElement) {
-                    this.movedElements.add(element);
                     if (element.pos != undefined) {
                         newElements.add(this.index.getById(element.pos) as SCanvasPoint | SCanvasElement);
                     }
                 } else if (element instanceof SRelativePoint) {
                     const editable =
                         DefaultEditTypes.MOVE_X in element.edits && DefaultEditTypes.MOVE_Y in element.edits;
-                    this.movedElements.add(element);
                     if (!editable) {
                         newElements.add(this.index.getById(element.target) as SCanvasPoint | SCanvasElement);
                     }
-                } else {
-                    this.movedElements.add(element);
                 }
             }
             currentElements = newElements;
