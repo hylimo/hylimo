@@ -1,6 +1,5 @@
 import { inject } from "inversify";
 import {
-    LinePoint,
     Math2D,
     EditSpecification,
     Point,
@@ -10,7 +9,6 @@ import {
 } from "@hylimo/diagram-common";
 import {
     findParentByFeature,
-    IModelIndex,
     isMoveable,
     isSelectable,
     MouseListener,
@@ -33,11 +31,12 @@ import { findViewportZoom } from "../../base/findViewportZoom.js";
 import { CanvasElementView, ResizePosition } from "../../views/canvas/canvasElementView.js";
 import { RotationHandler } from "./rotationHandler.js";
 import { SCanvasConnection } from "../../model/canvas/sCanvasConnection.js";
-import { SCanvasContent } from "../../model/canvas/sCanvasContent.js";
 import { SRoot } from "../../model/sRoot.js";
 import { ElementsGroupedBySize, ResizeHandler } from "./resizeHandler.js";
 import { SCanvasAxisAlignedSegment } from "../../model/canvas/sCanvasAxisAlignedSegment.js";
 import { AxisAligedSegmentEditHandler } from "./axisAlignedSegmentEditHandler.js";
+import { Matrix, compose, translate, applyToPoint, inverse, decomposeTSR, scale, rotate } from "transformation-matrix";
+import { MovedElementsSelector } from "./movedElementsSelector.js";
 
 /**
  * The maximum number of updates that can be performed on the same revision.
@@ -56,13 +55,23 @@ export class MoveMouseListener extends MouseListener {
     @inject(TYPES.TransactionIdProvider) transactionIdProvider!: TransactionIdProvider;
 
     /**
-     * Position where mouseDown occured
+     * The context of the current move
      */
-    private startPosition?: Point;
-    /**
-     * The target of the initial event
-     */
-    private targetElement?: Element;
+    private context?: {
+        /**
+         * A transformation matrix which directly outputs dx/dy in the parent canvas coordinate system.
+         */
+        transformationMatrix: Matrix;
+        /**
+         * The target of the initial event
+         */
+        targetElement: Element;
+        /**
+         * The id of the canvas in which the edit is performed
+         */
+        canvasContext: string;
+    };
+
     /**
      * Current moveHandler.
      * If null, creating a handler for the current move is not possible.
@@ -77,21 +86,29 @@ export class MoveMouseListener extends MouseListener {
         if (event.button === 0 && !(event.ctrlKey || event.altKey)) {
             const moveableTarget = findParentByFeature(target, isMoveable);
             if (moveableTarget != undefined) {
-                this.startPosition = { x: event.pageX, y: event.pageY };
-                this.targetElement = event.target as Element | undefined;
+                const parentCanvas = findParentByFeature(target, (element) => element instanceof SCanvas);
+                if (parentCanvas == undefined) {
+                    throw new Error("Cannot move an element without a parent canvas");
+                }
+                const matrix = parentCanvas.getMouseTransformationMatrix();
+                const initialPoint = applyToPoint(matrix, { x: event.pageX, y: event.pageY });
+                this.context = {
+                    transformationMatrix: compose(translate(-initialPoint.x, -initialPoint.y), matrix),
+                    targetElement: event.target as Element,
+                    canvasContext: parentCanvas.id
+                };
             } else {
-                this.startPosition = undefined;
-                this.targetElement = undefined;
+                this.context = undefined;
             }
         }
         return [];
     }
 
     override mouseMove(target: SModelElementImpl, event: MouseEvent): Action[] {
-        if (this.startPosition) {
+        if (this.context != undefined) {
             const root = target.root as SRoot;
             if (this.moveHandler === undefined) {
-                this.moveHandler = this.createHandler(target, this.targetElement);
+                this.moveHandler = this.createHandler(target, this.context.targetElement);
                 root.sequenceNumber = 0;
                 this.sequenceNumber = 0;
             }
@@ -133,7 +150,7 @@ export class MoveMouseListener extends MouseListener {
      */
     private commitMove(target: SModelElementImpl, event: MouseEvent): Action[] {
         if (this.moveHandler === undefined || this.moveHandler === null) {
-            this.startPosition = undefined;
+            this.context = undefined;
             this.moveHandler = undefined;
             return [];
         }
@@ -146,7 +163,7 @@ export class MoveMouseListener extends MouseListener {
             event
         );
         this.moveHandler = undefined;
-        this.startPosition = undefined;
+        this.context = undefined;
         return [result];
     }
 
@@ -158,14 +175,10 @@ export class MoveMouseListener extends MouseListener {
      * @return the calculated translation
      */
     private calculateTranslation(target: SModelElementImpl, event: MouseEvent): Point {
-        if (this.startPosition == undefined) {
+        if (this.context == undefined) {
             throw new Error("Cannot calculate translation without a start position");
         }
-        const zoom = findViewportZoom(target);
-        return {
-            x: (event.pageX - this.startPosition.x) / zoom,
-            y: (event.pageY - this.startPosition.y) / zoom
-        };
+        return applyToPoint(this.context.transformationMatrix, { x: event.pageX, y: event.pageY });
     }
 
     /**
@@ -319,9 +332,9 @@ export class MoveMouseListener extends MouseListener {
         }
         let scaleX: number | undefined = undefined;
         if (classList.contains(ResizePosition.LEFT)) {
-            scaleX = target.width / target.x;
+            scaleX = target.width / target.dx;
         } else if (classList.contains(ResizePosition.RIGHT)) {
-            scaleX = target.width / (target.width + target.x);
+            scaleX = target.width / (target.width + target.dx);
         }
         if (scaleX == undefined) {
             return undefined;
@@ -350,9 +363,9 @@ export class MoveMouseListener extends MouseListener {
         }
         let scaleY: number | undefined = undefined;
         if (classList.contains(ResizePosition.TOP)) {
-            scaleY = target.height / target.y;
+            scaleY = target.height / target.dy;
         } else if (classList.contains(ResizePosition.BOTTOM)) {
-            scaleY = target.height / (target.height + target.y);
+            scaleY = target.height / (target.height + target.dy);
         }
         if (scaleY == undefined) {
             return undefined;
@@ -376,7 +389,7 @@ export class MoveMouseListener extends MouseListener {
         const origin = target.position;
         const distance = CanvasElementView.ROTATE_ICON_DISTANCE / findViewportZoom(target);
         const angleRad = (target.rotation / 180) * Math.PI;
-        const handlePosition = Math2D.add(origin, Math2D.rotate({ x: 0, y: target.y - distance }, angleRad));
+        const handlePosition = Math2D.add(origin, Math2D.rotate({ x: 0, y: target.dy - distance }, angleRad));
         return new RotationHandler(target.id, this.transactionIdProvider.generateId(), origin, handlePosition);
     }
 
@@ -388,257 +401,126 @@ export class MoveMouseListener extends MouseListener {
      * @returns the move handler if move is supported, otherwise null
      */
     private createMoveHandler(target: SModelElementImpl): MoveHandler | null {
-        const index = target.root.index;
         const selected = this.getSelectedElements(target.root).filter(
             (element) => element instanceof SCanvasPoint || element instanceof SCanvasElement
         ) as (SCanvasPoint | SCanvasElement)[];
         if (selected.length === 0) {
             return null;
         }
-        const canvases = new Set(selected.map((element) => element.parent));
-        if (canvases.size > 1) {
-            return null;
-        }
-        const canvas = canvases.values().next().value;
-        if (!(canvas instanceof SCanvas)) {
-            return null;
-        }
-        const { points, elements } = this.computePoints(selected, index);
-        const { points: pointsToMove, elements: elementsToMove } = this.getPointsAndElementsToMove(
-            points,
-            index,
-            elements
-        );
 
-        const editSpecifications = [...pointsToMove, ...elementsToMove].flatMap((element) => {
-            const entries: EditSpecificationEntry[] = [];
+        const { movedElements, hasConflict } = new MovedElementsSelector(selected, target.index);
+        if (hasConflict) {
+            return null;
+        }
+        const linePoints: SLinePoint[] = [];
+        const translateableElements: (SCanvasElement | SRelativePoint | SAbsolutePoint)[] = [];
+        for (const element of movedElements) {
             if (element instanceof SLinePoint) {
-                entries.push(element.edits[DefaultEditTypes.MOVE_LPOS_POS]);
-                if (element.distance != undefined) {
-                    entries.push(element.edits[DefaultEditTypes.MOVE_LPOS_DIST]);
-                }
+                linePoints.push(element);
             } else {
-                entries.push(element.edits[DefaultEditTypes.MOVE_X], element.edits[DefaultEditTypes.MOVE_Y]);
+                translateableElements.push(element as SCanvasElement | SRelativePoint | SAbsolutePoint);
             }
-            return entries;
-        });
+        }
+        if (linePoints.length > 0) {
+            if (linePoints.length > 1 || translateableElements.length > 0) {
+                return null;
+            }
+            return this.createLineMoveHandler(linePoints[0]);
+        }
+        return this.createTranslationMoveHandler(translateableElements);
+    }
+
+    /**
+     * Creates the line move handler for the given line point.
+     *
+     * @param linePoint the point to move
+     * @returns the created move handler or null if no handler could be created
+     */
+    private createLineMoveHandler(linePoint: SLinePoint): MoveHandler | null {
+        const editSpecifications: EditSpecificationEntry[] = [];
+        editSpecifications.push(linePoint.edits[DefaultEditTypes.MOVE_LPOS_POS]);
+        if (linePoint.distance != undefined) {
+            editSpecifications.push(linePoint.edits[DefaultEditTypes.MOVE_LPOS_DIST]);
+        }
         if (!EditSpecification.isConsistent([editSpecifications])) {
             return null;
         }
-        return this.createMoveHandlerForPointsAndElements(pointsToMove, elementsToMove);
+        const root = linePoint.root as SRoot;
+        return new LineMoveHandler(
+            linePoint.id,
+            this.transactionIdProvider.generateId(),
+            root.layoutEngine.getPoint(linePoint.id, this.context!.canvasContext),
+            linePoint.edits[DefaultEditTypes.MOVE_LPOS_DIST] == undefined,
+            linePoint.segment != undefined,
+            root.layoutEngine.layoutLine(
+                root.index.getById(linePoint.lineProvider) as SCanvasConnection | SCanvasElement,
+                this.context!.canvasContext
+            )
+        );
     }
 
     /**
-     * Creates the move handler for moving the given points and elements.
-     * If both line points and translateable elements (absolute & relative points, canvas elements) are given, null is returned.
-     * If multiple line points are given, null is returned.
-     * Otherwise, the corresponding handler is created and returned.
+     * Creates the translation move handler for the given points and elements.
      *
-     * @param pointsToMove the points to move
      * @param elements the elements to move
      * @returns the created move handler or null if no handler could be created
      */
-    private createMoveHandlerForPointsAndElements(
-        pointsToMove: SCanvasPoint[],
-        elements: Set<SCanvasElement>
+    private createTranslationMoveHandler(
+        elements: (SCanvasElement | SAbsolutePoint | SRelativePoint)[]
     ): MoveHandler | null {
-        let hasTranslatablePoint = elements.size > 0;
-        let hasLinePoint = false;
-        for (const point of pointsToMove) {
-            if (point instanceof SRelativePoint || point instanceof SAbsolutePoint) {
-                hasTranslatablePoint = true;
-            } else if (point instanceof SLinePoint) {
-                hasLinePoint = true;
-            }
-        }
-        if (hasLinePoint && hasTranslatablePoint) {
+        if (elements.length == 0) {
             return null;
         }
-        if (hasTranslatablePoint) {
-            return new TranslationMoveHandler(
-                [...pointsToMove, ...elements].map((point) => point.id),
-                this.transactionIdProvider.generateId()
-            );
-        } else if (hasLinePoint) {
-            if (pointsToMove.length !== 1) {
-                return null;
-            }
-            const linePoint = pointsToMove[0] as SLinePoint;
-            return new LineMoveHandler(
-                linePoint.id,
-                this.transactionIdProvider.generateId(),
-                linePoint.position,
-                linePoint.edits[DefaultEditTypes.MOVE_LPOS_DIST] == undefined,
-                linePoint.segment != undefined,
-                linePoint.line
-            );
-        } else {
-            return null;
-        }
-    }
-
-    /**
-     * Gets the points and elements which are required to move so that points are moved as a whole.
-     * Returns the points which should be moved, and elements without points which should be moved
-     *
-     * @param points the points to move
-     * @param index used for point lookup
-     * @param elements elements which are moved by creating a new point
-     * @returns the points and elements which are required to move to move the given points
-     */
-    private getPointsAndElementsToMove(
-        points: Set<SCanvasPoint>,
-        index: IModelIndex,
-        elements: Set<SCanvasElement>
-    ): { points: SCanvasPoint[]; elements: Set<SCanvasElement> } {
-        const movedPoints = new Set(points);
-        const movedElements = new Set(elements);
-        let currentPoints: Set<SCanvasPoint> = points;
-        do {
-            const newPoints = new Set<SCanvasPoint>();
-            for (const point of currentPoints) {
-                const editable = DefaultEditTypes.MOVE_X in point.edits && DefaultEditTypes.MOVE_Y in point.edits;
-                if (point instanceof SRelativePoint && !editable) {
-                    let targetPoint: SCanvasPoint | undefined;
-                    const target = index.getById(point.target) as SCanvasPoint | SCanvasElement;
-                    if (target instanceof SCanvasPoint) {
-                        targetPoint = target;
-                    } else {
-                        if (target.pos != undefined) {
-                            targetPoint = index.getById(target.pos) as SCanvasPoint;
-                        } else {
-                            movedElements.add(target);
-                        }
-                    }
-                    if (targetPoint != undefined) {
-                        newPoints.add(targetPoint);
-                        movedPoints.add(targetPoint);
-                    }
-                }
-            }
-            currentPoints = newPoints;
-        } while (currentPoints.size > 0);
-
-        const toMove = [...movedPoints].filter(
-            (point) => !this.isPointImplicitelyMoved(point, index, movedPoints, elements)
-        );
-        return { points: toMove, elements: movedElements };
-    }
-
-    /**
-     * Computes the points to move based on the selected elements.
-     * Returns the points which are moved, and elements without points which are moved
-     *
-     * @param selected the selected elements
-     * @param index index for element lookup
-     * @returns the extracted points and elements without a position
-     */
-    private computePoints(
-        selected: (SCanvasElement | SCanvasPoint)[],
-        index: IModelIndex
-    ): { points: Set<SCanvasPoint>; elements: Set<SCanvasElement> } {
-        const points = new Set<SCanvasPoint>();
-        const elements = new Set<SCanvasElement>();
-        selected.map((element) => {
-            if (element instanceof SCanvasPoint) {
-                points.add(element);
-            } else if (element instanceof SCanvasElement) {
-                if (element.pos != undefined) {
-                    points.add(index.getById(element.pos) as SCanvasPoint);
-                } else {
-                    elements.add(element);
-                }
-            } else {
-                throw new Error("This should not be reachable");
-            }
+        const entries = this.computeTranslationMoveEntries(elements);
+        const editSpecifications = entries.map((entry) => {
+            return entry.elements.flatMap((element) => {
+                return [element.edits[DefaultEditTypes.MOVE_X], element.edits[DefaultEditTypes.MOVE_Y]];
+            });
         });
-        return { points, elements };
+        if (!EditSpecification.isConsistent(editSpecifications)) {
+            return null;
+        }
+        return new TranslationMoveHandler(
+            entries.map((entry) => ({
+                transformation: entry.transformation,
+                elements: entry.elements.map((element) => element.id)
+            })),
+            this.transactionIdProvider.generateId()
+        );
     }
 
     /**
-     * Checks if a point is moved.
+     * Computes the translation move entries for the given elements.
+     * Groups the elements by their transformation matrix (ignoring translation).
      *
-     * @param point the point to check
-     * @param index index for element lookup
-     * @param movedPoints all points which are moved
-     * @param movedElements elements which are moved without a position
-     * @returns true if the point is moved, otherwise false
+     * @param elements the elements to move
+     * @returns the translation move entries
      */
-    private isPointMoved(
-        point: SCanvasPoint,
-        index: IModelIndex,
-        movedPoints: Set<SCanvasPoint>,
-        movedElements: Set<SCanvasElement>
-    ): boolean {
-        if (movedPoints.has(point)) {
-            return true;
-        } else {
-            return this.isPointImplicitelyMoved(point, index, movedPoints, movedElements);
-        }
-    }
-
-    /**
-     * Checks if an element is moved.
-     * An element is moved if it has a position and the position is moved, or if it is in the set of moved elements.
-     *
-     * @param element the element to check
-     * @param index index for element lookup
-     * @param movedPoints all points which are moved
-     * @param movedElements elements which are moved without a position
-     * @returns true if the element is moved, otherwise false
-     */
-    private isElementMoved(
-        element: SCanvasElement,
-        index: IModelIndex,
-        movedPoints: Set<SCanvasPoint>,
-        movedElements: Set<SCanvasElement>
-    ): boolean {
-        if (element.pos != undefined) {
-            return this.isPointMoved(index.getById(element.pos) as SCanvasPoint, index, movedPoints, movedElements);
-        } else {
-            return movedElements.has(element);
-        }
-    }
-
-    /**
-     * Checks if a point is a relative point and if the target is moved.
-     *
-     * @param point the point to check
-     * @param index index for element lookup
-     * @param movedPoints all points which are moved
-     * @param movedElements elements which are moved without a position
-     * @returns true if the point is a relative point and the target is moved, otherwise false
-     */
-    private isPointImplicitelyMoved(
-        point: SCanvasPoint,
-        index: IModelIndex,
-        movedPoints: Set<SCanvasPoint>,
-        movedElements: Set<SCanvasElement>
-    ): boolean {
-        if (point instanceof SRelativePoint) {
-            const target = index.getById(point.target) as SCanvasPoint | SCanvasElement;
-            if (target instanceof SCanvasPoint) {
-                return this.isPointMoved(target, index, movedPoints, movedElements);
-            } else {
-                return this.isElementMoved(target, index, movedPoints, movedElements);
+    private computeTranslationMoveEntries(
+        elements: (SCanvasElement | SRelativePoint | SAbsolutePoint)[]
+    ): TranslationMoveEntry[] {
+        const entries = new Map<string, TranslationMoveEntry>();
+        const root = elements[0].root as SRoot;
+        const currentMatrix = root.layoutEngine.localToAncestor(this.context!.canvasContext, root.id);
+        const transformationLookup = new Map<string, string>();
+        for (const element of elements) {
+            const parentCanvas = findParentByFeature(element, (element) => element instanceof SCanvas) as SCanvas;
+            if (!transformationLookup.has(parentCanvas.id)) {
+                const transformationMatrix = root.layoutEngine.localToAncestor(parentCanvas.id, root.id);
+                const matrix = compose(inverse(transformationMatrix), currentMatrix);
+                const { scale: tsrScale, rotation: tsrRotation } = decomposeTSR(matrix);
+                const key = `${tsrRotation.angle} ${tsrScale.sx} ${tsrScale.sy}`;
+                transformationLookup.set(parentCanvas.id, key);
+                if (!entries.has(key)) {
+                    entries.set(key, {
+                        transformation: compose(scale(tsrScale.sx, tsrScale.sy), rotate(tsrRotation.angle)),
+                        elements: []
+                    });
+                }
             }
-        } else if (point instanceof SLinePoint) {
-            const lineProviderId = point.lineProvider;
-            const lineProvider = index.getById(lineProviderId) as SCanvasContent;
-            if (lineProvider instanceof SCanvasElement) {
-                return this.isElementMoved(lineProvider, index, movedPoints, movedElements);
-            }
-            if (lineProvider instanceof SCanvasConnection) {
-                const affectedSegment = LinePoint.calcSegmentIndex(point.pos, lineProvider.segments.length);
-                const points = [lineProvider.start, ...lineProvider.segments.map((segment) => segment.end)];
-                const relevantPoints = [
-                    index.getById(points[affectedSegment]),
-                    index.getById(points[affectedSegment + 1])
-                ] as SCanvasPoint[];
-                return relevantPoints.every((point) => this.isPointMoved(point, index, movedPoints, movedElements));
-            }
+            entries.get(transformationLookup.get(parentCanvas.id)!)!.elements.push(element);
         }
-        return false;
+        return [...entries.values()];
     }
 
     /**
@@ -650,4 +532,18 @@ export class MoveMouseListener extends MouseListener {
     private getSelectedElements(root: SModelRootImpl): SModelElementImpl[] {
         return [...root.index.all().filter((child) => isSelectable(child) && child.selected)];
     }
+}
+
+/**
+ * Entry for a translation move operation
+ */
+export interface TranslationMoveEntry {
+    /**
+     * The transformation applied to the dx and dy values
+     */
+    transformation: Matrix;
+    /**
+     * The elements to move
+     */
+    elements: (SCanvasElement | SRelativePoint | SAbsolutePoint)[];
 }

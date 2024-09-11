@@ -17,7 +17,7 @@ export class RelativePointView extends CanvasPointView<SRelativePoint> {
     ): VNode | undefined {
         const position = model.position;
         const target = model.targetPosition;
-        const pointRadius = SRoot.POINT_SIZE / (model.root as SRoot).zoom / 2;
+        const pointRadius = SRoot.POINT_SIZE / model.root.zoom / 2;
         const startY = target.y + Math.sign(position.y - target.y) * pointRadius;
         const endX = position.x - Math.sign(position.x - target.x) * pointRadius;
         let endY: number;

@@ -1,9 +1,8 @@
-import { LineEngine, LinePoint, Point, TransformedLine } from "@hylimo/diagram-common";
-import { SModelElementImpl } from "sprotty";
+import { LineEngine, LinePoint, Point } from "@hylimo/diagram-common";
 import { LinearAnimatable } from "../../features/animation/model.js";
-import { isLineProvider } from "../../features/layout/lineProvider.js";
 import { SCanvasPoint } from "./sCanvasPoint.js";
-import { identity } from "transformation-matrix";
+import { SCanvasConnection } from "./sCanvasConnection.js";
+import { SCanvasElement } from "./sCanvasElement.js";
 
 const linePointAnimatedFields = new Set(["pos"]);
 
@@ -33,35 +32,20 @@ export class SLinePoint extends SCanvasPoint implements LinePoint, LinearAnimata
      * Cached position without distance
      */
     rootPosition!: Point;
-    /**
-     * Cached line
-     */
-    line!: TransformedLine;
 
     constructor() {
         super();
 
-        this.cachedProperty<TransformedLine>("line", () => {
-            const lineProvider = this.root.index.getById(this.lineProvider) as SModelElementImpl;
-            if (isLineProvider(lineProvider)) {
-                return lineProvider.line;
-            } else {
-                return {
-                    line: {
-                        start: Point.ORIGIN,
-                        segments: []
-                    },
-                    transform: identity()
-                };
-            }
-        });
         this.cachedProperty<Point>("rootPosition", () => {
-            return LineEngine.DEFAULT.getPoint(this.pos, this.segment, 0, this.line);
+            const line = this.root.layoutEngine.layoutLine(
+                this.index.getById(this.lineProvider) as SCanvasConnection | SCanvasElement,
+                this.parent.id
+            );
+            return LineEngine.DEFAULT.getPoint(this.pos, this.segment, 0, line);
         });
     }
 
     override get dependencies(): string[] {
-        // maybe TODO
         return [];
     }
 }

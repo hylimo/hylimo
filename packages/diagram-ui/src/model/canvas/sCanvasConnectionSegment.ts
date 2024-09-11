@@ -22,7 +22,7 @@ export abstract class SCanvasConnectionSegment extends SElement {
     constructor() {
         super();
         this.cachedProperty<Point>("endPosition", () => {
-            const target = this.root.index.getById(this.end) as SCanvasPoint;
+            const target = this.index.getById(this.end) as SCanvasPoint;
             return target.position;
         });
     }

@@ -1,7 +1,7 @@
 import { FullObject, numberType } from "@hylimo/core";
 import { Size, Point, Element, Marker } from "@hylimo/diagram-common";
 import { ContentCardinality, LayoutElement, SizeConstraints } from "../../layoutElement.js";
-import { Layout } from "../../layoutEngine.js";
+import { Layout } from "../../engine/layout.js";
 import { StyledElementLayoutConfig } from "../styledElementLayoutConfig.js";
 import { elementType } from "../../../module/base/types.js";
 
@@ -47,7 +47,7 @@ export class MarkerLayoutConfig extends StyledElementLayoutConfig {
             id,
             ...size,
             lineStart: element.styles.lineStart ?? 0,
-            children: layout.layout(content, { x: -size.width, y: -size.height / 2 }, size, `${id}_0`),
+            children: layout.layout(content, { x: -size.width, y: -size.height / 2 }, size),
             pos: element.position,
             edits: element.edits
         };

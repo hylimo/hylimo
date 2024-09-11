@@ -1,6 +1,6 @@
 import { Size, Point, Element, CanvasLineSegment } from "@hylimo/diagram-common";
 import { LayoutElement } from "../../layoutElement.js";
-import { Layout } from "../../layoutEngine.js";
+import { Layout } from "../../engine/layout.js";
 import { CanvasConnectionSegmentLayoutConfig } from "./canvasConnectionSegmentLayoutConfig.js";
 
 /**
@@ -18,7 +18,7 @@ export class CanvasLineSegmentLayoutConfig extends CanvasConnectionSegmentLayout
             id,
             type: CanvasLineSegment.TYPE,
             children: [],
-            end: this.getContentId(element, "end"),
+            end: this.getContentId(layout, element, "end"),
             edits: element.edits
         };
         return [result];

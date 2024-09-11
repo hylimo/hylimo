@@ -1,24 +1,28 @@
-import { Canvas, CanvasConnection, CanvasElement, CanvasLayoutEngine, CanvasPoint } from "@hylimo/diagram-common";
-import { SChildElementImpl } from "sprotty";
+import { Canvas } from "@hylimo/diagram-common";
 import { SLayoutedElement } from "../sLayoutedElement.js";
 import { PointVisibilityManager } from "./pointVisibilityManager.js";
-import { SCanvasPoint } from "./sCanvasPoint.js";
-import { SCanvasConnection } from "./sCanvasConnection.js";
-import { SCanvasElement } from "./sCanvasElement.js";
+import { LinearAnimatable } from "../../features/animation/model.js";
+import { decomposeTSR } from "transformation-matrix";
+
+/**
+ * Animated fields for SCanvas
+ */
+const canvasAnimatedFields = new Set(["dx", "dy"]);
 
 /**
  * Canvas model element
  */
-export class SCanvas extends SLayoutedElement implements Canvas {
+export class SCanvas extends SLayoutedElement implements Canvas, LinearAnimatable {
     override type!: typeof Canvas.TYPE;
     /**
-     * CanvasConnectionlayoutEngine children can use
+     * The x offset applied to its coordinate system
      */
-    readonly layoutEngine!: CanvasLayoutEngine;
+    dx!: number;
     /**
-     * Lookup of children by id
+     * The y offset applied to its coordinate system
      */
-    private childrenById?: Map<string, SChildElementImpl>;
+    dy!: number;
+    readonly animatedFields = canvasAnimatedFields;
 
     /**
      * Internal cached version of the PointVisibilityManager
@@ -35,26 +39,18 @@ export class SCanvas extends SLayoutedElement implements Canvas {
         return this._pointVisibilityManager;
     }
 
+    /**
+     * The global rotation of the canvas
+     * (used for UI elements which depend on global roation, e.g. cursor icons)
+     */
+    globalRotation!: number;
+
     constructor() {
         super();
-        this.cachedProperty<CanvasLayoutEngine>("layoutEngine", () => new SCanvasLayoutEngine(this));
-    }
-}
-
-/**
- * CanvasLayoutEngine implementation for SCanvas
- */
-class SCanvasLayoutEngine extends CanvasLayoutEngine {
-    /**
-     * Creates a new SCanvasLayoutEngine based on the given canvas
-     *
-     * @param canvas the canvas to layout elements of
-     */
-    constructor(private readonly canvas: SCanvas) {
-        super();
-    }
-
-    override getElement(id: string): CanvasPoint | CanvasElement | CanvasConnection {
-        return this.canvas.index.getById(id) as SCanvasPoint | SCanvasElement | SCanvasConnection;
+        this.cachedProperty<number>("globalRotation", () => {
+            const localToRoot = this.root.layoutEngine.localToAncestor(this.id, this.root.id);
+            const { rotation } = decomposeTSR(localToRoot);
+            return rotation.angle * (180 / Math.PI);
+        });
     }
 }

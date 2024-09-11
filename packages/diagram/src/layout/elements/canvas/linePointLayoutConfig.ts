@@ -20,7 +20,7 @@ import {
     DefaultEditTypes
 } from "@hylimo/diagram-common";
 import { LayoutElement } from "../../layoutElement.js";
-import { Layout } from "../../layoutEngine.js";
+import { Layout } from "../../engine/layout.js";
 import { CanvasPointLayoutConfig } from "./canvasPointLayoutConfig.js";
 import { elementType } from "../../../module/base/types.js";
 
@@ -75,8 +75,7 @@ export class LinePointLayoutConfig extends CanvasPointLayoutConfig {
     override layout(layout: Layout, element: LayoutElement, position: Point, size: Size, id: string): Element[] {
         const positionField = element.element.getLocalFieldOrUndefined("_pos")?.value;
         const distanceValue = element.element.getLocalFieldOrUndefined("_distance");
-        const lineProvider = this.getContentId(
-            element,
+        const lineProvider = layout.getElementId(
             element.element.getLocalFieldOrUndefined("lineProvider")!.value as FullObject
         );
         let pos: number;

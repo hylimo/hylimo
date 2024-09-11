@@ -10,7 +10,7 @@ import {
     str,
     toExecutable
 } from "@hylimo/core";
-import { LayoutEngine } from "./layout/layoutEngine.js";
+import { LayoutEngine } from "./layout/engine/layoutEngine.js";
 import { DiagramConfig } from "@hylimo/diagram-common";
 import { LayoutedDiagram } from "./layout/diagramLayoutResult.js";
 

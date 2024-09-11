@@ -1,16 +1,24 @@
 import { Line } from "../../../line/model/line.js";
 import { Element } from "../base/element.js";
-import { LayoutedElement } from "../base/layoutedElement.js";
+import { SizedElement } from "../base/sizedElement.js";
 
 /**
  * Moveable and resizeable element in a canvas
  */
-export interface CanvasElement extends LayoutedElement {
+export interface CanvasElement extends SizedElement {
     type: typeof CanvasElement.TYPE;
     /**
      * The id of the CanvasPoint which is used as start
      */
     pos?: string;
+    /**
+     * The x offset, applied before rotation
+     */
+    dx: number;
+    /**
+     * The y offset, applied before rotation
+     */
+    dy: number;
     /**
      * The rotation in degrees
      */

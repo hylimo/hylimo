@@ -1,6 +1,8 @@
-import { FontFamilyConfig, Point, convertFontsToCssStyle } from "@hylimo/diagram-common";
+import { FontFamilyConfig, convertFontsToCssStyle } from "@hylimo/diagram-common";
 import { ModelIndexImpl, ViewportRootElementImpl } from "sprotty";
 import { SCanvasAxisAlignedSegment } from "./canvas/sCanvasAxisAlignedSegment.js";
+import { SCanvasLayoutEngine } from "./canvas/sCanvasLayoutEngine.js";
+import { Matrix, compose, translate, scale } from "transformation-matrix";
 
 /**
  * Root element.
@@ -26,22 +28,39 @@ export class SRoot extends ViewportRootElementImpl {
      */
     sequenceNumber = 0;
 
+    /**
+     * The layout engine for the canvases
+     */
+    private currentLayoutEngine: SCanvasLayoutEngine | undefined;
+    /**
+     * The version of the layout engine
+     */
+    private layoutEngineVersion = -1;
+
     constructor(index = new ModelIndexImpl()) {
         super(index);
     }
 
     /**
-     * Gets the coordinates of a mouse event
-     *
-     * @param event the mouse event
-     * @returns the coordinates of the event
+     * Gets the current layout engine
      */
-    getEventCoordinates(event: MouseEvent): Point {
+    get layoutEngine(): SCanvasLayoutEngine {
+        if (this.currentLayoutEngine == undefined || this.layoutEngineVersion != this.changeRevision) {
+            this.currentLayoutEngine = new SCanvasLayoutEngine(this);
+            this.layoutEngineVersion = this.changeRevision;
+        }
+        return this.currentLayoutEngine;
+    }
+
+    /**
+     * Gets a transformation matrix which converts from the global coordinate system
+     * to the coordinate system with the scroll and zoom applied.
+     *
+     * @returns the transformation matrix
+     */
+    getZoomScrollTransformationMatrix(): Matrix {
         const rect = this.canvasBounds;
-        return {
-            x: (event.clientX - rect.x) / this.zoom + this.scroll.x,
-            y: (event.clientY - rect.y) / this.zoom + this.scroll.y
-        };
+        return compose(translate(this.scroll.x, this.scroll.y), scale(1 / this.zoom), translate(-rect.x, -rect.y));
     }
 
     /**

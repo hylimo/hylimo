@@ -63,7 +63,9 @@ export class LineEngine {
                 segmentIndex = i;
                 const normal = engine.getNormalVector(candidate.position, segment, startPosition);
                 const d2 = normal.x ** 2 + normal.y ** 2;
-                distance = ((point.x - candidate.point.x) * normal.x + (point.y - candidate.point.y) * normal.y) / d2;
+                distance =
+                    ((localPoint.x - candidate.point.x) * normal.x + (localPoint.y - candidate.point.y) * normal.y) /
+                    d2;
             }
             startPosition = segment.end;
         }

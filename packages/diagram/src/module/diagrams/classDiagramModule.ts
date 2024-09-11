@@ -264,6 +264,11 @@ const scopeExpressions: ExecutableExpression[] = [
         fun(
             `
                 (name, optionalCallback, keywords) = args
+
+                callback = optionalCallback ?? {}
+                result = object(contents = list())
+                callback.callWithScope(result)
+
                 packageElement = canvasElement(
                     class = list("package-element"),
                     content = vbox(
@@ -278,14 +283,13 @@ const scopeExpressions: ExecutableExpression[] = [
                                 class = list("package")
                             ),
                             rect(
+                                content = canvas(contents = result.contents, class = list("package-canvas")),
                                 class = list("package-body")
                             )
                         )
                     )
                 )
-                if(optionalCallback != null) {
-                    optionalCallback()
-                }
+                scope.internal.registerInDiagramScope(name, packageElement)
                 packageElement
             `
         )
@@ -378,9 +382,7 @@ const scopeExpressions: ExecutableExpression[] = [
                     class = list("class-element")
                 )
                 targetScope = args.self
-                if(targetScope.get(name) == null) {
-                    targetScope.set(name, classElement)
-                }
+                scope.internal.registerInDiagramScope(name, classElement)
                 classElement
             `
         )
@@ -533,7 +535,8 @@ const scopeExpressions: ExecutableExpression[] = [
                 (content) = args
                 scope.internal.registerCanvasElement(
                     _comment(content, self = args.self),
-                    args
+                    args,
+                    args.self
                 )
             `,
             {
@@ -551,7 +554,8 @@ const scopeExpressions: ExecutableExpression[] = [
                 (name, callback) = args
                 scope.internal.registerCanvasElement(
                     _package(name, callback, args.keywords, self = args.self),
-                    args
+                    args,
+                    args.self
                 )
             `,
             {
@@ -573,7 +577,8 @@ const scopeExpressions: ExecutableExpression[] = [
                 (name, callback) = args
                 scope.internal.registerCanvasElement(
                     _classifier(name, callback, args.keywords, args.abstract, self = args.self),
-                    args
+                    args,
+                    args.self
                 )
             `,
             {
@@ -600,7 +605,8 @@ const scopeExpressions: ExecutableExpression[] = [
                 }
                 scope.internal.registerCanvasElement(
                     _classifier(name, callback, keywords, args.abstract, self = args.self),
-                    args
+                    args,
+                    args.self
                 )
             `,
             {
@@ -627,7 +633,8 @@ const scopeExpressions: ExecutableExpression[] = [
                 }
                 scope.internal.registerCanvasElement(
                     _classifier(name, callback, keywords, args.abstract, self = args.self, hasEntries = true),
-                    args
+                    args,
+                    args.self
                 )
             `,
             {
@@ -730,6 +737,9 @@ const scopeExpressions: ExecutableExpression[] = [
                     minHeight = 50
                     stroke = var("primary")
                     strokeWidth = var("strokeWidth")
+                }
+                cls("package-canvas") {
+                    margin = 40
                 }
                 cls("package") {
                     type("vbox") {

@@ -1,7 +1,5 @@
 import { Point, RelativePoint } from "@hylimo/diagram-common";
-import { SModelElementImpl } from "sprotty";
 import { LinearAnimatable } from "../../features/animation/model.js";
-import { isPositionProvider } from "../../features/layout/positionProvider.js";
 import { SCanvasPoint } from "./sCanvasPoint.js";
 
 /**
@@ -35,12 +33,7 @@ export class SRelativePoint extends SCanvasPoint implements RelativePoint, Linea
     constructor() {
         super();
         this.cachedProperty<Point>("targetPosition", () => {
-            const target = this.root.index.getById(this.target) as SModelElementImpl;
-            if (isPositionProvider(target)) {
-                return target.position;
-            } else {
-                return Point.ORIGIN;
-            }
+            return this.root.layoutEngine.getPoint(this.target, this.parent.id);
         });
     }
 

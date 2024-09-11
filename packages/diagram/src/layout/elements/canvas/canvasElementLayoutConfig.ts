@@ -8,7 +8,7 @@ import {
     SizeConstraints,
     VerticalAlignment
 } from "../../layoutElement.js";
-import { Layout } from "../../layoutEngine.js";
+import { Layout } from "../../engine/layout.js";
 import { alignStyleAttributes, sizeStyleAttributes } from "../attributes.js";
 import { EditableCanvasContentLayoutConfig } from "./editableCanvasContentLayoutConfig.js";
 
@@ -56,30 +56,30 @@ export class CanvasElementLayoutConfig extends EditableCanvasContentLayoutConfig
 
     override layout(layout: Layout, element: LayoutElement, position: Point, size: Size, id: string): Element[] {
         const content = element.content as LayoutElement;
-        let x = 0;
+        let dx = 0;
         const hAlign = element.styles.hAlign;
         if (hAlign === HorizontalAlignment.RIGHT) {
-            x = -size.width;
+            dx = -size.width;
         } else if (hAlign === HorizontalAlignment.CENTER) {
-            x = -size.width / 2;
+            dx = -size.width / 2;
         }
-        let y = 0;
+        let dy = 0;
         const vAlign = element.styles.vAlign;
         if (vAlign === VerticalAlignment.BOTTOM) {
-            y = -size.height;
+            dy = -size.height;
         } else if (vAlign === VerticalAlignment.CENTER) {
-            y = -size.height / 2;
+            dy = -size.height / 2;
         }
 
         const result: CanvasElement = {
             id,
             type: CanvasElement.TYPE,
             ...size,
-            x,
-            y,
-            pos: this.extractPos(element),
+            dx,
+            dy,
+            pos: this.extractPos(layout, element),
             rotation: element.element.getLocalFieldOrUndefined("_rotation")?.value?.toNative() ?? 0,
-            children: layout.layout(content, { x, y }, size, `${id}_0`),
+            children: layout.layout(content, { x: dx, y: dy }, size),
             outline: content.layoutConfig.outline(
                 layout,
                 content,
@@ -96,15 +96,16 @@ export class CanvasElementLayoutConfig extends EditableCanvasContentLayoutConfig
      * Extracts the position from the element
      * If the element has a pos field, the position is extracted.
      *
+     * @param layout the layout engine
      * @param element the element from which the position should be extracted
      * @returns the extracted position
      */
-    private extractPos(element: LayoutElement): string | undefined {
+    private extractPos(layout: Layout, element: LayoutElement): string | undefined {
         const pos = element.element.getLocalFieldOrUndefined("pos")?.value as FullObject | undefined;
         if (pos == undefined) {
             return undefined;
         } else {
-            return this.getContentId(element, pos);
+            return layout.getElementId(pos);
         }
     }
 

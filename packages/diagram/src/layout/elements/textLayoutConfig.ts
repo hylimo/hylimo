@@ -1,7 +1,7 @@
 import { FullObject, objectToList } from "@hylimo/core";
 import { Element, Size, Point, Text } from "@hylimo/diagram-common";
 import { ContentCardinality, LayoutElement, SizeConstraints } from "../layoutElement.js";
-import { Layout } from "../layoutEngine.js";
+import { Layout } from "../engine/layout.js";
 import { StyledElementLayoutConfig } from "./styledElementLayoutConfig.js";
 import { elementType } from "../../module/base/types.js";
 

@@ -7,6 +7,14 @@ import { LayoutedElement } from "../base/layoutedElement.js";
  */
 export interface Canvas extends LayoutedElement {
     type: typeof Canvas.TYPE;
+    /**
+     * The x offset applied to its coordinate system
+     */
+    dx: number;
+    /**
+     * The y offset applied to its coordinate system
+     */
+    dy: number;
 }
 
 export namespace Canvas {

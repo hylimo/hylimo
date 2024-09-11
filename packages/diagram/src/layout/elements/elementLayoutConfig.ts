@@ -1,7 +1,8 @@
 import { ExecutableAbstractFunctionExpression, Type, fun, listType, optional, stringType } from "@hylimo/core";
 import { ArcSegment, Element, Line, LineSegment, Point, Size } from "@hylimo/diagram-common";
 import { LayoutElement, LayoutConfig, SizeConstraints, AttributeConfig, ContentCardinality } from "../layoutElement.js";
-import { Layout } from "../layoutEngine.js";
+import { Layout } from "../engine/layout.js";
+import { Matrix } from "transformation-matrix";
 
 /**
  * Base class for all layout element configs
@@ -179,5 +180,16 @@ export abstract class ElementLayoutConfig implements LayoutConfig {
      */
     postprocessStyles(_element: LayoutElement, styles: Record<string, any>): Record<string, any> {
         return styles;
+    }
+
+    /**
+     * Creates a matrix which transforms from the local to the parent coordinate system
+     * Can return undefined if the element does not have a parent or if the transformation is the identity matrix
+     *
+     * @param _element the element to transform
+     * @returns the transformation matrix
+     */
+    localToParent(_element: LayoutElement): Matrix | undefined {
+        return undefined;
     }
 }

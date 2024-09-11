@@ -1,6 +1,6 @@
 import { Size, Point, Element, Ellipse, Math2D, Line, ArcSegment, Segment } from "@hylimo/diagram-common";
 import { LayoutElement, SizeConstraints } from "../layoutElement.js";
-import { Layout } from "../layoutEngine.js";
+import { Layout } from "../engine/layout.js";
 import { ContentShapeLayoutConfig } from "./contentShapeLayoutConfig.js";
 import { FullObject } from "@hylimo/core";
 
@@ -46,7 +46,7 @@ export class EllipseLayoutConfig extends ContentShapeLayoutConfig {
                 x: (size.width - contentSize.width) / 2,
                 y: (size.height - contentSize.height) / 2
             });
-            result.children.push(...layout.layout(element.content, contentPosition, contentSize, `${id}_0`));
+            result.children.push(...layout.layout(element.content, contentPosition, contentSize));
         }
         return [result];
     }

@@ -17,7 +17,7 @@ export const resizeHeight: EditHandler<ResizeEdit> = {
                     changes: {
                         height: newest.height,
                         // scale the relative y position according to the new height
-                        y: (newest.height! / element.height) * element.y
+                        y: (newest.height! / element.height) * element.dy
                     }
                 });
             }

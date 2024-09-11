@@ -1,6 +1,6 @@
 import { Element, Point, Size } from "@hylimo/diagram-common";
 import { LayoutElement, SizeConstraints } from "../layoutElement.js";
-import { Layout } from "../layoutEngine.js";
+import { Layout } from "../engine/layout.js";
 import { PanelLayoutConfig } from "./panelLayoutConfig.js";
 
 /**
@@ -40,7 +40,7 @@ export class VBoxLayoutConfig extends PanelLayoutConfig {
         }
     }
 
-    override layout(layout: Layout, element: LayoutElement, position: Point, size: Size, id: string): Element[] {
+    override layout(layout: Layout, element: LayoutElement, position: Point, size: Size): Element[] {
         const elements: Element[] = [];
         const contents = element.contents as LayoutElement[];
         let y = position.y;
@@ -53,7 +53,7 @@ export class VBoxLayoutConfig extends PanelLayoutConfig {
             if (i == contents.length - 1) {
                 contentSize.height = Math.max(contentSize.height, position.y + size.height - y);
             }
-            elements.push(...layout.layout(content, { x: position.x, y }, contentSize, `${id}_${i}`));
+            elements.push(...layout.layout(content, { x: position.x, y }, contentSize));
             y += contentSize.height;
         }
         return elements;

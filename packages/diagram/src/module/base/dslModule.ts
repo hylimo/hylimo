@@ -32,8 +32,7 @@ const scopeExpressions: ExecutableExpression[] = [
                 internal = object(
                     classCounter = 0,
                     styles = styles({ })
-                ),
-                protos = object()
+                )
             )
         `
     ),
@@ -43,7 +42,7 @@ const scopeExpressions: ExecutableExpression[] = [
             `
                 (x, y) = args
                 point = absolutePoint(x = x, y = y)
-                scope.internal.registerCanvasContent(point, args)
+                scope.internal.registerCanvasContent(point, args, args.self)
                 point
             `,
             {
@@ -62,7 +61,7 @@ const scopeExpressions: ExecutableExpression[] = [
             `
                 (target, offsetX, offsetY) = args
                 point = relativePoint(target = target, offsetX = offsetX, offsetY = offsetY)
-                scope.internal.registerCanvasContent(point, args)
+                scope.internal.registerCanvasContent(point, args, args.self)
                 point
             `,
             {
@@ -82,7 +81,7 @@ const scopeExpressions: ExecutableExpression[] = [
             `
                 (lineProvider, pos, distance) = args
                 point = linePoint(lineProvider = lineProvider, pos = pos, distance = distance, segment = args.seg)
-                scope.internal.registerCanvasContent(point, args)
+                scope.internal.registerCanvasContent(point, args, args.self)
                 point
             `,
             {
@@ -280,6 +279,7 @@ const scopeExpressions: ExecutableExpression[] = [
         fun(
             `
                 (self, callback) = args
+                this.contents = self.canvasScope.contents
                 result = object(
                     over = null,
                     end = self.endProvider,
@@ -294,10 +294,10 @@ const scopeExpressions: ExecutableExpression[] = [
                         }
                         labelCanvasElement = canvasElement(
                             content = text(contents = labelContent, class = list("label")),
-                            pos = scope.lpos(self, pos, distance, seg = args.seg),
+                            pos = self.canvasScope.lpos(self, pos, distance, seg = args.seg),
                             class = list("label-element")
                         )
-                        scope.internal.registerCanvasElement(labelCanvasElement, args)
+                        scope.internal.registerCanvasElement(labelCanvasElement, args, self.canvasScope)
                         labelCanvasElement.rotation = rotation
                         labelCanvasElement
                     }
@@ -348,12 +348,12 @@ const scopeExpressions: ExecutableExpression[] = [
         "_createConnection",
         fun(
             `
-                (start, end, class, target) = args
+                (start, end, class, target, canvasScope) = args
                 startMarkerFactory = args.startMarkerFactory
                 endMarkerFactory = args.endMarkerFactory
                 startPoint = start
                 startProvider = if((start.type == "canvasElement") || (start.type == "canvasConnection")) {
-                    startPoint = scope.lpos(start, 0)
+                    startPoint = canvasScope.lpos(start, 0)
                     startPoint.edits.set(
                         "${DefaultEditTypes.MOVE_LPOS_POS}",
                         createAppendScopeEdit(target, "with", "'over = start(' & pos & ').axisAligned(0.5, end(0.5))'")
@@ -367,7 +367,7 @@ const scopeExpressions: ExecutableExpression[] = [
                 }
                 endPoint = end
                 endProvider = if ((end.type == "canvasElement") || (end.type == "canvasConnection")) {
-                    endPoint = scope.lpos(end, 0.5)
+                    endPoint = canvasScope.lpos(end, 0.5)
                     endPoint.edits.set(
                         "${DefaultEditTypes.MOVE_LPOS_POS}",
                         createAppendScopeEdit(target, "with", "'over = start(0).axisAligned(0.5, end(' & pos & '))'")
@@ -379,7 +379,6 @@ const scopeExpressions: ExecutableExpression[] = [
                 } {
                     { end }
                 }
-                
                 this.segment = canvasAxisAlignedSegment(end = endPoint, verticalPos = 0.5)
                 segment.edits.set(
                     "${DefaultEditTypes.AXIS_ALIGNED_SEGMENT_POS}",
@@ -389,7 +388,6 @@ const scopeExpressions: ExecutableExpression[] = [
                     "${DefaultEditTypes.SPLIT_CANVAS_AXIS_ALIGNED_SEGMENT}",
                     createAppendScopeEdit(target, "with", "'over = start(0).axisAligned(' & pos & ', apos(' & x & ', ' & y & '), ' & nextPos & ', end(0.5))'")
                 )
-
                 connection = canvasConnection(
                     start = startPoint,
                     contents = list(
@@ -401,7 +399,8 @@ const scopeExpressions: ExecutableExpression[] = [
                 )
                 connection.startProvider = startProvider
                 connection.endProvider = endProvider
-                scope.internal.registerCanvasElement(connection, target)
+                connection.canvasScope = canvasScope
+                scope.internal.registerCanvasElement(connection, target, canvasScope)
 
                 connection
             `,
@@ -409,7 +408,10 @@ const scopeExpressions: ExecutableExpression[] = [
                 docs: "Helper which creates a CanvasConnection between two elements",
                 params: [
                     [0, "the start element", canvasContentType],
-                    [1, "the end element", canvasContentType]
+                    [1, "the end element", canvasContentType],
+                    [2, "the class of the connection"],
+                    [3, "the target expression referenced by edits"],
+                    [4, "the scope to which canvas contents should be added"]
                 ],
                 returns: "The created CanvasConnection"
             }
@@ -421,8 +423,8 @@ const scopeExpressions: ExecutableExpression[] = [
             "registerCanvasContent",
             fun(
                 `
-                    (content, source) = args
-                    scope.contents += content
+                    (content, source, canvasScope) = args
+                    canvasScope.contents += content
                     content.source = reflect(source)
                     content
                 `
@@ -434,8 +436,8 @@ const scopeExpressions: ExecutableExpression[] = [
             "registerCanvasElement",
             fun(
                 `
-                    (element, source) = args
-                    scope.internal.registerCanvasContent(element, source)
+                    (element, source, canvasScope) = args
+                    scope.internal.registerCanvasContent(element, source, canvasScope)
 
                     this.moveEdit = createAppendScopeEdit(source, "layout", "'pos = apos(' & dx & ', ' & dy & ')'")
                     element.edits.set("${DefaultEditTypes.MOVE_X}", this.moveEdit)
@@ -470,6 +472,7 @@ const scopeExpressions: ExecutableExpression[] = [
                         end,
                         class,
                         args,
+                        args.self,
                         startMarkerFactory = startMarkerFactory,
                         endMarkerFactory = endMarkerFactory
                     )
@@ -483,6 +486,19 @@ const scopeExpressions: ExecutableExpression[] = [
                     ],
                     returns: "The generated connection operator function"
                 }
+            )
+        ),
+    id(scope)
+        .field("internal")
+        .assignField(
+            "registerInDiagramScope",
+            fun(
+                `
+                    (name, value) = args
+                    if(scope.get(name) == null) {
+                        scope.set(name, value)
+                    }
+                `
             )
         ),
     id(scope).assignField(
@@ -523,7 +539,7 @@ const scopeExpressions: ExecutableExpression[] = [
                 } {
                     canvasElement(content = callbackOrElement())
                 }
-                scope.internal.registerCanvasElement(this.element, args)
+                scope.internal.registerCanvasElement(this.element, args, args.self)
             }
             scope.styles {
                 cls("label-element") {

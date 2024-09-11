@@ -4,6 +4,7 @@ import { VNode } from "snabbdom";
 import { IView, IViewArgs, RenderingContext, svg } from "sprotty";
 import { findViewportZoom } from "../../base/findViewportZoom.js";
 import { SCanvasElement } from "../../model/canvas/sCanvasElement.js";
+import { SCanvas } from "../../model/canvas/sCanvas.js";
 
 /**
  * IView that represents a CanvasElement
@@ -88,8 +89,8 @@ export class CanvasElementView implements IView {
                 "selected-rect": true
             },
             attrs: {
-                x: model.x,
-                y: model.y,
+                x: model.dx,
+                y: model.dy,
                 width: model.width,
                 height: model.height
             }
@@ -105,7 +106,7 @@ export class CanvasElementView implements IView {
      */
     private generateRotationIcon(model: Readonly<SCanvasElement>): VNode {
         const zoom = findViewportZoom(model);
-        const y = model.y - CanvasElementView.ROTATE_ICON_DISTANCE / zoom;
+        const y = model.dy - CanvasElementView.ROTATE_ICON_DISTANCE / zoom;
         return svg(
             "g",
             {
@@ -147,7 +148,7 @@ export class CanvasElementView implements IView {
      */
     private generateResizeBorder(model: Readonly<SCanvasElement>): VNode[] {
         const result: VNode[] = [];
-        const iconOffset = Math.round((model.rotation / 45) % 8);
+        const iconOffset = this.computeResizeIconOffset(model);
         const isXResizable = DefaultEditTypes.RESIZE_WIDTH in model.edits;
         const isYResizable = DefaultEditTypes.RESIZE_HEIGHT in model.edits;
         if (isXResizable) {
@@ -165,6 +166,21 @@ export class CanvasElementView implements IView {
             result.push(this.generateResizeLine(model, 3, 3, iconOffset, ResizePosition.BOTTOM, ResizePosition.LEFT));
         }
         return result;
+    }
+
+    /**
+     * Computes the offset to the index of a resize icon based on the elements rotation relative to the diagram root.
+     * The resize icon index ranges from 0 to 7, where each step is a 45 degree rotation.
+     * The computed offset can be applied to the index based on the location of the resize border, e.g. 0 for the top left corner,
+     * to obtain the index of the icon which is rotated according to the element's rotation relative to the diagram root.
+     *
+     * @param model the canvas element to compute the offset for
+     * @returns the offset for the rotation of the canvas element
+     */
+    private computeResizeIconOffset(model: Readonly<SCanvasElement>) {
+        const canvasRotation = (model.parent as SCanvas).globalRotation;
+        const iconOffset = Math.round(((model.rotation + canvasRotation) / 45) % 8);
+        return iconOffset;
     }
 
     /**
@@ -217,7 +233,7 @@ export class CanvasElementView implements IView {
         pos = pos % 4;
         const x = pos === 1 || pos === 2 ? model.width : 0;
         const y = pos < 2 ? 0 : model.height;
-        return { x: model.x + x, y: model.y + y };
+        return { x: model.dx + x, y: model.dy + y };
     }
 }
 

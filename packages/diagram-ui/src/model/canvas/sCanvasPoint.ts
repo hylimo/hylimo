@@ -21,7 +21,7 @@ export abstract class SCanvasPoint extends SCanvasContent implements CanvasPoint
     constructor() {
         super();
         this.cachedProperty<Point>("position", () => {
-            return this.parent.layoutEngine.getPoint(this.id);
+            return this.root.layoutEngine.getPoint(this.id, this.parent.id);
         });
     }
 }

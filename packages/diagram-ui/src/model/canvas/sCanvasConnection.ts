@@ -1,6 +1,5 @@
 import { CanvasConnection, CanvasConnectionLayout, Point, Stroke, TransformedLine } from "@hylimo/diagram-common";
 import { LinearAnimatable } from "../../features/animation/model.js";
-import { LineProvider } from "../../features/layout/lineProvider.js";
 import { SCanvasConnectionSegment } from "./sCanvasConnectionSegment.js";
 import { SCanvasContent } from "./sCanvasContent.js";
 import { SCanvasPoint } from "./sCanvasPoint.js";
@@ -14,7 +13,7 @@ const canvasConnectionAnimatedFields = new Set([]);
 /**
  * Model for CanvasConnection
  */
-export class SCanvasConnection extends SCanvasContent implements CanvasConnection, LineProvider, LinearAnimatable {
+export class SCanvasConnection extends SCanvasContent implements CanvasConnection, LinearAnimatable {
     override type!: typeof CanvasConnection.TYPE;
     animatedFields = canvasConnectionAnimatedFields;
     /**
@@ -58,7 +57,7 @@ export class SCanvasConnection extends SCanvasContent implements CanvasConnectio
         super();
 
         this.cachedProperty<Point>("startPosition", () => {
-            const target = this.root.index.getById(this.start) as SCanvasPoint;
+            const target = this.index.getById(this.start) as SCanvasPoint;
             return target.position;
         });
         this.cachedProperty<SMarker | null>("startMarker", () => {
@@ -75,10 +74,10 @@ export class SCanvasConnection extends SCanvasContent implements CanvasConnectio
             ) as SCanvasConnectionSegment[];
         });
         this.cachedProperty<CanvasConnectionLayout>("layout", () => {
-            return this.parent.layoutEngine.layoutConnection(this);
+            return this.root.layoutEngine.layoutConnection(this);
         });
         this.cachedProperty<TransformedLine>("line", () => {
-            return this.parent.layoutEngine.layoutLine(this);
+            return this.root.layoutEngine.layoutLine(this, this.parent.id);
         });
     }
 

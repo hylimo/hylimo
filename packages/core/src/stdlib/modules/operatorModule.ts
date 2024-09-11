@@ -120,7 +120,7 @@ export const operatorModule = InterpreterModule.create(
                         );
                 },
                 {
-                    docs: "The + operator, expects two arguments, calls + on the first argument with the second argument. If any of the two arguments is a string, implicitely converts the other to a string.",
+                    docs: "The + operator, expects two arguments, calls + on the first argument with the second argument. If any of the two arguments is a string, implicitly converts the other to a string.",
                     params: [
                         [0, "the target where + is invoked"],
                         [1, "the value passed to the + function"]
