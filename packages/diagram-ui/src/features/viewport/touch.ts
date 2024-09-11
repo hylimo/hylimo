@@ -21,11 +21,30 @@ import { Action, Bounds, SetViewportAction, Viewport } from "sprotty-protocol";
  */
 @injectable()
 export class ViewportTouchListener implements IVNodePostprocessor {
-    private lastScrollPosition?: Point;
+    /**
+     * The last positon a one-finger touch event occurred at
+     * (Updated on touch start and touch move)
+     */
+    private lastTouchPosition?: Point;
+    /**
+     * The last distance (in screen units) between two fingers in a two-finger touch event
+     * (Updated on touch start and touch move)
+     */
     private lastTouchDistance?: number;
+    /**
+     * The last midpoint between two fingers in a two-finger touch event
+     * (Updated on touch start and touch move)
+     */
     private lastTouchMidpoint?: Point;
 
+    /**
+     * The action dispatcher used to dispatch actions
+     */
     @inject(TYPES.IActionDispatcher) private actionDispatcher!: IActionDispatcher;
+
+    /**
+     * The viewer options used to limit the zoom level
+     */
     @inject(TYPES.ViewerOptions) protected viewerOptions!: ViewerOptions;
 
     /**
@@ -39,7 +58,7 @@ export class ViewportTouchListener implements IVNodePostprocessor {
         const viewport = findParentByFeature(target, isViewport);
         if (viewport != undefined) {
             if (event.touches.length === 1) {
-                this.lastScrollPosition = {
+                this.lastTouchPosition = {
                     x: event.touches[0].clientX,
                     y: event.touches[0].clientY
                 };
@@ -48,7 +67,7 @@ export class ViewportTouchListener implements IVNodePostprocessor {
                 this.lastTouchMidpoint = this.calculateMidpoint(event.touches, viewport.canvasBounds);
             }
         } else {
-            this.lastScrollPosition = undefined;
+            this.lastTouchPosition = undefined;
         }
         return [];
     }
@@ -69,7 +88,7 @@ export class ViewportTouchListener implements IVNodePostprocessor {
 
         let newViewport: Viewport;
         if (event.touches.length === 1) {
-            if (this.lastScrollPosition == undefined) {
+            if (this.lastTouchPosition == undefined) {
                 return [];
             }
             newViewport = this.calculateViewportFromOneTouch(viewport, event);
@@ -93,12 +112,12 @@ export class ViewportTouchListener implements IVNodePostprocessor {
         const touch = event.touches[0];
         const newViewport = {
             scroll: {
-                x: viewport.scroll.x - (touch.clientX - this.lastScrollPosition!.x) / viewport.zoom,
-                y: viewport.scroll.y - (touch.clientY - this.lastScrollPosition!.y) / viewport.zoom
+                x: viewport.scroll.x - (touch.clientX - this.lastTouchPosition!.x) / viewport.zoom,
+                y: viewport.scroll.y - (touch.clientY - this.lastTouchPosition!.y) / viewport.zoom
             },
             zoom: viewport.zoom
         };
-        this.lastScrollPosition = { x: touch.clientX, y: touch.clientY };
+        this.lastTouchPosition = { x: touch.clientX, y: touch.clientY };
         return newViewport;
     }
 
@@ -141,11 +160,11 @@ export class ViewportTouchListener implements IVNodePostprocessor {
      */
     private touchEnd(target: SModelElementImpl, event: TouchEvent): Action[] {
         if (event.touches.length === 0) {
-            this.lastScrollPosition = undefined;
+            this.lastTouchPosition = undefined;
             this.lastTouchDistance = undefined;
             this.lastTouchMidpoint = undefined;
         } else if (event.touches.length === 1) {
-            this.lastScrollPosition = {
+            this.lastTouchPosition = {
                 x: event.touches[0].clientX,
                 y: event.touches[0].clientY
             };
