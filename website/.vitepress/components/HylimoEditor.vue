@@ -34,9 +34,9 @@ import { inject } from "vue";
 import { language, languageClientKey } from "../theme/lspPlugin";
 import { Disposable } from "vscode-languageserver-protocol";
 import { useResizeObserver } from "@vueuse/core";
-import { v4 as uuid } from "uuid"
+import { v4 as uuid } from "uuid";
 
-const id = uuid()
+const id = uuid();
 
 defineProps({
     horizontal: {
