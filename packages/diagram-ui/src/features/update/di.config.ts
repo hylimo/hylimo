@@ -4,7 +4,7 @@ import { IncrementalUpdateModelCommand } from "./incrementalUpdateModel.js";
 import { UpdateModelCommand } from "./updateModel.js";
 
 /**
- * Module which configers the UpdateModelCommand
+ * Module which configures the UpdateModelCommand
  */
 export const updateModule = new ContainerModule((bind, _unbind, isBound) => {
     configureCommand({ bind, isBound }, UpdateModelCommand);
