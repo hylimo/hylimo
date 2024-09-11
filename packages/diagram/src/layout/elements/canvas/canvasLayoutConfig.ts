@@ -184,6 +184,7 @@ export class CanvasLayoutConfig extends StyledElementLayoutConfig {
 
     /**
      * Calculates the bounds for the given marker
+     * See {@link Marker} how a marker is aligned relative to the connection start or end
      *
      * @param markerLayout the layout information of the marker
      * @returns the bounds of the marker
