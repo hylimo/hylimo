@@ -87,7 +87,10 @@ export class PDFDiagramVisitor extends SimplifiedDiagramVisitor<PDFKit.PDFDocume
             size: [width, height]
         });
         context.rect(0, 0, width, height).fill(this.background);
-        context.translate(-element.hylimoBounds.position.x + this.margin, -element.hylimoBounds.position.y + this.margin);
+        context.translate(
+            -element.hylimoBounds.position.x + this.margin,
+            -element.hylimoBounds.position.y + this.margin
+        );
         this.visitChildren(element, context);
     }
 
