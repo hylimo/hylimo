@@ -1,5 +1,5 @@
 import { FullObject, assertString, nativeToList, RuntimeError, BaseObject } from "@hylimo/core";
-import { Point, Size } from "@hylimo/diagram-common";
+import { Line, Point, Size } from "@hylimo/diagram-common";
 import { FontCollection } from "../../font/fontCollection.js";
 import { FontFamily } from "../../font/fontFamily.js";
 import { StyleList, Selector, SelectorType, Style } from "../../styles.js";
@@ -426,6 +426,23 @@ export class Layout {
             y += layoutInformation.marginTop;
         }
         return { y, height };
+    }
+
+    /**
+     * Create the outline of an element
+     * Requires that the element has been measured and layouted
+     *
+     * @param element the element to get the outline of
+     * @returns the outline of the element
+     */
+    outline(element: LayoutElement): Line {
+        return element.layoutConfig.outline(
+            this,
+            element,
+            element.layoutBounds!.position,
+            element.layoutBounds!.size,
+            element.id
+        );
     }
 
     /**

@@ -1,16 +1,16 @@
-import { Element, Point, Size } from "@hylimo/diagram-common";
+import { Element, Line, Point, Size } from "@hylimo/diagram-common";
 import { LayoutElement, SizeConstraints } from "../layoutElement.js";
 import { Layout } from "../engine/layout.js";
-import { PanelLayoutConfig } from "./panelLayoutConfig.js";
+import { BoxLayoutConfig, BoxOutlinePart } from "./boxLazoutConfig.js";
 
 /**
  * Layout config for vbox
  */
-export class VBoxLayoutConfig extends PanelLayoutConfig {
+export class VBoxLayoutConfig extends BoxLayoutConfig {
     override type = "vbox";
 
     constructor() {
-        super([], []);
+        super();
     }
 
     override measure(layout: Layout, element: LayoutElement, constraints: SizeConstraints): Size {
@@ -57,5 +57,22 @@ export class VBoxLayoutConfig extends PanelLayoutConfig {
             y += contentSize.height;
         }
         return elements;
+    }
+
+    override outline(layout: Layout, element: LayoutElement, position: Point, size: Size, id: string): Line {
+        const contents = element.contents as LayoutElement[];
+        if (contents.length < 2) {
+            return super.outline(layout, element, position, size, id);
+        }
+        const parts: BoxOutlinePart[] = contents.map((content) => {
+            const bounds = content.layoutBounds!;
+            return {
+                primaryOffset: bounds.position.y - position.y,
+                secondaryOffset: bounds.position.x - position.x,
+                primaryLength: bounds.size.height,
+                secondaryLength: bounds.size.width
+            };
+        });
+        return this.computeOutlineFromParts(parts, id, (primary, secondary) => ({ x: secondary, y: primary }));
     }
 }
