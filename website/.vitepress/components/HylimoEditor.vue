@@ -34,8 +34,9 @@ import { inject } from "vue";
 import { language, languageClientKey } from "../theme/lspPlugin";
 import { Disposable } from "vscode-languageserver-protocol";
 import { useResizeObserver } from "@vueuse/core";
+import { v4 as uuid } from "uuid";
 
-const id = crypto.randomUUID();
+const id = uuid();
 
 defineProps({
     horizontal: {
@@ -82,6 +83,9 @@ onMounted(async () => {
                     },
                     suggest: {
                         snippetsPreventQuickSuggestions: false
+                    },
+                    scrollbar: {
+                        alwaysConsumeMouseWheel: false
                     }
                 }
             }
