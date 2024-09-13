@@ -100,7 +100,7 @@ class SVGDiagramVisitor extends SimplifiedDiagramVisitor<undefined, SVGNode[]> {
     }
 
     override visitRoot(element: Root): SVGNode[] {
-        const viewBox = element.bounds;
+        const viewBox = element.hylimoBounds;
         const x = viewBox.position.x - this.margin;
         const y = viewBox.position.y - this.margin;
         const width = viewBox.size.width + this.margin * 2;

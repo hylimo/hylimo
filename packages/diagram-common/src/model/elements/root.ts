@@ -19,9 +19,9 @@ export interface Root extends Element {
      */
     fonts: FontFamilyConfig[];
     /**
-     * The bounds of the whole diagram
+     * The bounds of the whole diagram, as defined by hylimo internally, not by sprotty
      */
-    bounds: Bounds;
+    hylimoBounds: Bounds;
 }
 
 export namespace Root {

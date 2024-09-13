@@ -165,7 +165,7 @@ export class LayoutEngine {
                 children: elements,
                 fonts: fontFamilyConfigs,
                 edits: {},
-                bounds
+                hylimoBounds: bounds
             },
             elementLookup: layout.elementLookup,
             layoutElementLookup: layout.layoutElementLookup

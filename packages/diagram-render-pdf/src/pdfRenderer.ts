@@ -80,14 +80,14 @@ export class PDFDiagramVisitor extends SimplifiedDiagramVisitor<PDFKit.PDFDocume
 
     override visitRoot(element: Root, context: PDFKit.PDFDocument): void {
         const [width, height] = [
-            element.bounds.size.width + 2 * this.margin,
-            element.bounds.size.height + 2 * this.margin
+            element.hylimoBounds.size.width + 2 * this.margin,
+            element.hylimoBounds.size.height + 2 * this.margin
         ];
         context.addPage({
             size: [width, height]
         });
         context.rect(0, 0, width, height).fill(this.background);
-        context.translate(-element.bounds.position.x + this.margin, -element.bounds.position.y + this.margin);
+        context.translate(-element.hylimoBounds.position.x + this.margin, -element.hylimoBounds.position.y + this.margin);
         this.visitChildren(element, context);
     }
 
