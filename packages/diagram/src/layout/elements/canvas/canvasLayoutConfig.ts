@@ -14,7 +14,7 @@ import {
     svgPathBbox,
     MarkerLayoutInformation
 } from "@hylimo/diagram-common";
-import { ContentCardinality, LayoutElement, SizeConstraints } from "../../layoutElement.js";
+import { ContentCardinality, LayoutElement } from "../../layoutElement.js";
 import { Layout } from "../../engine/layout.js";
 import { StyledElementLayoutConfig } from "../styledElementLayoutConfig.js";
 import { canvasPointType, elementType } from "../../../module/base/types.js";
@@ -47,10 +47,13 @@ export class CanvasLayoutConfig extends StyledElementLayoutConfig {
         );
     }
 
-    override measure(layout: Layout, element: LayoutElement, constraints: SizeConstraints): Size {
+    override measure(layout: Layout, element: LayoutElement): Size {
         const contents = this.getContents(element);
         const layoutedContents = contents.map((content) =>
-            layout.measure(content, element, { min: { width: 0, height: 0 }, max: constraints.max })
+            layout.measure(content, element, {
+                min: { width: 0, height: 0 },
+                max: { width: Number.POSITIVE_INFINITY, height: Number.POSITIVE_INFINITY }
+            })
         );
         element.contents = layoutedContents;
 

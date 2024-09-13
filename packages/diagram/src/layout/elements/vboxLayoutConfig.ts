@@ -19,14 +19,18 @@ export class VBoxLayoutConfig extends BoxLayoutConfig {
             let height = 0;
             let width = constraints.min.width;
             const contentElements: LayoutElement[] = [];
-            const contentConstraints: SizeConstraints = {
-                min: {
-                    width: constraints.min.width,
-                    height: 0
-                },
-                max: constraints.max
+            const minConstraints = {
+                width: constraints.min.width,
+                height: 0
             };
             for (const content of contents) {
+                const contentConstraints: SizeConstraints = {
+                    min: minConstraints,
+                    max: {
+                        width: constraints.max.width,
+                        height: constraints.max.height - height
+                    }
+                };
                 const layoutedContent = layout.measure(content, element, contentConstraints);
                 contentElements.push(layoutedContent);
                 height += layoutedContent.measuredSize!.height;

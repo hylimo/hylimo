@@ -19,14 +19,18 @@ export class HBoxLayoutConfig extends BoxLayoutConfig {
             let width = 0;
             let height = constraints.min.height;
             const contentElements: LayoutElement[] = [];
-            const contentConstraints: SizeConstraints = {
-                min: {
-                    width: 0,
-                    height: constraints.min.height
-                },
-                max: constraints.max
+            const minConstraints = {
+                width: 0,
+                height: constraints.min.height
             };
             for (const content of contents) {
+                const contentConstraints: SizeConstraints = {
+                    min: minConstraints,
+                    max: {
+                        width: constraints.max.width - width,
+                        height: constraints.max.height
+                    }
+                };
                 const layoutedContent = layout.measure(content, element, contentConstraints);
                 contentElements.push(layoutedContent);
                 width += layoutedContent.measuredSize!.width;
