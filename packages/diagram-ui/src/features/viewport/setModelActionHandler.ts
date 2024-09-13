@@ -3,7 +3,7 @@ import { IActionHandler, ICommand } from "sprotty";
 import { Action, FitToScreenAction } from "sprotty-protocol";
 
 /**
- * Action handler that executes fit-to-screen whenever the model has been set (i.e. copy-paste, initial load, …)
+ * Action handler that executes fit-to-screen whenever the model has been set (initial page load)
  */
 @injectable()
 export class SetModelActionHandler implements IActionHandler {
