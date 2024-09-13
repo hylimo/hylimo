@@ -23,7 +23,7 @@ export class SRoot extends ViewportRootElementImpl {
     /**
      * The bounds of the whole diagram, as defined by hylimo internally, not by sprotty
      */
-    hylimoBounds!: HylimoBounds;
+    rootBounds!: HylimoBounds;
 
     /**
      * The revision number increasing with each change.
@@ -61,10 +61,10 @@ export class SRoot extends ViewportRootElementImpl {
 
     override get bounds(): Bounds {
         return {
-            x: this.hylimoBounds.position.x,
-            y: this.hylimoBounds.position.y,
-            width: this.hylimoBounds.size.width,
-            height: this.hylimoBounds.size.height
+            x: this.rootBounds.position.x,
+            y: this.rootBounds.position.y,
+            width: this.rootBounds.size.width,
+            height: this.rootBounds.size.height
         };
     }
 
