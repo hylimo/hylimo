@@ -165,7 +165,7 @@ export class LayoutEngine {
                 children: elements,
                 fonts: fontFamilyConfigs,
                 edits: {},
-                bounds
+                rootBounds: bounds
             },
             elementLookup: layout.elementLookup,
             layoutElementLookup: layout.layoutElementLookup

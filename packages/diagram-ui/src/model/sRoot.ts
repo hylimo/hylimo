@@ -3,6 +3,8 @@ import { ModelIndexImpl, ViewportRootElementImpl } from "sprotty";
 import { SCanvasAxisAlignedSegment } from "./canvas/sCanvasAxisAlignedSegment.js";
 import { SCanvasLayoutEngine } from "./canvas/sCanvasLayoutEngine.js";
 import { Matrix, compose, translate, scale } from "transformation-matrix";
+import { Bounds } from "sprotty-protocol";
+import { Bounds as HylimoBounds } from "@hylimo/diagram-common";
 
 /**
  * Root element.
@@ -17,6 +19,11 @@ export class SRoot extends ViewportRootElementImpl {
      * Defined font families
      */
     fonts!: FontFamilyConfig[];
+
+    /**
+     * The bounds of the whole diagram, as defined by hylimo internally, not by sprotty
+     */
+    rootBounds!: HylimoBounds;
 
     /**
      * The revision number increasing with each change.
@@ -50,6 +57,15 @@ export class SRoot extends ViewportRootElementImpl {
             this.layoutEngineVersion = this.changeRevision;
         }
         return this.currentLayoutEngine;
+    }
+
+    override get bounds(): Bounds {
+        return {
+            x: this.rootBounds.position.x,
+            y: this.rootBounds.position.y,
+            width: this.rootBounds.size.width,
+            height: this.rootBounds.size.height
+        };
     }
 
     /**
