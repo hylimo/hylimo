@@ -110,6 +110,10 @@
     margin-right: 8px !important;
 }
 
+.VPImage.logo {
+    margin-right: 12px;
+}
+
 /* Sprotty */
 
 .sprotty-wrapper {
