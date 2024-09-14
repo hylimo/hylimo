@@ -5,7 +5,7 @@
         :class="{
             'screen-menu': screenMenu
         }"
-        :title="label"
+        :title="screenMenu ? undefined : label"
     >
         <template v-if="screenMenu">
             <span class="screen-menu-label">{{ label }}</span>
