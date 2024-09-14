@@ -61,6 +61,10 @@
         .wrapper {
             padding: 0 !important;
         }
+
+        .VPNavBarHamburger {
+            margin-right: 8px;
+        }
     }
 }
 
