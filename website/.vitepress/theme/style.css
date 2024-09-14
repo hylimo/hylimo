@@ -2,6 +2,7 @@
 
 :root {
     --vp-nav-height: 51px;
+    --vp-nav-logo-height: 35px;
 }
 
 .VPSidebar {
@@ -31,7 +32,7 @@
 .VPNav {
     .container > .title {
         position: relative !important;
-        padding-left: 32px !important;
+        padding-left: 24px !important;
         width: var(--vp-sidebar-width) !important;
         flex-shrink: 1;
     }
@@ -95,6 +96,12 @@
         height: 24px;
         background-color: var(--vp-c-divider);
         content: "";
+    }
+
+    .VPNav {
+        .container > .title {
+            padding-left: 32px !important;
+        }
     }
 }
 

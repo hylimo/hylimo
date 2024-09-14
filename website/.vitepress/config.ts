@@ -5,6 +5,11 @@ export default defineConfig({
     title: "HyLiMo",
     markdown,
     themeConfig: {
+        logo: {
+            src: "/icons/hylimo.svg",
+            width: 35,
+            height: 35
+        },
         nav: [
             { text: "Docs", link: "/docs/docs" },
             { component: "NavTeleportTarget", props: { "target-id": "copy-diagram-link" } },
