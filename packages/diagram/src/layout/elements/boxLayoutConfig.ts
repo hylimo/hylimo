@@ -10,8 +10,8 @@ export abstract class BoxLayoutConfig extends PanelLayoutConfig {
     }
 
     /**
-     * Comnputes the poitline based on the provided parts.
-     * Eeach part is an element that is stacked along the primary axis.
+     * Computes the outline based on the provided parts.
+     * Each part is an element that is stacked along the primary axis.
      * Requires at least two parts.
      *
      * @param parts the parts to compute the outline from
