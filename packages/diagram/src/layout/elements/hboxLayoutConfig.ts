@@ -1,7 +1,7 @@
 import { Element, Line, Point, Size } from "@hylimo/diagram-common";
 import { LayoutElement, SizeConstraints } from "../layoutElement.js";
 import { Layout } from "../engine/layout.js";
-import { BoxLayoutConfig, BoxOutlinePart } from "./boxLazoutConfig.js";
+import { BoxLayoutConfig, BoxOutlinePart } from "./boxLayoutConfig.js";
 
 /**
  * Layout config for hbox

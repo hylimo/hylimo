@@ -47,11 +47,11 @@ export abstract class BoxLayoutConfig extends PanelLayoutConfig {
         createPoint: (primary: number, secondary: number) => Point
     ): Point[] {
         const firstPart = parts[0];
-        const startPoints: Point[] = [];
-        const endPoints: Point[] = [
-            createPoint(firstPart.primaryOffset, firstPart.secondaryOffset),
-            createPoint(firstPart.primaryOffset, firstPart.secondaryOffset + firstPart.secondaryLength)
+        const startPoints: Point[] = [
+            createPoint(firstPart.primaryOffset, firstPart.secondaryOffset + firstPart.secondaryLength),
+            createPoint(firstPart.primaryOffset, firstPart.secondaryOffset)
         ];
+        const endPoints: Point[] = [];
         for (let i = 1; i < parts.length; i++) {
             const part = parts[i];
             const previousPart = parts[i - 1];
@@ -64,7 +64,7 @@ export abstract class BoxLayoutConfig extends PanelLayoutConfig {
         const { primaryOffset, primaryLength, secondaryOffset, secondaryLength } = parts.at(-1)!;
         startPoints.push(createPoint(primaryOffset + primaryLength, secondaryOffset));
         endPoints.push(createPoint(primaryOffset + primaryLength, secondaryOffset + secondaryLength));
-        return [...startPoints, ...endPoints.reverse()];
+        return [...endPoints, ...startPoints.reverse()];
     }
 }
 
