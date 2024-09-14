@@ -80,13 +80,7 @@ export class CanvasElementLayoutConfig extends EditableCanvasContentLayoutConfig
             pos: this.extractPos(layout, element),
             rotation: element.element.getLocalFieldOrUndefined("_rotation")?.value?.toNative() ?? 0,
             children: layout.layout(content, { x: dx, y: dy }, size),
-            outline: content.layoutConfig.outline(
-                layout,
-                content,
-                content.layoutBounds!.position,
-                content.layoutBounds!.size,
-                id
-            ),
+            outline: layout.outline(content),
             edits: element.edits
         };
         return [result];

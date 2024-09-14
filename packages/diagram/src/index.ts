@@ -17,6 +17,7 @@ export * from "./layout/elements/canvas/linePointLayoutConfig.js";
 export * from "./layout/elements/canvas/markerLayoutConfig.js";
 export * from "./layout/elements/canvas/relativePointLayoutConfig.js";
 export * from "./layout/elements/attributes.js";
+export * from "./layout/elements/boxLayoutConfig.js";
 export * from "./layout/elements/contentShapeLayoutConfig.js";
 export * from "./layout/elements/elementLayoutConfig.js";
 export * from "./layout/elements/ellipseLayoutConfig.js";
