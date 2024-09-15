@@ -180,14 +180,17 @@ export class Parser extends CstParser {
      */
     private objectExpression = this.RULE(Rules.OBJECT_EXPRESSION, () => {
         this.CONSUME(OpenSquareBracket, { ERR_MSG: "Object expressions are started using '['" });
-        this.MANY_SEP({
-            SEP: Comma,
-            DEF: () => this.SUBRULE(this.listEntry)
-        });
-
-        // Allow trailing commas
         this.OPTION(() => {
-            this.CONSUME(Comma);
+            this.SUBRULE(this.listEntry);
+            this.MANY({
+                DEF: () => {
+                    this.CONSUME(Comma, { ERR_MSG: "Object expressions are separated by ','" });
+                    this.SUBRULE1(this.listEntry);
+                }
+            });
+            this.OPTION1(() => {
+                this.CONSUME1(Comma);
+            });
         });
         this.CONSUME(CloseSquareBracket, { ERR_MSG: "Object expressions are terminated using ']'" });
     });
@@ -204,14 +207,25 @@ export class Parser extends CstParser {
                 {
                     ALT: () => {
                         this.CONSUME(OpenRoundBracket, { ERR_MSG: "Opening '(' of function call is missing" });
-                        this.MANY_SEP({
-                            SEP: Comma,
-                            DEF: () =>
-                                this.withError(
-                                    () => this.SUBRULE(this.listEntry),
-                                    "Expected a function parameter",
-                                    this.OR1
-                                )
+                        this.OPTION(() => {
+                            this.withError(
+                                () => this.SUBRULE(this.listEntry),
+                                "Expected a function parameter",
+                                this.OR1
+                            );
+                            this.MANY({
+                                DEF: () => {
+                                    this.CONSUME(Comma, { ERR_MSG: "Function parameters are separated by ','" });
+                                    this.withError(
+                                        () => this.SUBRULE1(this.listEntry),
+                                        "Expected a function parameter",
+                                        this.OR2
+                                    );
+                                }
+                            });
+                            this.OPTION1(() => {
+                                this.CONSUME1(Comma);
+                            });
                         });
                         this.CONSUME(CloseRoundBracket, { ERR_MSG: "Closing ')' of function call is missing" });
                     }
@@ -220,7 +234,7 @@ export class Parser extends CstParser {
             ],
             ERR_MSG: "Function call is missing"
         });
-        this.MANY(() => {
+        this.MANY2(() => {
             this.SUBRULE2(this.function);
         });
     });
@@ -336,12 +350,16 @@ export class Parser extends CstParser {
     private destructuringExpression = this.RULE(Rules.DESTRUCTURING_EXPRESSION, () => {
         this.CONSUME(OpenRoundBracket);
         const elements: string[] = [];
-        this.AT_LEAST_ONE_SEP({
-            SEP: Comma,
-            DEF: () => elements.push(this.CONSUME(Identifier).image),
-            ERR_MSG: "Destructuring expressions need at least one element inside them"
+        elements.push(this.CONSUME(Identifier).image);
+        this.MANY({
+            DEF: () => {
+                this.CONSUME(Comma, { ERR_MSG: "Destructuring expression is missing a ','" });
+                elements.push(this.CONSUME1(Identifier).image);
+            }
         });
-        this.OPTION(() => this.CONSUME(Comma)); // Allow trailing commas
+        this.OPTION(() => {
+            this.CONSUME1(Comma);
+        });
         this.CONSUME(CloseRoundBracket, {
             ERR_MSG: `Destructuring expression '(${this.elementsToText(elements)}' is missing its ending ')'`
         });
@@ -350,7 +368,8 @@ export class Parser extends CstParser {
         });
         this.withError(
             () => this.SUBRULE(this.operatorExpression),
-            `Assignment expression '(${this.elementsToText(elements)}' is missing the value(s) you want to store`
+            `Assignment expression '(${this.elementsToText(elements)}' is missing the value(s) you want to store`,
+            this.OR1
         );
     });
 
