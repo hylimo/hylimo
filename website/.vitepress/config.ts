@@ -41,6 +41,42 @@ export default defineConfig({
 
         socialLinks: [{ icon: "github", link: "https://github.com/hylimo/hylimo" }]
     },
+    head: [
+        [
+            "meta",
+            {
+                name: "description",
+                content: "Graphical and text editor for diagrams, especially UML diagrams"
+            }
+        ],
+        [
+            "meta",
+            {
+                name: "author",
+                content: "Niklas Krieger and Leon Hofmeister"
+            }
+        ],
+        ["link", { rel: "icon", href: "/favicon.ico" }],
+        [
+            "meta",
+            {
+                name: "keywords",
+                content: "UML diagram editor, graphical editor, text editor, diagram editor"
+            }
+        ],
+        [
+            "meta",
+            {
+                name: "charset",
+                content: "UTF-8"
+            }
+        ],
+
+        // Config for the PWA:
+        ["link", { rel: "canonical", href: "https://hylimo.github.io" }],
+        ["link", { rel: "manifest", href: "/manifest.webmanifest" }],
+        ["script", {}]
+    ],
     vite: {
         resolve: {
             dedupe: ["vscode"]
