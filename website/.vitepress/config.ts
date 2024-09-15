@@ -75,7 +75,15 @@ export default defineConfig({
         // Config for the PWA:
         ["link", { rel: "canonical", href: "https://hylimo.github.io" }],
         ["link", { rel: "manifest", href: "/manifest.webmanifest" }],
-        ["script", {}]
+        [
+            "script",
+            { id: "register-service-worker" },
+            `;(() => {
+        if ('serviceWorker' in navigator) {
+          navigator.serviceWorker.register('/serviceworker.js')
+        }
+      })()`
+        ]
     ],
     vite: {
         resolve: {
