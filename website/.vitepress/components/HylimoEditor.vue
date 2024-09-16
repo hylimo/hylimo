@@ -86,7 +86,8 @@ onMounted(async () => {
                     },
                     scrollbar: {
                         alwaysConsumeMouseWheel: false
-                    }
+                    },
+                    glyphMargin: false
                 }
             }
         }

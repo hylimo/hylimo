@@ -1,93 +1,159 @@
 import { defineConfig } from "vitepress";
 import markdown from "./theme/markdown";
+import { withPwa } from "@vite-pwa/vitepress";
 
-export default defineConfig({
-    title: "HyLiMo",
-    markdown,
-    themeConfig: {
-        logo: {
-            src: "/icons/hylimo.svg",
-            width: 35,
-            height: 35
+export default withPwa(
+    defineConfig({
+        title: "HyLiMo",
+        markdown,
+        themeConfig: {
+            logo: {
+                src: "/icons/hylimo.svg",
+                width: 35,
+                height: 35
+            },
+            nav: [
+                { text: "Docs", link: "/docs/docs" },
+                { component: "NavTeleportTarget", props: { "target-id": "copy-diagram-link" } },
+                { component: "NavTeleportTarget", props: { "target-id": "export-diagram" } },
+                { component: "Settings" }
+            ],
+
+            sidebar: [
+                {
+                    text: "Getting Started",
+                    collapsed: false,
+                    items: [
+                        { text: "HyLiMo", link: "/docs/docs" },
+                        { text: "Hybrid Editor", link: "/docs/editor" },
+                        { text: "SyncScript", link: "/docs/syncscript" },
+                        { text: "Diagram DSL", link: "/docs/diagram" }
+                    ]
+                },
+                {
+                    text: "Diagram Types",
+                    collapsed: false,
+                    items: [{ text: "UML Class Diagram", link: "/docs/class" }]
+                }
+            ],
+
+            search: {
+                provider: "local"
+            },
+
+            socialLinks: [{ icon: "github", link: "https://github.com/hylimo/hylimo" }]
         },
-        nav: [
-            { text: "Docs", link: "/docs/docs" },
-            { component: "NavTeleportTarget", props: { "target-id": "copy-diagram-link" } },
-            { component: "NavTeleportTarget", props: { "target-id": "export-diagram" } },
-            { component: "Settings" }
+        head: [
+            [
+                "meta",
+                {
+                    name: "description",
+                    content: "Graphical and text editor for diagrams, especially UML diagrams"
+                }
+            ],
+            [
+                "meta",
+                {
+                    name: "author",
+                    content: "Niklas Krieger and Leon Hofmeister"
+                }
+            ],
+            ["link", { rel: "icon", href: "/favicon.ico" }],
+            [
+                "meta",
+                {
+                    name: "keywords",
+                    content: "UML diagram editor, graphical editor, text editor, diagram editor"
+                }
+            ],
+            [
+                "meta",
+                {
+                    name: "charset",
+                    content: "UTF-8"
+                }
+            ]
         ],
-
-        sidebar: [
-            {
-                text: "Getting Started",
-                collapsed: false,
-                items: [
-                    { text: "HyLiMo", link: "/docs/docs" },
-                    { text: "Hybrid Editor", link: "/docs/editor" },
-                    { text: "SyncScript", link: "/docs/syncscript" },
-                    { text: "Diagram DSL", link: "/docs/diagram" }
+        vite: {
+            resolve: {
+                dedupe: ["vscode"]
+            }
+        },
+        pwa: {
+            manifest: {
+                name: "HyLiMo",
+                short_name: "HyLiMo",
+                theme_color: "#1B1B1F",
+                background_color: "#1B1B1F",
+                icons: [
+                    {
+                        src: "/icons/hylimo-128px.avif",
+                        sizes: "128x128",
+                        type: "image/avif"
+                    },
+                    {
+                        src: "/icons/hylimo-192px.avif",
+                        sizes: "192x192",
+                        type: "image/avif"
+                    },
+                    {
+                        src: "/icons/hylimo-256px.avif",
+                        sizes: "256x256",
+                        type: "image/avif"
+                    },
+                    {
+                        src: "/icons/hylimo-256px.jpg",
+                        sizes: "256x256",
+                        type: "image/jpeg"
+                    },
+                    {
+                        src: "/icons/hylimo-256px.webp",
+                        sizes: "256x256",
+                        type: "image/webp"
+                    },
+                    {
+                        src: "/icons/hylimo-512px.avif",
+                        sizes: "512x512",
+                        type: "image/avif"
+                    },
+                    {
+                        src: "/icons/hylimo.svg",
+                        sizes: "128x128",
+                        type: "image/svg+xml"
+                    }
+                ],
+                screenshots: [
+                    {
+                        src: "/screenshots/editor.png",
+                        sizes: "2000x1000",
+                        type: "image/png",
+                        form_factor: "wide",
+                        label: "Editing an example diagram"
+                    },
+                    {
+                        src: "/screenshots/docs.png",
+                        sizes: "2000x1000",
+                        type: "image/png",
+                        form_factor: "wide",
+                        label: "Viewing the documentation"
+                    },
+                    {
+                        src: "/screenshots/search.png",
+                        sizes: "2000x1000",
+                        type: "image/png",
+                        form_factor: "wide",
+                        label: "Searching in the documentation"
+                    }
                 ]
             },
-            {
-                text: "Diagram Types",
-                collapsed: false,
-                items: [{ text: "UML Class Diagram", link: "/docs/class" }]
+            workbox: {
+                maximumFileSizeToCacheInBytes: 10 * 1024 ** 2
+            },
+            devOptions: {
+                enabled: true,
+                suppressWarnings: true,
+                navigateFallback: "/"
             }
-        ],
-
-        search: {
-            provider: "local"
-        },
-
-        socialLinks: [{ icon: "github", link: "https://github.com/hylimo/hylimo" }]
-    },
-    head: [
-        [
-            "meta",
-            {
-                name: "description",
-                content: "Graphical and text editor for diagrams, especially UML diagrams"
-            }
-        ],
-        [
-            "meta",
-            {
-                name: "author",
-                content: "Niklas Krieger and Leon Hofmeister"
-            }
-        ],
-        ["link", { rel: "icon", href: "/favicon.ico" }],
-        [
-            "meta",
-            {
-                name: "keywords",
-                content: "UML diagram editor, graphical editor, text editor, diagram editor"
-            }
-        ],
-        [
-            "meta",
-            {
-                name: "charset",
-                content: "UTF-8"
-            }
-        ],
-
-        // Config for the PWA:
-        ["link", { rel: "canonical", href: "https://hylimo.github.io" }],
-        ["link", { rel: "manifest", href: "/manifest.webmanifest" }],
-        [
-            "script",
-            { id: "register-service-worker" },
-            `;(() => {
-        if ('serviceWorker' in navigator) {
-          navigator.serviceWorker.register('/serviceworker.js')
         }
-      })()`
-        ]
-    ],
-    vite: {
-        resolve: {
-            dedupe: ["vscode"]
-        }
-    }
-});
+    })
+);
