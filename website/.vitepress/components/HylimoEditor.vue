@@ -36,6 +36,7 @@ import { language, languageClientKey } from "../theme/lspPlugin";
 import { Disposable } from "vscode-languageserver-protocol";
 import { useResizeObserver } from "@vueuse/core";
 import { v4 as uuid } from "uuid";
+import * as monaco from "monaco-editor";
 
 const id = uuid();
 
@@ -96,7 +97,7 @@ onMounted(async () => {
                 $type: "classic",
                 editorOptions: {
                     language,
-                    value: model.value,
+                    model: null,
                     automaticLayout: true,
                     fixedOverflowWidgets: true,
                     hover: {
@@ -118,13 +119,14 @@ onMounted(async () => {
     const editor = wrapper.getEditor()!;
     hideMainContent.value = false;
 
-    const editorModel = editor.getModel()!;
-    const pushStackElement = editorModel.pushStackElement;
+    const editorModel = monaco.editor.createModel(model.value, language);
+    editor.setModel(editorModel);
+    const pushStackElement = editorModel.pushStackElement.bind(editorModel);
 
     // override pushStackElement to ignore undo stops during transactions
     editorModel.pushStackElement = () => {
         if (transactionState.value == TransactionState.None) {
-            pushStackElement.call(editorModel);
+            pushStackElement();
         }
     };
 
