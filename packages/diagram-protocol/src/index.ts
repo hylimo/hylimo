@@ -3,6 +3,8 @@ export * from "./diagram/transaction/defaultEditTypes.js";
 export * from "./diagram/transaction/edit.js";
 export * from "./diagram/transaction/incrementalUpdateAction.js";
 export * from "./diagram/transaction/transactionalAction.js";
+export * from "./diagram/undo-redo/remoteRedoAction.js";
+export * from "./diagram/undo-redo/remoteUndoAction.js";
 export * from "./lsp/config.js";
 export * from "./lsp/diagramNotificationTypes.js";
 export * from "./lsp/diagramRequestTypes.js";

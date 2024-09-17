@@ -28,7 +28,7 @@ import {
     TYPES,
     decorationModule,
     registerModelElement,
-    undoRedoModule
+    undoRedoModule as sprottyUndoRedoModule
 } from "sprotty";
 import { CommandStack } from "./base/commandStack.js";
 import { moveModule } from "./features/move/di.config.js";
@@ -66,6 +66,7 @@ import { navigationModule } from "./features/navigation/di.config.js";
 import { splitCanvasSegmentModule } from "./features/split-canvas-segment/di.config.js";
 import { resetCanvasBoundsModule } from "./features/canvas-bounds/di.config.js";
 import { viewportModule } from "./features/viewport/di.config.js";
+import { undoRedoModule } from "./features/undo-redo/di.config.js";
 
 /**
  * The module used
@@ -111,7 +112,7 @@ const diagramModule = new ContainerModule((bind, unbind, isBound, rebind) => {
 export function createContainer(widgetId: string): Container {
     const container = new Container();
     loadDefaultModules(container, {
-        exclude: [sprottyUpdateModule, sprottyMoveModule, sprottyZOrderModule, decorationModule, undoRedoModule]
+        exclude: [sprottyUpdateModule, sprottyMoveModule, sprottyZOrderModule, decorationModule, sprottyUndoRedoModule]
     });
     container.load(
         updateModule,
@@ -121,7 +122,8 @@ export function createContainer(widgetId: string): Container {
         resetCanvasBoundsModule,
         navigationModule,
         splitCanvasSegmentModule,
-        viewportModule
+        viewportModule,
+        undoRedoModule
     );
     container.load(diagramModule);
 

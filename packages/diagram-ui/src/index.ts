@@ -24,6 +24,8 @@ export * from "./features/split-canvas-segment/di.config.js";
 export * from "./features/split-canvas-segment/splitCanvasSegmentMouseListener.js";
 export * from "./features/transaction/di.config.js";
 export * from "./features/transaction/transactionIdProvider.js";
+export * from "./features/undo-redo/di.config.js";
+export * from "./features/undo-redo/remoteUndoRedoKeyListener.js";
 export * from "./features/update/di.config.js";
 export * from "./features/update/incrementalUpdateModel.js";
 export * from "./features/update/updateModel.js";

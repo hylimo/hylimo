@@ -17,7 +17,7 @@ export abstract class MoveHandler {
      * @param dx the absolute x offset
      * @param dy the absolute y offset
      * @param sequenceNumber the sequence number of the action
-     * @param commited if true, this is the final action of the transaction
+     * @param committed if true, this is the final action of the transaction
      * @param event the mouse event which triggered the move
      * @returns the generated action
      */
@@ -25,14 +25,14 @@ export abstract class MoveHandler {
         dx: number,
         dy: number,
         sequenceNumber: number,
-        commited: boolean,
+        committed: boolean,
         event: MouseEvent
     ): TransactionalAction {
         return {
             kind: TransactionalAction.KIND,
             transactionId: this.transactionId,
             sequenceNumber,
-            commited,
+            committed,
             edits: this.generateEdits(dx, dy, event)
         };
     }

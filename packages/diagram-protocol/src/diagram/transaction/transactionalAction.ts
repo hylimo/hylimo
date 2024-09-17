@@ -20,7 +20,7 @@ export interface TransactionalAction {
      * If true, the action commits the transaction
      * and no further actions with the same transactionId are possible.
      */
-    commited: boolean;
+    committed: boolean;
     /**
      * The edits to perform
      */

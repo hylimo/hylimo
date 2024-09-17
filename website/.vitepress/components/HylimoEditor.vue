@@ -23,7 +23,8 @@ import { RequestModelAction, ActionMessage } from "sprotty-protocol";
 import {
     DiagramActionNotification,
     DiagramOpenNotification,
-    PublishDocumentRevealNotification
+    PublishDocumentRevealNotification,
+    TransactionalAction
 } from "@hylimo/diagram-protocol";
 import { createContainer, DiagramServerProxy, ResetCanvasBoundsAction } from "@hylimo/diagram-ui";
 import { Root } from "@hylimo/diagram-common";
@@ -54,11 +55,31 @@ const model = defineModel({
     required: true
 });
 
+/**
+ * Enum which controls the current transaction state
+ * Used for handling undo stops, which should be ignored during transactions
+ */
+enum TransactionState {
+    /**
+     * No transaction is in progress
+     */
+    None,
+    /**
+     * Transaction is in progress, ignore undo stops
+     */
+    InProgress,
+    /**
+     * Transaction is committed, go to normal mode after next final edit
+     */
+    Committed
+}
+
 const editorElement = ref<HTMLElement | null>(null);
 const sprottyWrapper = ref<HTMLElement | null>(null);
 const disposables = shallowRef<Disposable[]>([]);
 const languageClient = inject(languageClientKey)!;
 const actionDispatcher = shallowRef<IActionDispatcher>();
+const transactionState = ref(TransactionState.None);
 const hideMainContent = ref(true);
 
 useResizeObserver(sprottyWrapper, () => {
@@ -97,8 +118,23 @@ onMounted(async () => {
     const editor = wrapper.getEditor()!;
     hideMainContent.value = false;
 
-    editor.getModel()?.onDidChangeContent(() => {
+    const editorModel = editor.getModel()!;
+    const pushStackElement = editorModel.pushStackElement;
+
+    // override pushStackElement to ignore undo stops during transactions
+    editorModel.pushStackElement = () => {
+        if (transactionState.value == TransactionState.None) {
+            pushStackElement.call(editorModel);
+        }
+    };
+
+    editorModel.onDidChangeContent(() => {
         model.value = editor.getValue();
+        if (transactionState.value == TransactionState.Committed) {
+            // it's important to do this here, as by this, the undo stop before applying the last update is still ignored,
+            // while the undo stop after applying counts as a normal undo stop
+            transactionState.value = TransactionState.None;
+        }
     });
 
     const uri = editor.getModel()?.uri?.toString();
@@ -146,6 +182,23 @@ onMounted(async () => {
 
         protected override sendMessage(message: ActionMessage): void {
             currentLanguageClient.sendNotification(DiagramActionNotification.type, message);
+        }
+
+        protected handleUndo(): void {
+            editor.trigger("diagram", "undo", {});
+        }
+
+        protected handleRedo(): void {
+            editor.trigger("diagram", "redo", {});
+        }
+
+        protected handleTransactionStart(): void {
+            editorModel.pushStackElement();
+            transactionState.value = TransactionState.InProgress;
+        }
+
+        protected handleTransactionCommit(): void {
+            transactionState.value = TransactionState.Committed;
         }
     }
 
