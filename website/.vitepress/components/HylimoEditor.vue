@@ -184,20 +184,20 @@ onMounted(async () => {
             currentLanguageClient.sendNotification(DiagramActionNotification.type, message);
         }
 
-        protected handleUndo(): void {
+        protected override handleUndo(): void {
             editor.trigger("diagram", "undo", {});
         }
 
-        protected handleRedo(): void {
+        protected override handleRedo(): void {
             editor.trigger("diagram", "redo", {});
         }
 
-        protected handleTransactionStart(): void {
+        protected override handleTransactionStart(): void {
             editorModel.pushStackElement();
             transactionState.value = TransactionState.InProgress;
         }
 
-        protected handleTransactionCommit(): void {
+        protected override handleTransactionCommit(): void {
             transactionState.value = TransactionState.Committed;
         }
     }
