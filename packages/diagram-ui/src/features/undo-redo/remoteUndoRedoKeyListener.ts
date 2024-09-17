@@ -7,13 +7,14 @@ import { Action } from "sprotty-protocol";
  */
 export class RemoteUndoRedoKeyListener extends KeyListener {
     override keyDown(element: SModelElementImpl, event: KeyboardEvent): Action[] {
-        if (isCtrlOrCmd(event)) {
-            if (event.key.toLowerCase() == "y" || (event.shiftKey && event.key.toLowerCase() == "z")) {
-                return [{ kind: RemoteRedoAction.KIND } satisfies RemoteRedoAction];
-            }
-            if (event.key.toLowerCase() == "z") {
-                return [{ kind: RemoteUndoAction.KIND } satisfies RemoteUndoAction];
-            }
+        if (!isCtrlOrCmd(event)) {
+            return [];
+        }
+        if (event.key.toLowerCase() == "y" || (event.shiftKey && event.key.toLowerCase() == "z")) {
+            return [{ kind: RemoteRedoAction.KIND } satisfies RemoteRedoAction];
+        }
+        if (event.key.toLowerCase() == "z") {
+            return [{ kind: RemoteUndoAction.KIND } satisfies RemoteUndoAction];
         }
         return [];
     }
