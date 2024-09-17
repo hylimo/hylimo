@@ -96,7 +96,7 @@ export class TransactionManager {
             this.diagram.applyEdit(textDocumentEdit);
             this.lastAppliedAction = this.lastKnownAction;
         }
-        if (this.lastAppliedAction?.commited) {
+        if (this.lastAppliedAction?.committed) {
             this.resetActionState();
         }
     }

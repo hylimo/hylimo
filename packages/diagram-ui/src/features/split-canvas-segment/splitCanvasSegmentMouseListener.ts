@@ -58,7 +58,7 @@ export class SplitCanvasSegmentMouseListener extends MouseListener {
                 kind: TransactionalAction.KIND,
                 transactionId: this.transactionIdProvider.generateId(),
                 sequenceNumber: 0,
-                commited: true,
+                committed: true,
                 edits
             };
             return [action];
