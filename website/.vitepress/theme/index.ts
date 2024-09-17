@@ -1,10 +1,15 @@
-import type { Theme } from "vitepress";
+import type { Theme as VitepressTheme } from "vitepress";
 import DefaultTheme from "vitepress/theme";
 import "./style.css";
 import "./icons.css";
 import EmbeddedHylimoEditor from "../components/EmbeddedHylimoEditor.vue";
 import NavTeleportTarget from "../components/NavTeleportTarget.vue";
 import Settings from "../components/Settings.vue";
+
+import { h } from 'vue';
+import Theme from 'vitepress/theme';
+
+import RegisterSW from '../components/RegisterSW.vue';
 
 export default {
     extends: DefaultTheme,
@@ -16,5 +21,10 @@ export default {
             const { lspPlugin } = await import("./lspPlugin");
             app.use(lspPlugin);
         }
-    }
-} satisfies Theme;
+    },
+    Layout() {
+    return h(Theme.Layout, null, {
+      'layout-bottom': () => h(RegisterSW)
+    })
+  }
+} satisfies VitepressTheme;
