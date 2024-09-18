@@ -5,9 +5,8 @@ import { WrapperObject } from "../runtime/objects/wrapperObject.js";
 
 /**
  * Field access expression
- * Evalueates to the value of the field
+ * Evaluates to the value of the field
  */
-
 export class FieldAccessExpression extends Expression<CompletionExpressionMetadata> {
     static readonly TYPE = "FieldAccessExpression";
 

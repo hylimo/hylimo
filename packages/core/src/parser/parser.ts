@@ -268,7 +268,21 @@ export class Parser extends CstParser {
      * @param onlyIdentifier if true, only an identifier is match for the first part
      */
     private simpleCallExpression = this.RULE(Rules.SIMPLE_CALL_EXPRESSION, () => {
-        this.CONSUME(Identifier, { ERR_MSG: "Function call is missing its caller" });
+        this.OR([
+            {
+                ALT: () => {
+                    this.CONSUME(OpenSquareBracket, { ERR_MSG: "Opening '[' of index access is missing" });
+                    this.withError(() => this.SUBRULE(this.expression), "Index access is missing its index", this.OR1);
+                    this.CONSUME(CloseSquareBracket, { ERR_MSG: "Closing ']' of index access is missing" });
+                }
+            },
+            {
+                ALT: () => {
+                    this.CONSUME(Dot, { ERR_MSG: "Expected a '.' but found none" });
+                    this.CONSUME(Identifier, { ERR_MSG: "Missing identifier after '.'" });
+                }
+            }
+        ]);
         this.MANY(() => {
             this.SUBRULE(this.callBrackets);
         });
@@ -294,13 +308,15 @@ export class Parser extends CstParser {
     private fieldAccessExpression = this.RULE(Rules.FIELD_ACCESS_EXPRESSION, () => {
         this.SUBRULE1(this.callExpression);
         this.MANY({
+            GATE: () => this.LA(2).tokenType != CloseSquareBracket,
             DEF: () => {
-                this.CONSUME(Dot, { ERR_MSG: "Expected a '.' but found none" });
-                this.withError(() => this.SUBRULE2(this.simpleCallExpression), `Missing identifier after '.'`);
+                this.SUBRULE2(this.simpleCallExpression);
             }
         });
         if (this.faultTolerant) {
-            this.OPTION(() => this.CONSUME1(Dot, { LABEL: AdditionalToken.FAULT_TOLERANT }));
+            this.OPTION(() => {
+                this.CONSUME2(Dot, { LABEL: AdditionalToken.FAULT_TOLERANT });
+            });
         }
     });
 

@@ -6,7 +6,7 @@ import {
     FieldAccessExpression,
     IdentifierExpression,
     NumberLiteralExpression,
-    SelfInvocationExpression
+    FieldSelfInvocationExpression
 } from "@hylimo/core";
 import { ExecutableExpression } from "@hylimo/core";
 import { RuntimeAstTransformer } from "@hylimo/core";
@@ -29,9 +29,9 @@ export class CompletionAstTransformer extends RuntimeAstTransformer {
     override visitAssignmentExpression(expression: AssignmentExpression): ExecutableExpression<any> {
         if (this.isInCompletionRange(expression)) {
             if (expression.target != undefined) {
-                return new ExecutableCompletionExpression(expression, this.visit(expression.target));
+                return new ExecutableCompletionExpression(expression, true, this.visit(expression.target));
             } else {
-                return new ExecutableCompletionExpression(expression);
+                return new ExecutableCompletionExpression(expression, false);
             }
         } else {
             return super.visitAssignmentExpression(expression);
@@ -43,7 +43,7 @@ export class CompletionAstTransformer extends RuntimeAstTransformer {
             this.isInCompletionRange(expression) &&
             (!(expression.target instanceof NumberLiteralExpression) || expression.name !== "")
         ) {
-            return new ExecutableCompletionExpression(expression, this.visit(expression.target));
+            return new ExecutableCompletionExpression(expression, true, this.visit(expression.target));
         } else {
             return super.visitFieldAccessExpression(expression);
         }
@@ -51,17 +51,17 @@ export class CompletionAstTransformer extends RuntimeAstTransformer {
 
     override visitIdentifierExpression(expression: IdentifierExpression): ExecutableExpression<any> {
         if (this.isInCompletionRange(expression)) {
-            return new ExecutableCompletionExpression(expression);
+            return new ExecutableCompletionExpression(expression, false);
         } else {
             return super.visitIdentifierExpression(expression);
         }
     }
 
-    override visitSelfInvocationExpression(expression: SelfInvocationExpression): ExecutableExpression<any> {
+    override visitFieldSelfInvocationExpression(expression: FieldSelfInvocationExpression): ExecutableExpression<any> {
         if (this.isInCompletionRange(expression)) {
-            return new ExecutableCompletionExpression(expression, this.visit(expression.target));
+            return new ExecutableCompletionExpression(expression, true, this.visit(expression.target));
         } else {
-            return super.visitSelfInvocationExpression(expression);
+            return super.visitFieldSelfInvocationExpression(expression);
         }
     }
 

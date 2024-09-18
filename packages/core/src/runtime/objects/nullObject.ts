@@ -20,8 +20,8 @@ export class NullObject extends BaseObject {
         throw new RuntimeError(`Getting fields on null not supported: try to get ${key}`);
     }
 
-    override getFields(_context: InterpreterContext, _self: BaseObject): Record<string, LabeledValue> {
-        return {};
+    override getFields(_context: InterpreterContext, _self: BaseObject): Map<string | number, LabeledValue> {
+        return new Map();
     }
 
     override setField(

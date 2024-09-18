@@ -2,12 +2,8 @@ import { DefaultModuleNames } from "../defaultModuleNames.js";
 import { InterpreterModule } from "../../runtime/interpreter/interpreterModule.js";
 import { assign, fun, id, jsFun, native, num, str } from "../../runtime/executableAstHelper.js";
 import { SemanticFieldNames } from "../../runtime/semanticFieldNames.js";
-import { assertFunction, assertObject } from "../typeHelpers.js";
-import { BaseObject } from "../../runtime/objects/baseObject.js";
+import { assertFunction, assertIndex, assertObject } from "../typeHelpers.js";
 import { LabeledValue } from "../../runtime/objects/labeledValue.js";
-import { StringObject } from "../../runtime/objects/stringObject.js";
-import { NumberObject } from "../../runtime/objects/numberObject.js";
-import { RuntimeError } from "../../runtime/runtimeError.js";
 import { generateArgs } from "../../runtime/objects/generateArgs.js";
 import { or } from "../../types/or.js";
 import { stringType } from "../../types/string.js";
@@ -21,22 +17,6 @@ import { ExecutableNativeExpression } from "../../runtime/ast/executableNativeEx
  * Name of the temporary field where the object prototype is assigned
  */
 const objectProto = "objectProto";
-
-/**
- * Asserts that the value is a string or a number, and returns its value
- *
- * @param value the value to check
- * @returns the string or number value
- */
-function assertIndex(value: BaseObject): string | number {
-    if (value instanceof StringObject) {
-        return value.value;
-    } else if (value instanceof NumberObject) {
-        return value.value;
-    } else {
-        throw new RuntimeError("Only string and number are supported as index types");
-    }
-}
 
 /**
  * Object module

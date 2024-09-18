@@ -36,17 +36,17 @@ export class FullObject extends BaseObject {
         return this.getFieldInternal(key, context, self ?? this);
     }
 
-    override getFields(context: InterpreterContext, self?: BaseObject): Record<string, LabeledValue> {
+    override getFields(context: InterpreterContext, self?: BaseObject): Map<string | number, LabeledValue> {
         const proto = this.proto;
-        const entries: Record<string, LabeledValue> = proto?.getFields(context, self ?? this) ?? {};
+        const entries: Map<string | number, LabeledValue> = proto?.getFields(context, self ?? this) ?? new Map();
         for (const [key, value] of this.fields) {
-            entries[key] = value;
+            entries.set(key, value);
         }
         if (this.properties == undefined) {
             return entries;
         }
         for (const [key, value] of this.properties) {
-            entries[key] = value.get(self ?? this, context);
+            entries.set(key, value.get(self ?? this, context));
         }
         return entries;
     }

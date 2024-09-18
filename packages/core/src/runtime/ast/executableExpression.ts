@@ -9,7 +9,7 @@ import {
     ExecutableFieldAccessExpression,
     ExecutableListEntry,
     ExecutableInvocationExpression,
-    ExecutableSelfInvocationExpression
+    ExecutableFieldSelfInvocationExpression
 } from "../../index.js";
 
 /**
@@ -122,7 +122,7 @@ export abstract class ExecutableExpression<T extends Expression = Expression> {
     callField(
         name: string,
         ...args: (ExecutableListEntry | ExecutableExpression)[]
-    ): ExecutableSelfInvocationExpression {
+    ): ExecutableFieldSelfInvocationExpression {
         const escapedArgs = args.map((arg) => {
             if (arg instanceof ExecutableExpression) {
                 return { value: arg };
@@ -130,7 +130,7 @@ export abstract class ExecutableExpression<T extends Expression = Expression> {
                 return arg;
             }
         });
-        return new ExecutableSelfInvocationExpression(undefined, escapedArgs, this, name);
+        return new ExecutableFieldSelfInvocationExpression(undefined, escapedArgs, this, name);
     }
 
     /**

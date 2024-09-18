@@ -9,6 +9,11 @@ import { CompletionItemKind, InsertTextFormat, InsertTextMode, MarkupKind } from
 import { CompletionItem } from "./completionItem.js";
 
 /**
+ * Pattern for identifiers which can be used directly without indexing
+ */
+const identifierPattern = /^((([!#%&'+\-:;<=>?@\\^`|~_$]|\*(?!\/)|\/(?![/*])|\.{2,})+)|([a-z_$][a-z0-9_$]*))$/i;
+
+/**
  * An expression which throws an CompletionError on evaluation
  */
 export class ExecutableCompletionExpression extends ExecutableExpression<Expression<CompletionExpressionMetadata>> {
@@ -16,10 +21,12 @@ export class ExecutableCompletionExpression extends ExecutableExpression<Express
      * Creates a new ExecutableCompletionExpression
      *
      * @param expression the expression this represents
+     * @param isAccess whether this is an access completion (can index be used directly)
      * @param context evaluated and thrown as CompletionError, if undefined, the current scope is used
      */
     constructor(
         expression: Expression<CompletionExpressionMetadata>,
+        readonly isAccess: boolean,
         readonly context?: ExecutableExpression<any>
     ) {
         super(expression);
@@ -43,7 +50,7 @@ export class ExecutableCompletionExpression extends ExecutableExpression<Express
      */
     private transformCompletionContext(value: BaseObject, context: InterpreterContext): CompletionItem[] {
         const items: CompletionItem[] = [];
-        for (const [key, entry] of Object.entries(value.getFields(context))) {
+        for (const [key, entry] of value.getFields(context)) {
             const value = entry.value;
             const docs = this.getDocsDescription(value, context) ?? this.getFieldDescription(value, context, key) ?? "";
             const snippet: string | undefined = this.getDocSnippet(value, context);
@@ -54,7 +61,7 @@ export class ExecutableCompletionExpression extends ExecutableExpression<Express
             } else {
                 kind = isFunction ? CompletionItemKind.Function : CompletionItemKind.Variable;
             }
-            const range = this.expression!.metadata.identifierRange;
+            const range = this.expression!.metadata.completionRange;
             items.push(this.createCompletionItem(key, docs, range, kind));
             if (snippet != undefined) {
                 items.push(this.createSnippetCompletionItem(key, docs, snippet, range));
@@ -182,20 +189,67 @@ export class ExecutableCompletionExpression extends ExecutableExpression<Express
      * @param kind the kind of the completion item
      * @returns the completion item
      */
-    private createCompletionItem(key: string, docs: string, range: Range, kind: CompletionItemKind): CompletionItem {
+    private createCompletionItem(
+        key: string | number,
+        docs: string,
+        range: Range,
+        kind: CompletionItemKind
+    ): CompletionItem {
+        const requiresIndex = typeof key === "number" || !identifierPattern.test(key);
+        let text: string;
+        if (this.isAccess) {
+            text = requiresIndex ? `[${this.keyToString(key)}]` : `.${key}`;
+        } else {
+            text = requiresIndex ? `this[${this.keyToString(key)}]` : key;
+        }
         return {
-            label: key,
-            detail: key,
+            label: key.toString(),
+            detail: key.toString(),
+            filterText: this.computeFilterText(key),
             documentation: {
                 kind: MarkupKind.Markdown,
                 value: docs
             },
             textEdit: {
                 range,
-                text: key
+                text
             },
             kind
         };
+    }
+
+    /**
+     * Converts a key to a string
+     * If the key is a number, it is converted to a string directly.
+     * Otherwise, it is put in quotes and non-ASCII characters are escaped.
+     *
+     * @param key the key to convert
+     * @returns the key as a string
+     */
+    private keyToString(key: string | number): string {
+        if (typeof key === "number") {
+            return key.toString();
+        }
+
+        const allowedPattern = /^[a-zA-Z0-9!#$%&'()*+,\-./:;<=>?@[\]^_`{|}~ ]$/;
+        const escapedKey = [...key]
+            .map((char) => {
+                if (allowedPattern.test(char)) {
+                    return char;
+                } else if (char === "\n") {
+                    return "\\n";
+                } else if (char === "\t") {
+                    return "\\t";
+                } else if (char === '"') {
+                    return '\\"';
+                } else {
+                    const code = char.charCodeAt(0);
+                    return "\\u" + code.toString(16).padStart(4, "0");
+                }
+            })
+            .join("");
+
+        return `"${escapedKey}"`;
     }
 
     /**
@@ -207,11 +261,17 @@ export class ExecutableCompletionExpression extends ExecutableExpression<Express
      * @param range the range to replace
      * @returns the completion item
      */
-    private createSnippetCompletionItem(key: string, docs: string, snippet: string, range: Range): CompletionItem {
+    private createSnippetCompletionItem(
+        key: string | number,
+        docs: string,
+        snippet: string,
+        range: Range
+    ): CompletionItem {
         const snippetCode = key + snippet;
         return {
-            label: key,
-            detail: key,
+            label: key.toString(),
+            detail: key.toString(),
+            filterText: this.computeFilterText(key),
             documentation: {
                 kind: MarkupKind.Markdown,
                 value: docs
@@ -224,5 +284,16 @@ export class ExecutableCompletionExpression extends ExecutableExpression<Express
             insertTextFormat: InsertTextFormat.Snippet,
             insertTextMode: InsertTextMode.adjustIndentation
         };
+    }
+
+    /**
+     * Computes the filter text for a completion item
+     * Currently simply prepends a dot to the key (necessary for field access as the dot is replaced)
+     *
+     * @param key the key of the completion item
+     * @returns the filter text
+     */
+    private computeFilterText(key: string | number): string {
+        return `.${key}`;
     }
 }
