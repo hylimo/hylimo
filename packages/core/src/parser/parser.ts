@@ -308,7 +308,6 @@ export class Parser extends CstParser {
     private fieldAccessExpression = this.RULE(Rules.FIELD_ACCESS_EXPRESSION, () => {
         this.SUBRULE1(this.callExpression);
         this.MANY({
-            GATE: () => this.LA(2).tokenType != CloseSquareBracket,
             DEF: () => {
                 this.SUBRULE2(this.simpleCallExpression);
             }
