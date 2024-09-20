@@ -20,6 +20,8 @@ import { OperatorExpression } from "../ast/operatorExpression.js";
 import { NoopExpression } from "../ast/noopExpression.js";
 import { IndexExpression } from "../ast/indexExpression.js";
 import { IndexSelfInvocationExpression } from "../ast/indexSelfInvocationExpression.js";
+import { FieldAssignmentExpression } from "../ast/fieldAssignmentExpression.js";
+import { IndexAssignmentExpression } from "../ast/indexAssignmentExpression.js";
 
 /**
  * Defines a function invocation
@@ -472,15 +474,19 @@ export function generateCstToAstTransfromer(parser: Parser): ICstVisitor<never, 
                 if (expressions.length > 1) {
                     const target = expressions[0];
                     const value = expressions[1];
-                    const targetMeta = target.metadata as CompletionExpressionMetadata;
-                    const meta: CompletionExpressionMetadata = {
-                        ...generateMetadata(target.range, value.range),
-                        completionRange: targetMeta.completionRange
-                    };
+                    const meta = generateMetadata(target.range, value.range);
                     if (target instanceof IdentifierExpression) {
-                        return new AssignmentExpression(target.identifier, undefined, value, meta);
+                        return new AssignmentExpression(target.identifier, value, {
+                            ...meta,
+                            completionRange: target.metadata.completionRange
+                        });
                     } else if (target instanceof FieldAccessExpression) {
-                        return new AssignmentExpression(target.name as string, target.target, value, meta);
+                        return new FieldAssignmentExpression(target.name, target.target, value, {
+                            ...meta,
+                            completionRange: target.metadata.completionRange
+                        });
+                    } else if (target instanceof IndexExpression) {
+                        return new IndexAssignmentExpression(target.index, target.target, value, meta);
                     } else {
                         throw Error("invalid assignment target");
                     }

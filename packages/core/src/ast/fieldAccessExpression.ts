@@ -12,16 +12,7 @@ export class FieldAccessExpression extends Expression<CompletionExpressionMetada
 
     private static readonly WRAPPER_ENTRIES = new Map([
         ...Expression.expressionWrapperObjectEntries<FieldAccessExpression>(FieldAccessExpression.TYPE),
-        [
-            "name",
-            (wrapped, context) => {
-                if (typeof wrapped.name === "string") {
-                    return context.newString(wrapped.name);
-                } else {
-                    return context.newNumber(wrapped.name);
-                }
-            }
-        ],
+        ["name", (wrapped, context) => context.newString(wrapped.name)],
         ["target", (wrapped, context) => wrapped.target.toWrapperObject(context)]
     ]);
 
@@ -33,7 +24,7 @@ export class FieldAccessExpression extends Expression<CompletionExpressionMetada
      * @param metadata metadata for the expression
      */
     constructor(
-        readonly name: string | number,
+        readonly name: string,
         readonly target: Expression,
         metadata: CompletionExpressionMetadata
     ) {

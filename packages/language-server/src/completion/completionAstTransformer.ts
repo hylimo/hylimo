@@ -11,6 +11,7 @@ import {
 import { ExecutableExpression } from "@hylimo/core";
 import { RuntimeAstTransformer } from "@hylimo/core";
 import { ExecutableCompletionExpression } from "./executableCompletionExpression.js";
+import { FieldAssignmentExpression } from "@hylimo/core/src/ast/fieldAssignmentExpression.js";
 
 /**
  * Transforms the AST into an executable AST where completion expressions are replaced with
@@ -28,13 +29,17 @@ export class CompletionAstTransformer extends RuntimeAstTransformer {
 
     override visitAssignmentExpression(expression: AssignmentExpression): ExecutableExpression<any> {
         if (this.isInCompletionRange(expression)) {
-            if (expression.target != undefined) {
-                return new ExecutableCompletionExpression(expression, true, this.visit(expression.target));
-            } else {
-                return new ExecutableCompletionExpression(expression, false);
-            }
+            return new ExecutableCompletionExpression(expression, false);
         } else {
             return super.visitAssignmentExpression(expression);
+        }
+    }
+
+    override visitFieldAssignmentExpression(expression: FieldAssignmentExpression): ExecutableExpression<any> {
+        if (this.isInCompletionRange(expression)) {
+            return new ExecutableCompletionExpression(expression, true, this.visit(expression.target));
+        } else {
+            return super.visitFieldAssignmentExpression(expression);
         }
     }
 

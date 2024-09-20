@@ -402,9 +402,13 @@ export class Parser extends CstParser {
                     ALT: () => {
                         const leftSide = this.SUBRULE1(this.operatorExpression);
                         this.OPTION({
-                            GATE: () =>
-                                this.LA(0).tokenType == Identifier &&
-                                leftSide.children.fieldAccessExpression.length == 1,
+                            GATE: () => {
+                                if (leftSide.children.fieldAccessExpression?.length != 1) {
+                                    return false;
+                                }
+                                const current = this.LA(0).tokenType;
+                                return current === Identifier || current === CloseSquareBracket;
+                            },
                             DEF: () => {
                                 const equals = this.CONSUME(Equal);
                                 this.withError(

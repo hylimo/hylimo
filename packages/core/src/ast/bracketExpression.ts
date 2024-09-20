@@ -6,7 +6,6 @@ import { WrapperObject } from "../runtime/objects/wrapperObject.js";
 /**
  * Expression which evaluates and returns an inner expression
  */
-
 export class BracketExpression extends Expression {
     static readonly TYPE = "BracketExpression";
 

@@ -31,6 +31,10 @@ import { IndexExpression } from "../ast/indexExpression.js";
 import { ExecutableIndexExpression } from "./ast/executableIndexExpression.js";
 import { IndexSelfInvocationExpression } from "../ast/indexSelfInvocationExpression.js";
 import { ExecutableIndexSelfInvocationExpression } from "./ast/executableIndexSelfInvocationExpression.js";
+import { FieldAssignmentExpression } from "../ast/fieldAssignmentExpression.js";
+import { ExecutableFieldAssignmentExpression } from "./ast/executableFieldAssignmentExpression.js";
+import { IndexAssignmentExpression } from "../ast/indexAssignmentExpression.js";
+import { ExecutableIndexAssignmentExpression } from "./ast/executableIndexAssignmentExpression.js";
 
 /**
  * Transforms the AST into an executable AST
@@ -48,9 +52,26 @@ export class RuntimeAstTransformer extends ASTVisitor<undefined, ExecutableExpre
     override visitAssignmentExpression(expression: AssignmentExpression): ExecutableExpression<any> {
         return new ExecutableAssignmentExpression(
             this.optionalExpression(expression),
-            this.visitOptional(expression.target),
             this.visit(expression.value),
             expression.name
+        );
+    }
+
+    override visitFieldAssignmentExpression(expression: FieldAssignmentExpression): ExecutableExpression<any> {
+        return new ExecutableFieldAssignmentExpression(
+            this.optionalExpression(expression),
+            this.visit(expression.target),
+            this.visit(expression.value),
+            expression.name
+        );
+    }
+
+    override visitIndexAssignmentExpression(expression: IndexAssignmentExpression): ExecutableExpression<any> {
+        return new ExecutableIndexAssignmentExpression(
+            this.optionalExpression(expression),
+            this.visit(expression.target),
+            this.visit(expression.value),
+            this.visit(expression.index)
         );
     }
 
@@ -150,16 +171,6 @@ export class RuntimeAstTransformer extends ASTVisitor<undefined, ExecutableExpre
 
     override visit(expression: Expression): ExecutableExpression<any> {
         return super.visit(expression, undefined);
-    }
-
-    /**
-     * If the expression is undefined, returns undefined, otherwise visits the expression
-     *
-     * @param expression the optional expression to visit
-     * @returns the visited expression or undefined
-     */
-    private visitOptional(expression: Expression | undefined): ExecutableExpression<any> | undefined {
-        return expression ? this.visit(expression) : undefined;
     }
 
     /**

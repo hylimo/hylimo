@@ -5,7 +5,7 @@ import { LabeledValue } from "../objects/labeledValue.js";
 // These classes must not be imported from their originating file directly.
 // Otherwise circular imports will cause runtime errors.
 import {
-    ExecutableAssignmentExpression,
+    ExecutableFieldAssignmentExpression,
     ExecutableFieldAccessExpression,
     ExecutableListEntry,
     ExecutableInvocationExpression,
@@ -134,14 +134,14 @@ export abstract class ExecutableExpression<T extends Expression = Expression> {
     }
 
     /**
-     * Helper function to create an AssignmentExpression which assigns
+     * Helper function to create an FieldAssignmentExpression which assigns
      * a field on this as the target
      *
      * @param field the name of the field
      * @param value the new value of the field
-     * @returns the created AssignmentExpression
+     * @returns the created FieldAssignmentExpression
      */
-    assignField(field: string, value: ExecutableExpression): ExecutableAssignmentExpression {
-        return new ExecutableAssignmentExpression(undefined, this, value, field);
+    assignField(field: string, value: ExecutableExpression): ExecutableFieldAssignmentExpression {
+        return new ExecutableFieldAssignmentExpression(undefined, this, value, field);
     }
 }

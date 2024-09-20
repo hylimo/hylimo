@@ -6,7 +6,6 @@ import { WrapperObjectFieldRetriever } from "../runtime/objects/wrapperObject.js
 /**
  * Base class for all invocation expressions, provides helper to generate args
  */
-
 export abstract class AbstractInvocationExpression<
     M extends ParenthesisExpressionMetadata = ParenthesisExpressionMetadata
 > extends Expression<M> {

@@ -43,6 +43,8 @@ export * from "./runtime/ast/executableObjectExpression.js";
 export * from "./runtime/ast/executableOperatorExpression.js";
 export * from "./runtime/ast/executableFieldSelfInvocationExpression.js";
 export * from "./runtime/ast/executableStringLiteralExpression.js";
+export * from "./runtime/ast/executableIndexSelfInvocationExpression.js";
+export * from "./runtime/ast/executableFieldAssignmentExpression.js";
 export * from "./runtime/interpreter/interpreter.js";
 export * from "./runtime/interpreter/interpreterContext.js";
 export * from "./runtime/interpreter/interpreterModule.js";

@@ -14,6 +14,8 @@ import { OperatorExpression } from "./operatorExpression.js";
 import { NoopExpression } from "./noopExpression.js";
 import { IndexExpression } from "./indexExpression.js";
 import { IndexSelfInvocationExpression } from "./indexSelfInvocationExpression.js";
+import { FieldAssignmentExpression } from "./fieldAssignmentExpression.js";
+import { IndexAssignmentExpression } from "./indexAssignmentExpression.js";
 
 /**
  * Visitor to transform an AST.
@@ -34,6 +36,10 @@ export abstract class ASTVisitor<C, O> {
         switch (expression.type) {
             case AssignmentExpression.TYPE:
                 return this.visitAssignmentExpression(expression as AssignmentExpression, context);
+            case FieldAssignmentExpression.TYPE:
+                return this.visitFieldAssignmentExpression(expression as FieldAssignmentExpression, context);
+            case IndexAssignmentExpression.TYPE:
+                return this.visitIndexAssignmentExpression(expression as IndexAssignmentExpression, context);
             case BracketExpression.TYPE:
                 return this.visitBracketExpression(expression as BracketExpression, context);
             case DestructuringExpression.TYPE:
@@ -68,6 +74,8 @@ export abstract class ASTVisitor<C, O> {
     }
 
     abstract visitAssignmentExpression(expression: AssignmentExpression, context: C): O;
+    abstract visitFieldAssignmentExpression(expression: FieldAssignmentExpression, context: C): O;
+    abstract visitIndexAssignmentExpression(expression: IndexAssignmentExpression, context: C): O;
     abstract visitBracketExpression(expression: BracketExpression, context: C): O;
     abstract visitDestructoringExpression(expression: DestructuringExpression, context: C): O;
     abstract visitFieldAccessExpression(expression: FieldAccessExpression, context: C): O;
