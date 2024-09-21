@@ -285,54 +285,85 @@ export function generateCstToAstTransfromer(parser: Parser): ICstVisitor<never, 
                 identifier = ctx.Identifier[0];
             }
             return (baseExpression) => {
-                const startPos = baseExpression.range;
                 if (identifier != undefined) {
-                    const dot = ctx.Dot[0];
-                    const completionRange = generateRange(dot, identifier);
-                    if (callBrackets.length > 0) {
-                        const [first, ...remaining] = callBrackets;
-                        const { inner, trailing, endPos: endRange } = first;
-                        const invocationExpression = new FieldSelfInvocationExpression(
-                            identifier.image,
-                            baseExpression,
-                            inner,
-                            trailing,
-                            {
-                                ...generateCompletionMetadata(startPos, endRange, completionRange),
-                                parenthesisRange: this.calculateParenthesisRange(first, completionRange)
-                            }
-                        );
-                        return this.applyCallBrackets(invocationExpression, remaining);
-                    } else {
-                        return new FieldAccessExpression(
-                            identifier.image,
-                            baseExpression,
-                            generateCompletionMetadata(startPos, completionRange, completionRange)
-                        );
-                    }
+                    return this.handleIdentifierSimpleCallExpression(ctx, identifier, callBrackets, baseExpression);
                 } else if (index != undefined) {
-                    const indexRange = generateRange(ctx.OpenSquareBracket[0], ctx.CloseSquareBracket[0]);
-                    if (callBrackets.length > 0) {
-                        const [first, ...remaining] = callBrackets;
-                        const { inner, trailing, endPos: endRange } = first;
-                        const invocationExpression = new IndexSelfInvocationExpression(
-                            index,
-                            baseExpression,
-                            inner,
-                            trailing,
-                            {
-                                ...generateMetadata(startPos, endRange),
-                                parenthesisRange: this.calculateParenthesisRange(first, indexRange)
-                            }
-                        );
-                        return this.applyCallBrackets(invocationExpression, remaining);
-                    } else {
-                        return new IndexExpression(index, baseExpression, generateMetadata(startPos, indexRange));
-                    }
+                    return this.handleIndexSimpleCallExpression(ctx, index, callBrackets, baseExpression);
                 } else {
                     throw Error("Invalid simple call expression");
                 }
             };
+        }
+
+        /**
+         * Handles a simple call expression with an identifier
+         *
+         * @param ctx the children of the current CST node
+         * @param identifier the identifier token to handle
+         * @param callBrackets the call brackets to apply
+         * @param baseExpression the base expression to apply the call brackets to
+         * @returns the resulting expression
+         */
+        private handleIdentifierSimpleCallExpression(
+            ctx: any,
+            identifier: IToken,
+            callBrackets: CallBracketsDefinition[],
+            baseExpression: Expression
+        ): Expression {
+            const startPos = baseExpression.range;
+            const dot = ctx.Dot[0];
+            const completionRange = generateRange(dot, identifier);
+            if (callBrackets.length > 0) {
+                const [first, ...remaining] = callBrackets;
+                const { inner, trailing, endPos: endRange } = first;
+                const invocationExpression = new FieldSelfInvocationExpression(
+                    identifier.image,
+                    baseExpression,
+                    inner,
+                    trailing,
+                    {
+                        ...generateCompletionMetadata(startPos, endRange, completionRange),
+                        parenthesisRange: this.calculateParenthesisRange(first, completionRange)
+                    }
+                );
+                return this.applyCallBrackets(invocationExpression, remaining);
+            } else {
+                return new FieldAccessExpression(
+                    identifier.image,
+                    baseExpression,
+                    generateCompletionMetadata(startPos, completionRange, completionRange)
+                );
+            }
+        }
+
+        /**
+         * Handles a simple call expression with an index
+         *
+         * @param ctx the children of the current CST node
+         * @param index the index expression to handle
+         * @param callBrackets the call brackets to apply
+         * @param baseExpression the base expression to apply the call brackets to
+         * @returns the resulting expression
+         */
+        private handleIndexSimpleCallExpression(
+            ctx: any,
+            index: Expression,
+            callBrackets: CallBracketsDefinition[],
+            baseExpression: Expression
+        ): Expression {
+            const startPos = baseExpression.range;
+            const indexRange = generateRange(ctx.OpenSquareBracket[0], ctx.CloseSquareBracket[0]);
+            if (callBrackets.length > 0) {
+                const [first, ...remaining] = callBrackets;
+                const { inner, trailing, endPos: endRange } = first;
+                const invocationExpression = new IndexSelfInvocationExpression(index, baseExpression, inner, trailing, {
+                    ...generateMetadata(startPos, endRange),
+                    parenthesisRange: this.calculateParenthesisRange(first, indexRange)
+                });
+                return this.applyCallBrackets(invocationExpression, remaining);
+            } else {
+                return new IndexExpression(index, baseExpression, generateMetadata(startPos, indexRange));
+            }
         }
 
         /**
