@@ -6,7 +6,6 @@ import { InterpreterContext } from "../runtime/interpreter/interpreterContext.js
 /**
  * Base interface for all expressions
  */
-
 export abstract class Expression<M extends ExpressionMetadata = ExpressionMetadata> {
     /**
      * Creates the common entries for subclass wrapper objects

@@ -33,7 +33,7 @@ export abstract class BaseObject {
      * @param self the object to get the fields from
      * @returns all field entries
      */
-    abstract getFields(context: InterpreterContext, self?: BaseObject): Record<string, LabeledValue>;
+    abstract getFields(context: InterpreterContext, self?: BaseObject): Map<string | number, LabeledValue>;
 
     /**
      * Wrapper for getField which only returns the value
@@ -138,7 +138,7 @@ export abstract class SimpleObject extends BaseObject {
         }
     }
 
-    override getFields(context: InterpreterContext, self?: BaseObject): Record<string, LabeledValue> {
+    override getFields(context: InterpreterContext, self?: BaseObject): Map<string | number, LabeledValue> {
         return this.proto.getFields(context, self ?? this);
     }
 

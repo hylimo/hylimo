@@ -1,5 +1,5 @@
 import { StringLiteralExpression } from "../ast/stringLiteralExpression.js";
-import { SelfInvocationExpression } from "../ast/selfInvocationExpression.js";
+import { FieldSelfInvocationExpression } from "../ast/fieldSelfInvocationExpression.js";
 import { NumberLiteralExpression } from "../ast/numberLiteralExpression.js";
 import { InvocationExpression } from "../ast/invocationExpression.js";
 import { ListEntry } from "../ast/listEntry.js";
@@ -21,12 +21,20 @@ import { ExecutableFunctionExpression } from "./ast/executableFunctionExpression
 import { ExecutableIdentifierExpression } from "./ast/executableIdentifierExpression.js";
 import { ExecutableInvocationExpression } from "./ast/executableInvocationExpression.js";
 import { ExecutableNumberLiteralExpression } from "./ast/executableNumberLiteralExpression.js";
-import { ExecutableSelfInvocationExpression } from "./ast/executableSelfInvocationExpression.js";
+import { ExecutableFieldSelfInvocationExpression } from "./ast/executableFieldSelfInvocationExpression.js";
 import { ExecutableStringLiteralExpression } from "./ast/executableStringLiteralExpression.js";
 import { ObjectExpression } from "../ast/objectExpression.js";
 import { ExecutableObjectExpression } from "./ast/executableObjectExpression.js";
 import { OperatorExpression } from "../ast/operatorExpression.js";
 import { ExecutableOperatorExpression } from "./ast/executableOperatorExpression.js";
+import { IndexExpression } from "../ast/indexExpression.js";
+import { ExecutableIndexExpression } from "./ast/executableIndexExpression.js";
+import { IndexSelfInvocationExpression } from "../ast/indexSelfInvocationExpression.js";
+import { ExecutableIndexSelfInvocationExpression } from "./ast/executableIndexSelfInvocationExpression.js";
+import { FieldAssignmentExpression } from "../ast/fieldAssignmentExpression.js";
+import { ExecutableFieldAssignmentExpression } from "./ast/executableFieldAssignmentExpression.js";
+import { IndexAssignmentExpression } from "../ast/indexAssignmentExpression.js";
+import { ExecutableIndexAssignmentExpression } from "./ast/executableIndexAssignmentExpression.js";
 
 /**
  * Transforms the AST into an executable AST
@@ -44,9 +52,26 @@ export class RuntimeAstTransformer extends ASTVisitor<undefined, ExecutableExpre
     override visitAssignmentExpression(expression: AssignmentExpression): ExecutableExpression<any> {
         return new ExecutableAssignmentExpression(
             this.optionalExpression(expression),
-            this.visitOptional(expression.target),
             this.visit(expression.value),
             expression.name
+        );
+    }
+
+    override visitFieldAssignmentExpression(expression: FieldAssignmentExpression): ExecutableExpression<any> {
+        return new ExecutableFieldAssignmentExpression(
+            this.optionalExpression(expression),
+            this.visit(expression.target),
+            this.visit(expression.value),
+            expression.name
+        );
+    }
+
+    override visitIndexAssignmentExpression(expression: IndexAssignmentExpression): ExecutableExpression<any> {
+        return new ExecutableIndexAssignmentExpression(
+            this.optionalExpression(expression),
+            this.visit(expression.target),
+            this.visit(expression.value),
+            this.visit(expression.index)
         );
     }
 
@@ -67,6 +92,14 @@ export class RuntimeAstTransformer extends ASTVisitor<undefined, ExecutableExpre
             this.optionalExpression(expression),
             this.visit(expression.target),
             expression.name
+        );
+    }
+
+    override visitIndexExpression(expression: IndexExpression): ExecutableExpression<any> {
+        return new ExecutableIndexExpression(
+            this.optionalExpression(expression),
+            this.visit(expression.target),
+            this.visit(expression.index)
         );
     }
 
@@ -94,12 +127,21 @@ export class RuntimeAstTransformer extends ASTVisitor<undefined, ExecutableExpre
         return new ExecutableNumberLiteralExpression(this.optionalExpression(expression), expression.value);
     }
 
-    override visitSelfInvocationExpression(expression: SelfInvocationExpression): ExecutableExpression<any> {
-        return new ExecutableSelfInvocationExpression(
+    override visitFieldSelfInvocationExpression(expression: FieldSelfInvocationExpression): ExecutableExpression<any> {
+        return new ExecutableFieldSelfInvocationExpression(
             this.optionalExpression(expression),
             this.generateListEntries(expression.argumentExpressions),
             this.visit(expression.target),
             expression.name
+        );
+    }
+
+    override visitIndexSelfInvocationExpression(expression: IndexSelfInvocationExpression): ExecutableExpression<any> {
+        return new ExecutableIndexSelfInvocationExpression(
+            this.optionalExpression(expression),
+            this.generateListEntries(expression.argumentExpressions),
+            this.visit(expression.target),
+            this.visit(expression.index)
         );
     }
 
@@ -129,16 +171,6 @@ export class RuntimeAstTransformer extends ASTVisitor<undefined, ExecutableExpre
 
     override visit(expression: Expression): ExecutableExpression<any> {
         return super.visit(expression, undefined);
-    }
-
-    /**
-     * If the expression is undefined, returns undefined, otherwise visits the expression
-     *
-     * @param expression the optional expression to visit
-     * @returns the visited expression or undefined
-     */
-    private visitOptional(expression: Expression | undefined): ExecutableExpression<any> | undefined {
-        return expression ? this.visit(expression) : undefined;
     }
 
     /**

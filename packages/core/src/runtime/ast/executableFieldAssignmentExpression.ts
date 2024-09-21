@@ -1,21 +1,23 @@
-import { AssignmentExpression } from "../../ast/assignmentExpression.js";
+import { FieldAssignmentExpression } from "../../ast/fieldAssignmentExpression.js";
 import { InterpreterContext } from "../interpreter/interpreterContext.js";
 import { LabeledValue } from "../objects/labeledValue.js";
 import { ExecutableExpression } from "./executableExpression.js";
 
 /**
- * Executable AssignmentExpression
+ * Executable FieldAssignmentExpression
  */
-export class ExecutableAssignmentExpression extends ExecutableExpression<AssignmentExpression> {
+export class ExecutableFieldAssignmentExpression extends ExecutableExpression<FieldAssignmentExpression> {
     /**
-     * Creates a new ExecutableAssignmentExpression
+     * Creates a new ExecutableFieldAssignmentExpression
      *
      * @param expression the expression this represents
+     * @param target evaluated to provide the object to assign to
      * @param value evaluated to provide the value to assign
      * @param name the name of the field to assign to
      */
     constructor(
-        expression: AssignmentExpression | undefined,
+        expression: FieldAssignmentExpression | undefined,
+        readonly target: ExecutableExpression<any>,
         readonly value: ExecutableExpression<any>,
         readonly name: string | number
     ) {
@@ -23,9 +25,9 @@ export class ExecutableAssignmentExpression extends ExecutableExpression<Assignm
     }
 
     override evaluateInternal(context: InterpreterContext): LabeledValue {
-        const targetValue = context.currentScope;
+        const targetValue = this.target.evaluate(context).value;
         const valueValue = this.value.evaluateWithSource(context);
-        targetValue.setField(this.name, valueValue, context);
+        targetValue.setLocalField(this.name, valueValue, context);
         return valueValue;
     }
 }

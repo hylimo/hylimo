@@ -1,6 +1,6 @@
 import { ICstVisitor, CstNode, IToken } from "chevrotain";
 import { StringLiteralExpression } from "../ast/stringLiteralExpression.js";
-import { SelfInvocationExpression } from "../ast/selfInvocationExpression.js";
+import { FieldSelfInvocationExpression } from "../ast/fieldSelfInvocationExpression.js";
 import { NumberLiteralExpression } from "../ast/numberLiteralExpression.js";
 import { LiteralExpression } from "../ast/literalExpression.js";
 import { InvocationExpression } from "../ast/invocationExpression.js";
@@ -18,6 +18,10 @@ import { Parser } from "./parser.js";
 import { ObjectExpression } from "../ast/objectExpression.js";
 import { OperatorExpression } from "../ast/operatorExpression.js";
 import { NoopExpression } from "../ast/noopExpression.js";
+import { IndexExpression } from "../ast/indexExpression.js";
+import { IndexSelfInvocationExpression } from "../ast/indexSelfInvocationExpression.js";
+import { FieldAssignmentExpression } from "../ast/fieldAssignmentExpression.js";
+import { IndexAssignmentExpression } from "../ast/indexAssignmentExpression.js";
 
 /**
  * Defines a function invocation
@@ -43,22 +47,10 @@ interface CallBracketsDefinition {
 }
 
 /**
- * Defines an access with multiple possible call brackets
+ * Generator for an Expression which takes a base expression and returns the generated expression
+ * Used to map simple call expressions to the AST
  */
-interface AccessDefinition {
-    /**
-     * The accessed fields
-     */
-    identifier: string;
-    /**
-     * Range of the identifier
-     */
-    identifierRange: Range;
-    /**
-     * Defines applied function invocations (0..n)
-     */
-    callBrackets: CallBracketsDefinition[];
-}
+type SimpleCallExpressionGenerator = (baseExpression: Expression) => Expression;
 
 export function generateCstToAstTransfromer(parser: Parser): ICstVisitor<never, any> {
     /**
@@ -79,22 +71,22 @@ export function generateCstToAstTransfromer(parser: Parser): ICstVisitor<never, 
     }
 
     /**
-     * Calls generateMetadata. Also adds the completionRange and identifierRange based on the provided identifier
+     * Calls generateMetadata. Also adds the completionRange based on the provided completionRange.
      *
      * @param start the start range
      * @param end the end range
+     * @param completionRange the range of the completion or the token which should be replaced
      * @returns the combined start and end range or undefined
      */
     function generateCompletionMetadata(
         start: Range | IToken,
         end: Range | IToken,
-        identifierRange: IToken | Range
+        completionRange: IToken | Range
     ): CompletionExpressionMetadata {
-        const range = generateRange(identifierRange, identifierRange);
+        const range = generateRange(completionRange, completionRange);
         return {
             ...generateMetadata(start, end),
-            completionRange: range,
-            identifierRange: range
+            completionRange: range
         };
     }
 
@@ -276,18 +268,102 @@ export function generateCstToAstTransfromer(parser: Parser): ICstVisitor<never, 
         }
 
         /**
-         * Maps a call expression to an Expression
+         * Maps a simple call expression to a generator for an Expression
+         * The generated expression depends on whether there are any call brackets,
+         * and whether the expression is a field access or an index expression.
          *
          * @param ctx the children of the current CST node
-         * @returns a definition of the field access
+         * @returns a generator for the expression
          */
-        private simpleCallExpression(ctx: any): AccessDefinition {
-            const token = ctx.Identifier[0];
-            return {
-                identifier: token.image,
-                identifierRange: generateRange(token, token),
-                callBrackets: (ctx.callBrackets ?? []).map((brackets: CstNode) => this.visit(brackets))
+        private simpleCallExpression(ctx: any): SimpleCallExpressionGenerator {
+            const callBrackets = (ctx.callBrackets ?? []).map((brackets: CstNode) => this.visit(brackets));
+            let identifier: IToken | undefined = undefined;
+            let index: Expression | undefined = undefined;
+            if (ctx.expression) {
+                index = this.visit(ctx.expression[0]);
+            } else {
+                identifier = ctx.Identifier[0];
+            }
+            return (baseExpression) => {
+                if (identifier != undefined) {
+                    return this.handleIdentifierSimpleCallExpression(ctx, identifier, callBrackets, baseExpression);
+                } else if (index != undefined) {
+                    return this.handleIndexSimpleCallExpression(ctx, index, callBrackets, baseExpression);
+                } else {
+                    throw Error("Invalid simple call expression");
+                }
             };
+        }
+
+        /**
+         * Handles a simple call expression with an identifier
+         *
+         * @param ctx the children of the current CST node
+         * @param identifier the identifier token to handle
+         * @param callBrackets the call brackets to apply
+         * @param baseExpression the base expression to apply the call brackets to
+         * @returns the resulting expression
+         */
+        private handleIdentifierSimpleCallExpression(
+            ctx: any,
+            identifier: IToken,
+            callBrackets: CallBracketsDefinition[],
+            baseExpression: Expression
+        ): Expression {
+            const startPos = baseExpression.range;
+            const dot = ctx.Dot[0];
+            const completionRange = generateRange(dot, identifier);
+            if (callBrackets.length > 0) {
+                const [first, ...remaining] = callBrackets;
+                const { inner, trailing, endPos: endRange } = first;
+                const invocationExpression = new FieldSelfInvocationExpression(
+                    identifier.image,
+                    baseExpression,
+                    inner,
+                    trailing,
+                    {
+                        ...generateCompletionMetadata(startPos, endRange, completionRange),
+                        parenthesisRange: this.calculateParenthesisRange(first, completionRange)
+                    }
+                );
+                return this.applyCallBrackets(invocationExpression, remaining);
+            } else {
+                return new FieldAccessExpression(
+                    identifier.image,
+                    baseExpression,
+                    generateCompletionMetadata(startPos, completionRange, completionRange)
+                );
+            }
+        }
+
+        /**
+         * Handles a simple call expression with an index
+         *
+         * @param ctx the children of the current CST node
+         * @param index the index expression to handle
+         * @param callBrackets the call brackets to apply
+         * @param baseExpression the base expression to apply the call brackets to
+         * @returns the resulting expression
+         */
+        private handleIndexSimpleCallExpression(
+            ctx: any,
+            index: Expression,
+            callBrackets: CallBracketsDefinition[],
+            baseExpression: Expression
+        ): Expression {
+            const startPos = baseExpression.range;
+            const indexRange = generateRange(ctx.OpenSquareBracket[0], ctx.CloseSquareBracket[0]);
+            if (callBrackets.length > 0) {
+                const [first, ...remaining] = callBrackets;
+                const { inner, trailing, endPos: endRange } = first;
+                const invocationExpression = new IndexSelfInvocationExpression(index, baseExpression, inner, trailing, {
+                    ...generateMetadata(startPos, endRange),
+                    parenthesisRange: this.calculateParenthesisRange(first, indexRange)
+                });
+                return this.applyCallBrackets(invocationExpression, remaining);
+            } else {
+                return new IndexExpression(index, baseExpression, generateMetadata(startPos, indexRange));
+            }
         }
 
         /**
@@ -312,44 +388,17 @@ export function generateCstToAstTransfromer(parser: Parser): ICstVisitor<never, 
          */
         private fieldAccessExpression(ctx: any): Expression {
             let baseExpression = this.visit(ctx.callExpression);
-            const startPos = baseExpression.range;
             if (ctx.simpleCallExpression) {
-                const accessDefinitions: AccessDefinition[] = ctx.simpleCallExpression.map((exp: CstNode) =>
-                    this.visit(exp)
+                const expressionGenerators: SimpleCallExpressionGenerator[] = ctx.simpleCallExpression.map(
+                    (exp: CstNode) => this.visit(exp)
                 );
-                for (const accessDefinition of accessDefinitions) {
-                    if (accessDefinition.callBrackets.length > 0) {
-                        const [first, ...remaining] = accessDefinition.callBrackets;
-                        const { inner, trailing, endPos: endRange } = first;
-                        baseExpression = new SelfInvocationExpression(
-                            accessDefinition.identifier,
-                            baseExpression,
-                            inner,
-                            trailing,
-                            {
-                                ...generateCompletionMetadata(startPos, endRange, accessDefinition.identifierRange),
-                                parenthesisRange: this.calculateParenthesisRange(
-                                    first,
-                                    accessDefinition.identifierRange
-                                )
-                            }
-                        );
-                        baseExpression = this.applyCallBrackets(baseExpression, remaining);
-                    } else {
-                        baseExpression = new FieldAccessExpression(
-                            accessDefinition.identifier,
-                            baseExpression,
-                            generateCompletionMetadata(
-                                startPos,
-                                accessDefinition.identifierRange,
-                                accessDefinition.identifierRange
-                            )
-                        );
-                    }
+
+                for (const generator of expressionGenerators) {
+                    baseExpression = generator(baseExpression);
                 }
             }
             if (ctx.FaultTolerantToken) {
-                return this.generateFieldAccessExpressionForOnlyDot(baseExpression, ctx.FaultTolerantToken[0]);
+                return this.generateFieldAccessExpressionForOnlyDot(baseExpression, ctx.FaultTolerantToken);
             } else {
                 return baseExpression;
             }
@@ -399,8 +448,7 @@ export function generateCstToAstTransfromer(parser: Parser): ICstVisitor<never, 
             const dotRange = generateRange(dotToken, dotToken);
             return new FieldAccessExpression("", baseExpression, {
                 ...generateMetadata(baseExpression.range, dotToken),
-                completionRange: dotRange,
-                identifierRange: [dotRange[1], dotRange[1]]
+                completionRange: dotRange
             });
         }
 
@@ -457,16 +505,19 @@ export function generateCstToAstTransfromer(parser: Parser): ICstVisitor<never, 
                 if (expressions.length > 1) {
                     const target = expressions[0];
                     const value = expressions[1];
-                    const targetMeta = target.metadata as CompletionExpressionMetadata;
-                    const meta: CompletionExpressionMetadata = {
-                        ...generateMetadata(target.range, value.range),
-                        completionRange: targetMeta.completionRange,
-                        identifierRange: targetMeta.identifierRange
-                    };
+                    const meta = generateMetadata(target.range, value.range);
                     if (target instanceof IdentifierExpression) {
-                        return new AssignmentExpression(target.identifier, undefined, value, meta);
+                        return new AssignmentExpression(target.identifier, value, {
+                            ...meta,
+                            completionRange: target.metadata.completionRange
+                        });
                     } else if (target instanceof FieldAccessExpression) {
-                        return new AssignmentExpression(target.name as string, target.target, value, meta);
+                        return new FieldAssignmentExpression(target.name, target.target, value, {
+                            ...meta,
+                            completionRange: target.metadata.completionRange
+                        });
+                    } else if (target instanceof IndexExpression) {
+                        return new IndexAssignmentExpression(target.index, target.target, value, meta);
                     } else {
                         throw Error("invalid assignment target");
                     }

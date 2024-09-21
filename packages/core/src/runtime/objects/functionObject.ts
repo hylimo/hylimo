@@ -41,12 +41,12 @@ export abstract class AbstractFunctionObject<T extends ExecutableAbstractFunctio
         }
     }
 
-    override getFields(context: InterpreterContext): Record<string, LabeledValue> {
+    override getFields(context: InterpreterContext): Map<string | number, LabeledValue> {
         const result = super.getFields(context);
         if (this.docs !== undefined) {
-            result[SemanticFieldNames.DOCS] = {
+            result.set(SemanticFieldNames.DOCS, {
                 value: this.docs
-            };
+            });
         }
         return result;
     }

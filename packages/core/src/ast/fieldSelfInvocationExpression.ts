@@ -10,13 +10,15 @@ import { WrapperObject } from "../runtime/objects/wrapperObject.js";
  * Accesses the field name on target, invokes it and provides target as self
  */
 
-export class SelfInvocationExpression extends AbstractInvocationExpression<
+export class FieldSelfInvocationExpression extends AbstractInvocationExpression<
     CompletionExpressionMetadata & ParenthesisExpressionMetadata
 > {
-    static readonly TYPE = "SelfInvocationExpression";
+    static readonly TYPE = "FieldSelfInvocationExpression";
 
     private static readonly WRAPPER_ENTRIES = new Map([
-        ...Expression.expressionWrapperObjectEntries<SelfInvocationExpression>(SelfInvocationExpression.TYPE),
+        ...AbstractInvocationExpression.invocationExpressionWrapperObjectEntries<FieldSelfInvocationExpression>(
+            FieldSelfInvocationExpression.TYPE
+        ),
         [
             "name",
             (wrapped, context) => {
@@ -26,11 +28,6 @@ export class SelfInvocationExpression extends AbstractInvocationExpression<
                     return context.newNumber(wrapped.name);
                 }
             }
-        ],
-        ["target", (wrapped, context) => wrapped.target.toWrapperObject(context)],
-        [
-            "arguments",
-            (wrapped, context) => context.newListWrapperObject(wrapped.argumentExpressions, ListEntry.toWrapperObject)
         ]
     ]);
 
@@ -46,23 +43,21 @@ export class SelfInvocationExpression extends AbstractInvocationExpression<
      */
     constructor(
         readonly name: string | number,
-        readonly target: Expression,
+        target: Expression,
         innerArgumentExpressions: ListEntry[],
         trailingArgumentExpressions: ListEntry[],
         metadata: CompletionExpressionMetadata & ParenthesisExpressionMetadata
     ) {
-        super(innerArgumentExpressions, trailingArgumentExpressions, SelfInvocationExpression.TYPE, metadata);
-    }
-
-    protected override markNoEditInternal(): void {
-        super.markNoEditInternal();
-        this.target.markNoEdit();
-        for (const argument of this.argumentExpressions) {
-            argument.value.markNoEdit();
-        }
+        super(
+            target,
+            innerArgumentExpressions,
+            trailingArgumentExpressions,
+            FieldSelfInvocationExpression.TYPE,
+            metadata
+        );
     }
 
     override toWrapperObject(context: InterpreterContext): WrapperObject<this> {
-        return context.newWrapperObject(this, SelfInvocationExpression.WRAPPER_ENTRIES);
+        return context.newWrapperObject(this, FieldSelfInvocationExpression.WRAPPER_ENTRIES);
     }
 }

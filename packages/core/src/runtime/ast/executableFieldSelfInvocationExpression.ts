@@ -1,4 +1,4 @@
-import { SelfInvocationExpression } from "../../ast/selfInvocationExpression.js";
+import { FieldSelfInvocationExpression } from "../../ast/fieldSelfInvocationExpression.js";
 import { InterpreterContext } from "../interpreter/interpreterContext.js";
 import { LabeledValue } from "../objects/labeledValue.js";
 import { SemanticFieldNames } from "../semanticFieldNames.js";
@@ -10,7 +10,7 @@ import { ExecutableExpression } from "./executableExpression.js";
 /**
  * Executable SelfInvocationExpression
  */
-export class ExecutableSelfInvocationExpression extends ExecutableAbstractInvocationExpression<SelfInvocationExpression> {
+export class ExecutableFieldSelfInvocationExpression extends ExecutableAbstractInvocationExpression<FieldSelfInvocationExpression> {
     /**
      * Creates a new ExecutableInvocationExpression consisting of an expression of which the result should be invoked,
      * and a set of optionally named expressions as arguments
@@ -21,7 +21,7 @@ export class ExecutableSelfInvocationExpression extends ExecutableAbstractInvoca
      * @param name the name of the field to access
      */
     constructor(
-        expression: SelfInvocationExpression | undefined,
+        expression: FieldSelfInvocationExpression | undefined,
         argumentExpressions: ExecutableListEntry[],
         readonly target: ExecutableExpression<any>,
         readonly name: string | number
