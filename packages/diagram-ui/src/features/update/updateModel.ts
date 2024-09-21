@@ -1,14 +1,16 @@
-import { injectable } from "inversify";
+import { inject, injectable } from "inversify";
 import {
     Animation,
     CommandExecutionContext,
     CommandReturn,
     CompoundAnimation,
     forEachMatch,
+    IActionDispatcher,
     isSelectable,
     MatchResult,
     SModelElementImpl,
     SModelRootImpl,
+    TYPES,
     UpdateModelCommand as BaseUpdateModelCommand,
     ViewportRootElementImpl
 } from "sprotty";
@@ -18,12 +20,16 @@ import {
     LinearInterpolationAnimation
 } from "../animation/linearInterpolationAnimation.js";
 import { computeCommonAnimatableFields, isLinearAnimatable } from "../animation/model.js";
+import { createFitToScreenAction } from "../viewport/fitToScreenAction.js";
+import { FluentIterable } from "sprotty/lib/utils/iterable.js";
 
 /**
  * Custom UpdateModelCommand which handles linear interpolation animations
  */
 @injectable()
 export class UpdateModelCommand extends BaseUpdateModelCommand {
+    @inject(TYPES.IActionDispatcher) private dispatcher!: IActionDispatcher;
+
     protected override computeAnimation(
         newRoot: SModelRootImpl,
         matchResult: MatchResult,
@@ -109,6 +115,70 @@ export class UpdateModelCommand extends BaseUpdateModelCommand {
     ): CommandReturn {
         (newRoot as SRoot).changeRevision = (oldRoot as SRoot).changeRevision + 1;
         (newRoot as SRoot).sequenceNumber = (oldRoot as SRoot).sequenceNumber;
+        layoutViewportIfNecessary(oldRoot.index.all(), newRoot.index.all(), this.dispatcher);
         return super.performUpdate(oldRoot, newRoot, context);
     }
+}
+
+/**
+ * Fits the viewport to the new diagram size if too many changes occurred (i.e. the user pasted half a diagram into the editor).
+ *
+ * @param newElements the index storing all new model elements
+ * @param old the index storing all current model elements
+ * @param dispatcher the dispatcher to dispatch the 'fit to screen' action
+ */
+function layoutViewportIfNecessary(
+    old: FluentIterable<SModelElementImpl>,
+    newElements: FluentIterable<SModelElementImpl>,
+    dispatcher: IActionDispatcher
+) {
+    const updatedElements = new Set(newElements.map((update) => update.id));
+
+    // When we have so few updates, it isn't worth relayouting the viewport. We only want to lay it out if there are enough changes
+    if (updatedElements.size < 10) {
+        return;
+    }
+
+    const oldElements = new Set(old.map((element) => element.id));
+    const difference = calculateDifference(oldElements, updatedElements);
+    if (difference >= 0.5) {
+        dispatcher.dispatch(createFitToScreenAction());
+    }
+}
+
+/**
+ * Calculates the difference ratio in the current diagram.<br>
+ * The result is limited to the intervall [0, 1] where 0 means completely equal and 1 means completely different.
+ *
+ * @param oldElements the elements that were previously in this model
+ * @param updatedElements the elements that were updated
+ */
+function calculateDifference(oldElements: Set<string>, updatedElements: Set<string>): number {
+    const distance = calculateLevenshteinDistance(oldElements, updatedElements);
+    const totalElements = new Set([...oldElements, ...updatedElements]);
+    return distance / totalElements.size;
+}
+
+/**
+ * Calculates the Levenshtein distance on two sets of strings instead of two strings.<br>
+ * The typical rules apply: each deletion and insertion is counted as one additional distance, and replacement/movement can be ignored in our usecase
+ *
+ * @param oldElements the set of previously present model element IDs
+ * @param newElements the set of updated model element IDs
+ */
+function calculateLevenshteinDistance(oldElements: Set<string>, newElements: Set<string>): number {
+    let distance = 0;
+    for (const newlyAdded of newElements) {
+        if (!oldElements.has(newlyAdded)) {
+            distance++;
+        }
+    }
+
+    for (const deleted of oldElements) {
+        if (!newElements.has(deleted)) {
+            distance++;
+        }
+    }
+
+    return distance;
 }
