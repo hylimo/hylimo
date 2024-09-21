@@ -8,6 +8,6 @@ import { Action, FitToScreenAction } from "sprotty-protocol";
 @injectable()
 export class SetModelActionHandler implements IActionHandler {
     handle(_: Action): ICommand | Action | void {
-        return FitToScreenAction.create([]);
+        return FitToScreenAction.create([], { padding: 50 });
     }
 }
