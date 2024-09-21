@@ -4,7 +4,6 @@ import { ViewportTouchListener } from "./touch.js";
 import { SetModelAction } from "sprotty-protocol";
 import { SetModelActionHandler } from "./setModelActionHandler.js";
 import { CenterKeyboardListener } from "./fitToScreenKeyboardListener.js";
-
 import { CenterKeyboardListener as SprottyCenterKeyboardListener } from "sprotty";
 
 /**

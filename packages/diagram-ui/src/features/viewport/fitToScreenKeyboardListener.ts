@@ -1,7 +1,7 @@
-import { KeyListener, SModelElementImpl } from "sprotty";
-import { Action, CenterAction, FitToScreenAction } from "sprotty-protocol";
-import { matchesKeystroke } from "sprotty/lib/utils/keyboard.js";
+import { isCtrlOrCmd, KeyListener, SModelElementImpl } from "sprotty";
+import { Action, CenterAction} from "sprotty-protocol";
 import { injectable } from "inversify";
+import { createFitToScreenAction } from "./fitToScreenAction.js";
 
 /**
  * Copy of the sprotty built-in key listener for ctrl+shift+c/f, except we can now set custom options
@@ -9,8 +9,15 @@ import { injectable } from "inversify";
 @injectable()
 export class CenterKeyboardListener extends KeyListener {
     override keyDown(element: SModelElementImpl, event: KeyboardEvent): Action[] {
-        if (matchesKeystroke(event, "KeyC", "ctrlCmd", "shift")) return [CenterAction.create([], { retainZoom: true })];
-        if (matchesKeystroke(event, "KeyF", "ctrlCmd", "shift")) return [FitToScreenAction.create([], { padding: 50 })];
+        if (!isCtrlOrCmd(event) || !event.shiftKey) {
+            return [];
+        }
+        if (event.key.toLowerCase() == "c") {
+            return [CenterAction.create([], { retainZoom: true })];
+        }
+        if (event.key.toLowerCase() == "f") {
+            return [createFitToScreenAction()];
+        }
         return [];
     }
 }
