@@ -1,5 +1,5 @@
 import { isCtrlOrCmd, KeyListener, SModelElementImpl } from "sprotty";
-import { Action, CenterAction} from "sprotty-protocol";
+import { Action, CenterAction } from "sprotty-protocol";
 import { injectable } from "inversify";
 import { createFitToScreenAction } from "./fitToScreenAction.js";
 
