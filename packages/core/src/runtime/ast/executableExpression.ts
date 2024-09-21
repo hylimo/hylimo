@@ -5,11 +5,11 @@ import { LabeledValue } from "../objects/labeledValue.js";
 // These classes must not be imported from their originating file directly.
 // Otherwise circular imports will cause runtime errors.
 import {
-    ExecutableAssignmentExpression,
+    ExecutableFieldAssignmentExpression,
     ExecutableFieldAccessExpression,
     ExecutableListEntry,
     ExecutableInvocationExpression,
-    ExecutableSelfInvocationExpression
+    ExecutableFieldSelfInvocationExpression
 } from "../../index.js";
 
 /**
@@ -122,7 +122,7 @@ export abstract class ExecutableExpression<T extends Expression = Expression> {
     callField(
         name: string,
         ...args: (ExecutableListEntry | ExecutableExpression)[]
-    ): ExecutableSelfInvocationExpression {
+    ): ExecutableFieldSelfInvocationExpression {
         const escapedArgs = args.map((arg) => {
             if (arg instanceof ExecutableExpression) {
                 return { value: arg };
@@ -130,18 +130,18 @@ export abstract class ExecutableExpression<T extends Expression = Expression> {
                 return arg;
             }
         });
-        return new ExecutableSelfInvocationExpression(undefined, escapedArgs, this, name);
+        return new ExecutableFieldSelfInvocationExpression(undefined, escapedArgs, this, name);
     }
 
     /**
-     * Helper function to create an AssignmentExpression which assigns
+     * Helper function to create an FieldAssignmentExpression which assigns
      * a field on this as the target
      *
      * @param field the name of the field
      * @param value the new value of the field
-     * @returns the created AssignmentExpression
+     * @returns the created FieldAssignmentExpression
      */
-    assignField(field: string, value: ExecutableExpression): ExecutableAssignmentExpression {
-        return new ExecutableAssignmentExpression(undefined, this, value, field);
+    assignField(field: string, value: ExecutableExpression): ExecutableFieldAssignmentExpression {
+        return new ExecutableFieldAssignmentExpression(undefined, this, value, field);
     }
 }

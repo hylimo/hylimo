@@ -58,7 +58,7 @@ export function num(value: number): ExecutableNumberLiteralExpression {
  * @returns the created ExecutableAssignmentExpression
  */
 export function assign(field: string, value: ExecutableExpression): ExecutableAssignmentExpression {
-    return new ExecutableAssignmentExpression(undefined, undefined, value, field);
+    return new ExecutableAssignmentExpression(undefined, value, field);
 }
 
 /**

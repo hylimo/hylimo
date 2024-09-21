@@ -18,7 +18,7 @@ export const printers: Record<Rules, ({ ctx, path, print }: PrintContext) => Doc
     callBrackets: printCallBrackets,
     objectExpression: printObjectExpression,
     callExpression: printCallExpression,
-    simpleCallExpression: printCallExpression,
+    simpleCallExpression: printSimpleCallExpression,
     bracketExpression: printBracketExpression,
     fieldAccessExpression: printFieldAccessExpression,
     simpleFieldAccessExpression: printSimpleFieldAccessExpression,
@@ -154,7 +154,8 @@ function printInnerListEntries({ ctx, path, print, options }: PrintContext): Doc
  * @param context prettier print context
  * @returns the formatted call expression
  */
-function printCallExpression({ ctx, path, print }: PrintContext): Doc {
+function printCallExpression(context: PrintContext): Doc {
+    const { ctx, path, print } = context;
     let baseExpression: Doc;
     if (ctx.Identifier != undefined) {
         baseExpression = ctx.Identifier[0].image;
@@ -167,6 +168,34 @@ function printCallExpression({ ctx, path, print }: PrintContext): Doc {
     } else {
         baseExpression = path.map(print, Rules.OBJECT_EXPRESSION);
     }
+    return applyCallBrackets(context, baseExpression);
+}
+
+/**
+ * Formats a simple call expression
+ *
+ * @param context prettier print context
+ * @returns the formatted simple call expression
+ */
+function printSimpleCallExpression(context: PrintContext): Doc {
+    const { ctx, path, print } = context;
+    let baseExpression: Doc;
+    if (ctx.Identifier != undefined) {
+        baseExpression = [".", ctx.Identifier[0].image];
+    } else {
+        baseExpression = group(["[", indent([softline, path.map(print, Rules.EXPRESSION)]), softline, "]"]);
+    }
+    return applyCallBrackets(context, baseExpression);
+}
+
+/**
+ * Applies optional call brackets to the base expression
+ *
+ * @param context prettier print context
+ * @param baseExpression the base expression
+ * @returns the base expression with optional call brackets
+ */
+function applyCallBrackets({ ctx, path, print }: PrintContext, baseExpression: Doc): Doc {
     if (ctx.callBrackets != undefined) {
         const docs = [baseExpression];
         if (ctx.callBrackets[0].OpenRoundBracket == undefined) {
@@ -200,7 +229,7 @@ function printFieldAccessExpression({ ctx, path, print }: PrintContext): Doc {
     if (ctx.simpleCallExpression != undefined) {
         docs.push(...path.map(print, Rules.SIMPLE_CALL_EXPRESSION));
     }
-    return join(".", docs);
+    return docs;
 }
 
 /**

@@ -10,10 +10,12 @@ import {
     functionType,
     id,
     IdentifierExpression,
+    IndexExpression,
     InterpreterModule,
     InvocationExpression,
     jsFun,
     listType,
+    NumberLiteralExpression,
     OperatorExpression,
     optional,
     parse,
@@ -41,7 +43,57 @@ function convertStringOrIdentifier(expression: Expression): string {
     } else if (expression instanceof IdentifierExpression) {
         return expression.identifier;
     } else {
-        throw new RuntimeError("Expected string or identifier", expression);
+        throw new RuntimeError("Expression is neither a string nor an identifier", expression);
+    }
+}
+
+/**
+ * Converts an expression to a string, assuming the expression is either a number literal or an identifier.
+ * If the expression is not a number literal or an identifier, an error is thrown.
+ *
+ * @param expression the expression to convert
+ * @returns the string representation of the expression
+ */
+function convertNumberOrIdentifier(expression: Expression): string {
+    if (expression instanceof NumberLiteralExpression) {
+        return expression.value.toString();
+    } else if (expression instanceof IdentifierExpression) {
+        return expression.identifier;
+    } else {
+        throw new RuntimeError("Expression is neither a number nor an identifier", expression);
+    }
+}
+
+/**
+ * Converts a multiplicity element, can either be a string or a range using the '..' operator
+ *
+ * @param expression the expression to convert
+ * @returns the multiplicity element without enclosing square brackets
+ */
+function convertMultiplicityElement(expression: Expression): string {
+    if (expression instanceof StringLiteralExpression) {
+        return expression.value;
+    } else if (expression instanceof OperatorExpression && isRangeOperator(expression)) {
+        const left = expression.left;
+        const right = expression.right;
+        return convertNumberOrIdentifier(left) + ".." + convertNumberOrIdentifier(right);
+    } else {
+        throw new RuntimeError("Expected string or range with '..'", expression);
+    }
+}
+
+/**
+ * Converts a type (string or identifier) with an optional multiplicity delared using an index operator
+ *
+ * @param expression the expression to convert
+ * @returns the UML type with multiplicity string
+ */
+function convertTypeWithOptionalMultiplicity(expression: Expression): string {
+    if (expression instanceof IndexExpression) {
+        const target = convertStringOrIdentifier(expression.target);
+        return `${target} [${convertMultiplicityElement(expression.index)}]`;
+    } else {
+        return convertStringOrIdentifier(expression);
     }
 }
 
@@ -60,7 +112,7 @@ function convertFunctionInvocation(expression: InvocationExpression): string {
             if (value instanceof OperatorExpression && isColonOperator(value)) {
                 const left = value.left;
                 const right = value.right;
-                return convertStringOrIdentifier(left) + " : " + convertStringOrIdentifier(right);
+                return convertStringOrIdentifier(left) + " : " + convertTypeWithOptionalMultiplicity(right);
             } else {
                 return convertStringOrIdentifier(value);
             }
@@ -79,6 +131,16 @@ function isColonOperator(expression: OperatorExpression): boolean {
 }
 
 /**
+ * Checks if the operator expression is an operator expression with a range ('..') as operator
+ *
+ * @param expression the expression to check
+ * @returns true if the expression is a range operator, false otherwise
+ */
+function isRangeOperator(expression: OperatorExpression): boolean {
+    return expression.operator instanceof IdentifierExpression && expression.operator.identifier === "..";
+}
+
+/**
  * Converts the given expressions to fields and functions
  *
  * @param expressions the expressions to convert
@@ -89,17 +151,16 @@ function convertFieldsAndFunctions(expressions: Expression[]): [string[], string
     const functions: string[] = [];
     for (const expression of expressions) {
         if (expression instanceof OperatorExpression) {
-            if (isColonOperator(expression)) {
-                const left = expression.left;
-                const right = expression.right;
-                const type = convertStringOrIdentifier(right);
-                if (left instanceof InvocationExpression) {
-                    functions.push(convertFunctionInvocation(left) + " : " + type);
-                } else {
-                    fields.push(convertStringOrIdentifier(left) + " : " + type);
-                }
-            } else {
+            if (!isColonOperator(expression)) {
                 throw new RuntimeError("Unexpected operator", expression);
+            }
+            const left = expression.left;
+            const right = expression.right;
+            const type = convertTypeWithOptionalMultiplicity(right);
+            if (left instanceof InvocationExpression) {
+                functions.push(convertFunctionInvocation(left) + " : " + type);
+            } else {
+                fields.push(convertStringOrIdentifier(left) + " : " + type);
             }
         } else if (expression instanceof InvocationExpression) {
             functions.push(convertFunctionInvocation(expression));

@@ -36,10 +36,6 @@ export interface CompletionExpressionMetadata extends ExpressionMetadata {
      * E.g. for an FieldAccessExpression, this would be the range of the dot and the field name
      */
     completionRange: Range;
-    /**
-     * The range of the identifier of the expression (the identifier which should be replaced on complete)
-     */
-    identifierRange: Range;
 }
 
 /**

@@ -50,6 +50,32 @@ export function assertNumber(value: BaseObject, description = ""): number {
 }
 
 /**
+ * Checks if a value is a NumberObject
+ *
+ * @param value the value to check
+ * @returns true iff it is a NumberObject
+ */
+export function isNumber(value: BaseObject): value is NumberObject {
+    return value instanceof NumberObject;
+}
+
+/**
+ * Asserts that the value is a string or a number, and returns its value
+ *
+ * @param value the value to check
+ * @returns the string or number value
+ */
+export function assertIndex(value: BaseObject): string | number {
+    if (value instanceof StringObject) {
+        return value.value;
+    } else if (value instanceof NumberObject) {
+        return value.value;
+    } else {
+        throw new RuntimeError("Only string and number are supported as index types");
+    }
+}
+
+/**
  * Helper to check that an object is a BooleanObject, throws an error if not
  *
  * @param value the value to check
@@ -61,16 +87,6 @@ export function assertBoolean(value: BaseObject, description = ""): boolean {
         throw new RuntimeError(`${description} is not a boolean`);
     }
     return value.value;
-}
-
-/**
- * Checks if a value is a NumberObject
- *
- * @param value the value to check
- * @returns true iff it is a NumberObject
- */
-export function isNumber(value: BaseObject): value is NumberObject {
-    return value instanceof NumberObject;
 }
 
 /**

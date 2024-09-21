@@ -44,10 +44,10 @@ export class WrapperObject<T> extends BaseObject {
         return this.proto.getField(key, context, self ?? this);
     }
 
-    override getFields(context: InterpreterContext, self?: BaseObject): Record<string, LabeledValue> {
-        const entries: Record<string, LabeledValue> = this.proto.getFields(context, self ?? this);
+    override getFields(context: InterpreterContext, self?: BaseObject): Map<string | number, LabeledValue> {
+        const entries = this.proto.getFields(context, self ?? this);
         for (const [key, value] of this.entries) {
-            entries[key] = { value: value(this.wrapped, context) };
+            entries.set(key, { value: value(this.wrapped, context) });
         }
         return entries;
     }
