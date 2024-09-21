@@ -43,7 +43,7 @@ function convertStringOrIdentifier(expression: Expression): string {
     } else if (expression instanceof IdentifierExpression) {
         return expression.identifier;
     } else {
-        throw new RuntimeError("Expected string or identifier", expression);
+        throw new RuntimeError("Expression is neither a string nor an identifier", expression);
     }
 }
 
@@ -60,7 +60,7 @@ function convertNumberOrIdentifier(expression: Expression): string {
     } else if (expression instanceof IdentifierExpression) {
         return expression.identifier;
     } else {
-        throw new RuntimeError("Expected number or identifier");
+        throw new RuntimeError("Expression is neither a number nor an identifier", expression);
     }
 }
 
@@ -78,7 +78,7 @@ function convertMultiplicityElement(expression: Expression): string {
         const right = expression.right;
         return convertNumberOrIdentifier(left) + ".." + convertNumberOrIdentifier(right);
     } else {
-        throw new RuntimeError("Expected string or range with '..'");
+        throw new RuntimeError("Expected string or range with '..'", expression);
     }
 }
 
