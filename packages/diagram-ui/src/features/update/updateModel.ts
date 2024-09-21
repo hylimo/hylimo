@@ -133,12 +133,6 @@ function layoutViewportIfNecessary(
     dispatcher: IActionDispatcher
 ) {
     const updatedElements = new Set(newElements.map((update) => update.id));
-
-    // When we have so few updates, it isn't worth relayouting the viewport. We only want to lay it out if there are enough changes
-    if (updatedElements.size < 10) {
-        return;
-    }
-
     const oldElements = new Set(old.map((element) => element.id));
     const difference = calculateDifference(oldElements, updatedElements);
     if (difference >= 0.5) {
@@ -151,11 +145,12 @@ function layoutViewportIfNecessary(
  * The result is limited to the intervall [0, 1] where 0 means completely equal and 1 means completely different.
  *
  * @param oldElements the elements that were previously in this model
- * @param updatedElements the elements that were updated
+ * @param newElements the elements that were updated
+ * @return the ratio of divergence
  */
-function calculateDifference(oldElements: Set<string>, updatedElements: Set<string>): number {
-    const distance = calculateLevenshteinDistance(oldElements, updatedElements);
-    const totalElements = new Set([...oldElements, ...updatedElements]);
+function calculateDifference(oldElements: Set<string>, newElements: Set<string>): number {
+    const distance = calculateLevenshteinDistance(oldElements, newElements);
+    const totalElements = new Set([...oldElements, ...newElements]);
     return distance / totalElements.size;
 }
 
@@ -165,6 +160,7 @@ function calculateDifference(oldElements: Set<string>, updatedElements: Set<stri
  *
  * @param oldElements the set of previously present model element IDs
  * @param newElements the set of updated model element IDs
+ * @return the number of deviations for the given inputs
  */
 function calculateLevenshteinDistance(oldElements: Set<string>, newElements: Set<string>): number {
     let distance = 0;
