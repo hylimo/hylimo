@@ -6,9 +6,8 @@
         </div>
     </template>
 </template>
-
 <script setup lang="ts">
-import { ref, onBeforeMount, onMounted } from "vue";
+import { ref, onBeforeMount } from "vue";
 
 const offlineReady = ref(false);
 const progressWidth = ref(100);
@@ -55,17 +54,14 @@ onBeforeMount(async () => {
     });
 });
 </script>
-
 <style scoped>
 .pwa-snackbar {
     position: fixed;
-    right: 0;
-    top: 0;
+    right: 1rem;
+    top: calc(var(--vp-nav-height) + 1rem);
     background-color: var(--vp-c-bg);
     color: var(--vp-c-text-1);
     border-radius: 8px;
-    margin-right: 1rem;
-    margin-top: calc(var(--vp-nav-height) + 1rem);
     box-shadow: var(--vp-shadow-3);
     z-index: 100;
 }
