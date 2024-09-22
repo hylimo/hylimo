@@ -1,6 +1,7 @@
 <template>
     <div class="main">
         <VPNav class="navbar" />
+        <RegisterSW />
         <HylimoEditor
             v-model="code"
             :horizontal="height > width && width < 800"
@@ -35,6 +36,7 @@ import { PDFRenderer } from "@hylimo/diagram-render-pdf";
 import fileSaver from "file-saver";
 import { serialize, deserialize } from "../util/serialization.js";
 import { onBeforeMount } from "vue";
+import RegisterSW from "./RegisterSW.vue";
 
 const HylimoEditor = defineClientComponent(() => import("./HylimoEditor.vue"));
 

@@ -5,11 +5,8 @@ import "./icons.css";
 import EmbeddedHylimoEditor from "../components/EmbeddedHylimoEditor.vue";
 import NavTeleportTarget from "../components/NavTeleportTarget.vue";
 import Settings from "../components/Settings.vue";
-
-import { h } from 'vue';
-import Theme from 'vitepress/theme';
-
-import RegisterSW from '../components/RegisterSW.vue';
+import { h } from "vue";
+import RegisterSW from "../components/RegisterSW.vue";
 
 export default {
     extends: DefaultTheme,
@@ -23,8 +20,8 @@ export default {
         }
     },
     Layout() {
-    return h(Theme.Layout, null, {
-      'layout-bottom': () => h(RegisterSW)
-    })
-  }
+        return h(DefaultTheme.Layout, null, {
+            "layout-bottom": () => h(RegisterSW)
+        });
+    }
 } satisfies VitepressTheme;

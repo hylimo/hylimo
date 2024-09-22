@@ -80,6 +80,8 @@ export default withPwa(
             }
         },
         pwa: {
+            registerType: "autoUpdate",
+            injectRegister: false,
             manifest: {
                 name: "HyLiMo",
                 short_name: "HyLiMo",
