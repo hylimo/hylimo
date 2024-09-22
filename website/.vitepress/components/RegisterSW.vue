@@ -1,21 +1,42 @@
 <template>
     <template v-if="offlineReady">
-        <div class="pwa-toast" role="alertdialog" aria-labelledby="pwa-message">
-            <div id="pwa-message" class="mb-3">App ready to work offline</div>
-            <button type="button" class="pwa-cancel" @click="close">Close</button>
+        <div class="pwa-snackbar" role="alertdialog" aria-labelledby="pwa-message">
+            <div id="pwa-message" class="snackbar-message">App ready to work offline</div>
+            <div class="progress-bar" :style="{ width: progressWidth + '%' }"></div>
         </div>
     </template>
 </template>
 
 <script setup lang="ts">
-import { onBeforeMount, ref } from "vue";
+import { ref, onBeforeMount, onMounted } from "vue";
 
 const offlineReady = ref(false);
+const progressWidth = ref(100);
+
 function onOfflineReady() {
     offlineReady.value = true;
+    startProgress();
 }
-async function close() {
-    offlineReady.value = false;
+
+function startProgress() {
+    let startTime: number | null = null;
+    const duration = 2500;
+
+    function animateProgress(timestamp: number) {
+        if (!startTime) {
+            startTime = timestamp;
+        }
+        const elapsed = timestamp - startTime;
+        const progress = Math.max(0, 100 - (elapsed / duration) * 100);
+        if (progress <= 0) {
+            offlineReady.value = false;
+        } else {
+            progressWidth.value = progress;
+            requestAnimationFrame(animateProgress);
+        }
+    }
+
+    requestAnimationFrame(animateProgress);
 }
 
 onBeforeMount(async () => {
@@ -36,27 +57,25 @@ onBeforeMount(async () => {
 </script>
 
 <style scoped>
-.pwa-toast {
+.pwa-snackbar {
     position: fixed;
     right: 0;
-    bottom: 0;
-    margin: 16px;
-    padding: 12px;
-    border: 1px solid #8885;
-    border-radius: 4px;
+    top: 0;
+    background-color: var(--vp-c-bg);
+    color: var(--vp-c-text-1);
+    border-radius: 8px;
+    margin-right: 1rem;
+    margin-top: calc(var(--vp-nav-height) + 1rem);
+    box-shadow: var(--vp-shadow-3);
     z-index: 100;
-    text-align: left;
-    box-shadow: 3px 4px 5px 0 #8885;
-    background-color: white;
 }
-.pwa-toast #pwa-message {
-    margin-bottom: 8px;
+
+.snackbar-message {
+    margin: 16px;
 }
-.pwa-toast button {
-    border: 1px solid #8885;
-    outline: none;
-    margin-right: 5px;
-    border-radius: 2px;
-    padding: 3px 10px;
+
+.progress-bar {
+    height: 4px;
+    background-color: var(--vp-c-brand-1);
 }
 </style>
