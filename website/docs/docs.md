@@ -282,6 +282,11 @@ classDiagram {
 
     hdist = 300
 
+    top = 0.1608
+    left = [4, 0.5]
+    right = [2, 0.5]
+    bottom = [3, 0.5]
+
     chevrotain = customPackage("Chevrotaion") styles {
         class += "foreign"
     }
@@ -345,72 +350,69 @@ classDiagram {
     }
 
     diagram --> core with {
-        over = start(Position.Top).line(end(Position.Bottom))
+        over = start(top).line(end(bottom))
     }
 
     diagram --> diagramCommon with {
-        over = start(Position.Right).line(end(Position.Left))
+        over = start(right).line(end(left))
     }
 
     diagram --> _fonts with {
-        over = start(Position.Top + 0.05).axisAligned(
-            -0.51,
-            end(Position.Bottom)
-        )
+        over = start(0.2).axisAligned(-0.51, end(bottom))
     }
 
     renderSvg --> diagramCommon with {
-        over = start(Position.Right).axisAligned(
+        over = start(right).axisAligned(
             -1,
             rpos(diagramUI, 137, 0),
             0,
-            end(Position.Right)
+            end(right)
         )
     }
 
     renderPdf --> renderSvg with {
-        over = start(Position.Right).line(end(Position.Left))
+        over = start(right).line(end(left))
     }
 
     renderPdf --> diagram with {
-        over = start(Position.Left).axisAligned(
+        over = start(left).axisAligned(
             1,
             rpos(languageServer, -149, 2),
             0,
-            end(Position.Left)
+            end(left)
         )
     }
 
     languageServer --> diagram with {
-        over = start(Position.Top).line(end(Position.Bottom))
+        over = start(top).line(end(bottom))
     }
 
     languageServer --> diagramProtocol with {
-        over = start(Position.Right).line(end(Position.Left))
+        over = start(right).line(end(left))
     }
 
     diagramUI --> diagramProtocol with {
-        over = start(Position.Left).line(end(Position.Right))
+        over = start(left).line(end(right))
     }
 
-    diagramUI -- rpos(lpos(diagramCommon, 0), hdist - 100, 0) with {
-        over = start(Position.Top).line(end())
+    diagramUI --> diagramCommon with {
+        over = start(top).axisAligned(0, end(right))
     }
 
     languageServer --> vscodeLSP with {
-        over = start(Position.Left).line(end(Position.Right))
+        over = start(left).line(end(right))
     }
 
     core --> chevrotain with {
-        over = start(Position.Left).line(end(Position.Right))
+        over = start(left).line(end(right))
     }
 
     renderPdf --> pdfkit with {
-        over = start(Position.Bottom).line(end(Position.Top))
+        over = start(bottom).line(end(top))
     }
 
     diagramUI --> sprotty with {
-        over = start(Position.Right).line(end(Position.Left))
+        over = start(right).line(end(left))
     }
 
     globe = {

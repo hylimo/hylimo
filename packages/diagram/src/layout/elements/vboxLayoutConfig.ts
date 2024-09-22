@@ -71,8 +71,8 @@ export class VBoxLayoutConfig extends BoxLayoutConfig {
         const parts: BoxOutlinePart[] = contents.map((content) => {
             const bounds = content.layoutBounds!;
             return {
-                primaryOffset: bounds.position.y - position.y,
-                secondaryOffset: bounds.position.x - position.x,
+                primaryOffset: bounds.position.y,
+                secondaryOffset: bounds.position.x,
                 primaryLength: bounds.size.height,
                 secondaryLength: bounds.size.width
             };
