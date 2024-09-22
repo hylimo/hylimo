@@ -287,22 +287,22 @@ export class Layout {
         if (styles.vAlign == undefined) {
             minHeight = constraints.min.height - marginY;
         }
+        const maxWidth = Math.max(
+            styles.width ?? Math.min(styles.maxWidth ?? Number.POSITIVE_INFINITY, constraints.max.width - marginX),
+            0
+        );
+        const maxHeight = Math.max(
+            styles.height ?? Math.min(styles.maxHeight ?? Number.POSITIVE_INFINITY, constraints.max.height - marginY),
+            0
+        );
         return {
             min: {
-                width: Math.max(styles.width ?? Math.max(styles.minWidth ?? 0, minWidth), 0),
-                height: Math.max(styles.height ?? Math.max(styles.minHeight ?? 0, minHeight), 0)
+                width: Math.max(styles.width ?? Math.min(Math.max(styles.minWidth ?? 0, minWidth), maxWidth), 0),
+                height: Math.max(styles.height ?? Math.min(Math.max(styles.minHeight ?? 0, minHeight), maxHeight), 0)
             },
             max: {
-                width: Math.max(
-                    styles.width ??
-                        Math.min(styles.maxWidth ?? Number.POSITIVE_INFINITY, constraints.max.width - marginX),
-                    0
-                ),
-                height: Math.max(
-                    styles.height ??
-                        Math.min(styles.maxHeight ?? Number.POSITIVE_INFINITY, constraints.max.height - marginY),
-                    0
-                )
+                width: maxWidth,
+                height: maxHeight
             }
         };
     }
