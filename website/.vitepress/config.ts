@@ -146,7 +146,8 @@ export default withPwa(
                         form_factor: "wide",
                         label: "Searching in the documentation"
                     }
-                ]
+                ],
+                file_handlers: [{ action: "/diagram", accept: { "text/*": [".hyl"] } }]
             },
             workbox: {
                 maximumFileSizeToCacheInBytes: 10 * 1024 ** 2
