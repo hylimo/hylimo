@@ -1,5 +1,4 @@
 import { inject, injectable } from "inversify";
-import { Point } from "@hylimo/diagram-common";
 import { VNode } from "snabbdom";
 import {
     findParentByFeature,
@@ -14,7 +13,7 @@ import {
     TYPES,
     ViewerOptions
 } from "sprotty";
-import { Action, Bounds, SetViewportAction, Viewport } from "sprotty-protocol";
+import { Action, Bounds, SetViewportAction, Viewport, Point } from "sprotty-protocol";
 
 /**
  * A touch listener that handles panning and zooming of the viewport
