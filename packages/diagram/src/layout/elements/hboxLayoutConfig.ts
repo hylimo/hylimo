@@ -71,8 +71,8 @@ export class HBoxLayoutConfig extends BoxLayoutConfig {
         const parts: BoxOutlinePart[] = contents.map((content) => {
             const bounds = content.layoutBounds!;
             return {
-                primaryOffset: bounds.position.x - position.x,
-                secondaryOffset: bounds.position.y - position.y,
+                primaryOffset: bounds.position.x,
+                secondaryOffset: bounds.position.y,
                 primaryLength: bounds.size.width,
                 secondaryLength: bounds.size.height
             };
