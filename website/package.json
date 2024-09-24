@@ -1,7 +1,8 @@
 {
     "name": "website",
+    "private": true,
+    "license": "MIT",
     "type": "module",
-    "description": "",
     "main": "index.js",
     "scripts": {
         "dev": "vitepress dev",

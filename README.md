@@ -48,7 +48,20 @@ Depolying the web-based editor:
 
 ```
 cd website
-npm start
+npm run dev
 ```
 
-This deploys the website at http://localhost:3000
+This deploys the website at http://localhost:5173
+
+## Licenses
+
+- @hylimo/cli: [MIT](packages/cli/LICENSE)
+- @hylimo/core: [MIT](packages/core/LICENSE)
+- @hylimo/diagram: [MIT](packages/diagram/LICENSE)
+- @hylimo/diagram-common: [MIT](packages/diagram-common/LICENSE)
+- @hylimo/diagram-protocol: [MIT](packages/diagram-protocol/LICENSE)
+- @hylimo/diagram-render-pdf: [MIT](packages/diagram-render-pdf/LICENSE)
+- @hylimo/diagram-render-svg: [MIT](packages/diagram-render-svg/LICENSE)
+- @hylimo/diagram-ui: [EPL-2.0](packages/diagram-ui/LICENSE)
+- @hylimo/fonts: [MIT](packages/fonts/LICENSE)
+- @hylimo/language-server: [MIT](packages/language-server/LICENSE)
