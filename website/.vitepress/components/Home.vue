@@ -1,6 +1,7 @@
 <template>
     <div class="main">
         <VPNav class="navbar" />
+        <RegisterSW />
         <HylimoEditor
             v-model="code"
             :horizontal="height > width && width < 800"
@@ -11,6 +12,10 @@
             <Teleport to="#copy-diagram-link">
                 <IconButton label="Copy diagram link" icon="vpi-link" @click="copyLink" />
                 <span class="tooltip" :class="{ active: copiedSuccess }">Copied!</span>
+            </Teleport>
+            <Teleport v-if="codeWithFileHandle != undefined" to="#save-diagram">
+                <IconButton label="Save diagram" icon="vpi-save" @click="saveFile" :disabled="!hasFileCodeChanges" />
+                <span class="tooltip" :class="{ active: savedSuccess }">Saved</span>
             </Teleport>
             <Teleport to="#export-diagram">
                 <VPFlyout icon="vpi-download" label="Download diagram" class="download-flyout">
@@ -24,36 +29,60 @@
 </template>
 <script setup lang="ts">
 import VPNav from "vitepress/dist/client/theme-default/components/VPNav.vue";
-import { useLocalStorage, onKeyStroke, useWindowSize } from "@vueuse/core";
+import { useLocalStorage, onKeyStroke, useWindowSize, useEventListener } from "@vueuse/core";
 import { defineClientComponent, useData } from "vitepress";
 import IconButton from "./IconButton.vue";
 import VPFlyout from "vitepress/dist/client/theme-default/components/VPFlyout.vue";
 import { Root } from "@hylimo/diagram-common";
-import { ref } from "vue";
+import { computed, ref } from "vue";
 import { SVGRenderer } from "@hylimo/diagram-render-svg";
 import { PDFRenderer } from "@hylimo/diagram-render-pdf";
 import fileSaver from "file-saver";
 import { serialize, deserialize } from "../util/serialization.js";
 import { onBeforeMount } from "vue";
+import RegisterSW from "./RegisterSW.vue";
+import { CodeWithFileHandle, openDiagram } from "../util/diagramOpener";
 
 const HylimoEditor = defineClientComponent(() => import("./HylimoEditor.vue"));
 
 const { isDark, site } = useData();
 const { width, height } = useWindowSize();
 
-const code = useLocalStorage(
+const localStorageCode = useLocalStorage(
     "code",
     'classDiagram {\n    class("HelloWorld") {\n        public {\n            hello : string\n        }\n    }\n}'
 );
+const fileCode = ref<string>();
+const codeWithFileHandle = ref<CodeWithFileHandle>();
+const hasFileCodeChanges = computed(
+    () => fileCode.value != undefined && fileCode.value != codeWithFileHandle.value?.code
+);
+const code = computed({
+    get: () => fileCode.value ?? localStorageCode.value,
+    set: (value: string) => {
+        if (codeWithFileHandle.value != undefined) {
+            fileCode.value = value;
+        } else {
+            localStorageCode.value = value;
+        }
+    }
+});
 const diagram = ref<Root>();
+const successMessageTimeout = 1000;
 const copiedSuccess = ref(false);
+const savedSuccess = ref(false);
 
 const svgRenderer = new SVGRenderer();
 const pdfRenderer = new PDFRenderer();
 
 onKeyStroke("s", (event) => {
-    if (event.ctrlKey || event.metaKey) {
-        event.preventDefault();
+    if (!(event.ctrlKey || event.metaKey)) {
+        return;
+    }
+    event.preventDefault();
+    if (codeWithFileHandle.value != undefined) {
+        saveFile();
+    } else {
         downloadSource();
     }
 });
@@ -72,6 +101,21 @@ function downloadSource() {
     fileSaver.saveAs(new Blob([code.value]), "diagram.hyl");
 }
 
+async function saveFile() {
+    const fileHandle = codeWithFileHandle.value?.fileHandle;
+    if (fileHandle == undefined) {
+        throw new Error("No file handle");
+    }
+    const writable = await fileHandle.createWritable();
+    await writable.write(code.value);
+    await writable.close();
+    codeWithFileHandle.value!.code = code.value;
+    savedSuccess.value = true;
+    setTimeout(() => {
+        savedSuccess.value = false;
+    }, successMessageTimeout);
+}
+
 function copyLink() {
     const data = serialize(code.value, "pako");
     const url = new URL(site.value.base, window.location.href);
@@ -79,7 +123,7 @@ function copyLink() {
     copiedSuccess.value = true;
     setTimeout(() => {
         copiedSuccess.value = false;
-    }, 1000);
+    }, successMessageTimeout);
 }
 
 onBeforeMount(() => {
@@ -91,7 +135,24 @@ onBeforeMount(() => {
         } catch (e) {
             console.warn("Failed to deserialize diagram from URL", e);
         }
+    } else {
+        openDiagram()
+            .then((diagram) => {
+                if (diagram != undefined) {
+                    codeWithFileHandle.value = diagram;
+                    fileCode.value = diagram.code;
+                }
+            })
+            .catch((e) => {
+                // eslint-disable-next-line no-console
+                console.error("Failed to open diagram", e);
+            });
     }
+    useEventListener(window, "beforeunload", (event) => {
+        if (hasFileCodeChanges.value) {
+            event.preventDefault();
+        }
+    });
 });
 </script>
 <style scoped>

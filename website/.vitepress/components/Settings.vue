@@ -1,5 +1,12 @@
 <template>
-    <IconButton icon="vpi-settings" label="Settings" class="settings-button" @click="showDialog = true" />
+    <IconButton
+        icon="vpi-settings"
+        label="Settings"
+        class="settings-button"
+        :class="{ 'screen-menu': screenMenu }"
+        :screen-menu="screenMenu"
+        @click="showDialog = true"
+    />
     <ClientOnly>
         <Teleport to="body">
             <Transition name="modal">
@@ -28,6 +35,13 @@ import IconButton from "./IconButton.vue";
 import { useLocalStorage } from "@vueuse/core";
 import { mapObject } from "../util/mapObject.js";
 import { onClickOutside } from "@vueuse/core";
+
+defineProps({
+    screenMenu: {
+        type: Boolean,
+        default: false
+    }
+});
 
 const showDialog = ref(false);
 const dialog = ref<HTMLElement | null>(null);
@@ -145,5 +159,11 @@ function updateAndValidate(key: keyof typeof names, value: string) {
 .modal-enter-from .modal-container,
 .modal-leave-to .modal-container {
     transform: scale(1.1);
+}
+
+@media (max-width: 450px) {
+    .settings-button:not(.screen-menu) {
+        display: none;
+    }
 }
 </style>

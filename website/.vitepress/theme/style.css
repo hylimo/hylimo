@@ -2,6 +2,7 @@
 
 :root {
     --vp-nav-height: 51px;
+    --vp-nav-logo-height: 35px;
 }
 
 .VPSidebar {
@@ -31,7 +32,7 @@
 .VPNav {
     .container > .title {
         position: relative !important;
-        padding-left: 32px !important;
+        padding-left: 24px !important;
         width: var(--vp-sidebar-width) !important;
         flex-shrink: 1;
     }
@@ -59,6 +60,10 @@
 
         .wrapper {
             padding: 0 !important;
+        }
+
+        .VPNavBarHamburger {
+            margin-right: 8px;
         }
     }
 }
@@ -96,11 +101,21 @@
         background-color: var(--vp-c-divider);
         content: "";
     }
+
+    .VPNav {
+        .container > .title {
+            padding-left: 32px !important;
+        }
+    }
 }
 
 .VPSocialLinks,
 .VPNavBarExtra {
     margin-right: 8px !important;
+}
+
+.VPImage.logo {
+    margin-right: 10px;
 }
 
 /* Sprotty */

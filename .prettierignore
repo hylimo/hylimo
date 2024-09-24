@@ -2,4 +2,5 @@ package-lock.json
 website/build/
 website/.vitepress/dist/
 website/.vitepress/cache/
+website/dev-dist/
 packages/**/lib

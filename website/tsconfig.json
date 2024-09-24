@@ -8,7 +8,7 @@
         "skipLibCheck": true,
         "resolveJsonModule": true,
         "jsx": "preserve",
-        "lib": ["esnext", "dom", "dom.iterable"],
+        "lib": ["esnext", "dom", "dom.iterable", "webworker"],
         "types": ["vite/client"]
     },
     "include": [".vitepress/**/*.vue", ".vitepress/**/*.ts"]
