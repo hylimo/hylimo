@@ -15,6 +15,7 @@ export default withPwa(
             nav: [
                 { text: "Docs", link: "/docs/docs" },
                 { component: "NavTeleportTarget", props: { "target-id": "copy-diagram-link" } },
+                { component: "NavTeleportTarget", props: { "target-id": "save-diagram" } },
                 { component: "NavTeleportTarget", props: { "target-id": "export-diagram" } },
                 { component: "Settings" }
             ],
@@ -147,7 +148,7 @@ export default withPwa(
                         label: "Searching in the documentation"
                     }
                 ],
-                file_handlers: [{ action: "/diagram", accept: { "text/*": [".hyl"] } }]
+                file_handlers: [{ action: "./", accept: { "text/*": [".hyl"] } }]
             },
             workbox: {
                 maximumFileSizeToCacheInBytes: 10 * 1024 ** 2

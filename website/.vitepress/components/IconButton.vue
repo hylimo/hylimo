@@ -52,9 +52,13 @@ defineProps({
     width: 36px;
 }
 
-.icon-button:hover {
+.icon-button:hover:not(:disabled) {
     color: var(--vp-c-brand-1);
     transition: color 0.25s;
+}
+
+.icon-button:disabled {
+    color: var(--vp-c-text-3);
 }
 
 .icon-button span:last-child {
