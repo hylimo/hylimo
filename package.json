@@ -13,6 +13,7 @@
         "lint:check": "eslint"
     },
     "devDependencies": {
+        "@types/wicg-file-system-access": "^2023.10.5",
         "@typescript-eslint/eslint-plugin": "^8.1.0",
         "@typescript-eslint/parser": "^8.1.0",
         "eslint": "^9.9.0",
