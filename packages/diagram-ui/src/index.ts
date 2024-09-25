@@ -30,6 +30,8 @@ export * from "./features/update/di.config.js";
 export * from "./features/update/incrementalUpdateModel.js";
 export * from "./features/update/updateModel.js";
 export * from "./features/viewport/di.config.js";
+export * from "./features/viewport/fitToScreenAction.js";
+export * from "./features/viewport/fitToScreenKeyboardListener.js";
 export * from "./features/viewport/setModelActionHandler.js";
 export * from "./features/viewport/touch.js";
 export * from "./features/zorder/di.config.js";
