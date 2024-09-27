@@ -32,4 +32,4 @@ export const nonNavigableAssociationsModule = InterpreterModule.create(
             `
         )
     ]
-)
+);

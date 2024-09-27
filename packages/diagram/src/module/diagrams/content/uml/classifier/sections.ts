@@ -12,20 +12,21 @@ export const sectionsModule = InterpreterModule.create(
             `
                 scope.internal.sectionsContentHandler = [
                     {
-                        args.scope.sections = list()
-                        args.scope.section = listWrapper {
+                        this.scope = args.scope
+                        scope.sections = list()
+                        scope.section = listWrapper {
                             sectionIndex = args.section
                             newSection = it
                             if(sectionIndex == null) {
-                                result.sections += newSection
+                                scope.sections += newSection
                             } {
-                                while { result.sections.length <= sectionIndex } {
-                                    result.sections += null
+                                while { scope.sections.length <= sectionIndex } {
+                                    scope.sections += null
                                 }
-                                if(result.sections.get(sectionIndex) == null) {
-                                    result.sections.set(sectionIndex, list())
+                                if(scope.sections.get(sectionIndex) == null) {
+                                    scope.sections.set(sectionIndex, list())
                                 }
-                                result.sections.get(sectionIndex).addAll(newSection)
+                                scope.sections.get(sectionIndex).addAll(newSection)
                             }
                         }
                     },

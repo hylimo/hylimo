@@ -22,4 +22,4 @@ export const elementModule = InterpreterModule.create(
             `
         )
     ]
-)
+);

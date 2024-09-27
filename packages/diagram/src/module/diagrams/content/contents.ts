@@ -46,4 +46,4 @@ export const contents: InterpreterModule[] = [
     nonNavigableAssociationsModule,
     packageModule,
     readingDirectionModule
-]
+];

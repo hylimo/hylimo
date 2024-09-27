@@ -16,7 +16,7 @@ export const classModule = InterpreterModule.create(
     [
         ...parse(
             `
-                _classifier = scope.internal.createClassifier(
+                _class = scope.internal.createClassifier(
                     "class",
                     list(
                         scope.internal.defaultNameContentHandler,
@@ -32,7 +32,7 @@ export const classModule = InterpreterModule.create(
                 `
                     (name, callback) = args
                     scope.internal.registerCanvasElement(
-                        _classifier(name, callback, args.keywords, args.abstract, self = args.self),
+                        _class(name, callback, args.keywords, args.abstract, self = args.self),
                         args,
                         args.self
                     )

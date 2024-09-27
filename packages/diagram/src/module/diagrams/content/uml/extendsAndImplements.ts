@@ -21,4 +21,4 @@ export const extendsAndImplementsModule = InterpreterModule.create(
             `
         )
     ]
-)
+);

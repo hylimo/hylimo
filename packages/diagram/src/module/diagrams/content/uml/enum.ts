@@ -17,8 +17,8 @@ export const enumModule = InterpreterModule.create(
     [
         ...parse(
             `
-                _classifier = scope.internal.createClassifier(
-                    "class",
+                _enum = scope.internal.createClassifier(
+                    "enum",
                     list(
                         scope.internal.defaultNameContentHandler,
                         scope.internal.sectionsContentHandler,
@@ -39,7 +39,7 @@ export const enumModule = InterpreterModule.create(
                         keywords.addAll(otherKeywords)
                     }
                     scope.internal.registerCanvasElement(
-                        _classifier(name, callback, keywords, args.abstract, self = args.self, hasEntries = true),
+                        _enum(name, callback, keywords, args.abstract, self = args.self, hasEntries = true),
                         args,
                         args.self
                     )
@@ -55,6 +55,6 @@ export const enumModule = InterpreterModule.create(
                     returns: "The created enum"
                 }
             )
-        ),
+        )
     ]
-)
+);

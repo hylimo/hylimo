@@ -10,22 +10,27 @@ export const defaultNameModule = InterpreterModule.create(
     [
         ...parse(
             `
+                scope.internal.defaultTitle = {
+                    (name, keywords) = args
+                    this.contents = list()
+                    if(keywords != null) {
+                        keywords.forEach {
+                            contents += text(
+                                contents = list(span(text = "\\u00AB" + it + "\\u00BB")),
+                                class = list("keyword")
+                            )
+                        }
+                    }
+
+                    contents += text(contents = list(span(text = name)), class = list("title"))
+                    vbox(contents = contents)
+                }
+
                 scope.internal.defaultNameContentHandler = [
                     { },
                     {
-                        (name, keywords) = args.args
-                        this.contents = list()
-                        if(keywords != null) {
-                            keywords.forEach {
-                                contents += text(
-                                    contents = list(span(text = "\\u00AB" + it + "\\u00BB")),
-                                    class = list("keyword")
-                                )
-                            }
-                        }
-
-                        contents += text(contents = list(span(text = name)), class = list("title"))
-                        args.contents += vbox(contents = contents) 
+                        (name, _, keywords) = args.args
+                        args.contents += scope.internal.defaultTitle(name, keywords) 
                     }
                 ]
             `

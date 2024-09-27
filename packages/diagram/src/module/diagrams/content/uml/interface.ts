@@ -16,8 +16,8 @@ export const interfaceModule = InterpreterModule.create(
     [
         ...parse(
             `
-                _classifier = scope.internal.createClassifier(
-                    "class",
+                _interface = scope.internal.createClassifier(
+                    "interface",
                     list(
                         scope.internal.defaultNameContentHandler,
                         scope.internal.sectionsContentHandler,
@@ -37,7 +37,7 @@ export const interfaceModule = InterpreterModule.create(
                         keywords.addAll(otherKeywords)
                     }
                     scope.internal.registerCanvasElement(
-                        _classifier(name, callback, keywords, args.abstract, self = args.self),
+                        _interface(name, callback, keywords, args.abstract, self = args.self),
                         args,
                         args.self
                     )
@@ -53,6 +53,6 @@ export const interfaceModule = InterpreterModule.create(
                     returns: "The created interface"
                 }
             )
-        ),
+        )
     ]
-)
+);

@@ -94,11 +94,12 @@ export const propertiesAndMethodsModule = InterpreterModule.create(
             `
                 scope.internal.propertiesAndMethodsContentHandler = [
                     {
-                        args.scope.public = _classifierEntryScopeGenerator("+ ", result.section)
-                        args.scope.protected = _classifierEntryScopeGenerator("# ", result.section)
-                        args.scope.private = _classifierEntryScopeGenerator("- ", result.section)
-                        args.scope.package = _classifierEntryScopeGenerator("~ ", result.section)
-                        args.scope.default = _classifierEntryScopeGenerator("", result.section)
+                        this.scope = args.scope
+                        scope.public = _classifierEntryScopeGenerator("+ ", scope.section)
+                        scope.protected = _classifierEntryScopeGenerator("# ", scope.section)
+                        scope.private = _classifierEntryScopeGenerator("- ", scope.section)
+                        scope.package = _classifierEntryScopeGenerator("~ ", scope.section)
+                        scope.default = _classifierEntryScopeGenerator("", scope.section)
                     },
                     { }
                 ]

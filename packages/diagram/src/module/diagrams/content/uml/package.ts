@@ -6,7 +6,7 @@ import { SCOPE } from "../../../base/dslModule.js";
  */
 export const packageModule = InterpreterModule.create(
     "uml/package",
-    [],
+    ["uml/classifier/defaultName"],
     [],
     [
         assign(
@@ -25,7 +25,7 @@ export const packageModule = InterpreterModule.create(
                             contents = list(
                                 stack(
                                     contents = list(
-                                        rect(content = _title(name, keywords), class = list("title-wrapper")),
+                                        rect(content = scope.internal.defaultTitle(name, keywords), class = list("title-wrapper")),
                                         path(path = "M 0 0 V 1", hAlign = "left"),
                                         path(path = "M 0 0 V 1", hAlign = "right"),
                                         path(path = "M 0 0 H 1", vAlign = "top")
@@ -95,6 +95,12 @@ export const packageModule = InterpreterModule.create(
                             }
                             minWidth = 100
                             hAlign = "left"
+                        }
+                        cls("title") {
+                            hAlign = "center"
+                            type("span") {
+                                fontWeight = "bold"
+                            }
                         }
                     }
                 }

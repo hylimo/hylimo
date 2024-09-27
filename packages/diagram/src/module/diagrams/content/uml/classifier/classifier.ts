@@ -21,16 +21,16 @@ export const classifierModule = InterpreterModule.create(
                             (name, optionalCallback) = args
                             callback = optionalCallback ?? {}
                             result = []
-
+                            
                             contentHandlers.forEach {
-                                result += it[0](scope = result, args = classifierArgs)
+                                it[0](scope = result, args = classifierArgs)
                             }
 
                             callback.callWithScope(result)
 
                             classifierContents = list()
                             renderedClassifier = rect(
-                                classifier = list("classifier"),
+                                class = list("classifier", type),
                                 content = vbox(contents = classifierContents)
                             )
                             if(classifierArgs.abstract == true) {

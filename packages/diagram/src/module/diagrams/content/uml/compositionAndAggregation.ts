@@ -42,4 +42,4 @@ export const compositionAndAggregationModule = InterpreterModule.create(
             `
         )
     ]
-)
+);
