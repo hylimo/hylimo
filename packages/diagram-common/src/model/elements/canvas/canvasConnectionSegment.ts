@@ -26,6 +26,14 @@ export function calculateMarkerRenderInformationInternal(
     helperPos: Point,
     marker: Marker
 ): MarkerLayoutInformation {
+    if (Point.equals(pos, helperPos)) {
+        return {
+            rotation: 0,
+            newPosition: pos,
+            marker,
+            position: pos
+        };
+    }
     const markerWidth = marker.width * marker.lineStart;
     const rotation = (Math.atan2(pos.y - helperPos.y, pos.x - helperPos.x) * 180) / Math.PI;
     const normalizedDelta = Math2D.normalize(Math2D.sub(helperPos, pos));
