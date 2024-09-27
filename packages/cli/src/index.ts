@@ -56,7 +56,8 @@ const layoutEngine = new LayoutEngine();
 const diagramEngine = new DiagramEngine(
     new Parser(false),
     new Interpreter(
-        [...defaultModules, diagramModule, dslModule, editModule, baseDiagramModule, classDiagramModule],
+        [diagramModule, dslModule, editModule, baseDiagramModule, classDiagramModule],
+        defaultModules,
         maxExecutionSteps
     ),
     layoutEngine

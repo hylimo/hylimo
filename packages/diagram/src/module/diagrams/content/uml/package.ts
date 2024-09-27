@@ -1,0 +1,104 @@
+import { assign, fun, functionType, id, InterpreterModule, listType, optional, parse, stringType } from "@hylimo/core";
+import { SCOPE } from "../../../base/dslModule.js";
+
+/**
+ * Module providing the package element
+ */
+export const packageModule = InterpreterModule.create(
+    "uml/package",
+    [],
+    [],
+    [
+        assign(
+            "_package",
+            fun(
+                `
+                    (name, optionalCallback, keywords) = args
+    
+                    callback = optionalCallback ?? {}
+                    result = object(contents = list())
+                    callback.callWithScope(result)
+    
+                    packageElement = canvasElement(
+                        class = list("package-element"),
+                        content = vbox(
+                            contents = list(
+                                stack(
+                                    contents = list(
+                                        rect(content = _title(name, keywords), class = list("title-wrapper")),
+                                        path(path = "M 0 0 V 1", hAlign = "left"),
+                                        path(path = "M 0 0 V 1", hAlign = "right"),
+                                        path(path = "M 0 0 H 1", vAlign = "top")
+                                    ),
+                                    class = list("package")
+                                ),
+                                rect(
+                                    content = canvas(contents = result.contents, class = list("package-canvas")),
+                                    class = list("package-body")
+                                )
+                            )
+                        )
+                    )
+                    scope.internal.registerInDiagramScope(name, packageElement)
+                    packageElement
+                `
+            )
+        ),
+        id(SCOPE).assignField(
+            "package",
+            fun(
+                `
+                    (name, callback) = args
+                    scope.internal.registerCanvasElement(
+                        _package(name, callback, args.keywords, self = args.self),
+                        args,
+                        args.self
+                    )
+                `,
+                {
+                    docs: "Creates a package.",
+                    params: [
+                        [0, "the name of the package", stringType],
+                        [1, "the callback function for the package", optional(functionType)],
+                        ["keywords", "the keywords of the package", optional(listType(stringType))]
+                    ],
+                    snippet: `("$1") {\n    $2\n}`,
+                    returns: "The created package"
+                }
+            )
+        ),
+        ...parse(
+            `
+                scope.styles {
+                    cls("package-element") {
+                        minWidth = 300
+                            cls("package-body") {
+                            minHeight = 50
+                            stroke = var("primary")
+                            strokeWidth = var("strokeWidth")
+                        }
+                        cls("package-canvas") {
+                            margin = 40
+                        }
+                        cls("package") {
+                            type("vbox") {
+                                margin = 5
+                            }
+                            cls("title-wrapper") {
+                                marginLeft = var("strokeWidth")
+                                marginRight = var("strokeWidth")
+                                marginTop = var("strokeWidth")
+                            }
+                            type("path") {
+                                stroke = var("primary")
+                                strokeWidth = var("strokeWidth")
+                            }
+                            minWidth = 100
+                            hAlign = "left"
+                        }
+                    }
+                }
+            `
+        )
+    ]
+);

@@ -22,7 +22,7 @@ const mathObject = "Math";
  */
 export const numberModule = InterpreterModule.create(
     DefaultModuleNames.NUMBER,
-    [],
+    [DefaultModuleNames.OBJECT],
     [DefaultModuleNames.COMMON],
     [
         fun([

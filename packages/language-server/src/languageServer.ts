@@ -112,13 +112,12 @@ export class LanguageServer {
         this.diagramServerManager = new DiagramServerManager(this.connection);
         this.textDocuments.listen(this.connection);
         const interpreterModules = [
-            ...defaultModules,
             editModule,
             diagramModule,
             dslModule,
             ...config.additionalInterpreterModules
         ];
-        const interpreter = new Interpreter(interpreterModules, config.maxExecutionSteps);
+        const interpreter = new Interpreter(interpreterModules, defaultModules, config.maxExecutionSteps);
         const parser = new Parser();
         this.diagramUtils = {
             config: new Config(config.defaultConfig),

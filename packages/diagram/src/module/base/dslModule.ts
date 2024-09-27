@@ -17,7 +17,7 @@ import { LinePointLayoutConfig } from "../../layout/elements/canvas/linePointLay
 /**
  * Identifier for the scope variable
  */
-const scope = "scope";
+export const SCOPE = "scope";
 
 /**
  * Expressions which create the initial scope which is passed to the callback of all diagram DSL functions
@@ -36,7 +36,7 @@ const scopeExpressions: ExecutableExpression[] = [
             )
         `
     ),
-    id(scope).assignField(
+    id(SCOPE).assignField(
         "apos",
         fun(
             `
@@ -55,7 +55,7 @@ const scopeExpressions: ExecutableExpression[] = [
             }
         )
     ),
-    id(scope).assignField(
+    id(SCOPE).assignField(
         "rpos",
         fun(
             `
@@ -75,7 +75,7 @@ const scopeExpressions: ExecutableExpression[] = [
             }
         )
     ),
-    id(scope).assignField(
+    id(SCOPE).assignField(
         "lpos",
         fun(
             `
@@ -99,7 +99,7 @@ const scopeExpressions: ExecutableExpression[] = [
             }
         )
     ),
-    id(scope).assignField(
+    id(SCOPE).assignField(
         "styles",
         fun(
             `
@@ -233,7 +233,7 @@ const scopeExpressions: ExecutableExpression[] = [
             }
         `
     ),
-    id(scope).assignField(
+    id(SCOPE).assignField(
         "layout",
         fun(
             `
@@ -274,7 +274,7 @@ const scopeExpressions: ExecutableExpression[] = [
             }
         )
     ),
-    id(scope).assignField(
+    id(SCOPE).assignField(
         "with",
         fun(
             `
@@ -417,7 +417,7 @@ const scopeExpressions: ExecutableExpression[] = [
             }
         )
     ),
-    id(scope)
+    id(SCOPE)
         .field("internal")
         .assignField(
             "registerCanvasContent",
@@ -430,7 +430,7 @@ const scopeExpressions: ExecutableExpression[] = [
                 `
             )
         ),
-    id(scope)
+    id(SCOPE)
         .field("internal")
         .assignField(
             "registerCanvasElement",
@@ -455,7 +455,7 @@ const scopeExpressions: ExecutableExpression[] = [
                 `
             )
         ),
-    id(scope)
+    id(SCOPE)
         .field("internal")
         .assignField(
             "createConnectionOperator",
@@ -488,7 +488,7 @@ const scopeExpressions: ExecutableExpression[] = [
                 }
             )
         ),
-    id(scope)
+    id(SCOPE)
         .field("internal")
         .assignField(
             "registerInDiagramScope",
@@ -501,7 +501,7 @@ const scopeExpressions: ExecutableExpression[] = [
                 `
             )
         ),
-    id(scope).assignField(
+    id(SCOPE).assignField(
         "Position",
         enumObject({
             Right: 0,
@@ -514,7 +514,7 @@ const scopeExpressions: ExecutableExpression[] = [
             TopRight: 0.875
         })
     ),
-    id(scope).assignField(
+    id(SCOPE).assignField(
         "VAlign",
         enumObject({
             Top: "top",
@@ -522,7 +522,7 @@ const scopeExpressions: ExecutableExpression[] = [
             Bottom: "bottom"
         })
     ),
-    id(scope).assignField(
+    id(SCOPE).assignField(
         "HAlign",
         enumObject({
             Left: "left",
@@ -532,20 +532,6 @@ const scopeExpressions: ExecutableExpression[] = [
     ),
     ...parse(
         `
-            scope.element = {
-                callbackOrElement = it
-                this.element = if(callbackOrElement._type == "element") {
-                    canvasElement(content = callbackOrElement)
-                } {
-                    canvasElement(content = callbackOrElement())
-                }
-                scope.internal.registerCanvasElement(this.element, args, args.self)
-            }
-            scope.styles {
-                cls("label-element") {
-                    hAlign = "center"
-                }
-            }
             scopeEnhancer(scope)
             callback.callWithScope(scope)
             diagramCanvas = canvas(contents = scope.contents)

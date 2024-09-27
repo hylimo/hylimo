@@ -28,6 +28,24 @@ export interface InterpreterModule {
     expressions: ExecutableExpression<any>[];
 }
 
+/**
+ * Helper data structure for topological sorting of modules
+ */
+interface MarkedModule {
+    /**
+     * The module itself
+     */
+    module: InterpreterModule;
+    /**
+     * If true, the module has been added to the list of modules
+     */
+    mark: boolean;
+    /**
+     * If visited with true, a cycle was detected
+     */
+    temporaryMark: boolean;
+}
+
 export namespace InterpreterModule {
     /**
      * Creates a new InterpreterModule based on the provided name, dependencies and expressions
@@ -50,5 +68,81 @@ export namespace InterpreterModule {
             runtimeDependencies,
             expressions: expressions
         };
+    }
+
+    /**
+     * Computes the order in which modules have to be loaded
+     *
+     * @param requiredModules the modules which have to be loaded
+     * @param optionalModules the modules which are only loaded if required by any required module
+     * @returns the ordered list of modules
+     */
+    export function computeModules(
+        requiredModules: InterpreterModule[],
+        optionalModules: InterpreterModule[]
+    ): InterpreterModule[] {
+        const markedModules = requiredModules.map((module) => ({ module, mark: false, temporaryMark: false }));
+        const markedOptionalModules = optionalModules.map((module) => ({ module, mark: false, temporaryMark: false }));
+        const moduleLookup = new Map<string, (typeof markedModules)[0]>();
+        const modules: InterpreterModule[] = [];
+        for (const module of markedModules) {
+            if (moduleLookup.has(module.module.name)) {
+                throw new Error(`Duplicate module ${module.module.name}`);
+            }
+            moduleLookup.set(module.module.name, module);
+        }
+        for (const module of markedOptionalModules) {
+            if (!moduleLookup.has(module.module.name)) {
+                moduleLookup.set(module.module.name, module);
+            }
+        }
+        for (const module of markedModules) {
+            visit(module, moduleLookup, modules);
+        }
+        return modules;
+    }
+
+    /**
+     * Topological sorting helper for modules
+     * Detects cycles and missing modules.
+     *
+     * @param module the current visited module
+     * @param moduleLookup mapping of all known modules
+     * @param modules the list of modules to add the current module to
+     */
+    function visit(module: MarkedModule, moduleLookup: Map<string, MarkedModule>, modules: InterpreterModule[]): void {
+        if (module.temporaryMark) {
+            throw new Error(`Cycle in module dependencies: ${module.module.name}`);
+        }
+        if (!module.mark) {
+            module.temporaryMark = true;
+            visitDependencies(module.module.dependencies, moduleLookup, modules);
+            module.temporaryMark = false;
+            module.mark = true;
+            modules.push(module.module);
+            visitDependencies(module.module.runtimeDependencies, moduleLookup, modules);
+        }
+    }
+
+    /**
+     * Visits each dependency in dependencies.
+     * Used for visit. Detects cycles and missing modules.
+     *
+     * @param dependencies the dependencies to visit, must be existant in moduleLookup
+     * @param moduleLookup lookup from depenency name to module
+     * @param modules the list of modules to add the dependencies to
+     */
+    function visitDependencies(
+        dependencies: string[],
+        moduleLookup: Map<string, MarkedModule>,
+        modules: InterpreterModule[]
+    ): void {
+        for (const child of dependencies) {
+            const childModule = moduleLookup.get(child);
+            if (!childModule) {
+                throw new Error(`Unknown module dependency: ${child}`);
+            }
+            visit(childModule, moduleLookup, modules);
+        }
     }
 }
