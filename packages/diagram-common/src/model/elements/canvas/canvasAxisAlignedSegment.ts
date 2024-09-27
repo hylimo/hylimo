@@ -59,10 +59,15 @@ export namespace CanvasAxisAlignedSegment {
         pos: number,
         marker: Marker
     ): MarkerLayoutInformation {
+        let helperPos: Point;
         if (pos > -1 && pos <= 0) {
-            return calculateMarkerRenderInformationInternal(point, { x: point.x, y: endPoint.y }, marker);
+            helperPos = { x: point.x, y: endPoint.y };
         } else {
-            return calculateMarkerRenderInformationInternal(point, { x: endPoint.x, y: point.y }, marker);
+            helperPos = { x: endPoint.x, y: point.y };
         }
+        if (Point.equals(helperPos, point)) {
+            helperPos = endPoint;
+        }
+        return calculateMarkerRenderInformationInternal(point, helperPos, marker);
     }
 }
