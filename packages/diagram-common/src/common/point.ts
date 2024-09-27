@@ -14,7 +14,7 @@ export namespace Point {
 
     /**
      * Checks if two points are equal
-     * 
+     *
      * @param a the first point
      * @param b the second point
      * @returns true if the points are equal
