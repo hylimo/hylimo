@@ -78,7 +78,7 @@ export const packageModule = InterpreterModule.create(
                             strokeWidth = var("strokeWidth")
                         }
                         cls("package-canvas") {
-                            margin = 40
+                            margin = var("subcanvasMargin")
                         }
                         cls("package") {
                             type("vbox") {

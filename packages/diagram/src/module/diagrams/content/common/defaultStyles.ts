@@ -18,6 +18,7 @@ export const defaultStylesModule = InterpreterModule.create(
                             "#000000"
                         }
                         strokeWidth = 2
+                        subcanvasMargin = 40
                     }
                     type("span") {
                         fill = var("primary")

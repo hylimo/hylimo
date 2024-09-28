@@ -111,6 +111,9 @@ export const classifierModule = InterpreterModule.create(
                         cls("keyword") {
                             hAlign = "center"
                         }
+                        cls("classifier-canvas") {
+                            margin = var("subcanvasMargin")
+                        }
                     }
                 }
             `

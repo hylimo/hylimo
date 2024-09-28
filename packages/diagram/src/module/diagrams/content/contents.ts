@@ -20,6 +20,7 @@ import { interfaceModule } from "./uml/interface.js";
 import { nonNavigableAssociationsModule } from "./uml/nonNavigableAssociations.js";
 import { packageModule } from "./uml/package.js";
 import { readingDirectionModule } from "./uml/readingDirection.js";
+import { contentModule } from "./uml/classifier/content.js";
 
 /**
  * All content modules
@@ -30,6 +31,7 @@ export const contents: InterpreterModule[] = [
     elementModule,
     associationsModule,
     classifierModule,
+    contentModule,
     defaultNameModule,
     entriesModule,
     portsModule,
