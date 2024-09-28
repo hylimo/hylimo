@@ -25,6 +25,7 @@ export class CompletionEngine {
      * Generates completion items based on the given text and position
      *
      * @param text the code to execute
+     * @param additionalExpressions additionally available variables for use in the completion that are not located within the given text
      * @param position the position of the cursor
      * @returns the generated complete items or undefined if no items could be generated
      */
