@@ -18,6 +18,8 @@ import { ExecutableNativeExpression } from "./ast/executableNativeExpression.js"
 import { ListEntry } from "../ast/listEntry.js";
 import { FunctionDocumentation } from "./ast/executableAbstractFunctionExpression.js";
 import { OperatorExpression } from "../ast/operatorExpression.js";
+import { ExecutableObjectExpression } from "./ast/executableObjectExpression.js";
+import { ExecutableListEntry } from "./ast/executableListEntry.js";
 
 /**
  * Helper function to create an IdentifierExpression without a position
@@ -59,6 +61,16 @@ export function num(value: number): ExecutableNumberLiteralExpression {
  */
 export function assign(field: string, value: ExecutableExpression): ExecutableAssignmentExpression {
     return new ExecutableAssignmentExpression(undefined, value, field);
+}
+
+/**
+ * Helpe rfunction to create an ExecutableObjectExpression
+ *
+ * @param fields the fields of the object
+ * @returns the created ExecutableObjectExpression
+ */
+export function object(fields: ExecutableListEntry[]): ExecutableObjectExpression {
+    return new ExecutableObjectExpression(undefined, fields);
 }
 
 /**

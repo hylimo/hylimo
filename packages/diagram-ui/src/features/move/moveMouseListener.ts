@@ -439,7 +439,7 @@ export class MoveMouseListener extends MouseListener {
     private createLineMoveHandler(linePoint: SLinePoint): MoveHandler | null {
         const editSpecifications: EditSpecificationEntry[] = [];
         editSpecifications.push(linePoint.edits[DefaultEditTypes.MOVE_LPOS_POS]);
-        if (linePoint.distance != undefined) {
+        if (linePoint.edits[DefaultEditTypes.MOVE_LPOS_DIST] != undefined) {
             editSpecifications.push(linePoint.edits[DefaultEditTypes.MOVE_LPOS_DIST]);
         }
         if (!EditSpecification.isConsistent([editSpecifications])) {
