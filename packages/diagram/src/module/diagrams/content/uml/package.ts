@@ -74,8 +74,6 @@ export const packageModule = InterpreterModule.create(
                         minWidth = 300
                             cls("package-body") {
                             minHeight = 50
-                            stroke = var("primary")
-                            strokeWidth = var("strokeWidth")
                         }
                         cls("package-canvas") {
                             margin = var("subcanvasMargin")
@@ -88,10 +86,6 @@ export const packageModule = InterpreterModule.create(
                                 marginLeft = var("strokeWidth")
                                 marginRight = var("strokeWidth")
                                 marginTop = var("strokeWidth")
-                            }
-                            type("path") {
-                                stroke = var("primary")
-                                strokeWidth = var("strokeWidth")
                             }
                             minWidth = 100
                             hAlign = "left"

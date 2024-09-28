@@ -28,6 +28,14 @@ export const defaultStylesModule = InterpreterModule.create(
                         stroke = var("primary")
                         strokeWidth = var("strokeWidth")
                     }
+                    type("rect") {
+                        stroke = var("primary")
+                        strokeWidth = var("strokeWidth")
+                    }
+                    type("path") {
+                        stroke = var("primary")
+                        strokeWidth = var("strokeWidth")
+                    }
                     cls("label-element") {
                         hAlign = "center"
                     }

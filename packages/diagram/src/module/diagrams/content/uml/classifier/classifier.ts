@@ -21,12 +21,6 @@ export const classifierModule = InterpreterModule.create(
                             (name, optionalCallback) = args
                             callback = optionalCallback ?? {}
                             result = []
-                            
-                            contentHandlers.forEach {
-                                it[0](scope = result, args = classifierArgs)
-                            }
-
-                            callback.callWithScope(result)
 
                             classifierContents = list()
                             renderedClassifier = rect(
@@ -40,8 +34,13 @@ export const classifierModule = InterpreterModule.create(
                                 content = renderedClassifier,
                                 class = list("classifier-element", type + "-element")
                             )
+                            
+                            contentHandlers.forEach {
+                                it[0](scope = result, args = classifierArgs, element = classifierElement, contents = classifierContents)
+                            }
 
-                            targetScope = args.self
+                            callback.callWithScope(result)
+
                             scope.internal.registerInDiagramScope(name, classifierElement)
 
                             contentHandlers.forEach {
@@ -81,8 +80,6 @@ export const classifierModule = InterpreterModule.create(
                         minWidth = 300
 
                         cls("classifier") {
-                            stroke = var("primary")
-                            strokeWidth = var("strokeWidth")
                             type("vbox") {
                                 margin = 5
                             }
@@ -92,8 +89,6 @@ export const classifierModule = InterpreterModule.create(
                             marginBottom = 5
                             marginLeft = -5
                             marginRight = -5
-                            strokeWidth = var("strokeWidth")
-                            stroke = var("primary")
                         }
                         cls("abstract") {
                             cls("title") {

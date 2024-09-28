@@ -74,10 +74,6 @@ export const defaultMarkersModule = InterpreterModule.create(
                     cls("filled-diamond-marker") {
                         width = 28
                     }
-                    cls("marker-path") {
-                        strokeWidth = var("strokeWidth")
-                        stroke = var("primary")
-                    }
                     cls("filled-marker-path") {
                         fill = var("primary")
                     }
