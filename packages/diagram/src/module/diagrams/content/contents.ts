@@ -4,7 +4,7 @@ import { defaultStylesModule } from "./common/defaultStyles.js";
 import { elementModule } from "./common/element.js";
 import { associationsModule } from "./uml/associations.js";
 import { classifierModule } from "./uml/classifier/classifier.js";
-import { defaultNameModule } from "./uml/classifier/defaultName.js";
+import { defaultTitleModule } from "./uml/classifier/defaultTitle.js";
 import { entriesModule } from "./uml/classifier/entries.js";
 import { portsModule } from "./uml/classifier/ports.js";
 import { propertiesAndMethodsModule } from "./uml/classifier/propertiesAndMethods.js";
@@ -21,6 +21,7 @@ import { nonNavigableAssociationsModule } from "./uml/nonNavigableAssociations.j
 import { packageModule } from "./uml/package.js";
 import { readingDirectionModule } from "./uml/readingDirection.js";
 import { contentModule } from "./uml/classifier/content.js";
+import { componentTitleModule } from "./uml/classifier/componentTitle.js";
 
 /**
  * All content modules
@@ -31,8 +32,9 @@ export const contents: InterpreterModule[] = [
     elementModule,
     associationsModule,
     classifierModule,
+    componentTitleModule,
     contentModule,
-    defaultNameModule,
+    defaultTitleModule,
     entriesModule,
     portsModule,
     propertiesAndMethodsModule,

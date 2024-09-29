@@ -3,8 +3,8 @@ import { InterpreterModule, parse } from "@hylimo/core";
 /**
  * Module providing the default name content handler
  */
-export const defaultNameModule = InterpreterModule.create(
-    "uml/classifier/defaultName",
+export const defaultTitleModule = InterpreterModule.create(
+    "uml/classifier/defaultTitle",
     [],
     [],
     [
@@ -23,10 +23,10 @@ export const defaultNameModule = InterpreterModule.create(
                     }
 
                     contents += text(contents = list(span(text = name)), class = list("title"))
-                    vbox(contents = contents)
+                    vbox(contents = contents, class = list("title-container"))
                 }
 
-                scope.internal.defaultNameContentHandler = [
+                scope.internal.defaultTitleContentHandler = [
                     { },
                     {
                         (name, _, keywords) = args.args

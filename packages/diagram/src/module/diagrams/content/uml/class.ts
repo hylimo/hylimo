@@ -8,7 +8,7 @@ export const classModule = InterpreterModule.create(
     "uml/class",
     [
         "uml/classifier/classifier",
-        "uml/classifier/defaultName",
+        "uml/classifier/defaultTitle",
         "uml/classifier/sections",
         "uml/classifier/propertiesAndMethods",
         "uml/classifier/content",
@@ -21,7 +21,7 @@ export const classModule = InterpreterModule.create(
                 _class = scope.internal.createClassifier(
                     "class",
                     list(
-                        scope.internal.defaultNameContentHandler,
+                        scope.internal.defaultTitleContentHandler,
                         scope.internal.sectionsContentHandler,
                         scope.internal.propertiesAndMethodsContentHandler,
                         scope.internal.contentContentHandler,

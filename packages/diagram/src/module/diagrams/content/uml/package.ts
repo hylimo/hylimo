@@ -6,7 +6,7 @@ import { SCOPE } from "../../../base/dslModule.js";
  */
 export const packageModule = InterpreterModule.create(
     "uml/package",
-    ["uml/classifier/defaultName"],
+    ["uml/classifier/defaultTitle"],
     [],
     [
         assign(

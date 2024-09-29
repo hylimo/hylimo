@@ -48,7 +48,7 @@ export * from "./module/diagrams/content/common/defaultStyles.js";
 export * from "./module/diagrams/content/common/element.js";
 export * from "./module/diagrams/content/uml/classifier/classifier.js";
 export * from "./module/diagrams/content/uml/classifier/content.js";
-export * from "./module/diagrams/content/uml/classifier/defaultName.js";
+export * from "./module/diagrams/content/uml/classifier/defaultTitle.js";
 export * from "./module/diagrams/content/uml/classifier/entries.js";
 export * from "./module/diagrams/content/uml/classifier/ports.js";
 export * from "./module/diagrams/content/uml/classifier/propertiesAndMethods.js";

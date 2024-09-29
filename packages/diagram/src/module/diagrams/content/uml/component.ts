@@ -8,7 +8,7 @@ export const componentModule = InterpreterModule.create(
     "uml/component",
     [
         "uml/classifier/classifier",
-        "uml/classifier/defaultName",
+        "uml/classifier/componentTitle",
         "uml/classifier/sections",
         "uml/classifier/propertiesAndMethods",
         "uml/classifier/content",
@@ -22,7 +22,7 @@ export const componentModule = InterpreterModule.create(
                 _component = scope.internal.createClassifier(
                     "component",
                     list(
-                        scope.internal.defaultNameContentHandler,
+                        scope.internal.componentTitleContentHandler,
                         scope.internal.sectionsContentHandler,
                         scope.internal.propertiesAndMethodsContentHandler,
                         scope.internal.contentContentHandler,
@@ -37,8 +37,13 @@ export const componentModule = InterpreterModule.create(
             fun(
                 `
                     (name, callback) = args
+                    keywords = list("component")
+                    otherKeywords = args.keywords
+                    if(otherKeywords != null) {
+                        keywords.addAll(otherKeywords)
+                    }
                     scope.internal.registerCanvasElement(
-                        _component(name, callback, args.keywords, args.abstract, self = args.self),
+                        _component(name, callback, keywords, args.abstract, self = args.self),
                         args,
                         args.self
                     )

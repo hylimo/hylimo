@@ -8,7 +8,7 @@ export const enumModule = InterpreterModule.create(
     "uml/enum",
     [
         "uml/classifier/classifier",
-        "uml/classifier/defaultName",
+        "uml/classifier/defaultTitle",
         "uml/classifier/sections",
         "uml/classifier/propertiesAndMethods",
         "uml/classifier/entries"
@@ -20,7 +20,7 @@ export const enumModule = InterpreterModule.create(
                 _enum = scope.internal.createClassifier(
                     "enum",
                     list(
-                        scope.internal.defaultNameContentHandler,
+                        scope.internal.defaultTitleContentHandler,
                         scope.internal.sectionsContentHandler,
                         scope.internal.propertiesAndMethodsContentHandler,
                         scope.internal.entriesContentHandler
