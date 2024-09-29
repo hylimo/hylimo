@@ -21,7 +21,7 @@ export const providesAndRequiresModule = InterpreterModule.create(
                             ...parse(
                                 `
                                     this.scope = args.scope
-                                    this.canvasScope = args.args.self
+                                    this.canvasScope = args.canvasScope
                                     this.element = args.element
                                     scope.ports = list()
                                 `
@@ -121,18 +121,18 @@ export const providesAndRequiresModule = InterpreterModule.create(
             ),
         ...parse(
             `
-                scope.dependsOn = scope.internal.createConnectionOperator(
-                    endMarkerFactory = {
-                        marker(
-                            content = path(
-                                path = "M 0 0 L 10 6 L 0 12",
-                                class = list("arrow-marker-path", "marker-path", "marker")
-                            ),
-                            class=list("arrow-marker", "depends-on-marker", "marker")
-                        )
-                    },
-                    class = list("dashed-connection", "depends-on-connection")
-                )
+                scope.dependsOn = {
+                    (start, end) = args
+                    canvasScope = args.self
+                    scope.internal.createConnection(
+                        canvasScope.rpos(start),
+                        canvasScope.rpos(end),
+                        list("dashed-connection", "depends-on-connection"),
+                        args,
+                        canvasScope,
+                        endMarkerFactory = scope.defaultMarkers.arrow
+                    )
+                }
 
                 scope.styles {
                     vars {

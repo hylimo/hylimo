@@ -7,7 +7,7 @@ import { LinePointLayoutConfig } from "../../../../../layout/elements/canvas/lin
  */
 export const portsModule = InterpreterModule.create(
     "uml/classifier/ports",
-    [],
+    ["uml/classifier/providesAndRequires"],
     [],
     [
         id(SCOPE)
@@ -20,7 +20,7 @@ export const portsModule = InterpreterModule.create(
                             ...parse(
                                 `
                                     this.scope = args.scope
-                                    this.canvasScope = args.args.self
+                                    this.canvasScope = args.canvasScope
                                     this.element = args.element
                                     scope.ports = list()
                                 `
@@ -29,12 +29,23 @@ export const portsModule = InterpreterModule.create(
                                 "port",
                                 fun(
                                     `
-                                        (pos) = args
+                                        (pos, optionalCallback) = args
+                                        callback = optionalCallback ?? {}
                                         portElement = canvasElement(
                                             class = list("port-element"),
                                             content = rect(class = list("port")),
                                             pos = canvasScope.lpos(element, pos, args.dist ?? -1)
                                         )
+                                        
+                                        result = []
+                                        scope.internal.providesRequiresContentHandler[0](
+                                            scope = result,
+                                            args = args,
+                                            element = portElement,
+                                            canvasScope = canvasScope
+                                        )
+                                        callback.callWithScope(result)
+                                        
                                         scope.internal.registerCanvasElement(portElement, args, canvasScope)
                                     `,
                                     {

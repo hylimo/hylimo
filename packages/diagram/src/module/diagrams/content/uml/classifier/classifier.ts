@@ -34,9 +34,14 @@ export const classifierModule = InterpreterModule.create(
                                 content = renderedClassifier,
                                 class = list("classifier-element", type + "-element")
                             )
-                            
                             contentHandlers.forEach {
-                                it[0](scope = result, args = classifierArgs, element = classifierElement, contents = classifierContents)
+                                it[0](
+                                    scope = result,
+                                    args = classifierArgs,
+                                    element = classifierElement,
+                                    contents = classifierContents,
+                                    canvasScope = classifierArgs.self
+                                )
                             }
 
                             callback.callWithScope(result)
@@ -44,7 +49,13 @@ export const classifierModule = InterpreterModule.create(
                             scope.internal.registerInDiagramScope(name, classifierElement)
 
                             contentHandlers.forEach {
-                                it[1](scope = result, args = classifierArgs, element = classifierElement, contents = classifierContents)
+                                it[1](
+                                    scope = result,
+                                    args = classifierArgs,
+                                    element = classifierElement,
+                                    contents = classifierContents,
+                                    canvasScope = classifierArgs.self
+                                )
                             }
 
                             classifierElement
