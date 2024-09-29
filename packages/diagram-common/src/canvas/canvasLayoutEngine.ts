@@ -344,10 +344,29 @@ export abstract class CanvasLayoutEngine {
             } else {
                 point = Point.ORIGIN;
             }
+        } else if (CanvasConnection.isCanvasConnection(element)) {
+            point = this.getCanvasConnectionEnd(element, context);
         } else {
             throw new Error(`Unknown point type: ${element.type}`);
         }
         return { point, context };
+    }
+
+    /**
+     * Gets the end point of a canvas connection
+     *
+     * @param connection the connection to get the end point of
+     * @param context the context of which coordinate system to use
+     * @returns the end point of the connection
+     */
+    private getCanvasConnectionEnd(connection: CanvasConnection, context: string): Point {
+        const segments = connection.children;
+        for (let i = segments.length - 1; i >= 0; i--) {
+            if ("end" in segments[i]) {
+                return this.getPoint((segments[i] as CanvasConnectionSegment).end, context);
+            }
+        }
+        throw new Error(`Connection ${connection.id} does not have a single segment`);
     }
 
     /**

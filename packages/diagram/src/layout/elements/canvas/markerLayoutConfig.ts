@@ -27,6 +27,16 @@ export class MarkerLayoutConfig extends StyledElementLayoutConfig {
                     name: "lineStart",
                     description: "The relative (0..1) offset where the line starts in the marker",
                     type: numberType
+                },
+                {
+                    name: "refX",
+                    description: "The x coordinate of the reference point",
+                    type: numberType
+                },
+                {
+                    name: "refY",
+                    description: "The y coordinate of the reference point",
+                    type: numberType
                 }
             ]
         );
@@ -42,12 +52,16 @@ export class MarkerLayoutConfig extends StyledElementLayoutConfig {
 
     layout(layout: Layout, element: LayoutElement, _position: Point, size: Size, id: string): Element[] {
         const content = element.content as LayoutElement;
+        const refX = element.styles.refX ?? 1;
+        const refY = element.styles.refY ?? 0.5;
         const result: Marker = {
             type: Marker.TYPE,
             id,
             ...size,
             lineStart: element.styles.lineStart ?? 0,
-            children: layout.layout(content, { x: -size.width, y: -size.height / 2 }, size),
+            refX,
+            refY,
+            children: layout.layout(content, { x: -size.width * refX, y: -size.height * refY }, size),
             pos: element.position,
             edits: element.edits
         };

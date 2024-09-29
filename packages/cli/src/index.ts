@@ -10,6 +10,7 @@ import {
     LayoutEngine,
     baseDiagramModule,
     classDiagramModule,
+    componentDiagramModule,
     diagramModule,
     dslModule,
     editModule
@@ -56,7 +57,7 @@ const layoutEngine = new LayoutEngine();
 const diagramEngine = new DiagramEngine(
     new Parser(false),
     new Interpreter(
-        [diagramModule, dslModule, editModule, baseDiagramModule, classDiagramModule],
+        [diagramModule, dslModule, editModule, baseDiagramModule, classDiagramModule, componentDiagramModule],
         defaultModules,
         maxExecutionSteps
     ),

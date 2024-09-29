@@ -144,7 +144,12 @@ export class MovedElementsSelector {
             }
             return this.isParentCanvasImplicitlyMoved(element);
         } else if (element instanceof SRelativePoint) {
-            return this.isMoved(element.target);
+            const target = this.index.getById(element.target) as SCanvasPoint | SCanvasElement | SCanvasConnection;
+            if (target instanceof SCanvasConnection) {
+                return this.isMoved(target.segments.at(-1)!.end);
+            } else {
+                return this.isMoved(element.target);
+            }
         } else if (element instanceof SLinePoint) {
             const lineProviderId = element.lineProvider;
             const lineProvider = this.index.getById(lineProviderId) as SCanvasContent;

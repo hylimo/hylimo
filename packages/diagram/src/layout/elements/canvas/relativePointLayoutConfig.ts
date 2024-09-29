@@ -1,6 +1,6 @@
-import { ExecutableAbstractFunctionExpression, FullObject, fun, numberType, optional, or } from "@hylimo/core";
-import { Size, Element, RelativePoint, Point, CanvasElement, DefaultEditTypes } from "@hylimo/diagram-common";
-import { canvasPointType, elementType } from "../../../module/base/types.js";
+import { ExecutableAbstractFunctionExpression, FullObject, fun, numberType, optional } from "@hylimo/core";
+import { Size, Element, RelativePoint, Point, DefaultEditTypes } from "@hylimo/diagram-common";
+import { canvasContentType } from "../../../module/base/types.js";
 import { LayoutElement } from "../../layoutElement.js";
 import { Layout } from "../../engine/layout.js";
 import { CanvasPointLayoutConfig } from "./canvasPointLayoutConfig.js";
@@ -27,7 +27,7 @@ export class RelativePointLayoutConfig extends CanvasPointLayoutConfig {
                 {
                     name: "target",
                     description: "the target point or canvas element of which the relative point is based",
-                    type: or(canvasPointType, elementType(CanvasElement.TYPE))
+                    type: canvasContentType
                 }
             ],
             []

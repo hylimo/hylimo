@@ -67,7 +67,7 @@ const scopeExpressions: ExecutableExpression[] = [
             {
                 docs: "Create a relative point",
                 params: [
-                    [0, "the target to which the point is relative", elementType()],
+                    [0, "the target to which the point is relative", canvasContentType],
                     [1, "the x coordinate", optional(numberType)],
                     [2, "the y coordinate", optional(numberType)]
                 ],
@@ -344,10 +344,12 @@ const scopeExpressions: ExecutableExpression[] = [
             }
         )
     ),
-    assign(
-        "_createConnection",
-        fun(
-            `
+    id(SCOPE)
+        .field("internal")
+        .assignField(
+            "createConnection",
+            fun(
+                `
                 (start, end, class, target, canvasScope) = args
                 startMarkerFactory = args.startMarkerFactory
                 endMarkerFactory = args.endMarkerFactory
@@ -404,19 +406,19 @@ const scopeExpressions: ExecutableExpression[] = [
 
                 connection
             `,
-            {
-                docs: "Helper which creates a CanvasConnection between two elements",
-                params: [
-                    [0, "the start element", canvasContentType],
-                    [1, "the end element", canvasContentType],
-                    [2, "the class of the connection"],
-                    [3, "the target expression referenced by edits"],
-                    [4, "the scope to which canvas contents should be added"]
-                ],
-                returns: "The created CanvasConnection"
-            }
-        )
-    ),
+                {
+                    docs: "Helper which creates a CanvasConnection between two elements",
+                    params: [
+                        [0, "the start element", canvasContentType],
+                        [1, "the end element", canvasContentType],
+                        [2, "the class of the connection"],
+                        [3, "the target expression referenced by edits"],
+                        [4, "the scope to which canvas contents should be added"]
+                    ],
+                    returns: "The created CanvasConnection"
+                }
+            )
+        ),
     id(SCOPE)
         .field("internal")
         .assignField(
@@ -467,7 +469,7 @@ const scopeExpressions: ExecutableExpression[] = [
 
                 {
                     (start, end) = args
-                    _createConnection(
+                    scope.internal.createConnection(
                         start,
                         end,
                         class,

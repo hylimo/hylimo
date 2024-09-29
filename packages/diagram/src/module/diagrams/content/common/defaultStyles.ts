@@ -32,6 +32,10 @@ export const defaultStylesModule = InterpreterModule.create(
                         stroke = var("primary")
                         strokeWidth = var("strokeWidth")
                     }
+                    type("ellipse") {
+                        stroke = var("primary")
+                        strokeWidth = var("strokeWidth")
+                    }
                     type("path") {
                         stroke = var("primary")
                         strokeWidth = var("strokeWidth")
