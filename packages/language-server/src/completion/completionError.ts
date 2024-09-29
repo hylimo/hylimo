@@ -1,4 +1,5 @@
 import { CompletionItem } from "./completionItem.js";
+import { Range } from "@hylimo/core";
 
 /**
  * An error which aborts the execution of the program and provides the context for completion
@@ -9,7 +10,10 @@ export class CompletionError extends Error {
      *
      * @param completionItems the items to provide for completion
      */
-    constructor(readonly completionItems: CompletionItem[]) {
+    constructor(
+        readonly completionItems: CompletionItem[],
+        readonly completionRange: Range
+    ) {
         super();
     }
 
@@ -20,6 +24,6 @@ export class CompletionError extends Error {
      * @returns true if the error is an CompletionError
      */
     static isCompletionError(error: any): error is CompletionError {
-        return "completionItems" in error;
+        return "completionItems" in error && "completionRange" in error;
     }
 }

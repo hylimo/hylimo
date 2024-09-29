@@ -179,7 +179,7 @@ export class RuntimeAstTransformer extends ASTVisitor<undefined, ExecutableExpre
      * @param args the list entries to map
      * @returns the mapped list entries
      */
-    private generateListEntries(args: ListEntry[]): ExecutableListEntry[] {
+    protected generateListEntries(args: ListEntry[]): ExecutableListEntry[] {
         return args.map((arg) => {
             return {
                 name: arg.name,
@@ -194,7 +194,7 @@ export class RuntimeAstTransformer extends ASTVisitor<undefined, ExecutableExpre
      * @param expression the expression to return if keepExpression is true
      * @returns the provided expression if keepExpression is true, otherwise undefined
      */
-    private optionalExpression<T extends Expression>(expression: T): T | undefined {
+    protected optionalExpression<T extends Expression>(expression: T): T | undefined {
         return this.keepExpression ? expression : undefined;
     }
 }
