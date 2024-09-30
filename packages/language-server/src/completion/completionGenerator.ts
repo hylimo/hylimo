@@ -48,21 +48,26 @@ export function supplyNamedArguments(
 }
 
 /**
- * Computes completion items for the named arguments of the currently executed function.
+ * Computes completion items for the documented named arguments of the currently executed function.
  *
  * @param func the currently interpreted function
  * @param context the current context
  * @param error the error that was thrown beforehand
+ * @return the completion items generated from the documented named arguments of this function
  */
 function getNamedArgs(
     func: AbstractFunctionObject<ExecutableAbstractFunctionExpression<any>>,
     context: InterpreterContext,
     error: CompletionError
 ): CompletionItem[] {
-    if (!(func.docs instanceof FullObject)) return [];
+    if (!(func.docs instanceof FullObject)) {
+        return [];
+    }
 
     const params = func.docs.getFieldValue("params", context);
-    if (!(params instanceof FullObject)) return [];
+    if (!(params instanceof FullObject)) {
+        return [];
+    }
 
     return [...params.fields.entries()]
         .filter(([key, entry]) => key !== SemanticFieldNames.PROTO && !entry.value.isNull)

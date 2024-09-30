@@ -9,6 +9,7 @@ export class CompletionError extends Error {
      * Creates a new CompletionError
      *
      * @param completionItems the items to provide for completion
+     * @param completionRange the range in which the completion should occur
      */
     constructor(
         readonly completionItems: CompletionItem[],

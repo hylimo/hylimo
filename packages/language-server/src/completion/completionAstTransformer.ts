@@ -68,7 +68,9 @@ export class CompletionAstTransformer extends RuntimeAstTransformer {
         }
     }
 
-    // Override 'test(…)' so that we can autocomplete documented named params declared by 'test'
+    /**
+     * Override 'test(…)' so that we can autocomplete documented named params declared by 'test'
+     */
     override visitInvocationExpression(expression: InvocationExpression): ExecutableExpression<any> {
         if (this.isEditingArgumentName(expression)) {
             return new CompletableInvocationExpression(
@@ -80,7 +82,9 @@ export class CompletionAstTransformer extends RuntimeAstTransformer {
         return super.visitInvocationExpression(expression);
     }
 
-    // Override 'object["a"](…)' so that we can autocomplete documented named params declared by '0'
+    /**
+     * Override 'this["test"](…)' so that we can autocomplete documented named params declared by 'test'
+     */
     override visitIndexSelfInvocationExpression(expression: IndexSelfInvocationExpression): ExecutableExpression<any> {
         if (this.isEditingArgumentName(expression)) {
             return new CompletableIndexSelfInvocationExpression(
@@ -93,7 +97,9 @@ export class CompletionAstTransformer extends RuntimeAstTransformer {
         return super.visitIndexSelfInvocationExpression(expression);
     }
 
-    // Override 'test.hello(…)' so that we can autocomplete documented named params declared by 'hello'
+    /**
+     * Override 'test.hello(…)' so that we can autocomplete documented named params declared by 'hello'
+     */
     override visitFieldSelfInvocationExpression(expression: FieldSelfInvocationExpression): ExecutableExpression<any> {
         if (this.isEditingArgumentName(expression)) {
             return new CompletableFieldSelfInvocationExpression(
