@@ -2,7 +2,7 @@ import { Range } from "@hylimo/core";
 import { CompletionItem as LspCompletionItem } from "vscode-languageserver";
 
 /**
- * Completion item with a text edit based on a AST range (instead of a LSP range)
+ * Completion item with a text edit based on an AST range (instead of an LSP range)
  */
 export type CompletionItem = Omit<LspCompletionItem, "textEdit"> & {
     textEdit: {

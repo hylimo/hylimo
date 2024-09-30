@@ -1,9 +1,14 @@
-import { Range, Expression, FullObject, SemanticFieldNames } from "@hylimo/core";
-import { CompletionExpressionMetadata } from "@hylimo/core";
-import { ExecutableExpression } from "@hylimo/core";
-import { InterpreterContext } from "@hylimo/core";
-import { BaseObject } from "@hylimo/core";
-import { AbstractFunctionObject } from "@hylimo/core";
+import {
+    AbstractFunctionObject,
+    BaseObject,
+    CompletionExpressionMetadata,
+    ExecutableExpression,
+    Expression,
+    FullObject,
+    InterpreterContext,
+    Range,
+    SemanticFieldNames
+} from "@hylimo/core";
 import { CompletionError } from "./completionError.js";
 import { CompletionItemKind, InsertTextFormat, InsertTextMode, MarkupKind } from "vscode-languageserver";
 import { CompletionItem } from "./completionItem.js";
@@ -35,9 +40,15 @@ export class ExecutableCompletionExpression extends ExecutableExpression<Express
     override evaluateInternal(context: InterpreterContext): never {
         if (this.context != undefined) {
             const completionContext = this.context.evaluate(context);
-            throw new CompletionError(this.transformCompletionContext(completionContext.value, context));
+            throw new CompletionError(
+                this.transformCompletionContext(completionContext.value, context),
+                this.expression!.metadata.completionRange
+            );
         } else {
-            throw new CompletionError(this.transformCompletionContext(context.currentScope, context));
+            throw new CompletionError(
+                this.transformCompletionContext(context.currentScope, context),
+                this.expression!.metadata.completionRange
+            );
         }
     }
 
@@ -62,7 +73,7 @@ export class ExecutableCompletionExpression extends ExecutableExpression<Express
                 kind = isFunction ? CompletionItemKind.Function : CompletionItemKind.Variable;
             }
             const range = this.expression!.metadata.completionRange;
-            items.push(this.createCompletionItem(key, docs, range, kind));
+            items.push(this.createIdentifierCompletionItem(key, docs, range, kind));
             if (snippet != undefined) {
                 items.push(this.createSnippetCompletionItem(key, docs, snippet, range));
             }
@@ -189,7 +200,7 @@ export class ExecutableCompletionExpression extends ExecutableExpression<Express
      * @param kind the kind of the completion item
      * @returns the completion item
      */
-    private createCompletionItem(
+    private createIdentifierCompletionItem(
         key: string | number,
         docs: string,
         range: Range,
