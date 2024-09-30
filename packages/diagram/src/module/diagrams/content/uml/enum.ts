@@ -1,4 +1,14 @@
-import { fun, functionType, id, InterpreterModule, listType, optional, parse, stringType } from "@hylimo/core";
+import {
+    booleanType,
+    fun,
+    functionType,
+    id,
+    InterpreterModule,
+    listType,
+    optional,
+    parse,
+    stringType
+} from "@hylimo/core";
 import { SCOPE } from "../../../base/dslModule.js";
 
 /**
@@ -45,7 +55,8 @@ export const enumModule = InterpreterModule.create(
                     params: [
                         [0, "the name of the enum", stringType],
                         [1, "the callback function for the enum", optional(functionType)],
-                        ["keywords", "the keywords of the enum", optional(listType(stringType))]
+                        ["keywords", "the keywords of the enum", optional(listType(stringType))],
+                        ["abstract", "whether the enum is abstract", optional(booleanType)]
                     ],
                     snippet: `("$1") {\n    entries {\n        $2\n    }\n}`,
                     returns: "The created enum"

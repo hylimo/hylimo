@@ -1,4 +1,14 @@
-import { fun, functionType, id, InterpreterModule, listType, optional, parse, stringType } from "@hylimo/core";
+import {
+    booleanType,
+    fun,
+    functionType,
+    id,
+    InterpreterModule,
+    listType,
+    optional,
+    parse,
+    stringType
+} from "@hylimo/core";
 import { SCOPE } from "../../../base/dslModule.js";
 
 /**
@@ -42,7 +52,8 @@ export const classModule = InterpreterModule.create(
                     params: [
                         [0, "the name of the class", stringType],
                         [1, "the callback function for the class", optional(functionType)],
-                        ["keywords", "the keywords of the class", optional(listType(stringType))]
+                        ["keywords", "the keywords of the class", optional(listType(stringType))],
+                        ["abstract", "whether the class is abstract", optional(booleanType)]
                     ],
                     snippet: `("$1") {\n    $2\n}`,
                     returns: "The created class"
