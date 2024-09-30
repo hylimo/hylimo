@@ -80,7 +80,7 @@ const scopeExpressions: ExecutableExpression[] = [
         fun(
             `
                 (lineProvider, pos, distance) = args
-                point = linePoint(lineProvider = lineProvider, pos = pos, distance = distance, segment = args.seg)
+                point = linePoint(lineProvider = lineProvider, pos = pos, distance = distance)
                 scope.internal.registerCanvasContent(point, args, args.self)
                 point
             `,
@@ -231,6 +231,84 @@ const scopeExpressions: ExecutableExpression[] = [
                 segments += segment
                 args.self
             }
+            
+            _canvasConnectionWith = {
+                (self, callback) = args
+                this.contents = self.canvasScope.contents
+                result = object(
+                    over = null,
+                    end = self.endProvider,
+                    start = {
+                        pos = self.startProvider(it)
+                        object(proto = lineBuilderProto, segments = list(), start = pos)
+                    },
+                    label = {
+                        (labelContent, pos, distance, rotation) = args
+                        if(object().==(self = "".proto, labelContent.proto)) {
+                            labelContent = list(span(text = labelContent))
+                        }
+                        labelCanvasElement = canvasElement(
+                            content = text(contents = labelContent, class = list("label")),
+                            pos = self.canvasScope.lpos(self, pos, distance),
+                            class = list("label-element")
+                        )
+                        scope.internal.registerCanvasElement(labelCanvasElement, args, self.canvasScope)
+                        labelCanvasElement.rotation = rotation
+                        labelCanvasElement
+                    }
+                )
+                callback.callWithScope(result)
+                if(result.over != null) {
+                    segments = result.over.segments
+                    if((segments == null) || (segments.length == 0)) {
+                        error("over must define at least one segment")
+                    }
+                    self.start = result.over.start
+                    self.contents = result.over.segments
+                } {
+                    if (self.contents.length == 1) {
+                        segment = self.contents.get(0)
+                        self.start.edits.set(
+                            "${DefaultEditTypes.MOVE_LPOS_POS}",
+                            createAddEdit(callback, "'over = start(' & pos & ').axisAligned(0.5, end(0.5))'")
+                        )
+                        segment.end.edits.set(
+                            "${DefaultEditTypes.MOVE_LPOS_POS}",
+                            createAddEdit(callback, "'over = start(0).axisAligned(0.5, end(' & pos & '))'")
+                        )
+                        segment.edits.set(
+                            "${DefaultEditTypes.AXIS_ALIGNED_SEGMENT_POS}",
+                            createAddEdit(callback, "'over = start(0).axisAligned(' & pos & ', end(0.5))'")
+                        )
+                        segment.edits.set(
+                            "${DefaultEditTypes.SPLIT_CANVAS_AXIS_ALIGNED_SEGMENT}",
+                            createAddEdit(callback, "'over = start(0).axisAligned(' & pos & ', apos(' & x & ', ' & y & '), ' & nextPos & ', end(0.5))'")
+                        )
+                    }
+                }
+            }
+
+            _canvasPointOrElementWith = {
+                (self, callback) = args
+                this.contents = self.canvasScope.contents
+                result = object(
+                    label = {
+                        (labelContent, x, y, rotation) = args
+                        if(object().==(self = "".proto, labelContent.proto)) {
+                            labelContent = list(span(text = labelContent))
+                        }
+                        labelCanvasElement = canvasElement(
+                            content = text(contents = labelContent, class = list("label")),
+                            pos = self.canvasScope.rpos(self, x, y),
+                            class = list("label-element")
+                        )
+                        scope.internal.registerCanvasElement(labelCanvasElement, args, self.canvasScope)
+                        labelCanvasElement.rotation = rotation
+                        labelCanvasElement
+                    }
+                )
+                callback.callWithScope(result)
+            }
         `
     ),
     id(SCOPE).assignField(
@@ -279,65 +357,22 @@ const scopeExpressions: ExecutableExpression[] = [
         fun(
             `
                 (self, callback) = args
-                this.contents = self.canvasScope.contents
-                result = object(
-                    over = null,
-                    end = self.endProvider,
-                    start = {
-                        pos = self.startProvider(it)
-                        object(proto = lineBuilderProto, segments = list(), start = pos)
-                    },
-                    label = {
-                        (labelContent, pos, distance, rotation) = args
-                        if(object().==(self = "".proto, labelContent.proto)) {
-                            labelContent = list(span(text = labelContent))
-                        }
-                        labelCanvasElement = canvasElement(
-                            content = text(contents = labelContent, class = list("label")),
-                            pos = self.canvasScope.lpos(self, pos, distance, seg = args.seg),
-                            class = list("label-element")
-                        )
-                        scope.internal.registerCanvasElement(labelCanvasElement, args, self.canvasScope)
-                        labelCanvasElement.rotation = rotation
-                        labelCanvasElement
-                    }
-                )
-                callback.callWithScope(result)
-                if(result.over != null) {
-                    segments = result.over.segments
-                    if((segments == null) || (segments.length == 0)) {
-                        error("over must define at least one segment")
-                    }
-                    self.start = result.over.start
-                    self.contents = result.over.segments
+                if(self.type == "canvasConnection") {
+                    _canvasConnectionWith(self, callback)
                 } {
-                    if (self.contents.length == 1) {
-                        segment = self.contents.get(0)
-                        self.start.edits.set(
-                            "${DefaultEditTypes.MOVE_LPOS_POS}",
-                            createAddEdit(callback, "'over = start(' & pos & ').axisAligned(0.5, end(0.5))'")
-                        )
-                        segment.end.edits.set(
-                            "${DefaultEditTypes.MOVE_LPOS_POS}",
-                            createAddEdit(callback, "'over = start(0).axisAligned(0.5, end(' & pos & '))'")
-                        )
-                        segment.edits.set(
-                            "${DefaultEditTypes.AXIS_ALIGNED_SEGMENT_POS}",
-                            createAddEdit(callback, "'over = start(0).axisAligned(' & pos & ', end(0.5))'")
-                        )
-                        segment.edits.set(
-                            "${DefaultEditTypes.SPLIT_CANVAS_AXIS_ALIGNED_SEGMENT}",
-                            createAddEdit(callback, "'over = start(0).axisAligned(' & pos & ', apos(' & x & ', ' & y & '), ' & nextPos & ', end(0.5))'")
-                        )
-                    }
+                    _canvasPointOrElementWith(self, callback)
                 }
                 self
             `,
             {
-                docs: "Helper which applies a with operator to a CanvasElement. Handles the routing points, and labels.",
+                docs: `
+                    Helper which applies a with operator to a CanvasContent.
+                    Applied to a CanvasConnection, it allows to define a new route using the over field, and to add labels using the label function.
+                    Applied to a CanvasElement or CanvasPoint, it allows to add labels using the label function.
+                `,
                 params: [
-                    [0, "the CanvasElement to which to apply the with", elementType(CanvasConnection.TYPE)],
-                    [1, "the callback providing the new route via the field over", functionType]
+                    [0, "the CanvasContent to which to apply the with", canvasContentType],
+                    [1, "the callback providing the new route via the field over and/or labels", functionType]
                 ],
                 returns: "null",
                 snippet: ` {\n    over = start($1).line(end($2))\n}`
@@ -401,7 +436,6 @@ const scopeExpressions: ExecutableExpression[] = [
                 )
                 connection.startProvider = startProvider
                 connection.endProvider = endProvider
-                connection.canvasScope = canvasScope
                 scope.internal.registerCanvasElement(connection, target, canvasScope)
 
                 connection
@@ -427,6 +461,7 @@ const scopeExpressions: ExecutableExpression[] = [
                 `
                     (content, source, canvasScope) = args
                     canvasScope.contents += content
+                    content.canvasScope = canvasScope
                     content.source = reflect(source)
                     content
                 `

@@ -52,12 +52,6 @@ export class LinePointLayoutConfig extends CanvasPointLayoutConfig {
                     type: optional(LinePointLayoutConfig.POS_TYPE)
                 },
                 {
-                    name: "segment",
-                    description:
-                        "the segment to which pos is relative to, if not given, pos is calculated for the whole line",
-                    type: optional(numberType)
-                },
-                {
                     name: "distance",
                     description: "the distance of the point to the line, defaults to 0",
                     type: optional(numberType)

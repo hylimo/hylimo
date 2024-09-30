@@ -18,10 +18,14 @@ export const contentModule = InterpreterModule.create(
                         this.innerContents = args.scope.contents
                         this.contents = args.contents
                         if (innerContents.length > 0) {
-                            contents += path(path = "M 0 0 L 1 0", class = list("separator"))
+                            this.innerCanvasClass = list()
+                            if(innerContents.some { (it.type == "canvasElement") || (it.type == "canvasConnection") }) {
+                                contents += path(path = "M 0 0 L 1 0", class = list("separator"))
+                                innerCanvasClass += "classifier-canvas"
+                            }
                             contents += canvas(
                                 contents = innerContents,
-                                class = list("classifier-canvas")
+                                class = innerCanvasClass
                             )
                         }
                     }
