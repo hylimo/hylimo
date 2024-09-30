@@ -34,7 +34,7 @@ import { defineClientComponent, useData } from "vitepress";
 import IconButton from "./IconButton.vue";
 import VPFlyout from "vitepress/dist/client/theme-default/components/VPFlyout.vue";
 import { Root } from "@hylimo/diagram-common";
-import { computed, ref } from "vue";
+import { computed, inject, ref } from "vue";
 import { SVGRenderer } from "@hylimo/diagram-render-svg";
 import { PDFRenderer } from "@hylimo/diagram-render-pdf";
 import fileSaver from "file-saver";
@@ -42,11 +42,13 @@ import { serialize, deserialize } from "../util/serialization.js";
 import { onBeforeMount } from "vue";
 import RegisterSW from "./RegisterSW.vue";
 import { CodeWithFileHandle, openDiagram } from "../util/diagramOpener";
+import { languageServerConfigKey } from "../theme/lspPlugin";
 
 const HylimoEditor = defineClientComponent(() => import("./HylimoEditor.vue"));
 
 const { isDark, site } = useData();
 const { width, height } = useWindowSize();
+const languageServerConfig = inject(languageServerConfigKey)!;
 
 const localStorageCode = useLocalStorage(
     "code",
@@ -93,7 +95,11 @@ function downloadSVG() {
 }
 
 async function downloadPDF() {
-    const pdf = await pdfRenderer.render(diagram.value!, isDark.value ? "#1e1e1e" : "#ffffff");
+    const config = languageServerConfig.diagramConfig.value;
+    const pdf = await pdfRenderer.render(
+        diagram.value!,
+        isDark.value ? config.darkBackgroundColor : config.lightBackgroundColor
+    );
     fileSaver.saveAs(new Blob(pdf, { type: "application/pdf" }), "diagram.pdf");
 }
 
