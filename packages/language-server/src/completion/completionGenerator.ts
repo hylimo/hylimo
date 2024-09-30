@@ -23,6 +23,7 @@ import { Range } from "@hylimo/core";
  * @param context the current context
  * @param args the arguments of this function
  * @param expression the executed invocation expression
+ * @return the result returned by the function in case it completed normally
  */
 export function supplyNamedArguments(
     func: BaseObject,
