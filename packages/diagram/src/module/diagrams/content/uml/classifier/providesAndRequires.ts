@@ -1,4 +1,4 @@
-import { fun, id, InterpreterModule, object, optional, parse, stringType } from "@hylimo/core";
+import { fun, id, InterpreterModule, numberType, object, optional, parse, stringType } from "@hylimo/core";
 import { LinePointLayoutConfig } from "../../../../../layout/elements/canvas/linePointLayoutConfig.js";
 import { SCOPE } from "../../../../base/dslModule.js";
 import { canvasContentType } from "../../../../base/types.js";
@@ -31,8 +31,12 @@ export const providesAndRequiresModule = InterpreterModule.create(
                                 fun(
                                     `
                                         (name, pos, target) = args
+                                        this.dist = args.dist
                                         if(target == null) {
-                                            target = canvasScope.lpos(element, pos, 100)
+                                            target = canvasScope.lpos(element, pos, dist)
+                                            if(dist == null) {
+                                                target._distance = 100
+                                            }
                                         } {
                                             target = canvasScope.rpos(target)
                                         }
@@ -64,7 +68,16 @@ export const providesAndRequiresModule = InterpreterModule.create(
                                                 "Relative position on the outline",
                                                 optional(LinePointLayoutConfig.POS_TYPE)
                                             ],
-                                            [2, "Target element for the interface", optional(canvasContentType)]
+                                            [
+                                                2,
+                                                "Target element for the provided interface",
+                                                optional(canvasContentType)
+                                            ],
+                                            [
+                                                "dist",
+                                                "Distance of the provided interface to the classifier",
+                                                optional(numberType)
+                                            ]
                                         ],
                                         returns: "The created provided interface"
                                     }
@@ -75,8 +88,12 @@ export const providesAndRequiresModule = InterpreterModule.create(
                                 fun(
                                     `
                                         (name, pos, target) = args
+                                        this.dist = args.dist
                                         if(target == null) {
-                                            target = canvasScope.lpos(element, pos, 100)
+                                            target = canvasScope.lpos(element, pos, dist)
+                                            if(dist == null) {
+                                                target._distance = 100
+                                            }
                                         } {
                                             target = canvasScope.rpos(target)
                                         }
@@ -106,7 +123,12 @@ export const providesAndRequiresModule = InterpreterModule.create(
                                                 "Relative position on the outline",
                                                 optional(LinePointLayoutConfig.POS_TYPE)
                                             ],
-                                            [2, "Target element for the interface", optional(canvasContentType)]
+                                            [2, "Target element for the interface", optional(canvasContentType)],
+                                            [
+                                                "dist",
+                                                "Distance of the required interface to the classifier",
+                                                optional(numberType)
+                                            ]
                                         ],
                                         returns: "The created required interface"
                                     }

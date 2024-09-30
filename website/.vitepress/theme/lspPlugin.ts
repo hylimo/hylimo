@@ -22,7 +22,7 @@ import { checkServiceConsistency, configureServices } from "monaco-editor-wrappe
 import * as monaco from "monaco-editor";
 import { customDarkTheme, customLightTheme, languageConfiguration, monarchTokenProvider } from "../util/language";
 import { useData } from "vitepress";
-import { useLocalStorage } from "@vueuse/core";
+import { useLocalStorage, throttledWatch } from "@vueuse/core";
 import { useWorkerFactory } from "monaco-editor-wrapper/workerFactory";
 import monacoEditorWorker from "monaco-editor/esm/vs/editor/editor.worker?worker";
 
@@ -121,7 +121,7 @@ export const lspPlugin: Plugin = {
             watch(isDark, (value) => {
                 monaco.editor.setTheme(value ? "custom-dark" : "custom-light");
             });
-            watch(
+            throttledWatch(
                 languageServerConfig,
                 () => {
                     const configValue = languageServerConfig.value;
@@ -132,7 +132,7 @@ export const lspPlugin: Plugin = {
                         });
                     }
                 },
-                { deep: true, immediate: true }
+                { deep: true, immediate: true, leading: true, trailing: true, throttle: 500 }
             );
         });
     }
