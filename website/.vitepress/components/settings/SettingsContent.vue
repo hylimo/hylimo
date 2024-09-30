@@ -24,7 +24,7 @@ import SettingsItem from "./SettingsItem.vue";
 import { inject, ref } from "vue";
 import SettingsTabs from "./SettingsTabs.vue";
 import NumberInput from "./NumberInput.vue";
-import { languageServerConfigKey } from "../../theme/lspPlugin";
+import { languageServerConfigKey } from "../../theme/injectionKeys";
 import ColorInput from "./ColorInput.vue";
 
 const graphicalEditorNames = {

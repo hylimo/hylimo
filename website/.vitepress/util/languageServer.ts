@@ -9,7 +9,9 @@ const connection = createConnection(messageReader, messageWriter);
 const languageServer = new LanguageServer({
     defaultConfig: {
         diagramConfig: {
-            theme: "dark"
+            theme: "dark",
+            primaryColor: "#ffffff",
+            backgroundColor: "#1e1e1e"
         },
         settings: {}
     },

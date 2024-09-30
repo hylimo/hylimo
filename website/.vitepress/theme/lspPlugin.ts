@@ -1,4 +1,4 @@
-import { computed, InjectionKey, Plugin, Ref, ShallowRef, shallowRef, toRaw, watch } from "vue";
+import { computed, Plugin, Ref, shallowRef, toRaw, watch } from "vue";
 import {
     BrowserMessageReader,
     BrowserMessageWriter,
@@ -25,6 +25,7 @@ import { useData } from "vitepress";
 import { useLocalStorage, throttledWatch } from "@vueuse/core";
 import { useWorkerFactory } from "monaco-editor-wrapper/workerFactory";
 import monacoEditorWorker from "monaco-editor/esm/vs/editor/editor.worker?worker";
+import { languageServerConfigKey, languageClientKey } from "./injectionKeys";
 
 /**
  * Config for the diagram
@@ -61,16 +62,6 @@ export interface LanguageServerConfig {
      */
     diagramConfig: Ref<DiagramConfig>;
 }
-
-/**
- * A key for the language client in the Vue app.
- */
-export const languageClientKey = Symbol("languageClient") as InjectionKey<ShallowRef<Promise<LanguageClientProxy>>>;
-
-/**
- * A key for the language server config in the Vue app.
- */
-export const languageServerConfigKey = Symbol("languageServerConfig") as InjectionKey<LanguageServerConfig>;
 
 /**
  * The language identifier for the SyncScript language.
@@ -215,7 +206,7 @@ async function setupLanguageClient(isDark: boolean) {
 /**
  * A proxy for the language client that allows for multiple subscriptions to the same notification type.
  */
-class LanguageClientProxy {
+export class LanguageClientProxy {
     /**
      * A map of notification handlers for each method.
      */
