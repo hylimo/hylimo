@@ -6,12 +6,18 @@ import {
     FieldAccessExpression,
     IdentifierExpression,
     NumberLiteralExpression,
-    FieldSelfInvocationExpression
+    FieldSelfInvocationExpression,
+    IndexSelfInvocationExpression,
+    InvocationExpression,
+    AbstractInvocationExpression
 } from "@hylimo/core";
 import { ExecutableExpression } from "@hylimo/core";
 import { RuntimeAstTransformer } from "@hylimo/core";
 import { ExecutableCompletionExpression } from "./executableCompletionExpression.js";
 import { FieldAssignmentExpression } from "@hylimo/core/src/ast/fieldAssignmentExpression.js";
+import { CompletableIndexSelfInvocationExpression } from "./completableIndexSelfInvocationExpression.js";
+import { CompletableInvocationExpression } from "./completableInvocationExpression.js";
+import { CompletableFieldSelfInvocationExpression } from "./completableFieldSelfInvocationExpression.js";
 
 /**
  * Transforms the AST into an executable AST where completion expressions are replaced with
@@ -62,12 +68,63 @@ export class CompletionAstTransformer extends RuntimeAstTransformer {
         }
     }
 
+    /**
+     * Override 'test(…)' so that we can autocomplete documented named params declared by 'test'
+     */
+    override visitInvocationExpression(expression: InvocationExpression): ExecutableExpression<any> {
+        if (this.isEditingArgumentName(expression)) {
+            return new CompletableInvocationExpression(
+                this.optionalExpression(expression),
+                this.generateListEntries(expression.argumentExpressions),
+                this.visit(expression.target)
+            );
+        }
+        return super.visitInvocationExpression(expression);
+    }
+
+    /**
+     * Override 'this["test"](…)' so that we can autocomplete documented named params declared by 'test'
+     */
+    override visitIndexSelfInvocationExpression(expression: IndexSelfInvocationExpression): ExecutableExpression<any> {
+        if (this.isEditingArgumentName(expression)) {
+            return new CompletableIndexSelfInvocationExpression(
+                this.optionalExpression(expression),
+                this.generateListEntries(expression.argumentExpressions),
+                this.visit(expression.target),
+                this.visit(expression.index)
+            );
+        }
+        return super.visitIndexSelfInvocationExpression(expression);
+    }
+
+    /**
+     * Override 'test.hello(…)' so that we can autocomplete documented named params declared by 'hello'
+     */
     override visitFieldSelfInvocationExpression(expression: FieldSelfInvocationExpression): ExecutableExpression<any> {
+        if (this.isEditingArgumentName(expression)) {
+            return new CompletableFieldSelfInvocationExpression(
+                this.optionalExpression(expression),
+                this.generateListEntries(expression.argumentExpressions),
+                this.visit(expression.target),
+                expression.name
+            );
+        }
         if (this.isInCompletionRange(expression)) {
             return new ExecutableCompletionExpression(expression, true, this.visit(expression.target));
-        } else {
-            return super.visitFieldSelfInvocationExpression(expression);
         }
+        return super.visitFieldSelfInvocationExpression(expression);
+    }
+
+    /**
+     * Checks whether the user is currently editing any of the inner arguments of an expression that may be a named argument (is an identifier).
+     *
+     * @param func the function expression to check
+     * @return true when named arguments should be suggested
+     */
+    isEditingArgumentName(func: AbstractInvocationExpression): boolean {
+        return func.innerArgumentExpressions.some(
+            (arg) => arg.value instanceof IdentifierExpression && this.isInCompletionRange(arg.value)
+        );
     }
 
     override visitNoopExpression(): ExecutableExpression<any> {
