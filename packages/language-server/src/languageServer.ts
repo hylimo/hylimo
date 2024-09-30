@@ -15,7 +15,7 @@ import {
 import { TextDocument, TextDocumentContentChangeEvent } from "vscode-languageserver-textdocument";
 import { Diagram } from "./diagram/diagram.js";
 import { Formatter } from "./format/formatter.js";
-import { DiagramEngine, diagramModule, dslModule, editModule, LayoutEngine } from "@hylimo/diagram";
+import { defaultDiagramModules, DiagramEngine, LayoutEngine } from "@hylimo/diagram";
 import { DiagramServerManager } from "./diagramServerManager.js";
 import {
     DiagramActionNotification,
@@ -111,7 +111,7 @@ export class LanguageServer {
         this.connection.onInitialize(this.onInitialize.bind(this));
         this.diagramServerManager = new DiagramServerManager(this.connection);
         this.textDocuments.listen(this.connection);
-        const interpreterModules = [editModule, diagramModule, dslModule, ...config.additionalInterpreterModules];
+        const interpreterModules = [...defaultDiagramModules, ...config.additionalInterpreterModules];
         const interpreter = new Interpreter(interpreterModules, defaultModules, config.maxExecutionSteps);
         const parser = new Parser();
         this.diagramUtils = {

@@ -133,6 +133,12 @@ export const providesAndRequiresModule = InterpreterModule.create(
                                         returns: "The created required interface"
                                     }
                                 )
+                            ),
+                            ...parse(
+                                `
+                                    args.element.provides = scope.provides
+                                    args.element.requires = scope.requires
+                                `
                             )
                         ])
                     },

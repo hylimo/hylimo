@@ -51,7 +51,11 @@ export const portsModule = InterpreterModule.create(
                                     {
                                         docs: "Creates a port on the outline of the classifier",
                                         params: [
-                                            [0, "Relative position on the outline", LinePointLayoutConfig.POS_TYPE],
+                                            [
+                                                0,
+                                                "Relative position on the outline",
+                                                optional(LinePointLayoutConfig.POS_TYPE)
+                                            ],
                                             [
                                                 1,
                                                 "Optional callback function to define the content of the port",
@@ -66,6 +70,11 @@ export const portsModule = InterpreterModule.create(
                                         returns: "The created port element"
                                     }
                                 )
+                            ),
+                            ...parse(
+                                `
+                                    args.element.port = scope.port
+                                `
                             )
                         ])
                     },
