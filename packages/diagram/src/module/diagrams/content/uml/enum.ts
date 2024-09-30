@@ -38,11 +38,7 @@ export const enumModule = InterpreterModule.create(
                     if(otherKeywords != null) {
                         keywords.addAll(otherKeywords)
                     }
-                    scope.internal.registerCanvasElement(
-                        _enum(name, callback, keywords, args.abstract, self = args.self, hasEntries = true),
-                        args,
-                        args.self
-                    )
+                    _enum(name, callback, keywords, args.abstract, args = args, hasEntries = true)
                 `,
                 {
                     docs: "Creates an enum.",

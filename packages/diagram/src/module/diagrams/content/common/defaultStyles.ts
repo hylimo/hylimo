@@ -12,11 +12,8 @@ export const defaultStylesModule = InterpreterModule.create(
             `
                 scope.styles {
                     vars {
-                        primary = if((config ?? object()).theme == "dark") {
-                            "#ffffff"
-                        } {
-                            "#000000"
-                        }
+                        primary = config.primaryColor
+                        background = config.backgroundColor
                         strokeWidth = 2
                         subcanvasMargin = 40
                     }

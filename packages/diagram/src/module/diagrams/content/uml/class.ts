@@ -35,11 +35,7 @@ export const classModule = InterpreterModule.create(
             fun(
                 `
                     (name, callback) = args
-                    scope.internal.registerCanvasElement(
-                        _class(name, callback, args.keywords, args.abstract, self = args.self),
-                        args,
-                        args.self
-                    )
+                    _class(name, callback, args.keywords, args.abstract, args = args)
                 `,
                 {
                     docs: "Creates a class.",

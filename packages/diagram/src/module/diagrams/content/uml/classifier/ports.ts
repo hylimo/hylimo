@@ -1,4 +1,4 @@
-import { fun, id, InterpreterModule, numberType, object, optional, parse } from "@hylimo/core";
+import { fun, functionType, id, InterpreterModule, numberType, object, optional, parse } from "@hylimo/core";
 import { SCOPE } from "../../../../base/dslModule.js";
 import { LinePointLayoutConfig } from "../../../../../layout/elements/canvas/linePointLayoutConfig.js";
 
@@ -53,6 +53,11 @@ export const portsModule = InterpreterModule.create(
                                         params: [
                                             [0, "Relative position on the outline", LinePointLayoutConfig.POS_TYPE],
                                             [
+                                                1,
+                                                "Optional callback function to define the content of the port",
+                                                optional(functionType)
+                                            ],
+                                            [
                                                 "dist",
                                                 "Distance from the outline, needs to be adapted if width of outline is not the default value",
                                                 optional(numberType)
@@ -80,6 +85,9 @@ export const portsModule = InterpreterModule.create(
                         hAlign = "center"
                         width = var("portSize")
                         height = var("portSize")
+                        cls("port") {
+                            fill = var("background")
+                        }
                     }
                 }
             `

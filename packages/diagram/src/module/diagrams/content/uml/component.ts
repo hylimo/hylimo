@@ -42,11 +42,7 @@ export const componentModule = InterpreterModule.create(
                     if(otherKeywords != null) {
                         keywords.addAll(otherKeywords)
                     }
-                    scope.internal.registerCanvasElement(
-                        _component(name, callback, keywords, args.abstract, self = args.self),
-                        args,
-                        args.self
-                    )
+                    _component(name, callback, keywords, args.abstract, args = args)
                 `,
                 {
                     docs: "Creates a component.",

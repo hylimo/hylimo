@@ -18,6 +18,7 @@ export const classifierModule = InterpreterModule.create(
                         (type, contentHandlers) = args
                         {
                             classifierArgs = args
+                            canvasScope = classifierArgs.args.self
                             (name, optionalCallback) = args
                             callback = optionalCallback ?? {}
                             result = []
@@ -40,13 +41,18 @@ export const classifierModule = InterpreterModule.create(
                                     args = classifierArgs,
                                     element = classifierElement,
                                     contents = classifierContents,
-                                    canvasScope = classifierArgs.self
+                                    canvasScope = canvasScope
                                 )
                             }
 
-                            callback.callWithScope(result)
-
+                            scope.internal.registerCanvasElement(
+                                classifierElement,
+                                classifierArgs.args,
+                                canvasScope
+                            )
                             scope.internal.registerInDiagramScope(name, classifierElement)
+
+                            callback.callWithScope(result)
 
                             contentHandlers.forEach {
                                 it[1](

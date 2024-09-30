@@ -1,4 +1,4 @@
-import { computed, InjectionKey, Plugin, ShallowRef, shallowRef, toRaw, watch } from "vue";
+import { computed, InjectionKey, Plugin, Ref, ShallowRef, shallowRef, toRaw, watch } from "vue";
 import {
     BrowserMessageReader,
     BrowserMessageWriter,
@@ -12,6 +12,7 @@ import { CloseAction, ErrorAction } from "vscode-languageclient";
 import {
     ConfigNotification,
     DynamicLanguageServerConfig,
+    LanguageServerSettings,
     RemoteNotification,
     RemoteRequest,
     SetLanguageServerIdNotification
@@ -26,9 +27,50 @@ import { useWorkerFactory } from "monaco-editor-wrapper/workerFactory";
 import monacoEditorWorker from "monaco-editor/esm/vs/editor/editor.worker?worker";
 
 /**
+ * Config for the diagram
+ */
+export interface DiagramConfig {
+    /**
+     * Primary color for light theme
+     */
+    lightPrimaryColor: string;
+    /**
+     * Background color for light theme
+     */
+    lightBackgroundColor: string;
+    /**
+     * Primary color for dark theme
+     */
+    darkPrimaryColor: string;
+    /**
+     * Background color for dark theme
+     */
+    darkBackgroundColor: string;
+}
+
+/**
+ * Config for the Hylimo language server.
+ */
+export interface LanguageServerConfig {
+    /**
+     * Settings, primarily for graphical interaction
+     */
+    settings: Ref<LanguageServerSettings>;
+    /**
+     * Diagram configuration
+     */
+    diagramConfig: Ref<DiagramConfig>;
+}
+
+/**
  * A key for the language client in the Vue app.
  */
 export const languageClientKey = Symbol("languageClient") as InjectionKey<ShallowRef<Promise<LanguageClientProxy>>>;
+
+/**
+ * A key for the language server config in the Vue app.
+ */
+export const languageServerConfigKey = Symbol("languageServerConfig") as InjectionKey<LanguageServerConfig>;
 
 /**
  * The language identifier for the SyncScript language.
@@ -42,11 +84,27 @@ export const language = "syncscript";
  */
 export const lspPlugin: Plugin = {
     install(app) {
-        const languageServerSettings = useLocalStorage("languageServerSettings", {});
+        const languageServerSettings = useLocalStorage<LanguageServerSettings>("languageServerSettings", {});
+        const diagramConfig = useLocalStorage<DiagramConfig>("diagramConfig", {
+            lightPrimaryColor: "#000000",
+            lightBackgroundColor: "#ffffff",
+            darkPrimaryColor: "#ffffff",
+            darkBackgroundColor: "#1e1e1e"
+        });
+        app.provide(languageServerConfigKey, {
+            settings: languageServerSettings,
+            diagramConfig
+        });
         const languageServerConfig = computed<DynamicLanguageServerConfig>(() => {
             return {
                 diagramConfig: {
-                    theme: isDark.value ? "dark" : "light"
+                    theme: isDark.value ? "dark" : "light",
+                    primaryColor: isDark.value
+                        ? diagramConfig.value.darkPrimaryColor
+                        : diagramConfig.value.lightPrimaryColor,
+                    backgroundColor: isDark.value
+                        ? diagramConfig.value.darkBackgroundColor
+                        : diagramConfig.value.lightBackgroundColor
                 },
                 settings: languageServerSettings.value
             };
