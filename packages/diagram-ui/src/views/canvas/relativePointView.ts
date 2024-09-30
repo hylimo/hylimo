@@ -4,6 +4,7 @@ import { IViewArgs, RenderingContext, svg } from "sprotty";
 import { SRelativePoint } from "../../model/canvas/sRelativePoint.js";
 import { CanvasPointView } from "./canvasPointView.js";
 import { SRoot } from "../../model/sRoot.js";
+import { Point } from "@hylimo/diagram-common";
 
 /**
  * IView that represents an RelativePoint
@@ -32,19 +33,20 @@ export class RelativePointView extends CanvasPointView<SRelativePoint> {
         } else {
             startX = target.x;
         }
-        return svg(
-            "g",
-            null,
-            svg("polyline", {
-                attrs: {
-                    points: `${startX},${startY} ${startX},${endY} ${endX},${endY}`,
-                    "marker-start": "url(#arrow)"
-                },
-                class: {
-                    "canvas-dependency-line": true
-                }
-            }),
-            this.renderPoint(model, context, position)
-        );
+        const children: VNode[] = [this.renderPoint(model, context, position)];
+        if (!Point.equals(position, target)) {
+            children.push(
+                svg("polyline", {
+                    attrs: {
+                        points: `${startX},${startY} ${startX},${endY} ${endX},${endY}`,
+                        "marker-start": "url(#arrow)"
+                    },
+                    class: {
+                        "canvas-dependency-line": true
+                    }
+                })
+            );
+        }
+        return svg("g", null, ...children);
     }
 }
