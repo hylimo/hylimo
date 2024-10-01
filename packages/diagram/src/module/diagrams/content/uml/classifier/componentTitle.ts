@@ -11,7 +11,7 @@ const componentIconPath =
  */
 export const componentTitleModule = InterpreterModule.create(
     "uml/classifier/componentTitle",
-    [],
+    ["uml/classifier/defaultTitle"],
     [],
     [
         ...parse(
@@ -19,10 +19,10 @@ export const componentTitleModule = InterpreterModule.create(
                 scope.internal.componentTitleContentHandler = [
                     { },
                     {
-                        (name, _, keywords) = args.args
+                        (name) = args.args
                         args.contents += stack(
                             contents = list(
-                                scope.internal.defaultTitle(name, keywords),
+                                scope.internal.defaultTitle(name, args.args.keywords),
                                 path(path = "${componentIconPath}", class = list("component-icon"))
                             ),
                             class = list("component-title-container")
