@@ -17,6 +17,7 @@ import {
     RuntimeError,
     MissingArgumentSource
 } from "@hylimo/core";
+import { DiagramModuleNames } from "../diagramModuleNames.js";
 
 /**
  * Generates an edit
@@ -117,7 +118,7 @@ function generateAddArgEdit(
  * Edit module providing edit generation function
  */
 export const editModule = InterpreterModule.create(
-    "edit",
+    DiagramModuleNames.EDIT,
     [...Object.values(DefaultModuleNames)],
     [],
     [

@@ -28,6 +28,7 @@ import { openSans, roboto, sourceCodePro } from "@hylimo/fonts";
 import { AttributeConfig, ContentCardinality, LayoutConfig } from "../../layout/layoutElement.js";
 import { layouts } from "../../layout/layouts.js";
 import { elementType } from "./types.js";
+import { DiagramModuleNames } from "../diagramModuleNames.js";
 
 /**
  * Type for unset, default style values
@@ -184,8 +185,8 @@ function font(name: string, url: string): ExecutableListEntry {
  * Diagram module providing standard diagram UI elements
  */
 export const diagramModule = InterpreterModule.create(
-    "diagram",
-    [...Object.values(DefaultModuleNames), "edit"],
+    DiagramModuleNames.DIAGRAM,
+    [...Object.values(DefaultModuleNames), DiagramModuleNames.EDIT],
     [],
     [
         fun([

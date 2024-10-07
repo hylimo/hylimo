@@ -10,13 +10,14 @@ import { compositionAndAggregationModule } from "./content/uml/compositionAndAgg
 import { extendsAndImplementsModule } from "./content/uml/extendsAndImplements.js";
 import { readingDirectionModule } from "./content/uml/readingDirection.js";
 import { componentModule } from "./content/uml/component.js";
+import { DiagramModuleNames } from "../diagramModuleNames.js";
 
 /**
  * Module for component diagrams
  */
 export const componentDiagramModule = InterpreterModule.create(
-    "component-diagram",
-    ["diagram", "dsl"],
+    DiagramModuleNames.COMPONENT_DIAGRAM,
+    [DiagramModuleNames.DIAGRAM, DiagramModuleNames.DSL],
     [],
     createDiagramModule("componentDiagram", [
         elementModule,

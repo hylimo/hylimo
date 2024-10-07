@@ -74,7 +74,7 @@ export const propertiesAndMethodsModule = InterpreterModule.create(
                     },
                     {
                         docs: `
-                            Function to take a function in which fields and functions can be declared declaratively.
+                            Takes a function as paramater that declares fields and functions though its expressions.
                             The content of the function is not executed, but analyzed on the AST level.
                             Identifiers can be provided both as identifiers and as strings.
                             A field is defined by an identifier, and optionally a colon and a type identifier.
@@ -82,7 +82,8 @@ export const propertiesAndMethodsModule = InterpreterModule.create(
                             A function is defined by an identifier, an opening and closing bracket with optional parameters,
                             and optionally a colon and a return type identifier (e.g. test() : int).
                             Parameters are defined like fields, and separated by commas.
-                            Example: \`point(x : int, y : int) : Point\`
+                            Example: \`point(x : int, y : int) : Point\`.
+                            Use newlines to separate fields and functions.
                         `,
                         params: [[0, "the function which defines the fields and functions", functionType]],
                         returns: "null"

@@ -40,6 +40,7 @@ export class Interpreter {
      * An error is thrown if a module has unsatisfied dependencies,
      *
      * @param modules loaded modules
+     * @param optionalModules modules which are only loaded if required by any required module
      * @param maxExecutionSteps the maximum number of steps the interpreter is allowed to execute
      */
     constructor(

@@ -12,13 +12,14 @@ import { nonNavigableAssociationsModule } from "./content/uml/nonNavigableAssoci
 import { compositionAndAggregationModule } from "./content/uml/compositionAndAggregation.js";
 import { extendsAndImplementsModule } from "./content/uml/extendsAndImplements.js";
 import { readingDirectionModule } from "./content/uml/readingDirection.js";
+import { DiagramModuleNames } from "../diagramModuleNames.js";
 
 /**
  * Module for class diagrams
  */
 export const classDiagramModule = InterpreterModule.create(
-    "class-diagram",
-    ["diagram", "dsl"],
+    DiagramModuleNames.CLASS_DIAGRAM,
+    [DiagramModuleNames.DIAGRAM, DiagramModuleNames.DSL],
     [],
     createDiagramModule("classDiagram", [
         elementModule,

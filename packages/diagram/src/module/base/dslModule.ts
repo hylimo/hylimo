@@ -13,6 +13,7 @@ import {
 import { canvasContentType, elementType } from "./types.js";
 import { CanvasConnection, CanvasElement, DefaultEditTypes } from "@hylimo/diagram-common";
 import { LinePointLayoutConfig } from "../../layout/elements/canvas/linePointLayoutConfig.js";
+import { DiagramModuleNames } from "../diagramModuleNames.js";
 
 /**
  * Identifier for the scope variable
@@ -343,7 +344,7 @@ const scopeExpressions: ExecutableExpression[] = [
                 self
             `,
             {
-                docs: "Layout operator which can be applied either to a CanvasElement",
+                docs: "Layout operator which can be applied to a CanvasElement",
                 params: [
                     [0, "the CanvasElement or CanvasConnection to apply the layout to", elementType(CanvasElement.TYPE)],
                     [1, "callback which provides the layout definition", functionType]
@@ -366,7 +367,7 @@ const scopeExpressions: ExecutableExpression[] = [
             `,
             {
                 docs: `
-                    Helper which applies a with operator to a CanvasContent.
+                    With operator which can be applied to a CanvasConnection, CanvasElement or CanvasPoint.
                     Applied to a CanvasConnection, it allows to define a new route using the over field, and to add labels using the label function.
                     Applied to a CanvasElement or CanvasPoint, it allows to add labels using the label function.
                 `,
@@ -581,9 +582,9 @@ const scopeExpressions: ExecutableExpression[] = [
  * Module which provides common DSL functionality
  */
 export const dslModule = InterpreterModule.create(
-    "dsl",
+    DiagramModuleNames.DSL,
     [],
-    ["diagram"],
+    [DiagramModuleNames.DIAGRAM],
     [
         assign(
             "generateDiagramEnvironment",

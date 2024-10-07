@@ -207,7 +207,7 @@ export const listModule = InterpreterModule.create(
                     (args, context) => {
                         const self = args.getFieldValue(SemanticFieldNames.SELF, context);
                         const callback = args.getFieldValue(0, context);
-                        assertFunction(callback, "first positional argument of forEach");
+                        assertFunction(callback, "first positional argument of some");
                         const length = assertNumber(self.getFieldValue(lengthField, context), "length field of a list");
                         for (let i = 0; i < length; i++) {
                             const res = callback.invoke(
