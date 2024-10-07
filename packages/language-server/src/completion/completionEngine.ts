@@ -1,6 +1,4 @@
-import { Parser } from "@hylimo/core";
-import { ExecutableExpression } from "@hylimo/core";
-import { Interpreter } from "@hylimo/core";
+import { Parser, ExecutableExpression, Interpreter } from "@hylimo/core";
 import { CompletionAstTransformer } from "./completionAstTransformer.js";
 import { CompletionError } from "./completionError.js";
 import { CompletionItem } from "./completionItem.js";

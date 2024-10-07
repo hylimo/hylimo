@@ -1,10 +1,12 @@
-import { IndexSelfInvocationExpression } from "@hylimo/core/lib/ast/indexSelfInvocationExpression.js";
-import { InterpreterContext } from "@hylimo/core/lib/runtime/interpreter/interpreterContext.js";
-import { LabeledValue } from "@hylimo/core/lib/runtime/objects/labeledValue.js";
-import { ExecutableAbstractInvocationExpression } from "@hylimo/core/lib/runtime/ast/executableAbstractInvocationExpression.js";
-import { ExecutableListEntry } from "@hylimo/core/lib/runtime/ast/executableListEntry.js";
-import { ExecutableExpression } from "@hylimo/core/lib/runtime/ast/executableExpression.js";
-import { assertIndex } from "@hylimo/core/lib/stdlib/typeHelpers.js";
+import {
+    ExecutableAbstractInvocationExpression,
+    IndexSelfInvocationExpression,
+    ExecutableListEntry,
+    ExecutableExpression,
+    InterpreterContext,
+    LabeledValue,
+    assertIndex
+} from "@hylimo/core";
 import { supplyNamedArguments } from "./completionGenerator.js";
 
 /**

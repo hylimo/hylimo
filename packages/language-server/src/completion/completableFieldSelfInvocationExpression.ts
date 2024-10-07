@@ -1,9 +1,11 @@
-import { FieldSelfInvocationExpression } from "@hylimo/core/lib/ast/fieldSelfInvocationExpression.js";
-import { InterpreterContext } from "@hylimo/core/lib/runtime/interpreter/interpreterContext.js";
-import { LabeledValue } from "@hylimo/core/lib/runtime/objects/labeledValue.js";
-import { ExecutableAbstractInvocationExpression } from "@hylimo/core/lib/runtime/ast/executableAbstractInvocationExpression.js";
-import { ExecutableListEntry } from "@hylimo/core/lib/runtime/ast/executableListEntry.js";
-import { ExecutableExpression } from "@hylimo/core/lib/runtime/ast/executableExpression.js";
+import {
+    ExecutableAbstractInvocationExpression,
+    FieldSelfInvocationExpression,
+    ExecutableListEntry,
+    ExecutableExpression,
+    InterpreterContext,
+    LabeledValue
+} from "@hylimo/core";
 import { supplyNamedArguments } from "./completionGenerator.js";
 
 /**
