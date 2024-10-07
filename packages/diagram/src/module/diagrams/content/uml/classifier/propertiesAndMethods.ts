@@ -176,7 +176,7 @@ function convertTypeWithOptionalMultiplicity(expression: Expression): string {
 }
 
 /**
- * Converts a invocation to a UML function string
+ * Converts an invocation to a UML function string
  *
  * @param expression the expression to convert
  * @returns the UML function string
