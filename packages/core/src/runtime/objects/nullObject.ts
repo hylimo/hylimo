@@ -62,4 +62,8 @@ export class NullObject extends BaseObject {
     override toNative(): any {
         return null;
     }
+
+    override equals(other: BaseObject): boolean {
+        return other instanceof NullObject;
+    }
 }

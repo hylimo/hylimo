@@ -194,7 +194,7 @@ export const objectModule = InterpreterModule.create(
                     (args, context) => {
                         const self = args.getFieldValue(SemanticFieldNames.SELF, context);
                         const other = args.getFieldValue(0, context);
-                        return context.newBoolean(self === other);
+                        return context.newBoolean(self.equals(other));
                     },
                     {
                         docs: "Compares self to another value, returns true if they are the same.",

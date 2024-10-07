@@ -1,7 +1,6 @@
 import { ExecutableNativeExpression } from "../../runtime/ast/executableNativeExpression.js";
 import { assign, fun, id, jsFun } from "../../runtime/executableAstHelper.js";
 import { InterpreterModule } from "../../runtime/interpreter/interpreterModule.js";
-import { NumberObject } from "../../runtime/objects/numberObject.js";
 import { SemanticFieldNames } from "../../runtime/semanticFieldNames.js";
 import { numberType } from "../../types/number.js";
 import { DefaultModuleNames } from "../defaultModuleNames.js";
@@ -195,29 +194,6 @@ export const numberModule = InterpreterModule.create(
                             [0, "the right side of the comparison, must be a number", numberType]
                         ],
                         returns: "true if the left side is greater than or equal to the right side"
-                    }
-                )
-            ),
-            id(numberProto).assignField(
-                "==",
-                jsFun(
-                    (args, context) => {
-                        const self = assertNumber(args.getFieldValue(SemanticFieldNames.SELF, context));
-                        const other = args.getFieldValue(0, context);
-                        let res: boolean;
-                        if (other instanceof NumberObject) {
-                            res = self === other.value;
-                        } else {
-                            res = false;
-                        }
-                        return context.newBoolean(res);
-                    },
-                    {
-                        docs: "Compares self to another value, returns true if they are the same number.",
-                        params: [
-                            [SemanticFieldNames.SELF, "the left side of the comparison, must be a number", numberType]
-                        ],
-                        returns: "true if the left side is equal to the right side"
                     }
                 )
             )

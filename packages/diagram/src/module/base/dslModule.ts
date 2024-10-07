@@ -245,7 +245,7 @@ const scopeExpressions: ExecutableExpression[] = [
                     },
                     label = {
                         (labelContent, pos, distance, rotation) = args
-                        if(object().==(self = "".proto, labelContent.proto)) {
+                        if("".proto == labelContent.proto) {
                             labelContent = list(span(text = labelContent))
                         }
                         labelCanvasElement = canvasElement(
@@ -295,7 +295,7 @@ const scopeExpressions: ExecutableExpression[] = [
                 result = object(
                     label = {
                         (labelContent, x, y, rotation) = args
-                        if(object().==(self = "".proto, labelContent.proto)) {
+                        if("".proto == labelContent.proto) {
                             labelContent = list(span(text = labelContent))
                         }
                         labelCanvasElement = canvasElement(

@@ -114,6 +114,14 @@ export abstract class BaseObject {
      * @returns the js representation
      */
     abstract toNative(): any;
+
+    /**
+     * Checks if this object is equal to another object
+     *
+     * @param other the other object
+     * @returns true if they are equal
+     */
+    abstract equals(other: BaseObject): boolean;
 }
 
 /**

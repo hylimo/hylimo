@@ -1,7 +1,6 @@
 import { ExecutableNativeExpression } from "../../runtime/ast/executableNativeExpression.js";
 import { assign, fun, id, jsFun } from "../../runtime/executableAstHelper.js";
 import { InterpreterModule } from "../../runtime/interpreter/interpreterModule.js";
-import { StringObject } from "../../runtime/objects/stringObject.js";
 import { SemanticFieldNames } from "../../runtime/semanticFieldNames.js";
 import { stringType } from "../../types/string.js";
 import { DefaultModuleNames } from "../defaultModuleNames.js";
@@ -95,33 +94,6 @@ export const stringModule = InterpreterModule.create(
                             [0, "the right side of the comparison, must be a string", stringType]
                         ],
                         returns: "true if the left side is greater than or equal to the right side"
-                    }
-                )
-            ),
-            id(stringProto).assignField(
-                "==",
-                jsFun(
-                    (args, context) => {
-                        const self = assertString(
-                            args.getFieldValue(SemanticFieldNames.SELF, context),
-                            "self argument of =="
-                        );
-                        const other = args.getFieldValue(0, context);
-                        let res: boolean;
-                        if (other instanceof StringObject) {
-                            res = self === other.value;
-                        } else {
-                            res = false;
-                        }
-                        return context.newBoolean(res);
-                    },
-                    {
-                        docs: "Compares self to another value, returns true if they are the same string.",
-                        params: [
-                            ["self", "a string to compare", stringType],
-                            [0, "other value for the comparison"]
-                        ],
-                        returns: "true iff both values are the same string"
                     }
                 )
             ),

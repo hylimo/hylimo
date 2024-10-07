@@ -316,4 +316,8 @@ export class FullObject extends BaseObject {
     ): LabeledValue {
         throw new RuntimeError("Invoke not supported");
     }
+
+    override equals(other: BaseObject): boolean {
+        return other === this;
+    }
 }
