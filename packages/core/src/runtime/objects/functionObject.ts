@@ -78,6 +78,10 @@ export abstract class AbstractFunctionObject<T extends ExecutableAbstractFunctio
     override toNative(): any {
         return null;
     }
+
+    override equals(other: BaseObject): boolean {
+        return other === this;
+    }
 }
 
 /**

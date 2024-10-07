@@ -57,20 +57,24 @@ export class MovedElementsSelector {
      * @param points the points to move
      */
     private registerElements(elements: Set<SCanvasPoint | SCanvasElement>) {
-        let currentElements: Set<SCanvasPoint | SCanvasElement> = elements;
+        let currentElements: Set<SCanvasContent> = elements;
         while (currentElements.size > 0) {
-            const newElements = new Set<SCanvasPoint | SCanvasElement>();
+            const newElements = new Set<SCanvasContent>();
             for (const element of currentElements) {
-                this.movedElements.add(element);
+                if (element instanceof SCanvasConnection) {
+                    newElements.add(this.index.getById(element.segments.at(-1)!.end) as SCanvasContent);
+                } else {
+                    this.movedElements.add(element as SCanvasPoint | SCanvasElement);
+                }
                 if (element instanceof SCanvasElement) {
                     if (element.pos != undefined) {
-                        newElements.add(this.index.getById(element.pos) as SCanvasPoint | SCanvasElement);
+                        newElements.add(this.index.getById(element.pos) as SCanvasContent);
                     }
                 } else if (element instanceof SRelativePoint) {
                     const editable =
                         DefaultEditTypes.MOVE_X in element.edits && DefaultEditTypes.MOVE_Y in element.edits;
                     if (!editable) {
-                        newElements.add(this.index.getById(element.target) as SCanvasPoint | SCanvasElement);
+                        newElements.add(this.index.getById(element.target) as SCanvasContent);
                     }
                 }
             }
@@ -144,7 +148,12 @@ export class MovedElementsSelector {
             }
             return this.isParentCanvasImplicitlyMoved(element);
         } else if (element instanceof SRelativePoint) {
-            return this.isMoved(element.target);
+            const target = this.index.getById(element.target) as SCanvasPoint | SCanvasElement | SCanvasConnection;
+            if (target instanceof SCanvasConnection) {
+                return this.isMoved(target.segments.at(-1)!.end);
+            } else {
+                return this.isMoved(element.target);
+            }
         } else if (element instanceof SLinePoint) {
             const lineProviderId = element.lineProvider;
             const lineProvider = this.index.getById(lineProviderId) as SCanvasContent;

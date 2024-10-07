@@ -108,7 +108,7 @@ export class MoveMouseListener extends MouseListener {
         if (this.context != undefined) {
             const root = target.root as SRoot;
             if (this.moveHandler === undefined) {
-                this.moveHandler = this.createHandler(target, this.context.targetElement);
+                this.moveHandler = this.createHandler(target, event);
                 root.sequenceNumber = 0;
                 this.sequenceNumber = 0;
             }
@@ -185,10 +185,11 @@ export class MoveMouseListener extends MouseListener {
      * Creats the handler for the current move
      *
      * @param target the element which was clicked
-     * @param target the initial mouse down event
+     * @param event the mouse event
      * @returns the move handler if move is supported, otherwise null
      */
-    private createHandler(target: SModelElementImpl, targetElement?: Element): MoveHandler | null {
+    private createHandler(target: SModelElementImpl, event: MouseEvent): MoveHandler | null {
+        const targetElement = this.context?.targetElement;
         const classList = targetElement?.classList;
         if (target instanceof SCanvasElement && classList != undefined) {
             if (classList.contains(CanvasElementView.ROTATE_ICON_CLASS)) {
@@ -203,7 +204,7 @@ export class MoveMouseListener extends MouseListener {
                 return this.createAxisAlignedSegmentHandler(targetElement as HTMLElement, false);
             }
         }
-        return this.createMoveHandler(target);
+        return this.createMoveHandler(target, event);
     }
 
     /**
@@ -398,9 +399,10 @@ export class MoveMouseListener extends MouseListener {
      * Handles move events, meaning moving points on the canvas.
      *
      * @param target the element which was clicked
+     * @param event the mouse event
      * @returns the move handler if move is supported, otherwise null
      */
-    private createMoveHandler(target: SModelElementImpl): MoveHandler | null {
+    private createMoveHandler(target: SModelElementImpl, event: MouseEvent): MoveHandler | null {
         const selected = this.getSelectedElements(target.root).filter(
             (element) => element instanceof SCanvasPoint || element instanceof SCanvasElement
         ) as (SCanvasPoint | SCanvasElement)[];
@@ -425,7 +427,7 @@ export class MoveMouseListener extends MouseListener {
             if (linePoints.length > 1 || translateableElements.length > 0) {
                 return null;
             }
-            return this.createLineMoveHandler(linePoints[0]);
+            return this.createLineMoveHandler(linePoints[0], event);
         }
         return this.createTranslationMoveHandler(translateableElements);
     }
@@ -434,12 +436,13 @@ export class MoveMouseListener extends MouseListener {
      * Creates the line move handler for the given line point.
      *
      * @param linePoint the point to move
+     * @param event the mouse event
      * @returns the created move handler or null if no handler could be created
      */
-    private createLineMoveHandler(linePoint: SLinePoint): MoveHandler | null {
+    private createLineMoveHandler(linePoint: SLinePoint, event: MouseEvent): MoveHandler | null {
         const editSpecifications: EditSpecificationEntry[] = [];
         editSpecifications.push(linePoint.edits[DefaultEditTypes.MOVE_LPOS_POS]);
-        if (linePoint.distance != undefined) {
+        if (linePoint.edits[DefaultEditTypes.MOVE_LPOS_DIST] != undefined) {
             editSpecifications.push(linePoint.edits[DefaultEditTypes.MOVE_LPOS_DIST]);
         }
         if (!EditSpecification.isConsistent([editSpecifications])) {
@@ -450,7 +453,7 @@ export class MoveMouseListener extends MouseListener {
             linePoint.id,
             this.transactionIdProvider.generateId(),
             root.layoutEngine.getPoint(linePoint.id, this.context!.canvasContext),
-            linePoint.edits[DefaultEditTypes.MOVE_LPOS_DIST] == undefined,
+            linePoint.edits[DefaultEditTypes.MOVE_LPOS_DIST] == undefined || event.shiftKey,
             linePoint.segment != undefined,
             root.layoutEngine.layoutLine(
                 root.index.getById(linePoint.lineProvider) as SCanvasConnection | SCanvasElement,

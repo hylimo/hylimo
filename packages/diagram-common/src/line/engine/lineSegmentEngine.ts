@@ -50,6 +50,6 @@ export class LineSegmentEngine extends SegmentEngine<LineSegment> {
 
     override getNormalVector(_position: number, segment: LineSegment, segmentStartPoint: Point): Point {
         const delta = Math2D.sub(segment.end, segmentStartPoint);
-        return Math2D.normalize({ x: -delta.y, y: delta.x });
+        return Math2D.normalize({ x: delta.y, y: -delta.x });
     }
 }

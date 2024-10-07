@@ -4,7 +4,7 @@ import "./style.css";
 import "./icons.css";
 import EmbeddedHylimoEditor from "../components/EmbeddedHylimoEditor.vue";
 import NavTeleportTarget from "../components/NavTeleportTarget.vue";
-import Settings from "../components/Settings.vue";
+import Settings from "../components/settings/Settings.vue";
 import { h } from "vue";
 import RegisterSW from "../components/RegisterSW.vue";
 import { themeColorPlugin } from "./themeColorPlugin";

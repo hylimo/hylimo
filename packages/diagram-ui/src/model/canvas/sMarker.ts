@@ -22,4 +22,12 @@ export class SMarker extends SElement implements Marker {
      * The position on the vertical center line where the line actually starts
      */
     lineStart!: number;
+    /**
+     * The x coordinate of the reference point
+     */
+    refX!: number;
+    /**
+     * The y coordinate of the reference point
+     */
+    refY!: number;
 }

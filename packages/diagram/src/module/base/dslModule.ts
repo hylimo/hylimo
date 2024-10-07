@@ -13,11 +13,12 @@ import {
 import { canvasContentType, elementType } from "./types.js";
 import { CanvasConnection, CanvasElement, DefaultEditTypes } from "@hylimo/diagram-common";
 import { LinePointLayoutConfig } from "../../layout/elements/canvas/linePointLayoutConfig.js";
+import { DiagramModuleNames } from "../diagramModuleNames.js";
 
 /**
  * Identifier for the scope variable
  */
-const scope = "scope";
+export const SCOPE = "scope";
 
 /**
  * Expressions which create the initial scope which is passed to the callback of all diagram DSL functions
@@ -36,7 +37,7 @@ const scopeExpressions: ExecutableExpression[] = [
             )
         `
     ),
-    id(scope).assignField(
+    id(SCOPE).assignField(
         "apos",
         fun(
             `
@@ -55,7 +56,7 @@ const scopeExpressions: ExecutableExpression[] = [
             }
         )
     ),
-    id(scope).assignField(
+    id(SCOPE).assignField(
         "rpos",
         fun(
             `
@@ -67,7 +68,7 @@ const scopeExpressions: ExecutableExpression[] = [
             {
                 docs: "Create a relative point",
                 params: [
-                    [0, "the target to which the point is relative", elementType()],
+                    [0, "the target to which the point is relative", canvasContentType],
                     [1, "the x coordinate", optional(numberType)],
                     [2, "the y coordinate", optional(numberType)]
                 ],
@@ -75,12 +76,12 @@ const scopeExpressions: ExecutableExpression[] = [
             }
         )
     ),
-    id(scope).assignField(
+    id(SCOPE).assignField(
         "lpos",
         fun(
             `
                 (lineProvider, pos, distance) = args
-                point = linePoint(lineProvider = lineProvider, pos = pos, distance = distance, segment = args.seg)
+                point = linePoint(lineProvider = lineProvider, pos = pos, distance = distance)
                 scope.internal.registerCanvasContent(point, args, args.self)
                 point
             `,
@@ -99,7 +100,7 @@ const scopeExpressions: ExecutableExpression[] = [
             }
         )
     ),
-    id(scope).assignField(
+    id(SCOPE).assignField(
         "styles",
         fun(
             `
@@ -231,53 +232,8 @@ const scopeExpressions: ExecutableExpression[] = [
                 segments += segment
                 args.self
             }
-        `
-    ),
-    id(scope).assignField(
-        "layout",
-        fun(
-            `
-                (self, callback) = args
-                result = object(pos = null, width = null, height = null, rotation = null)
-                callback.callWithScope(result)
-                if(result.pos != null) {
-                    self.pos = result.pos
-                } {
-                    this.moveEdit = createAddEdit(callback, "'pos = apos(' & dx & ', ' & dy & ')'")
-                    self.edits.set("${DefaultEditTypes.MOVE_X}", this.moveEdit)
-                    self.edits.set("${DefaultEditTypes.MOVE_Y}", this.moveEdit)
-                }
-                if(result.width != null) {
-                    self.width = result.width
-                } {
-                    self.edits.set("${DefaultEditTypes.RESIZE_WIDTH}", createAddEdit(callback, "'width = ' & width"))
-                }
-                if(result.height != null) {
-                    self.height = result.height
-                } {
-                    self.edits.set("${DefaultEditTypes.RESIZE_HEIGHT}", createAddEdit(callback, "'height = ' & height"))
-                }
-                if(result.rotation != null) {
-                    self.rotation = result.rotation
-                } {
-                    self.edits.set("${DefaultEditTypes.ROTATE}", createAddEdit(callback, "'rotation = ' & rotation"))
-                }
-                self
-            `,
-            {
-                docs: "Layout operator which can be applied either to a CanvasElement",
-                params: [
-                    [0, "the CanvasElement or CanvasConnection to aply the layout to", elementType(CanvasElement.TYPE)],
-                    [1, "callback which provides the layout definition", functionType]
-                ],
-                returns: "The provided element"
-            }
-        )
-    ),
-    id(scope).assignField(
-        "with",
-        fun(
-            `
+            
+            _canvasConnectionWith = {
                 (self, callback) = args
                 this.contents = self.canvasScope.contents
                 result = object(
@@ -289,12 +245,12 @@ const scopeExpressions: ExecutableExpression[] = [
                     },
                     label = {
                         (labelContent, pos, distance, rotation) = args
-                        if(object().==(self = "".proto, labelContent.proto)) {
+                        if("".proto == labelContent.proto) {
                             labelContent = list(span(text = labelContent))
                         }
                         labelCanvasElement = canvasElement(
                             content = text(contents = labelContent, class = list("label")),
-                            pos = self.canvasScope.lpos(self, pos, distance, seg = args.seg),
+                            pos = self.canvasScope.lpos(self, pos, distance),
                             class = list("label-element")
                         )
                         scope.internal.registerCanvasElement(labelCanvasElement, args, self.canvasScope)
@@ -331,23 +287,109 @@ const scopeExpressions: ExecutableExpression[] = [
                         )
                     }
                 }
+            }
+
+            _canvasPointOrElementWith = {
+                (self, callback) = args
+                this.contents = self.canvasScope.contents
+                result = object(
+                    label = {
+                        (labelContent, x, y, rotation) = args
+                        if("".proto == labelContent.proto) {
+                            labelContent = list(span(text = labelContent))
+                        }
+                        labelCanvasElement = canvasElement(
+                            content = text(contents = labelContent, class = list("label")),
+                            pos = self.canvasScope.rpos(self, x, y),
+                            class = list("label-element")
+                        )
+                        scope.internal.registerCanvasElement(labelCanvasElement, args, self.canvasScope)
+                        labelCanvasElement.rotation = rotation
+                        labelCanvasElement
+                    }
+                )
+                callback.callWithScope(result)
+            }
+        `
+    ),
+    id(SCOPE).assignField(
+        "layout",
+        fun(
+            `
+                (self, callback) = args
+                result = object(pos = null, width = null, height = null, rotation = null)
+                callback.callWithScope(result)
+                if(result.pos != null) {
+                    self.pos = result.pos
+                } {
+                    this.moveEdit = createAddEdit(callback, "'pos = apos(' & dx & ', ' & dy & ')'")
+                    self.edits.set("${DefaultEditTypes.MOVE_X}", this.moveEdit)
+                    self.edits.set("${DefaultEditTypes.MOVE_Y}", this.moveEdit)
+                }
+                if(result.width != null) {
+                    self.width = result.width
+                } {
+                    self.edits.set("${DefaultEditTypes.RESIZE_WIDTH}", createAddEdit(callback, "'width = ' & width"))
+                }
+                if(result.height != null) {
+                    self.height = result.height
+                } {
+                    self.edits.set("${DefaultEditTypes.RESIZE_HEIGHT}", createAddEdit(callback, "'height = ' & height"))
+                }
+                if(result.rotation != null) {
+                    self.rotation = result.rotation
+                } {
+                    self.edits.set("${DefaultEditTypes.ROTATE}", createAddEdit(callback, "'rotation = ' & rotation"))
+                }
                 self
             `,
             {
-                docs: "Helper which applies a with operator to a CanvasElement. Handles the routing points, and labels.",
+                docs: "Layout operator which can be applied to a CanvasElement",
                 params: [
-                    [0, "the CanvasElement to which to apply the with", elementType(CanvasConnection.TYPE)],
-                    [1, "the callback providing the new route via the field over", functionType]
+                    [
+                        0,
+                        "the CanvasElement or CanvasConnection to apply the layout to",
+                        elementType(CanvasElement.TYPE)
+                    ],
+                    [1, "callback which provides the layout definition", functionType]
+                ],
+                returns: "The provided element"
+            }
+        )
+    ),
+    id(SCOPE).assignField(
+        "with",
+        fun(
+            `
+                (self, callback) = args
+                if(self.type == "canvasConnection") {
+                    _canvasConnectionWith(self, callback)
+                } {
+                    _canvasPointOrElementWith(self, callback)
+                }
+                self
+            `,
+            {
+                docs: `
+                    With operator which can be applied to a CanvasConnection, CanvasElement or CanvasPoint.
+                    Applied to a CanvasConnection, it allows to define a new route using the over field, and to add labels using the label function.
+                    Applied to a CanvasElement or CanvasPoint, it allows to add labels using the label function.
+                `,
+                params: [
+                    [0, "the CanvasContent to which to apply the with", canvasContentType],
+                    [1, "the callback providing the new route via the field over and/or labels", functionType]
                 ],
                 returns: "null",
                 snippet: ` {\n    over = start($1).line(end($2))\n}`
             }
         )
     ),
-    assign(
-        "_createConnection",
-        fun(
-            `
+    id(SCOPE)
+        .field("internal")
+        .assignField(
+            "createConnection",
+            fun(
+                `
                 (start, end, class, target, canvasScope) = args
                 startMarkerFactory = args.startMarkerFactory
                 endMarkerFactory = args.endMarkerFactory
@@ -399,25 +441,24 @@ const scopeExpressions: ExecutableExpression[] = [
                 )
                 connection.startProvider = startProvider
                 connection.endProvider = endProvider
-                connection.canvasScope = canvasScope
                 scope.internal.registerCanvasElement(connection, target, canvasScope)
 
                 connection
             `,
-            {
-                docs: "Helper which creates a CanvasConnection between two elements",
-                params: [
-                    [0, "the start element", canvasContentType],
-                    [1, "the end element", canvasContentType],
-                    [2, "the class of the connection"],
-                    [3, "the target expression referenced by edits"],
-                    [4, "the scope to which canvas contents should be added"]
-                ],
-                returns: "The created CanvasConnection"
-            }
-        )
-    ),
-    id(scope)
+                {
+                    docs: "Helper which creates a CanvasConnection between two elements",
+                    params: [
+                        [0, "the start element", canvasContentType],
+                        [1, "the end element", canvasContentType],
+                        [2, "the class of the connection"],
+                        [3, "the target expression referenced by edits"],
+                        [4, "the scope to which canvas contents should be added"]
+                    ],
+                    returns: "The created CanvasConnection"
+                }
+            )
+        ),
+    id(SCOPE)
         .field("internal")
         .assignField(
             "registerCanvasContent",
@@ -425,12 +466,13 @@ const scopeExpressions: ExecutableExpression[] = [
                 `
                     (content, source, canvasScope) = args
                     canvasScope.contents += content
+                    content.canvasScope = canvasScope
                     content.source = reflect(source)
                     content
                 `
             )
         ),
-    id(scope)
+    id(SCOPE)
         .field("internal")
         .assignField(
             "registerCanvasElement",
@@ -455,7 +497,7 @@ const scopeExpressions: ExecutableExpression[] = [
                 `
             )
         ),
-    id(scope)
+    id(SCOPE)
         .field("internal")
         .assignField(
             "createConnectionOperator",
@@ -467,7 +509,7 @@ const scopeExpressions: ExecutableExpression[] = [
 
                 {
                     (start, end) = args
-                    _createConnection(
+                    scope.internal.createConnection(
                         start,
                         end,
                         class,
@@ -488,7 +530,7 @@ const scopeExpressions: ExecutableExpression[] = [
                 }
             )
         ),
-    id(scope)
+    id(SCOPE)
         .field("internal")
         .assignField(
             "registerInDiagramScope",
@@ -501,7 +543,7 @@ const scopeExpressions: ExecutableExpression[] = [
                 `
             )
         ),
-    id(scope).assignField(
+    id(SCOPE).assignField(
         "Position",
         enumObject({
             Right: 0,
@@ -514,7 +556,7 @@ const scopeExpressions: ExecutableExpression[] = [
             TopRight: 0.875
         })
     ),
-    id(scope).assignField(
+    id(SCOPE).assignField(
         "VAlign",
         enumObject({
             Top: "top",
@@ -522,7 +564,7 @@ const scopeExpressions: ExecutableExpression[] = [
             Bottom: "bottom"
         })
     ),
-    id(scope).assignField(
+    id(SCOPE).assignField(
         "HAlign",
         enumObject({
             Left: "left",
@@ -532,20 +574,6 @@ const scopeExpressions: ExecutableExpression[] = [
     ),
     ...parse(
         `
-            scope.element = {
-                callbackOrElement = it
-                this.element = if(callbackOrElement._type == "element") {
-                    canvasElement(content = callbackOrElement)
-                } {
-                    canvasElement(content = callbackOrElement())
-                }
-                scope.internal.registerCanvasElement(this.element, args, args.self)
-            }
-            scope.styles {
-                cls("label-element") {
-                    hAlign = "center"
-                }
-            }
             scopeEnhancer(scope)
             callback.callWithScope(scope)
             diagramCanvas = canvas(contents = scope.contents)
@@ -558,9 +586,9 @@ const scopeExpressions: ExecutableExpression[] = [
  * Module which provides common DSL functionality
  */
 export const dslModule = InterpreterModule.create(
-    "dsl",
+    DiagramModuleNames.DSL,
     [],
-    ["diagram"],
+    [DiagramModuleNames.DIAGRAM],
     [
         assign(
             "generateDiagramEnvironment",

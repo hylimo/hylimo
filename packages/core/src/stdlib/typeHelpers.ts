@@ -90,6 +90,16 @@ export function assertBoolean(value: BaseObject, description = ""): boolean {
 }
 
 /**
+ * Checks if a value is a BooleanObject
+ *
+ * @param value the value to check
+ * @returns true iff it is a BooleanObject
+ */
+export function isBoolean(value: BaseObject): value is BooleanObject {
+    return value instanceof BooleanObject;
+}
+
+/**
  * Helper to check that an object is a AbstractFunctionObject, throws an error if not
  *
  * @param value the value to check

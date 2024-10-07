@@ -1,4 +1,4 @@
-import { computed, InjectionKey, Plugin, ShallowRef, shallowRef, toRaw, watch } from "vue";
+import { computed, Plugin, Ref, shallowRef, toRaw, watch } from "vue";
 import {
     BrowserMessageReader,
     BrowserMessageWriter,
@@ -12,6 +12,7 @@ import { CloseAction, ErrorAction } from "vscode-languageclient";
 import {
     ConfigNotification,
     DynamicLanguageServerConfig,
+    LanguageServerSettings,
     RemoteNotification,
     RemoteRequest,
     SetLanguageServerIdNotification
@@ -21,14 +22,46 @@ import { checkServiceConsistency, configureServices } from "monaco-editor-wrappe
 import * as monaco from "monaco-editor";
 import { customDarkTheme, customLightTheme, languageConfiguration, monarchTokenProvider } from "../util/language";
 import { useData } from "vitepress";
-import { useLocalStorage } from "@vueuse/core";
+import { useLocalStorage, throttledWatch } from "@vueuse/core";
 import { useWorkerFactory } from "monaco-editor-wrapper/workerFactory";
 import monacoEditorWorker from "monaco-editor/esm/vs/editor/editor.worker?worker";
+import { languageServerConfigKey, languageClientKey } from "./injectionKeys";
 
 /**
- * A key for the language client in the Vue app.
+ * Config for the diagram
  */
-export const languageClientKey = Symbol("languageClient") as InjectionKey<ShallowRef<Promise<LanguageClientProxy>>>;
+export interface DiagramConfig {
+    /**
+     * Primary color for light theme
+     */
+    lightPrimaryColor: string;
+    /**
+     * Background color for light theme
+     */
+    lightBackgroundColor: string;
+    /**
+     * Primary color for dark theme
+     */
+    darkPrimaryColor: string;
+    /**
+     * Background color for dark theme
+     */
+    darkBackgroundColor: string;
+}
+
+/**
+ * Config for the Hylimo language server.
+ */
+export interface LanguageServerConfig {
+    /**
+     * Settings, primarily for graphical interaction
+     */
+    settings: Ref<LanguageServerSettings>;
+    /**
+     * Diagram configuration
+     */
+    diagramConfig: Ref<DiagramConfig>;
+}
 
 /**
  * The language identifier for the SyncScript language.
@@ -42,11 +75,27 @@ export const language = "syncscript";
  */
 export const lspPlugin: Plugin = {
     install(app) {
-        const languageServerSettings = useLocalStorage("languageServerSettings", {});
+        const languageServerSettings = useLocalStorage<LanguageServerSettings>("languageServerSettings", {});
+        const diagramConfig = useLocalStorage<DiagramConfig>("diagramConfig", {
+            lightPrimaryColor: "#000000",
+            lightBackgroundColor: "#ffffff",
+            darkPrimaryColor: "#ffffff",
+            darkBackgroundColor: "#1e1e1e"
+        });
+        app.provide(languageServerConfigKey, {
+            settings: languageServerSettings,
+            diagramConfig
+        });
         const languageServerConfig = computed<DynamicLanguageServerConfig>(() => {
             return {
                 diagramConfig: {
-                    theme: isDark.value ? "dark" : "light"
+                    theme: isDark.value ? "dark" : "light",
+                    primaryColor: isDark.value
+                        ? diagramConfig.value.darkPrimaryColor
+                        : diagramConfig.value.lightPrimaryColor,
+                    backgroundColor: isDark.value
+                        ? diagramConfig.value.darkBackgroundColor
+                        : diagramConfig.value.lightBackgroundColor
                 },
                 settings: languageServerSettings.value
             };
@@ -63,7 +112,7 @@ export const lspPlugin: Plugin = {
             watch(isDark, (value) => {
                 monaco.editor.setTheme(value ? "custom-dark" : "custom-light");
             });
-            watch(
+            throttledWatch(
                 languageServerConfig,
                 () => {
                     const configValue = languageServerConfig.value;
@@ -74,7 +123,7 @@ export const lspPlugin: Plugin = {
                         });
                     }
                 },
-                { deep: true, immediate: true }
+                { deep: true, immediate: true, leading: true, trailing: true, throttle: 500 }
             );
         });
     }
@@ -157,7 +206,7 @@ async function setupLanguageClient(isDark: boolean) {
 /**
  * A proxy for the language client that allows for multiple subscriptions to the same notification type.
  */
-class LanguageClientProxy {
+export class LanguageClientProxy {
     /**
      * A map of notification handlers for each method.
      */

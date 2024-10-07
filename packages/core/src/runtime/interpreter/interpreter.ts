@@ -6,24 +6,6 @@ import { InterpreterContext } from "./interpreterContext.js";
 import { InterpreterModule } from "./interpreterModule.js";
 
 /**
- * Helper data structure for topological sorting of modules
- */
-interface MarkedModule {
-    /**
-     * The module itself
-     */
-    module: InterpreterModule;
-    /**
-     * If true, the module has been added to the list of modules
-     */
-    mark: boolean;
-    /**
-     * If visited with true, a cycle was detected
-     */
-    temporaryMark: boolean;
-}
-
-/**
  * The result of an interpreter run
  */
 export interface InterpretationResult {
@@ -50,7 +32,7 @@ export class Interpreter {
     /**
      * Sorted consistent modules loaded before each execution
      */
-    private readonly modules: InterpreterModule[] = [];
+    private readonly modules: InterpreterModule[];
 
     /**
      * Creates a new Interpreter.
@@ -58,61 +40,15 @@ export class Interpreter {
      * An error is thrown if a module has unsatisfied dependencies,
      *
      * @param modules loaded modules
+     * @param optionalModules modules which are only loaded if required by any required module
      * @param maxExecutionSteps the maximum number of steps the interpreter is allowed to execute
      */
     constructor(
         modules: InterpreterModule[],
+        optionalModules: InterpreterModule[],
         private readonly maxExecutionSteps: number
     ) {
-        const markedModules = modules.map((module) => ({ module, mark: false, temporaryMark: false }));
-        const moduleLookup = new Map<string, (typeof markedModules)[0]>();
-        for (const module of markedModules) {
-            if (moduleLookup.has(module.module.name)) {
-                throw new Error(`Duplicate module ${module.module.name}`);
-            }
-            moduleLookup.set(module.module.name, module);
-        }
-        for (const module of markedModules) {
-            this.visit(module, moduleLookup);
-        }
-    }
-
-    /**
-     * Topological sorting helper for modules
-     * Detects cycles and missing modules.
-     *
-     * @param module the current visited module
-     * @param moduleLookup mapping of all known modules
-     */
-    private visit(module: MarkedModule, moduleLookup: Map<string, MarkedModule>): void {
-        if (module.temporaryMark) {
-            throw new Error(`Cycle in module dependencies: ${module.module.name}`);
-        }
-        if (!module.mark) {
-            module.temporaryMark = true;
-            this.visitDependencies(module.module.dependencies, moduleLookup);
-            module.temporaryMark = false;
-            module.mark = true;
-            this.modules.push(module.module);
-            this.visitDependencies(module.module.runtimeDependencies, moduleLookup);
-        }
-    }
-
-    /**
-     * Visits each dependency in dependencies.
-     * Used for visit. Detects cycles and missing modules.
-     *
-     * @param dependencies the dependencies to visit, must be existant in moduleLookup
-     * @param moduleLookup lookup from depenency name to module
-     */
-    private visitDependencies(dependencies: string[], moduleLookup: Map<string, MarkedModule>) {
-        for (const child of dependencies) {
-            const childModule = moduleLookup.get(child);
-            if (!childModule) {
-                throw new Error(`Unknown module dependency: ${child}`);
-            }
-            this.visit(childModule, moduleLookup);
-        }
+        this.modules = InterpreterModule.computeModules(modules, optionalModules);
     }
 
     /**

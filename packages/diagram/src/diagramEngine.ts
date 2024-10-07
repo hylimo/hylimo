@@ -7,6 +7,7 @@ import {
     RuntimeError,
     SemanticFieldNames,
     id,
+    object,
     str,
     toExecutable
 } from "@hylimo/core";
@@ -111,10 +112,11 @@ export class DiagramEngine {
     convertConfig(config: DiagramConfig): ExecutableExpression[] {
         const expression = id(SemanticFieldNames.THIS).assignField(
             "config",
-            id("object").call({
-                name: "theme",
-                value: str(config.theme)
-            })
+            object([
+                { name: "theme", value: str(config.theme) },
+                { name: "primaryColor", value: str(config.primaryColor) },
+                { name: "backgroundColor", value: str(config.backgroundColor) }
+            ])
         );
         return [expression];
     }

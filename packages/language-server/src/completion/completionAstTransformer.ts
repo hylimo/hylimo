@@ -9,15 +9,15 @@ import {
     FieldSelfInvocationExpression,
     IndexSelfInvocationExpression,
     InvocationExpression,
-    AbstractInvocationExpression
+    AbstractInvocationExpression,
+    ExecutableExpression,
+    FieldAssignmentExpression,
+    RuntimeAstTransformer
 } from "@hylimo/core";
-import { ExecutableExpression } from "@hylimo/core";
-import { RuntimeAstTransformer } from "@hylimo/core";
-import { ExecutableCompletionExpression } from "./executableCompletionExpression.js";
-import { FieldAssignmentExpression } from "@hylimo/core/src/ast/fieldAssignmentExpression.js";
+import { CompletableFieldSelfInvocationExpression } from "./completableFieldSelfInvocationExpression.js";
 import { CompletableIndexSelfInvocationExpression } from "./completableIndexSelfInvocationExpression.js";
 import { CompletableInvocationExpression } from "./completableInvocationExpression.js";
-import { CompletableFieldSelfInvocationExpression } from "./completableFieldSelfInvocationExpression.js";
+import { ExecutableCompletionExpression } from "./executableCompletionExpression.js";
 
 /**
  * Transforms the AST into an executable AST where completion expressions are replaced with

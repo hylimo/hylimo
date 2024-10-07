@@ -1,4 +1,4 @@
-import { SimpleObject } from "./baseObject.js";
+import { BaseObject, SimpleObject } from "./baseObject.js";
 import { FullObject } from "./fullObject.js";
 
 /**
@@ -26,5 +26,9 @@ export class LiteralObject<T> extends SimpleObject {
 
     override toNative(): any {
         return this.value;
+    }
+
+    override equals(other: BaseObject): boolean {
+        return other instanceof LiteralObject && this.value === other.value;
     }
 }

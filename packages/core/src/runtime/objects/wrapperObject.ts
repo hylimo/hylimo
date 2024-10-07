@@ -97,6 +97,10 @@ export class WrapperObject<T> extends BaseObject {
     override toNative(): T {
         return this.wrapped;
     }
+
+    override equals(other: BaseObject): boolean {
+        return other instanceof WrapperObject && this.wrapped === other.wrapped;
+    }
 }
 
 /**

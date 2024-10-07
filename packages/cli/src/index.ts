@@ -5,15 +5,7 @@ import * as path from "path";
 import { program } from "commander";
 import { PDFRenderer } from "@hylimo/diagram-render-pdf";
 import { SVGRenderer } from "@hylimo/diagram-render-svg";
-import {
-    DiagramEngine,
-    LayoutEngine,
-    baseDiagramModule,
-    classDiagramModule,
-    diagramModule,
-    dslModule,
-    editModule
-} from "@hylimo/diagram";
+import { DiagramEngine, LayoutEngine, defaultDiagramModules } from "@hylimo/diagram";
 import { Interpreter, Parser, defaultModules } from "@hylimo/core";
 import { DiagramConfig } from "@hylimo/diagram-common";
 
@@ -26,6 +18,14 @@ program
         "Output file path. Should end with .svg or .pdf to automatically select the output format"
     )
     .option("--dark", "Enable dark mode", false)
+    .option(
+        "--primary <color>",
+        "Primary color for the diagram (defaults to #000000 for light mode and #ffffff for dark mode)"
+    )
+    .option(
+        "--background <color>",
+        "Background color for the diagram (defaults to #ffffff for light mode and #000000 for dark mode)"
+    )
     .option("--max-execution-steps", "Maximum number of execution steps", parseInt, 1000000)
     .parse(process.argv);
 
@@ -34,6 +34,8 @@ const options = program.opts();
 const inputFile = options.input;
 const outputFile = options.output;
 const darkMode = options.dark;
+const primary = options.primary ?? (darkMode ? "#ffffff" : "#000000");
+const background = options.background ?? (darkMode ? "#000000" : "#ffffff");
 const maxExecutionSteps = options.maxExecutionSteps;
 
 const validExtensions = [".svg", ".pdf"];
@@ -55,15 +57,14 @@ try {
 const layoutEngine = new LayoutEngine();
 const diagramEngine = new DiagramEngine(
     new Parser(false),
-    new Interpreter(
-        [...defaultModules, diagramModule, dslModule, editModule, baseDiagramModule, classDiagramModule],
-        maxExecutionSteps
-    ),
+    new Interpreter(defaultDiagramModules, defaultModules, maxExecutionSteps),
     layoutEngine
 );
 
 const config: DiagramConfig = {
-    theme: darkMode ? "dark" : "light"
+    theme: darkMode ? "dark" : "light",
+    primaryColor: primary,
+    backgroundColor: background
 };
 
 (async () => {

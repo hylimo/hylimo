@@ -46,24 +46,6 @@ export const functionModule = InterpreterModule.create(
                         returns: "the result of the call"
                     }
                 )
-            ),
-            id(functionProto).assignField(
-                "==",
-                jsFun(
-                    (args, context) => {
-                        const self = args.getFieldValue(SemanticFieldNames.SELF, context);
-                        const other = args.getFieldValue(0, context);
-                        return context.newBoolean(self === other);
-                    },
-                    {
-                        docs: "Compares self to another value, returns true if they are the same.",
-                        params: [
-                            [SemanticFieldNames.SELF, "one value for the comparison"],
-                            [0, "other value for the comparison"]
-                        ],
-                        returns: "true iff both values are the same"
-                    }
-                )
             )
         ]).call()
     ]

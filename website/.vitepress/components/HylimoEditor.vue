@@ -17,14 +17,13 @@ import "reflect-metadata";
 // @ts-ignore
 import { Splitpanes, Pane } from "splitpanes";
 import "splitpanes/dist/splitpanes.css";
-import { ref, onBeforeUnmount } from "vue";
+import { ref, onBeforeUnmount, computed } from "vue";
 import { ActionHandlerRegistry, IActionDispatcher, TYPES } from "sprotty";
 import { RequestModelAction, ActionMessage } from "sprotty-protocol";
 import {
     DiagramActionNotification,
     DiagramOpenNotification,
-    PublishDocumentRevealNotification,
-    TransactionalAction
+    PublishDocumentRevealNotification
 } from "@hylimo/diagram-protocol";
 import { createContainer, DiagramServerProxy, ResetCanvasBoundsAction } from "@hylimo/diagram-ui";
 import { Root } from "@hylimo/diagram-common";
@@ -32,11 +31,13 @@ import { onMounted } from "vue";
 import { MonacoEditorLanguageClientWrapper, UserConfig } from "monaco-editor-wrapper";
 import { shallowRef } from "vue";
 import { inject } from "vue";
-import { language, languageClientKey } from "../theme/lspPlugin";
+import { language } from "../theme/lspPlugin";
+import { languageClientKey, languageServerConfigKey } from "../theme/injectionKeys";
 import { Disposable } from "vscode-languageserver-protocol";
 import { useResizeObserver } from "@vueuse/core";
 import { v4 as uuid } from "uuid";
 import * as monaco from "monaco-editor";
+import { useData } from "vitepress";
 
 const id = uuid();
 
@@ -79,6 +80,12 @@ const editorElement = ref<HTMLElement | null>(null);
 const sprottyWrapper = ref<HTMLElement | null>(null);
 const disposables = shallowRef<Disposable[]>([]);
 const languageClient = inject(languageClientKey)!;
+const languageServerConfig = inject(languageServerConfigKey)!;
+const { isDark } = useData();
+const diagramBackground = computed(() => {
+    const config = languageServerConfig.diagramConfig.value;
+    return isDark.value ? config.darkBackgroundColor : config.lightBackgroundColor;
+});
 const actionDispatcher = shallowRef<IActionDispatcher>();
 const transactionState = ref(TransactionState.None);
 const hideMainContent = ref(true);
@@ -230,6 +237,10 @@ onBeforeUnmount(() => {
 .editor-element {
     width: 100%;
     height: 100%;
+}
+
+.sprotty-wrapper {
+    --diagram-background: v-bind(diagramBackground);
 }
 </style>
 <style>

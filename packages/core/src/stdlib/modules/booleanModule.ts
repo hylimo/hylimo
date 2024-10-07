@@ -183,30 +183,6 @@ export const booleanModule = InterpreterModule.create(
                         returns: "true if the left side is greater than or equal to the right side"
                     }
                 )
-            ),
-            id(booleanProto).assignField(
-                "==",
-                jsFun(
-                    (args, context) => {
-                        const self = assertBoolean(args.getFieldValue(SemanticFieldNames.SELF, context));
-                        const other = args.getFieldValue(0, context);
-                        let res: boolean;
-                        if (other instanceof BooleanObject) {
-                            res = self === other.value;
-                        } else {
-                            res = false;
-                        }
-                        return context.newBoolean(res);
-                    },
-                    {
-                        docs: "Compares self to another value, returns true if they are the same boolean.",
-                        params: [
-                            [SemanticFieldNames.SELF, "a boolean to compare", booleanType],
-                            [0, "other value for the comparison", booleanType]
-                        ],
-                        returns: "true iff both values are the same boolean"
-                    }
-                )
             )
         ]).call(),
         assign(

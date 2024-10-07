@@ -5,13 +5,13 @@ import {
     ExecutableAbstractFunctionExpression,
     ExecutableConstExpression,
     ExecutableListEntry,
+    FullObject,
     InterpreterContext,
     LabeledValue,
     SemanticFieldNames
 } from "@hylimo/core";
 import { CompletionError } from "./completionError.js";
 import { CompletionItem } from "./completionItem.js";
-import { FullObject } from "@hylimo/core/lib/runtime/objects/fullObject.js";
 import { CompletionItemKind, InsertTextFormat, InsertTextMode, MarkupKind } from "vscode-languageserver";
 import { Range } from "@hylimo/core";
 

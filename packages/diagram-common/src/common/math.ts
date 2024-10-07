@@ -166,6 +166,18 @@ export namespace Math2D {
      * @returns the merged bounds
      */
     export function mergeBounds(...bounds: Bounds[]): Bounds {
+        if (bounds.length === 0) {
+            return {
+                position: {
+                    x: 0,
+                    y: 0
+                },
+                size: {
+                    width: 0,
+                    height: 0
+                }
+            };
+        }
         const minX = Math.min(...bounds.map((b) => b.position.x));
         const minY = Math.min(...bounds.map((b) => b.position.y));
         const maxX = Math.max(...bounds.map((b) => b.position.x + b.size.width));

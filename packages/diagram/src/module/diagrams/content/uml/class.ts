@@ -1,0 +1,64 @@
+import {
+    booleanType,
+    fun,
+    functionType,
+    id,
+    InterpreterModule,
+    listType,
+    optional,
+    parse,
+    stringType
+} from "@hylimo/core";
+import { SCOPE } from "../../../base/dslModule.js";
+
+/**
+ * Module providing the UML class model element
+ */
+export const classModule = InterpreterModule.create(
+    "uml/class",
+    [
+        "uml/classifier/classifier",
+        "uml/classifier/defaultTitle",
+        "uml/classifier/sections",
+        "uml/classifier/propertiesAndMethods",
+        "uml/classifier/content",
+        "uml/classifier/ports"
+    ],
+    [],
+    [
+        ...parse(
+            `
+                _class = scope.internal.createClassifier(
+                    "class",
+                    list(
+                        scope.internal.defaultTitleContentHandler,
+                        scope.internal.sectionsContentHandler,
+                        scope.internal.propertiesAndMethodsContentHandler,
+                        scope.internal.contentContentHandler,
+                        scope.internal.portsContentHandler
+                    )
+                )
+            `
+        ),
+        id(SCOPE).assignField(
+            "class",
+            fun(
+                `
+                    (name, callback) = args
+                    _class(name, callback, keywords = args.keywords, abstract = args.abstract, args = args)
+                `,
+                {
+                    docs: "Creates a class.",
+                    params: [
+                        [0, "the name of the class", stringType],
+                        [1, "the callback function for the class", optional(functionType)],
+                        ["keywords", "the keywords of the class", optional(listType(stringType))],
+                        ["abstract", "whether the class is abstract", optional(booleanType)]
+                    ],
+                    snippet: `("$1") {\n    $2\n}`,
+                    returns: "The created class"
+                }
+            )
+        )
+    ]
+);

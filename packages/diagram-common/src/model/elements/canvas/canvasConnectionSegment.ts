@@ -34,7 +34,7 @@ export function calculateMarkerRenderInformationInternal(
             position: pos
         };
     }
-    const markerWidth = marker.width * marker.lineStart;
+    const markerWidth = marker.width * (1 - marker.lineStart) * marker.refX;
     const rotation = (Math.atan2(pos.y - helperPos.y, pos.x - helperPos.x) * 180) / Math.PI;
     const normalizedDelta = Math2D.normalize(Math2D.sub(helperPos, pos));
     const newPoint = Math2D.add(pos, Math2D.scale(normalizedDelta, markerWidth));

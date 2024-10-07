@@ -11,7 +11,7 @@ import { functionType } from "../../types/function.js";
 import { listType } from "../../types/list.js";
 import { objectType } from "../../types/object.js";
 import { DefaultModuleNames } from "../defaultModuleNames.js";
-import { assertFunction, assertNumber } from "../typeHelpers.js";
+import { assertBoolean, assertFunction, assertNumber, isBoolean } from "../typeHelpers.js";
 import { numberType } from "../../types/number.js";
 import { optional } from "../../types/null.js";
 import { ExecutableListEntry } from "../../runtime/ast/executableListEntry.js";
@@ -198,6 +198,42 @@ export const listModule = InterpreterModule.create(
                             ]
                         ],
                         returns: "The resulting new list"
+                    }
+                )
+            ),
+            id(listProto).assignField(
+                "some",
+                jsFun(
+                    (args, context) => {
+                        const self = args.getFieldValue(SemanticFieldNames.SELF, context);
+                        const callback = args.getFieldValue(0, context);
+                        assertFunction(callback, "first positional argument of some");
+                        const length = assertNumber(self.getFieldValue(lengthField, context), "length field of a list");
+                        for (let i = 0; i < length; i++) {
+                            const res = callback.invoke(
+                                [
+                                    { value: new ExecutableConstExpression(self.getField(i, context)) },
+                                    { value: num(i) }
+                                ],
+                                context
+                            );
+                            if (isBoolean(res.value) && assertBoolean(res.value)) {
+                                return context.newBoolean(true);
+                            }
+                        }
+                        return context.newBoolean(false);
+                    },
+                    {
+                        docs: "Checks if at least one entry in the list fulfills the predicate.",
+                        params: [
+                            [SemanticFieldNames.SELF, "the list to check", listType()],
+                            [
+                                0,
+                                "the predicate to check, called with the two positional parameters value and index",
+                                functionType
+                            ]
+                        ],
+                        returns: "true if at least one entry fulfills the predicate, false otherwise"
                     }
                 )
             ),

@@ -40,7 +40,7 @@ export abstract class CanvasPointView<T extends SCanvasPoint> implements IView {
      * @param context rendering context
      * @returns the rendered point
      */
-    protected renderPoint(model: Readonly<T>, _context: RenderingContext, position: Point): VNode | undefined {
+    protected renderPoint(model: Readonly<T>, _context: RenderingContext, position: Point): VNode {
         return svg("line", {
             attrs: {
                 transform: `translate(${position.x}, ${position.y})`
