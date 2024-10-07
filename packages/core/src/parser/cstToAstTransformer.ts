@@ -398,7 +398,7 @@ export function generateCstToAstTransfromer(parser: Parser): ICstVisitor<never, 
                 }
             }
             if (ctx.FaultTolerantToken) {
-                return this.generateFieldAccessExpressionForOnlyDot(baseExpression, ctx.FaultTolerantToken);
+                return this.generateFieldAccessExpressionForOnlyDot(baseExpression, ctx.FaultTolerantToken[0]);
             } else {
                 return baseExpression;
             }
