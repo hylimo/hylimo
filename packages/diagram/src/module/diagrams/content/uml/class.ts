@@ -12,7 +12,7 @@ import {
 import { SCOPE } from "../../../base/dslModule.js";
 
 /**
- * Module providing the class element
+ * Module providing the UML class model element
  */
 export const classModule = InterpreterModule.create(
     "uml/class",

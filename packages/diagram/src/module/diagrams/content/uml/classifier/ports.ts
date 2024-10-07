@@ -58,7 +58,7 @@ export const portsModule = InterpreterModule.create(
                                             ],
                                             [
                                                 1,
-                                                "Optional callback function to define the content of the port",
+                                                "Optional function to define the content of the port",
                                                 optional(functionType)
                                             ],
                                             [

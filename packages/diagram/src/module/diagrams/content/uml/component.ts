@@ -58,7 +58,7 @@ export const componentModule = InterpreterModule.create(
                     docs: "Creates a component.",
                     params: [
                         [0, "the name of the component", stringType],
-                        [1, "the callback function for the component", optional(functionType)],
+                        [1, "the function defining the component content", optional(functionType)],
                         ["keywords", "the keywords of the component", optional(listType(stringType))],
                         ["abstract", "whether the component is abstract", optional(booleanType)]
                     ],

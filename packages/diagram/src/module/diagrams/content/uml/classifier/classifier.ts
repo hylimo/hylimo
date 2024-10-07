@@ -2,7 +2,7 @@ import { fun, id, InterpreterModule, parse } from "@hylimo/core";
 import { SCOPE } from "../../../../base/dslModule.js";
 
 /**
- * Module poviding a helper function to create a DSL construct used for e.g. classes and components
+ * Module providing a helper function to create a DSL construct used for e.g. classes and components
  */
 export const classifierModule = InterpreterModule.create(
     "uml/classifier/classifier",

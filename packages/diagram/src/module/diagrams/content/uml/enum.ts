@@ -54,7 +54,7 @@ export const enumModule = InterpreterModule.create(
                     docs: "Creates an enum.",
                     params: [
                         [0, "the name of the enum", stringType],
-                        [1, "the callback function for the enum", optional(functionType)],
+                        [1, "the function declaring the enum constants", optional(functionType)],
                         ["keywords", "the keywords of the enum", optional(listType(stringType))],
                         ["abstract", "whether the enum is abstract", optional(booleanType)]
                     ],

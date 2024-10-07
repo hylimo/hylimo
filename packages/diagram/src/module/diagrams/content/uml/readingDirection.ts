@@ -16,7 +16,7 @@ export const readingDirectionModule = InterpreterModule.create(
                     list(span(text = "\\u25c0", class = list("direction-triangle")), span(text = it))
                 `,
                 {
-                    docs: "Can be used to create a label with an arrow pointing to the right. Typically used for labels on associations to indicate the the reading direction from right to left.",
+                    docs: "Can be used to create a label with an arrow pointing to the right. Typically used for labels on associations to indicate that the association should be read from right to left.",
                     params: [[0, "the text of the label", stringType]],
                     returns: "A list of spans, containing the arrow and the text"
                 }

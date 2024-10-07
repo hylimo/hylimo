@@ -59,7 +59,7 @@ export const packageModule = InterpreterModule.create(
                     docs: "Creates a package.",
                     params: [
                         [0, "the name of the package", stringType],
-                        [1, "the callback function for the package", optional(functionType)],
+                        [1, "function that initializes the package content", optional(functionType)],
                         ["keywords", "the keywords of the package", optional(listType(stringType))]
                     ],
                     snippet: `("$1") {\n    $2\n}`,

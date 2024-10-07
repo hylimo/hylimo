@@ -62,7 +62,7 @@ export const entriesModule = InterpreterModule.create(
                     },
                     {
                         docs: `
-                            Function to take a function in which enum literals can be declared declaratively.
+                            Takes a function as parameter that declares enum literals through its expressions.
                             The content of the function is not executed, but analyzed on the AST level.
                             Enum literals can be provided both as identifiers and as strings.
                             Example: \`ENUM_ENTRY\`
