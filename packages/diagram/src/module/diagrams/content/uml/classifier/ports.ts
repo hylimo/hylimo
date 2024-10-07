@@ -63,7 +63,7 @@ export const portsModule = InterpreterModule.create(
                                             ],
                                             [
                                                 "dist",
-                                                "Distance from the outline, needs to be adapted if width of outline is not the default value",
+                                                "Distance from the outline, defaults to half of the default stroke width (width of the outline). Needs to be adapted if the width of outline is not the default value",
                                                 optional(numberType)
                                             ]
                                         ],

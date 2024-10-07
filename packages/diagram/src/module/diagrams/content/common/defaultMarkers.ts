@@ -41,7 +41,7 @@ export const defaultMarkersModule = InterpreterModule.create(
                     cross = {
                         marker(
                             content = path(
-                                path = "M 0 0 L 12 12 M 12 0 L 0 12",
+                                path = "M 0 0 L 1 1 M 1 0 L 0 1",
                                 class = list("cross-marker-path", "marker-path")
                             ),
                             class=list("cross-marker", "marker")

@@ -16,10 +16,11 @@ export const defaultStylesModule = InterpreterModule.create(
                         background = config.backgroundColor
                         strokeWidth = 2
                         subcanvasMargin = 40
+                        fontSize = 16
                     }
                     type("span") {
                         fill = var("primary")
-                        fontSize = 16
+                        fontSize = var("fontSize")
                     }
                     type("canvasConnection") {
                         stroke = var("primary")
