@@ -15,8 +15,7 @@ export const viewportModule = new ContainerModule((bind, unbind, isBound, rebind
 
     // Sprotty has a default behavior for ctrl+shift+f/c that we want to customize
     bind(CenterKeyboardListener).toSelf().inSingletonScope();
-    rebind(TYPES.KeyListener).toService(CenterKeyboardListener);
-    unbind(SprottyCenterKeyboardListener);
+    rebind(SprottyCenterKeyboardListener).toService(CenterKeyboardListener);
 
     // Layout viewport on initial load
     configureActionHandler({ bind, isBound }, SetModelAction.KIND, SetModelActionHandler);
