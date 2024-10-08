@@ -1,3 +1,4 @@
+import dedent from "dedent";
 import { Expression } from "../../ast/expression.js";
 import { Type } from "../../types/base.js";
 import { InterpreterContext } from "../interpreter/interpreterContext.js";
@@ -53,7 +54,7 @@ export abstract class ExecutableAbstractFunctionExpression<
             return context.null;
         }
         const result = context.newObject();
-        result.setLocalField("docs", { value: context.newString(this.documentation.docs) }, context);
+        result.setLocalField("docs", { value: context.newString(dedent(this.documentation.docs)) }, context);
         result.setLocalField("returns", { value: context.newString(this.documentation.returns) }, context);
         if (this.documentation.snippet !== undefined) {
             result.setLocalField("snippet", { value: context.newString(this.documentation.snippet) }, context);
