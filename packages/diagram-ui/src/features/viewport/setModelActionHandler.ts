@@ -9,6 +9,6 @@ import { createFitToScreenAction } from "./fitToScreenAction.js";
 @injectable()
 export class SetModelActionHandler implements IActionHandler {
     handle(_: Action): ICommand | Action | void {
-        return createFitToScreenAction();
+        return createFitToScreenAction(false);
     }
 }
