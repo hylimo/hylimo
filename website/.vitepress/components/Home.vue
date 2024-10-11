@@ -95,7 +95,7 @@ onKeyStroke("E", (event) => {
     }
     event.preventDefault();
     downloadSVG();
-})
+});
 
 function downloadSVG() {
     const svgBlob = new Blob([svgRenderer.render(diagram.value!)], { type: "image/svg+xml;charset=utf-8" });
