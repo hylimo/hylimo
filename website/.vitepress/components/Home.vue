@@ -89,6 +89,14 @@ onKeyStroke("s", (event) => {
     }
 });
 
+onKeyStroke("E", (event) => {
+    if (!(event.ctrlKey || event.metaKey)) {
+        return;
+    }
+    event.preventDefault();
+    downloadSVG();
+})
+
 function downloadSVG() {
     const svgBlob = new Blob([svgRenderer.render(diagram.value!)], { type: "image/svg+xml;charset=utf-8" });
     fileSaver.saveAs(svgBlob, "diagram.svg");
