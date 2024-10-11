@@ -57,7 +57,12 @@ export class AxisAlignedSegmentLayoutEngine extends SegmentLayoutEngine<CanvasAx
                 this.createLineSegment(end.x, end.y, segment.id, 2)
             ];
         } else {
-            const horizontalY = end.y + (end.y - start.y) * segment.pos;
+            let horizontalY: number;
+            if (segment.pos == -1) {
+                horizontalY = start.y;
+            } else {
+                horizontalY = end.y + (end.y - start.y) * segment.pos;
+            }
             return [
                 this.createLineSegment(start.x, horizontalY, segment.id, 0),
                 this.createLineSegment(end.x, horizontalY, segment.id, 1),
