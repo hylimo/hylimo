@@ -3,7 +3,7 @@ import { Point } from "../../common/point.js";
 import { LinePoint } from "../../model/elements/canvas/canvasPoint.js";
 import { ArcSegment } from "../model/arcSegment.js";
 import { BezierSegment } from "../model/bezierSegment.js";
-import { TransformedLine } from "../model/line.js";
+import { Line, TransformedLine } from "../model/line.js";
 import { LineSegment } from "../model/lineSegment.js";
 import { Segment } from "../model/segment.js";
 import { ArcSegmentEngine } from "./arcSegmentEngine.js";
@@ -81,27 +81,58 @@ export class LineEngine {
      * Gets a point on a segment
      *
      * @param position the position of the point on the segment, a number between 0 and 1
-     * @param segment the segment to which position is relative to
+     * @param segment the segment to which position is relative to (if undefined position is relative to the whole line)
      * @param distance the distance to the line at which the point should be located
      * @param transformedLine line with associated transform
      * @returns the point on the line
      */
     getPoint(position: number, segment: number | undefined, distance: number, transformedLine: TransformedLine): Point {
-        const { line, transform } = transformedLine;
+        const { line } = transformedLine;
         if (line.segments.length == 0) {
             return line.start;
         }
         let segmentIndex: number;
         let relativePosition: number;
         if (segment != undefined) {
-            segmentIndex = Math.min(Math.max(Math.round(segment), 0), transformedLine.line.segments.length - 1);
+            segmentIndex = Math.min(Math.max(Math.round(segment), 0), line.segments.length - 1);
             relativePosition = position;
         } else {
             segmentIndex = LinePoint.calcSegmentIndex(position, line.segments.length);
             relativePosition = position * line.segments.length - segmentIndex;
         }
-        const segmentStartPos = segmentIndex == 0 ? line.start : line.segments[segmentIndex - 1].end;
-        const lineSegment = line.segments[segmentIndex];
+        if (!this.doesSegmentExist(line, segmentIndex)) {
+            for (let i = segmentIndex - 1; i >= 0; i--) {
+                if (this.doesSegmentExist(line, i)) {
+                    return this.getPointInternal(1, i, distance, transformedLine);
+                }
+            }
+            for (let i = segmentIndex + 1; i < line.segments.length; i++) {
+                if (this.doesSegmentExist(line, i)) {
+                    return this.getPointInternal(0, i, distance, transformedLine);
+                }
+            }
+        }
+        return this.getPointInternal(relativePosition, segmentIndex, distance, transformedLine);
+    }
+
+    /**
+     * Gets a point on a segment
+     *
+     * @param relativePosition the position of the point on the segment, a number between 0 and 1
+     * @param segment the segment to which position is relative to
+     * @param distance the distance to the line at which the point should be located
+     * @param transformedLine line with associated transform
+     * @returns the point on the line
+     */
+    private getPointInternal(
+        relativePosition: number,
+        segment: number,
+        distance: number,
+        transformedLine: TransformedLine
+    ): Point {
+        const { line, transform } = transformedLine;
+        const segmentStartPos = segment == 0 ? line.start : line.segments[segment - 1].end;
+        const lineSegment = line.segments[segment];
         const engine = this.getEngine(lineSegment);
         const localPoint = engine.getPoint(relativePosition, distance, lineSegment, segmentStartPos);
         return applyToPoint(transform, localPoint);
@@ -120,6 +151,23 @@ export class LineEngine {
         } else {
             throw new Error(`Unknown segment type: ${segment.type}`);
         }
+    }
+
+    /**
+     * Checks if a segment exists
+     *
+     * @param line the line to check
+     * @param segmentIndex the index of the segment to check
+     * @returns true if the segment exists
+     */
+    private doesSegmentExist(line: Line, segmentIndex: number): boolean {
+        if (segmentIndex < 0 || segmentIndex >= line.segments.length) {
+            return false;
+        }
+        const segment = line.segments[segmentIndex];
+        const startPosition = segmentIndex == 0 ? line.start : line.segments[segmentIndex - 1].end;
+        const engine = this.getEngine(segment);
+        return engine.exists(segment, startPosition);
     }
 }
 

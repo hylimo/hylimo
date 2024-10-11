@@ -52,4 +52,8 @@ export class LineSegmentEngine extends SegmentEngine<LineSegment> {
         const delta = Math2D.sub(segment.end, segmentStartPoint);
         return Math2D.normalize({ x: delta.y, y: -delta.x });
     }
+
+    override exists(segment: LineSegment, segmentStartPoint: Point): boolean {
+        return !Point.equals(segmentStartPoint, segment.end);
+    }
 }

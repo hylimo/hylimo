@@ -103,6 +103,10 @@ export class ArcSegmentEngine extends SegmentEngine<ArcSegment> {
         return { x: nx, y: ny };
     }
 
+    override exists(segment: ArcSegment, segmentStartPoint: Point): boolean {
+        return !Point.equals(segmentStartPoint, segment.end);
+    }
+
     /**
      * Generates additional data for an arc
      *

@@ -38,6 +38,15 @@ export abstract class SegmentEngine<T extends Segment> {
      * @returns the normal vector
      */
     abstract getNormalVector(position: number, segment: T, segmentStartPoint: Point): Point;
+
+    /**
+     * Checks if the segment exists, meaning it is a path which does not collapse to a point
+     *
+     * @param segment the segment to check
+     * @param segmentStartPoint the start position of the segment
+     * @returns true if the segment exists
+     */
+    abstract exists(segment: T, segmentStartPoint: Point): boolean;
 }
 
 /**
