@@ -69,6 +69,7 @@ const code = computed({
         }
     }
 });
+const baseName = computed(() => codeWithFileHandle.value?.fileHandle?.name?.match(/^(.*?)(\.hyl)?$/)?.[1] ?? "diagram");
 const diagram = ref<Root>();
 const successMessageTimeout = 1000;
 const copiedSuccess = ref(false);
@@ -91,7 +92,7 @@ onKeyStroke("s", (event) => {
 
 function downloadSVG() {
     const svgBlob = new Blob([svgRenderer.render(diagram.value!)], { type: "image/svg+xml;charset=utf-8" });
-    fileSaver.saveAs(svgBlob, "diagram.svg");
+    fileSaver.saveAs(svgBlob, baseName.value + ".svg");
 }
 
 async function downloadPDF() {
@@ -100,11 +101,11 @@ async function downloadPDF() {
         diagram.value!,
         isDark.value ? config.darkBackgroundColor : config.lightBackgroundColor
     );
-    fileSaver.saveAs(new Blob(pdf, { type: "application/pdf" }), "diagram.pdf");
+    fileSaver.saveAs(new Blob(pdf, { type: "application/pdf" }), baseName.value + ".pdf");
 }
 
 function downloadSource() {
-    fileSaver.saveAs(new Blob([code.value]), "diagram.hyl");
+    fileSaver.saveAs(new Blob([code.value]), baseName.value + ".hyl");
 }
 
 async function saveFile() {
