@@ -29,7 +29,7 @@ export class PDFRenderer {
      * @param margin the margin to apply to the bounding box
      */
     constructor(
-        private readonly fontManager: FontManager = new FontManager(),
+        private readonly fontManager: FontManager | undefined = undefined,
         private readonly margin = 10
     ) {}
 
@@ -44,8 +44,8 @@ export class PDFRenderer {
         return new Promise(async (resolve, reject) => {
             try {
                 const parts: Uint8Array[] = [];
-                const fontFamilies = await Promise.all(root.fonts.map((font) => this.fontManager.getFontFamily(font)));
-                const fontCollection = new FontCollection(fontFamilies.map((family) => family.fontFamily));
+                // const fontFamilies = await Promise.all(root.fonts.map((font) => this.fontManager.getFontFamily(font)));
+                const fontCollection = new FontCollection();
                 const document = new PDFDocument({ autoFirstPage: false });
                 const visitor = new PDFDiagramVisitor(this.margin, background, fontCollection);
                 document.on("data", (data: Uint8Array) => parts.push(data));
@@ -138,24 +138,24 @@ export class PDFDiagramVisitor extends SimplifiedDiagramVisitor<PDFKit.PDFDocume
     }
 
     override visitText(element: Text, context: PDFKit.PDFDocument): void {
-        const font = this.fontCollection.getFont(element.fontFamily, element.fontWeight, element.fontStyle);
-        const scalingFactor = element.fontSize / font.unitsPerEm;
-        const glyphRun = font.layout(element.text);
-        const fillAttributes = extractFillAttributes(element);
-        context.save();
-        context.translate(element.x, element.y);
-        context.scale(scalingFactor, -scalingFactor);
-        for (const glyph of glyphRun.glyphs) {
-            if (!/^\s*$/.test(String.fromCodePoint(...glyph.codePoints)) && element.fill != undefined) {
-                const path = glyph.path.toSVG();
-                context.path(path);
-                context.fillOpacity(fillAttributes["fill-opacity"] ?? 1);
-                context.fillColor(fillAttributes.fill);
-                context.fill();
-            }
-            context.translate(glyph.advanceWidth, 0);
-        }
-        context.restore();
+        // const font = this.fontCollection.getFont(element.fontFamily, element.fontWeight, element.fontStyle);
+        // const scalingFactor = element.fontSize / font.unitsPerEm;
+        // const glyphRun = font.layout(element.text);
+        // const fillAttributes = extractFillAttributes(element);
+        // context.save();
+        // context.translate(element.x, element.y);
+        // context.scale(scalingFactor, -scalingFactor);
+        // for (const glyph of glyphRun.glyphs) {
+        //     if (!/^\s*$/.test(String.fromCodePoint(...glyph.codePoints)) && element.fill != undefined) {
+        //         const path = glyph.path.toSVG();
+        //         context.path(path);
+        //         context.fillOpacity(fillAttributes["fill-opacity"] ?? 1);
+        //         context.fillColor(fillAttributes.fill);
+        //         context.fill();
+        //     }
+        //     context.translate(glyph.advanceWidth, 0);
+        // }
+        // context.restore();
     }
 
     override visitCanvas(element: Canvas, context: PDFKit.PDFDocument): void {

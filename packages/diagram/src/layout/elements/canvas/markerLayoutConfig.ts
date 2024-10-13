@@ -42,16 +42,15 @@ export class MarkerLayoutConfig extends StyledElementLayoutConfig {
         );
     }
 
-    measure(layout: Layout, element: LayoutElement, constraints: SizeConstraints): Size {
+    override measure(layout: Layout, element: LayoutElement, constraints: SizeConstraints): Size {
         // TODO (maybe) better size calculation
-        const content = element.element.getLocalFieldOrUndefined("content")?.value as FullObject;
-        const contentElement = layout.measure(content, element, constraints);
-        element.content = contentElement;
+        const content = element.children[0];
+        const contentElement = layout.measure(content, constraints);
         return contentElement.measuredSize!;
     }
 
-    layout(layout: Layout, element: LayoutElement, _position: Point, size: Size, id: string): Element[] {
-        const content = element.content as LayoutElement;
+    override layout(layout: Layout, element: LayoutElement, _position: Point, size: Size, id: string): Element[] {
+        const content = element.children[0];
         const refX = element.styles.refX ?? 1;
         const refY = element.styles.refY ?? 0.5;
         const result: Marker = {
@@ -66,5 +65,10 @@ export class MarkerLayoutConfig extends StyledElementLayoutConfig {
             edits: element.edits
         };
         return [result];
+    }
+
+    override getChildren(layout: Layout, element: LayoutElement): FullObject[] {
+        const content = element.element.getLocalFieldOrUndefined("content")?.value as FullObject;
+        return [content];
     }
 }

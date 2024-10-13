@@ -1,8 +1,8 @@
 import LineBreaker, { Break } from "linebreak";
-import { LayoutElement } from "../layout/layoutElement.js";
+import { LayoutElement } from "../layoutElement.js";
 import { Text, Size, FontWeight, FontStyle } from "@hylimo/diagram-common";
 import { FontCollection } from "./fontCollection.js";
-import { extractFillStyleAttributes } from "../layout/elements/attributes.js";
+import { extractFillStyleAttributes } from "../elements/attributes.js";
 
 /**
  * Result of a text layout process
@@ -57,7 +57,7 @@ export class TextLayouter {
             currentDescent = 0;
             textOffset = 0;
         };
-        const addTextElement = (text: string, styles: any) => {
+        const addTextElement = (text: string, styles: any, fontFamily: string) => {
             usedMaxWidth = Math.max(usedMaxWidth, offsetX);
             currentAscent = Math.max(currentAscent, fontAscent);
             currentDescent = Math.max(currentDescent, fontDescent);
@@ -65,10 +65,8 @@ export class TextLayouter {
                 type: Text.TYPE,
                 text,
                 ...extractFillStyleAttributes(styles),
-                fontFamily: styles.fontFamily,
+                fontFamily,
                 fontSize: styles.fontSize,
-                fontWeight: styles.fontWeight ?? FontWeight.Normal,
-                fontStyle: styles.fontStyle ?? FontStyle.Normal,
                 id: "",
                 x: textOffset,
                 y: offsetY,
@@ -80,12 +78,12 @@ export class TextLayouter {
             lineEmpty = false;
             textOffset = offsetX;
         };
-        for (const span of text.contents as LayoutElement[]) {
+        for (const span of text.children as LayoutElement[]) {
             const styles = span.styles;
             const textContent = styles.text as string;
             const lineBreaker = new LineBreaker(textContent + " ");
             let lineBreak: Break | null = lineBreaker.nextBreak();
-            const font = fonts.getFont(
+            const { font, id: fontFamily } = fonts.getFont(
                 styles.fontFamily,
                 styles.fontWeight ?? FontWeight.Normal,
                 styles.fontStyle ?? FontStyle.Normal
@@ -113,7 +111,8 @@ export class TextLayouter {
                             offsetX = lastBreakOpportunityOffsetX;
                             addTextElement(
                                 textContent.substring(textContentStart, lastBreakOpportunityTextContentOffset),
-                                styles
+                                styles,
+                                fontFamily
                             );
                             textContentStart = lastBreakOpportunityTextContentOffset;
                         }
@@ -122,7 +121,7 @@ export class TextLayouter {
                         textContentOffset = lastBreakOpportunityTextContentOffset;
                         continue;
                     } else if (i > 0) {
-                        addTextElement(textContent.substring(textContentStart, i), styles);
+                        addTextElement(textContent.substring(textContentStart, i), styles, fontFamily);
                         doBreak();
                         textContentStart = i;
                     }
@@ -135,14 +134,14 @@ export class TextLayouter {
                     lastBreakOpportunityTextContentOffset = textContentOffset;
                     lastBreakOpportunityOffsetX = offsetX;
                     if (lineBreak.required) {
-                        addTextElement(textContent.substring(textContentStart, i + 1), styles);
+                        addTextElement(textContent.substring(textContentStart, i + 1), styles, fontFamily);
                         textContentStart = i + 1;
                         doBreak();
                     }
                     lineBreak = lineBreaker.nextBreak();
                 }
             }
-            addTextElement(textContent.substring(textContentStart, textContent.length), styles);
+            addTextElement(textContent.substring(textContentStart, textContent.length), styles, fontFamily);
             if (lineBreak && lineBreak.required) {
                 doBreak();
             }

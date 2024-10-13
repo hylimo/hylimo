@@ -14,7 +14,7 @@ export class VBoxLayoutConfig extends BoxLayoutConfig {
     }
 
     override measure(layout: Layout, element: LayoutElement, constraints: SizeConstraints): Size {
-        const contents = this.getContents(element);
+        const contents = element.children;
         if (contents.length > 0) {
             let height = 0;
             let width = constraints.min.width;
@@ -31,22 +31,20 @@ export class VBoxLayoutConfig extends BoxLayoutConfig {
                         height: constraints.max.height - height
                     }
                 };
-                const layoutedContent = layout.measure(content, element, contentConstraints);
+                const layoutedContent = layout.measure(content, contentConstraints);
                 contentElements.push(layoutedContent);
                 height += layoutedContent.measuredSize!.height;
                 width = Math.max(width, layoutedContent.measuredSize!.width);
             }
-            element.contents = contentElements;
             return { width, height };
         } else {
-            element.contents = [];
             return constraints.min;
         }
     }
 
     override layout(layout: Layout, element: LayoutElement, position: Point, size: Size): Element[] {
         const elements: Element[] = [];
-        const contents = element.contents as LayoutElement[];
+        const contents = element.children;
         let y = position.y;
         for (let i = 0; i < contents.length; i++) {
             const content = contents[i];
@@ -64,7 +62,7 @@ export class VBoxLayoutConfig extends BoxLayoutConfig {
     }
 
     override outline(layout: Layout, element: LayoutElement, position: Point, size: Size, id: string): Line {
-        const contents = element.contents as LayoutElement[];
+        const contents = element.children;
         if (contents.length < 2) {
             return super.outline(layout, element, position, size, id);
         }
