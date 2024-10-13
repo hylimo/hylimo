@@ -28,7 +28,8 @@ import {
     TYPES,
     decorationModule,
     registerModelElement,
-    undoRedoModule as sprottyUndoRedoModule
+    undoRedoModule as sprottyUndoRedoModule,
+    exportModule
 } from "sprotty";
 import { CommandStack } from "./base/commandStack.js";
 import { moveModule } from "./features/move/di.config.js";
@@ -112,7 +113,14 @@ const diagramModule = new ContainerModule((bind, unbind, isBound, rebind) => {
 export function createContainer(widgetId: string): Container {
     const container = new Container();
     loadDefaultModules(container, {
-        exclude: [sprottyUpdateModule, sprottyMoveModule, sprottyZOrderModule, decorationModule, sprottyUndoRedoModule]
+        exclude: [
+            sprottyUpdateModule,
+            sprottyMoveModule,
+            sprottyZOrderModule,
+            decorationModule,
+            sprottyUndoRedoModule,
+            exportModule
+        ]
     });
     container.load(
         updateModule,
