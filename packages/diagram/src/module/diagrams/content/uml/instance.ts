@@ -12,48 +12,49 @@ import {
 import { SCOPE } from "../../../base/dslModule.js";
 
 /**
- * Module providing the UML class model element
+ * Module providing the UML 'instance' function for object/sequence diagrams
  */
-export const classModule = InterpreterModule.create(
+export const instanceModule = InterpreterModule.create(
     "uml/class",
     [
         "uml/classifier/classifier",
         "uml/classifier/defaultTitle",
         "uml/classifier/sections",
         "uml/classifier/propertiesAndMethods",
-        "uml/classifier/content",
-        "uml/classifier/ports"
+        "uml/classifier/content"
     ],
     [],
     [
         ...parse(
             `
-                _class = scope.internal.createClassifier(
-                    "class",
+                _instance = scope.internal.createClassifier(
+                    "instance",
                     list(
                         scope.internal.defaultTitleContentHandler,
                         scope.internal.sectionsContentHandler,
                         scope.internal.propertiesAndMethodsContentHandler,
-                        scope.internal.contentContentHandler,
-                        scope.internal.portsContentHandler
+                        scope.internal.contentContentHandler
                     )
                 )
             `
         ),
         id(SCOPE).assignField(
-            "class",
+            "instance",
             fun(
                 `
-                    (name, callback) = args
-                    _class(name, callback, title = name, keywords = args.keywords, abstract = args.abstract, args = args)
+                    (name, class, callback) = args
+                    title = name
+                    if(class.proto == "".proto) {
+                        title = name + ":" + class
+                    }
+                    _instance(name, callback, title = title, keywords = args.keywords, args = args)
                 `,
                 {
-                    docs: "Creates a class.",
+                    docs: "Creates a instance.",
                     params: [
-                        [0, "the name of the class", stringType],
-                        [1, "the callback function for the class", optional(functionType)],
-                        ["keywords", "the keywords of the class", optional(listType(stringType))],
-                        ["abstract", "whether the class is abstract", optional(booleanType)]
+                        [0, "the optional name of the instance. If it is missing, it will be treated as the class name", stringType],
+                        [1, "the class name of this instance", optional(stringType)],
+                        ["keywords", "the keywords of the class", optional(listType(stringType))]
                     ],
                     snippet: `("$1") {\n    $2\n}`,
                     returns: "The created class"
