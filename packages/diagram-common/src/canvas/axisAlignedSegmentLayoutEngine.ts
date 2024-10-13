@@ -43,14 +43,26 @@ export class AxisAlignedSegmentLayoutEngine extends SegmentLayoutEngine<CanvasAx
     override generateSegments(segment: CanvasAxisAlignedSegment, layout: SegmentLayoutInformation): Segment[] {
         const { start, end } = layout;
         if (segment.pos >= 0) {
-            const verticalX = start.x + (end.x - start.x) * segment.pos;
+            let verticalX: number;
+            if (segment.pos == 0) {
+                verticalX = start.x;
+            } else if (segment.pos == 1) {
+                verticalX = end.x;
+            } else {
+                verticalX = start.x + (end.x - start.x) * segment.pos;
+            }
             return [
                 this.createLineSegment(verticalX, start.y, segment.id, 0),
                 this.createLineSegment(verticalX, end.y, segment.id, 1),
                 this.createLineSegment(end.x, end.y, segment.id, 2)
             ];
         } else {
-            const horizontalY = end.y + (end.y - start.y) * segment.pos;
+            let horizontalY: number;
+            if (segment.pos == -1) {
+                horizontalY = start.y;
+            } else {
+                horizontalY = end.y + (end.y - start.y) * segment.pos;
+            }
             return [
                 this.createLineSegment(start.x, horizontalY, segment.id, 0),
                 this.createLineSegment(end.x, horizontalY, segment.id, 1),

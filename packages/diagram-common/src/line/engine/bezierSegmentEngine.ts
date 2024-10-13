@@ -33,4 +33,12 @@ export class BezierSegmentEngine extends SegmentEngine<BezierSegment> {
         const curve = new Bezier(segmentStartPoint, segment.startControlPoint, segment.endControlPoint, segment.end);
         return curve.normal(position);
     }
+
+    override exists(segment: BezierSegment, segmentStartPoint: Point): boolean {
+        return !(
+            Point.equals(segmentStartPoint, segment.end) &&
+            Point.equals(segmentStartPoint, segment.startControlPoint) &&
+            Point.equals(segmentStartPoint, segment.endControlPoint)
+        );
+    }
 }
