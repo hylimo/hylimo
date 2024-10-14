@@ -5,6 +5,7 @@ import { elementModule } from "./content/common/element.js";
 import { defaultStylesModule } from "./content/common/defaultStyles.js";
 import { readingDirectionModule } from "./content/uml/readingDirection.js";
 import { associationsModule } from "./content/uml/associations.js";
+import { instanceModule } from "./content/uml/instance.js";
 
 /**
  * Module for UML sequence diagrams.
@@ -16,6 +17,7 @@ export const componentDiagramModule = InterpreterModule.create(
     createDiagramModule("sequenceDiagram", [
         elementModule,
         defaultStylesModule,
+        instanceModule,
         /* actorModule,
         timelineModule,
         lifelineModule,
