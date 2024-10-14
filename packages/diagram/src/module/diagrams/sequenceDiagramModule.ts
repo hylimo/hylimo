@@ -10,7 +10,7 @@ import { instanceModule } from "./content/uml/instance.js";
 /**
  * Module for UML sequence diagrams.
  */
-export const componentDiagramModule = InterpreterModule.create(
+export const sequenceDiagramModule = InterpreterModule.create(
     DiagramModuleNames.SEQUENCE_DIAGRAM,
     [DiagramModuleNames.DIAGRAM, DiagramModuleNames.DSL],
     [],
