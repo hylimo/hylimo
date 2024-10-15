@@ -22,6 +22,8 @@ import { packageModule } from "./uml/package.js";
 import { readingDirectionModule } from "./uml/readingDirection.js";
 import { contentModule } from "./uml/classifier/content.js";
 import { componentTitleModule } from "./uml/classifier/componentTitle.js";
+import { instanceModule } from "./uml/instance.js";
+import { sequenceDiagramInstanceModule } from "./uml/sequenceDiagramInstance.js";
 
 /**
  * All content modules
@@ -47,7 +49,9 @@ export const contents: InterpreterModule[] = [
     enumModule,
     extendsAndImplementsModule,
     interfaceModule,
+    instanceModule,
     nonNavigableAssociationsModule,
     packageModule,
-    readingDirectionModule
+    readingDirectionModule,
+    sequenceDiagramInstanceModule
 ];

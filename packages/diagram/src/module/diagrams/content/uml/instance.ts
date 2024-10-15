@@ -5,7 +5,7 @@ import { SCOPE } from "../../../base/dslModule.js";
  * Module providing the UML 'instance' function for object/sequence diagrams
  */
 export const instanceModule = InterpreterModule.create(
-    "uml/class",
+    "uml/instance",
     [
         "uml/classifier/classifier",
         "uml/classifier/defaultTitle",
@@ -55,15 +55,6 @@ export const instanceModule = InterpreterModule.create(
                     returns: "The created class"
                 }
             )
-        ),
-        ...parse(
-            `
-                scope.styles {
-                    cls("instance-element") {
-                        vAlign = "bottom"
-                    }
-                }
-            `
         )
     ]
 );
