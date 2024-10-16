@@ -12,12 +12,16 @@ import {
     Text
 } from "@hylimo/diagram-common";
 import PDFDocument from "pdfkit/js/pdfkit.standalone.js";
+import {} from "pdfkit/js/data";
+import { create } from "fontkit";
+import { Buffer } from "buffer";
 import {
     ShapeStyleAttributes,
     extractFillAttributes,
     extractOutlinedShapeAttributes,
     extractShapeStyleAttributes
 } from "@hylimo/diagram-render-svg";
+import EmbeddedFont from "./embeddedFont.js";
 
 /**
  * Renderer which renders a diagram to pdf
@@ -44,10 +48,8 @@ export class PDFRenderer {
         return new Promise(async (resolve, reject) => {
             try {
                 const parts: Uint8Array[] = [];
-                // const fontFamilies = await Promise.all(root.fonts.map((font) => this.fontManager.getFontFamily(font)));
-                const fontCollection = new FontCollection();
                 const document = new PDFDocument({ autoFirstPage: false });
-                const visitor = new PDFDiagramVisitor(this.margin, background, fontCollection);
+                const visitor = new PDFDiagramVisitor(this.margin, background);
                 document.on("data", (data: Uint8Array) => parts.push(data));
                 document.on("end", () => resolve(parts));
                 visitor.visit(root, document);
@@ -72,13 +74,18 @@ export class PDFDiagramVisitor extends SimplifiedDiagramVisitor<PDFKit.PDFDocume
      */
     constructor(
         private readonly margin: number,
-        private readonly background: string,
-        private readonly fontCollection: FontCollection
+        private readonly background: string
     ) {
         super();
     }
 
     override visitRoot(element: Root, context: PDFKit.PDFDocument): void {
+        for (const font of element.fonts) {
+            const buffer = Buffer.from(font.data, "base64");
+            const id = `F${++(context as any)._fontCount}`;
+            const embeddedFont = new EmbeddedFont(context, create(buffer), id);
+            (context as any)._fontFamilies[font.fontFamily] = embeddedFont;
+        }
         const [width, height] = [
             element.rootBounds.size.width + 2 * this.margin,
             element.rootBounds.size.height + 2 * this.margin
@@ -138,24 +145,14 @@ export class PDFDiagramVisitor extends SimplifiedDiagramVisitor<PDFKit.PDFDocume
     }
 
     override visitText(element: Text, context: PDFKit.PDFDocument): void {
-        // const font = this.fontCollection.getFont(element.fontFamily, element.fontWeight, element.fontStyle);
-        // const scalingFactor = element.fontSize / font.unitsPerEm;
-        // const glyphRun = font.layout(element.text);
-        // const fillAttributes = extractFillAttributes(element);
-        // context.save();
-        // context.translate(element.x, element.y);
-        // context.scale(scalingFactor, -scalingFactor);
-        // for (const glyph of glyphRun.glyphs) {
-        //     if (!/^\s*$/.test(String.fromCodePoint(...glyph.codePoints)) && element.fill != undefined) {
-        //         const path = glyph.path.toSVG();
-        //         context.path(path);
-        //         context.fillOpacity(fillAttributes["fill-opacity"] ?? 1);
-        //         context.fillColor(fillAttributes.fill);
-        //         context.fill();
-        //     }
-        //     context.translate(glyph.advanceWidth, 0);
-        // }
-        // context.restore();
+        context.fontSize(element.fontSize);
+        context.font(element.fontFamily, element.fontSize);
+        const fillAttributes = extractFillAttributes(element);
+        context.fillColor(fillAttributes.fill);
+        context.text(element.text, element.x, element.y, {
+            lineBreak: false,
+            baseline: "alphabetic"
+        });
     }
 
     override visitCanvas(element: Canvas, context: PDFKit.PDFDocument): void {

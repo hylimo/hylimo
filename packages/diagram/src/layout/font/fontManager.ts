@@ -4,7 +4,7 @@ import { FontFamily, SubsettedFont } from "./fontFamily.js";
 import { Buffer } from "buffer";
 import { SubsetConfig } from "./subsetCollector.js";
 import { LayoutCache } from "../engine/layoutCache.js";
-import { subsetFont } from "./subsetFont.js";
+import { SubsetManager } from "./subsetFont.js";
 
 /**
  * Handles retrieving fonts from an url
@@ -29,6 +29,11 @@ export class FontManager {
      * Cache for font families
      */
     private readonly fontFamilyCache = new Map<string, FontFamily>();
+
+    /**
+     * Handles font subsetting
+     */
+    private readonly subsetManager = new SubsetManager();
 
     /**
      * Creates a new font manager
@@ -58,7 +63,7 @@ export class FontManager {
         let cacheHit = false;
         if (cachedFontFamily != undefined) {
             if (
-                cachedFontFamily.normal?.originalFont === fontFamily.normal?.originalFont &&
+                cachedFontFamily.normal === fontFamily.normal &&
                 cachedFontFamily.italic === fontFamily.italic &&
                 cachedFontFamily.bold === fontFamily.bold &&
                 cachedFontFamily.boldItalic === fontFamily.boldItalic
@@ -91,7 +96,11 @@ export class FontManager {
         return this.subsetFontCache.getOrCompute(
             { variationSettings: config.variationSettings, id: fetchResult.id },
             async () => {
-                const subsettedFont = await subsetFont(fetchResult.font, subset, config.variationSettings);
+                const subsettedFont = await this.subsetManager.subsetFont(
+                    fetchResult.font,
+                    subset,
+                    config.variationSettings
+                );
                 return {
                     id: `custom_${this.fontIdCounter++}`,
                     font: create(subsettedFont) as Font,
