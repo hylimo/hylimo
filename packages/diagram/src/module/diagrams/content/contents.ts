@@ -23,7 +23,7 @@ import { readingDirectionModule } from "./uml/readingDirection.js";
 import { contentModule } from "./uml/classifier/content.js";
 import { componentTitleModule } from "./uml/classifier/componentTitle.js";
 import { instanceModule } from "./uml/instance.js";
-import { sequenceDiagramInstanceModule } from "./uml/sequenceDiagramInstance.js";
+import { sequenceDiagramInstanceModule } from "./uml/sequence/sequenceDiagramInstance.js";
 
 /**
  * All content modules
