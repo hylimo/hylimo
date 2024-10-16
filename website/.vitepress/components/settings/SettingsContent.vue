@@ -1,6 +1,6 @@
 <template>
     <p class="title">Settings</p>
-    <SettingsTabs v-model="tab" :tabs="tabs">
+    <SettingsTabs v-model="tab" :tabs="tabs" class="settings-tabs">
         <div class="content">
             <template v-if="tab == 'graphical-editor'">
                 <div v-for="(name, key) in graphicalEditorNames" :key="key">
@@ -65,8 +65,23 @@ const tab = ref("graphical-editor");
     margin-right: 30px;
 }
 
+.settings-tabs :deep(.tabs) {
+    margin-right: 0;
+    margin-left: 0;
+    border-radius: 8px 8px 0 0;
+    flex-shrink: 0;
+}
+
+.settings-tabs {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+}
+
 .content {
     margin-bottom: 30px;
     margin-top: 25px;
+    overflow-y: auto;
 }
 </style>
