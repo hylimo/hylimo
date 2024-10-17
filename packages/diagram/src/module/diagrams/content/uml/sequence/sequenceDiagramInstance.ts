@@ -1,4 +1,14 @@
-import { fun, functionType, id, InterpreterModule, listType, optional, parse, stringType } from "@hylimo/core";
+import {
+    booleanType,
+    fun,
+    functionType,
+    id,
+    InterpreterModule,
+    listType,
+    optional,
+    parse,
+    stringType
+} from "@hylimo/core";
 import { SCOPE } from "../../../../base/dslModule.js";
 
 /**
@@ -11,6 +21,10 @@ export const sequenceDiagramInstanceModule = InterpreterModule.create(
     ["uml/instance"],
     ["uml/sequence/margin", "uml/associations"],
     [
+        ...parse(`
+          // TODO: Define exactly how the stickman should be rendered - we probably want to render an SVG, selfregister the users name, and put the full title below the SVG, either as an rpos, or inside the SVG itself
+          _stickman = scope.internal
+        `),
         id(SCOPE).assignField(
             "instance",
             fun(
@@ -21,7 +35,11 @@ export const sequenceDiagramInstanceModule = InterpreterModule.create(
                         title = name + ":" + class
                     }
                     
-                    this.instance = _instance(name, callback, title = title, keywords = args.keywords, args = args)
+                    if(args.user) {
+                      this.instance = _stickman(name, title = title, args = args)
+                    } {
+                      this.instance = _instance(name, callback, title = title, keywords = args.keywords, args = args)
+                    }
          //           println(this.instance)
                     this.bottomcenter = scope.lpos(this.instance, 0.25)
        //             println(this.bottomcenter)
@@ -38,6 +56,11 @@ export const sequenceDiagramInstanceModule = InterpreterModule.create(
                         ],
                         [1, "the class name of this instance", optional(stringType)],
                         [2, "the callback function of this instance", optional(functionType)],
+                        [
+                            "user",
+                            "whether this instance is a human. If true, the default appearance is changed from a box to a stickman",
+                            optional(booleanType)
+                        ],
                         ["keywords", "the keywords of the class", optional(listType(stringType))]
                     ],
                     snippet: `("$1") {\n    $2\n}`,

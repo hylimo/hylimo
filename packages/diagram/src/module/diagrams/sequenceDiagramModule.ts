@@ -20,8 +20,8 @@ export const sequenceDiagramModule = InterpreterModule.create(
         defaultStylesModule,
         marginSettingModule,
         sequenceDiagramInstanceModule,
-        /* actorModule,
-        timelineModule,
+        /*
+        eventModule
         lifelineModule,
         frameModule, */
         associationsModule,
