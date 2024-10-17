@@ -1,5 +1,15 @@
 import { BaseObject, FullObject, nativeToList } from "@hylimo/core";
-import { Size, Point, Stroke, Canvas, Bounds, FontFamilyConfig, Element, FontData } from "@hylimo/diagram-common";
+import {
+    Size,
+    Point,
+    Stroke,
+    Canvas,
+    Bounds,
+    FontFamilyConfig,
+    Element,
+    FontData,
+    DiagramConfig
+} from "@hylimo/diagram-common";
 import { FontManager, SubsetFontKey } from "../font/fontManager.js";
 import { TextLayoutResult, TextLayouter } from "../font/textLayouter.js";
 import { generateStyles } from "../../styles.js";
@@ -115,9 +125,10 @@ export class LayoutEngine {
      * Layouts a diagram defined using syncscript
      *
      * @param diagram the diagram to layout
+     * @param config the configuration to use
      * @returns the layouted diagram
      */
-    async layout(diagram: BaseObject): Promise<LayoutedDiagram> {
+    async layout(diagram: BaseObject, config: DiagramConfig): Promise<LayoutedDiagram> {
         this.assertDiagram(diagram);
         const nativeFonts = nativeToList(diagram.getLocalFieldOrUndefined("fonts")?.value?.toNative());
         const layout = new Layout(
@@ -130,7 +141,7 @@ export class LayoutEngine {
             diagram.getLocalFieldOrUndefined("element")?.value as FullObject,
             undefined
         );
-        await this.initFonts(layoutElement, nativeFonts, layout);
+        await this.initFonts(layoutElement, nativeFonts, layout, config);
         this.pathCache.nextIteration();
 
         return {
@@ -213,11 +224,13 @@ export class LayoutEngine {
      * @param layoutElement the root layout element
      * @param fontFamilies the font families to initialize
      * @param layout the layout to use
+     * @param diagramConfig the diagram config
      */
     private async initFonts(
         layoutElement: LayoutElement,
         fontFamilies: FontFamilyConfig[],
-        layout: Layout
+        layout: Layout,
+        diagramConfig: DiagramConfig
     ): Promise<void> {
         const subsetCollector = new SubsetCollector(layoutElement, fontFamilies[0].fontFamily);
         let cacheMiss = false;
@@ -225,7 +238,8 @@ export class LayoutEngine {
             fontFamilies.map(async (config) => {
                 const { fontFamily, cacheHit } = await this.fontManager.getFontFamily(
                     config,
-                    subsetCollector.subsets.get(config.fontFamily) ?? {}
+                    subsetCollector.subsets.get(config.fontFamily) ?? {},
+                    diagramConfig
                 );
                 cacheMiss = cacheMiss || !cacheHit;
                 layout.fonts.registerFont(fontFamily);

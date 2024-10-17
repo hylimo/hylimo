@@ -27,6 +27,8 @@ program
         "Background color for the diagram (defaults to #ffffff for light mode and #000000 for dark mode)"
     )
     .option("--max-execution-steps", "Maximum number of execution steps", parseInt, 1000000)
+    .option("--disable-font-subsetting", "Disable font subsetting", false)
+    .option("--enable-external-fonts", "Enable external fonts", false)
     .parse(process.argv);
 
 const options = program.opts();
@@ -64,7 +66,9 @@ const diagramEngine = new DiagramEngine(
 const config: DiagramConfig = {
     theme: darkMode ? "dark" : "light",
     primaryColor: primary,
-    backgroundColor: background
+    backgroundColor: background,
+    enableFontSubsetting: !options.disableFontSubsetting,
+    enableExternalFonts: options.enableExternalFonts
 };
 
 (async () => {
@@ -78,7 +82,7 @@ const config: DiagramConfig = {
 
     if (outputExtension === ".pdf") {
         const renderer = new PDFRenderer();
-        const renderedPdf = await renderer.render(rootElement, darkMode ? "black" : "white");
+        const renderedPdf = await renderer.render(rootElement, background);
         fs.writeFileSync(outputFile, Buffer.from(renderedPdf.flatMap((part) => [...part])));
     } else if (outputExtension === ".svg") {
         const renderer = new SVGRenderer();

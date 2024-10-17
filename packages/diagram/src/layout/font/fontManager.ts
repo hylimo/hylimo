@@ -1,4 +1,4 @@
-import { FontFamilyConfig, FontConfig } from "@hylimo/diagram-common";
+import { FontFamilyConfig, FontConfig, DiagramConfig } from "@hylimo/diagram-common";
 import { Font, create } from "fontkit";
 import { FontFamily, SubsettedFont } from "./fontFamily.js";
 import { Buffer } from "buffer";
@@ -46,18 +46,21 @@ export class FontManager {
      * Gets a font family, caches results if possible
      *
      * @param config the config of the font family
+     * @param subsetConfig defines which subset to use
+     * @param fontLoadingConfig the font config, used to determine if font subsetting is enabled and if external fonts are enabled
      * @returns the created font family, and a boolean indicating if the font family was cached
      */
     async getFontFamily(
         config: FontFamilyConfig,
-        subsetConfig: SubsetConfig
+        subsetConfig: SubsetConfig,
+        fontLoadingConfig: FontLoadingConfig
     ): Promise<{ fontFamily: FontFamily; cacheHit: boolean }> {
         const fontFamily = {
             config,
-            normal: await this.getFont(config.normal, subsetConfig.normal),
-            italic: await this.getFont(config.italic, subsetConfig.italic),
-            bold: await this.getFont(config.bold, subsetConfig.bold),
-            boldItalic: await this.getFont(config.boldItalic, subsetConfig.boldItalic)
+            normal: await this.getFont(config.normal, subsetConfig.normal, fontLoadingConfig),
+            italic: await this.getFont(config.italic, subsetConfig.italic, fontLoadingConfig),
+            bold: await this.getFont(config.bold, subsetConfig.bold, fontLoadingConfig),
+            boldItalic: await this.getFont(config.boldItalic, subsetConfig.boldItalic, fontLoadingConfig)
         };
         const cachedFontFamily = this.fontFamilyCache.get(config.fontFamily);
         let cacheHit = false;
@@ -80,25 +83,25 @@ export class FontManager {
      *
      * @param config config necessary for collection font types and variation font types
      * @param subset the subset to use
+     * @param fontLoadingConfig the font config, used to determine if font subsetting is enabled and if external fonts are enabled
      * @returns the font
      */
-    private async getFont(config: FontConfig, subset: Set<string> | undefined): Promise<SubsettedFont | undefined> {
+    private async getFont(
+        config: FontConfig,
+        subset: Set<string> | undefined,
+        fontLoadingConfig: FontLoadingConfig
+    ): Promise<SubsettedFont | undefined> {
         if (subset == undefined) {
             return undefined;
         }
-        let fetchResult = this.fetchCache.get(config.url);
-        if (!fetchResult) {
-            const buffer = Buffer.from(await (await fetch(config.url)).arrayBuffer());
-            fetchResult = { font: buffer, id: this.fetchIdCounter++ };
-            this.fetchCache.set(config.url, fetchResult);
-        }
+        const fetchResult = await this.fetchFont(config, fontLoadingConfig);
 
         return this.subsetFontCache.getOrCompute(
             { variationSettings: config.variationSettings, id: fetchResult.id },
             async () => {
                 const subsettedFont = await this.subsetManager.subsetFont(
                     fetchResult.font,
-                    subset,
+                    fontLoadingConfig.enableFontSubsetting ? subset : undefined,
                     config.variationSettings
                 );
                 return {
@@ -110,7 +113,33 @@ export class FontManager {
             }
         );
     }
+
+    /**
+     * Fetches a font from the cache or the url
+     *
+     * @param fontLoadingConfig the font config, used to determine if font subsetting is enabled and if external fonts are enabled
+     * @param config the config of the font
+     * @returns the fetched
+     */
+    private async fetchFont(config: FontConfig, fontLoadingConfig: FontLoadingConfig) {
+        if (!fontLoadingConfig.enableExternalFonts && !config.url.startsWith("data:")) {
+            throw new Error(`External fonts are disabled, but the font url is not a data url: ${config.url}`);
+        }
+        let fetchResult = this.fetchCache.get(config.url);
+        if (!fetchResult) {
+            const buffer = Buffer.from(await (await fetch(config.url)).arrayBuffer());
+            fetchResult = { font: buffer, id: this.fetchIdCounter++ };
+            this.fetchCache.set(config.url, fetchResult);
+        }
+        return fetchResult;
+    }
 }
+
+/**
+ * Configuration for font loading
+ * Defines if font subsetting is enabled and if external fonts are enabled
+ */
+type FontLoadingConfig = Pick<DiagramConfig, "enableFontSubsetting" | "enableExternalFonts">;
 
 /**
  * Key used to store subsetted fonts in the cache

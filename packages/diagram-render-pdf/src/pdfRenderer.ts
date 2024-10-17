@@ -1,4 +1,3 @@
-import { FontManager } from "@hylimo/diagram";
 import {
     Canvas,
     Element,
@@ -32,10 +31,7 @@ export class PDFRenderer {
      *
      * @param margin the margin to apply to the bounding box
      */
-    constructor(
-        private readonly fontManager: FontManager | undefined = undefined,
-        private readonly margin = 10
-    ) {}
+    constructor(private readonly margin = 10) {}
 
     /**
      * Renders the provided root to an svg string
