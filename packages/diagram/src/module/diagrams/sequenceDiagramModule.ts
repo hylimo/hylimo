@@ -6,7 +6,7 @@ import { defaultStylesModule } from "./content/common/defaultStyles.js";
 import { readingDirectionModule } from "./content/uml/readingDirection.js";
 import { associationsModule } from "./content/uml/associations.js";
 import { sequenceDiagramInstanceModule } from "./content/uml/sequence/sequenceDiagramInstance.js";
-import { marginSettingModule } from "./content/uml/sequence/marginSettingModule.js";
+import { marginSetting } from "./content/uml/sequence/marginSetting.js";
 
 /**
  * Module for UML sequence diagrams.
@@ -18,7 +18,7 @@ export const sequenceDiagramModule = InterpreterModule.create(
     createDiagramModule("sequenceDiagram", [
         elementModule,
         defaultStylesModule,
-        marginSettingModule,
+        marginSetting,
         sequenceDiagramInstanceModule,
         /*
         eventModule

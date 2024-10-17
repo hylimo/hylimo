@@ -47,7 +47,7 @@ export const sequenceDiagramInstanceModule = InterpreterModule.create(
          //           println(this.instance.line)
                 `,
                 {
-                    docs: "Creates an instance.",
+                    docs: "Creates an instance. An instance is like a class, except it can optionally have an instance name",
                     params: [
                         [
                             0,
@@ -63,8 +63,8 @@ export const sequenceDiagramInstanceModule = InterpreterModule.create(
                         ],
                         ["keywords", "the keywords of the class", optional(listType(stringType))]
                     ],
-                    snippet: `("$1") {\n    $2\n}`,
-                    returns: "The created class"
+                    snippet: `("$1")`,
+                    returns: "The created instance"
                 }
             )
         ),
