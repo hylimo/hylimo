@@ -5,7 +5,7 @@
         "website"
     ],
     "scripts": {
-        "build": "npm run build -w packages",
+        "build": "npm run build -w packages/wasm-libs -w packages",
         "watch": "tsc -b tsconfig.build.json --watch",
         "format": "prettier --write .",
         "format:check": "prettier --check .",
