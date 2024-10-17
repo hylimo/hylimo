@@ -9,19 +9,19 @@ export interface SubsetConfig {
     /**
      * The normal font subset
      */
-    normal?: string;
+    normal?: Set<string>;
     /**
      * The italic font subset
      */
-    italic?: string;
+    italic?: Set<string>;
     /**
      * The bold font subset
      */
-    bold?: string;
+    bold?: Set<string>;
     /**
      * The bold italic font subset
      */
-    boldItalic?: string;
+    boldItalic?: Set<string>;
 }
 
 /**
@@ -75,10 +75,10 @@ export class SubsetCollector {
         this.collect(element);
         for (const [fontFamily, subsetConfig] of this.temporarySubsets) {
             const subset: SubsetConfig = {
-                normal: this.convertToSubset(subsetConfig.normal),
-                italic: this.convertToSubset(subsetConfig.italic),
-                bold: this.convertToSubset(subsetConfig.bold),
-                boldItalic: this.convertToSubset(subsetConfig.boldItalic)
+                normal: this.addDefaultChars(subsetConfig.normal),
+                italic: this.addDefaultChars(subsetConfig.italic),
+                bold: this.addDefaultChars(subsetConfig.bold),
+                boldItalic: this.addDefaultChars(subsetConfig.boldItalic)
             };
             this.subsets.set(fontFamily, subset);
         }
@@ -133,20 +133,19 @@ export class SubsetCollector {
     }
 
     /**
-     * Converts a temporary subset to a subset config
      * If the temporary subset is empty, undefined is returned
      * Adds all printable ASCII characters to the subset
      *
-     * @param temporary the temporary subset
+     * @param subset the temporary subset
      * @returns the subset config
      */
-    private convertToSubset(temporary: Set<string>): string | undefined {
-        if (temporary.size == 0) {
+    private addDefaultChars(subset: Set<string>): Set<string> | undefined {
+        if (subset.size == 0) {
             return undefined;
         }
         for (let i = 32; i <= 126; i++) {
-            temporary.add(String.fromCharCode(i));
+            subset.add(String.fromCharCode(i));
         }
-        return Array.from(temporary).sort().join("");
+        return subset;
     }
 }

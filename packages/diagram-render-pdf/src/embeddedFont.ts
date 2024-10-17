@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-nocheck
 // fork from foliojs/pdfkit until they update fontkit to 2.0.x
 // only changes the encode method used during subsetting
@@ -74,7 +75,7 @@ export class EmbeddedFont extends PDFFont {
         // Normalize position values
         for (let i = 0; i < run.positions.length; i++) {
             const position = run.positions[i];
-            for (let key in position) {
+            for (const key in position) {
                 position[key] *= this.scale;
             }
 
@@ -113,7 +114,7 @@ export class EmbeddedFont extends PDFFont {
         let last = 0;
         let index = 0;
         while (index <= text.length) {
-            var needle;
+            let needle;
             if (
                 (index === text.length && last < index) ||
                 ((needle = text.charAt(index)), [" ", "\t"].includes(needle))
@@ -263,7 +264,7 @@ export class EmbeddedFont extends PDFFont {
         const cmap = this.document.ref();
 
         const entries = [];
-        for (let codePoints of this.unicode) {
+        for (const codePoints of this.unicode) {
             const encoded = [];
 
             // encode codePoints to utf16

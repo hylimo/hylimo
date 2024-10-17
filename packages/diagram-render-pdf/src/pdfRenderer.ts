@@ -1,4 +1,4 @@
-import { FontCollection, FontManager } from "@hylimo/diagram";
+import { FontManager } from "@hylimo/diagram";
 import {
     Canvas,
     Element,

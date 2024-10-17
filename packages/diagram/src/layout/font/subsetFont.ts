@@ -3,7 +3,51 @@ import { convert } from "fontverter";
 import { Buffer } from "buffer";
 import pLimit from "p-limit";
 
+/**
+ * The pointer type
+ */
+type Pointer = number;
+
+/**
+ * Helper to create subsets of fonts
+ * Large parts of this are a modified version of papandreou/subset-font
+ */
 export class SubsetManager {
+    /**
+     * Harfbuzz subset sets name id
+     */
+    private static readonly HB_SUBSET_SETS_NAME_ID = 4;
+
+    /**
+     * Harfbuzz subset sets layout feature tag
+     */
+    private static readonly HB_SUBSET_SETS_LAYOUT_FEATURE_TAG = 6;
+
+    /**
+     * Harfbuzz writable memory mode
+     */
+    private static readonly HB_MEMORY_MODE_WRITABLE = 2;
+
+    /**
+     * OpenType name table ID for the COPYRIGHT notice.
+     */
+    private static readonly NAME_ID_COPYRIGHT = 0;
+
+    /**
+     * OpenType name table ID for the TRADEMARK notice.
+     */
+    private static readonly NAME_ID_TRADEMARK = 7;
+
+    /**
+     * OpenType name table ID for the LICENSE notice.
+     */
+    private static readonly NAME_ID_LICENSE = 13;
+
+    /**
+     * OpenType name table ID for the LICENSE URL.
+     */
+    private static readonly NAME_ID_LICENSE_URL = 14;
+
     /**
      * The cached harfbuzzjs instance
      */
@@ -23,16 +67,16 @@ export class SubsetManager {
      * Always includes the following name table entries: COPYRIGHT, TRADEMARK, LICENSE, LICENSE_URL
      *
      * @param originalFont the original font to subset
-     * @param text text including all characters that should be included in the subset
+     * @param characters text including all characters that should be included in the subset, all characters are included if undefined
      * @param variationAxes optional object with variation axes to pin to specific values
      * @returns the subset font
      */
     async subsetFont(
         originalFont: Buffer,
-        text: string,
+        characters: Set<string> | undefined,
         variationAxes: Record<string, number> | undefined
     ): Promise<Buffer> {
-        return this.limiter(() => this.subsetFontInternal(originalFont, text, variationAxes));
+        return this.limiter(() => this.subsetFontInternal(originalFont, characters, variationAxes));
     }
 
     /**
@@ -69,91 +113,52 @@ export class SubsetManager {
 
     /**
      * Subsets a font
-     * Modified version of papandreou/subset-font
      * Always includes the following name table entries: COPYRIGHT, TRADEMARK, LICENSE, LICENSE_URL
      * Must NOT be called concurrently / interleaved
      *
      * @param originalFont the original font to subset
-     * @param text text including all characters that should be included in the subset
+     * @param characters text including all characters that should be included in the subset, all characters are included if undefined
      * @param variationAxes optional object with variation axes to pin to specific values
      * @returns the subset font
      */
     private async subsetFontInternal(
         originalFont: Buffer,
-        text: string,
+        characters: Set<string> | undefined,
         variationAxes: Record<string, number> | undefined
     ): Promise<Buffer> {
-        if (typeof text !== "string") {
-            throw new Error("The subset text must be given as a string");
-        }
         const { harfbuzzJsWasm, heapu8 } = await this.getHarfbuzzJs();
+        const convertedFont = await convert(originalFont, "truetype");
+        const { input, face, fontBuffer } = this.importFontIntoHarfbuzz(harfbuzzJsWasm, convertedFont, heapu8);
 
-        originalFont = await convert(originalFont, "truetype");
-
-        const input = harfbuzzJsWasm.hb_subset_input_create_or_fail();
-        if (input === 0) {
-            throw new Error("hb_subset_input_create_or_fail (harfbuzz) returned zero, indicating failure");
+        this.setLayoutFeaturesForSubset(harfbuzzJsWasm, input);
+        this.setNameTableForSubset(harfbuzzJsWasm, input);
+        this.setInputUnicodesForSubset(harfbuzzJsWasm, input, characters);
+        try {
+            this.setVariationAxesForSubset(harfbuzzJsWasm, variationAxes, input, face);
+        } catch (e) {
+            this.cleanupResources(harfbuzzJsWasm, face, fontBuffer);
+            throw e;
         }
 
-        const fontBuffer = harfbuzzJsWasm.malloc(originalFont.byteLength);
-        heapu8.set(new Uint8Array(originalFont), fontBuffer);
+        return this.computeSubset(harfbuzzJsWasm, heapu8, face, input, fontBuffer);
+    }
 
-        const blob = harfbuzzJsWasm.hb_blob_create(
-            fontBuffer,
-            originalFont.byteLength,
-            2, // HB_MEMORY_MODE_WRITABLE
-            0,
-            0
-        );
-        const face = harfbuzzJsWasm.hb_face_create(blob, 0);
-        harfbuzzJsWasm.hb_blob_destroy(blob);
-
-        const layoutFeatures = harfbuzzJsWasm.hb_subset_input_set(
-            input,
-            6 // HB_SUBSET_SETS_LAYOUT_FEATURE_TAG
-        );
-        harfbuzzJsWasm.hb_set_clear(layoutFeatures);
-        harfbuzzJsWasm.hb_set_invert(layoutFeatures);
-
-        const inputNameIds = harfbuzzJsWasm.hb_subset_input_set(
-            input,
-            4 // HB_SUBSET_SETS_NAME_ID
-        );
-        const preserveNameIds = [
-            0, // COPYRIGHT
-            7, // TRADEMARK
-            13, // LICENSE
-            14 // LICENSE_URL
-        ];
-        for (const nameId of preserveNameIds) {
-            harfbuzzJsWasm.hb_set_add(inputNameIds, nameId);
-        }
-
-        // Add unicodes indices
-        const inputUnicodes = harfbuzzJsWasm.hb_subset_input_unicode_set(input);
-        for (const c of text) {
-            harfbuzzJsWasm.hb_set_add(inputUnicodes, c.codePointAt(0));
-        }
-
-        harfbuzzJsWasm.hb_subset_input_pin_all_axes_to_default();
-        if (variationAxes) {
-            for (const [axisName, value] of Object.entries(variationAxes)) {
-                if (!harfbuzzJsWasm.hb_subset_input_pin_axis_location(input, face, this.HB_TAG(axisName), value)) {
-                    harfbuzzJsWasm.hb_face_destroy(face);
-                    harfbuzzJsWasm.free(fontBuffer);
-                    throw new Error(
-                        `hb_subset_input_pin_axis_location (harfbuzz) returned zero when pinning ${axisName} to ${value}, indicating failure. Maybe the axis does not exist in the font?`
-                    );
-                }
-            }
-        }
-
-        let subset;
+    /**
+     * Computes the subset
+     *
+     * @param harfbuzzJsWasm the harfbuzzjs instance
+     * @param heapu8 the harfbuzz instance heap to use
+     * @param face the harfbuzz face pointer
+     * @param input the harfbuzz input pointer
+     * @param fontBuffer the font buffer
+     * @returns the subset font
+     */
+    private computeSubset(harfbuzzJsWasm: any, heapu8: Uint8Array, face: Pointer, input: Pointer, fontBuffer: Pointer) {
+        let subset: Pointer;
         try {
             subset = harfbuzzJsWasm.hb_subset_or_fail(face, input);
             if (subset === 0) {
-                harfbuzzJsWasm.hb_face_destroy(face);
-                harfbuzzJsWasm.free(fontBuffer);
+                this.cleanupResources(harfbuzzJsWasm, face, fontBuffer);
                 throw new Error(
                     "hb_subset_or_fail (harfbuzz) returned zero, indicating failure. Maybe the input file is corrupted?"
                 );
@@ -163,24 +168,160 @@ export class SubsetManager {
         }
 
         const result = harfbuzzJsWasm.hb_face_reference_blob(subset);
-
         const offset = harfbuzzJsWasm.hb_blob_get_data(result, 0);
         const subsetByteLength = harfbuzzJsWasm.hb_blob_get_length(result);
         if (subsetByteLength === 0) {
-            harfbuzzJsWasm.hb_blob_destroy(result);
-            harfbuzzJsWasm.hb_face_destroy(subset);
-            harfbuzzJsWasm.hb_face_destroy(face);
-            harfbuzzJsWasm.free(fontBuffer);
+            this.cleanupResources(harfbuzzJsWasm, face, fontBuffer, result, subset);
             throw new Error("Failed to create subset font, maybe the input file is corrupted?");
         }
 
         const subsetFont = Buffer.from(heapu8.subarray(offset, offset + subsetByteLength));
-
-        harfbuzzJsWasm.hb_blob_destroy(result);
-        harfbuzzJsWasm.hb_face_destroy(subset);
-        harfbuzzJsWasm.hb_face_destroy(face);
-        harfbuzzJsWasm.free(fontBuffer);
-
+        this.cleanupResources(harfbuzzJsWasm, face, fontBuffer, result, subset);
         return subsetFont;
+    }
+
+    /**
+     * Imports a font into harfbuzz
+     *
+     * @param harfbuzzJsWasm the harfbuzzjs instance
+     * @param convertedFont the converted font
+     * @param heapu8 the harfbuzz instance heap to use
+     * @returns the input, face and font buffer
+     */
+    private importFontIntoHarfbuzz(
+        harfbuzzJsWasm: any,
+        convertedFont: Buffer,
+        heapu8: Uint8Array
+    ): { input: Pointer; face: Pointer; fontBuffer: Pointer } {
+        const input: Pointer = harfbuzzJsWasm.hb_subset_input_create_or_fail();
+        if (input === 0) {
+            throw new Error("hb_subset_input_create_or_fail (harfbuzz) returned zero, indicating failure");
+        }
+
+        const fontBuffer: Pointer = harfbuzzJsWasm.malloc(convertedFont.byteLength);
+        heapu8.set(new Uint8Array(convertedFont), fontBuffer);
+
+        const blob: Pointer = harfbuzzJsWasm.hb_blob_create(
+            fontBuffer,
+            convertedFont.byteLength,
+            SubsetManager.HB_MEMORY_MODE_WRITABLE,
+            0,
+            0
+        );
+        const face: Pointer = harfbuzzJsWasm.hb_face_create(blob, 0);
+        harfbuzzJsWasm.hb_blob_destroy(blob);
+        return { input, face, fontBuffer };
+    }
+
+    /**
+     * Sets the input unicodes for the subset
+     *
+     * @param harfbuzzJsWasm the harfbuzzjs instance
+     * @param input the harfbuzz input pointer
+     * @param characters the characters to include in the subset, all characters are included if undefined
+     */
+    private setInputUnicodesForSubset(harfbuzzJsWasm: any, input: Pointer, characters: Set<string> | undefined) {
+        const inputUnicodes = harfbuzzJsWasm.hb_subset_input_unicode_set(input);
+        if (characters != undefined) {
+            for (const c of characters) {
+                harfbuzzJsWasm.hb_set_add(inputUnicodes, c.codePointAt(0));
+            }
+        } else {
+            harfbuzzJsWasm.hb_set_clear(inputUnicodes);
+            harfbuzzJsWasm.hb_set_invert(inputUnicodes);
+        }
+    }
+
+    /**
+     * Sets the layout features for the subset
+     * Removes all layout features
+     *
+     * @param harfbuzzJsWasm the harfbuzzjs instance
+     * @param input the harfbuzz input pointer
+     */
+    private setLayoutFeaturesForSubset(harfbuzzJsWasm: any, input: Pointer) {
+        const layoutFeatures: Pointer = harfbuzzJsWasm.hb_subset_input_set(
+            input,
+            SubsetManager.HB_SUBSET_SETS_LAYOUT_FEATURE_TAG
+        );
+        harfbuzzJsWasm.hb_set_clear(layoutFeatures);
+        harfbuzzJsWasm.hb_set_invert(layoutFeatures);
+    }
+
+    /**
+     * Sets the variation axes for the subset
+     * Removes all variation axes, uses the default value for non-provided axes
+     *
+     * @param harfbuzzJsWasm the harfbuzzjs instance
+     * @param variationAxes the variation axes
+     * @param input the harfbuzz input pointer
+     * @param face the harfbuzz face pointer
+     */
+    private setVariationAxesForSubset(
+        harfbuzzJsWasm: any,
+        variationAxes: Record<string, number> | undefined,
+        input: Pointer,
+        face: Pointer
+    ) {
+        harfbuzzJsWasm.hb_subset_input_pin_all_axes_to_default();
+        if (variationAxes) {
+            for (const [axisName, value] of Object.entries(variationAxes)) {
+                if (!harfbuzzJsWasm.hb_subset_input_pin_axis_location(input, face, this.HB_TAG(axisName), value)) {
+                    throw new Error(
+                        `hb_subset_input_pin_axis_location (harfbuzz) returned zero when pinning ${axisName} to ${value}, indicating failure. Maybe the axis does not exist in the font?`
+                    );
+                }
+            }
+        }
+    }
+
+    /**
+     * Sets the name table for the subset
+     * Removes all name table entries except COPYRIGHT, TRADEMARK, LICENSE, LICENSE_URL
+     *
+     * @param harfbuzzJsWasm the harfbuzzjs instance
+     * @param input the harfbuzz input pointer
+     */
+    private setNameTableForSubset(harfbuzzJsWasm: any, input: Pointer) {
+        const inputNameIds = harfbuzzJsWasm.hb_subset_input_set(input, SubsetManager.HB_SUBSET_SETS_NAME_ID);
+        const preserveNameIds = [
+            SubsetManager.NAME_ID_COPYRIGHT,
+            SubsetManager.NAME_ID_TRADEMARK,
+            SubsetManager.NAME_ID_LICENSE,
+            SubsetManager.NAME_ID_LICENSE_URL
+        ];
+        for (const nameId of preserveNameIds) {
+            harfbuzzJsWasm.hb_set_add(inputNameIds, nameId);
+        }
+    }
+
+    /**
+     * Cleans up resources
+     *
+     * @param harfbuzzJsWasm the harfbuzzjs instance
+     * @param result the harfbuzz result pointer
+     * @param subset the harfbuzz subset pointer
+     * @param face the harfbuzz face pointer
+     * @param fontBuffer the font buffer
+     */
+    private cleanupResources(
+        harfbuzzJsWasm: any,
+        face?: Pointer,
+        fontBuffer?: Pointer,
+        result?: Pointer,
+        subset?: Pointer
+    ) {
+        if (result != undefined) {
+            harfbuzzJsWasm.hb_blob_destroy(result);
+        }
+        if (subset != undefined) {
+            harfbuzzJsWasm.hb_face_destroy(subset);
+        }
+        if (face != undefined) {
+            harfbuzzJsWasm.hb_face_destroy(face);
+        }
+        if (fontBuffer != undefined) {
+            harfbuzzJsWasm.free(fontBuffer);
+        }
     }
 }

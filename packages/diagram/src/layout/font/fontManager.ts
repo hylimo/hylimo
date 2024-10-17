@@ -82,7 +82,7 @@ export class FontManager {
      * @param subset the subset to use
      * @returns the font
      */
-    private async getFont(config: FontConfig, subset: string | undefined): Promise<SubsettedFont | undefined> {
+    private async getFont(config: FontConfig, subset: Set<string> | undefined): Promise<SubsettedFont | undefined> {
         if (subset == undefined) {
             return undefined;
         }
