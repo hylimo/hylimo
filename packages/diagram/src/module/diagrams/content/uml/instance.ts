@@ -17,7 +17,7 @@ export const instanceModule = InterpreterModule.create(
     [
         ...parse(
             `
-                _instance = scope.internal.createClassifier(
+                scope.internal.createInstance = scope.internal.createClassifier(
                     "instance",
                     list(
                         scope.internal.defaultTitleContentHandler,
@@ -37,7 +37,7 @@ export const instanceModule = InterpreterModule.create(
                     if(class != null) {
                         title = name + ":" + class
                     }
-                    _instance(name, callback, title = title, keywords = args.keywords, args = args)
+                    scope.internal.createInstance(name, callback, title = title, keywords = args.keywords, args = args)
                 `,
                 {
                     docs: "Creates an instance.",

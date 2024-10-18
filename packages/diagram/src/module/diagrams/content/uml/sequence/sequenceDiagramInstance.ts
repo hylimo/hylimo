@@ -38,7 +38,7 @@ export const sequenceDiagramInstanceModule = InterpreterModule.create(
                     if(args.user != null && x) {
                       this.instance = _stickman(name, title = title, args = args)
                     } {
-                      this.instance = _instance(name, callback, title = title, keywords = args.keywords, args = args)
+                      this.instance = scope.internal.createInstance(name, callback, title = title, keywords = args.keywords, args = args)
                     }
          //           println(this.instance)
                     this.bottomcenter = scope.lpos(this.instance, 0.25)
