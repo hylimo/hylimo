@@ -145,6 +145,7 @@ export class PDFDiagramVisitor extends SimplifiedDiagramVisitor<PDFKit.PDFDocume
         context.font(element.fontFamily, element.fontSize);
         const fillAttributes = extractFillAttributes(element);
         context.fillColor(fillAttributes.fill);
+        context.fillOpacity(fillAttributes["fill-opacity"] ?? 1);
         context.text(element.text, element.x, element.y, {
             lineBreak: false,
             baseline: "alphabetic"
@@ -205,8 +206,7 @@ export class PDFDiagramVisitor extends SimplifiedDiagramVisitor<PDFKit.PDFDocume
         if (fill != undefined && stroke != undefined) {
             context.fillAndStroke(fill, stroke);
         } else if (fill != undefined) {
-            context.fillColor(fill);
-            context.fill();
+            context.fill(fill);
         } else if (stroke != undefined) {
             context.stroke(stroke);
         }
