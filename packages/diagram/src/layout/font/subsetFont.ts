@@ -1,5 +1,4 @@
 import { harfbuzzjsSubset } from "@hylimo/wasm-libs";
-import { convert } from "fontverter";
 import { Buffer } from "buffer";
 import pLimit from "p-limit";
 
@@ -116,19 +115,18 @@ export class SubsetManager {
      * Always includes the following name table entries: COPYRIGHT, TRADEMARK, LICENSE, LICENSE_URL
      * Must NOT be called concurrently / interleaved
      *
-     * @param originalFont the original font to subset
+     * @param font the font to subset
      * @param characters text including all characters that should be included in the subset, all characters are included if undefined
      * @param variationAxes optional object with variation axes to pin to specific values
      * @returns the subset font
      */
     private async subsetFontInternal(
-        originalFont: Buffer,
+        font: Buffer,
         characters: string | undefined,
         variationAxes: Record<string, number> | undefined
     ): Promise<Buffer> {
         const { harfbuzzJsWasm, heapu8 } = await this.getHarfbuzzJs();
-        const convertedFont = await convert(originalFont, "truetype");
-        const { input, face, fontBuffer } = this.importFontIntoHarfbuzz(harfbuzzJsWasm, convertedFont, heapu8);
+        const { input, face, fontBuffer } = this.importFontIntoHarfbuzz(harfbuzzJsWasm, font, heapu8);
 
         this.setLayoutFeaturesForSubset(harfbuzzJsWasm, input);
         this.setNameTableForSubset(harfbuzzJsWasm, input);
