@@ -73,7 +73,7 @@ export class SubsetManager {
      */
     async subsetFont(
         originalFont: Buffer,
-        characters: Set<string> | undefined,
+        characters: string | undefined,
         variationAxes: Record<string, number> | undefined
     ): Promise<Buffer> {
         return this.limiter(() => this.subsetFontInternal(originalFont, characters, variationAxes));
@@ -123,7 +123,7 @@ export class SubsetManager {
      */
     private async subsetFontInternal(
         originalFont: Buffer,
-        characters: Set<string> | undefined,
+        characters: string | undefined,
         variationAxes: Record<string, number> | undefined
     ): Promise<Buffer> {
         const { harfbuzzJsWasm, heapu8 } = await this.getHarfbuzzJs();
@@ -220,7 +220,7 @@ export class SubsetManager {
      * @param input the harfbuzz input pointer
      * @param characters the characters to include in the subset, all characters are included if undefined
      */
-    private setInputUnicodesForSubset(harfbuzzJsWasm: any, input: Pointer, characters: Set<string> | undefined) {
+    private setInputUnicodesForSubset(harfbuzzJsWasm: any, input: Pointer, characters: string | undefined) {
         const inputUnicodes = harfbuzzJsWasm.hb_subset_input_unicode_set(input);
         if (characters != undefined) {
             for (const c of characters) {
@@ -229,6 +229,9 @@ export class SubsetManager {
         } else {
             harfbuzzJsWasm.hb_set_clear(inputUnicodes);
             harfbuzzJsWasm.hb_set_invert(inputUnicodes);
+            const inputGlyphs = harfbuzzJsWasm.hb_subset_input_glyph_set(input);
+            harfbuzzJsWasm.hb_set_clear(inputGlyphs);
+            harfbuzzJsWasm.hb_set_invert(inputGlyphs);
         }
     }
 
@@ -284,6 +287,7 @@ export class SubsetManager {
      */
     private setNameTableForSubset(harfbuzzJsWasm: any, input: Pointer) {
         const inputNameIds = harfbuzzJsWasm.hb_subset_input_set(input, SubsetManager.HB_SUBSET_SETS_NAME_ID);
+        harfbuzzJsWasm.hb_set_clear(inputNameIds);
         const preserveNameIds = [
             SubsetManager.NAME_ID_COPYRIGHT,
             SubsetManager.NAME_ID_TRADEMARK,

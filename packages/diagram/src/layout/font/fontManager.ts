@@ -88,7 +88,7 @@ export class FontManager {
      */
     private async getFont(
         config: FontConfig,
-        subset: Set<string> | undefined,
+        subset: string | undefined,
         fontLoadingConfig: FontLoadingConfig
     ): Promise<SubsettedFont | undefined> {
         if (subset == undefined) {
@@ -96,12 +96,13 @@ export class FontManager {
         }
         const fetchResult = await this.fetchFont(config, fontLoadingConfig);
 
+        const computedSubset = fontLoadingConfig.enableFontSubsetting ? subset : undefined;
         return this.subsetFontCache.getOrCompute(
-            { variationSettings: config.variationSettings, id: fetchResult.id },
+            { variationSettings: config.variationSettings, id: fetchResult.id, subset: computedSubset },
             async () => {
                 const subsettedFont = await this.subsetManager.subsetFont(
                     fetchResult.font,
-                    fontLoadingConfig.enableFontSubsetting ? subset : undefined,
+                    computedSubset,
                     config.variationSettings
                 );
                 return {
@@ -149,4 +150,8 @@ export interface SubsetFontKey extends Omit<FontConfig, "url"> {
      * The id of the fetched buffer
      */
     id: number;
+    /**
+     * The subset to use
+     */
+    subset: string | undefined;
 }

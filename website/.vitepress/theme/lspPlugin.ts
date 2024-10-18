@@ -106,7 +106,7 @@ export const lspPlugin: Plugin = {
                     backgroundColor: isDark.value
                         ? diagramConfig.value.darkBackgroundColor
                         : diagramConfig.value.lightBackgroundColor,
-                    enableFontSubsetting: diagramConfig.value.enableExternalFonts,
+                    enableFontSubsetting: diagramConfig.value.enableFontSubsetting,
                     enableExternalFonts: diagramConfig.value.enableExternalFonts
                 },
                 settings: languageServerSettings.value
