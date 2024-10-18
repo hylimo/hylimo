@@ -12,6 +12,7 @@ export * from "./common/point.js";
 export * from "./common/size.js";
 export * from "./font/convertFontToCssStyle.js";
 export * from "./font/fontConfig.js";
+export * from "./font/fontData.js";
 export * from "./layout/baseLayoutedDiagram.js";
 export * from "./line/engine/arcSegmentEngine.js";
 export * from "./line/engine/bezierSegmentEngine.js";

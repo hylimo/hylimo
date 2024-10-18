@@ -22,13 +22,7 @@ export abstract class PanelLayoutConfig extends StyledElementLayoutConfig {
         super(additionalAttributes, additionalStyleAttributes);
     }
 
-    /**
-     * Gets the contents of a panel
-     *
-     * @param element the element containing the contents
-     * @returns the contents
-     */
-    getContents(element: LayoutElement): FullObject[] {
+    override getChildren(layout: Layout, element: LayoutElement): FullObject[] {
         const contents = element.element.getLocalFieldOrUndefined("contents")?.value as FullObject | undefined;
         if (contents) {
             return objectToList(contents) as FullObject[];
@@ -38,7 +32,7 @@ export abstract class PanelLayoutConfig extends StyledElementLayoutConfig {
     }
 
     override outline(layout: Layout, element: LayoutElement, position: Point, size: Size, id: string): Line {
-        const contents = element.contents as LayoutElement[];
+        const contents = element.children;
         if (contents.length == 1) {
             return layout.outline(contents[0]);
         }

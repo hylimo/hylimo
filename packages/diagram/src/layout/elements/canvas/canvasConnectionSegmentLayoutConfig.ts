@@ -36,6 +36,10 @@ export abstract class CanvasConnectionSegmentLayoutConfig extends ElementLayoutC
         return constraints.min;
     }
 
+    override getChildren(): FullObject[] {
+        return [];
+    }
+
     /**
      * Gets the id of a point registered on the canvas
      *

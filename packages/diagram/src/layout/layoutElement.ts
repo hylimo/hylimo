@@ -116,6 +116,10 @@ export interface LayoutElement {
      */
     parent?: LayoutElement;
     /**
+     * The children of the element
+     */
+    children: LayoutElement[];
+    /**
      * Computed styles
      */
     styles: Record<string, any>;
@@ -221,6 +225,14 @@ export interface LayoutConfig {
      * The cardinality of the contents attribute
      */
     contentCardinality: ContentCardinality;
+    /**
+     * Returns the children of the element
+     *
+     * @param layout performs the layout
+     * @param element the element to get the children of
+     * @returns the children of the element
+     */
+    getChildren(layout: Layout, element: LayoutElement): FullObject[];
     /**
      * Called to determine the size the element requires
      *

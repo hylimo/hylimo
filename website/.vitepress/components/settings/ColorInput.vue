@@ -51,7 +51,8 @@ watch(
 
 .color-input-wrapper {
     display: flex;
-    flex-grow: 1;
+    flex: 1 1 0;
+    min-width: 0;
 }
 
 .color-picker-wrapper {

@@ -2,7 +2,6 @@ import { Size, Point, Element, Ellipse, Math2D, Line, ArcSegment, Segment } from
 import { LayoutElement, SizeConstraints } from "../layoutElement.js";
 import { Layout } from "../engine/layout.js";
 import { ContentShapeLayoutConfig } from "./contentShapeLayoutConfig.js";
-import { FullObject } from "@hylimo/core";
 
 /**
  * Layout config for ellipse
@@ -17,13 +16,12 @@ export class EllipseLayoutConfig extends ContentShapeLayoutConfig {
     override measure(layout: Layout, element: LayoutElement, constraints: SizeConstraints): Size {
         this.normalizeStrokeWidth(element);
         const strokeWidth = element.styles.strokeWidth;
-        const content = element.element.getLocalFieldOrUndefined("content")?.value as FullObject | undefined;
+        const content = element.children[0];
         if (content) {
-            const contentElement = layout.measure(content, element, {
+            const contentElement = layout.measure(content, {
                 min: this.calculateInnerSize(constraints.min, strokeWidth),
                 max: this.calculateInnerSize(constraints.max, strokeWidth)
             });
-            element.content = contentElement;
             return this.calculateOuterSize(contentElement.measuredSize!, strokeWidth);
         } else {
             return constraints.min;
@@ -40,13 +38,14 @@ export class EllipseLayoutConfig extends ContentShapeLayoutConfig {
             children: [],
             edits: element.edits
         };
-        if (element.content) {
+        const content = element.children[0];
+        if (content != undefined) {
             const contentSize = this.calculateInnerSize(size, result.stroke?.width ?? 0);
             const contentPosition = Math2D.add(position, {
                 x: (size.width - contentSize.width) / 2,
                 y: (size.height - contentSize.height) / 2
             });
-            result.children.push(...layout.layout(element.content, contentPosition, contentSize));
+            result.children.push(...layout.layout(content, contentPosition, contentSize));
         }
         return [result];
     }

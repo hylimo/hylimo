@@ -1,5 +1,6 @@
 node_modules/
 **/lib/
+**/.rollup.cache/
 *.tsbuildinfo
 # debug files
 **/test.ts

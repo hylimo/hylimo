@@ -48,14 +48,13 @@ export class CanvasElementLayoutConfig extends EditableCanvasContentLayoutConfig
     }
 
     override measure(layout: Layout, element: LayoutElement, constraints: SizeConstraints): Size {
-        const content = element.element.getLocalFieldOrUndefined("content")?.value as FullObject;
-        const contentElement = layout.measure(content, element, constraints);
-        element.content = contentElement;
+        const content = element.children[0];
+        const contentElement = layout.measure(content, constraints);
         return contentElement.measuredSize!;
     }
 
     override layout(layout: Layout, element: LayoutElement, position: Point, size: Size, id: string): Element[] {
-        const content = element.content as LayoutElement;
+        const content = element.children[0];
         let dx = 0;
         const hAlign = element.styles.hAlign;
         if (hAlign === HorizontalAlignment.RIGHT) {
@@ -84,6 +83,11 @@ export class CanvasElementLayoutConfig extends EditableCanvasContentLayoutConfig
             edits: element.edits
         };
         return [result];
+    }
+
+    override getChildren(layout: Layout, element: LayoutElement): FullObject[] {
+        const content = element.element.getLocalFieldOrUndefined("content")?.value as FullObject;
+        return [content];
     }
 
     /**

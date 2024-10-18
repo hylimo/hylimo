@@ -20,14 +20,6 @@ export interface Text extends LayoutedElement, FilledElement {
      * Text size
      */
     fontSize: number;
-    /**
-     * normal or bold weight
-     */
-    fontWeight: FontWeight;
-    /**
-     * normal or italic style
-     */
-    fontStyle: FontStyle;
 }
 
 /**

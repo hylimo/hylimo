@@ -378,16 +378,15 @@ export const diagramModule = InterpreterModule.create(
             "font",
             fun(
                 `
-                    (url, name, variationSettings) = args
-                    object(url = url, name = name, variationSettings = variationSettings)
+                    (url, variationSettings) = args
+                    object(url = url, variationSettings = variationSettings)
                 `,
                 {
                     docs: "Creates a new font, should be used with fontFamily.",
                     params: [
                         [0, "the url where the font can be found, e.g. a google fonts url", stringType],
-                        [1, "if a collection font file is used, the name of the font to use", optional(stringType)],
                         [
-                            2,
+                            1,
                             "if a variation font file is used, either the name of the named variation or an object with values for variation axes",
                             optional(objectType())
                         ]

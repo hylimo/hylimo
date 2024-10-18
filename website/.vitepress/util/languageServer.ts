@@ -11,7 +11,9 @@ const languageServer = new LanguageServer({
         diagramConfig: {
             theme: "dark",
             primaryColor: "#ffffff",
-            backgroundColor: "#1e1e1e"
+            backgroundColor: "#1e1e1e",
+            enableFontSubsetting: true,
+            enableExternalFonts: false
         },
         settings: {}
     },

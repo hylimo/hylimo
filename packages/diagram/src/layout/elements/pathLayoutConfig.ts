@@ -1,4 +1,4 @@
-import { enumType, stringType } from "@hylimo/core";
+import { enumType, FullObject, stringType } from "@hylimo/core";
 import { Size, Point, Element, Path, Stroke } from "@hylimo/diagram-common";
 import svgPath from "svgpath";
 import { svgPathBbox } from "@hylimo/diagram-common";
@@ -101,6 +101,10 @@ export class PathLayoutConfig extends ShapeLayoutConfig {
             edits: element.edits
         };
         return [result];
+    }
+
+    override getChildren(): FullObject[] {
+        return [];
     }
 
     /**

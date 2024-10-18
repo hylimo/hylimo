@@ -1,7 +1,9 @@
 <template>
-    <p class="subtitle">{{ subtitle }}</p>
-    <div class="wrapper">
-        <slot />
+    <div>
+        <p class="subtitle">{{ subtitle }}</p>
+        <div class="wrapper">
+            <slot />
+        </div>
     </div>
 </template>
 <script setup lang="ts">
@@ -15,7 +17,6 @@ defineProps({
 <style scoped>
 .subtitle {
     font-size: 16px;
-    margin-top: 15px;
     margin-bottom: 8px;
 }
 

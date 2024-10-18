@@ -21,7 +21,8 @@ const model = defineModel({
     border-radius: 6px;
     padding: 0 12px;
     height: 34px;
-    flex-grow: 1;
+    flex: 1 1 0;
+    min-width: 0;
 }
 
 .text-field:hover,

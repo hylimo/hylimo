@@ -1,4 +1,12 @@
-import { ExecutableAbstractFunctionExpression, Type, fun, listType, optional, stringType } from "@hylimo/core";
+import {
+    ExecutableAbstractFunctionExpression,
+    FullObject,
+    Type,
+    fun,
+    listType,
+    optional,
+    stringType
+} from "@hylimo/core";
 import { ArcSegment, Element, Line, LineSegment, Point, Size } from "@hylimo/diagram-common";
 import { LayoutElement, LayoutConfig, SizeConstraints, AttributeConfig, ContentCardinality } from "../layoutElement.js";
 import { Layout } from "../engine/layout.js";
@@ -44,6 +52,15 @@ export abstract class ElementLayoutConfig implements LayoutConfig {
     ) {
         this.attributes.push(...additionalAttributes);
     }
+
+    /**
+     * Returns the children of the element
+     *
+     * @param layout performs the layout
+     * @param element the element to get the children of
+     * @returns the children of the element
+     */
+    abstract getChildren(layout: Layout, element: LayoutElement): FullObject[];
 
     /**
      * Called to determine the size the element requires

@@ -1,7 +1,6 @@
 import { FullObject, assertString, nativeToList, RuntimeError, BaseObject } from "@hylimo/core";
 import { Line, Point, Size } from "@hylimo/diagram-common";
-import { FontCollection } from "../../font/fontCollection.js";
-import { FontFamily } from "../../font/fontFamily.js";
+import { FontCollection } from "../font/fontCollection.js";
 import { StyleList, Selector, SelectorType, Style } from "../../styles.js";
 import {
     LayoutElement,
@@ -53,13 +52,13 @@ export class Layout {
      * @param engine the engine which provides fonts
      * @param styles styles to possibly apply to elements
      * @param fonts fonts to use
-     * @param defaultFont the default font to use
+     * @param defaultFontFamily the default font to use
      */
     constructor(
         readonly engine: LayoutEngine,
         readonly styles: StyleList,
         readonly fonts: FontCollection,
-        readonly defaultFont: FontFamily
+        readonly defaultFontFamily: string
     ) {}
 
     /**
@@ -211,34 +210,43 @@ export class Layout {
         };
     }
 
-    /**
-     * Calls measure on the element and generates a LayoutElement for it.
-     * computes the styles
-     *
-     * @param element the element to measure
-     * @param parent the parent element if existing
-     * @param constraints size constraitns required for measure
-     * @returns the generated LayoutElement
-     */
-    measure(element: FullObject, parent: LayoutElement | undefined, constraints: SizeConstraints): LayoutElement {
+    create(element: FullObject, parent: LayoutElement | undefined): LayoutElement {
         const type = assertString(element.getLocalFieldOrUndefined("type")!.value, "type");
         const cls = nativeToList(element.getLocalFieldOrUndefined("class")?.value?.toNative() ?? {});
         const id = this.generateId(parent);
+        const layoutConfig = this.engine.layoutConfigs.get(type)!;
         const layoutElement: LayoutElement = {
             id,
             element,
             parent,
+            children: [],
             styles: {},
-            layoutConfig: this.engine.layoutConfigs.get(type)!,
+            layoutConfig,
             class: new Set(cls),
             edits: generateEdits(element)
         };
+        layoutElement.children.push(
+            ...layoutConfig.getChildren(this, layoutElement).map((child) => this.create(child, layoutElement))
+        );
         this.elementIdLookup.set(element, id);
         this.layoutElementLookup.set(id, layoutElement);
         this.applyStyles(layoutElement);
-        const styles = layoutElement.styles;
         const layoutInformation = this.computeLayoutInformation(layoutElement.styles);
         layoutElement.layoutInformation = layoutInformation;
+        return layoutElement;
+    }
+
+    /**
+     * Calls measure on the element and generates a LayoutElement for it.
+     * computes the styles
+     *
+     * @param layoutElement the element to measure
+     * @param constraints size constraitns required for measure
+     * @returns the generated LayoutElement
+     */
+    measure(layoutElement: LayoutElement, constraints: SizeConstraints): LayoutElement {
+        const styles = layoutElement.styles;
+        const layoutInformation = layoutElement.layoutInformation!;
         const marginX = layoutInformation.marginLeft + layoutInformation.marginRight;
         const marginY = layoutInformation.marginTop + layoutInformation.marginBottom;
         const computedConstraints = this.computeSizeConstraints(styles, constraints, marginX, marginY);

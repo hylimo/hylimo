@@ -1,5 +1,5 @@
 import { Bounds } from "../../common/bounds.js";
-import { FontFamilyConfig } from "../../font/fontConfig.js";
+import { FontData } from "../../font/fontData.js";
 import { Element } from "./base/element.js";
 
 /**
@@ -17,7 +17,7 @@ export interface Root extends Element {
     /**
      * Defined font families
      */
-    fonts: FontFamilyConfig[];
+    fonts: FontData[];
     /**
      * The bounds of the whole diagram, as defined by hylimo's internal definition, not the definition of any external tool
      */

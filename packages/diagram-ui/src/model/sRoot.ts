@@ -1,4 +1,4 @@
-import { FontFamilyConfig, convertFontsToCssStyle } from "@hylimo/diagram-common";
+import { FontData, convertFontsToCssStyle } from "@hylimo/diagram-common";
 import { ModelIndexImpl, ViewportRootElementImpl } from "sprotty";
 import { SCanvasAxisAlignedSegment } from "./canvas/sCanvasAxisAlignedSegment.js";
 import { SCanvasLayoutEngine } from "./canvas/sCanvasLayoutEngine.js";
@@ -18,7 +18,7 @@ export class SRoot extends ViewportRootElementImpl {
     /**
      * Defined font families
      */
-    fonts!: FontFamilyConfig[];
+    fonts!: FontData[];
 
     /**
      * The bounds of the whole diagram, as defined by hylimo internally, not by sprotty

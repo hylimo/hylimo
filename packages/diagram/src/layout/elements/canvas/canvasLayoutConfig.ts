@@ -48,14 +48,13 @@ export class CanvasLayoutConfig extends StyledElementLayoutConfig {
     }
 
     override measure(layout: Layout, element: LayoutElement): Size {
-        const contents = this.getContents(element);
+        const contents = element.children;
         const layoutedContents = contents.map((content) =>
-            layout.measure(content, element, {
+            layout.measure(content, {
                 min: { width: 0, height: 0 },
                 max: { width: Number.POSITIVE_INFINITY, height: Number.POSITIVE_INFINITY }
             })
         );
-        element.contents = layoutedContents;
 
         const children: Element[] = [];
         const layoutChildren: Element[] = [];
@@ -76,7 +75,7 @@ export class CanvasLayoutConfig extends StyledElementLayoutConfig {
             }
         }
         const bounds = Math2D.mergeBounds(...childBounds);
-        element.children = [...children, ...layoutChildren];
+        element.childElements = [...children, ...layoutChildren];
         element.canvasBounds = bounds;
 
         return bounds.size;
@@ -84,7 +83,7 @@ export class CanvasLayoutConfig extends StyledElementLayoutConfig {
 
     override layout(layout: Layout, element: LayoutElement, position: Point, size: Size, id: string): Element[] {
         const bounds = element.canvasBounds as Bounds;
-        const children = element.children as Element[];
+        const children = element.childElements as Element[];
         const result: Canvas = {
             type: Canvas.TYPE,
             id,
@@ -206,13 +205,7 @@ export class CanvasLayoutConfig extends StyledElementLayoutConfig {
         );
     }
 
-    /**
-     * Gets the contents of a panel
-     *
-     * @param element the element containing the contents
-     * @returns the contents
-     */
-    private getContents(element: LayoutElement): FullObject[] {
+    override getChildren(layout: Layout, element: LayoutElement): FullObject[] {
         const contents = element.element.getLocalFieldOrUndefined("contents")?.value as FullObject | undefined;
         if (contents) {
             return objectToList(contents) as FullObject[];
