@@ -35,7 +35,7 @@ export const sequenceDiagramInstanceModule = InterpreterModule.create(
                         title = name + ":" + class
                     }
                     
-                    if(args.user) {
+                    if(args.user != null && x) {
                       this.instance = _stickman(name, title = title, args = args)
                     } {
                       this.instance = _instance(name, callback, title = title, keywords = args.keywords, args = args)
