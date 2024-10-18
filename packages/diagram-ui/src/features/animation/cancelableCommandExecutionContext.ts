@@ -24,7 +24,7 @@ export interface CancelState {
      */
     cancelUntil: number;
     /**
-     *Skip all animations with lesser or equal sequence numbers
+     * Skip all animations with lesser or equal sequence numbers
      */
     skipUntil: number;
 }

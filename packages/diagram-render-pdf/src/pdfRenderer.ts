@@ -11,7 +11,6 @@ import {
     Text
 } from "@hylimo/diagram-common";
 import PDFDocument from "pdfkit/js/pdfkit.standalone.js";
-import {} from "pdfkit/js/data";
 import { create } from "fontkit";
 import { Buffer } from "buffer";
 import {
