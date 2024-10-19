@@ -241,7 +241,7 @@ export class LayoutEngine {
                     subsetCollector.subsets.get(config.fontFamily) ?? {},
                     diagramConfig
                 );
-                cacheMiss = cacheMiss || !cacheHit;
+                cacheMiss ||= !cacheHit;
                 layout.fonts.registerFont(fontFamily);
                 return fontFamily;
             })

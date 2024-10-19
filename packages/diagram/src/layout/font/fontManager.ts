@@ -124,7 +124,7 @@ export class FontManager {
      */
     private async fetchFont(config: FontConfig, fontLoadingConfig: FontLoadingConfig) {
         if (!fontLoadingConfig.enableExternalFonts && !config.url.startsWith("data:")) {
-            throw new Error(`External fonts are disabled, but the font url is not a data url: ${config.url}`);
+            throw new Error(`External fonts are disabled, but font URL '${config.url}' is not a 'data:' URL`);
         }
         let fetchResult = this.fetchCache.get(config.url);
         if (!fetchResult) {

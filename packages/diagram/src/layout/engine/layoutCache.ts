@@ -14,7 +14,7 @@ export class LayoutCache<K, T> {
     /**
      * Creates a new layout cache
      *
-     * @param maxAge the time after which items are removed from the cache
+     * @param maxAge the time (number of diagram renderings) after which items are removed from the cache
      */
     constructor(readonly maxAge: number) {}
 
@@ -70,7 +70,7 @@ interface ItemWithAge<T> {
      */
     item: T;
     /**
-     * The age of the item
+     * The age of the item in diagram renderings
      */
     age: number;
 }
