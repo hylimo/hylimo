@@ -1,14 +1,4 @@
-import {
-    booleanType,
-    fun,
-    functionType,
-    id,
-    InterpreterModule,
-    listType,
-    optional,
-    parse,
-    stringType
-} from "@hylimo/core";
+import { fun, functionType, id, InterpreterModule, listType, optional, parse, stringType } from "@hylimo/core";
 import { SCOPE } from "../../../../base/dslModule.js";
 
 /**
@@ -18,13 +8,9 @@ import { SCOPE } from "../../../../base/dslModule.js";
  */
 export const sequenceDiagramInstanceModule = InterpreterModule.create(
     "uml/sequenceDiagramInstance",
-    ["uml/instance"],
-    ["uml/sequence/margin", "uml/associations"],
+    ["uml/sequence/defaultValues", "uml/instance", "uml/associations"],
+    [],
     [
-        ...parse(`
-          // TODO: Define exactly how the stickman should be rendered - we probably want to render an SVG, selfregister the users name, and put the full title below the SVG, either as an rpos, or inside the SVG itself
-          _stickman = scope.internal
-        `),
         id(SCOPE).assignField(
             "instance",
             fun(
@@ -35,16 +21,17 @@ export const sequenceDiagramInstanceModule = InterpreterModule.create(
                         title = name + ":" + class
                     }
                     
-                    if(args.user != null && x) {
-                      this.instance = _stickman(name, title = title, args = args)
-                    } {
-                      this.instance = scope.internal.createInstance(name, callback, title = title, keywords = args.keywords, args = args)
+                    this.instance = scope.internal.createInstance(name, callback, title = title, keywords = args.keywords, args = args)
+                    
+                    if(scope.internal.lastSequenceDiagramElement != null) {
+                        this.instance.pos = scope.rpos(scope.internal.lastSequenceDiagramElement, scope.instanceMargin, 0)
                     }
-         //           println(this.instance)
+                    
                     this.bottomcenter = scope.lpos(this.instance, 0.25)
-       //             println(this.bottomcenter)
-                    this.instance.line = bottomcenter .. scope.rpos(bottomcenter, 0, scope.margin)
-         //           println(this.instance.line)
+                    this.instance.line = scope[".."](bottomcenter, scope.rpos(bottomcenter, 0, scope.margin))
+                    
+                    scope.internal.sequenceDiagramTimelines += this.instance.line
+                    scope.internal.lastSequenceDiagramElement = this.instance
                 `,
                 {
                     docs: "Creates an instance. An instance is like a class, except it can optionally have an instance name",
@@ -56,11 +43,6 @@ export const sequenceDiagramInstanceModule = InterpreterModule.create(
                         ],
                         [1, "the class name of this instance", optional(stringType)],
                         [2, "the callback function of this instance", optional(functionType)],
-                        [
-                            "user",
-                            "whether this instance is a human. If true, the default appearance is changed from a box to a stickman",
-                            optional(booleanType)
-                        ],
                         ["keywords", "the keywords of the class", optional(listType(stringType))]
                     ],
                     snippet: `("$1")`,
@@ -73,6 +55,7 @@ export const sequenceDiagramInstanceModule = InterpreterModule.create(
                 scope.styles {
                     cls("instance-element") {
                         vAlign = "bottom"
+                        minWidth = 50
                     }
                 }
             `

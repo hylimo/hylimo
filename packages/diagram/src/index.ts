@@ -65,7 +65,7 @@ export * from "./module/diagrams/content/uml/extendsAndImplements.js";
 export * from "./module/diagrams/content/uml/interface.js";
 export * from "./module/diagrams/content/uml/instance.js";
 export * from "./module/diagrams/content/uml/sequence/sequenceDiagramInstance.js";
-export * from "./module/diagrams/content/uml/sequence/marginSetting.js";
+export * from "./module/diagrams/content/uml/sequence/defaultValues.js";
 export * from "./module/diagrams/content/uml/nonNavigableAssociations.js";
 export * from "./module/diagrams/content/uml/package.js";
 export * from "./module/diagrams/content/uml/readingDirection.js";
