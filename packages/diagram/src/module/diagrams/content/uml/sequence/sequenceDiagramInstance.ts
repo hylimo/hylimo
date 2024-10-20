@@ -5,6 +5,7 @@ import { SCOPE } from "../../../../base/dslModule.js";
  * Module providing the UML 'instance' function for sequence diagrams - they differ from normal instances in that
  * - they are bottom aligned
  * - they store the line pointing down
+ * - they receive a default position based on the previous elements
  */
 export const sequenceDiagramInstanceModule = InterpreterModule.create(
     "uml/sequenceDiagramInstance",

@@ -24,11 +24,13 @@ import { contentModule } from "./uml/classifier/content.js";
 import { componentTitleModule } from "./uml/classifier/componentTitle.js";
 import { instanceModule } from "./uml/instance.js";
 import { sequenceDiagramInstanceModule } from "./uml/sequence/sequenceDiagramInstance.js";
+import { actorModule } from "./uml/actor.js";
 
 /**
  * All content modules
  */
 export const contents: InterpreterModule[] = [
+    actorModule,
     defaultMarkersModule,
     defaultStylesModule,
     elementModule,
