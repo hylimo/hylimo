@@ -1,4 +1,4 @@
-import { fun, id, InterpreterModule, listType, optional, parse, stringType } from "@hylimo/core";
+import { fun, id, InterpreterModule, optional, parse, stringType } from "@hylimo/core";
 import { SCOPE } from "../../../../base/dslModule.js";
 
 /**
@@ -31,10 +31,7 @@ export const sequenceDiagramActorModule = InterpreterModule.create(
                 `,
                 {
                     docs: "Creates an actor. An actor is a stickman with an optional name",
-                    params: [
-                        [0, "the optional name of the actor", optional(stringType)],
-                        ["keywords", "the keywords of the class", optional(listType(stringType))]
-                    ],
+                    params: [[0, "the optional name of the actor", optional(stringType)]],
                     snippet: `("$1")`,
                     returns: "The created actor"
                 }
@@ -43,7 +40,7 @@ export const sequenceDiagramActorModule = InterpreterModule.create(
         ...parse(
             `
                 scope.styles {
-                    cls("actor") {
+                    cls("actor-element") {
                         vAlign = "bottom"
                     }
                 }
