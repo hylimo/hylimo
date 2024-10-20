@@ -13,15 +13,15 @@ export const actorModule = InterpreterModule.create(
             `
             scope.internal.createActor = {
                 canvasElement(
-                    content = vbox(
+                    content =         vbox(
                         contents = list(
-                            stack(
-                                contents = list(
-                                    path(path = "M 50,10 A 40,40 0 1,1 50,90 A 40,40 0 1,1 50,10") // the head
-                                    path(path = "M 0 40 h 120 M 60 0 v 100 M 0 160 L 100 60 M 120 160 L 100 60") // the remaining body
-                                ),
-                                class = list("actor")
-                            )
+                            contents = list(
+                                path(
+                                    path = "M 50,10 A 40,40 0 1,1 50,90 A 40,40 0 1,1 50,10 M 0 40 h 120 M 60 0 v 100 M 0 160 L 60 100 M 120 160 L 60 100",
+                                    stretch = "uniform"
+                                )
+                            ),
+                            class = list("actor")
                         )
                     )
                 )
