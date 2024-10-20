@@ -1,4 +1,4 @@
-import { fun, id, InterpreterModule, listType, optional, stringType } from "@hylimo/core";
+import { fun, id, InterpreterModule, listType, optional, parse, stringType } from "@hylimo/core";
 import { SCOPE } from "../../../../base/dslModule.js";
 
 /**
@@ -15,13 +15,9 @@ export const sequenceDiagramActorModule = InterpreterModule.create(
             "actor",
             fun(
                 `
-                    (name, class) = args
-                    title = name
-                    if(class != null) {
-                        title = name + ":" + class
-                    }
+                    (name) = args
  
-                    this.actor = scope.internal.createActor(name, title = title, keywords = args.keywords, args = args)
+                    this.actor = scope.internal.createActor(name, args = args)
  
                     if(scope.internal.lastSequenceDiagramElement != null) {
                         this.actor.pos = scope.rpos(scope.internal.lastSequenceDiagramElement, scope.instanceMargin, 0)
@@ -36,28 +32,22 @@ export const sequenceDiagramActorModule = InterpreterModule.create(
                 {
                     docs: "Creates an actor. An actor is a stickman with an optional name",
                     params: [
-                        [
-                            0,
-                            "the optional name of the actor. If the next argument is missing, this argument will be treated as the class name",
-                            optional(stringType)
-                        ],
-                        [1, "the optional class name of this actor", optional(stringType)],
+                        [0, "the optional name of the actor", optional(stringType)],
                         ["keywords", "the keywords of the class", optional(listType(stringType))]
                     ],
                     snippet: `("$1")`,
                     returns: "The created actor"
                 }
             )
-        )
-        /*  ...parse(
+        ),
+        ...parse(
             `
                 scope.styles {
-                    cls("actor-element") {
+                    cls("actor") {
                         vAlign = "bottom"
-                        minWidth = 50
                     }
                 }
             `
-        )*/
+        )
     ]
 );
