@@ -47,6 +47,14 @@ export interface DiagramConfig {
      * Background color for dark theme
      */
     darkBackgroundColor: string;
+    /**
+     * Whether to enable font subsetting
+     */
+    enableFontSubsetting: boolean;
+    /**
+     * Whether to enable external fonts
+     */
+    enableExternalFonts: boolean;
 }
 
 /**
@@ -80,7 +88,9 @@ export const lspPlugin: Plugin = {
             lightPrimaryColor: "#000000",
             lightBackgroundColor: "#ffffff",
             darkPrimaryColor: "#ffffff",
-            darkBackgroundColor: "#1e1e1e"
+            darkBackgroundColor: "#1e1e1e",
+            enableFontSubsetting: true,
+            enableExternalFonts: false
         });
         app.provide(languageServerConfigKey, {
             settings: languageServerSettings,
@@ -95,7 +105,9 @@ export const lspPlugin: Plugin = {
                         : diagramConfig.value.lightPrimaryColor,
                     backgroundColor: isDark.value
                         ? diagramConfig.value.darkBackgroundColor
-                        : diagramConfig.value.lightBackgroundColor
+                        : diagramConfig.value.lightBackgroundColor,
+                    enableFontSubsetting: diagramConfig.value.enableFontSubsetting,
+                    enableExternalFonts: diagramConfig.value.enableExternalFonts
                 },
                 settings: languageServerSettings.value
             };

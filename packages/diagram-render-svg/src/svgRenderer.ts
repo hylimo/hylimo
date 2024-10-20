@@ -167,9 +167,7 @@ class SVGDiagramVisitor extends SimplifiedDiagramVisitor<undefined, SVGNode[]> {
             ...extractLayoutAttributes(element),
             ...extractFillAttributes(element),
             "font-family": element.fontFamily,
-            "font-size": element.fontSize,
-            "font-style": element.fontStyle,
-            "font-weight": element.fontWeight
+            "font-size": element.fontSize
         };
         return [result];
     }

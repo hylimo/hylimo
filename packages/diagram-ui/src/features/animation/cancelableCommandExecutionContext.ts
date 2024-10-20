@@ -5,7 +5,12 @@ import { CommandExecutionContext } from "sprotty";
  */
 export interface CancelableCommandExecutionContext extends CommandExecutionContext {
     /**
-     * The CancelState of the animation
+     * Sequence number for command execution contexts
+     */
+    commandSequenceNumber: number;
+    /**
+     * The state of the cancelation
+     * Should be shared between all CommandExecutionContexts
      */
     cancelState: CancelState;
 }
@@ -13,19 +18,15 @@ export interface CancelableCommandExecutionContext extends CommandExecutionConte
 /**
  * The state of the cancelation
  */
-export enum CancelState {
+export interface CancelState {
     /**
-     * The animation is running and not canceled
+     * Cancel all animations with lesser or equal sequence numbers
      */
-    RUNNING = 0,
+    cancelUntil: number;
     /**
-     * The animation is canceled, but should NOT be skipped to the final state
+     * Skip all animations with lesser or equal sequence numbers
      */
-    CANCELED = 1,
-    /**
-     * The animation is canceled and should be skipped to the final state
-     */
-    CANCELED_AND_SKIPPED = 2
+    skipUntil: number;
 }
 
 export namespace CancelableCommandExecutionContext {
@@ -46,7 +47,7 @@ export namespace CancelableCommandExecutionContext {
      * @returns true if it is canceled
      */
     export function isCanceled(context: CommandExecutionContext): boolean {
-        return is(context) && context.cancelState != CancelState.RUNNING;
+        return is(context) && context.cancelState.cancelUntil <= context.commandSequenceNumber;
     }
 
     /**
@@ -56,7 +57,7 @@ export namespace CancelableCommandExecutionContext {
      * @returns true if it is canceled AND skipped
      */
     export function isCanceledAndSkipped(context: CommandExecutionContext): boolean {
-        return is(context) && context.cancelState == CancelState.CANCELED_AND_SKIPPED;
+        return is(context) && isCanceled(context) && context.cancelState.skipUntil <= context.commandSequenceNumber;
     }
 
     /**
@@ -66,11 +67,9 @@ export namespace CancelableCommandExecutionContext {
      * @param skipToFinalState true if the animation should be skipped to the final state
      */
     export function setCanceled(context: CancelableCommandExecutionContext, skipToFinalState: boolean) {
+        context.cancelState.cancelUntil = context.commandSequenceNumber;
         if (skipToFinalState) {
-            context.cancelState = CancelState.CANCELED_AND_SKIPPED;
-        } else {
-            context.cancelState = CancelState.CANCELED;
+            context.cancelState.skipUntil = context.commandSequenceNumber;
         }
-        context.duration = 0;
     }
 }

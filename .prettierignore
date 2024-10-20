@@ -4,3 +4,4 @@ website/.vitepress/dist/
 website/.vitepress/cache/
 website/dev-dist/
 packages/**/lib
+packages/**/.rollup.cache

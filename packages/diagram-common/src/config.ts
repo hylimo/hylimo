@@ -17,4 +17,15 @@ export interface DiagramConfig {
      * Should be a hex color string
      */
     backgroundColor: string;
+    /**
+     * Whether to enable font subsetting
+     * If disabled, fonts are still subsetted e.g. to remove variation axes, however
+     * all glyphs are included in the subset.
+     */
+    enableFontSubsetting: boolean;
+    /**
+     * Whether to enable external fonts
+     * If disabled, only fonts with data urls are used, other fonts cause an error
+     */
+    enableExternalFonts: boolean;
 }

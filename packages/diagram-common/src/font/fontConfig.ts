@@ -34,11 +34,7 @@ export interface FontConfig {
      */
     url: string;
     /**
-     * If a collection font file is used (otc, ttc), the name of the font to use
+     * If a variation font file is used the values to use for varition axis
      */
-    name?: string;
-    /**
-     * If a variation font file is used, either the named variation or the values to use for varition axis
-     */
-    variationSettings?: string | { [axis: string]: number };
+    variationSettings?: { [axis: string]: number };
 }

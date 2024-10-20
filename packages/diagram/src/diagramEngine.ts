@@ -84,7 +84,7 @@ export class DiagramEngine {
             ]);
             if (interpretationResult.result != undefined) {
                 try {
-                    layoutedDiagram = await this.layoutEngine.layout(interpretationResult.result);
+                    layoutedDiagram = await this.layoutEngine.layout(interpretationResult.result, config);
                 } catch (e: any) {
                     layoutErrors.push(e);
                 }
