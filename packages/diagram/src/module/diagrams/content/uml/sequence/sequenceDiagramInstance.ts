@@ -25,13 +25,14 @@ export const sequenceDiagramInstanceModule = InterpreterModule.create(
                     this.instance = scope.internal.createInstance(name, callback, title = title, keywords = args.keywords, args = args)
                     
                     if(scope.internal.lastSequenceDiagramElement != null) {
-                        this.instance.pos = scope.rpos(scope.internal.lastSequenceDiagramElement, scope.instanceMargin, 0)
+                        this.instance.pos = scope.rpos(scope.internal.lastSequenceDiagramElement, scope.instanceDistance, 0)
                     }
                     
+                    //  Create the line of this instance now so that it will always be rendered behind everything else
                     this.bottomcenter = scope.lpos(this.instance, 0.25)
                     this.instance.line = scope[".."](bottomcenter, scope.rpos(bottomcenter, 0, scope.margin))
                     
-                    scope.internal.sequenceDiagramTimelines += this.instance.line
+                    scope.internal.sequenceDiagramElements += this.instance
                     scope.internal.lastSequenceDiagramElement = this.instance
                 `,
                 {

@@ -20,13 +20,14 @@ export const sequenceDiagramActorModule = InterpreterModule.create(
                     this.actor = scope.internal.createActor(name, args = args)
  
                     if(scope.internal.lastSequenceDiagramElement != null) {
-                        this.actor.pos = scope.rpos(scope.internal.lastSequenceDiagramElement, scope.instanceMargin, 0)
+                        this.actor.pos = scope.rpos(scope.internal.lastSequenceDiagramElement, scope.instanceDistance, 0)
                     }
 
+                    //  Create the line of this actor now so that it will always be rendered behind everything else
                     this.bottomcenter = scope.lpos(this.actor, 0.25)
                     this.actor.line = scope[".."](bottomcenter, scope.rpos(bottomcenter, 0, scope.margin))
 
-                    scope.internal.sequenceDiagramTimelines += this.actor.line
+                    scope.internal.sequenceDiagramElements += this.actor
                     scope.internal.lastSequenceDiagramElement = this.actor
                 `,
                 {

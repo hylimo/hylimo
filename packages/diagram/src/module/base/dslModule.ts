@@ -537,9 +537,11 @@ const scopeExpressions: ExecutableExpression[] = [
             fun(
                 `
                     (name, value) = args
-                    if(scope.get(name) == null) {
+                    isNew = scope.get(name) == null
+                    if(isNew) {
                         scope.set(name, value)
                     }
+                    isNew // Return true if the name has actually been added
                 `
             )
         ),
