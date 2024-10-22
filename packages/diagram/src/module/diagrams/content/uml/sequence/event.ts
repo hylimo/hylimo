@@ -15,20 +15,26 @@ export const eventModule = InterpreterModule.create(
             fun(
                 `
                 (name) = args
-                event = scope.apos(0, scope.margin)
-                if(scope.internal.lastSequenceDiagramEvent != null) {
-                    event = scope.rpos(scope.internal.lastSequenceDiagramEvent, 0, scope.eventDistance)
+                
+                eventObject = []
+                
+                if(!(scope.internal.registerInDiagramScope(name, eventObject))) {
+                    error("Cannot construct event '" + name + "' as this variable is already declared somewhere else")
                 }
                 
-                /*// Add all events as per the user facing definition of events, i.e. 'start.User', 'start.Shop', …
-                // TODO: Finish, and store the instance name within actors and instances when possible (not registered already)
+                // Position the event for each instance relative to the latest previous event
+                // and add all events as per the user facing definition of events, i.e. 'start.User', 'start.Shop', …
                 scope.internal.sequenceDiagramElements.forEach {
-                    event.set(it.name
-                }*/
                 
-                
-                if(!(scope.internal.registerInDiagramScope(name, event))) {
-                    error("Cannot construct event '" + name + "' as this variable is already declared somewhere else")
+                    // Use either the position below the instance, or the position below the last event
+                    eventPosition = scope.rpos(it.pos, 0, scope.eventDistance)
+                    events = it.events
+                    if(events.length > 0) {
+                        eventPosition = scope.rpos(events.get(events.length - 1), 0, scope.eventDistance)
+                    }
+                    
+                    it.events += eventPosition // for the position calculation
+                    eventObject[it.name] = eventPosition // for arrows, i.e. 'event.shop --> event.cart'
                 }
                 
                 scope.internal.lastSequenceDiagramEvent = event

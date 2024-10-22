@@ -18,7 +18,14 @@ export const sequenceDiagramActorModule = InterpreterModule.create(
                     (name) = args
  
                     this.actor = scope.internal.createActor(name, args = args)
- 
+                    this.actor.pos = if(scope.internal.lastSequenceDiagramElement != null) {
+                        scope.rpos(scope.internal.lastSequenceDiagramElement, scope.instanceDistance, 0)
+                    } {
+                        scope.apos(0, 0) // so that we don't get NPEs for the event layouting
+                    }
+                    // Actors have an optional name, so we must supply one for the first actor for the first actor in the diagram for example for arrows: 'event.User --> event.Shop'
+                    this.actor.name = name ?? "User"
+                    
                     if(scope.internal.lastSequenceDiagramElement != null) {
                         this.actor.pos = scope.rpos(scope.internal.lastSequenceDiagramElement, scope.instanceDistance, 0)
                     }
@@ -26,6 +33,7 @@ export const sequenceDiagramActorModule = InterpreterModule.create(
                     //  Create the line of this actor now so that it will always be rendered behind everything else
                     this.bottomcenter = scope.lpos(this.actor, 0.25)
                     this.actor.line = scope[".."](bottomcenter, scope.rpos(bottomcenter, 0, scope.margin))
+                    this.actor.events = list() // Needed for the autolayouting of events
 
                     scope.internal.sequenceDiagramElements += this.actor
                     scope.internal.lastSequenceDiagramElement = this.actor

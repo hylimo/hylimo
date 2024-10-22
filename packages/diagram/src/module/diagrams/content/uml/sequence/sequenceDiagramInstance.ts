@@ -24,13 +24,18 @@ export const sequenceDiagramInstanceModule = InterpreterModule.create(
                     
                     this.instance = scope.internal.createInstance(name, callback, title = title, keywords = args.keywords, args = args)
                     
-                    if(scope.internal.lastSequenceDiagramElement != null) {
-                        this.instance.pos = scope.rpos(scope.internal.lastSequenceDiagramElement, scope.instanceDistance, 0)
+                    this.instance.pos = if(scope.internal.lastSequenceDiagramElement != null) {
+                        scope.rpos(scope.internal.lastSequenceDiagramElement, scope.instanceDistance, 0)
+                    } {
+                        scope.apos(0, 0) // so that we don't get NPEs for the event layouting
                     }
+                    this.instance.name = name
                     
                     //  Create the line of this instance now so that it will always be rendered behind everything else
                     this.bottomcenter = scope.lpos(this.instance, 0.25)
                     this.instance.line = scope[".."](bottomcenter, scope.rpos(bottomcenter, 0, scope.margin))
+                    this.instance.events = list() // Needed for the autolayouting of events
+
                     
                     scope.internal.sequenceDiagramElements += this.instance
                     scope.internal.lastSequenceDiagramElement = this.instance
