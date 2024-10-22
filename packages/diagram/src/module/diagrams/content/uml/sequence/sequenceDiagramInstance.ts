@@ -1,4 +1,4 @@
-import { fun, functionType, id, InterpreterModule, listType, optional, parse, stringType } from "@hylimo/core";
+import { fun, functionType, id, InterpreterModule, listType, optional, or, parse, stringType } from "@hylimo/core";
 import { SCOPE } from "../../../../base/dslModule.js";
 
 /**
@@ -48,7 +48,7 @@ export const sequenceDiagramInstanceModule = InterpreterModule.create(
                             "the optional name of the instance. If the next argument is missing, this argument will be treated as the class name",
                             stringType
                         ],
-                        [1, "the class name of this instance", optional(stringType)],
+                        [1, "the class name of this instance", optional(or(stringType, functionType))], // TODO: Shift $1 to $2 if necessary
                         [2, "the callback function of this instance", optional(functionType)],
                         ["keywords", "the keywords of the class", optional(listType(stringType))]
                     ],
