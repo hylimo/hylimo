@@ -64,6 +64,7 @@ export const actorModule = InterpreterModule.create(
                     }
                     cls("actor-element") {
                         width = 30
+                        hAlign = "center"
                     }
                 }
             `
