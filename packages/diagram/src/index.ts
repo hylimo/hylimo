@@ -67,6 +67,7 @@ export * from "./module/diagrams/content/uml/interface.js";
 export * from "./module/diagrams/content/uml/instance.js";
 export * from "./module/diagrams/content/uml/sequence/defaultValues.js";
 export * from "./module/diagrams/content/uml/sequence/event.js";
+export * from "./module/diagrams/content/uml/sequence/lifeline.js";
 export * from "./module/diagrams/content/uml/sequence/sequenceDiagramInstance.js";
 export * from "./module/diagrams/content/uml/sequence/sequenceDiagramActor.js";
 export * from "./module/diagrams/content/uml/nonNavigableAssociations.js";

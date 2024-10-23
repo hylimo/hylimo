@@ -26,7 +26,7 @@ export const sequenceDiagramModule = InterpreterModule.create(
         sequenceDiagramActorModule,
         eventModule,
         lifelineModule,
-        /* frameModule */
+        // frameModule,
         associationsModule,
         readingDirectionModule
     ])
