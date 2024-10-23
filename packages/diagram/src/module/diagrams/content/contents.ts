@@ -26,6 +26,7 @@ import { instanceModule } from "./uml/instance.js";
 import { sequenceDiagramInstanceModule } from "./uml/sequence/sequenceDiagramInstance.js";
 import { actorModule } from "./uml/actor.js";
 import { eventModule } from "./uml/sequence/event.js";
+import { lifelineModule } from "./uml/sequence/lifeline.js";
 
 /**
  * All content modules
@@ -50,6 +51,7 @@ export const contents: InterpreterModule[] = [
     extendsAndImplementsModule,
     instanceModule,
     interfaceModule,
+    lifelineModule,
     nonNavigableAssociationsModule,
     packageModule,
     portsModule,

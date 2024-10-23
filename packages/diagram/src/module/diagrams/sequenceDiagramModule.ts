@@ -9,6 +9,7 @@ import { sequenceDiagramInstanceModule } from "./content/uml/sequence/sequenceDi
 import { defaultValues } from "./content/uml/sequence/defaultValues.js";
 import { sequenceDiagramActorModule } from "./content/uml/sequence/sequenceDiagramActor.js";
 import { eventModule } from "./content/uml/sequence/event.js";
+import { lifelineModule } from "./content/uml/sequence/lifeline.js";
 
 /**
  * Module for UML sequence diagrams.
@@ -24,9 +25,8 @@ export const sequenceDiagramModule = InterpreterModule.create(
         sequenceDiagramInstanceModule,
         sequenceDiagramActorModule,
         eventModule,
-        /*
         lifelineModule,
-        frameModule, */
+        /* frameModule */
         associationsModule,
         readingDirectionModule
     ])

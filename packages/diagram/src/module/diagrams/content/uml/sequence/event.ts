@@ -7,7 +7,7 @@ import { SCOPE } from "../../../../base/dslModule.js";
  */
 export const eventModule = InterpreterModule.create(
     "uml/sequence/event",
-    [],
+    ["uml/sequence/defaultValues"],
     [],
     [
         id(SCOPE).assignField(
