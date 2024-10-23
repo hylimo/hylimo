@@ -11,6 +11,7 @@ export const defaultValues = InterpreterModule.create(
         ...parse(`
         // Exposed and changable variables
         scope.margin = 5
+        scope.lifelineWidth = 10
         scope.instanceDistance = 200
         scope.eventDistance = 30
         

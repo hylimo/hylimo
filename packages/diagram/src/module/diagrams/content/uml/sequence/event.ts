@@ -1,4 +1,4 @@
-import { fun, id, InterpreterModule, stringType } from "@hylimo/core";
+import { fun, id, InterpreterModule, numberType, optional, stringType } from "@hylimo/core";
 import { SCOPE } from "../../../../base/dslModule.js";
 
 /**
@@ -14,7 +14,7 @@ export const eventModule = InterpreterModule.create(
             "event",
             fun(
                 `
-                (name) = args
+                (name, yDistance) = args
                 
                 eventObject = []
                 
@@ -22,15 +22,20 @@ export const eventModule = InterpreterModule.create(
                     error("Cannot construct event '" + name + "' as this variable is already declared somewhere else")
                 }
                 
+                // The event itself must store its y-coordinate so that the calculation of the lifelines and co works correctly
+                previousEvent = scope.internal.sequenceDiagramEvent
+                eventObject.deltaY = if(yDistance != null) { yDistance } { scope.eventDistance }
+                eventObject.y = if(previousEvent != null) { previousEvent.y } { 0 } + eventObject.deltaY 
+                
                 // Position the event for each instance relative to the latest previous event
                 // and add all events as per the user facing definition of events, i.e. 'start.User', 'start.Shop', …
                 scope.internal.sequenceDiagramElements.forEach {
                 
-                    // Use either the position below the instance, or the position below the last event
-                    eventPosition = scope.rpos(it.pos, 0, scope.eventDistance)
+                    // Use either the position below the instance, the position below the last event, or the user supplied position
+                    eventPosition = scope.rpos(it.pos, 0, eventObject.deltaY)
                     events = it.events
                     if(events.length > 0) {
-                        eventPosition = scope.rpos(events.get(events.length - 1), 0, scope.eventDistance)
+                        eventPosition = scope.rpos(events.get(events.length - 1), 0, eventObject.deltaY)
                     }
                     
                     it.events += eventPosition // for the position calculation
@@ -41,7 +46,14 @@ export const eventModule = InterpreterModule.create(
                 `,
                 {
                     docs: "Creates an event. Events are points in time when something happens, without knowing where.",
-                    params: [[0, "the name of the event. Can be used as variable afterward", stringType]],
+                    params: [
+                        [0, "the name of the event. Can be used as variable afterward", stringType],
+                        [
+                            1,
+                            "an optional distance on the y-axis to the previous event. Defaults to 'eventDistance'",
+                            optional(numberType)
+                        ]
+                    ],
                     snippet: `("$1")`,
                     returns: "The created event"
                 }
