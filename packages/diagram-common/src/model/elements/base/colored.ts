@@ -13,9 +13,9 @@ export interface Colored {
 }
 
 /**
- * A stroke
+ * A basic stroke without line join, cap or miter limit information
  */
-export interface Stroke extends Colored {
+export interface SimpleStroke extends Colored {
     /**
      * The width of the stroke
      */
@@ -28,6 +28,12 @@ export interface Stroke extends Colored {
      * The space between dashes, defaults to strokeDash
      */
     dashSpace?: number;
+}
+
+/**
+ * A stroke
+ */
+export interface Stroke extends SimpleStroke {
     /**
      * Defines how segments are joined together
      */

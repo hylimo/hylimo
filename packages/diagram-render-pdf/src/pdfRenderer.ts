@@ -8,7 +8,7 @@ import {
     Shape,
     SimplifiedCanvasElement,
     SimplifiedDiagramVisitor,
-    Text
+    SimplifiedText
 } from "@hylimo/diagram-common";
 import PDFDocument from "pdfkit/js/pdfkit.standalone.js";
 import { create } from "fontkit";
@@ -139,7 +139,7 @@ export class PDFDiagramVisitor extends SimplifiedDiagramVisitor<PDFKit.PDFDocume
         }
     }
 
-    override visitText(element: Text, context: PDFKit.PDFDocument): void {
+    override visitText(element: SimplifiedText, context: PDFKit.PDFDocument): void {
         context.fontSize(element.fontSize);
         context.font(element.fontFamily, element.fontSize);
         const fillAttributes = extractFillAttributes(element);
@@ -149,6 +149,7 @@ export class PDFDiagramVisitor extends SimplifiedDiagramVisitor<PDFKit.PDFDocume
             lineBreak: false,
             baseline: "alphabetic"
         });
+        this.visitChildren(element, context);
     }
 
     override visitCanvas(element: Canvas, context: PDFKit.PDFDocument): void {
