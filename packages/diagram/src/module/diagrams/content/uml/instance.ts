@@ -10,7 +10,7 @@ export const instanceModule = InterpreterModule.create(
         "uml/classifier/classifier",
         "uml/classifier/defaultTitle",
         "uml/classifier/sections",
-        "uml/classifier/propertiesAndMethods",
+        "uml/classifier/values",
         "uml/classifier/content"
     ],
     [],
@@ -22,7 +22,7 @@ export const instanceModule = InterpreterModule.create(
                     list(
                         scope.internal.defaultTitleContentHandler,
                         scope.internal.sectionsContentHandler,
-                        scope.internal.propertiesAndMethodsContentHandler,
+                        scope.internal.valuesContentHandler,
                         scope.internal.contentContentHandler
                     )
                 )
@@ -35,7 +35,7 @@ export const instanceModule = InterpreterModule.create(
                     (name, class, callback) = args
                     title = name
                     if(class != null) {
-                        title = name + ":" + class
+                        title = name + " : " + class
                     }
                     scope.internal.createInstance(name, callback, title = title, keywords = args.keywords, args = args)
                 `,
@@ -55,6 +55,19 @@ export const instanceModule = InterpreterModule.create(
                     returns: "The created class"
                 }
             )
+        ),
+        ...parse(
+            `
+                scope.styles {
+                    cls("instance-element") {
+                        cls("title") {
+                            type("span") {
+                                underline = true
+                            }
+                        }
+                    }
+                }
+            `
         )
     ]
 );

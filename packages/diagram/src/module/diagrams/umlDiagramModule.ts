@@ -14,6 +14,7 @@ import { extendsAndImplementsModule } from "./content/uml/extendsAndImplements.j
 import { readingDirectionModule } from "./content/uml/readingDirection.js";
 import { componentModule } from "./content/uml/component.js";
 import { DiagramModuleNames } from "../diagramModuleNames.js";
+import { instanceModule } from "./content/uml/instance.js";
 
 /**
  * Module for (arbitrary) UML diagrams
@@ -30,6 +31,7 @@ export const umlDiagramModule = InterpreterModule.create(
         enumModule,
         packageModule,
         componentModule,
+        instanceModule,
         commentModule,
         associationsModule,
         nonNavigableAssociationsModule,

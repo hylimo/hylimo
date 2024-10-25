@@ -23,10 +23,8 @@ import { readingDirectionModule } from "./uml/readingDirection.js";
 import { contentModule } from "./uml/classifier/content.js";
 import { componentTitleModule } from "./uml/classifier/componentTitle.js";
 import { instanceModule } from "./uml/instance.js";
-import { sequenceDiagramInstanceModule } from "./uml/sequence/sequenceDiagramInstance.js";
 import { actorModule } from "./uml/actor.js";
-import { eventModule } from "./uml/sequence/event.js";
-import { lifelineModule } from "./uml/sequence/lifeline.js";
+import { valuesModule } from "./uml/classifier/values.js";
 
 /**
  * All content modules
@@ -47,11 +45,9 @@ export const contents: InterpreterModule[] = [
     elementModule,
     entriesModule,
     enumModule,
-    eventModule,
     extendsAndImplementsModule,
     instanceModule,
     interfaceModule,
-    lifelineModule,
     nonNavigableAssociationsModule,
     packageModule,
     portsModule,
@@ -59,5 +55,5 @@ export const contents: InterpreterModule[] = [
     providesAndRequiresModule,
     readingDirectionModule,
     sectionsModule,
-    sequenceDiagramInstanceModule
+    valuesModule
 ];
