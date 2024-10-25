@@ -16,7 +16,7 @@ export const eventModule = InterpreterModule.create(
                 `
                 (name, yDistance) = args
                 
-                eventObject = []
+                eventObject = [name = name]
                 
                 if(!(scope.internal.registerInDiagramScope(name, eventObject))) {
                     error("Cannot construct event '" + name + "' as this variable is already declared somewhere else")
@@ -41,8 +41,7 @@ export const eventModule = InterpreterModule.create(
                     it.events += eventPosition // for the position calculation
                     eventObject[it.name] = eventPosition // for arrows, i.e. 'event.shop --> event.cart'
                 }
-                
-                scope.internal.lastSequenceDiagramEvent = event
+                scope.internal.lastSequenceDiagramEvent = eventObject
                 `,
                 {
                     docs: "Creates an event. Events are points in time when something happens, without knowing where.",
