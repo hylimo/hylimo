@@ -199,6 +199,7 @@ export class DiagramSimplifier {
      * Simplifies a text line (underline or strikethrough) by converting it to a path
      *
      * @param text the text element containing the line
+     * @param line the line to convert
      * @returns the simplified path
      */
     private convertTextLineToPath(text: Text, line: TextLine): Path {
