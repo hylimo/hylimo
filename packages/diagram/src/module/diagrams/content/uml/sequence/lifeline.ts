@@ -1,7 +1,13 @@
-import { fun, id, InterpreterModule } from "@hylimo/core";
+import { anyType, fun, id, InterpreterModule, listType, objectType, stringType } from "@hylimo/core";
 import { SCOPE } from "../../../../base/dslModule.js";
 
-const instanceType = null; // TODO: Create type containing the fields 'name' (string), 'line' (canvas connection?), 'events' (list of rpos)
+const instanceType = objectType(
+    new Map([
+        ["name", stringType],
+        ["line", anyType /* TODO: specify what lines are. CanvasConnections? */],
+        ["events", listType(/* TODO: specify element type */)]
+    ])
+);
 
 /**
  * Defines an event.<br>
@@ -74,7 +80,8 @@ export const lifelineModule = InterpreterModule.create(
                 {
                     docs: "Deactivates the most recent lifeline",
                     params: [[0, "the instance to deactivate", instanceType]],
-                    snippet: `("$1")`
+                    snippet: `("$1")`,
+                    returns: "nothing"
                 }
             )
         )
