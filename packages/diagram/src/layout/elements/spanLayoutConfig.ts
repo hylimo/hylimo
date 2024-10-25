@@ -1,4 +1,4 @@
-import { enumType, FullObject, nullType, numberType, stringType } from "@hylimo/core";
+import { booleanType, enumType, FullObject, nullType, numberType, or, stringType } from "@hylimo/core";
 import { Element, FontStyle, FontWeight, Point, Size } from "@hylimo/diagram-common";
 import { ContentCardinality, LayoutElement, SizeConstraints } from "../layoutElement.js";
 import { Layout } from "../engine/layout.js";
@@ -36,6 +36,49 @@ export class SpanLayoutConfig extends ElementLayoutConfig {
                     name: "fontStyle",
                     description: 'optional font style, if given must be either "normal" or "italic"',
                     type: enumType(FontStyle)
+                },
+                {
+                    name: "underline",
+                    description: "optional underline, must be a valid color string or boolean (fill color used)",
+                    type: or(stringType, booleanType)
+                },
+                {
+                    name: "underlineOpacity",
+                    description: "optional underline opacity, must be a number between 0 and 1",
+                    type: numberType
+                },
+                { name: "underlineWidth", description: "optional width of the underline", type: numberType },
+                {
+                    name: "underlineDash",
+                    description: "optional dash length. If not set, underline is solid.",
+                    type: numberType
+                },
+                {
+                    name: "underlineDashSpace",
+                    description: "space between dashes, only used if underlineDash is set, defaults to underlineDash",
+                    type: numberType
+                },
+                {
+                    name: "strikethrough",
+                    description: "optional strikethrough, must be a valid color string or boolean (fill color used)",
+                    type: or(stringType, booleanType)
+                },
+                {
+                    name: "strikethroughOpacity",
+                    description: "optional strikethrough opacity, must be a number between 0 and 1",
+                    type: numberType
+                },
+                { name: "strikethroughWidth", description: "optional width of the strikethrough", type: numberType },
+                {
+                    name: "strikethroughDash",
+                    description: "optional dash length. If not set, strikethrough is solid.",
+                    type: numberType
+                },
+                {
+                    name: "strikethroughDashSpace",
+                    description:
+                        "space between dashes, only used if strikethroughDash is set, defaults to strikethroughDash",
+                    type: numberType
                 }
             ]
         );

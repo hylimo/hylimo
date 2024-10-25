@@ -132,7 +132,7 @@ export function extractStrokeStyleAttributes(styles: Record<string, any>): Pick<
                 dashSpace: styles.strokeDashSpace ?? styles.strokeDash,
                 lineCap: styles.strokeLineCap ?? LineCap.Butt,
                 lineJoin: styles.strokeLineJoin ?? LineJoin.Miter,
-                miterLimit: styles.strokeMiterLimit ?? 4
+                miterLimit: Math.max(styles.strokeMiterLimit ?? 4, 1)
             }
         };
     } else {

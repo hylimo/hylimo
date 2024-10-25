@@ -1,3 +1,4 @@
+import { SimpleStroke } from "./base/colored.js";
 import { Element } from "./base/element.js";
 import { FilledElement } from "./base/filledElement.js";
 import { LayoutedElement } from "./base/layoutedElement.js";
@@ -20,6 +21,29 @@ export interface Text extends LayoutedElement, FilledElement {
      * Text size
      */
     fontSize: number;
+    /**
+     * The underline to apply to the text, if any
+     */
+    underline?: TextLine;
+    /**
+     * The strikethrough to apply to the text, if any
+     */
+    strikethrough?: TextLine;
+}
+
+/**
+ * A line (underline or strikethrough) to apply to text
+ * The x position and width is obtained from the containing text element
+ */
+export interface TextLine extends SimpleStroke {
+    /**
+     * The y position of the line
+     */
+    y: number;
+    /**
+     * The thickness of the line
+     */
+    width: number;
 }
 
 /**

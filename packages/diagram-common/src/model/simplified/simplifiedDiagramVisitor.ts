@@ -5,13 +5,14 @@ import { MarkerLayoutInformation } from "../elements/canvas/marker.js";
 import { Path } from "../elements/path.js";
 import { Rect } from "../elements/rect.js";
 import { Root } from "../elements/root.js";
-import { SimplifiedCanvasElement } from "./simplifiedTypes.js";
+import { SimplifiedCanvasElement, SimplifiedText } from "./simplifiedTypes.js";
 import { Element } from "../elements/base/element.js";
-import { Text } from "../elements/text.js";
+import { TextLine, Text } from "../elements/text.js";
 import { CanvasConnection } from "../elements/canvas/canvasConnection.js";
 import { Point } from "../../common/point.js";
 import { LayoutedElement } from "../elements/base/layoutedElement.js";
 import { Ellipse } from "../elements/ellipse.js";
+import { LineCap, LineJoin } from "../elements/base/colored.js";
 
 /**
  * Helper class to simplify a diagram.
@@ -57,11 +58,12 @@ export class DiagramSimplifier {
             }
             case Rect.TYPE:
             case Path.TYPE:
-            case Text.TYPE:
             case Ellipse.TYPE:
                 return this.simplifyLayoutedElement(element as LayoutedElement);
             case Canvas.TYPE:
                 return this.simplifyCanvas(element as Canvas);
+            case Text.TYPE:
+                return this.simplifyText(element as Text);
             default:
                 throw new Error(`Unknown element type: ${element.type}`);
         }
@@ -172,6 +174,53 @@ export class DiagramSimplifier {
             edits: {}
         };
     }
+
+    /**
+     * Simplifies a text element by converting the underline and strikethrough to paths
+     *
+     * @param text the text element to simplify
+     * @returns the simplified text element
+     */
+    private simplifyText(text: Text): SimplifiedText {
+        const children = text.children.map(this.simplify.bind(this));
+        if (text.underline != undefined) {
+            children.push(this.convertTextLineToPath(text, text.underline));
+        }
+        if (text.strikethrough != undefined) {
+            children.push(this.convertTextLineToPath(text, text.strikethrough));
+        }
+        return {
+            ...text,
+            children
+        };
+    }
+
+    /**
+     * Simplifies a text line (underline or strikethrough) by converting it to a path
+     *
+     * @param text the text element containing the line
+     * @param line the line to convert
+     * @returns the simplified path
+     */
+    private convertTextLineToPath(text: Text, line: TextLine): Path {
+        return {
+            type: Path.TYPE,
+            id: `simplified_${this.idCounter++}`,
+            x: text.x,
+            y: text.y,
+            width: text.width,
+            height: text.height,
+            children: [],
+            edits: {},
+            path: `M 0 ${line.y} L ${text.width} ${line.y}`,
+            stroke: {
+                ...line,
+                lineJoin: LineJoin.Bevel,
+                lineCap: LineCap.Butt,
+                miterLimit: 1
+            }
+        };
+    }
 }
 
 /**
@@ -243,9 +292,9 @@ class SimpleCanvasLayoutEngine extends CanvasLayoutEngine {
     private readonly parentLookup = new Map<string, string>();
 
     /**
-     * Creates a new CanvasLayoutEngine based on the given children of a canvas
+     * Creates a new CanvasLayoutEngine based on the given root element
      *
-     * @param children the children of a canvas
+     * @param root the root element of the diagram
      */
     constructor(root: Root) {
         super();

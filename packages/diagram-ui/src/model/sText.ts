@@ -1,4 +1,4 @@
-import { Fill, FontStyle, FontWeight, Text } from "@hylimo/diagram-common";
+import { Fill, TextLine, FontStyle, FontWeight, Text } from "@hylimo/diagram-common";
 import { LinearAnimatable } from "../features/animation/model.js";
 import { SLayoutedElement } from "./sLayoutedElement.js";
 
@@ -37,4 +37,12 @@ export class SText extends SLayoutedElement implements Text, LinearAnimatable {
      * normal or italic style
      */
     fontStyle!: FontStyle;
+    /**
+     * The underline to apply to the text, if any
+     */
+    underline?: TextLine;
+    /**
+     * The strikethrough to apply to the text, if any
+     */
+    strikethrough?: TextLine;
 }
