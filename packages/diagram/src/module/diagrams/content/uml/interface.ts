@@ -46,7 +46,7 @@ export const interfaceModule = InterpreterModule.create(
                     if(otherKeywords != null) {
                         keywords.addAll(otherKeywords)
                     }
-                    _interface(name, callback, keywords = keywords, abstract = args.abstract, args = args)
+                    _interface(name, callback, title = name, keywords = keywords, abstract = args.abstract, args = args)
                 `,
                 {
                     docs: "Creates an interface.",

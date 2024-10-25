@@ -4,6 +4,7 @@ import { editModule } from "./base/editModule.js";
 import { baseDiagramModule } from "./diagrams/baseDiagramModule.js";
 import { classDiagramModule } from "./diagrams/classDiagramModule.js";
 import { componentDiagramModule } from "./diagrams/componentDiagramModule.js";
+import { sequenceDiagramModule } from "./diagrams/sequenceDiagramModule.js";
 import { umlDiagramModule } from "./diagrams/umlDiagramModule.js";
 
 /**
@@ -20,5 +21,6 @@ export const defaultDiagramModules = [
     baseDiagramModule,
     classDiagramModule,
     componentDiagramModule,
+    sequenceDiagramModule,
     umlDiagramModule
 ];

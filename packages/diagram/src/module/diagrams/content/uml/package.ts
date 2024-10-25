@@ -72,7 +72,7 @@ export const packageModule = InterpreterModule.create(
                 scope.styles {
                     cls("package-element") {
                         minWidth = 300
-                            cls("package-body") {
+                        cls("package-body") {
                             minHeight = 50
                         }
                         cls("package-canvas") {

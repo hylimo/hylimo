@@ -22,32 +22,42 @@ import { packageModule } from "./uml/package.js";
 import { readingDirectionModule } from "./uml/readingDirection.js";
 import { contentModule } from "./uml/classifier/content.js";
 import { componentTitleModule } from "./uml/classifier/componentTitle.js";
+import { instanceModule } from "./uml/instance.js";
+import { sequenceDiagramInstanceModule } from "./uml/sequence/sequenceDiagramInstance.js";
+import { actorModule } from "./uml/actor.js";
+import { eventModule } from "./uml/sequence/event.js";
+import { lifelineModule } from "./uml/sequence/lifeline.js";
 
 /**
  * All content modules
  */
 export const contents: InterpreterModule[] = [
+    actorModule,
+    associationsModule,
+    classModule,
+    classifierModule,
+    commentModule,
+    componentModule,
+    componentTitleModule,
+    compositionAndAggregationModule,
+    contentModule,
     defaultMarkersModule,
     defaultStylesModule,
-    elementModule,
-    associationsModule,
-    classifierModule,
-    componentTitleModule,
-    contentModule,
     defaultTitleModule,
+    elementModule,
     entriesModule,
+    enumModule,
+    eventModule,
+    extendsAndImplementsModule,
+    instanceModule,
+    interfaceModule,
+    lifelineModule,
+    nonNavigableAssociationsModule,
+    packageModule,
     portsModule,
     propertiesAndMethodsModule,
     providesAndRequiresModule,
+    readingDirectionModule,
     sectionsModule,
-    classModule,
-    commentModule,
-    componentModule,
-    compositionAndAggregationModule,
-    enumModule,
-    extendsAndImplementsModule,
-    interfaceModule,
-    nonNavigableAssociationsModule,
-    packageModule,
-    readingDirectionModule
+    sequenceDiagramInstanceModule
 ];
