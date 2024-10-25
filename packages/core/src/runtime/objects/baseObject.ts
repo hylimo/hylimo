@@ -103,9 +103,10 @@ export abstract class BaseObject {
      * Creates a readable string representation
      *
      * @param context context in which this is performed
+     * @param maxDepth the maximum depth to query to avoid endless recursion
      * @returns a string representation
      */
-    abstract toString(context: InterpreterContext): string;
+    abstract toString(context: InterpreterContext, maxDepth: number): string;
 
     /**
      * Transforms this to a js number/string/object

@@ -283,12 +283,16 @@ export class FullObject extends BaseObject {
         }
     }
 
-    override toString(context: InterpreterContext): string {
+    override toString(context: InterpreterContext, maxDepth: number = 3): string {
         let res = "{\n";
         for (const [name, value] of this.fields.entries()) {
             if (name != SemanticFieldNames.THIS && name != SemanticFieldNames.PROTO) {
                 const escapedName = typeof name === "string" ? `"${name}"` : name.toString();
-                res += `  ${escapedName}: ${value.value.toString(context).replaceAll("\n", "\n  ")}\n`;
+                if (maxDepth > 0)
+                    res += `  ${escapedName}: ${value.value
+                        .toString(context, maxDepth - 1)
+                        .replaceAll("\n", "\n  ")}\n`;
+                else res += `  ${escapedName}: <more data>`;
             }
         }
         res += "}";

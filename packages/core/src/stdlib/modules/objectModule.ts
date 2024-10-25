@@ -34,7 +34,7 @@ export const objectModule = InterpreterModule.create(
                 jsFun(
                     (args, context) => {
                         const self = args.getField(SemanticFieldNames.SELF, context).value;
-                        return context.newString(self.toString(context));
+                        return context.newString(self.toString(context, 3));
                     },
                     {
                         docs: "Creates and returns a string representation.",

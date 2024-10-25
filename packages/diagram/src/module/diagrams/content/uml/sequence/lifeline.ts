@@ -6,7 +6,8 @@ const instanceType = objectType(
         ["name", stringType],
         ["line", anyType /* TODO: specify what lines are. CanvasConnections? */],
         ["events", listType(/* TODO: specify element type */)]
-    ])
+    ]),
+    "UML sequence diagram instance or actor"
 );
 
 /**

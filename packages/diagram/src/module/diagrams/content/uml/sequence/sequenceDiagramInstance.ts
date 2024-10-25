@@ -33,6 +33,7 @@ export const sequenceDiagramInstanceModule = InterpreterModule.create(
                     
                     //  Create the line of this instance now so that it will always be rendered behind everything else
                     this.bottomcenter = scope.lpos(this.instance, 0.25)
+                    this.instance.lineStart = this.bottomcenter
                     this.instance.line = scope[".."](bottomcenter, scope.rpos(bottomcenter, 0, scope.margin))
                     this.instance.events = list() // Needed for the autolayouting of events
 
