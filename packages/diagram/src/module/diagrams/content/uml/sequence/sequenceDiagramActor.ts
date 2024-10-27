@@ -18,13 +18,20 @@ export const sequenceDiagramActorModule = InterpreterModule.create(
                     (name) = args
  
                     this.actor = scope.internal.createActor(name, args = args)
+                    
+                    // Actors have an optional name, so we must supply one for the first actor for the first actor in the diagram for example for arrows: 'event.User --> event.Shop' or 'activate(User)'
+                    // Note however, that this name should not be displayed, so it cannot be used above
+                    if(name == null) {
+                        name = "User"
+                        scope.internal.registerInDiagramScope(name, this.actor)
+                    }
+                    this.actor.name = name
+                    
                     this.actor.pos = if(scope.internal.lastSequenceDiagramElement != null) {
                         scope.rpos(scope.internal.lastSequenceDiagramElement, scope.instanceDistance, 0)
                     } {
                         scope.apos(0, 0) // so that we don't get NPEs for the event layouting
                     }
-                    // Actors have an optional name, so we must supply one for the first actor for the first actor in the diagram for example for arrows: 'event.User --> event.Shop'
-                    this.actor.name = name ?? "User"
                     
                     if(scope.internal.lastSequenceDiagramElement != null) {
                         this.actor.pos = scope.rpos(scope.internal.lastSequenceDiagramElement, scope.instanceDistance, 0)
