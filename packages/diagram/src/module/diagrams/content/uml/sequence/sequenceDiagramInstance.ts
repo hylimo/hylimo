@@ -1,4 +1,4 @@
-import { fun, functionType, id, InterpreterModule, listType, optional, or, parse, stringType } from "@hylimo/core";
+import { fun, functionType, id, InterpreterModule, optional, or, parse, stringType } from "@hylimo/core";
 import { SCOPE } from "../../../../base/dslModule.js";
 
 /**
@@ -43,6 +43,7 @@ export const sequenceDiagramInstanceModule = InterpreterModule.create(
                     this.instance.lineStart = this.bottomcenter
                     this.instance.line = scope[".."](bottomcenter, scope.rpos(bottomcenter, 0, scope.margin))
                     this.instance.events = list() // Needed for the autolayouting of events
+                    this.instance.activeLifelines = list() // Needed for the lifeline autolayouting
 
                     
                     scope.internal.sequenceDiagramElements += this.instance

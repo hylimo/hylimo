@@ -42,6 +42,7 @@ export const sequenceDiagramActorModule = InterpreterModule.create(
                     this.actor.lineStart = this.bottomcenter
                     this.actor.line = scope[".."](bottomcenter, scope.rpos(bottomcenter, 0, scope.margin))
                     this.actor.events = list() // Needed for the autolayouting of events
+                    this.actor.activeLifelines = list() // Needed for the lifeline autolayouting
 
                     scope.internal.sequenceDiagramElements += this.actor
                     scope.internal.lastSequenceDiagramElement = this.actor

@@ -45,7 +45,11 @@ export const eventModule = InterpreterModule.create(
                     // (+3 margin so that a lifeline that is still present there can end, and there's still a bit of the line left over)
                     endpos = scope.rpos(eventPosition, 0, 3*scope.margin)
                     it.line.contents.get(it.line.contents.length - 1).end = endpos
-                    println(endpos)
+                    
+                    // Also enlarge all active lifelines
+                    it.activeLifelines.forEach {
+                        it.height = it.height + eventObject.deltaY
+                    }
 
                 }
                 scope.internal.lastSequenceDiagramEvent = eventObject

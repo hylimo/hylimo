@@ -303,6 +303,25 @@ export const listModule = InterpreterModule.create(
                     }
                 )
             ),
+            id(listProto).assignField(
+                "toString",
+                jsFun(
+                    (args, context) => {
+                        const self = args.getFieldValue(SemanticFieldNames.SELF, context);
+                        const length = assertNumber(self.getFieldValue(lengthField, context), "length field of a list");
+                        const fields = [];
+                        for (let i = 0; i < length; i++) {
+                            fields.push(self.getField(i, context).value.toString(context, 3));
+                        }
+                        return context.newString(`[${fields.join(", ")}]`);
+                    },
+                    {
+                        docs: "Converts this list into a human readable string",
+                        params: [[SemanticFieldNames.SELF, "the list to stringify", listType()]],
+                        returns: "The string version of this list"
+                    }
+                )
+            ),
             id(SemanticFieldNames.IT).assignField(
                 "range",
                 fun(

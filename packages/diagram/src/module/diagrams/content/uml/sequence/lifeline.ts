@@ -5,7 +5,8 @@ const instanceType = objectType(
     new Map([
         ["name", stringType],
         ["line", anyType /* TODO: specify what lines are. CanvasConnections? */],
-        ["events", listType(/* TODO: specify element type */)]
+        ["events", listType(/* TODO: specify element type */)],
+        ["activeLifelines", listType(/* TODO: specify element type*/)]
     ]),
     "UML sequence diagram instance or actor"
 );
@@ -56,6 +57,7 @@ export const lifelineModule = InterpreterModule.create(
                 lifelineElement.pos = scope.rpos(startPosition, -0.5*scope.lifelineWidth, -1*scope.margin)
                 
                 scope.internal.registerCanvasElement(lifelineElement, args, args.self)
+                instance.activeLifelines += lifelineElement
             `,
                 {
                     docs: "Activates a lifeline at the most recent event you declared. Lifelines are ranges of time during which an instance is active. You can activate a lifeline multiple times simultaneously",
@@ -74,9 +76,10 @@ export const lifelineModule = InterpreterModule.create(
                     error("Cannot deactivate a non-existing instance")
                 }
                 
-                if(instance /* TODO: Fix condition to "no lifeline present" */ == null) {
+                if(instance.activeLifelines.length == 0) {
                     error("Cannot deactivate instance '"+ instance.name + "' as it has not been activated")
                 }
+                lifeline = instance.activeLifelines.remove()
             `,
                 {
                     docs: "Deactivates the most recent lifeline",
