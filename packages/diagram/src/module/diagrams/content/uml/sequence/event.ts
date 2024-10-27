@@ -41,9 +41,9 @@ export const eventModule = InterpreterModule.create(
                     it.events += eventPosition // for the position calculation
                     eventObject[it.name] = eventPosition // for arrows, i.e. 'event.shop --> event.cart'
                     
-                    // change the length of the instance line (its end position) to the new last position + 2*margin
-                    // (+2 margin so that a lifeline that is still present there can end, and there's still a bit of the line left over)
-                    endpos = scope.rpos(eventPosition, 0, 2*scope.margin)
+                    // change the length of the instance line (its end position) to the new last position + 3*margin
+                    // (+3 margin so that a lifeline that is still present there can end, and there's still a bit of the line left over)
+                    endpos = scope.rpos(eventPosition, 0, 3*scope.margin)
                     it.line.contents.get(it.line.contents.length - 1).end = endpos
                     println(endpos)
 
