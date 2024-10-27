@@ -19,7 +19,14 @@ export const sequenceDiagramInstanceModule = InterpreterModule.create(
                     (name, class, callback) = args
                     title = name
                     if(class != null) {
-                        title = name + ":" + class
+                        if(class.proto == "".proto) {
+                            title = name + ":" + class
+                        } {
+                            if(callback != null) {
+                                error("Both the class name and body of instance '" + name + "' are set to functions which is not allowed. Either provide a class name string as second argument, or pass at most two arguments")
+                            }
+                            callback = class // shift $1 -> $2 when necessary, both the class name and the callback function are optional
+                        }
                     }
                     
                     this.instance = scope.internal.createInstance(name, callback, title = title, keywords = args.keywords, args = args)
@@ -49,9 +56,8 @@ export const sequenceDiagramInstanceModule = InterpreterModule.create(
                             "the optional name of the instance. If the next argument is missing, this argument will be treated as the class name",
                             stringType
                         ],
-                        [1, "the class name of this instance", optional(or(stringType, functionType))], // TODO: Shift $1 to $2 if necessary
-                        [2, "the callback function of this instance", optional(functionType)],
-                        ["keywords", "the keywords of the class", optional(listType(stringType))]
+                        [1, "the class name of this instance", optional(or(stringType, functionType))],
+                        [2, "the callback function of this instance", optional(functionType)]
                     ],
                     snippet: `("$1")`,
                     returns: "The created instance"
