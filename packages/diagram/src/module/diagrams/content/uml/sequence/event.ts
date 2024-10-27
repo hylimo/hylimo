@@ -44,7 +44,7 @@ export const eventModule = InterpreterModule.create(
                     // change the length of the instance line (its end position) to the new last position + 2*margin
                     // (+2 margin so that a lifeline that is still present there can end, and there's still a bit of the line left over)
                     endpos = scope.rpos(eventPosition, 0, 2*scope.margin)
-                    it.line.contents.get(it.line.contents.length - 1).verticalPos = endpos
+                    it.line.contents.get(it.line.contents.length - 1).end = endpos
                     println(endpos)
 
                 }
