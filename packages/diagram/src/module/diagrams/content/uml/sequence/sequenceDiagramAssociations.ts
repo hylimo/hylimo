@@ -22,18 +22,14 @@ export const sequenceDiagramAssociationsModule = InterpreterModule.create(
                   {
                       (startEvent, endEvent) = args
                       
-                      start = if(startEvent.left == null) {
-                          // TODO - Remove: scope.println("No left property found")
+                      start = if(startEvent.right == null) {
                           startEvent
                       } {
-                          // TODO - Remove: scope.println("Found a left property")
-                          startEvent.left
+                          startEvent.right
                       } 
-                      end = if(endEvent.right == null) {
-                          // TODO - Remove: scope.println("No right property found")
+                      end = if(endEvent.left == null) {
                           endEvent
                       }{
-                          // TODO - Remove: scope.println("Found a right property")
                           endEvent.left
                       } 
                       

@@ -85,8 +85,8 @@ export const lifelineModule = InterpreterModule.create(
                 )
                 
                 lifelineElement.xshift = xshift
-                lifelineElement.leftX = xshift
-                lifelineElement.rightX = xshift + width
+                lifelineElement.leftX = xshift - (0.5 * width)
+                lifelineElement.rightX = lifelineElement.leftX + width
                 
                 // Explanation of the position:
                 // - start: the (x,y) coordinate of the given event-actor combi
