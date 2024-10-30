@@ -10,6 +10,7 @@ import { defaultValues } from "./content/uml/sequence/defaultValues.js";
 import { sequenceDiagramActorModule } from "./content/uml/sequence/sequenceDiagramActor.js";
 import { eventModule } from "./content/uml/sequence/event.js";
 import { lifelineModule } from "./content/uml/sequence/lifeline.js";
+import { sequenceDiagramAssociationsModule } from "./content/uml/sequence/sequenceDiagramAssociations.js";
 
 /**
  * Module for UML sequence diagrams.
@@ -27,7 +28,7 @@ export const sequenceDiagramModule = InterpreterModule.create(
         eventModule,
         lifelineModule,
         // frameModule,
-        associationsModule,
+        sequenceDiagramAssociationsModule,
         readingDirectionModule
     ])
 );

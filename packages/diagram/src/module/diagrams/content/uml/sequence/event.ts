@@ -39,7 +39,18 @@ export const eventModule = InterpreterModule.create(
                     }
                     
                     it.events += eventPosition // for the position calculation
-                    eventObject[it.name] = eventPosition // for arrows, i.e. 'event.shop --> event.cart'
+                    
+                    // When we have a lifeline, we have to relocate the arrow to the end of the most recent lifeline, either on the left or on the right side of the lifeline
+                    leftX = 0
+                    rightX = 0
+                    activeLifelines = it.activeLifelines
+                    if(activeLifelines.length > 0) {
+                       lastLifeline = activeLifelines.get(activeLifelines.length - 1)
+                       leftX = lastLifeline.leftX
+                       rightX = lastLifeline.rightX
+                    }
+                    // TODO - Remove: scope.println("Event " +  eventObject.name + "." + it.name + ": left X: " + leftX + ", right X: " + rightX)
+                    eventObject[it.name] = [ left = scope.rpos(eventPosition, leftX, 0), center = eventPosition, right = scope.rpos(eventPosition, rightX, 0)] // for arrows, i.e. 'event.shop --> event.cart', the left/right is unwrapped by the arrow itself
                     
                     // change the length of the instance line (its end position) to the new last position + 3*margin
                     // (+3 margin so that a lifeline that is still present there can end, and there's still a bit of the line left over)

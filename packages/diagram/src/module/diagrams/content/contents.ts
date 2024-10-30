@@ -27,6 +27,8 @@ import { sequenceDiagramInstanceModule } from "./uml/sequence/sequenceDiagramIns
 import { actorModule } from "./uml/actor.js";
 import { eventModule } from "./uml/sequence/event.js";
 import { lifelineModule } from "./uml/sequence/lifeline.js";
+import { sequenceDiagramActorModule } from "./uml/sequence/sequenceDiagramActor.js";
+import { sequenceDiagramAssociationsModule } from "./uml/sequence/sequenceDiagramAssociations.js";
 
 /**
  * All content modules
@@ -59,5 +61,7 @@ export const contents: InterpreterModule[] = [
     providesAndRequiresModule,
     readingDirectionModule,
     sectionsModule,
+    sequenceDiagramActorModule,
+    sequenceDiagramAssociationsModule,
     sequenceDiagramInstanceModule
 ];
