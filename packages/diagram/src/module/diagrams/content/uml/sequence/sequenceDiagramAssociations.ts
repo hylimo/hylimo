@@ -22,15 +22,16 @@ export const sequenceDiagramAssociationsModule = InterpreterModule.create(
                   {
                       (startEvent, endEvent) = args
                       
-                      start = if(startEvent.right == null) {
-                          startEvent
+                      // If necessary, unwrap to the left/ right side of the most recent lifeline - calculated through the given left/right functions
+                      start = if(startEvent.right != null && (startEvent.right.proto == {}.proto)) {
+                          startEvent.right()
                       } {
-                          startEvent.right
+                          startEvent
                       } 
-                      end = if(endEvent.left == null) {
-                          endEvent
+                      end = if(endEvent.left != null && (endEvent.left.proto == {}.proto)) {
+                          endEvent.left()
                       }{
-                          endEvent.left
+                          endEvent
                       } 
                       
                       scope.internal.createConnection(
