@@ -71,6 +71,7 @@ export * from "./module/diagrams/content/uml/sequence/lifeline.js";
 export * from "./module/diagrams/content/uml/sequence/sequenceDiagramInstance.js";
 export * from "./module/diagrams/content/uml/sequence/sequenceDiagramActor.js";
 export * from "./module/diagrams/content/uml/sequence/sequenceDiagramAssociations.js";
+export * from "./module/diagrams/content/uml/sequence/types.js";
 export * from "./module/diagrams/content/uml/nonNavigableAssociations.js";
 export * from "./module/diagrams/content/uml/package.js";
 export * from "./module/diagrams/content/uml/readingDirection.js";

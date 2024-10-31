@@ -1,25 +1,6 @@
-import {
-    anyType,
-    fun,
-    id,
-    InterpreterModule,
-    listType,
-    numberType,
-    objectType,
-    optional,
-    stringType
-} from "@hylimo/core";
+import { fun, id, InterpreterModule, numberType, optional } from "@hylimo/core";
 import { SCOPE } from "../../../../base/dslModule.js";
-
-const instanceType = objectType(
-    new Map([
-        ["name", stringType],
-        ["line", anyType /* TODO: specify what lines are. CanvasConnections? */],
-        ["events", listType(/* TODO: specify element type */)],
-        ["activeLifelines", listType(/* TODO: specify element type*/)]
-    ]),
-    "UML sequence diagram instance or actor"
-);
+import { instanceType } from "./types.js";
 
 /**
  * Defines an event.<br>
