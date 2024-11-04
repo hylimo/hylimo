@@ -20,13 +20,13 @@ export const providesAndRequiresModule = InterpreterModule.create(
                         value: fun([
                             ...parse(
                                 `
-                                    this.scope = args.scope
+                                    this.callScope = args.callScope
                                     this.canvasScope = args.canvasScope
                                     this.element = args.element
-                                    scope.ports = list()
+                                    callScope.ports = list()
                                 `
                             ),
-                            id("scope").assignField(
+                            id("callScope").assignField(
                                 "provides",
                                 fun(
                                     `
@@ -83,7 +83,7 @@ export const providesAndRequiresModule = InterpreterModule.create(
                                     }
                                 )
                             ),
-                            id("scope").assignField(
+                            id("callScope").assignField(
                                 "requires",
                                 fun(
                                     `
@@ -136,8 +136,8 @@ export const providesAndRequiresModule = InterpreterModule.create(
                             ),
                             ...parse(
                                 `
-                                    args.element.provides = scope.provides
-                                    args.element.requires = scope.requires
+                                    args.element.provides = callScope.provides
+                                    args.element.requires = callScope.requires
                                 `
                             )
                         ])

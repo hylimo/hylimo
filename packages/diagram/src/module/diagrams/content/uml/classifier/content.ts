@@ -12,10 +12,10 @@ export const contentModule = InterpreterModule.create(
             `
                 scope.internal.contentContentHandler = [
                     {
-                        args.scope.contents = list()
+                        args.callScope.contents = list()
                     },
                     {
-                        this.innerContents = args.scope.contents
+                        this.innerContents = args.callScope.contents
                         this.contents = args.contents
                         if (innerContents.length > 0) {
                             this.innerCanvasClass = list()
