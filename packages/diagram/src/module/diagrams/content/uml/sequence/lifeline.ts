@@ -59,7 +59,7 @@ export const lifelineModule = InterpreterModule.create(
                 width = scope.lifelineWidth
                 
                 lifelineElement = canvasElement(
-                    content = rect(class = list("lifeline"), fill = "white"),
+                    content = rect(class = list("lifeline"), fill = var("background")),
                     class = list("lifeline-element"),
                     width = width,
                     height = 2 * scope.margin // margin around the event, once above and once below
