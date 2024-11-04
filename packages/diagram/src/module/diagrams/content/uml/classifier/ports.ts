@@ -39,7 +39,7 @@ export const portsModule = InterpreterModule.create(
                                         
                                         result = []
                                         scope.internal.providesRequiresContentHandler[0](
-                                            scope = result,
+                                            callScope = result,
                                             args = args,
                                             element = portElement,
                                             canvasScope = canvasScope
