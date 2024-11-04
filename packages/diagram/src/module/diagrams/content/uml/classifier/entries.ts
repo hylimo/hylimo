@@ -77,7 +77,7 @@ export const entriesModule = InterpreterModule.create(
             `
                 scope.internal.entriesContentHandler = [
                     {
-                        args.scope.entries = _literalsScopeGenerator(args.scope.section)
+                        args.callScope.entries = _literalsScopeGenerator(args.callScope.section)
                     },
                     { }
                 ]

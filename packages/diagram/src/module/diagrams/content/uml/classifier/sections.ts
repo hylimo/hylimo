@@ -12,28 +12,28 @@ export const sectionsModule = InterpreterModule.create(
             `
                 scope.internal.sectionsContentHandler = [
                     {
-                        this.scope = args.scope
-                        scope.sections = list()
-                        scope.section = listWrapper {
+                        this.callScope = args.callScope
+                        callScope.sections = list()
+                        callScope.section = listWrapper {
                             sectionIndex = args.section
                             newSection = it
                             if(sectionIndex == null) {
-                                scope.sections += newSection
+                                callScope.sections += newSection
                             } {
-                                while { scope.sections.length <= sectionIndex } {
-                                    scope.sections += null
+                                while { callScope.sections.length <= sectionIndex } {
+                                    callScope.sections += null
                                 }
-                                if(scope.sections.get(sectionIndex) == null) {
-                                    scope.sections.set(sectionIndex, list())
+                                if(callScope.sections.get(sectionIndex) == null) {
+                                    callScope.sections.set(sectionIndex, list())
                                 }
-                                scope.sections.get(sectionIndex).addAll(newSection)
+                                callScope.sections.get(sectionIndex).addAll(newSection)
                             }
                         }
                     },
                     {
                         this.contents = args.contents
 
-                        args.scope.sections.forEach {
+                        args.callScope.sections.forEach {
                             this.section = it
                             if (section != null) {
                                 contents += path(path = "M 0 0 L 1 0", class = list("separator"))

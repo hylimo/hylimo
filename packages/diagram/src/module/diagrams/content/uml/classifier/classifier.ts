@@ -37,7 +37,7 @@ export const classifierModule = InterpreterModule.create(
                             )
                             contentHandlers.forEach {
                                 it[0](
-                                    scope = result,
+                                    callScope = result,
                                     args = classifierArgs,
                                     element = classifierElement,
                                     contents = classifierContents,
@@ -56,7 +56,7 @@ export const classifierModule = InterpreterModule.create(
 
                             contentHandlers.forEach {
                                 it[1](
-                                    scope = result,
+                                    callScope = result,
                                     args = classifierArgs,
                                     element = classifierElement,
                                     contents = classifierContents,

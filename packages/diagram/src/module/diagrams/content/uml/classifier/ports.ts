@@ -19,13 +19,13 @@ export const portsModule = InterpreterModule.create(
                         value: fun([
                             ...parse(
                                 `
-                                    this.scope = args.scope
+                                    this.callScope = args.callScope
                                     this.canvasScope = args.canvasScope
                                     this.element = args.element
-                                    scope.ports = list()
+                                    callScope.ports = list()
                                 `
                             ),
-                            id("scope").assignField(
+                            id("callScope").assignField(
                                 "port",
                                 fun(
                                     `
@@ -73,7 +73,7 @@ export const portsModule = InterpreterModule.create(
                             ),
                             ...parse(
                                 `
-                                    args.element.port = scope.port
+                                    args.element.port = callScope.port
                                 `
                             )
                         ])
