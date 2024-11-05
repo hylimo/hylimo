@@ -21,6 +21,11 @@ export class CommandStack extends SprottyCommandStack {
      */
     private lastContext?: CancelableCommandExecutionContext;
 
+    /**
+     * The sequence number of the last cancelable command
+     */
+    private cancelCounter = -1;
+
     protected override handleCommand(
         command: ICommand,
         operation: (context: CommandExecutionContext) => CommandReturn,
@@ -32,20 +37,26 @@ export class CommandStack extends SprottyCommandStack {
         ) {
             CancelableCommandExecutionContext.setCanceled(
                 this.lastContext,
-                command instanceof IncrementalUpdateModelCommand
+                command instanceof IncrementalUpdateModelCommand,
+                this.cancelCounter
             );
         }
+        this.cancelCounter++;
         super.handleCommand(command, operation, beforeResolve);
     }
 
     protected override createContext(currentModel: SModelRootImpl): CancelableCommandExecutionContext {
         const originalContext = super.createContext(currentModel);
         const context: CancelableCommandExecutionContext = {
-            ...originalContext,
+            root: originalContext.root,
+            modelFactory: originalContext.modelFactory,
+            logger: originalContext.logger,
+            modelChanged: originalContext.modelChanged,
+            syncer: originalContext.syncer,
+            commandSequenceNumber: (this.lastContext?.commandSequenceNumber ?? -1) + 1,
             get duration(): number {
                 return CancelableCommandExecutionContext.isCanceled(this) ? 0 : originalContext.duration;
             },
-            commandSequenceNumber: this.lastContext?.commandSequenceNumber ?? 0,
             cancelState: this.lastContext?.cancelState ?? {
                 cancelUntil: -1,
                 skipUntil: -1
