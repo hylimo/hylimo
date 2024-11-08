@@ -3,7 +3,7 @@ import { InterpreterModule, parse } from "@hylimo/core";
 /**
  * Module providing association operators for sequence diagrams.<br>
  * They differ from normal associations in that they replace the target prior to drawing the line:<br>
- * For sequence diagrams, we only want to draw until the start/end of the corresponding lifeline instead of its center,
+ * For sequence diagrams, we only want to draw until the start/end of the corresponding activity indicator instead of its center,
  * which is the value the user supplies by giving the event
  */
 export const sequenceDiagramAssociationsModule = InterpreterModule.create(
@@ -22,7 +22,7 @@ export const sequenceDiagramAssociationsModule = InterpreterModule.create(
                   {
                       (startEvent, endEvent) = args
                       
-                      // If necessary, unwrap to the left/ right side of the most recent lifeline - calculated through the given left/right functions
+                      // If necessary, unwrap to the left/ right side of the most recent activity indicator - calculated through the given left/right functions
                       start = if(startEvent.right != null && (startEvent.right.proto == {}.proto)) {
                           startEvent.right()
                       } {

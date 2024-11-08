@@ -8,7 +8,7 @@ import { SCOPE } from "../../../../base/dslModule.js";
  */
 export const sequenceDiagramActorModule = InterpreterModule.create(
     "uml/sequenceDiagramActor",
-    ["uml/sequence/defaultValues", "uml/actor", "uml/associations"],
+    ["uml/sequence/defaultValues", "uml/actor", "uml/sequence/participant", "uml/associations"],
     [],
     [
         id(SCOPE).assignField(
@@ -25,27 +25,8 @@ export const sequenceDiagramActorModule = InterpreterModule.create(
                         name = "User"
                         scope.internal.registerInDiagramScope(name, this.actor)
                     }
-                    this.actor.name = name
                     
-                    this.actor.pos = if(scope.internal.lastSequenceDiagramElement != null) {
-                        scope.rpos(scope.internal.lastSequenceDiagramElement, scope.instanceDistance, 0)
-                    } {
-                        scope.apos(0, 0) // so that we don't get NPEs for the event layouting
-                    }
-                    
-                    if(scope.internal.lastSequenceDiagramElement != null) {
-                        this.actor.pos = scope.rpos(scope.internal.lastSequenceDiagramElement, scope.instanceDistance, 0)
-                    }
-
-                    //  Create the line of this actor now so that it will always be rendered behind everything else
-                    this.bottomcenter = scope.lpos(this.actor, 0.25)
-                    this.actor.lineStart = this.bottomcenter
-                    this.actor.line = scope[".."](bottomcenter, scope.rpos(bottomcenter, 0, scope.margin))
-                    this.actor.events = list() // Needed for the autolayouting of events
-                    this.actor.activeLifelines = list() // Needed for the lifeline autolayouting
-
-                    scope.internal.sequenceDiagramElements += this.actor
-                    scope.internal.lastSequenceDiagramElement = this.actor
+                    scope.internal.createSequenceDiagramParticipant(name, this.actor)
                 `,
                 {
                     docs: "Creates an actor. An actor is a stickman with an optional name",

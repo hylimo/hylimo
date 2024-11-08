@@ -12,31 +12,31 @@ export const eventType = objectType(
 
 export const eventCoordinateType = objectType(
     new Map([
-        ["left" /* left xy position of the most recent lifeline wrapped inside a function */, functionType],
+        ["left" /* left xy position of the most recent activity indicator wrapped inside a function */, functionType],
         ["center" /* precise xy position of the event */, canvasPointType],
-        ["right" /* right xy position of the most recent lifeline wrapped inside a function */, functionType]
+        ["right" /* right xy position of the most recent activity indicator wrapped inside a function */, functionType]
     ]),
     "UML sequence diagram event for a specific x coordinate"
 );
 
-export const lifelineType = objectType(
+export const activityIndicatorType = objectType(
     new Map([
         ["xshift", numberType],
         ["leftX", numberType],
         ["rightX", numberType],
         ["pos", canvasPointType]
     ]),
-    "UML sequence diagram lifeline"
+    "UML sequence diagram activity indicator"
 );
 
-export const instanceType = objectType(
+export const participantType = objectType(
     new Map([
         ["name", stringType],
-        ["line", canvasContentType],
+        ["lifeline", canvasContentType],
         ["events", listType(canvasPointType)],
-        ["activeLifelines", listType(lifelineType)]
+        ["activeActivityIndicators", listType(activityIndicatorType)]
     ]),
-    "UML sequence diagram instance or actor"
+    "UML sequence diagram participant (instance or actor)"
 );
 
 export const frameType = objectType(

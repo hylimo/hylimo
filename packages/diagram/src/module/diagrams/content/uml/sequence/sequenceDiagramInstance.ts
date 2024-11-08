@@ -9,7 +9,7 @@ import { SCOPE } from "../../../../base/dslModule.js";
  */
 export const sequenceDiagramInstanceModule = InterpreterModule.create(
     "uml/sequenceDiagramInstance",
-    ["uml/sequence/defaultValues", "uml/instance", "uml/associations"],
+    ["uml/sequence/defaultValues", "uml/instance", "uml/sequence/participant", "uml/associations"],
     [],
     [
         id(SCOPE).assignField(
@@ -28,26 +28,8 @@ export const sequenceDiagramInstanceModule = InterpreterModule.create(
                             callback = class // shift $1 -> $2 when necessary, both the class name and the callback function are optional
                         }
                     }
-                    
                     this.instance = scope.internal.createInstance(name, callback, title = title, keywords = args.keywords, args = args)
-                    
-                    this.instance.pos = if(scope.internal.lastSequenceDiagramElement != null) {
-                        scope.rpos(scope.internal.lastSequenceDiagramElement, scope.instanceDistance, 0)
-                    } {
-                        scope.apos(0, 0) // so that we don't get NPEs for the event layouting
-                    }
-                    this.instance.name = name
-                    
-                    //  Create the line of this instance now so that it will always be rendered behind everything else
-                    this.bottomcenter = scope.lpos(this.instance, 0.25)
-                    this.instance.lineStart = this.bottomcenter
-                    this.instance.line = scope[".."](bottomcenter, scope.rpos(bottomcenter, 0, scope.margin))
-                    this.instance.events = list() // Needed for the autolayouting of events
-                    this.instance.activeLifelines = list() // Needed for the lifeline autolayouting
-
-                    
-                    scope.internal.sequenceDiagramElements += this.instance
-                    scope.internal.lastSequenceDiagramElement = this.instance
+                    scope.internal.createSequenceDiagramParticipant(name, this.instance)
                 `,
                 {
                     docs: "Creates an instance. An instance is like a class, except it can optionally have an instance name",

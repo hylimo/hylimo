@@ -22,14 +22,14 @@ export const eventModule = InterpreterModule.create(
                     error("Cannot construct event '" + name + "' as this variable is already declared somewhere else")
                 }
                 
-                // The event itself must store its y-coordinate so that the calculation of the lifelines and co works correctly
+                // The event itself must store its y-coordinate so that the calculation of the activity indicators and co works correctly
                 previousEvent = scope.internal.sequenceDiagramEvent
                 eventObject.deltaY = if(yDistance != null) { yDistance } { scope.eventDistance }
                 eventObject.y = if(previousEvent != null) { previousEvent.y } { 0 } + eventObject.deltaY 
                 
                 // Position the event for each instance relative to the latest previous event
                 // and add all events as per the user facing definition of events, i.e. 'start.User', 'start.Shop', …
-                scope.internal.sequenceDiagramElements.forEach {
+                scope.internal.sequenceDiagramParticipants.forEach {
                 
                     // Use either the position below the instance, the position below the last event, or the user supplied position
                     eventPosition = scope.rpos(it.pos, 0, eventObject.deltaY)
@@ -40,38 +40,38 @@ export const eventModule = InterpreterModule.create(
                     
                     it.events += eventPosition // for the position calculation
                     
-                    // When we have a lifeline, we have to relocate the arrow to the end of the most recent lifeline, either on the left or on the right side of the lifeline
-                    // Additionally, since lifelines are defined after the event creating them, we must shift the position the moment we create an association since only then the currently active lifelines are known
+                    // When we have a activity indicator, we have to relocate the arrow to the end of the most recent activity indicator, either on the left or on the right side of the activity indicator
+                    // Additionally, since activity indicators are defined after the event creating them, we must shift the position the moment we create an association since only then the currently active activity indicators are known
                     leftX = 0
                     rightX = 0
-                    activeLifelines = it.activeLifelines
-                    lifelineShifter = {
-                        if(activeLifelines.length > 0) {
-                           lastLifeline = activeLifelines.get(activeLifelines.length - 1)
-                           leftX = lastLifeline.leftX
-                           rightX = lastLifeline.rightX
+                    activeActivityIndicators = it.activeActivityIndicators
+                    activityShifter = {
+                        if(activeActivityIndicators.length > 0) {
+                           lastActivityIndicator = activeActivityIndicators.get(activeActivityIndicators.length - 1)
+                           leftX = lastActivityIndicator.leftX
+                           rightX = lastActivityIndicator.rightX
                         }
                     }
                     
                     eventObject[it.name] = [
                         left = {
-                            lifelineShifter()
+                            activityShifter()
                             scope.rpos(eventPosition, leftX, 0)
                         },
                         center = eventPosition,
                         right = {
-                            lifelineShifter()
+                            activityShifter()
                             scope.rpos(eventPosition, rightX, 0) // for arrows, i.e. 'event.shop --> event.cart', the left/right is unwrapped by the arrow itself
                         }
                     ]
                     
                     // change the length of the instance line (its end position) to the new last position + 3*margin
-                    // (+3 margin so that a lifeline that is still present there can end, and there's still a bit of the line left over)
+                    // (+3 margin so that a activity indicator that is still present there can end, and there's still a bit of the line left over)
                     endpos = scope.rpos(eventPosition, 0, 3*scope.margin)
                     it.line.contents.get(it.line.contents.length - 1).end = endpos
                     
-                    // Also enlarge all active lifelines
-                    it.activeLifelines.forEach {
+                    // Also enlarge all active activity indicators
+                    it.activeActivityIndicators.forEach {
                         it.height = it.height + eventObject.deltaY
                     }
 

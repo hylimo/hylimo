@@ -4,13 +4,13 @@ import { createDiagramModule } from "./generateDiagramModule.js";
 import { elementModule } from "./content/common/element.js";
 import { defaultStylesModule } from "./content/common/defaultStyles.js";
 import { readingDirectionModule } from "./content/uml/readingDirection.js";
-import { associationsModule } from "./content/uml/associations.js";
 import { sequenceDiagramInstanceModule } from "./content/uml/sequence/sequenceDiagramInstance.js";
 import { defaultValues } from "./content/uml/sequence/defaultValues.js";
 import { sequenceDiagramActorModule } from "./content/uml/sequence/sequenceDiagramActor.js";
 import { eventModule } from "./content/uml/sequence/event.js";
-import { lifelineModule } from "./content/uml/sequence/lifeline.js";
+import { activityIndicatorModule } from "./content/uml/sequence/activityIndicator.js";
 import { sequenceDiagramAssociationsModule } from "./content/uml/sequence/sequenceDiagramAssociations.js";
+import { participantModule } from "./content/uml/sequence/participant.js";
 
 /**
  * Module for UML sequence diagrams.
@@ -26,8 +26,9 @@ export const sequenceDiagramModule = InterpreterModule.create(
         sequenceDiagramInstanceModule,
         sequenceDiagramActorModule,
         eventModule,
-        lifelineModule,
+        activityIndicatorModule,
         // frameModule,
+        participantModule,
         sequenceDiagramAssociationsModule,
         readingDirectionModule
     ])
