@@ -111,17 +111,15 @@ export class LanguageServer {
         this.connection.onInitialize(this.onInitialize.bind(this));
         this.diagramServerManager = new DiagramServerManager(this.connection);
         this.textDocuments.listen(this.connection);
-        const interpreterModules = [...defaultDiagramModules, ...config.additionalInterpreterModules];
-        const interpreter = new Interpreter(interpreterModules, defaultModules, config.maxExecutionSteps);
         const parser = new Parser();
+        const diagramEngine = new DiagramEngine(config.additionalInterpreterModules, config.maxExecutionSteps);
         this.diagramUtils = {
             config: new Config(config.defaultConfig),
             connection: this.connection,
-            interpreter,
             parser,
-            diagramEngine: new DiagramEngine(parser, interpreter, new LayoutEngine()),
+            diagramEngine,
             diagramServerManager: this.diagramServerManager,
-            completionEngine: new CompletionEngine(interpreter)
+            completionEngine: new CompletionEngine(diagramEngine)
         };
         this.layoutedDiagramManager = new RemoteDiagramImplementationManager(this.diagramUtils);
         this.formatter = new Formatter(this.diagramUtils.parser);

@@ -18,10 +18,6 @@ export interface SharedDiagramUtils {
      */
     readonly connection: Connection;
     /**
-     * Interpreter to execute scripts
-     */
-    readonly interpreter: Interpreter;
-    /**
      * Parser to parse scripts
      */
     readonly parser: Parser;

@@ -3,9 +3,11 @@ import {
     ExecutableExpression,
     InterpretationResult,
     Interpreter,
+    InterpreterModule,
     Parser,
     RuntimeError,
     SemanticFieldNames,
+    defaultModules,
     id,
     object,
     str,
@@ -14,6 +16,8 @@ import {
 import { LayoutEngine } from "./layout/engine/layoutEngine.js";
 import { DiagramConfig } from "@hylimo/diagram-common";
 import { LayoutedDiagram } from "./layout/diagramLayoutResult.js";
+import { createBaseDiagramModules, defaultDiagramModules } from "./module/diagramModules.js";
+import { baseDiagramModule } from "./module/diagrams/baseDiagramModule.js";
 
 /**
  * All errors that can occur during rendering of a diagram
@@ -31,14 +35,6 @@ export interface RenderErrors extends Pick<CstResult, "lexingErrors" | "parserEr
 
 export interface RenderResult {
     /**
-     * The result of the parser
-     */
-    cstResult: CstResult;
-    /**
-     * The result of the interpreter
-     */
-    interpretationResult?: InterpretationResult;
-    /**
      * All errors combined
      */
     errors: RenderErrors;
@@ -53,17 +49,31 @@ export interface RenderResult {
  */
 export class DiagramEngine {
     /**
+     * The parser to use
+     */
+    private readonly parser = new Parser(false);
+    /**
+     * The interpreter to use
+     */
+    private readonly interpreter: Interpreter;
+    /**
+     * The layout engine to use
+     */
+    private readonly layoutEngine = new LayoutEngine();
+
+    /**
      * Creates a new DiagramEngine
      *
-     * @param parser the parser to use
-     * @param interpreter the interpreter to use
-     * @param layoutEngine the layout engine to use
+     * @param additionalInterpreterModules additional modules to use in the interpreter
+     * @param maxExecutionSteps the maximum number of execution steps
      */
-    constructor(
-        private readonly parser: Parser,
-        private readonly interpreter: Interpreter,
-        private readonly layoutEngine: LayoutEngine
-    ) {}
+    constructor(additionalInterpreterModules: InterpreterModule[], maxExecutionSteps: number) {
+        this.interpreter = new Interpreter(
+            [...additionalInterpreterModules, ...createBaseDiagramModules(this.layoutEngine), ...defaultDiagramModules],
+            defaultModules,
+            maxExecutionSteps
+        );
+    }
 
     /**
      * Renders a diagram
@@ -74,30 +84,47 @@ export class DiagramEngine {
      */
     async render(source: string, config: DiagramConfig): Promise<RenderResult> {
         const parserResult = this.parser.parse(source);
-        let interpretationResult: InterpretationResult | undefined = undefined;
+        if (parserResult.ast == undefined) {
+            return {
+                errors: {
+                    lexingErrors: parserResult.lexingErrors,
+                    parserErrors: parserResult.parserErrors,
+                    interpreterErrors: [],
+                    layoutErrors: []
+                }
+            };
+        }
+        const expressions = toExecutable(parserResult.ast, true);
+        return this.renderInternal(expressions, config);
+    }
+
+    /**
+     * Renders a diagram from a list of executable expressions
+     *
+     * @param expressions the expressions to execute, typically derived from the parser result, does not include the config
+     * @param config additional config
+     * @returns the render result including the potential diagram and all errors
+     */
+    async renderInternal(
+        expressions: ExecutableExpression[],
+        config: DiagramConfig,
+    ): Promise<RenderResult> {
         let layoutedDiagram: LayoutedDiagram | undefined = undefined;
         const layoutErrors: Error[] = [];
-        if (parserResult.ast != undefined) {
-            interpretationResult = this.interpreter.run([
-                ...this.convertConfig(config),
-                ...toExecutable(parserResult.ast, true)
-            ]);
-            if (interpretationResult.result != undefined) {
-                try {
-                    layoutedDiagram = await this.layoutEngine.layout(interpretationResult.result, config);
-                } catch (e: any) {
-                    layoutErrors.push(e);
-                }
+        const interpretationResult = this.interpreter.run([...this.convertConfig(config), ...expressions]);
+        if (interpretationResult.result != undefined) {
+            try {
+                layoutedDiagram = await this.layoutEngine.layout(interpretationResult.result, config);
+            } catch (e: any) {
+                layoutErrors.push(e);
             }
         }
         return {
-            cstResult: parserResult,
-            interpretationResult,
             layoutedDiagram,
             errors: {
-                lexingErrors: parserResult.lexingErrors,
-                parserErrors: parserResult.parserErrors,
-                interpreterErrors: interpretationResult?.error != undefined ? [interpretationResult.error] : [],
+                lexingErrors: [],
+                parserErrors: [],
+                interpreterErrors: interpretationResult.error != undefined ? [interpretationResult.error] : [],
                 layoutErrors
             }
         };

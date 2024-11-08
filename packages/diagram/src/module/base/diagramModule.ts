@@ -29,6 +29,7 @@ import { AttributeConfig, ContentCardinality, LayoutConfig } from "../../layout/
 import { layouts } from "../../layout/layouts.js";
 import { elementType } from "./types.js";
 import { DiagramModuleNames } from "../diagramModuleNames.js";
+import { LayoutEngine } from "../../layout/engine/layoutEngine.js";
 
 /**
  * Type for unset, default style values
@@ -182,13 +183,21 @@ function font(name: string, url: string): ExecutableListEntry {
 }
 
 /**
- * Diagram module providing standard diagram UI elements
+ * Diagram module providing default diagram UI elements
  */
-export const diagramModule = InterpreterModule.create(
-    DiagramModuleNames.DIAGRAM,
-    [...Object.values(DefaultModuleNames), DiagramModuleNames.EDIT],
-    [],
-    [
+export class DiagramModule implements InterpreterModule {
+
+    /**
+     * Creates a new diagram module
+     * 
+     * @param layoutEngine the layout engine to use for layouting
+     */
+    constructor(readonly layoutEngine: LayoutEngine) {}
+
+    name = DiagramModuleNames.DIAGRAM;
+    dependencies = [...Object.values(DefaultModuleNames), DiagramModuleNames.EDIT];
+    runtimeDependencies = [];
+    expressions = [
         fun([
             assign("_elementProto", id("object").call({ name: "_type", value: str("element") })),
             assign(
@@ -448,5 +457,5 @@ export const diagramModule = InterpreterModule.create(
                 }
             )
         )
-    ]
-);
+    ];
+}

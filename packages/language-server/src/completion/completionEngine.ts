@@ -1,7 +1,9 @@
-import { Parser, ExecutableExpression, Interpreter } from "@hylimo/core";
+import { Parser } from "@hylimo/core";
 import { CompletionAstTransformer } from "./completionAstTransformer.js";
 import { CompletionError } from "./completionError.js";
 import { CompletionItem } from "./completionItem.js";
+import { DiagramEngine } from "@hylimo/diagram";
+import { DiagramConfig } from "@hylimo/diagram-common";
 
 /**
  * Completion engine which can generate completion items by executing the given code
@@ -15,21 +17,21 @@ export class CompletionEngine {
     /**
      * Creates a new CompletionEngine with the given interpreter and max execution steps
      *
-     * @param interpreter the interpreter to use
+     * @param diagramEngine the diagram engine to use
      */
-    constructor(private readonly interpreter: Interpreter) {}
+    constructor(private readonly diagramEngine: DiagramEngine) {}
 
     /**
      * Generates completion items based on the given text and position
      *
      * @param text the code to execute
-     * @param additionalExpressions additionally available variables for use in the completion that are not located within the given text
+     * @param config the configuration to use
      * @param position the position of the cursor
      * @returns the generated complete items or undefined if no items could be generated
      */
     complete(
         text: string,
-        additionalExpressions: ExecutableExpression[],
+        config: DiagramConfig,
         position: number
     ): CompletionItem[] | undefined {
         const parserResult = this.parser.parse(text);
@@ -39,7 +41,7 @@ export class CompletionEngine {
         const toExecutableTransformer = new CompletionAstTransformer(position);
         const executableAst = parserResult.ast.map((expression) => toExecutableTransformer.visit(expression));
         try {
-            this.interpreter.run([...additionalExpressions, ...executableAst]);
+            this.diagramEngine.renderInternal(executableAst, config)
         } catch (e: any) {
             if (CompletionError.isCompletionError(e)) {
                 return e.completionItems;

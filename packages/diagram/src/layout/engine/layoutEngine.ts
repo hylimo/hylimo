@@ -1,4 +1,4 @@
-import { BaseObject, FullObject, nativeToList } from "@hylimo/core";
+import { BaseObject, FullObject, InterpreterContext, nativeToList } from "@hylimo/core";
 import {
     Size,
     Point,
@@ -128,21 +128,21 @@ export class LayoutEngine {
      * @param config the configuration to use
      * @returns the layouted diagram
      */
-    async layout(diagram: BaseObject, config: DiagramConfig): Promise<LayoutedDiagram> {
+    async layout(diagram: BaseObject, config: DiagramConfig, context: InterpreterContext): Promise<LayoutedDiagram> {
         this.assertDiagram(diagram);
         const nativeFonts = nativeToList(diagram.getLocalFieldOrUndefined("fonts")?.value?.toNative());
         const layout = new Layout(
             this,
             generateStyles(diagram.getLocalFieldOrUndefined("styles")?.value as FullObject),
             new FontCollection(),
-            nativeFonts[0].fontFamily
+            nativeFonts[0].fontFamily,
+            context
         );
         const layoutElement = layout.create(
             diagram.getLocalFieldOrUndefined("element")?.value as FullObject,
             undefined
         );
         await this.initFonts(layoutElement, nativeFonts, layout, config);
-        this.pathCache.nextIteration();
 
         return {
             rootElement: {
@@ -155,6 +155,15 @@ export class LayoutEngine {
             elementLookup: layout.elementLookup,
             layoutElementLookup: layout.layoutElementLookup
         };
+    }
+
+    /**
+     * Starts the next iteration for each cache
+     */
+    nextCacheGeneration(): void {
+        this.textCache.nextIteration();
+        this.pathCache.nextIteration();
+        this.subsetFontCache.nextIteration();
     }
 
     /**
@@ -246,11 +255,8 @@ export class LayoutEngine {
                 return fontFamily;
             })
         );
-        this.subsetFontCache.nextIteration();
         if (cacheMiss) {
             this.textCache.clear();
-        } else {
-            this.textCache.nextIteration();
         }
     }
 

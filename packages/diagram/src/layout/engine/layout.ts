@@ -1,4 +1,4 @@
-import { FullObject, assertString, nativeToList, RuntimeError, BaseObject } from "@hylimo/core";
+import { FullObject, assertString, nativeToList, RuntimeError, BaseObject, InterpreterContext } from "@hylimo/core";
 import { Line, Point, Size } from "@hylimo/diagram-common";
 import { FontCollection } from "../font/fontCollection.js";
 import { StyleList, Selector, SelectorType, Style } from "../../styles.js";
@@ -53,12 +53,14 @@ export class Layout {
      * @param styles styles to possibly apply to elements
      * @param fonts fonts to use
      * @param defaultFontFamily the default font to use
+     * @param context the interpreter context to use for computing styles
      */
     constructor(
         readonly engine: LayoutEngine,
         readonly styles: StyleList,
         readonly fonts: FontCollection,
-        readonly defaultFontFamily: string
+        readonly defaultFontFamily: string,
+        readonly context: InterpreterContext
     ) {}
 
     /**
