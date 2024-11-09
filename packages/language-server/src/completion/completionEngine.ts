@@ -29,11 +29,7 @@ export class CompletionEngine {
      * @param position the position of the cursor
      * @returns the generated complete items or undefined if no items could be generated
      */
-    complete(
-        text: string,
-        config: DiagramConfig,
-        position: number
-    ): CompletionItem[] | undefined {
+    complete(text: string, config: DiagramConfig, position: number): CompletionItem[] | undefined {
         const parserResult = this.parser.parse(text);
         if (parserResult.ast == undefined) {
             return undefined;
@@ -41,7 +37,7 @@ export class CompletionEngine {
         const toExecutableTransformer = new CompletionAstTransformer(position);
         const executableAst = parserResult.ast.map((expression) => toExecutableTransformer.visit(expression));
         try {
-            this.diagramEngine.renderInternal(executableAst, config)
+            this.diagramEngine.execute(executableAst, config);
         } catch (e: any) {
             if (CompletionError.isCompletionError(e)) {
                 return e.completionItems;

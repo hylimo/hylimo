@@ -7,6 +7,7 @@ import {
     Parser,
     RuntimeError,
     SemanticFieldNames,
+    assertWrapperObject,
     defaultModules,
     id,
     object,
@@ -17,7 +18,6 @@ import { LayoutEngine } from "./layout/engine/layoutEngine.js";
 import { DiagramConfig } from "@hylimo/diagram-common";
 import { LayoutedDiagram } from "./layout/diagramLayoutResult.js";
 import { createBaseDiagramModules, defaultDiagramModules } from "./module/diagramModules.js";
-import { baseDiagramModule } from "./module/diagrams/baseDiagramModule.js";
 
 /**
  * All errors that can occur during rendering of a diagram
@@ -95,29 +95,12 @@ export class DiagramEngine {
             };
         }
         const expressions = toExecutable(parserResult.ast, true);
-        return this.renderInternal(expressions, config);
-    }
-
-    /**
-     * Renders a diagram from a list of executable expressions
-     *
-     * @param expressions the expressions to execute, typically derived from the parser result, does not include the config
-     * @param config additional config
-     * @returns the render result including the potential diagram and all errors
-     */
-    async renderInternal(
-        expressions: ExecutableExpression[],
-        config: DiagramConfig,
-    ): Promise<RenderResult> {
         let layoutedDiagram: LayoutedDiagram | undefined = undefined;
         const layoutErrors: Error[] = [];
-        const interpretationResult = this.interpreter.run([...this.convertConfig(config), ...expressions]);
+        const interpretationResult = this.execute(expressions, config);
         if (interpretationResult.result != undefined) {
-            try {
-                layoutedDiagram = await this.layoutEngine.layout(interpretationResult.result, config);
-            } catch (e: any) {
-                layoutErrors.push(e);
-            }
+            assertWrapperObject(interpretationResult.result, "Returned diagram");
+            layoutedDiagram = await this.layoutEngine.layout(interpretationResult.result.wrapped, config);
         }
         return {
             layoutedDiagram,
@@ -128,6 +111,18 @@ export class DiagramEngine {
                 layoutErrors
             }
         };
+    }
+
+    /**
+     * Executes the given expressions
+     * Also generates and adds expressions for the given config
+     *
+     * @param expressions the expressions to execute
+     * @param config the config to use
+     * @returns the interpretation result
+     */
+    execute(expressions: ExecutableExpression[], config: DiagramConfig): InterpretationResult {
+        return this.interpreter.run([...this.convertConfig(config), ...expressions]);
     }
 
     /**

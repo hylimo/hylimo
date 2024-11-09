@@ -22,7 +22,7 @@ export abstract class PanelLayoutConfig extends StyledElementLayoutConfig {
         super(additionalAttributes, additionalStyleAttributes);
     }
 
-    override getChildren(layout: Layout, element: LayoutElement): FullObject[] {
+    override getChildren(element: LayoutElement): FullObject[] {
         const contents = element.element.getLocalFieldOrUndefined("contents")?.value as FullObject | undefined;
         if (contents) {
             return objectToList(contents) as FullObject[];

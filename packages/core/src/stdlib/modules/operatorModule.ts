@@ -15,7 +15,7 @@ export const operatorModule = InterpreterModule.create(
     [],
     [DefaultModuleNames.COMMON],
     [
-        ...["*", "/", "%", "&&", "||", ">", ">=", "<", "<=", ">>", "<<", "+="].map((operator) =>
+        ...["*", "/", "%", "&&", "||", "&", "|", ">", ">=", "<", "<=", ">>", "<<", "+="].map((operator) =>
             id(SemanticFieldNames.THIS).assignField(
                 operator,
                 native(
@@ -158,7 +158,9 @@ export const operatorModule = InterpreterModule.create(
             "-",
             native(
                 (args, context) => {
-                    args.shift();
+                    if (args.length == 3 && args[0].name === SemanticFieldNames.SELF) {
+                        args.shift();
+                    }
                     if (
                         args.length > 2 ||
                         args.length < 1 ||

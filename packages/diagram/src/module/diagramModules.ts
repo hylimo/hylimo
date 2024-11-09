@@ -13,16 +13,12 @@ import { LayoutEngine } from "../layout/engine/layoutEngine.js";
  * - diagram
  * - dsl
  * - edit
- * 
+ *
  * @param layoutEngine the layout engine to use for the diagram module
  * @returns the base diagram modules
  */
-export function createBaseDiagramModules(layoutEngine: LayoutEngine) : InterpreterModule[] {
-    return [
-        new DiagramModule(layoutEngine),
-        dslModule,
-        editModule
-    ]
+export function createBaseDiagramModules(layoutEngine: LayoutEngine): InterpreterModule[] {
+    return [new DiagramModule(layoutEngine), dslModule, editModule];
 }
 
 /**
@@ -32,9 +28,4 @@ export function createBaseDiagramModules(layoutEngine: LayoutEngine) : Interpret
  * - UML component diagram: componentDiagram
  * - (arbitrary) UML diagram: umlDiagram
  */
-export const defaultDiagramModules = [
-    baseDiagramModule,
-    classDiagramModule,
-    componentDiagramModule,
-    umlDiagramModule
-];
+export const defaultDiagramModules = [baseDiagramModule, classDiagramModule, componentDiagramModule, umlDiagramModule];

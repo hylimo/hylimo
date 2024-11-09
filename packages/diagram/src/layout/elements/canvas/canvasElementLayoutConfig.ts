@@ -85,7 +85,7 @@ export class CanvasElementLayoutConfig extends EditableCanvasContentLayoutConfig
         return [result];
     }
 
-    override getChildren(layout: Layout, element: LayoutElement): FullObject[] {
+    override getChildren(element: LayoutElement): FullObject[] {
         const content = element.element.getLocalFieldOrUndefined("content")?.value as FullObject;
         return [content];
     }
@@ -134,21 +134,5 @@ export class CanvasElementLayoutConfig extends EditableCanvasContentLayoutConfig
                 elementProto
             `
         );
-    }
-
-    override postprocessStyles(element: LayoutElement, styles: Record<string, any>): Record<string, any> {
-        const width = element.element.getLocalFieldOrUndefined("_width")?.value?.toNative();
-        if (width != undefined) {
-            styles.width = width;
-        }
-        const height = element.element.getLocalFieldOrUndefined("_height")?.value?.toNative();
-        if (height != undefined) {
-            styles.height = height;
-        }
-        const rotation = element.element.getLocalFieldOrUndefined("_rotation")?.value?.toNative();
-        if (rotation != undefined) {
-            styles.rotation = rotation;
-        }
-        return styles;
     }
 }

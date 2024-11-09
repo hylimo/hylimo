@@ -124,6 +124,16 @@ export function assertObject(value: BaseObject, description = ""): asserts value
 }
 
 /**
+ * Checks if a value is a FullObject
+ *
+ * @param value the value to check
+ * @returns true iff it is a FullObject
+ */
+export function isObject(value: BaseObject): value is FullObject {
+    return value instanceof FullObject;
+}
+
+/**
  * Helper to check that an object is a WrapperObject, throws an error if not
  *
  * @param value the value to check

@@ -5,8 +5,7 @@ import * as path from "path";
 import { program } from "commander";
 import { PDFRenderer } from "@hylimo/diagram-render-pdf";
 import { SVGRenderer } from "@hylimo/diagram-render-svg";
-import { DiagramEngine, LayoutEngine, defaultDiagramModules } from "@hylimo/diagram";
-import { Interpreter, Parser, defaultModules } from "@hylimo/core";
+import { DiagramEngine } from "@hylimo/diagram";
 import { DiagramConfig } from "@hylimo/diagram-common";
 
 program
@@ -56,12 +55,7 @@ try {
     process.exit(1);
 }
 
-const layoutEngine = new LayoutEngine();
-const diagramEngine = new DiagramEngine(
-    new Parser(false),
-    new Interpreter(defaultDiagramModules, defaultModules, maxExecutionSteps),
-    layoutEngine
-);
+const diagramEngine = new DiagramEngine([], maxExecutionSteps);
 
 const config: DiagramConfig = {
     theme: darkMode ? "dark" : "light",

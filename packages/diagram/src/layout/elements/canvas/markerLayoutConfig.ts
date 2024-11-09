@@ -67,7 +67,7 @@ export class MarkerLayoutConfig extends StyledElementLayoutConfig {
         return [result];
     }
 
-    override getChildren(layout: Layout, element: LayoutElement): FullObject[] {
+    override getChildren(element: LayoutElement): FullObject[] {
         const content = element.element.getLocalFieldOrUndefined("content")?.value as FullObject;
         return [content];
     }

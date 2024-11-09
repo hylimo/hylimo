@@ -56,11 +56,10 @@ export abstract class ElementLayoutConfig implements LayoutConfig {
     /**
      * Returns the children of the element
      *
-     * @param layout performs the layout
      * @param element the element to get the children of
      * @returns the children of the element
      */
-    abstract getChildren(layout: Layout, element: LayoutElement): FullObject[];
+    abstract getChildren(element: LayoutElement): FullObject[];
 
     /**
      * Called to determine the size the element requires
@@ -186,17 +185,6 @@ export abstract class ElementLayoutConfig implements LayoutConfig {
      */
     createPrototype(): ExecutableAbstractFunctionExpression {
         return fun("object(proto = it)");
-    }
-
-    /**
-     * Called to postprocess the extracted styles
-     *
-     * @param _element the element to postprocess
-     * @param styles the extracted styles
-     * @returns the postprocessed styles
-     */
-    postprocessStyles(_element: LayoutElement, styles: Record<string, any>): Record<string, any> {
-        return styles;
     }
 
     /**

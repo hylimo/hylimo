@@ -32,7 +32,7 @@ const scopeExpressions: ExecutableExpression[] = [
                 contents = list(),
                 internal = object(
                     classCounter = 0,
-                    styles = styles({ })
+                    styles = object(styles = list())
                 )
             )
         `
@@ -113,21 +113,13 @@ const scopeExpressions: ExecutableExpression[] = [
                     } {
                         first.class += className
                     }
-                    scope.styles {
-                        cls(className) {
-                            this.any = any
-                            this.cls = cls
-                            this.type = type
-                            this.unset = unset
-                            this.var = var
-                            this.vars = vars
-                            this.class = first.class
-                            second.callWithScope(this)
-                        }
-                    }
+                    resultingStyle = styles(second, true)
+                    resultingStyle.selectorType = "class"
+                    resultingStyle.selectorValue = className
+                    scope.internal.styles.styles.add(resultingStyle)
                     first
                 } {
-                    resultStyles = styles(first)
+                    resultStyles = styles(first, false)
                     scope.internal.styles.styles.addAll(resultStyles.styles)
                 }
             `,

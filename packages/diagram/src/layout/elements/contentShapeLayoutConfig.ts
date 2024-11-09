@@ -2,7 +2,6 @@ import { AttributeConfig, ContentCardinality, LayoutElement } from "../layoutEle
 import { ShapeLayoutConfig } from "./shapeLayoutConfig.js";
 import { elementType } from "../../module/base/types.js";
 import { FullObject } from "@hylimo/core";
-import { Layout } from "../engine/layout.js";
 
 /**
  * Base class for all shape layout configs with a content
@@ -21,7 +20,7 @@ export abstract class ContentShapeLayoutConfig extends ShapeLayoutConfig {
         super(additionalAttributes, additionalStyleAttributes);
     }
 
-    override getChildren(layout: Layout, element: LayoutElement): FullObject[] {
+    override getChildren(element: LayoutElement): FullObject[] {
         const content = element.element.getLocalFieldOrUndefined("content")?.value as FullObject | undefined;
         if (content != undefined) {
             return [content];

@@ -1,4 +1,4 @@
-import { BaseObject, FullObject, InterpreterContext, nativeToList } from "@hylimo/core";
+import { FullObject, InterpreterContext, nativeToList } from "@hylimo/core";
 import {
     Size,
     Point,
@@ -79,6 +79,24 @@ export interface LayoutedPath {
 }
 
 /**
+ * The root element of the layout with the layout
+ */
+export interface LayoutWithRoot {
+    /**
+     * The root element of the layout
+     */
+    root: LayoutElement;
+    /**
+     * The layout
+     */
+    layout: Layout;
+    /**
+     * The fonts root uses
+     */
+    fontFamilies: FontFamilyConfig[];
+}
+
+/**
  * Performs layout, generates a model as a result
  */
 export class LayoutEngine {
@@ -122,33 +140,51 @@ export class LayoutEngine {
     }
 
     /**
-     * Layouts a diagram defined using syncscript
+     * Creates a layout with a root elementsd
      *
-     * @param diagram the diagram to layout
-     * @param config the configuration to use
-     * @returns the layouted diagram
+     * @param element the element to layout
+     * @param styles the styles to use
+     * @param fonts the fonts to use
+     * @param context the context to use
+     * @returns the layout with
      */
-    async layout(diagram: BaseObject, config: DiagramConfig, context: InterpreterContext): Promise<LayoutedDiagram> {
-        this.assertDiagram(diagram);
-        const nativeFonts = nativeToList(diagram.getLocalFieldOrUndefined("fonts")?.value?.toNative());
+    createLayout(
+        element: FullObject,
+        styles: FullObject,
+        fonts: FullObject,
+        context: InterpreterContext
+    ): LayoutWithRoot {
+        const nativeFonts = nativeToList(fonts.toNative());
         const layout = new Layout(
             this,
-            generateStyles(diagram.getLocalFieldOrUndefined("styles")?.value as FullObject),
+            generateStyles(styles),
             new FontCollection(),
             nativeFonts[0].fontFamily,
             context
         );
-        const layoutElement = layout.create(
-            diagram.getLocalFieldOrUndefined("element")?.value as FullObject,
-            undefined
-        );
-        await this.initFonts(layoutElement, nativeFonts, layout, config);
+        const layoutElement = layout.create(element, undefined);
+        return {
+            root: layoutElement,
+            layout,
+            fontFamilies: nativeFonts
+        };
+    }
+
+    /**
+     * Layouts a diagram defined using syncscript
+     *
+     * @param layoutWithRoot the layout with the root element
+     * @param config the configuration to use
+     * @returns the layouted diagram
+     */
+    async layout({ root, layout, fontFamilies }: LayoutWithRoot, config: DiagramConfig): Promise<LayoutedDiagram> {
+        await this.initFonts(root, fontFamilies, layout, config);
 
         return {
             rootElement: {
                 type: "root",
                 id: "root",
-                ...this.layoutElement(layout, layoutElement),
+                ...this.layoutElement(layout, root),
                 fonts: this.generateSubsettedFontData(layout),
                 edits: {}
             },
@@ -257,20 +293,6 @@ export class LayoutEngine {
         );
         if (cacheMiss) {
             this.textCache.clear();
-        }
-    }
-
-    /**
-     * Asserts that the provided diagram is a valid diagram
-     *
-     * @param diagram the diagram to check
-     */
-    private assertDiagram(diagram: BaseObject): asserts diagram is FullObject {
-        if (!(diagram instanceof FullObject)) {
-            throw new Error("A Diagram must be an Object");
-        }
-        if (!diagram.hasField("element") || !diagram.hasField("fonts") || !diagram.hasField("styles")) {
-            throw new Error("A Diagram must have an element, fonts and styles fields");
         }
     }
 }

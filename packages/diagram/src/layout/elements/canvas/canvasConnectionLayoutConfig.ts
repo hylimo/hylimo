@@ -98,7 +98,7 @@ export class CanvasConnectionLayoutConfig extends EditableCanvasContentLayoutCon
         return [result];
     }
 
-    override getChildren(layout: Layout, element: LayoutElement): FullObject[] {
+    override getChildren(element: LayoutElement): FullObject[] {
         const children: FullObject[] = [];
         const contents = element.element.getLocalFieldOrUndefined("contents")?.value as FullObject | undefined;
         if (contents) {

@@ -1,4 +1,4 @@
-import { Interpreter, Parser } from "@hylimo/core";
+import { Parser } from "@hylimo/core";
 import { DiagramEngine } from "@hylimo/diagram";
 import { Connection } from "vscode-languageserver";
 import { DiagramServerManager } from "./diagramServerManager.js";

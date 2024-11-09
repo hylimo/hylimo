@@ -93,6 +93,44 @@ export const booleanModule = InterpreterModule.create(
                 )
             ),
             id(booleanProto).assignField(
+                "&",
+                jsFun(
+                    (args, context) => {
+                        return context.newBoolean(
+                            assertBoolean(args.getFieldValue(SemanticFieldNames.SELF, context)) &&
+                                assertBoolean(args.getFieldValue(0, context))
+                        );
+                    },
+                    {
+                        docs: "Performs logical and (&&). NO short circuit evaluation! The first argument is always evaluated",
+                        params: [
+                            [SemanticFieldNames.SELF, "the left side of the logical and", booleanType],
+                            [0, "the right side of the logical and", booleanType]
+                        ],
+                        returns: "The result of the logical and"
+                    }
+                )
+            ),
+            id(booleanProto).assignField(
+                "|",
+                jsFun(
+                    (args, context) => {
+                        return context.newBoolean(
+                            assertBoolean(args.getFieldValue(SemanticFieldNames.SELF, context)) ||
+                                assertBoolean(args.getFieldValue(0, context))
+                        );
+                    },
+                    {
+                        docs: "Performs logical or (||). NO short circuit evaluation! The first argument is always evaluated",
+                        params: [
+                            [SemanticFieldNames.SELF, "the left side of the logical or", booleanType],
+                            [0, "the right side of the logical or", booleanType]
+                        ],
+                        returns: "The result of the logical or"
+                    }
+                )
+            ),
+            id(booleanProto).assignField(
                 "<",
                 jsFun(
                     (args, context) => {

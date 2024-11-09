@@ -228,11 +228,10 @@ export interface LayoutConfig {
     /**
      * Returns the children of the element
      *
-     * @param layout performs the layout
      * @param element the element to get the children of
      * @returns the children of the element
      */
-    getChildren(layout: Layout, element: LayoutElement): FullObject[];
+    getChildren(element: LayoutElement): FullObject[];
     /**
      * Called to determine the size the element requires
      *
@@ -271,14 +270,6 @@ export interface LayoutConfig {
      * @returns the prototype generation function
      */
     createPrototype(): ExecutableAbstractFunctionExpression;
-    /**
-     * Called to postprocess the extracted styles
-     *
-     * @param element the element to postprocess
-     * @param styles the extracted styles
-     * @returns the postprocessed styles
-     */
-    postprocessStyles(element: LayoutElement, styles: Record<string, any>): Record<string, any>;
     /**
      * Creates a matrix which transforms from the local to the parent coordinate system
      * Can return undefined if the element does not have a parent or if the transformation is the identity matrix

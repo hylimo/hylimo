@@ -1,4 +1,4 @@
-import { InterpreterModule, Interpreter, Parser, defaultModules } from "@hylimo/core";
+import { InterpreterModule, Parser } from "@hylimo/core";
 import {
     CompletionItem,
     CompletionParams,
@@ -15,7 +15,7 @@ import {
 import { TextDocument, TextDocumentContentChangeEvent } from "vscode-languageserver-textdocument";
 import { Diagram } from "./diagram/diagram.js";
 import { Formatter } from "./format/formatter.js";
-import { defaultDiagramModules, DiagramEngine, LayoutEngine } from "@hylimo/diagram";
+import { DiagramEngine } from "@hylimo/diagram";
 import { DiagramServerManager } from "./diagramServerManager.js";
 import {
     DiagramActionNotification,
