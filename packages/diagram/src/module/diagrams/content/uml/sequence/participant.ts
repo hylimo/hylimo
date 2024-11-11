@@ -1,4 +1,4 @@
-import { fun, InterpreterModule, optional, parse, stringType } from "@hylimo/core";
+import { InterpreterModule, parse } from "@hylimo/core";
 
 /**
  * Module providing the shared logic for all sorts of sequence diagram participants - instances, actors, …<br>
@@ -9,7 +9,7 @@ export const participantModule = InterpreterModule.create(
     ["uml/sequence/defaultValues", "uml/associations"],
     [],
     [
-        fun(
+        ...parse(
             `
                     scope.internal.createSequenceDiagramParticipant = {
                         (name, participant) = args
@@ -35,13 +35,7 @@ export const participantModule = InterpreterModule.create(
                         scope.internal.lastSequenceDiagramParticipant = participant
                         participant
                     }
-                `,
-            {
-                docs: "Creates an actor. An actor is a stickman with an optional name",
-                params: [[0, "the optional name of the actor", optional(stringType)]],
-                snippet: `("$1")`,
-                returns: "The created actor"
-            }
+                `
         ),
         ...parse(
             `
