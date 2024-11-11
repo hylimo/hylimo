@@ -132,14 +132,15 @@ export class Layout {
         const styles: Record<string, any> = {};
         for (const attributeConfig of styleAttributes) {
             const name = attributeConfig.name;
-            const elementValue = layoutElement.element.getField(name, this.context)?.value;
-            if (elementValue != undefined && !isNull(elementValue)) {
+            const elementValue = layoutElement.element.getField(name, this.context).value;
+            if (!isNull(elementValue)) {
                 styles[name] = elementValue.toNative();
-            }
-            const styleValue = styleValueParser.getValue(name);
-            if (styleValue != undefined) {
-                layoutElement.element.setField(name, styleValue, this.context);
-                styles[name] = layoutElement.element.getField(name, this.context)?.value?.toNative();
+            } else {
+                const styleValue = styleValueParser.getValue(name);
+                if (styleValue != undefined) {
+                    layoutElement.element.setField(name, styleValue, this.context);
+                    styles[name] = layoutElement.element.getField(name, this.context)?.value?.toNative();
+                }
             }
         }
         layoutElement.styles = styles;

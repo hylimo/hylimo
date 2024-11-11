@@ -34,8 +34,9 @@ export const portsModule = InterpreterModule.create(
                                         portElement = canvasElement(
                                             class = list("port-element"),
                                             content = rect(class = list("port")),
-                                            pos = canvasScope.lpos(element, pos, args.dist ?? -1)
+                                            pos = canvasScope.lpos(element, pos)
                                         )
+                                        portElement.pos.class = list("port-pos")
                                         
                                         result = []
                                         scope.internal.providesRequiresContentHandler[0](
@@ -60,11 +61,6 @@ export const portsModule = InterpreterModule.create(
                                                 1,
                                                 "Optional function to define the content of the port",
                                                 optional(functionType)
-                                            ],
-                                            [
-                                                "dist",
-                                                "Distance from the outline, defaults to half of the default stroke width (width of the outline). Needs to be adapted if the width of outline is not the default value",
-                                                optional(numberType)
                                             ]
                                         ],
                                         returns: "The created port element"
@@ -97,6 +93,9 @@ export const portsModule = InterpreterModule.create(
                         cls("port") {
                             fill = var("background")
                         }
+                    }
+                    cls("port-pos") {
+                        distance = var("strokeWidth") / -2
                     }
                 }
             `

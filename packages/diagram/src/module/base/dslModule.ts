@@ -14,6 +14,7 @@ import { canvasContentType, elementType } from "./types.js";
 import { CanvasConnection, CanvasElement, DefaultEditTypes } from "@hylimo/diagram-common";
 import { LinePointLayoutConfig } from "../../layout/elements/canvas/linePointLayoutConfig.js";
 import { DiagramModuleNames } from "../diagramModuleNames.js";
+import { allStyleAttributes } from "./diagramModule.js";
 
 /**
  * Identifier for the scope variable
@@ -49,8 +50,8 @@ const scopeExpressions: ExecutableExpression[] = [
             {
                 docs: "Create a absolute point",
                 params: [
-                    [0, "the x coordinate", numberType],
-                    [1, "the y coordinate", numberType]
+                    [0, "the x coordinate", optional(numberType)],
+                    [1, "the y coordinate", optional(numberType)]
                 ],
                 returns: "The created absolute point"
             }
@@ -113,13 +114,20 @@ const scopeExpressions: ExecutableExpression[] = [
                     } {
                         first.class += className
                     }
-                    resultingStyle = styles(second, true)
-                    resultingStyle.selectorType = "class"
-                    resultingStyle.selectorValue = className
+                    resultingStyle = styles(
+                        second,
+                        object(
+                            selectorType = "class",
+                            selectorValue = className,
+                            styles = list(),
+                            class = first.class,
+                            ${allStyleAttributes.map((attr) => `${attr.name} = null`).join(",")}
+                        )
+                    )
                     scope.internal.styles.styles.add(resultingStyle)
                     first
                 } {
-                    resultStyles = styles(first, false)
+                    resultStyles = styles(first, object(styles = list()))
                     scope.internal.styles.styles.addAll(resultStyles.styles)
                 }
             `,

@@ -40,7 +40,10 @@ import { LayoutEngine } from "../../layout/engine/layoutEngine.js";
 /**
  * Type for unset, default style values
  */
-const styleValueType = namedType(objectType(new Map([["_type", or(literal("unset"), literal("var"))]])), "unset | var");
+const styleValueType = namedType(
+    objectType(new Map([["_type", or(literal("unset"), literal("var"), literal("calc"))]])),
+    "unset | var"
+);
 
 /**
  * Gets a list of all known style attributes
@@ -64,7 +67,7 @@ function computeAllStyleAttributes(): AttributeConfig[] {
 /**
  * All style atributes
  */
-const allStyleAttributes = computeAllStyleAttributes();
+export const allStyleAttributes = computeAllStyleAttributes();
 
 /**
  * Creates a function which evaluates to the function to create a specific element
@@ -377,13 +380,8 @@ export class DiagramModule implements InterpreterModule {
                     [
                         ...parse(
                             `
-                                (callback, isSelector) = args
+                                (callback, res) = args
                                 this.stylesArgs = args
-                                res = if(isSelector) {
-                                    object(styles = list(), variables = object(), ${allStyleAttributes.map((attr) => `${attr.name} = null`).join(",")})
-                                } {
-                                    object(styles = list())
-                                }
                                 res.type = type
                                 res.cls = cls
                                 res.any = any
@@ -443,7 +441,7 @@ export class DiagramModule implements InterpreterModule {
                         docs: 'Creates a new styles object. Use "cls", "type", and "any" to create rules.',
                         params: [
                             [0, "the callback to invoke", functionType],
-                            [1, "if true, the result can be used as a selector", booleanType]
+                            [1, "the scope object to use which is provided to the callback end returned", objectType()]
                         ],
                         returns: "The created styles object"
                     }
