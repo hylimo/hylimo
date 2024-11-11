@@ -61,7 +61,7 @@ export class LinePointLayoutConfig extends CanvasPointLayoutConfig {
                     name: "distance",
                     description: "the distance of the point to the line, defaults to 0",
                     type: numberType
-                },
+                }
             ]
         );
     }

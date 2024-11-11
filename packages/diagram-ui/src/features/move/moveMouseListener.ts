@@ -37,6 +37,7 @@ import { SCanvasAxisAlignedSegment } from "../../model/canvas/sCanvasAxisAligned
 import { AxisAligedSegmentEditHandler } from "./axisAlignedSegmentEditHandler.js";
 import { Matrix, compose, translate, applyToPoint, inverse, decomposeTSR, scale, rotate } from "transformation-matrix";
 import { MovedElementsSelector } from "./movedElementsSelector.js";
+import { SMarker } from "../../model/canvas/sMarker.js";
 
 /**
  * The maximum number of updates that can be performed on the same revision.
@@ -404,8 +405,9 @@ export class MoveMouseListener extends MouseListener {
      */
     private createMoveHandler(target: SModelElementImpl, event: MouseEvent): MoveHandler | null {
         const selected = this.getSelectedElements(target.root).filter(
-            (element) => element instanceof SCanvasPoint || element instanceof SCanvasElement
-        ) as (SCanvasPoint | SCanvasElement)[];
+            (element) =>
+                element instanceof SCanvasPoint || element instanceof SCanvasElement || element instanceof SMarker
+        ) as (SCanvasPoint | SCanvasElement | SMarker)[];
         if (selected.length === 0) {
             return null;
         }

@@ -30,7 +30,7 @@ export class RelativePointLayoutConfig extends CanvasPointLayoutConfig {
                     name: "offsetY",
                     description: "the y offset",
                     type: numberType
-                },
+                }
             ]
         );
     }

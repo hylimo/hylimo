@@ -1,11 +1,24 @@
 import { Marker } from "@hylimo/diagram-common";
 import { SElement } from "../sElement.js";
+import { Selectable } from "sprotty-protocol";
+import { SCanvasConnection } from "./sCanvasConnection.js";
 
 /**
  * Model for Marker
  */
-export class SMarker extends SElement implements Marker {
+export class SMarker extends SElement implements Marker, Selectable {
     override type!: typeof Marker.TYPE;
+    override parent!: SCanvasConnection;
+    private _selected = false;
+
+    get selected(): boolean {
+        return this._selected;
+    }
+
+    set selected(value: boolean) {
+        this._selected = value;
+        this.parent.parent.pointVisibilityManager.setSelectionState(this, value);
+    }
     /**
      * The width of the element
      */
@@ -30,4 +43,18 @@ export class SMarker extends SElement implements Marker {
      * The y coordinate of the reference point
      */
     refY!: number;
+
+    /**
+     * The id of the start/end (depending on pos) of the parent connection
+     */
+    get posId(): string {
+        return this.pos === "start" ? this.parent.start : this.parent.segments.at(-1)!.end;
+    }
+
+    /**
+     * List of dependencies of this Marker
+     */
+    get dependencies(): string[] {
+        return [this.posId];
+    }
 }

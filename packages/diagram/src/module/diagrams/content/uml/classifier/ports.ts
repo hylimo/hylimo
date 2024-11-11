@@ -1,4 +1,4 @@
-import { fun, functionType, id, InterpreterModule, numberType, object, optional, parse } from "@hylimo/core";
+import { fun, functionType, id, InterpreterModule, object, optional, parse } from "@hylimo/core";
 import { SCOPE } from "../../../../base/dslModule.js";
 import { LinePointLayoutConfig } from "../../../../../layout/elements/canvas/linePointLayoutConfig.js";
 

@@ -3,7 +3,6 @@ import {
     assertObject,
     assign,
     BaseObject,
-    booleanType,
     DefaultModuleNames,
     ExecutableConstExpression,
     ExecutableExpression,

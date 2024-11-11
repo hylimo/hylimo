@@ -90,7 +90,14 @@ export const providesAndRequiresModule = InterpreterModule.create(
                                             [
                                                 "namePos",
                                                 "X and Y offset for the name label",
-                                                optional(objectType(new Map([[0, numberType], [1, numberType]])))
+                                                optional(
+                                                    objectType(
+                                                        new Map([
+                                                            [0, numberType],
+                                                            [1, numberType]
+                                                        ])
+                                                    )
+                                                )
                                             ]
                                         ],
                                         returns: "The created provided interface"
@@ -155,7 +162,14 @@ export const providesAndRequiresModule = InterpreterModule.create(
                                             [
                                                 "namePos",
                                                 "X and Y offset for the name label",
-                                                optional(objectType(new Map([[0, numberType], [1, numberType]])))
+                                                optional(
+                                                    objectType(
+                                                        new Map([
+                                                            [0, numberType],
+                                                            [1, numberType]
+                                                        ])
+                                                    )
+                                                )
                                             ]
                                         ],
                                         returns: "The created required interface"
