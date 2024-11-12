@@ -3,6 +3,7 @@ import {
     assertObject,
     assign,
     BaseObject,
+    booleanType,
     DefaultModuleNames,
     ExecutableConstExpression,
     ExecutableExpression,
@@ -41,7 +42,7 @@ import { LayoutEngine } from "../../layout/engine/layoutEngine.js";
  */
 const styleValueType = namedType(
     objectType(new Map([["_type", or(literal("unset"), literal("var"), literal("calc"))]])),
-    "unset | var"
+    "unset | var | calc"
 );
 
 /**
@@ -379,7 +380,7 @@ export class DiagramModule implements InterpreterModule {
                     [
                         ...parse(
                             `
-                                (callback, res) = args
+                                (callback, res, validateStyles) = args
                                 this.stylesArgs = args
                                 res.type = type
                                 res.cls = cls
@@ -432,6 +433,9 @@ export class DiagramModule implements InterpreterModule {
                         ...parse(
                             `
                                 callback.callWithScope(res)
+                                if(validateStyles == true) {
+                                    validateSelector(res, callback)
+                                }
                                 res
                             `
                         )
@@ -440,7 +444,8 @@ export class DiagramModule implements InterpreterModule {
                         docs: 'Creates a new styles object. Use "cls", "type", and "any" to create rules.',
                         params: [
                             [0, "the callback to invoke", functionType],
-                            [1, "the scope object to use which is provided to the callback end returned", objectType()]
+                            [1, "the scope object to use which is provided to the callback end returned", objectType()],
+                            [2, "validate style attributes", optional(booleanType)]
                         ],
                         returns: "The created styles object"
                     }

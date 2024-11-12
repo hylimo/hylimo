@@ -122,7 +122,8 @@ const scopeExpressions: ExecutableExpression[] = [
                             styles = list(),
                             class = first.class,
                             ${allStyleAttributes.map((attr) => `${attr.name} = null`).join(",")}
-                        )
+                        ),
+                        true
                     )
                     scope.internal.styles.styles.add(resultingStyle)
                     first

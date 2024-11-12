@@ -4,6 +4,18 @@ import { SCOPE } from "../../../../base/dslModule.js";
 import { canvasContentType } from "../../../../base/types.js";
 
 /**
+ * Type for the optional name label position
+ */
+const nameLabelPosType = optional(
+    objectType(
+        new Map([
+            [0, optional(numberType)],
+            [1, optional(numberType)]
+        ])
+    )
+);
+
+/**
  * Module providing helper function to create provided and required interfaces for a classifier
  */
 export const providesAndRequiresModule = InterpreterModule.create(
@@ -87,18 +99,7 @@ export const providesAndRequiresModule = InterpreterModule.create(
                                                 "Distance of the provided interface to the classifier",
                                                 optional(numberType)
                                             ],
-                                            [
-                                                "namePos",
-                                                "X and Y offset for the name label",
-                                                optional(
-                                                    objectType(
-                                                        new Map([
-                                                            [0, numberType],
-                                                            [1, numberType]
-                                                        ])
-                                                    )
-                                                )
-                                            ]
+                                            ["namePos", "X and Y offset for the name label", nameLabelPosType]
                                         ],
                                         returns: "The created provided interface"
                                     }
@@ -159,18 +160,7 @@ export const providesAndRequiresModule = InterpreterModule.create(
                                                 "Distance of the required interface to the classifier",
                                                 optional(numberType)
                                             ],
-                                            [
-                                                "namePos",
-                                                "X and Y offset for the name label",
-                                                optional(
-                                                    objectType(
-                                                        new Map([
-                                                            [0, numberType],
-                                                            [1, numberType]
-                                                        ])
-                                                    )
-                                                )
-                                            ]
+                                            ["namePos", "X and Y offset for the name label", nameLabelPosType]
                                         ],
                                         returns: "The created required interface"
                                     }
