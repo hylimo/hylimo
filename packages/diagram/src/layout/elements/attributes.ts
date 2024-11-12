@@ -1,7 +1,18 @@
 import { enumType, numberType, stringType } from "@hylimo/core";
 import { FilledElement, StrokedElement } from "@hylimo/diagram-common";
-import { HorizontalAlignment, VerticalAlignment } from "../layoutElement.js";
+import { HorizontalAlignment, VerticalAlignment, Visibility } from "../layoutElement.js";
 import { LineCap, LineJoin } from "@hylimo/diagram-common";
+
+/**
+ * Visibility style attributes
+ */
+export const visibilityStyleAttributes = [
+    {
+        name: "visibility",
+        description: 'optional visibility of the element, must be one of "visible", "hidden" or "collapse"',
+        type: enumType(Visibility)
+    }
+];
 
 /**
  * Style attributes related to size
@@ -43,6 +54,7 @@ export const alignStyleAttributes = [
  * Default style attributes, including margin, alignment, and size attributes
  */
 export const defaultStyleAttributes = [
+    ...visibilityStyleAttributes,
     ...sizeStyleAttributes,
     ...alignStyleAttributes,
     { name: "marginTop", description: "optional top margin of the element, must be a number", type: numberType },

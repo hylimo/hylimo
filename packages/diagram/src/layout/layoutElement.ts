@@ -100,6 +100,24 @@ export interface LayoutInformation {
 }
 
 /**
+ * Controls the visibility of an element
+ */
+export enum Visibility {
+    /**
+     * The element is visible
+     */
+    VISIBLE = "visible",
+    /**
+     * The element is invisible, but still takes up space
+     */
+    HIDDEN = "hidden",
+    /**
+     * The element is invisible, and does not take up space
+     */
+    COLLAPSE = "collapse"
+}
+
+/**
  * The element to layout
  */
 export interface LayoutElement {
@@ -140,10 +158,6 @@ export interface LayoutElement {
      */
     layoutBounds?: Bounds;
     /**
-     * Other required layout data
-     */
-    [key: string]: any;
-    /**
      * Layout information required to be present after style computation
      */
     layoutInformation?: LayoutInformation;
@@ -155,6 +169,19 @@ export interface LayoutElement {
      * Set of classes
      */
     class: Set<string>;
+    /**
+     * If true, this element should not be rendered
+     */
+    isHidden: boolean;
+    /**
+     * If true, this element should be collapsed and not rendered
+     * Implies isHidden
+     */
+    isCollapsed: boolean;
+    /**
+     * Other required layout data
+     */
+    [key: string]: any;
 }
 
 /**

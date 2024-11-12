@@ -9,7 +9,7 @@ import {
     VerticalAlignment
 } from "../../layoutElement.js";
 import { Layout } from "../../engine/layout.js";
-import { alignStyleAttributes, sizeStyleAttributes } from "../attributes.js";
+import { alignStyleAttributes, sizeStyleAttributes, visibilityStyleAttributes } from "../attributes.js";
 import { EditableCanvasContentLayoutConfig } from "./editableCanvasContentLayoutConfig.js";
 
 /**
@@ -42,7 +42,8 @@ export class CanvasElementLayoutConfig extends EditableCanvasContentLayoutConfig
                     description: "the rotation in degrees",
                     type: numberType
                 },
-                ...sizeStyleAttributes
+                ...sizeStyleAttributes,
+                ...visibilityStyleAttributes
             ]
         );
     }

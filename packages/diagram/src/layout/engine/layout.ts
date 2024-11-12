@@ -19,7 +19,8 @@ import {
     addToSize,
     matchToConstraints,
     HorizontalAlignment,
-    VerticalAlignment
+    VerticalAlignment,
+    Visibility
 } from "../layoutElement.js";
 import { LayoutEngine } from "./layoutEngine.js";
 import { Element } from "@hylimo/diagram-common";
@@ -147,6 +148,20 @@ export class Layout {
     }
 
     /**
+     * Sets the visibility of an element based on its styles and parent visibility
+     * 
+     * @param layoutElement the element to set the visibility for
+     */
+    private applyVisibility(layoutElement: LayoutElement): void {
+        layoutElement.isCollapsed =
+            (layoutElement.parent?.isCollapsed ?? false) || layoutElement.styles.visibility == Visibility.COLLAPSE;
+        layoutElement.isHidden =
+            layoutElement.isCollapsed ||
+            layoutElement.styles.visibility == Visibility.HIDDEN ||
+            (layoutElement.parent?.isHidden ?? false);
+    }
+
+    /**
      * Computes the layout information based on styles
      *
      * @param style defines all required layout information
@@ -174,7 +189,9 @@ export class Layout {
             styles: {},
             layoutConfig,
             class: new Set(cls),
-            edits: {}
+            edits: {},
+            isHidden: false,
+            isCollapsed: false
         };
         layoutElement.children.push(
             ...layoutConfig.getChildren(layoutElement).map((child) => this.create(child, layoutElement))
@@ -182,6 +199,7 @@ export class Layout {
         this.elementIdLookup.set(element, id);
         this.layoutElementLookup.set(id, layoutElement);
         this.applyStyles(layoutElement);
+        this.applyVisibility(layoutElement);
         applyEdits(layoutElement);
         const layoutInformation = this.computeLayoutInformation(layoutElement.styles);
         layoutElement.layoutInformation = layoutInformation;
@@ -197,16 +215,24 @@ export class Layout {
      * @returns the generated LayoutElement
      */
     measure(layoutElement: LayoutElement, constraints: SizeConstraints): LayoutElement {
-        const styles = layoutElement.styles;
-        const layoutInformation = layoutElement.layoutInformation!;
-        const marginX = layoutInformation.marginLeft + layoutInformation.marginRight;
-        const marginY = layoutInformation.marginTop + layoutInformation.marginBottom;
-        const computedConstraints = this.computeSizeConstraints(styles, constraints, marginX, marginY);
-        const requestedSize = layoutElement.layoutConfig.measure(this, layoutElement, computedConstraints);
-        const computedSize = addToSize(requestedSize, marginX, marginY);
-        const realSize = matchToConstraints(computedSize, constraints);
-        layoutElement.measuredSize = realSize;
-        layoutElement.requestedSize = requestedSize;
+        if (layoutElement.isCollapsed) {
+            const collapsedSize = { width: 0, height: 0 };
+            const collapsedConstraints = { min: collapsedSize, max: collapsedSize };
+            layoutElement.layoutConfig.measure(this, layoutElement, collapsedConstraints);
+            layoutElement.measuredSize = collapsedSize;
+            layoutElement.requestedSize = collapsedSize;
+        } else {
+            const styles = layoutElement.styles;
+            const layoutInformation = layoutElement.layoutInformation!;
+            const marginX = layoutInformation.marginLeft + layoutInformation.marginRight;
+            const marginY = layoutInformation.marginTop + layoutInformation.marginBottom;
+            const computedConstraints = this.computeSizeConstraints(styles, constraints, marginX, marginY);
+            const requestedSize = layoutElement.layoutConfig.measure(this, layoutElement, computedConstraints);
+            const computedSize = addToSize(requestedSize, marginX, marginY);
+            const realSize = matchToConstraints(computedSize, constraints);
+            layoutElement.measuredSize = realSize;
+            layoutElement.requestedSize = requestedSize;
+        }
         return layoutElement;
     }
 
