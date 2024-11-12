@@ -43,7 +43,6 @@ export class MarkerLayoutConfig extends StyledElementLayoutConfig {
     }
 
     override measure(layout: Layout, element: LayoutElement, constraints: SizeConstraints): Size {
-        // TODO (maybe) better size calculation
         const content = element.children[0];
         const contentElement = layout.measure(content, constraints);
         return contentElement.measuredSize!;

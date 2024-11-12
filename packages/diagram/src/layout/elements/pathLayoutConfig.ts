@@ -73,6 +73,9 @@ export class PathLayoutConfig extends ShapeLayoutConfig {
     }
 
     override layout(layout: Layout, element: LayoutElement, position: Point, size: Size, id: string): Element[] {
+        if (element.isHidden) {
+            return [];
+        }
         const expectedSize = element.layoutedPath.size;
         const shapeProperties = element.shapeProperties;
         let layoutedPath = element.layoutedPath;

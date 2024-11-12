@@ -573,6 +573,14 @@ const scopeExpressions: ExecutableExpression[] = [
             Right: "right"
         })
     ),
+    id(SCOPE).assignField(
+        "Visibility",
+        enumObject({
+            Visible: "visible",
+            Hidden: "hidden",
+            Collapse: "collapse"
+        })
+    ),
     ...parse(
         `
             scopeEnhancer(scope)

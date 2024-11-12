@@ -47,7 +47,11 @@ export class EllipseLayoutConfig extends ContentShapeLayoutConfig {
             });
             result.children.push(...layout.layout(content, contentPosition, contentSize));
         }
-        return [result];
+        if (element.isHidden) {
+            return result.children;
+        } else {
+            return [result];
+        }
     }
 
     override outline(layout: Layout, element: LayoutElement, position: Point, size: Size, id: string): Line {

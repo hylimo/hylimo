@@ -38,6 +38,9 @@ export class TextLayoutConfig extends StyledElementLayoutConfig {
     }
 
     override layout(layout: Layout, element: LayoutElement, position: Point, size: Size, id: string): Element[] {
+        if (element.isHidden) {
+            return [];
+        }
         const elements = element.layoutedContents as Text[];
         for (let i = 0; i < elements.length; i++) {
             const element = elements[i];

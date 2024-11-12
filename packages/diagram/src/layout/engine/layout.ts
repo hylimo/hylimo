@@ -149,7 +149,7 @@ export class Layout {
 
     /**
      * Sets the visibility of an element based on its styles and parent visibility
-     * 
+     *
      * @param layoutElement the element to set the visibility for
      */
     private applyVisibility(layoutElement: LayoutElement): void {
@@ -193,14 +193,14 @@ export class Layout {
             isHidden: false,
             isCollapsed: false
         };
-        layoutElement.children.push(
-            ...layoutConfig.getChildren(layoutElement).map((child) => this.create(child, layoutElement))
-        );
         this.elementIdLookup.set(element, id);
         this.layoutElementLookup.set(id, layoutElement);
         this.applyStyles(layoutElement);
         this.applyVisibility(layoutElement);
         applyEdits(layoutElement);
+        layoutElement.children.push(
+            ...layoutConfig.getChildren(layoutElement).map((child) => this.create(child, layoutElement))
+        );
         const layoutInformation = this.computeLayoutInformation(layoutElement.styles);
         layoutElement.layoutInformation = layoutInformation;
         return layoutElement;
@@ -339,6 +339,9 @@ export class Layout {
         size: Size,
         position: Point
     ): { x: number; width: number } {
+        if (element.isCollapsed) {
+            return { x: position.x, width: 0 };
+        }
         const horizontalAlignment = styles.hAlign;
         const marginX = layoutInformation.marginLeft + layoutInformation.marginRight;
         let width = element.requestedSize!.width;
@@ -385,6 +388,9 @@ export class Layout {
         size: Size,
         position: Point
     ): { y: number; height: number } {
+        if (element.isCollapsed) {
+            return { y: position.y, height: 0 };
+        }
         const verticalAlignment = styles.vAlign;
         const marginY = layoutInformation.marginTop + layoutInformation.marginBottom;
         let height = element.requestedSize!.height;
