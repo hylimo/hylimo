@@ -62,7 +62,9 @@ export const eventModule = InterpreterModule.create(
                         right = {
                             activityShifter()
                             scope.rpos(eventPosition, rightX, 0) // for arrows, i.e. 'event.shop --> event.cart', the left/right is unwrapped by the arrow itself
-                        }
+                        },
+                        parentEvent = eventObject,
+                        participantName = it.name
                     ]
                     
                     // change the length of the instance line (its end position) to the new last position + 3*margin

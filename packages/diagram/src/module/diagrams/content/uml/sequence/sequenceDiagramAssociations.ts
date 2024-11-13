@@ -2,9 +2,10 @@ import { InterpreterModule, parse } from "@hylimo/core";
 
 /**
  * Module providing association operators for sequence diagrams.<br>
- * They differ from normal associations in that they replace the target prior to drawing the line:<br>
- * For sequence diagrams, we only want to draw until the start/end of the corresponding activity indicator instead of its center,
- * which is the value the user supplies by giving the event
+ * They differ from normal associations in the following aspects:<br>
+ * - they replace the target prior to drawing the line: For sequence diagrams, we only want to draw until the start/end of the corresponding activity indicator instead of its center which is the value the user supplies by giving the event
+ * - when the event references the same instance, we must select the `right` instead of the `left` end as target to, (we do not want to change our x-coordinate)
+ * - they support additional arrows (sync  (-->>), async (-->), reply (..>, ..>>))
  */
 export const sequenceDiagramAssociationsModule = InterpreterModule.create(
     "uml/sequence/associations",
@@ -28,8 +29,15 @@ export const sequenceDiagramAssociationsModule = InterpreterModule.create(
                       } {
                           startEvent
                       } 
+                      
+                      // For the end point, there's a specialty: If both events point at the same participant (self message, so same x coordinate), don't use the left point but the right one instead so that x is indeed the same
+                      // Unfortunately, we can only validate this using name equivalency right now, so good luck in case of a name conflict
                       end = if(endEvent.left != null && (endEvent.left.proto == {}.proto)) {
-                          endEvent.left()
+                          if(endEvent.participantName == startEvent.participantName && (endEvent.right != null && endEvent.right.proto == {}.proto)) {
+                              endEvent.right()
+                          } {
+                              endEvent.left()
+                          }
                       }{
                           endEvent
                       } 

@@ -6,6 +6,7 @@ export const eventType = objectType(
         ["name", stringType],
         ["deltaY" /* to the last event */, numberType],
         ["y" /* to the root of the diagram */, numberType]
+        // And a bunch of 'eventCoordinateType's, always under the names of the currently available participants, i.e. 'event.Bob'
     ]),
     "UML sequence diagram event"
 );
@@ -14,7 +15,9 @@ export const eventCoordinateType = objectType(
     new Map([
         ["left" /* left xy position of the most recent activity indicator wrapped inside a function */, functionType],
         ["center" /* precise xy position of the event */, canvasPointType],
-        ["right" /* right xy position of the most recent activity indicator wrapped inside a function */, functionType]
+        ["right" /* right xy position of the most recent activity indicator wrapped inside a function */, functionType],
+        ["parentEvent", eventType],
+        ["participantName" /* i.e. 'Bob' when this object is called as 'event.Bob' */, stringType]
     ]),
     "UML sequence diagram event for a specific x coordinate"
 );

@@ -70,11 +70,17 @@ export const activityIndicatorModule = InterpreterModule.create(
                 activityIndicatorElement.leftX = xshift - (0.5 * width)
                 activityIndicatorElement.rightX = activityIndicatorElement.leftX + width
                 
+                // By default, start the indicator 'margin' above on the y-axis as it looks visually nicer not to have an arrow directly pointing at the corner of the indicator
+                // However, to be UML compliant, it must also be possible to start it at a corner
+                // Additionally, since it should be ABOVE the event, we must negate the argument
+                yStart = args.yoffset
+                yStart = -1 * if (yStart != null) { yStart } { scope.margin }
+
                 // Explanation of the position:
                 // - start: the (x,y) coordinate of the given event-actor combi
                 // - x=-0.5*activity indicatorwidth + xshift: In Hylimo coordinates, x is the upper left corner but we want it to be the center of the x-axis instead (unless there are multiple activity indicators simultaneously, then we want to offset them)
                 // - y=-margin: The line should not start at the event, but [margin] ahead  
-                activityIndicatorElement.pos = scope.rpos(startPosition, -0.5*scope.activityWidth + xshift, -1*scope.margin)
+                activityIndicatorElement.pos = scope.rpos(startPosition, -0.5*scope.activityWidth + xshift, yStart)
                 
                 scope.internal.registerCanvasElement(activityIndicatorElement, args, args.self)
                 instance.activeActivityIndicators += activityIndicatorElement
@@ -86,6 +92,11 @@ export const activityIndicatorModule = InterpreterModule.create(
                         [
                             "xshift",
                             "an optional shift on the x-axis when using multiple activity indicators simultaneously on the same instance. Defaults to 'activityShift'",
+                            optional(numberType)
+                        ],
+                        [
+                            "yoffset",
+                            "an optional offset on the y-axis where to start being active. Defaults to 'margin'",
                             optional(numberType)
                         ]
                     ],
