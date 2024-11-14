@@ -140,7 +140,7 @@ export class LayoutEngine {
     }
 
     /**
-     * Creates a layout with a root elementsd
+     * Creates a layout for a root element
      *
      * @param element the element to layout
      * @param styles the styles to use

@@ -102,7 +102,7 @@ export const booleanModule = InterpreterModule.create(
                         );
                     },
                     {
-                        docs: "Performs logical and (&&). NO short circuit evaluation! The first argument is always evaluated",
+                        docs: "Performs logical and (&&) WITHOUT short circuit evaluation! The second argument is always evaluated",
                         params: [
                             [SemanticFieldNames.SELF, "the left side of the logical and", booleanType],
                             [0, "the right side of the logical and", booleanType]
@@ -121,7 +121,7 @@ export const booleanModule = InterpreterModule.create(
                         );
                     },
                     {
-                        docs: "Performs logical or (||). NO short circuit evaluation! The first argument is always evaluated",
+                        docs: "Performs logical or (||) WITHOUT short circuit evaluation! The second argument is always evaluated",
                         params: [
                             [SemanticFieldNames.SELF, "the left side of the logical or", booleanType],
                             [0, "the right side of the logical or", booleanType]
