@@ -12,6 +12,7 @@ export class AbsolutePointLayoutConfig extends CanvasPointLayoutConfig {
 
     constructor() {
         super(
+            [],
             [
                 {
                     name: "x",
@@ -23,8 +24,7 @@ export class AbsolutePointLayoutConfig extends CanvasPointLayoutConfig {
                     description: "the y coordinate",
                     type: numberType
                 }
-            ],
-            []
+            ]
         );
     }
 
@@ -34,8 +34,8 @@ export class AbsolutePointLayoutConfig extends CanvasPointLayoutConfig {
         const result: AbsolutePoint = {
             type: AbsolutePoint.TYPE,
             id,
-            x: xValue?.value?.toNative(),
-            y: yValue?.value.toNative(),
+            x: xValue?.value?.toNative() ?? 0,
+            y: yValue?.value?.toNative() ?? 0,
             children: [],
             edits: element.edits
         };

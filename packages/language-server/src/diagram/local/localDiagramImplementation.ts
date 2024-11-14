@@ -130,7 +130,7 @@ export class LocalDiagramImplementation extends DiagramImplementation {
         this.document = TextDocument.create("", "sys", 0, source);
         const items = this.utils.completionEngine.complete(
             this.document.getText(),
-            this.utils.diagramEngine.convertConfig(config),
+            config,
             this.document.offsetAt(position)
         );
         return items?.map((item) => {

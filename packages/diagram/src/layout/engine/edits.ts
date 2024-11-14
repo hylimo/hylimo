@@ -17,13 +17,13 @@ import {
     Range
 } from "@hylimo/core";
 import {
-    EditSpecification,
     TemplateEntry,
     EditSpecificationEntry,
     ReplaceEditSpecificationEntry,
     AddEditSpecificationEntry,
     AddArgEditSpecificationEntry
 } from "@hylimo/diagram-common";
+import { LayoutElement } from "../layoutElement.js";
 
 /**
  * Converts the element to a EditSpecification
@@ -31,10 +31,10 @@ import {
  * @param expressions expression with associated key
  * @returns the generated EditSpecification
  */
-export function generateEdits(element: FullObject): EditSpecification {
+export function applyEdits(layoutElement: LayoutElement): void {
+    const element = layoutElement.element;
     const edits = element.getLocalFieldOrUndefined("edits")!.value;
     assertObject(edits);
-    const res: EditSpecification = {};
     for (const [key, { value }] of edits.fields.entries()) {
         if (key != SemanticFieldNames.PROTO && !isNull(value)) {
             assertObject(value);
@@ -42,10 +42,9 @@ export function generateEdits(element: FullObject): EditSpecification {
             const template = value.getLocalFieldOrUndefined("template")!.value;
             const parsedTemplate: TemplateEntry[] = parseTemplate(template);
             const target = value.getLocalFieldOrUndefined("target")!.value;
-            res[key] = generateEditSpecificationEntry(target, type, parsedTemplate, value);
+            layoutElement.edits[key] = generateEditSpecificationEntry(target, type, parsedTemplate, value);
         }
     }
-    return res;
 }
 
 /**

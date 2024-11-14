@@ -43,7 +43,6 @@ export class MarkerLayoutConfig extends StyledElementLayoutConfig {
     }
 
     override measure(layout: Layout, element: LayoutElement, constraints: SizeConstraints): Size {
-        // TODO (maybe) better size calculation
         const content = element.children[0];
         const contentElement = layout.measure(content, constraints);
         return contentElement.measuredSize!;
@@ -67,7 +66,7 @@ export class MarkerLayoutConfig extends StyledElementLayoutConfig {
         return [result];
     }
 
-    override getChildren(layout: Layout, element: LayoutElement): FullObject[] {
+    override getChildren(element: LayoutElement): FullObject[] {
         const content = element.element.getLocalFieldOrUndefined("content")?.value as FullObject;
         return [content];
     }

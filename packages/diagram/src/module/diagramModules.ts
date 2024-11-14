@@ -1,10 +1,25 @@
-import { diagramModule } from "./base/diagramModule.js";
+import { InterpreterModule } from "@hylimo/core";
+import { DiagramModule } from "./base/diagramModule.js";
 import { dslModule } from "./base/dslModule.js";
 import { editModule } from "./base/editModule.js";
 import { baseDiagramModule } from "./diagrams/baseDiagramModule.js";
 import { classDiagramModule } from "./diagrams/classDiagramModule.js";
 import { componentDiagramModule } from "./diagrams/componentDiagramModule.js";
 import { umlDiagramModule } from "./diagrams/umlDiagramModule.js";
+import { LayoutEngine } from "../layout/engine/layoutEngine.js";
+
+/**
+ * Provides / creates the base diagram modules, including
+ * - diagram
+ * - dsl
+ * - edit
+ *
+ * @param layoutEngine the layout engine to use for the diagram module
+ * @returns the base diagram modules
+ */
+export function createBaseDiagramModules(layoutEngine: LayoutEngine): InterpreterModule[] {
+    return [new DiagramModule(layoutEngine), dslModule, editModule];
+}
 
 /**
  * Default diagram modules, including
@@ -13,12 +28,4 @@ import { umlDiagramModule } from "./diagrams/umlDiagramModule.js";
  * - UML component diagram: componentDiagram
  * - (arbitrary) UML diagram: umlDiagram
  */
-export const defaultDiagramModules = [
-    diagramModule,
-    dslModule,
-    editModule,
-    baseDiagramModule,
-    classDiagramModule,
-    componentDiagramModule,
-    umlDiagramModule
-];
+export const defaultDiagramModules = [baseDiagramModule, classDiagramModule, componentDiagramModule, umlDiagramModule];

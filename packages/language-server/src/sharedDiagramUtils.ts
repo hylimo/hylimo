@@ -1,4 +1,4 @@
-import { Interpreter, Parser } from "@hylimo/core";
+import { Parser } from "@hylimo/core";
 import { DiagramEngine } from "@hylimo/diagram";
 import { Connection } from "vscode-languageserver";
 import { DiagramServerManager } from "./diagramServerManager.js";
@@ -17,10 +17,6 @@ export interface SharedDiagramUtils {
      * The connection to use
      */
     readonly connection: Connection;
-    /**
-     * Interpreter to execute scripts
-     */
-    readonly interpreter: Interpreter;
     /**
      * Parser to parse scripts
      */

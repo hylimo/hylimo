@@ -1,4 +1,14 @@
-import { FullObject, assertString, nativeToList, RuntimeError, BaseObject } from "@hylimo/core";
+import {
+    FullObject,
+    assertString,
+    nativeToList,
+    RuntimeError,
+    InterpreterContext,
+    isObject,
+    LabeledValue,
+    isNull,
+    ExecutableConstExpression
+} from "@hylimo/core";
 import { Line, Point, Size } from "@hylimo/diagram-common";
 import { FontCollection } from "../font/fontCollection.js";
 import { StyleList, Selector, SelectorType, Style } from "../../styles.js";
@@ -9,11 +19,12 @@ import {
     addToSize,
     matchToConstraints,
     HorizontalAlignment,
-    VerticalAlignment
+    VerticalAlignment,
+    Visibility
 } from "../layoutElement.js";
 import { LayoutEngine } from "./layoutEngine.js";
 import { Element } from "@hylimo/diagram-common";
-import { generateEdits } from "./edits.js";
+import { applyEdits } from "./edits.js";
 import { CanvasLayoutEngine } from "./canvasLayoutEngine.js";
 
 /**
@@ -53,12 +64,14 @@ export class Layout {
      * @param styles styles to possibly apply to elements
      * @param fonts fonts to use
      * @param defaultFontFamily the default font to use
+     * @param context the interpreter context to use for computing styles
      */
     constructor(
         readonly engine: LayoutEngine,
         readonly styles: StyleList,
         readonly fonts: FontCollection,
-        readonly defaultFontFamily: string
+        readonly defaultFontFamily: string,
+        readonly context: InterpreterContext
     ) {}
 
     /**
@@ -103,7 +116,7 @@ export class Layout {
     }
 
     /**
-     * Updates the styles of the provided layoutElement
+     * Computes the styles based on the provided element
      *
      * @param layoutElement the layout element where the styles should be updated
      */
@@ -115,84 +128,37 @@ export class Layout {
                 matchingStyles.push(style.fields);
             }
         }
-        matchingStyles.push(layoutElement.element);
         matchingStyles.reverse();
+        const styleValueParser = new StyleValueParser(matchingStyles, this.context);
         const styles: Record<string, any> = {};
         for (const attributeConfig of styleAttributes) {
-            const attribute = attributeConfig.name;
-            for (const style of matchingStyles) {
-                const entry = style.getLocalFieldOrUndefined(attribute);
-                if (entry != undefined) {
-                    styles[attribute] = this.applyStyle(entry.value, matchingStyles);
-                    break;
+            const name = attributeConfig.name;
+            const elementValue = layoutElement.element.getField(name, this.context).value;
+            if (!isNull(elementValue)) {
+                styles[name] = elementValue.toNative();
+            } else {
+                const styleValue = styleValueParser.getValue(name);
+                if (styleValue != undefined) {
+                    layoutElement.element.setField(name, styleValue, this.context);
+                    styles[name] = layoutElement.element.getField(name, this.context)?.value?.toNative();
                 }
             }
         }
-        layoutElement.styles = layoutElement.layoutConfig.postprocessStyles(layoutElement, styles);
+        layoutElement.styles = styles;
     }
 
     /**
-     * Applies a style rule to an element
-     * The value can either be a primitive value, a variable reference, or unset
+     * Sets the visibility of an element based on its styles and parent visibility
      *
-     * @param value the value to set the attribute to
-     * @param matchingStyles matching styles to extract variable values from
+     * @param layoutElement the element to set the visibility for
      */
-    private applyStyle(value: BaseObject, matchingStyles: FullObject[]): any {
-        const parsedValue = value.toNative();
-        if (typeof value === "object" && typeof parsedValue._type === "string") {
-            if (parsedValue._type === "unset") {
-                return undefined;
-            } else if (parsedValue._type === "var") {
-                const variableValue = this.extractVariableValue(matchingStyles, parsedValue.name);
-                return variableValue;
-            } else {
-                throw new Error(`Unknown style value: ${value}`);
-            }
-        } else {
-            return parsedValue;
-        }
-    }
-
-    /**
-     * Extracts a variable value from all matching styles
-     *
-     * @param matchingStyles the matching styles
-     * @param name the name of the variable
-     * @returns the value of the variable. if not found, undefined is returned
-     */
-    private extractVariableValue(matchingStyles: FullObject[], name: string): any {
-        for (const style of matchingStyles) {
-            const variables = style.getLocalFieldOrUndefined("variables")?.value;
-            if (variables instanceof FullObject) {
-                const entry = variables.getLocalFieldOrUndefined(name);
-                if (entry != undefined) {
-                    return this.parseVariableValue(entry.value);
-                }
-            }
-        }
-        return undefined;
-    }
-
-    /**
-     * Parses a variable value
-     *
-     * @param value the value to parse
-     * @returns the parsed value
-     */
-    private parseVariableValue(value: BaseObject): any {
-        const parsedValue = value.toNative();
-        if (typeof parsedValue === "object" && typeof parsedValue._type === "string") {
-            if (parsedValue._type === "unset") {
-                return undefined;
-            } else if (parsedValue._type === "var") {
-                throw new Error("Variables cannot be set to other variables");
-            } else {
-                throw new Error(`Unknown style value: ${parsedValue}`);
-            }
-        } else {
-            return parsedValue;
-        }
+    private applyVisibility(layoutElement: LayoutElement): void {
+        layoutElement.isCollapsed =
+            (layoutElement.parent?.isCollapsed ?? false) || layoutElement.styles.visibility == Visibility.COLLAPSE;
+        layoutElement.isHidden =
+            layoutElement.isCollapsed ||
+            layoutElement.styles.visibility == Visibility.HIDDEN ||
+            (layoutElement.parent?.isHidden ?? false);
     }
 
     /**
@@ -223,14 +189,18 @@ export class Layout {
             styles: {},
             layoutConfig,
             class: new Set(cls),
-            edits: generateEdits(element)
+            edits: {},
+            isHidden: false,
+            isCollapsed: false
         };
-        layoutElement.children.push(
-            ...layoutConfig.getChildren(this, layoutElement).map((child) => this.create(child, layoutElement))
-        );
         this.elementIdLookup.set(element, id);
         this.layoutElementLookup.set(id, layoutElement);
         this.applyStyles(layoutElement);
+        this.applyVisibility(layoutElement);
+        applyEdits(layoutElement);
+        layoutElement.children.push(
+            ...layoutConfig.getChildren(layoutElement).map((child) => this.create(child, layoutElement))
+        );
         const layoutInformation = this.computeLayoutInformation(layoutElement.styles);
         layoutElement.layoutInformation = layoutInformation;
         return layoutElement;
@@ -245,16 +215,24 @@ export class Layout {
      * @returns the generated LayoutElement
      */
     measure(layoutElement: LayoutElement, constraints: SizeConstraints): LayoutElement {
-        const styles = layoutElement.styles;
-        const layoutInformation = layoutElement.layoutInformation!;
-        const marginX = layoutInformation.marginLeft + layoutInformation.marginRight;
-        const marginY = layoutInformation.marginTop + layoutInformation.marginBottom;
-        const computedConstraints = this.computeSizeConstraints(styles, constraints, marginX, marginY);
-        const requestedSize = layoutElement.layoutConfig.measure(this, layoutElement, computedConstraints);
-        const computedSize = addToSize(requestedSize, marginX, marginY);
-        const realSize = matchToConstraints(computedSize, constraints);
-        layoutElement.measuredSize = realSize;
-        layoutElement.requestedSize = requestedSize;
+        if (layoutElement.isCollapsed) {
+            const collapsedSize = { width: 0, height: 0 };
+            const collapsedConstraints = { min: collapsedSize, max: collapsedSize };
+            layoutElement.layoutConfig.measure(this, layoutElement, collapsedConstraints);
+            layoutElement.measuredSize = collapsedSize;
+            layoutElement.requestedSize = collapsedSize;
+        } else {
+            const styles = layoutElement.styles;
+            const layoutInformation = layoutElement.layoutInformation!;
+            const marginX = layoutInformation.marginLeft + layoutInformation.marginRight;
+            const marginY = layoutInformation.marginTop + layoutInformation.marginBottom;
+            const computedConstraints = this.computeSizeConstraints(styles, constraints, marginX, marginY);
+            const requestedSize = layoutElement.layoutConfig.measure(this, layoutElement, computedConstraints);
+            const computedSize = addToSize(requestedSize, marginX, marginY);
+            const realSize = matchToConstraints(computedSize, constraints);
+            layoutElement.measuredSize = realSize;
+            layoutElement.requestedSize = requestedSize;
+        }
         return layoutElement;
     }
 
@@ -361,6 +339,9 @@ export class Layout {
         size: Size,
         position: Point
     ): { x: number; width: number } {
+        if (element.isCollapsed) {
+            return { x: position.x, width: 0 };
+        }
         const horizontalAlignment = styles.hAlign;
         const marginX = layoutInformation.marginLeft + layoutInformation.marginRight;
         let width = element.requestedSize!.width;
@@ -407,6 +388,9 @@ export class Layout {
         size: Size,
         position: Point
     ): { y: number; height: number } {
+        if (element.isCollapsed) {
+            return { y: position.y, height: 0 };
+        }
         const verticalAlignment = styles.vAlign;
         const marginY = layoutInformation.marginTop + layoutInformation.marginBottom;
         let height = element.requestedSize!.height;
@@ -465,5 +449,113 @@ export class Layout {
             throw new RuntimeError("Id of element not found");
         }
         return elementId;
+    }
+}
+
+/**
+ * Helper class to get style values from a set of matching style objects
+ */
+class StyleValueParser {
+    /**
+     * Cached variable values
+     * During computation, a variable value is set to null to detect circular dependencies
+     */
+    private readonly variableValues = new Map<string, LabeledValue | null>();
+
+    /**
+     * All variable objects from the matching styles
+     */
+    private readonly variables: FullObject[];
+
+    /**
+     * Creates a new style value parser
+     *
+     * @param matchingStyles all matching styles
+     * @param context the context to use for variable resolution
+     */
+    constructor(
+        readonly matchingStyles: FullObject[],
+        readonly context: InterpreterContext
+    ) {
+        this.variables = matchingStyles
+            .map((style) => style.getLocalFieldOrUndefined("variables")?.value)
+            .filter((variables) => variables instanceof FullObject);
+    }
+
+    /**
+     * Gets the value of a style attribute
+     *
+     * @param name the name of the attribute
+     * @returns the value of the attribute, undefined if none of the matching styles provides the attribute
+     */
+    getValue(name: string): LabeledValue | undefined {
+        for (const style of this.matchingStyles) {
+            const value = style.getLocalFieldOrUndefined(name);
+            if (value != undefined) {
+                return this.parse(value);
+            }
+        }
+        return undefined;
+    }
+
+    /**
+     * Parses a labeled value, resolving calc, var and unset special values
+     *
+     * @param labeledValue the labeled value to parse
+     * @returns the parsed labeled value
+     */
+    private parse(labeledValue: LabeledValue): LabeledValue {
+        const value = labeledValue.value;
+        if (!isObject(value)) {
+            return labeledValue;
+        }
+        const type = value.getLocalFieldOrUndefined("_type")?.value?.toNative();
+        if (type == undefined) {
+            return labeledValue;
+        }
+        if (type === "unset") {
+            return { value: this.context.null };
+        } else if (type === "var") {
+            const variableName = value.getLocalFieldOrUndefined("name")?.value?.toNative();
+            return this.getVariableValue(variableName);
+        } else if (type === "calc") {
+            const operator = value.getLocalField("operator", this.context).value;
+            const result = operator.invoke(
+                [
+                    { value: new ExecutableConstExpression(this.parse(value.getLocalField("left", this.context))) },
+                    { value: new ExecutableConstExpression(this.parse(value.getLocalField("right", this.context))) }
+                ],
+                this.context
+            );
+            return { value: result.value, source: labeledValue.source };
+        } else {
+            throw new Error(`Unknown style value type: ${type}`);
+        }
+    }
+
+    /**
+     * Gets the value of a variable
+     *
+     * @param name the name of the variable
+     * @returns the value of the variable
+     */
+    private getVariableValue(name: string): LabeledValue {
+        const variableValue = this.variableValues.get(name);
+        if (variableValue != undefined) {
+            return variableValue;
+        }
+        if (variableValue === null) {
+            throw new Error(`You cannot define variables such as ${name} with itself`);
+        }
+        this.variableValues.set(name, null);
+        for (const variables of this.variables) {
+            const entry = variables.getLocalFieldOrUndefined(name);
+            if (entry != undefined) {
+                const value = this.parse(entry);
+                this.variableValues.set(name, value);
+                return value;
+            }
+        }
+        return { value: this.context.null };
     }
 }

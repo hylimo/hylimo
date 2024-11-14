@@ -1,4 +1,4 @@
-import { BaseObject, FullObject, nativeToList } from "@hylimo/core";
+import { FullObject, InterpreterContext, nativeToList } from "@hylimo/core";
 import {
     Size,
     Point,
@@ -79,6 +79,24 @@ export interface LayoutedPath {
 }
 
 /**
+ * The root element of the layout with the layout
+ */
+export interface LayoutWithRoot {
+    /**
+     * The root element of the layout
+     */
+    root: LayoutElement;
+    /**
+     * The layout
+     */
+    layout: Layout;
+    /**
+     * The fonts root uses
+     */
+    fontFamilies: FontFamilyConfig[];
+}
+
+/**
  * Performs layout, generates a model as a result
  */
 export class LayoutEngine {
@@ -122,39 +140,66 @@ export class LayoutEngine {
     }
 
     /**
+     * Creates a layout for a root element
+     *
+     * @param element the element to layout
+     * @param styles the styles to use
+     * @param fonts the fonts to use
+     * @param context the context to use
+     * @returns the layout with the LayoutElement created for {@link element}
+     */
+    createLayout(
+        element: FullObject,
+        styles: FullObject,
+        fonts: FullObject,
+        context: InterpreterContext
+    ): LayoutWithRoot {
+        const nativeFonts = nativeToList(fonts.toNative());
+        const layout = new Layout(
+            this,
+            generateStyles(styles),
+            new FontCollection(),
+            nativeFonts[0].fontFamily,
+            context
+        );
+        const layoutElement = layout.create(element, undefined);
+        return {
+            root: layoutElement,
+            layout,
+            fontFamilies: nativeFonts
+        };
+    }
+
+    /**
      * Layouts a diagram defined using syncscript
      *
-     * @param diagram the diagram to layout
+     * @param layoutWithRoot the layout with the root element
      * @param config the configuration to use
      * @returns the layouted diagram
      */
-    async layout(diagram: BaseObject, config: DiagramConfig): Promise<LayoutedDiagram> {
-        this.assertDiagram(diagram);
-        const nativeFonts = nativeToList(diagram.getLocalFieldOrUndefined("fonts")?.value?.toNative());
-        const layout = new Layout(
-            this,
-            generateStyles(diagram.getLocalFieldOrUndefined("styles")?.value as FullObject),
-            new FontCollection(),
-            nativeFonts[0].fontFamily
-        );
-        const layoutElement = layout.create(
-            diagram.getLocalFieldOrUndefined("element")?.value as FullObject,
-            undefined
-        );
-        await this.initFonts(layoutElement, nativeFonts, layout, config);
-        this.pathCache.nextIteration();
+    async layout({ root, layout, fontFamilies }: LayoutWithRoot, config: DiagramConfig): Promise<LayoutedDiagram> {
+        await this.initFonts(root, fontFamilies, layout, config);
 
         return {
             rootElement: {
                 type: "root",
                 id: "root",
-                ...this.layoutElement(layout, layoutElement),
+                ...this.layoutElement(layout, root),
                 fonts: this.generateSubsettedFontData(layout),
                 edits: {}
             },
             elementLookup: layout.elementLookup,
             layoutElementLookup: layout.layoutElementLookup
         };
+    }
+
+    /**
+     * Starts the next iteration for each cache
+     */
+    nextCacheGeneration(): void {
+        this.textCache.nextIteration();
+        this.pathCache.nextIteration();
+        this.subsetFontCache.nextIteration();
     }
 
     /**
@@ -246,25 +291,8 @@ export class LayoutEngine {
                 return fontFamily;
             })
         );
-        this.subsetFontCache.nextIteration();
         if (cacheMiss) {
             this.textCache.clear();
-        } else {
-            this.textCache.nextIteration();
-        }
-    }
-
-    /**
-     * Asserts that the provided diagram is a valid diagram
-     *
-     * @param diagram the diagram to check
-     */
-    private assertDiagram(diagram: BaseObject): asserts diagram is FullObject {
-        if (!(diagram instanceof FullObject)) {
-            throw new Error("A Diagram must be an Object");
-        }
-        if (!diagram.hasField("element") || !diagram.hasField("fonts") || !diagram.hasField("styles")) {
-            throw new Error("A Diagram must have an element, fonts and styles fields");
         }
     }
 }

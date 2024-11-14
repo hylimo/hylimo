@@ -7,7 +7,6 @@ import {
     isNumber,
     numberType,
     objectType,
-    optional,
     or
 } from "@hylimo/core";
 import {
@@ -47,22 +46,23 @@ export class LinePointLayoutConfig extends CanvasPointLayoutConfig {
         super(
             [
                 {
-                    name: "pos",
-                    description: "the relative offset on the line, must be between 0 and 1 (inclusive)",
-                    type: optional(LinePointLayoutConfig.POS_TYPE)
-                },
-                {
-                    name: "distance",
-                    description: "the distance of the point to the line, defaults to 0",
-                    type: optional(numberType)
-                },
-                {
                     name: "lineProvider",
                     description: "the target which provides the line",
                     type: elementType(CanvasConnection.TYPE, CanvasElement.TYPE)
                 }
             ],
-            []
+            [
+                {
+                    name: "pos",
+                    description: "the relative offset on the line, must be between 0 and 1 (inclusive)",
+                    type: LinePointLayoutConfig.POS_TYPE
+                },
+                {
+                    name: "distance",
+                    description: "the distance of the point to the line, defaults to 0",
+                    type: numberType
+                }
+            ]
         );
     }
 

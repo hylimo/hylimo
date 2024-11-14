@@ -100,6 +100,24 @@ export interface LayoutInformation {
 }
 
 /**
+ * Controls the visibility of an element
+ */
+export enum Visibility {
+    /**
+     * The element is visible
+     */
+    VISIBLE = "visible",
+    /**
+     * The element is invisible, but still takes up space
+     */
+    HIDDEN = "hidden",
+    /**
+     * The element is invisible, and does not take up space
+     */
+    COLLAPSE = "collapse"
+}
+
+/**
  * The element to layout
  */
 export interface LayoutElement {
@@ -140,10 +158,6 @@ export interface LayoutElement {
      */
     layoutBounds?: Bounds;
     /**
-     * Other required layout data
-     */
-    [key: string]: any;
-    /**
      * Layout information required to be present after style computation
      */
     layoutInformation?: LayoutInformation;
@@ -155,6 +169,19 @@ export interface LayoutElement {
      * Set of classes
      */
     class: Set<string>;
+    /**
+     * If true, this element should not be rendered
+     */
+    isHidden: boolean;
+    /**
+     * If true, this element should be collapsed and not rendered
+     * Implies isHidden
+     */
+    isCollapsed: boolean;
+    /**
+     * Other required layout data
+     */
+    [key: string]: any;
 }
 
 /**
@@ -228,11 +255,10 @@ export interface LayoutConfig {
     /**
      * Returns the children of the element
      *
-     * @param layout performs the layout
      * @param element the element to get the children of
      * @returns the children of the element
      */
-    getChildren(layout: Layout, element: LayoutElement): FullObject[];
+    getChildren(element: LayoutElement): FullObject[];
     /**
      * Called to determine the size the element requires
      *
@@ -271,14 +297,6 @@ export interface LayoutConfig {
      * @returns the prototype generation function
      */
     createPrototype(): ExecutableAbstractFunctionExpression;
-    /**
-     * Called to postprocess the extracted styles
-     *
-     * @param element the element to postprocess
-     * @param styles the extracted styles
-     * @returns the postprocessed styles
-     */
-    postprocessStyles(element: LayoutElement, styles: Record<string, any>): Record<string, any>;
     /**
      * Creates a matrix which transforms from the local to the parent coordinate system
      * Can return undefined if the element does not have a parent or if the transformation is the identity matrix

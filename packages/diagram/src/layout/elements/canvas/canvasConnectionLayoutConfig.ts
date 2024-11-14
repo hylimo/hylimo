@@ -63,7 +63,6 @@ export class CanvasConnectionLayoutConfig extends EditableCanvasContentLayoutCon
     }
 
     override measure(layout: Layout, element: LayoutElement, constraints: SizeConstraints): Size {
-        // TODO (maybe) better size calculation
         for (const content of element.children) {
             layout.measure(content, constraints);
         }
@@ -79,7 +78,7 @@ export class CanvasConnectionLayoutConfig extends EditableCanvasContentLayoutCon
             children: contents
                 .filter((content) => content.layoutConfig.type != Marker.TYPE)
                 .flatMap((content) => layout.layout(content, position, content.measuredSize!)),
-            ...extractStrokeStyleAttributes(element.styles),
+            ...(element.isHidden ? {} : extractStrokeStyleAttributes(element.styles)),
             edits: element.edits
         };
         const contentLookup = new Map(contents.map((content) => [content.element, content]));
@@ -98,7 +97,7 @@ export class CanvasConnectionLayoutConfig extends EditableCanvasContentLayoutCon
         return [result];
     }
 
-    override getChildren(layout: Layout, element: LayoutElement): FullObject[] {
+    override getChildren(element: LayoutElement): FullObject[] {
         const children: FullObject[] = [];
         const contents = element.element.getLocalFieldOrUndefined("contents")?.value as FullObject | undefined;
         if (contents) {

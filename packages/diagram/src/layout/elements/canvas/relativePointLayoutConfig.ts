@@ -1,4 +1,4 @@
-import { ExecutableAbstractFunctionExpression, FullObject, fun, numberType, optional } from "@hylimo/core";
+import { ExecutableAbstractFunctionExpression, FullObject, fun, numberType } from "@hylimo/core";
 import { Size, Element, RelativePoint, Point, DefaultEditTypes } from "@hylimo/diagram-common";
 import { canvasContentType } from "../../../module/base/types.js";
 import { LayoutElement } from "../../layoutElement.js";
@@ -15,22 +15,23 @@ export class RelativePointLayoutConfig extends CanvasPointLayoutConfig {
         super(
             [
                 {
-                    name: "offsetX",
-                    description: "the x offset",
-                    type: optional(numberType)
-                },
-                {
-                    name: "offsetY",
-                    description: "the y offset",
-                    type: optional(numberType)
-                },
-                {
                     name: "target",
                     description: "the target point or canvas element of which the relative point is based",
                     type: canvasContentType
                 }
             ],
-            []
+            [
+                {
+                    name: "offsetX",
+                    description: "the x offset",
+                    type: numberType
+                },
+                {
+                    name: "offsetY",
+                    description: "the y offset",
+                    type: numberType
+                }
+            ]
         );
     }
 

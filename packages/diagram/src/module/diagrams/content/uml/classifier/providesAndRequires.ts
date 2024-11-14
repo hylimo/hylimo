@@ -1,7 +1,21 @@
-import { fun, id, InterpreterModule, numberType, object, optional, parse, stringType } from "@hylimo/core";
+import { fun, id, InterpreterModule, numberType, object, objectType, optional, parse, stringType } from "@hylimo/core";
 import { LinePointLayoutConfig } from "../../../../../layout/elements/canvas/linePointLayoutConfig.js";
 import { SCOPE } from "../../../../base/dslModule.js";
 import { canvasContentType } from "../../../../base/types.js";
+
+/**
+ * Type for the optional name label position
+ * The first value is the x offset, the second the y offset,
+ * both relative to the connection end.
+ */
+const nameLabelPosType = optional(
+    objectType(
+        new Map([
+            [0, optional(numberType)],
+            [1, optional(numberType)]
+        ])
+    )
+);
 
 /**
  * Module providing helper function to create provided and required interfaces for a classifier
@@ -57,6 +71,15 @@ export const providesAndRequiresModule = InterpreterModule.create(
                                         )
                                         interfaceConnection.contents[0]._verticalPos = 1
                                         scope.internal.registerInDiagramScope(name, interfaceConnection)
+                                        (xLabelOffset, yLabelOffset) = args.namePos ?? [null, null]
+                                        nameLabelPos = canvasScope.rpos(interfaceConnection, xLabelOffset, yLabelOffset)
+                                        nameLabelPos.class = list("provided-interface-label-pos")
+                                        nameLabel = canvasElement(
+                                            content = text(contents = list(span(text = name)), class = list("label")),
+                                            class = list("label-element"),
+                                            pos = nameLabelPos
+                                        )
+                                        scope.internal.registerCanvasContent(nameLabel, args, canvasScope)
                                         interfaceConnection
                                     `,
                                     {
@@ -77,7 +100,8 @@ export const providesAndRequiresModule = InterpreterModule.create(
                                                 "dist",
                                                 "Distance of the provided interface to the classifier",
                                                 optional(numberType)
-                                            ]
+                                            ],
+                                            ["namePos", "X and Y offset for the name label", nameLabelPosType]
                                         ],
                                         returns: "The created provided interface"
                                     }
@@ -112,6 +136,15 @@ export const providesAndRequiresModule = InterpreterModule.create(
                                         )
                                         interfaceConnection.contents[0]._verticalPos = 1
                                         scope.internal.registerInDiagramScope(name, interfaceConnection)
+                                        (xLabelOffset, yLabelOffset) = args.namePos ?? [null, null]
+                                        nameLabelPos = canvasScope.rpos(interfaceConnection, xLabelOffset, yLabelOffset)
+                                        nameLabelPos.class = list("required-interface-label-pos")
+                                        nameLabel = canvasElement(
+                                            content = text(contents = list(span(text = name)), class = list("label")),
+                                            class = list("label-element"),
+                                            pos = nameLabelPos
+                                        )
+                                        scope.internal.registerCanvasContent(nameLabel, args, canvasScope)
                                         interfaceConnection
                                     `,
                                     {
@@ -128,7 +161,8 @@ export const providesAndRequiresModule = InterpreterModule.create(
                                                 "dist",
                                                 "Distance of the required interface to the classifier",
                                                 optional(numberType)
-                                            ]
+                                            ],
+                                            ["namePos", "X and Y offset for the name label", nameLabelPosType]
                                         ],
                                         returns: "The created required interface"
                                     }
@@ -187,6 +221,12 @@ export const providesAndRequiresModule = InterpreterModule.create(
                             refX = 0.5
                             refY = 0.5
                         }
+                    }
+                    cls("provided-interface-label-pos") {
+                        offsetY = var("providedInterfaceSize") / 2
+                    }
+                    cls("required-interface-label-pos") {
+                        offsetY = var("requiredInterfaceSize") / 2
                     }
                 }
             `

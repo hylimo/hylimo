@@ -2,15 +2,20 @@ import {
     assertFunction,
     assertObject,
     assign,
+    BaseObject,
+    booleanType,
     DefaultModuleNames,
     ExecutableConstExpression,
     ExecutableExpression,
     ExecutableListEntry,
     ExecutableNumberLiteralExpression,
+    FullObject,
     fun,
     functionType,
     id,
     InterpreterModule,
+    isObject,
+    isString,
     jsFun,
     listType,
     literal,
@@ -19,6 +24,7 @@ import {
     objectType,
     optional,
     or,
+    parse,
     SemanticFieldNames,
     str,
     stringType,
@@ -29,11 +35,15 @@ import { AttributeConfig, ContentCardinality, LayoutConfig } from "../../layout/
 import { layouts } from "../../layout/layouts.js";
 import { elementType } from "./types.js";
 import { DiagramModuleNames } from "../diagramModuleNames.js";
+import { LayoutEngine } from "../../layout/engine/layoutEngine.js";
 
 /**
  * Type for unset, default style values
  */
-const styleValueType = namedType(objectType(new Map([["_type", or(literal("unset"), literal("var"))]])), "unset | var");
+const styleValueType = namedType(
+    objectType(new Map([["_type", or(literal("unset"), literal("var"), literal("calc"))]])),
+    "unset | var | calc"
+);
 
 /**
  * Gets a list of all known style attributes
@@ -57,7 +67,7 @@ function computeAllStyleAttributes(): AttributeConfig[] {
 /**
  * All style atributes
  */
-const allStyleAttributes = computeAllStyleAttributes();
+export const allStyleAttributes = computeAllStyleAttributes();
 
 /**
  * Creates a function which evaluates to the function to create a specific element
@@ -157,6 +167,12 @@ function extractContentAttributeAndCardinality(element: LayoutConfig): {
 const selectorProto = "selectorProto";
 
 /**
+ * The list of operators that have a proxy implementation
+ * on the selector prototype to support calculated style values
+ */
+const selectorProxiedOperators = ["+", "-", "*", "/", "%", "&", "|", ">", ">=", "<", "<=", ">>", "<<"];
+
+/**
  * Type for a font object
  */
 const fontType = objectType(
@@ -182,13 +198,37 @@ function font(name: string, url: string): ExecutableListEntry {
 }
 
 /**
- * Diagram module providing standard diagram UI elements
+ * Checks if a value is a var or calc object
+ *
+ * @param value the value to check
+ * @returns true if the value is a var or calc object
  */
-export const diagramModule = InterpreterModule.create(
-    DiagramModuleNames.DIAGRAM,
-    [...Object.values(DefaultModuleNames), DiagramModuleNames.EDIT],
-    [],
-    [
+function isVarOrCalc(value: BaseObject) {
+    if (!isObject(value)) {
+        return false;
+    }
+    const type = value.getLocalFieldOrUndefined("_type")?.value;
+    if (type == undefined || !isString(type)) {
+        return false;
+    }
+    return type.value === "var" || type.value === "calc";
+}
+
+/**
+ * Diagram module providing default diagram UI elements
+ */
+export class DiagramModule implements InterpreterModule {
+    /**
+     * Creates a new diagram module
+     *
+     * @param layoutEngine the layout engine to use for layouting
+     */
+    constructor(readonly layoutEngine: LayoutEngine) {}
+
+    name = DiagramModuleNames.DIAGRAM;
+    dependencies = [...Object.values(DefaultModuleNames), DiagramModuleNames.EDIT];
+    runtimeDependencies = [];
+    expressions = [
         fun([
             assign("_elementProto", id("object").call({ name: "_type", value: str("element") })),
             assign(
@@ -326,23 +366,87 @@ export const diagramModule = InterpreterModule.create(
                         }
                     )
                 ),
-                fun(
+                ...parse(
                     `
-                        (callback) = args
-                        res = object(styles = list())
-                        res.type = selector("type")
-                        res.cls = selector("class")
-                        anySelector = selector("any")
-                        res.any = { 
-                            anySelector("", it, self = args.self)
+                        this.type = selector("type")
+                        this.cls = selector("class")
+                        this.anySelector = selector("any")
+                        this.any = {
+                            this.anySelector("", it, self = args.self)
                         }
-                        res.vars = vars
-                        callback.callWithScope(res)
-                        res
-                    `,
+                    `
+                ),
+                fun(
+                    [
+                        ...parse(
+                            `
+                                (callback, res, validateStyles) = args
+                                this.stylesArgs = args
+                                res.type = type
+                                res.cls = cls
+                                res.any = any
+                                res.vars = vars
+                            `
+                        ),
+                        ...selectorProxiedOperators.map((operator) =>
+                            id("res").assignField(
+                                operator,
+                                jsFun(
+                                    (args, context) => {
+                                        const left = args.getField(0, context);
+                                        const right = args.getField(1, context);
+                                        const executableOperator = context
+                                            .getField("stylesArgs")
+                                            .getFieldValue("self", context)
+                                            .getField(operator, context);
+                                        if (isVarOrCalc(left.value) || isVarOrCalc(right.value)) {
+                                            const result = context.newObject();
+                                            result.setLocalField(
+                                                "_type",
+                                                { value: context.newString("calc") },
+                                                context
+                                            );
+                                            result.setLocalField("left", left, context);
+                                            result.setLocalField("right", right, context);
+                                            result.setLocalField("operator", executableOperator, context);
+                                            return result;
+                                        }
+                                        return executableOperator.value.invoke(
+                                            [
+                                                { value: new ExecutableConstExpression(left) },
+                                                { value: new ExecutableConstExpression(right) }
+                                            ],
+                                            context
+                                        );
+                                    },
+                                    {
+                                        docs: `The ${operator} operator, expects two arguments, calls ${operator} on the first argument with the second argument.`,
+                                        params: [
+                                            [0, `the target where ${operator} is invoked`],
+                                            [1, `the value passed to the ${operator} function`]
+                                        ],
+                                        returns: `The result of the invocation of ${operator} on the first argument`
+                                    }
+                                )
+                            )
+                        ),
+                        ...parse(
+                            `
+                                callback.callWithScope(res)
+                                if(validateStyles == true) {
+                                    validateSelector(res, callback)
+                                }
+                                res
+                            `
+                        )
+                    ],
                     {
-                        docs: 'Creates a new styles object. Use "cls" and "type" to create rules.',
-                        params: [],
+                        docs: 'Creates a new styles object. Use "cls", "type", and "any" to create rules.',
+                        params: [
+                            [0, "the callback to invoke", functionType],
+                            [1, "the scope object to use which is provided to the callback end returned", objectType()],
+                            [2, "validate style attributes", optional(booleanType)]
+                        ],
                         returns: "The created styles object"
                     }
                 )
@@ -432,11 +536,16 @@ export const diagramModule = InterpreterModule.create(
         ),
         assign(
             "createDiagram",
-            fun(
-                `
-                    (element, stylesObject, fonts) = args
-                    object(element = element, styles = stylesObject, fonts = fonts)
-                `,
+            jsFun(
+                (args, context) => {
+                    const layoutWithRoot = this.layoutEngine.createLayout(
+                        args.getField(0, context).value as FullObject,
+                        args.getField(1, context).value as FullObject,
+                        args.getField(2, context).value as FullObject,
+                        context
+                    );
+                    return context.newWrapperObject(layoutWithRoot, new Map());
+                },
                 {
                     docs: "Creates a new diagram, consisting of a ui element, styles and fonts",
                     params: [
@@ -448,5 +557,5 @@ export const diagramModule = InterpreterModule.create(
                 }
             )
         )
-    ]
-);
+    ];
+}
