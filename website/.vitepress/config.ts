@@ -52,13 +52,6 @@ export default withPwa(
                     content: "Graphical and text editor for diagrams, especially UML diagrams"
                 }
             ],
-            [
-                "meta",
-                {
-                    name: "author",
-                    content: "Niklas Krieger and Leon Hofmeister"
-                }
-            ],
             ["link", { rel: "icon", href: "/favicon.ico" }],
             [
                 "meta",
