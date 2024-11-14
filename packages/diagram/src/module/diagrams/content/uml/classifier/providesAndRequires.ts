@@ -5,6 +5,8 @@ import { canvasContentType } from "../../../../base/types.js";
 
 /**
  * Type for the optional name label position
+ * The first value is the x offset, the second the y offset,
+ * both relative to the connection end.
  */
 const nameLabelPosType = optional(
     objectType(

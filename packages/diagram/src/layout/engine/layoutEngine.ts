@@ -146,7 +146,7 @@ export class LayoutEngine {
      * @param styles the styles to use
      * @param fonts the fonts to use
      * @param context the context to use
-     * @returns the layout with
+     * @returns the layout with the LayoutElement created for {@link element}
      */
     createLayout(
         element: FullObject,
