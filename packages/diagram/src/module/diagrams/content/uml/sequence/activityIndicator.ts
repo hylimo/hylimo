@@ -57,24 +57,25 @@ export const activityIndicatorModule = InterpreterModule.create(
                     activityIndicators.get(activityIndicators.length - 1).xshift + xshift
                 }
                 
+                // By default, start the indicator 'margin' above on the y-axis as it looks visually nicer not to have an arrow directly pointing at the corner of the indicator
+                // However, to be UML compliant, it must also be possible to start it at a corner
+                // Additionally, since it should be ABOVE the event, we must negate the argument
+                yStart = args.yoffset
+                yStart = -1 * if (yStart != null) { yStart } { scope.margin }
+                height = scope.margin - yStart // make the pillar a bit more aesthetically pleasing by adding a bit of margin on both sides - at least if the user wants it (yStart is supposed to be negative, so add it on top of the height)
+                
                 width = scope.activityWidth
                 
                 activityIndicatorElement = canvasElement(
                     content = rect(class = list("activity-indicator"), fill = var("background")),
                     class = list("activity-indicator-element"),
                     width = width,
-                    height = 2 * scope.margin // margin around the event, once above and once below
+                    height = height
                 )
                 
                 activityIndicatorElement.xshift = xshift
                 activityIndicatorElement.leftX = xshift - (0.5 * width)
                 activityIndicatorElement.rightX = activityIndicatorElement.leftX + width
-                
-                // By default, start the indicator 'margin' above on the y-axis as it looks visually nicer not to have an arrow directly pointing at the corner of the indicator
-                // However, to be UML compliant, it must also be possible to start it at a corner
-                // Additionally, since it should be ABOVE the event, we must negate the argument
-                yStart = args.yoffset
-                yStart = -1 * if (yStart != null) { yStart } { scope.margin }
 
                 // Explanation of the position:
                 // - start: the (x,y) coordinate of the given event-actor combi

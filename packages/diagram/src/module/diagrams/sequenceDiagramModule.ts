@@ -11,6 +11,7 @@ import { eventModule } from "./content/uml/sequence/event.js";
 import { activityIndicatorModule } from "./content/uml/sequence/activityIndicator.js";
 import { sequenceDiagramAssociationsModule } from "./content/uml/sequence/sequenceDiagramAssociations.js";
 import { participantModule } from "./content/uml/sequence/participant.js";
+import { sequenceDiagramFrameModule } from "./content/uml/sequence/frame.js";
 
 /**
  * Module for UML sequence diagrams.
@@ -27,7 +28,7 @@ export const sequenceDiagramModule = InterpreterModule.create(
         sequenceDiagramActorModule,
         eventModule,
         activityIndicatorModule,
-        // frameModule,
+        sequenceDiagramFrameModule,
         participantModule,
         sequenceDiagramAssociationsModule,
         readingDirectionModule

@@ -31,12 +31,12 @@ export const sequenceDiagramFrameModule = InterpreterModule.create(
                         optional(booleanType)
                     ],
                     [
-                        "start",
+                        "topLeft",
                         "The top-left coordinate (event) to draw the border around. The border will be extended by 'frameMargin' on each side",
                         eventCoordinateType
                     ],
                     [
-                        "end",
+                        "bottomRight",
                         "The bottom-right coordinate (event) to draw the border around. The border will be extended by 'frameMargin' on each side",
                         eventCoordinateType
                     ]

@@ -17,7 +17,6 @@ export const eventModule = InterpreterModule.create(
                 (name, yDistance) = args
                 
                 eventObject = [name = name]
-                
                 if(!(scope.internal.registerInDiagramScope(name, eventObject))) {
                     error("Cannot construct event '" + name + "' as this variable is already declared somewhere else")
                 }
@@ -52,7 +51,7 @@ export const eventModule = InterpreterModule.create(
                            rightX = lastActivityIndicator.rightX
                         }
                     }
-                    
+
                     eventObject[it.name] = [
                         left = {
                             activityShifter()
@@ -66,12 +65,12 @@ export const eventModule = InterpreterModule.create(
                         parentEvent = eventObject,
                         participantName = it.name
                     ]
-                    
+
                     // change the length of the instance line (its end position) to the new last position + 3*margin
                     // (+3 margin so that a activity indicator that is still present there can end, and there's still a bit of the line left over)
                     endpos = scope.rpos(eventPosition, 0, 3*scope.margin)
-                    it.line.contents.get(it.line.contents.length - 1).end = endpos
-                    
+                    it.lifeline.contents.get(it.lifeline.contents.length - 1).end = endpos
+
                     // Also enlarge all active activity indicators
                     it.activeActivityIndicators.forEach {
                         it.height = it.height + eventObject.deltaY
