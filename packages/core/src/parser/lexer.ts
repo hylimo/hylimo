@@ -140,9 +140,9 @@ export const Comma = createToken({
  * Identifier token
  * Two types of identifiers exist:
  * - textual identifiers
- *  - can contain alphanumerical characters, underscore and dollar signs
+ *  - can contain ID_Continue characters, underscore and dollar signs
+ *  - must start with an ID_Start character, dollar sign or underscore
  *  - must not start with a number
- *  - must contain at least one alphanumerical character
  * - special characters identifiers
  *  - can contain all special characters EXCEPT
  *    - single dot (two or more dots are allowed)
@@ -151,12 +151,20 @@ export const Comma = createToken({
  *    - round/curly/square brackets
  *    - double quotes
  *    - /*, *\/, //
- *  - if there are trailing underscores or dollar signs, those are only part if afterwards there is no alphnumerical character
+ *  - if there are trailing underscores or dollar signs, those are only part if afterwards there is no ID_Continue character (except underscore)
  *    - otherwise these are part of the next textual identifier
  */
 export const Identifier = createToken({
     name: TokenType.IDENTIFIER,
-    pattern: /(([!#%&'+\-:;<=>?@\\^`|~]|\*(?!\/)|\/(?![/*])|\.{2,}|([_$](?![_$]*[a-z0-9])))+)|([a-z_$][a-z0-9_$]*)/i
+    pattern: {
+        exec: (text, startOffset) => {
+            const pattern =
+                /(([!#%&'+\-:;<=>?@\\^`|~]|\*(?!\/)|\/(?![/*])|\.{2,}|[$_]+(?![\p{ID_Continue}$]))+)|([\p{ID_Start}_$][\p{ID_Continue}$]*)/uy;
+            pattern.lastIndex = startOffset;
+            return pattern.exec(text);
+        }
+    },
+    line_breaks: false
 });
 
 /**
