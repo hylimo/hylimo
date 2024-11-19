@@ -96,6 +96,7 @@ export class SubsetCollector {
             for (const char of text) {
                 subset.add(char);
             }
+            subset.add("");
         }
         for (const child of element.children) {
             this.collect(child);
