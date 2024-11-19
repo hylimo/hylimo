@@ -195,7 +195,16 @@ export const languageConfiguration: languages.LanguageConfiguration = {
         ["(", ")"],
         ["[", "]"],
         ["${", "}"]
-    ]
+    ],
+    colorizedBracketPairs: [
+        ["{", "}"],
+        ["(", ")"],
+        ["[", "]"]
+    ],
+    comments: {
+        lineComment: "//",
+        blockComment: ["/*", "*/"]
+    }
 };
 
 /**
@@ -211,7 +220,7 @@ export const customDarkTheme: editor.IStandaloneThemeData = {
         },
         {
             token: "entity.name.function",
-            foreground: "#DCDCAA"
+            foreground: "#dcdcaa"
         },
         {
             token: "variable",
@@ -231,7 +240,11 @@ export const customDarkTheme: editor.IStandaloneThemeData = {
         },
         {
             token: "constant.numerical",
-            foreground: "#DCDCAA"
+            foreground: "#dcdcaa"
+        },
+        {
+            token: "delimiter.curly",
+            foreground: "#569cd6"
         }
     ],
     colors: {}
@@ -271,6 +284,10 @@ export const customLightTheme: editor.IStandaloneThemeData = {
         {
             token: "constant.numerical",
             foreground: "#098658"
+        },
+        {
+            token: "delimiter.curly",
+            foreground: "#0000ff"
         }
     ],
     colors: {}
