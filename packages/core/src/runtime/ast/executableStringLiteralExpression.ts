@@ -1,5 +1,6 @@
 import { StringLiteralExpression } from "../../ast/stringLiteralExpression.js";
 import { InterpreterContext } from "../interpreter/interpreterContext.js";
+import { AbstractFunctionObject } from "../objects/functionObject.js";
 import { LabeledValue } from "../objects/labeledValue.js";
 import { StringObject } from "../objects/stringObject.js";
 import { SemanticFieldNames } from "../semanticFieldNames.js";
@@ -33,7 +34,7 @@ export class ExecutableStringLiteralExpression extends ExecutableExpression<Stri
                 let evaluationResultValue = evaluationResult.value;
                 const toString = evaluationResultValue.getFieldValue("toString", context);
 
-                if (toString) {
+                if (toString instanceof AbstractFunctionObject) {
                     evaluationResultValue = toString.invoke(
                         [{ name: SemanticFieldNames.SELF, value: new ExecutableConstExpression(evaluationResult) }],
                         context,
