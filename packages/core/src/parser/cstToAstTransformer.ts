@@ -548,8 +548,8 @@ export function generateCstToAstTransfromer(parser: Parser): ICstVisitor<never, 
 }
 
 /**
- * Parses a string
- * Removes quotes and handles escapes
+ * Parses a string part
+ * Handles escapes
  *
  * @param value the string to parse
  * @returns the parsed string

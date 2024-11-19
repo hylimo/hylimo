@@ -17,7 +17,7 @@ export class StringLiteralExpression extends Expression {
     /**
      * Creates a new StringLiteralExpression consisting out of a constant string
      *
-     * @param value the constant literal
+     * @param parts the parts of the string literal
      * @param metadata metadata for the expression
      */
     constructor(
