@@ -574,6 +574,9 @@ function parseString(value: string): string {
                 case '"':
                     res += '"';
                     break;
+                case "$":
+                    res += "$";
+                    break;
                 case "u": {
                     const code = value.substring(i + 1, i + 5);
                     res += String.fromCharCode(parseInt(code, 16));
