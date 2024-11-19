@@ -12,6 +12,7 @@ const { group, indent, join, line, hardline, softline } = doc.builders;
  */
 export const printers: Record<Rules, ({ ctx, path, print }: PrintContext) => Doc> = {
     literal: printLiteral,
+    stringPart: printStringPart,
     function: printFunction,
     expressions: printExpressions,
     listEntry: printListEntry,
@@ -33,10 +34,9 @@ export const printers: Record<Rules, ({ ctx, path, print }: PrintContext) => Doc
  * @param ctx the children of the current CST node
  * @returns the formatteed literal
  */
-function printLiteral({ ctx }: PrintContext): Doc {
-    if (ctx.String) {
-        const token = ctx.String[0] as IToken;
-        return token.image;
+function printLiteral({ ctx, path, print }: PrintContext): Doc {
+    if (ctx.StringStart) {
+        return ['"', ...path.map(print, Rules.STRING_PART), '"'];
     } else {
         const token = ctx.Number[0] as IToken;
         if (ctx.SignMinus) {
@@ -44,6 +44,20 @@ function printLiteral({ ctx }: PrintContext): Doc {
         } else {
             return token.image;
         }
+    }
+}
+
+/**
+ * Formats a string part
+ *
+ * @param context prettier print context
+ * @returns the formatted string part
+ */
+function printStringPart({ ctx, path, print }: PrintContext): Doc {
+    if (ctx.StringContent) {
+        return ctx.StringContent[0].image;
+    } else {
+        return group(["${", indent([softline, ...path.map(print, Rules.EXPRESSION)]), softline, "}"]);
     }
 }
 

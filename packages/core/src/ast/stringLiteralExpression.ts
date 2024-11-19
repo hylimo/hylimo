@@ -2,17 +2,16 @@ import { InterpreterContext } from "../runtime/interpreter/interpreterContext.js
 import { WrapperObject } from "../runtime/objects/wrapperObject.js";
 import { Expression } from "./expression.js";
 import { ExpressionMetadata } from "./expressionMetadata.js";
-import { LiteralExpression } from "./literalExpression.js";
 
 /**
  * String expression
  */
-export class StringLiteralExpression extends LiteralExpression<string> {
+export class StringLiteralExpression extends Expression {
     static readonly TYPE = "StringLiteralExpression";
 
     private static readonly WRAPPER_ENTRIES = new Map([
         ...Expression.expressionWrapperObjectEntries<StringLiteralExpression>(StringLiteralExpression.TYPE),
-        ["value", (wrapped, context) => context.newString(wrapped.value)]
+        ["parts", (wrapped, context) => context.newListWrapperObject(wrapped.parts, StringLiteralPart.toWrapperObject)]
     ]);
 
     /**
@@ -21,11 +20,49 @@ export class StringLiteralExpression extends LiteralExpression<string> {
      * @param value the constant literal
      * @param metadata metadata for the expression
      */
-    constructor(value: string, metadata: ExpressionMetadata) {
-        super(value, StringLiteralExpression.TYPE, metadata);
+    constructor(
+        readonly parts: StringLiteralPart[],
+        metadata: ExpressionMetadata
+    ) {
+        super(StringLiteralExpression.TYPE, metadata);
     }
 
     override toWrapperObject(context: InterpreterContext): WrapperObject<this> {
         return context.newWrapperObject(this, StringLiteralExpression.WRAPPER_ENTRIES);
+    }
+}
+
+/**
+ * A part of a string literal
+ * Either a content string or a template expression
+ */
+export type StringLiteralPart =
+    | {
+          content: string;
+      }
+    | {
+          expression: Expression;
+      };
+
+namespace StringLiteralPart {
+    /**
+     * Converts a StringLiteralPart to a wrapper object
+     *
+     * @param part the part to convert
+     * @param context the interpreter context
+     * @returns the wrapped part
+     */
+    export function toWrapperObject(part: StringLiteralPart, context: InterpreterContext): WrapperObject<any> {
+        if ("content" in part) {
+            return context.newWrapperObject(
+                part,
+                new Map([["content", (wrapped, context) => context.newString(wrapped.content)]])
+            );
+        } else {
+            return context.newWrapperObject(
+                part,
+                new Map([["expression", (wrapped, context) => wrapped.expression.toWrapperObject(context)]])
+            );
+        }
     }
 }

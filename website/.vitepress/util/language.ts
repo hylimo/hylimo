@@ -27,7 +27,6 @@ export const monarchTokenProvider: languages.IMonarchLanguage = {
             [/[0-9]+(\.[0-9]+)?([eE]-?[0-9]+)?/u, { token: "constant.numerical", switchTo: "@expression.after" }],
 
             // strings
-            [/"([^"\\]|\\.)*$/u, "string.invalid"], // non-teminated string
             [/"/u, { token: "string.quote", bracket: "@open", switchTo: "@string" }],
 
             // open brackets
@@ -42,9 +41,8 @@ export const monarchTokenProvider: languages.IMonarchLanguage = {
             [
                 /\{/u,
                 {
-                    token: "delimiter.curly.open",
-                    bracket: "@open",
-                    switchTo: "@expression"
+                    token: "@rematch",
+                    switchTo: "@expression.after"
                 }
             ],
             [
@@ -70,7 +68,7 @@ export const monarchTokenProvider: languages.IMonarchLanguage = {
                 {
                     token: "delimiter.curly.close",
                     bracket: "@close",
-                    switchTo: "@expression.after"
+                    next: "@pop"
                 }
             ],
             [
@@ -108,6 +106,16 @@ export const monarchTokenProvider: languages.IMonarchLanguage = {
                 }
             ],
 
+            // open curly bracket
+            [
+                /\{/u,
+                {
+                    token: "delimiter.curly.open",
+                    bracket: "@open",
+                    next: "@expression"
+                }
+            ],
+
             // else
             { include: "@expression" }
         ],
@@ -131,12 +139,22 @@ export const monarchTokenProvider: languages.IMonarchLanguage = {
                 }
             ],
 
+            // open curly bracket
+            [
+                /\{/u,
+                {
+                    token: "@rematch",
+                    switchTo: "@expression.after"
+                }
+            ],
+
             // else
             { include: "@expression.after" }
         ],
 
         string: [
-            [/[a-zA-Z0-9!#$%&'()*+,\-./:;<=>?@[\]^_`{|}~ ]+/u, "string"],
+            [/\$\{/u, { token: "delimiter.curly.open", bracket: "@open", next: "@expression" }],
+            [/([^\\$"\n]|\$(?!\{))+/u, "string"],
             [/\\([\\"nt]|u[0-9a-fA-F]{4})/u, "string.escape"],
             [/\\./u, "string.escape.invalid"],
             [/"/u, { token: "string.quote", bracket: "@close", switchTo: "@expression.after" }]
@@ -175,7 +193,8 @@ export const languageConfiguration: languages.LanguageConfiguration = {
     brackets: [
         ["{", "}"],
         ["(", ")"],
-        ["[", "]"]
+        ["[", "]"],
+        ["${", "}"]
     ]
 };
 

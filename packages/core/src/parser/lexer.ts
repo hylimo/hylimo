@@ -11,7 +11,11 @@ export enum Modes {
     /**
      * Skip newlines in cst
      */
-    IGNORE_NEW_LINE = "IGNORE_NEW_LINES"
+    IGNORE_NEW_LINE = "IGNORE_NEW_LINES",
+    /**
+     * Mode inside
+     */
+    STRING_LITERAL = "STRING_LITERAL"
 }
 
 /**
@@ -32,7 +36,10 @@ export enum TokenType {
     IDENTIFIER = "Identifier",
     SIGN_MINUS = "SignMinus",
     EQUAL = "Equal",
-    STRING = "String",
+    STRING_CONTENT = "StringContent",
+    STRING_TEMPLATE_START = "StringTemplateStart",
+    STRING_START = "StringStart",
+    STRING_END = "StringEnd",
     NUMBER = "Number",
     SINGLE_LINE_COMMENT = "SingleLineComment",
     MULTI_LINE_COMMENT = "MultiLineComment"
@@ -189,19 +196,47 @@ export const Equal = createToken({
 });
 
 /**
- * String literal token
- * Must be enclosed in double quotes
+ * Content for a string literal except template expressions
  * The following characters must be escaped with a backslash:
  * - double quotes
  * - backslash
+ * - dollar sign if followed by opening curly brackets
+ *   - can be escaped even if not followed by opening curly brackets
  * Other supported escapes:
  * - n (newline)
  * - t (tab)
  * - u followed by 4 hexadecimal digits (unicode character)
  */
-export const String = createToken({
-    name: TokenType.STRING,
-    pattern: /"((\\([\\"nt]|u[0-9a-fA-F]{4}))|([a-zA-Z0-9!#$%&'()*+,\-./:;<=>?@[\]^_`{|}~ ]))*"/
+export const StringContent = createToken({
+    name: TokenType.STRING_CONTENT,
+    pattern: /([^\\$"\n]|\\([\\$"nt]|u[0-9a-fA-F]{4})|\$(?!\{))+/
+});
+
+/**
+ * Start of a template expression inside a string literal
+ */
+export const StringTemplateStart = createToken({
+    name: TokenType.STRING_TEMPLATE_START,
+    pattern: /\${/,
+    push_mode: Modes.IGNORE_NEW_LINE
+});
+
+/**
+ * String literal start token
+ */
+export const StringStart = createToken({
+    name: TokenType.STRING_START,
+    pattern: /"/,
+    push_mode: Modes.STRING_LITERAL
+});
+
+/**
+ * String template end token
+ */
+export const StringEnd = createToken({
+    name: TokenType.STRING_END,
+    pattern: /"/,
+    pop_mode: true
 });
 
 /**
@@ -248,7 +283,7 @@ const standardTokens = [
     Equal,
     SignMinus,
     Identifier,
-    String,
+    StringStart,
     Number,
     SingleLineComment,
     MultiLineComment
@@ -261,6 +296,7 @@ export const lexerDefinition: IMultiModeLexerDefinition = {
     defaultMode: Modes.DEFAULT,
     modes: {
         [Modes.DEFAULT]: [...standardTokens, NewLine],
-        [Modes.IGNORE_NEW_LINE]: [...standardTokens, SkippedNewLine]
+        [Modes.IGNORE_NEW_LINE]: [...standardTokens, SkippedNewLine],
+        [Modes.STRING_LITERAL]: [StringContent, StringTemplateStart, StringEnd]
     }
 };

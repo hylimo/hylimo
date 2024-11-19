@@ -1,8 +1,7 @@
 import { ICstVisitor, CstNode, IToken } from "chevrotain";
-import { StringLiteralExpression } from "../ast/stringLiteralExpression.js";
+import { StringLiteralExpression, StringLiteralPart } from "../ast/stringLiteralExpression.js";
 import { FieldSelfInvocationExpression } from "../ast/fieldSelfInvocationExpression.js";
 import { NumberLiteralExpression } from "../ast/numberLiteralExpression.js";
-import { LiteralExpression } from "../ast/literalExpression.js";
 import { InvocationExpression } from "../ast/invocationExpression.js";
 import { ListEntry } from "../ast/listEntry.js";
 import { IdentifierExpression } from "../ast/identifierExpression.js";
@@ -109,10 +108,10 @@ export function generateCstToAstTransfromer(parser: Parser): ICstVisitor<never, 
          * @param ctx the children of the current CST node
          * @returns the created literal expression
          */
-        private literal(ctx: any): LiteralExpression<any> {
-            if (ctx.String) {
-                const token = ctx.String[0];
-                return new StringLiteralExpression(parseString(token.image), generateMetadata(token, token));
+        private literal(ctx: any): NumberLiteralExpression | StringLiteralExpression {
+            if (ctx.StringStart) {
+                const parts = (ctx.stringPart ?? []).map((part: CstNode) => this.visit(part));
+                return new StringLiteralExpression(parts, generateMetadata(ctx.StringStart[0], ctx.StringEnd[0]));
             } else {
                 const token = ctx.Number[0];
                 let value = parseNumber(token.image);
@@ -124,6 +123,24 @@ export function generateCstToAstTransfromer(parser: Parser): ICstVisitor<never, 
                     meta = generateMetadata(token, token);
                 }
                 return new NumberLiteralExpression(value, meta);
+            }
+        }
+
+        /**
+         * Maps a string part
+         *
+         * @param ctx the children of the current CST node
+         * @returns the created string part
+         */
+        private stringPart(ctx: any): StringLiteralPart {
+            if (ctx.StringContent) {
+                return {
+                    content: parseString(ctx.StringContent[0].image)
+                };
+            } else {
+                return {
+                    expression: this.visit(ctx.expression)
+                };
             }
         }
 
@@ -539,7 +556,7 @@ export function generateCstToAstTransfromer(parser: Parser): ICstVisitor<never, 
  */
 function parseString(value: string): string {
     let res = "";
-    for (let i = 1; i < value.length - 1; i++) {
+    for (let i = 0; i < value.length; i++) {
         const char = value[i];
         if (char == "\\") {
             i++;
