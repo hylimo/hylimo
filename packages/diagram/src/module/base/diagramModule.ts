@@ -8,7 +8,6 @@ import {
     ExecutableConstExpression,
     ExecutableExpression,
     ExecutableListEntry,
-    ExecutableNumberLiteralExpression,
     FullObject,
     fun,
     functionType,
@@ -21,6 +20,7 @@ import {
     literal,
     namedType,
     nullType,
+    num,
     objectType,
     optional,
     or,
@@ -103,7 +103,7 @@ function createElementFunction(element: LayoutConfig): ExecutableExpression {
                             value: new ExecutableConstExpression({ value: args })
                         },
                         {
-                            value: new ExecutableNumberLiteralExpression(undefined, cardinalityNumber)
+                            value: num(cardinalityNumber)
                         }
                     ],
                     context

@@ -134,7 +134,7 @@ export class InterpreterContext {
      * @returns the created object
      */
     newString(value: string): StringObject {
-        return new StringObject(value, this.stringPrototype);
+        return new StringObject(value);
     }
 
     /**
@@ -144,7 +144,7 @@ export class InterpreterContext {
      * @returns the created object
      */
     newNumber(value: number): NumberObject {
-        return new NumberObject(value, this.numberPrototype);
+        return new NumberObject(value);
     }
 
     /**
@@ -154,7 +154,7 @@ export class InterpreterContext {
      * @returns the created object
      */
     newBoolean(value: boolean): BooleanObject {
-        return new BooleanObject(value, this.booleanPrototype);
+        return new BooleanObject(value);
     }
 
     /**

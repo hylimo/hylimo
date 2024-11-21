@@ -72,7 +72,7 @@ export abstract class ExecutableExpression<T extends Expression = Expression> {
      * @returns labeledValue or the new LabeledValue with the same value
      */
     protected ensureSource(labeledValue: LabeledValue): LabeledValue {
-        if (labeledValue.source) {
+        if (labeledValue.source != undefined) {
             return labeledValue;
         } else {
             return {
