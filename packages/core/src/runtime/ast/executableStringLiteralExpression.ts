@@ -1,5 +1,6 @@
 import { StringLiteralExpression } from "../../ast/stringLiteralExpression.js";
 import { InterpreterContext } from "../interpreter/interpreterContext.js";
+import { BaseObject } from "../objects/baseObject.js";
 import { AbstractFunctionObject } from "../objects/functionObject.js";
 import { LabeledValue } from "../objects/labeledValue.js";
 import { StringObject } from "../objects/stringObject.js";
@@ -32,7 +33,10 @@ export class ExecutableStringLiteralExpression extends ExecutableExpression<Stri
             } else {
                 const evaluationResult = part.expression.evaluate(context);
                 let evaluationResultValue = evaluationResult.value;
-                const toString = evaluationResultValue.getFieldValue("toString", context);
+                let toString: BaseObject | undefined;
+                if (!evaluationResultValue.isNull) {
+                    evaluationResultValue.getFieldValue("toString", context);
+                }
 
                 if (toString instanceof AbstractFunctionObject) {
                     evaluationResultValue = toString.invoke(
