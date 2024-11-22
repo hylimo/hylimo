@@ -14,7 +14,7 @@ export enum Modes {
     IGNORE_NEW_LINE = "IGNORE_NEW_LINES",
     /**
      * Mode inside string literals
-     * Behaves significantly differnt from the other modes,
+     * Behaves significantly differently from the other modes,
      * as here, only string content, template expressions, and double quotes are matched.
      */
     STRING_LITERAL = "STRING_LITERAL"
