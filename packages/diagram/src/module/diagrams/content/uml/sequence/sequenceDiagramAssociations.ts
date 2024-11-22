@@ -54,32 +54,42 @@ export const sequenceDiagramAssociationsModule = InterpreterModule.create(
                   }
                 }
                 scope.-- = create()
+                
+                // asynchronous message
                 scope.--> = create(
                     endMarkerFactory = scope.defaultMarkers.arrow
                 )
                 scope.<-- = create(
                     startMarkerFactory = scope.defaultMarkers.arrow
                 )
-                scope.<--> = create(
-                    startMarkerFactory = scope.defaultMarkers.arrow,
-                    endMarkerFactory = scope.defaultMarkers.arrow
+                
+                // synchronous message
+                scope.-->> = create(
+                    endMarkerFactory = scope.defaultMarkers.filledTriangle
                 )
-                scope.set("..", create(
-                    class = list("dashed-connection")
-                ))
-                scope.set("..>", create(
+                scope.<<-- = create(
+                    startMarkerFactory = scope.defaultMarkers.filledTriangle,
+                )
+                
+                // asynchronous return message
+                scope["..>"] = create(
                     endMarkerFactory = scope.defaultMarkers.arrow,
                     class = list("dashed-connection")
-                ))
-                scope.set("<..", create(
+                )
+                scope["<.."] = create(
                     startMarkerFactory = scope.defaultMarkers.arrow,
                     class = list("dashed-connection")
-                ))
-                scope.set("<..>", create(
-                    startMarkerFactory = scope.defaultMarkers.arrow,
-                    endMarkerFactory = scope.defaultMarkers.arrow,
+                )
+                
+                // synchronous return message
+                scope["..>>"] = create(
+                    endMarkerFactory = scope.defaultMarkers.filledTriangle,
                     class = list("dashed-connection")
-                ))
+                )
+                scope["<<.."] = create(
+                    startMarkerFactory = scope.defaultMarkers.filledTriangle,
+                    class = list("dashed-connection")
+                )
             `
         )
     ]
