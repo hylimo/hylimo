@@ -35,7 +35,7 @@ export class ExecutableStringLiteralExpression extends ExecutableExpression<Stri
                 let evaluationResultValue = evaluationResult.value;
                 let toString: BaseObject | undefined;
                 if (!evaluationResultValue.isNull) {
-                    evaluationResultValue.getFieldValue("toString", context);
+                    toString = evaluationResultValue.getFieldValue("toString", context);
                 }
 
                 if (toString instanceof AbstractFunctionObject) {
