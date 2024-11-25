@@ -16,7 +16,8 @@ import { CompletionItem } from "./completionItem.js";
 /**
  * Pattern for identifiers which can be used directly without indexing
  */
-const identifierPattern = /^((([!#%&'+\-:;<=>?@\\^`|~_$]|\*(?!\/)|\/(?![/*])|\.{2,})+)|([a-z_$][a-z0-9_$]*))$/i;
+const identifierPattern =
+    /^((([!#%&'+\-:;<=>?@\\^`|~]|\*(?!\/)|\/(?![/*])|\.{2,}|[$_]+(?![\p{ID_Continue}$]))+)|([\p{ID_Start}_$][\p{ID_Continue}$]*))$/u;
 
 /**
  * An expression which throws an CompletionError on evaluation
@@ -242,23 +243,24 @@ export class ExecutableCompletionExpression extends ExecutableExpression<Express
             return key.toString();
         }
 
-        const allowedPattern = /^[a-zA-Z0-9!#$%&'()*+,\-./:;<=>?@[\]^_`{|}~ ]$/;
-        const escapedKey = [...key]
-            .map((char) => {
-                if (allowedPattern.test(char)) {
-                    return char;
-                } else if (char === "\n") {
-                    return "\\n";
-                } else if (char === "\t") {
-                    return "\\t";
-                } else if (char === '"') {
-                    return '\\"';
-                } else {
-                    const code = char.charCodeAt(0);
-                    return "\\u" + code.toString(16).padStart(4, "0");
-                }
-            })
-            .join("");
+        // eslint-disable-next-line no-control-regex
+        const disallowedPattern = /[\\"\u0000-\u001f\u2028\u2029\u0085\u007f\n]|(\$\{)/g;
+        const escapedKey = key.replaceAll(disallowedPattern, (match) => {
+            if (match === "\n") {
+                return "\\n";
+            } else if (match === "\t") {
+                return "\\t";
+            } else if (match === '"') {
+                return '\\"';
+            } else if (match === "\\") {
+                return "\\\\";
+            } else if (match === "${") {
+                return "\\${";
+            } else {
+                const code = match.charCodeAt(0);
+                return "\\u" + code.toString(16).padStart(4, "0");
+            }
+        });
 
         return `"${escapedKey}"`;
     }

@@ -146,7 +146,16 @@ export class RuntimeAstTransformer extends ASTVisitor<undefined, ExecutableExpre
     }
 
     override visistStringLiteralExpression(expression: StringLiteralExpression): ExecutableExpression<any> {
-        return new ExecutableStringLiteralExpression(this.optionalExpression(expression), expression.value);
+        return new ExecutableStringLiteralExpression(
+            this.optionalExpression(expression),
+            expression.parts.map((part) => {
+                if ("content" in part) {
+                    return { content: part.content };
+                } else {
+                    return { expression: this.visit(part.expression) };
+                }
+            })
+        );
     }
 
     override visitObjectExpression(expression: ObjectExpression): ExecutableExpression<any> {

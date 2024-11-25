@@ -20,7 +20,7 @@ export const operatorModule = InterpreterModule.create(
                 operator,
                 native(
                     (args, context) => {
-                        if (args.length == 3 && args[0].name === SemanticFieldNames.SELF) {
+                        if (args[0].name === SemanticFieldNames.SELF) {
                             args.shift();
                         }
                         if (args.length != 2 || args[0].name !== undefined || args[1].name !== undefined) {
@@ -135,7 +135,7 @@ export const operatorModule = InterpreterModule.create(
             "??",
             native(
                 (args, context) => {
-                    if (args.length == 3 && args[0].name === SemanticFieldNames.SELF) {
+                    if (args[0].name === SemanticFieldNames.SELF) {
                         args.shift();
                     }
                     if (args.length != 2 || args[0].name !== undefined || args[1].name !== undefined) {
@@ -162,7 +162,7 @@ export const operatorModule = InterpreterModule.create(
             "-",
             native(
                 (args, context) => {
-                    if (args.length == 3 && args[0].name === SemanticFieldNames.SELF) {
+                    if (args[0].name === SemanticFieldNames.SELF) {
                         args.shift();
                     }
                     if (

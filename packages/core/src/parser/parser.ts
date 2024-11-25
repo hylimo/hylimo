@@ -1,4 +1,13 @@
-import { CstNode, CstParser, ICstVisitor, ILexingError, IRecognitionException, IToken, Lexer } from "chevrotain";
+import {
+    CstNode,
+    CstParser,
+    ICstVisitor,
+    ILexingError,
+    ILexingResult,
+    IRecognitionException,
+    IToken,
+    Lexer
+} from "chevrotain";
 import { Expression } from "../ast/expression.js";
 import { Range } from "../ast/range.js";
 import { generateCstToAstTransfromer } from "./cstToAstTransformer.js";
@@ -17,7 +26,10 @@ import {
     OpenRoundBracket,
     OpenSquareBracket,
     SignMinus,
-    String,
+    StringContent,
+    StringEnd,
+    StringStart,
+    StringTemplateStart,
     TokenType
 } from "./lexer.js";
 
@@ -26,6 +38,7 @@ import {
  */
 export enum Rules {
     LITERAL = "literal",
+    STRING_PART = "stringPart",
     FUNCTION = "function",
     EXPRESSIONS = "expressions",
     CALL_EXPRESSION = "callExpression",
@@ -118,7 +131,13 @@ export class Parser extends CstParser {
     private literal = this.RULE(Rules.LITERAL, () => {
         this.OR({
             DEF: [
-                { ALT: () => this.CONSUME(String) },
+                {
+                    ALT: () => {
+                        this.CONSUME(StringStart);
+                        this.MANY(() => this.SUBRULE(this.stringPart));
+                        this.CONSUME(StringEnd, { ERR_MSG: "String literal is missing its closing '\"'" });
+                    }
+                },
                 {
                     ALT: () => {
                         this.OPTION(() => this.CONSUME(SignMinus));
@@ -127,6 +146,27 @@ export class Parser extends CstParser {
                 }
             ],
             ERR_MSG: "Expected a literal but found none"
+        });
+    });
+
+    /**
+     * A part of a sting literal, either a string content or a string template
+     */
+    private stringPart = this.RULE(Rules.STRING_PART, () => {
+        this.OR1({
+            DEF: [
+                { ALT: () => this.CONSUME(StringContent) },
+                {
+                    ALT: () => {
+                        this.CONSUME(StringTemplateStart);
+                        this.withError(
+                            () => this.SUBRULE(this.expression),
+                            "String template is missing its expression"
+                        );
+                        this.CONSUME(CloseCurlyBracket, { ERR_MSG: "String template is missing its closing '}'" });
+                    }
+                }
+            ]
         });
     });
 
@@ -487,25 +527,43 @@ export class Parser extends CstParser {
 
     /**
      * Parses a text to a CST
+     *
      * @param text the text to parse
      * @returns the generated CST and possible errors
      */
     public parse(text: string): CstResult {
-        const lexerResult = this.lexer.tokenize(text);
-        this.input = lexerResult.tokens;
+        const lexingResult = this.lexer.tokenize(text);
+        if (lexingResult.errors.length > 0) {
+            for (const error of lexingResult.errors) {
+                error.line! -= 1;
+                error.column! -= 1;
+            }
+            return {
+                lexingErrors: lexingResult.errors,
+                parserErrors: [],
+                comments: []
+            };
+        }
         this.text = text;
+        return this.parseInternal(lexingResult);
+    }
+
+    /**
+     * Parses a list of tokens to a CST
+     *
+     * @param lexerResult contains the tokens to parse
+     * @returns the generated CST and possible errors
+     */
+    private parseInternal(lexerResult: ILexingResult): CstResult {
+        this.input = lexerResult.tokens;
         const result = this.expressions();
         let ast = undefined;
         if (result != undefined) {
             ast = this.generateAST(result);
         }
-        for (const error of lexerResult.errors) {
-            error.line! -= 1;
-            error.column! -= 1;
-        }
         return {
             comments: lexerResult.groups.comment,
-            lexingErrors: lexerResult.errors,
+            lexingErrors: [],
             parserErrors: this.errors.map((error) => ({
                 name: error.name,
                 message: error.message,

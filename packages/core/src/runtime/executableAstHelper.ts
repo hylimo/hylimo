@@ -38,7 +38,7 @@ export function id(identifier: string): ExecutableIdentifierExpression {
  * @returns the created literal expression
  */
 export function str(value: string): ExecutableStringLiteralExpression {
-    return new ExecutableStringLiteralExpression(undefined, value);
+    return new ExecutableStringLiteralExpression(undefined, [{ content: value }]);
 }
 
 /**
