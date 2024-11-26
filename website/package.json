@@ -14,6 +14,7 @@
         "@types/file-saver": "^2.0.7",
         "@types/pako": "^2.0.3",
         "@types/uuid": "^10.0.0",
+        "@types/wicg-file-system-access": "^2023.10.5",
         "@vite-pwa/vitepress": "^0.5.3",
         "vitepress": "^1.5.0",
         "vue": "^3.5.13"
@@ -24,7 +25,7 @@
         "@hylimo/diagram-render-svg": "^1.1.2",
         "@hylimo/diagram-ui": "^1.1.2",
         "@hylimo/language-server": "^1.1.2",
-        "@vueuse/core": "^11.2.0",
+        "@vueuse/core": "^11.3.0",
         "file-saver": "^2.0.5",
         "js-base64": "^3.7.7",
         "monaco-editor": "npm:@codingame/monaco-vscode-editor-api@~8.0.4",

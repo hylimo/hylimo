@@ -4,8 +4,6 @@ import { ExecutableAssignmentExpression } from "./ast/executableAssignmentExpres
 import { ExecutableExpression } from "./ast/executableExpression.js";
 import { ExecutableIdentifierExpression } from "./ast/executableIdentifierExpression.js";
 import { ExecutableNativeFunctionExpression, NativeFunctionType } from "./ast/executableNativeFunctionExpression.js";
-import { ExecutableNumberLiteralExpression } from "./ast/executableNumberLiteralExpression.js";
-import { ExecutableStringLiteralExpression } from "./ast/executableStringLiteralExpression.js";
 import { InterpreterContext } from "./interpreter/interpreterContext.js";
 import { BaseObject } from "./objects/baseObject.js";
 import { LabeledValue } from "./objects/labeledValue.js";
@@ -20,6 +18,9 @@ import { FunctionDocumentation } from "./ast/executableAbstractFunctionExpressio
 import { OperatorExpression } from "../ast/operatorExpression.js";
 import { ExecutableObjectExpression } from "./ast/executableObjectExpression.js";
 import { ExecutableListEntry } from "./ast/executableListEntry.js";
+import { ExecutableConstExpression } from "./ast/executableConstExpression.js";
+import { StringObject } from "./objects/stringObject.js";
+import { NumberObject } from "./objects/numberObject.js";
 
 /**
  * Helper function to create an IdentifierExpression without a position
@@ -37,8 +38,8 @@ export function id(identifier: string): ExecutableIdentifierExpression {
  * @param value the value of the literal
  * @returns the created literal expression
  */
-export function str(value: string): ExecutableStringLiteralExpression {
-    return new ExecutableStringLiteralExpression(undefined, [{ content: value }]);
+export function str(value: string): ExecutableConstExpression {
+    return new ExecutableConstExpression({ value: new StringObject(value) });
 }
 
 /**
@@ -47,8 +48,8 @@ export function str(value: string): ExecutableStringLiteralExpression {
  * @param value the value of the literal
  * @returns the created literal expression
  */
-export function num(value: number): ExecutableNumberLiteralExpression {
-    return new ExecutableNumberLiteralExpression(undefined, value);
+export function num(value: number): ExecutableConstExpression {
+    return new ExecutableConstExpression({ value: new NumberObject(value) });
 }
 
 /**

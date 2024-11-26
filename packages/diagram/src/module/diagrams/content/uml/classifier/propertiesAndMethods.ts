@@ -2,7 +2,6 @@ import {
     assertString,
     assign,
     ExecutableConstExpression,
-    ExecutableNumberLiteralExpression,
     Expression,
     fun,
     FunctionObject,
@@ -12,6 +11,7 @@ import {
     InterpreterModule,
     InvocationExpression,
     jsFun,
+    num,
     NumberLiteralExpression,
     OperatorExpression,
     parse,
@@ -60,7 +60,7 @@ export const propertiesAndMethodsModule = InterpreterModule.create(
                                         })),
                                         {
                                             name: "section",
-                                            value: new ExecutableNumberLiteralExpression(undefined, index)
+                                            value: num(index)
                                         }
                                     ],
                                     context

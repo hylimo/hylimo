@@ -25,10 +25,13 @@ export abstract class AbstractFunctionObject<T extends ExecutableAbstractFunctio
     constructor(
         readonly definition: T,
         readonly parentScope: FullObject,
-        proto: FullObject,
         public docs: BaseObject
     ) {
-        super(proto);
+        super();
+    }
+
+    override getProto(context: InterpreterContext): FullObject {
+        return context.functionPrototype;
     }
 
     override getField(key: string | number, context: InterpreterContext): LabeledValue {
@@ -93,16 +96,10 @@ export class FunctionObject extends AbstractFunctionObject<ExecutableFunctionExp
      *
      * @param definition defines the function (what to execute)
      * @param parentScope the parent scope, on exec a new scope with this as parent is created
-     * @param proto the prototype of this object
      * @param docs the documentation of this function
      */
-    constructor(
-        definition: ExecutableFunctionExpression,
-        parentScope: FullObject,
-        proto: FullObject,
-        docs: BaseObject
-    ) {
-        super(definition, parentScope, proto, docs);
+    constructor(definition: ExecutableFunctionExpression, parentScope: FullObject, docs: BaseObject) {
+        super(definition, parentScope, docs);
     }
 
     override invoke(
@@ -145,16 +142,10 @@ export class NativeFunctionObject extends AbstractFunctionObject<ExecutableNativ
      *
      * @param definition defines the function (what to execute)
      * @param parentScope the parent scope, on exec a new scope with this as parent is created
-     * @param proto the prototype of this object
      * @param docs the documentation of this function
      */
-    constructor(
-        definition: ExecutableNativeFunctionExpression,
-        parentScope: FullObject,
-        proto: FullObject,
-        docs: BaseObject
-    ) {
-        super(definition, parentScope, proto, docs);
+    constructor(definition: ExecutableNativeFunctionExpression, parentScope: FullObject, docs: BaseObject) {
+        super(definition, parentScope, docs);
     }
 
     override invoke(

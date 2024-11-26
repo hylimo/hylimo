@@ -1,13 +1,13 @@
 import {
     assign,
     ExecutableConstExpression,
-    ExecutableNumberLiteralExpression,
     Expression,
     fun,
     FunctionObject,
     functionType,
     InterpreterModule,
     jsFun,
+    num,
     parse
 } from "@hylimo/core";
 import { convertStringOrIdentifier } from "./propertiesAndMethods.js";
@@ -51,7 +51,7 @@ export const entriesModule = InterpreterModule.create(
                                     })),
                                     {
                                         name: "section",
-                                        value: new ExecutableNumberLiteralExpression(undefined, 2)
+                                        value: num(2)
                                     }
                                 ],
                                 context

@@ -132,29 +132,33 @@ export abstract class SimpleObject extends BaseObject {
         return false;
     }
 
-    constructor(readonly proto: FullObject) {
-        super();
-    }
+    /**
+     * Provides the prototype of this object based on the context
+     *
+     * @param context the context providing the prototype
+     * @returns the prototype of this object
+     */
+    abstract getProto(context: InterpreterContext): FullObject;
 
     override getField(key: string | number, context: InterpreterContext, self?: BaseObject): LabeledValue {
         if (key === SemanticFieldNames.PROTO) {
             return {
-                value: this.proto
+                value: this.getProto(context)
             };
         } else {
-            return this.proto.getField(key, context, self ?? this);
+            return this.getProto(context).getField(key, context, self ?? this);
         }
     }
 
     override getFields(context: InterpreterContext, self?: BaseObject): Map<string | number, LabeledValue> {
-        return this.proto.getFields(context, self ?? this);
+        return this.getProto(context).getFields(context, self ?? this);
     }
 
     override setField(key: string | number, value: LabeledValue, context: InterpreterContext, self?: BaseObject): void {
         if (key === SemanticFieldNames.PROTO) {
             throw new RuntimeError("Cannot set field proto of a non-Object");
         } else {
-            this.proto.setField(key, value, context, self ?? this);
+            this.getProto(context).setField(key, value, context, self ?? this);
         }
     }
 
