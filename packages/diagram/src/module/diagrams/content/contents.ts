@@ -30,11 +30,13 @@ import { activityIndicatorModule } from "./uml/sequence/activityIndicator.js";
 import { sequenceDiagramActorModule } from "./uml/sequence/sequenceDiagramActor.js";
 import { sequenceDiagramAssociationsModule } from "./uml/sequence/sequenceDiagramAssociations.js";
 import { participantModule } from "./uml/sequence/participant.js";
+import { lostFoundMessageModule } from "./uml/sequence/lostFoundMessage.js";
 
 /**
  * All content modules
  */
 export const contents: InterpreterModule[] = [
+    activityIndicatorModule,
     actorModule,
     associationsModule,
     classModule,
@@ -54,7 +56,7 @@ export const contents: InterpreterModule[] = [
     extendsAndImplementsModule,
     instanceModule,
     interfaceModule,
-    activityIndicatorModule,
+    lostFoundMessageModule,
     nonNavigableAssociationsModule,
     packageModule,
     participantModule,

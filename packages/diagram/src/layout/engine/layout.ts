@@ -1,19 +1,18 @@
-import { FullObject, assertString, nativeToList, RuntimeError, BaseObject } from "@hylimo/core";
-import { Line, Point, Size } from "@hylimo/diagram-common";
+import { assertString, BaseObject, FullObject, nativeToList, RuntimeError } from "@hylimo/core";
+import { Element, Line, Point, Size } from "@hylimo/diagram-common";
 import { FontCollection } from "../../font/fontCollection.js";
 import { FontFamily } from "../../font/fontFamily.js";
-import { StyleList, Selector, SelectorType, Style } from "../../styles.js";
+import { Selector, SelectorType, Style, StyleList } from "../../styles.js";
 import {
+    addToSize,
+    HorizontalAlignment,
     LayoutElement,
     LayoutInformation,
-    SizeConstraints,
-    addToSize,
     matchToConstraints,
-    HorizontalAlignment,
+    SizeConstraints,
     VerticalAlignment
 } from "../layoutElement.js";
 import { LayoutEngine } from "./layoutEngine.js";
-import { Element } from "@hylimo/diagram-common";
 import { generateEdits } from "./edits.js";
 import { CanvasLayoutEngine } from "./canvasLayoutEngine.js";
 
@@ -145,8 +144,7 @@ export class Layout {
             if (parsedValue._type === "unset") {
                 return undefined;
             } else if (parsedValue._type === "var") {
-                const variableValue = this.extractVariableValue(matchingStyles, parsedValue.name);
-                return variableValue;
+                return this.extractVariableValue(matchingStyles, parsedValue.name);
             } else {
                 throw new Error(`Unknown style value: ${value}`);
             }
@@ -313,7 +311,6 @@ export class Layout {
      * @param element the element to layout
      * @param position the position of the element
      * @param size the size of the element
-     * @param id the id of the element
      * @returns the layouted element
      */
     layout(element: LayoutElement, position: Point, size: Size): Element[] {
@@ -454,7 +451,7 @@ export class Layout {
     getElementId(element: FullObject): string {
         const elementId = this.elementIdLookup.get(element);
         if (!elementId) {
-            throw new RuntimeError("Id of element not found");
+            throw new RuntimeError(`Could not find ID of the element. Did you register ${element} in the canvas?`);
         }
         return elementId;
     }

@@ -15,6 +15,10 @@ export const defaultValues = InterpreterModule.create(
         scope.activityShift = 3
         scope.instanceDistance = 200
         scope.eventDistance = 30
+        scope.externalMessageDiameter = 20
+        // This one is calculated so that the resulting dot will be centered on the '100' grid lines when connecting against an activity indicator
+        // If you want to center it against a lifeline only, use '100' instead
+        scope.externalMessageDistance = 100 - (scope.activityWidth / 2) 
         
         // Used for internal layout
         scope.internal.sequenceDiagramParticipants = list() // Only the currently active participants, not including participants that were already terminated

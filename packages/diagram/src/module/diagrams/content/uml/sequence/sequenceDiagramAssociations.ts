@@ -6,6 +6,7 @@ import { InterpreterModule, parse } from "@hylimo/core";
  * - they replace the target prior to drawing the line: For sequence diagrams, we only want to draw until the start/end of the corresponding activity indicator instead of its center which is the value the user supplies by giving the event
  * - when the event references the same instance, we must select the `right` instead of the `left` end as target to, (we do not want to change our x-coordinate)
  * - they support additional arrows (sync  (-->>), async (-->), reply (..>, ..>>))
+ * - it must handle lost and found messages as we only know where to put it the moment the arrow is created
  */
 export const sequenceDiagramAssociationsModule = InterpreterModule.create(
     "uml/sequence/associations",
@@ -16,6 +17,8 @@ export const sequenceDiagramAssociationsModule = InterpreterModule.create(
             `
                 this.create = {
                   // Clone of scope.internal.createConnectionOperator that changes the start and end positions
+                  // Additionally, it positions lost and found messages where they belong
+                  
                   startMarkerFactory = args.startMarkerFactory
                   endMarkerFactory = args.endMarkerFactory
                   class = args.class
@@ -42,6 +45,18 @@ export const sequenceDiagramAssociationsModule = InterpreterModule.create(
                           endEvent
                       } 
                       
+                      // For lostMessage()/foundMessage(), we only calculate their position now, relative to the opposite side
+                      if((startEvent.externalMessageType != null) && (endEvent.externalMessageType != null)) {
+                        scope.error("Both left and right side of the relation calculate their position on the counterpart. Thus, no position can be calculated for \${startEvent.externalMessageType} message on the left and \${endEvent.externalMessageType} on the right")
+                      } 
+                      if((startEvent.externalMessageType != null) && (startEvent.distance != null)) {
+                        startEvent.pos = scope.rpos(end, startEvent.distance * -1 /* Go left */, 0)
+                      }
+                      if((endEvent.externalMessageType != null) && (endEvent.distance != null)) {
+                        endEvent.pos = scope.rpos(start, endEvent.distance, 0)
+                      }
+                      
+                      // Finally, the edge cases have been dealt with, do the normal thing
                       scope.internal.createConnection(
                           start,
                           end,

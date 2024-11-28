@@ -42,6 +42,15 @@ export const participantType = objectType(
     "UML sequence diagram participant (instance or actor)"
 );
 
+export const externalMessageType = objectType(
+    new Map([
+        ["distance", numberType], // on the x-axis compared to where it is pointing
+        ["diameter", numberType],
+        ["externalMessageType", booleanType] // The type of external message to use in error messages
+    ]),
+    "Lost or Found message"
+);
+
 export const frameType = objectType(
     new Map([
         ["text", optional(stringType)],

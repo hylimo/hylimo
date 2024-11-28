@@ -12,6 +12,7 @@ import { activityIndicatorModule } from "./content/uml/sequence/activityIndicato
 import { sequenceDiagramAssociationsModule } from "./content/uml/sequence/sequenceDiagramAssociations.js";
 import { participantModule } from "./content/uml/sequence/participant.js";
 import { sequenceDiagramFrameModule } from "./content/uml/sequence/frame.js";
+import { lostFoundMessageModule } from "./content/uml/sequence/lostFoundMessage.js";
 
 /**
  * Module for UML sequence diagrams.
@@ -31,6 +32,7 @@ export const sequenceDiagramModule = InterpreterModule.create(
         sequenceDiagramFrameModule,
         participantModule,
         sequenceDiagramAssociationsModule,
+        lostFoundMessageModule,
         readingDirectionModule
     ])
 );
