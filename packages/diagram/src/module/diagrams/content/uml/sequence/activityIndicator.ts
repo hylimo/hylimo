@@ -32,7 +32,11 @@ export const activityIndicatorModule = InterpreterModule.create(
                 
                 startPositionRaw = event[instance.name]
                 if(startPositionRaw == null) {
-                    error("'" + event.name + "." + instance.name + "' does not exist which should not happen")
+                    if(scope.internal.previouslyExistingSequenceDiagramParticipants[instance.name] != null) {
+                      error("'" + instance.name + "' has already been destroyed and thus cannot be activated anymore")
+                    } {
+                      error("'" + event.name + "." + instance.name + "' does not exist which should not happen")
+                    }
                 }
                 startPosition = startPositionRaw.center
                 if(startPosition == null) {
@@ -101,7 +105,7 @@ export const activityIndicatorModule = InterpreterModule.create(
                             optional(numberType)
                         ]
                     ],
-                    snippet: `("$1")`,
+                    snippet: `($1)`,
                     returns: "The created activity indicator"
                 }
             )
@@ -123,7 +127,7 @@ export const activityIndicatorModule = InterpreterModule.create(
                 {
                     docs: "Deactivates the most recent activity indicator",
                     params: [[0, "the instance to deactivate", participantType]],
-                    snippet: `("$1")`,
+                    snippet: `($1)`,
                     returns: "nothing"
                 }
             )

@@ -36,7 +36,7 @@ export const sequenceDiagramAssociationsModule = InterpreterModule.create(
                       // For the end point, there's a specialty: If both events point at the same participant (self message, so same x coordinate), don't use the left point but the right one instead so that x is indeed the same
                       // Unfortunately, we can only validate this using name equivalency right now, so good luck in case of a name conflict
                       end = if(endEvent.left != null && (endEvent.left.proto == {}.proto)) {
-                          if(endEvent.participantName == startEvent.participantName && (endEvent.right != null && endEvent.right.proto == {}.proto)) {
+                          if(endEvent.participantName == startEvent.participantName && ((endEvent.right != null) && (endEvent.right.proto == {}.proto))) {
                               endEvent.right()
                           } {
                               endEvent.left()

@@ -5,19 +5,28 @@ hidden: true
 
 Hylimo is able to efficiently draw sequence diagrams.
 On top of that, it is the most efficient tool we know to draw any typical sequence diagram:
-If you do not use any "advanced" sequence diagram feature we don't know of, sequence diagrams defined in Hylimo are the easiest diagrams you ever created.
+Sequence diagrams defined in Hylimo are the most maintainable sequence diagrams you will have ever created.
+
+## Basic principle
+
+Since sequence diagrams model **when** (and where) something happens, it should be modeled in a way that shows the **when** at a glance.\
+In other words: Order matters!\
+The sequence diagram has always only the currently available information and no additional information.
+
 
 ## Terminology
 
 In a sequence diagram, we have the following concepts:
-- Actor: one component whose behavior should be included in the diagram. Contains either a class (`User`), a UML instance declaration (`Bob: User`), or a stickman with a name symbolizing a user.
-- Lifeline: Duration during which a given actor is actively working on this problem. An actor can have multiple lifelines. More than one lifeline means that a process has parts that are fully asynchronous from one another.
-- Timeline: One-dimensional representation of your diagram that only stores the abstract instants when events happen (timeline points), without knowing where they occurred
-- Timeline point: A point in time at which \<something\> happens. There is no meaning behind this point in this definition, we simply know that **something** will happen here. A point is unique per timeline, so you know that if timeline point `A` == timelinepoint `B`, then we are at the same point in time and vice versa, if you construct a new point it is not equal to an existing one
-- Event: Combination between a timeline point and an actor (not necessarily its lifelines as for example messaging is possible where you receive the message prior to processing it) or a custom point.\
-  Note that each combination is unique and maps to one two dimensional point in the diagram - event to actor.
-- Frame: Box around a bunch of events. Can optionally contain a name (i.e. `if`, `while`), and sub compartments
-- Connection: Connects two events in the typical hylimo fashion
+- Participant: A component that "participates" in the diagram, so whose behavior should be modeled.\
+  It can be one of the following:
+  - an `instance` without a name (`User`)
+  - an `instance` with a name (`Bob: User`)
+  - an `actor` (a stickman symbolizing a user), optionally with a name
+- Lifeline: the entire duration a participant is alive, symbolized by the dotted line downwards
+- Event: an x/y coordinate linking a point in time to a participant, accessed by using the syntax `event.participant`, so i.e. `startPayment.User`.\
+- Message: arrow between two `event`s with a semantic meaning
+- Activity: the time a participant is active
+- Frame: Box around some events. Can optionally contain a name (i.e. `if`, `while`), and sub compartments
 
 ## Example
 Here is an example for a webshop order:
@@ -55,3 +64,13 @@ sequenceDiagram {
    frame(contained = list(cartResponse.Shop, cartResponse.Cart, notifyUser.User, notifyUser.Shop), name = "if", condition = "[response successful]", margin=30)
 }
 ```
+
+## Order matters
+
+Below, you'll find the order in which you should declare things so that they work as expected.\
+Hylimo walks through the diagram from left to right, and then from top to bottom.\
+The main way to move forward on the `y` axis in a sequence diagram is through `events`:\
+An `event` 
+
+First, declare all participants (`instance`, `actor`) in the order you want to display them as they will be positioned on the x axis in this order.
+Then, you can continue with the event-specific logic <TODO>

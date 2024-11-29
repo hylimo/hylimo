@@ -1,4 +1,6 @@
-import { InterpreterModule, parse } from "@hylimo/core";
+import { fun, id, InterpreterModule, numberType, optional, parse } from "@hylimo/core";
+import { SCOPE } from "../../../../base/dslModule.js";
+import { participantType } from "./types.js";
 
 /**
  * Module providing the shared logic for all sorts of sequence diagram participants - instances, actors, …<br>
@@ -19,10 +21,6 @@ export const participantModule = InterpreterModule.create(
                             scope.rpos(scope.internal.lastSequenceDiagramParticipant, scope.instanceDistance, 0)
                         } {
                             scope.apos(0, 0) // so that we don't get NPEs for the event layouting
-                        }
-                        
-                        if(scope.internal.lastSequenceDiagramParticipant != null) {
-                            participant.pos = scope.rpos(scope.internal.lastSequenceDiagramParticipant, scope.instanceDistance, 0)
                         }
 
                         //  Create the lifeline of this participant now so that it will always be rendered behind everything else
@@ -45,6 +43,58 @@ export const participantModule = InterpreterModule.create(
                     }
                 }
             `
+        ),
+        id(SCOPE).assignField(
+            "destroy",
+            fun(
+                `
+              (participant) = args
+              crossSize = args.crossSize ?? scope.destroyingCrossSize
+              
+              // Remove active activity indicators
+              while({participant.activeActivityIndicators.length > 0}) {
+                scope.deactivate(participant)
+              }
+              
+              // Unregister the participant from growing larger with every event
+              scope.internal.sequenceDiagramParticipants = scope.internal.sequenceDiagramParticipants.filter({
+                (storedParticipant) = args
+                participant != storedParticipant 
+              })
+              
+              // Register the participant as "existed previously"
+              scope.internal.previouslyExistingSequenceDiagramParticipants[participant.name] = participant
+              
+              // Draw the cross symbolizing the end of this participant, if there was any event so far
+              originalArgs = args
+              if(participant.events.length > 0) {
+                cross = canvasElement(content = path(
+                                  path = "M 0 0 L 1 1 M 1 0 L 0 1",
+                                  class = list("destroy-cross-path")
+                              ),
+                              class = list("destroy-cross-path-element"),
+                              width = crossSize,
+                              height = crossSize,
+                              vAlign = "center",
+                              hAlign = "center")
+                // We must change the position by 'margin' compared to the last event as the lifeline continues to be drawn by two additional margins
+                cross.pos = scope.rpos(participant.events.get(participant.events.length - 1), 0, 2*scope.margin)
+                scope.internal.registerCanvasElement(cross, originalArgs, originalArgs.self)
+              }
+              `,
+                {
+                    docs: "Destroys a participant at the current event",
+                    params: [
+                        [0, "the participant to destroy", participantType],
+                        [
+                            "crossSize",
+                            "the size of the cross to draw. Defaults to 'destroyingCrossSize'",
+                            optional(numberType)
+                        ]
+                    ],
+                    returns: "nothing"
+                }
+            )
         )
     ]
 );
