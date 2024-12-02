@@ -16,12 +16,28 @@ export const participantModule = InterpreterModule.create(
                     scope.internal.createSequenceDiagramParticipant = {
                         (name, participant) = args
                         participant.name = name
-                        
-                        participant.pos = if(scope.internal.lastSequenceDiagramParticipant != null) {
-                            scope.rpos(scope.internal.lastSequenceDiagramParticipant, scope.instanceDistance, 0)
+                        participant.below = args.below
+
+                        // Calculate y
+                        event = scope.internal.lastSequenceDiagramEvent
+                        participant.y = if(event != null) {
+                            event.y
+                        } { 0 }
+
+                        // Calculate x
+                        below = args.below
+                        previous = scope.internal.lastSequenceDiagramParticipant
+                        participant.x = if(below != null) {
+                            below.x
                         } {
-                            scope.apos(0, 0) // so that we don't get NPEs for the event layouting
+                            if(previous != null) {
+                                previous.x + scope.instanceDistance
+                            } {
+                                0
+                            }
                         }
+
+                        participant.pos = scope.apos(participant.x, participant.y) 
 
                         //  Create the lifeline of this participant now so that it will always be rendered behind everything else
                         this.bottomcenter = scope.lpos(participant, 0.25)

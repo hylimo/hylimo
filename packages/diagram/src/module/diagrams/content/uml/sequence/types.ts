@@ -37,7 +37,9 @@ export const participantType = objectType(
         ["name", stringType],
         ["lifeline", canvasContentType],
         ["events", listType(canvasPointType)],
-        ["activeActivityIndicators", listType(activityIndicatorType)]
+        ["activeActivityIndicators", listType(activityIndicatorType)],
+        ["y" /* to the root of the diagram */, numberType],
+        ["x" /* to the root of the diagram */, numberType]
     ]),
     "UML sequence diagram participant (instance or actor)"
 );

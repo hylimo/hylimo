@@ -22,7 +22,7 @@ export const eventModule = InterpreterModule.create(
                 }
                 
                 // The event itself must store its y-coordinate so that the calculation of the activity indicators and co works correctly
-                previousEvent = scope.internal.sequenceDiagramEvent
+                previousEvent = scope.internal.lastSequenceDiagramEvent
                 eventObject.deltaY = if(yDistance != null) { yDistance } { scope.eventDistance }
                 eventObject.y = if(previousEvent != null) { previousEvent.y } { 0 } + eventObject.deltaY 
                 

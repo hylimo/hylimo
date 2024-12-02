@@ -1,5 +1,6 @@
 import { fun, functionType, id, InterpreterModule, optional, or, parse, stringType } from "@hylimo/core";
 import { SCOPE } from "../../../../base/dslModule.js";
+import { participantType } from "./types.js";
 
 /**
  * Module providing the UML 'instance' function for sequence diagrams - they differ from normal instances in that
@@ -29,7 +30,7 @@ export const sequenceDiagramInstanceModule = InterpreterModule.create(
                         }
                     }
                     this.instance = scope.internal.createInstance(name, callback, title = title, keywords = args.keywords, args = args)
-                    scope.internal.createSequenceDiagramParticipant(name, this.instance)
+                    scope.internal.createSequenceDiagramParticipant(name, this.instance, below = args.below)
                 `,
                 {
                     docs: "Creates an instance. An instance is like a class, except it can optionally have an instance name",
@@ -40,9 +41,14 @@ export const sequenceDiagramInstanceModule = InterpreterModule.create(
                             stringType
                         ],
                         [1, "the class name of this instance", optional(or(stringType, functionType))],
-                        [2, "the callback function of this instance", optional(functionType)]
+                        [2, "the callback function of this instance", optional(functionType)],
+                        [
+                            "below",
+                            "the optional participant below which the instance should be placed. If set, this instance will have the same x coordinate as the given value and the y coordinate of the current event",
+                            optional(participantType)
+                        ]
                     ],
-                    snippet: `("$1")`,
+                    snippet: `("$1"$2)`,
                     returns: "The created instance"
                 }
             )

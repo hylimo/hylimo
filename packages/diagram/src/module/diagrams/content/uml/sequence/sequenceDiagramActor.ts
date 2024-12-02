@@ -1,5 +1,6 @@
 import { fun, id, InterpreterModule, optional, parse, stringType } from "@hylimo/core";
 import { SCOPE } from "../../../../base/dslModule.js";
+import { participantType } from "./types.js";
 
 /**
  * Module providing the UML 'actor' function for sequence diagrams - they differ from normal actors in that
@@ -26,12 +27,19 @@ export const sequenceDiagramActorModule = InterpreterModule.create(
                         scope.internal.registerInDiagramScope(name, this.actor)
                     }
                     
-                    scope.internal.createSequenceDiagramParticipant(name, this.actor)
+                    scope.internal.createSequenceDiagramParticipant(name, this.actor, below = args.below)
                 `,
                 {
                     docs: "Creates an actor. An actor is a stickman with an optional name",
-                    params: [[0, "the optional name of the actor", optional(stringType)]],
-                    snippet: `("$1")`,
+                    params: [
+                        [0, "the optional name of the actor", optional(stringType)],
+                        [
+                            "below",
+                            "the optional participant below which the actor should be placed. If set, this actor will have the same x coordinate as the given value and the y coordinate of the current event",
+                            optional(participantType)
+                        ]
+                    ],
+                    snippet: `($1)`,
                     returns: "The created actor"
                 }
             )
