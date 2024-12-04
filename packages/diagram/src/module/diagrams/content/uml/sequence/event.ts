@@ -26,6 +26,8 @@ export const eventModule = InterpreterModule.create(
                 eventObject.deltaY = if(yDistance != null) { yDistance } { scope.eventDistance }
                 eventObject.y = if(previousEvent != null) { previousEvent.y } { 0 } + eventObject.deltaY 
                 
+                originalArgs = args
+                
                 // Position the event for each instance relative to the latest previous event
                 // and add all events as per the user facing definition of events, i.e. 'start.User', 'start.Shop', …
                 scope.internal.sequenceDiagramParticipants.forEach {
@@ -65,6 +67,19 @@ export const eventModule = InterpreterModule.create(
                         parentEvent = eventObject,
                         participantName = it.name
                     ]
+                    
+                    /*
+                    // only for debugging purposes:
+                    _left = canvasElement(content = ellipse(fill = "red", stroke = "unset"), width=5, height=5, fill = "red", stroke = "unset")
+                    _left.pos = eventObject[it.name].left()
+                    scope.internal.registerCanvasElement(_left, originalArgs, originalArgs.self)
+                    _center = canvasElement(content = ellipse(fill = "red", stroke = "unset"), width=5, height=5, fill = "red", stroke = "unset")
+                    _center.pos = eventObject[it.name].center
+                    scope.internal.registerCanvasElement(_center, originalArgs, originalArgs.self)
+                    _right = canvasElement(content = ellipse(fill = "red", stroke = "unset"), width=5, height=5, fill = "red", stroke = "unset")
+                    _right.pos = eventObject[it.name].right()
+                    scope.internal.registerCanvasElement(_right, originalArgs, originalArgs.self)
+                    */
 
                     // change the length of the instance line (its end position) to the new last position + 3*margin
                     // (+3 margin so that a activity indicator that is still present there can end, and there's still a bit of the line left over)
