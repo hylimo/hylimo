@@ -16,7 +16,7 @@ export const eventCoordinateType = objectType(
         ["left" /* left xy position of the most recent activity indicator wrapped inside a function */, functionType],
         ["center" /* precise xy position of the event */, canvasPointType],
         ["right" /* right xy position of the most recent activity indicator wrapped inside a function */, functionType],
-        ["parentEvent", eventType],
+        ["parentEvent", optional(eventType) /* null for top level participants*/],
         ["participantName" /* i.e. 'Bob' when this object is called as 'event.Bob' */, stringType]
     ]),
     "UML sequence diagram event for a specific x coordinate"

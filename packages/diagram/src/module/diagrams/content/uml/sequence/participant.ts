@@ -47,6 +47,16 @@ export const participantModule = InterpreterModule.create(
 
                         scope.internal.sequenceDiagramParticipants += participant
                         scope.internal.lastSequenceDiagramParticipant = participant
+
+                        // the following attributes are necessary to cast the participant into a (pseudo) event that can be the target of associations as well
+                        // TODO: Fix the calculation of left, right and center position of the participant
+                        participant.left = { participant.pos }
+                        participant.center = pos
+                        participant.right = { participant.pos }
+                        participant.parentEvent = event
+                        participant.participantName = participant.name
+
+
                         participant
                     }
                 `
