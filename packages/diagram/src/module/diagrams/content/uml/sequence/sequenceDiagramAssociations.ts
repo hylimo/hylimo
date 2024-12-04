@@ -105,6 +105,31 @@ export const sequenceDiagramAssociationsModule = InterpreterModule.create(
                     startMarkerFactory = scope.defaultMarkers.filledTriangle,
                     class = list("dashed-connection")
                 )
+
+                // destruction message
+                scope["!--"] = create(
+                    startMarkerFactory = scope.defaultMarkers.cross
+                )
+                scope["--!"] = create(
+                    endMarkerFactory = scope.defaultMarkers.cross
+                )
+                scope["!--!"] = create(
+                    startMarkerFactory = scope.defaultMarkers.cross,
+                    endMarkerFactory = scope.defaultMarkers.cross
+                )
+                scope["!.."] = create(
+                    startMarkerFactory = scope.defaultMarkers.cross,
+                    class = list("dashed-connection")
+                )
+                scope["..!"] = create(
+                    endMarkerFactory = scope.defaultMarkers.cross,
+                    class = list("dashed-connection")
+                )
+                scope["!..!"] = create(
+                    startMarkerFactory = scope.defaultMarkers.cross,
+                    endMarkerFactory = scope.defaultMarkers.cross,
+                    class = list("dashed-connection")
+                )
             `
         )
     ]

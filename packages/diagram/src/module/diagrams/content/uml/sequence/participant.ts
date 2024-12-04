@@ -93,7 +93,7 @@ export const participantModule = InterpreterModule.create(
                               height = crossSize,
                               vAlign = "center",
                               hAlign = "center")
-                // We must change the position by 'margin' compared to the last event as the lifeline continues to be drawn by two additional margins
+                // We must change the position by '2*margin' compared to the last event as the lifeline continues to be drawn by two additional margins
                 cross.pos = scope.rpos(participant.events.get(participant.events.length - 1), 0, 2*scope.margin)
                 scope.internal.registerCanvasElement(cross, originalArgs, originalArgs.self)
               }
