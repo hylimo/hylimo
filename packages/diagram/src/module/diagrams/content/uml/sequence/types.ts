@@ -13,9 +13,15 @@ export const eventType = objectType(
 
 export const eventCoordinateType = objectType(
     new Map([
-        ["left" /* left xy position of the most recent activity indicator wrapped inside a function */, functionType],
+        [
+            "left" /* participant element or left xy position of the most recent activity indicator wrapped inside a function, so something that can create a connection */,
+            functionType
+        ],
         ["center" /* precise xy position of the event */, canvasPointType],
-        ["right" /* right xy position of the most recent activity indicator wrapped inside a function */, functionType],
+        [
+            "right" /* participant element or right xy position of the most recent activity indicator wrapped inside a function, so something that can create a connection */,
+            functionType
+        ],
         ["parentEvent", optional(eventType) /* null for top level participants*/],
         ["participantName" /* i.e. 'Bob' when this object is called as 'event.Bob' */, stringType]
     ]),

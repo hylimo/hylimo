@@ -49,10 +49,10 @@ export const participantModule = InterpreterModule.create(
                         scope.internal.lastSequenceDiagramParticipant = participant
 
                         // the following attributes are necessary to cast the participant into a (pseudo) event that can be the target of associations as well
-                        // TODO: Fix the calculation of left, right and center position of the participant
-                        participant.left = { participant.pos }
+                        // passing only the participant for left and right is correct as Hylimo uses the center point of canvas elements for connections and stops the arrow on the element border
+                        participant.left = { participant }
                         participant.center = pos
-                        participant.right = { participant.pos }
+                        participant.right = { participant }
                         participant.parentEvent = event
                         participant.participantName = participant.name
 
