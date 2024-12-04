@@ -13,6 +13,7 @@ import { sequenceDiagramAssociationsModule } from "./content/uml/sequence/sequen
 import { participantModule } from "./content/uml/sequence/participant.js";
 import { sequenceDiagramFrameModule } from "./content/uml/sequence/frame.js";
 import { lostFoundMessageModule } from "./content/uml/sequence/lostFoundMessage.js";
+import { commentModule } from "./content/uml/comment.js";
 
 /**
  * Module for UML sequence diagrams.
@@ -25,6 +26,7 @@ export const sequenceDiagramModule = InterpreterModule.create(
         elementModule,
         defaultStylesModule,
         defaultValues,
+        commentModule,
         sequenceDiagramInstanceModule,
         sequenceDiagramActorModule,
         eventModule,

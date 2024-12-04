@@ -14,20 +14,20 @@ export const participantModule = InterpreterModule.create(
         ...parse(
             `
                     scope.internal.createSequenceDiagramParticipant = {
-                        (name, participant) = args
-                        participant.name = name
-                        participant.below = args.below
+                        (name, participantElement) = args
+                        participantElement.name = name
+                        participantElement.below = args.below
 
                         // Calculate y
                         event = scope.internal.lastSequenceDiagramEvent
-                        participant.y = if(event != null) {
+                        participantElement.y = if(event != null) {
                             event.y
                         } { 0 }
 
                         // Calculate x
                         below = args.below
                         previous = scope.internal.lastSequenceDiagramParticipant
-                        participant.x = if(below != null) {
+                        participantElement.x = if(below != null) {
                             below.x
                         } {
                             if(previous != null) {
@@ -37,35 +37,45 @@ export const participantModule = InterpreterModule.create(
                             }
                         }
 
-                        participant.pos = scope.apos(participant.x, participant.y) 
+                        participantElement.pos = scope.apos(participantElement.x, participantElement.y) 
 
-                        //  Create the lifeline of this participant now so that it will always be rendered behind everything else
-                        this.bottomcenter = scope.lpos(participant, 0.25)
-                        participant.lifeline = scope[".."](bottomcenter, scope.rpos(bottomcenter, 0, scope.margin))
-                        participant.events = list() // Needed for the autolayouting of events
-                        participant.activeActivityIndicators = list() // Needed for the activity indicator autolayouting
+                        //  Create the lifeline of this participantElement now so that it will always be rendered behind everything else
+                        this.bottomcenter = scope.lpos(participantElement, 0.25)
+                        participantElement.lifeline = scope[".."](bottomcenter, scope.rpos(bottomcenter, 0, scope.margin))
+                        participantElement.events = list() // Needed for the autolayouting of events
+                        participantElement.activeActivityIndicators = list() // Needed for the activity indicator autolayouting
 
-                        scope.internal.sequenceDiagramParticipants += participant
-                        scope.internal.lastSequenceDiagramParticipant = participant
+                        scope.internal.sequenceDiagramParticipants += participantElement
+                        scope.internal.lastSequenceDiagramParticipant = participantElement
 
-                        // the following attributes are necessary to cast the participant into a (pseudo) event that can be the target of associations as well
+                        // the following attributes are necessary to cast the participantElement into a (pseudo) event that can be the target of associations as well
                         // passing only the participant for left and right is correct as Hylimo uses the center point of canvas elements for connections and stops the arrow on the element border
-                        participant.left = { participant }
-                        participant.center = pos
-                        participant.right = { participant }
-                        participant.parentEvent = event
-                        participant.participantName = participant.name
+                        participantElement.left = { participantElement }
+                        participantElement.center = pos
+                        participantElement.right = { participantElement }
+                        participantElement.parentEvent = event
+                        participantElement.participantName = participantElement.name
 
+                        // We want to bottom align top level participants, and only them
+                        // Later participants should be center aligned
+                        if(event == null) {
+                          participantElement.class += "top-level-participant-element"
+                        } {
+                          participantElement.class += "non-top-level-participant-element"
+                        }
 
-                        participant
+                        participantElement
                     }
                 `
         ),
         ...parse(
             `
                 scope.styles {
-                    cls("actor-element") {
+                    cls("top-level-participant-element") {
                         vAlign = "bottom"
+                    }
+                    cls("non-top-level-participant-element") {
+                        vAlign = "center"
                     }
                 }
             `

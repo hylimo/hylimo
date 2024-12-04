@@ -57,7 +57,6 @@ export const sequenceDiagramInstanceModule = InterpreterModule.create(
             `
                 scope.styles {
                     cls("instance-element") {
-                        vAlign = "bottom"
                         minWidth = 50
                     }
                 }

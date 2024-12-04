@@ -1,4 +1,4 @@
-import { fun, id, InterpreterModule, optional, parse, stringType } from "@hylimo/core";
+import { fun, id, InterpreterModule, optional, stringType } from "@hylimo/core";
 import { SCOPE } from "../../../../base/dslModule.js";
 import { participantType } from "./types.js";
 
@@ -43,15 +43,6 @@ export const sequenceDiagramActorModule = InterpreterModule.create(
                     returns: "The created actor"
                 }
             )
-        ),
-        ...parse(
-            `
-                scope.styles {
-                    cls("actor-element") {
-                        vAlign = "bottom"
-                    }
-                }
-            `
         )
     ]
 );
