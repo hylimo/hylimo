@@ -100,7 +100,11 @@ export class DiagramEngine {
         const interpretationResult = this.execute(expressions, config);
         if (interpretationResult.result != undefined) {
             assertWrapperObject(interpretationResult.result, "Returned diagram");
-            layoutedDiagram = await this.layoutEngine.layout(interpretationResult.result.wrapped, config);
+            try {
+                layoutedDiagram = await this.layoutEngine.layout(interpretationResult.result.wrapped, config);
+            } catch (e) {
+                layoutErrors.push(e as Error);
+            }
         }
         return {
             layoutedDiagram,

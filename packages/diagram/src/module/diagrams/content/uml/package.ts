@@ -1,4 +1,4 @@
-import { assign, fun, functionType, id, InterpreterModule, listType, optional, parse, stringType } from "@hylimo/core";
+import { assign, fun, functionType, id, InterpreterModule, listType, optional, stringType } from "@hylimo/core";
 import { SCOPE } from "../../../base/dslModule.js";
 
 /**
@@ -67,39 +67,37 @@ export const packageModule = InterpreterModule.create(
                 }
             )
         ),
-        ...parse(
-            `
-                scope.styles {
-                    cls("package-element") {
-                        minWidth = 300
-                            cls("package-body") {
-                            minHeight = 50
+        `
+            scope.styles {
+                cls("package-element") {
+                    minWidth = 300
+                        cls("package-body") {
+                        minHeight = 50
+                    }
+                    cls("package-canvas") {
+                        margin = var("subcanvasMargin")
+                    }
+                    cls("package") {
+                        type("vbox") {
+                            margin = 5
                         }
-                        cls("package-canvas") {
-                            margin = var("subcanvasMargin")
+                        cls("title-wrapper") {
+                            marginLeft = var("strokeWidth")
+                            marginRight = var("strokeWidth")
+                            marginTop = var("strokeWidth")
+                            stroke = unset
                         }
-                        cls("package") {
-                            type("vbox") {
-                                margin = 5
-                            }
-                            cls("title-wrapper") {
-                                marginLeft = var("strokeWidth")
-                                marginRight = var("strokeWidth")
-                                marginTop = var("strokeWidth")
-                                stroke = unset
-                            }
-                            minWidth = 100
-                            hAlign = "left"
-                        }
-                        cls("title") {
-                            hAlign = "center"
-                            type("span") {
-                                fontWeight = "bold"
-                            }
+                        minWidth = 100
+                        hAlign = "left"
+                    }
+                    cls("title") {
+                        hAlign = "center"
+                        type("span") {
+                            fontWeight = "bold"
                         }
                     }
                 }
-            `
-        )
+            }
+        `
     ]
 );

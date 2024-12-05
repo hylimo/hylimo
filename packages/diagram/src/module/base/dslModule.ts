@@ -1,14 +1,13 @@
 import {
     assign,
     enumObject,
-    ExecutableExpression,
     fun,
     functionType,
     id,
     InterpreterModule,
     numberType,
     optional,
-    parse
+    ParseableExpressions
 } from "@hylimo/core";
 import { canvasContentType, elementType } from "./types.js";
 import { CanvasConnection, CanvasElement, DefaultEditTypes } from "@hylimo/diagram-common";
@@ -24,20 +23,18 @@ export const SCOPE = "scope";
 /**
  * Expressions which create the initial scope which is passed to the callback of all diagram DSL functions
  */
-const scopeExpressions: ExecutableExpression[] = [
-    ...parse(
-        `
-            callback = it
-            scope = object(
-                fonts = list(defaultFonts.roboto, defaultFonts.openSans, defaultFonts.sourceCodePro),
-                contents = list(),
-                internal = object(
-                    classCounter = 0,
-                    styles = object(styles = list())
-                )
+const scopeExpressions: ParseableExpressions = [
+    `
+        callback = it
+        scope = object(
+            fonts = list(defaultFonts.roboto, defaultFonts.openSans, defaultFonts.sourceCodePro),
+            contents = list(),
+            internal = object(
+                classCounter = 0,
+                styles = object(styles = list())
             )
-        `
-    ),
+        )
+    `,
     id(SCOPE).assignField(
         "apos",
         fun(
@@ -142,177 +139,175 @@ const scopeExpressions: ExecutableExpression[] = [
             }
         )
     ),
-    ...parse(
-        `
-            lineBuilderProto = object()
-            lineBuilderProto.line = listWrapper {
-                positions = it
-                target = args
-                segments = args.self.segments
-                positions.forEach {
-                    (point, index) = args
-                    segment = canvasLineSegment(end = point)
-                    segment.edits.set(
-                        "${DefaultEditTypes.SPLIT_CANVAS_LINE_SEGMENT}",
-                        createAddArgEdit(target, index - 0.5, "'apos(' & x & ', ' & y & ')'")
-                    )
-                    segments += segment
-                }
-                args.self
+    `
+        lineBuilderProto = object()
+        lineBuilderProto.line = listWrapper {
+            positions = it
+            target = args
+            segments = args.self.segments
+            positions.forEach {
+                (point, index) = args
+                segment = canvasLineSegment(end = point)
+                segment.edits.set(
+                    "${DefaultEditTypes.SPLIT_CANVAS_LINE_SEGMENT}",
+                    createAddArgEdit(target, index - 0.5, "'apos(' & x & ', ' & y & ')'")
+                )
+                segments += segment
             }
-            lineBuilderProto.axisAligned = listWrapper {
-                positions = it
-                target = args
-                segments = args.self.segments
-                range(positions.length / 2).forEach {
-                    segment = canvasAxisAlignedSegment(
-                        end = positions.get(2 * it + 1),
-                        verticalPos = positions.get(2 * it)
-                    )
-                    segment.edits.set(
-                        "${DefaultEditTypes.SPLIT_CANVAS_AXIS_ALIGNED_SEGMENT}",
-                        createAddArgEdit(target, 2 * it - 0.5, "pos & ', apos(' & x & ', ' & y & ')'")
-                    )
-                    segments += this.segment
-                }
-                args.self
+            args.self
+        }
+        lineBuilderProto.axisAligned = listWrapper {
+            positions = it
+            target = args
+            segments = args.self.segments
+            range(positions.length / 2).forEach {
+                segment = canvasAxisAlignedSegment(
+                    end = positions.get(2 * it + 1),
+                    verticalPos = positions.get(2 * it)
+                )
+                segment.edits.set(
+                    "${DefaultEditTypes.SPLIT_CANVAS_AXIS_ALIGNED_SEGMENT}",
+                    createAddArgEdit(target, 2 * it - 0.5, "pos & ', apos(' & x & ', ' & y & ')'")
+                )
+                segments += this.segment
             }
-            lineBuilderProto.bezier = listWrapper {
-                positions = it
-                target = args
-                self = args.self
-                segments = self.segments
-                segmentCount = (positions.length - 2) / 3
-                startPoint = if(segments.length > 0) {
-                    segments.get(segments.length - 1).end
-                } {
-                    self.start
-                }
+            args.self
+        }
+        lineBuilderProto.bezier = listWrapper {
+            positions = it
+            target = args
+            self = args.self
+            segments = self.segments
+            segmentCount = (positions.length - 2) / 3
+            startPoint = if(segments.length > 0) {
+                segments.get(segments.length - 1).end
+            } {
+                self.start
+            }
 
-                range(segmentCount - 1).forEach {
-                    endPoint = positions.get(3 * it + 2)
-                    segment = canvasBezierSegment(
-                        startControlPoint = scope.rpos(
-                            startPoint,
-                            positions.get(3 * it),
-                            positions.get(3 * it + 1)
-                        ),
-                        endControlPoint = scope.rpos(
-                            endPoint,
-                            -(positions.get(3 * it + 3)),
-                            -(positions.get(3 * it + 4))
-                        ),
-                        end = endPoint
-                    )
-                    segment.edits.set(
-                        "${DefaultEditTypes.SPLIT_CANVAS_BEZIER_SEGMENT}",
-                        createAddArgEdit(target, 3 * it + 1.5, "'apos(' & x & ', ' & y & '), ' & cx1 & ', ' & cy1")
-                    )
-                    segments += segment
-                    startPoint = endPoint
-                }
-
-                endPoint = positions.get(3 * segmentCount - 1)
+            range(segmentCount - 1).forEach {
+                endPoint = positions.get(3 * it + 2)
                 segment = canvasBezierSegment(
                     startControlPoint = scope.rpos(
                         startPoint,
-                        positions.get(3 * segmentCount - 3),
-                        positions.get(3 * segmentCount - 2)
+                        positions.get(3 * it),
+                        positions.get(3 * it + 1)
                     ),
                     endControlPoint = scope.rpos(
                         endPoint,
-                        positions.get(3 * segmentCount),
-                        positions.get(3 * segmentCount + 1)
+                        -(positions.get(3 * it + 3)),
+                        -(positions.get(3 * it + 4))
                     ),
                     end = endPoint
                 )
                 segment.edits.set(
                     "${DefaultEditTypes.SPLIT_CANVAS_BEZIER_SEGMENT}",
-                    createAddArgEdit(target, 3 * segmentCount - 1.5, "'apos(' & x & ', ' & y & '), ' & cx1 & ', ' & cy1")
+                    createAddArgEdit(target, 3 * it + 1.5, "'apos(' & x & ', ' & y & '), ' & cx1 & ', ' & cy1")
                 )
                 segments += segment
-                args.self
-            }
-            
-            _canvasConnectionWith = {
-                (self, callback) = args
-                this.contents = self.canvasScope.contents
-                result = object(
-                    over = null,
-                    end = self.endProvider,
-                    start = {
-                        pos = self.startProvider(it)
-                        object(proto = lineBuilderProto, segments = list(), start = pos)
-                    },
-                    label = {
-                        (labelContent, pos, distance, rotation) = args
-                        if("".proto == labelContent.proto) {
-                            labelContent = list(span(text = labelContent))
-                        }
-                        labelCanvasElement = canvasElement(
-                            content = text(contents = labelContent, class = list("label")),
-                            pos = self.canvasScope.lpos(self, pos, distance),
-                            class = list("label-element")
-                        )
-                        scope.internal.registerCanvasElement(labelCanvasElement, args, self.canvasScope)
-                        labelCanvasElement.rotation = rotation
-                        labelCanvasElement
-                    }
-                )
-                callback.callWithScope(result)
-                if(result.over != null) {
-                    segments = result.over.segments
-                    if((segments == null) || (segments.length == 0)) {
-                        error("over must define at least one segment")
-                    }
-                    self.start = result.over.start
-                    self.contents = result.over.segments
-                } {
-                    if (self.contents.length == 1) {
-                        segment = self.contents.get(0)
-                        self.start.edits.set(
-                            "${DefaultEditTypes.MOVE_LPOS_POS}",
-                            createAddEdit(callback, "'over = start(' & pos & ').axisAligned(0.5, end(0.5))'")
-                        )
-                        segment.end.edits.set(
-                            "${DefaultEditTypes.MOVE_LPOS_POS}",
-                            createAddEdit(callback, "'over = start(0).axisAligned(0.5, end(' & pos & '))'")
-                        )
-                        segment.edits.set(
-                            "${DefaultEditTypes.AXIS_ALIGNED_SEGMENT_POS}",
-                            createAddEdit(callback, "'over = start(0).axisAligned(' & pos & ', end(0.5))'")
-                        )
-                        segment.edits.set(
-                            "${DefaultEditTypes.SPLIT_CANVAS_AXIS_ALIGNED_SEGMENT}",
-                            createAddEdit(callback, "'over = start(0).axisAligned(' & pos & ', apos(' & x & ', ' & y & '), ' & nextPos & ', end(0.5))'")
-                        )
-                    }
-                }
+                startPoint = endPoint
             }
 
-            _canvasPointOrElementWith = {
-                (self, callback) = args
-                this.contents = self.canvasScope.contents
-                result = object(
-                    label = {
-                        (labelContent, x, y, rotation) = args
-                        if("".proto == labelContent.proto) {
-                            labelContent = list(span(text = labelContent))
-                        }
-                        labelCanvasElement = canvasElement(
-                            content = text(contents = labelContent, class = list("label")),
-                            pos = self.canvasScope.rpos(self, x, y),
-                            class = list("label-element")
-                        )
-                        scope.internal.registerCanvasElement(labelCanvasElement, args, self.canvasScope)
-                        labelCanvasElement.rotation = rotation
-                        labelCanvasElement
+            endPoint = positions.get(3 * segmentCount - 1)
+            segment = canvasBezierSegment(
+                startControlPoint = scope.rpos(
+                    startPoint,
+                    positions.get(3 * segmentCount - 3),
+                    positions.get(3 * segmentCount - 2)
+                ),
+                endControlPoint = scope.rpos(
+                    endPoint,
+                    positions.get(3 * segmentCount),
+                    positions.get(3 * segmentCount + 1)
+                ),
+                end = endPoint
+            )
+            segment.edits.set(
+                "${DefaultEditTypes.SPLIT_CANVAS_BEZIER_SEGMENT}",
+                createAddArgEdit(target, 3 * segmentCount - 1.5, "'apos(' & x & ', ' & y & '), ' & cx1 & ', ' & cy1")
+            )
+            segments += segment
+            args.self
+        }
+        
+        _canvasConnectionWith = {
+            (self, callback) = args
+            this.contents = self.canvasScope.contents
+            result = object(
+                over = null,
+                end = self.endProvider,
+                start = {
+                    pos = self.startProvider(it)
+                    object(proto = lineBuilderProto, segments = list(), start = pos)
+                },
+                label = {
+                    (labelContent, pos, distance, rotation) = args
+                    if("".proto == labelContent.proto) {
+                        labelContent = list(span(text = labelContent))
                     }
-                )
-                callback.callWithScope(result)
+                    labelCanvasElement = canvasElement(
+                        content = text(contents = labelContent, class = list("label")),
+                        pos = self.canvasScope.lpos(self, pos, distance),
+                        class = list("label-element")
+                    )
+                    scope.internal.registerCanvasElement(labelCanvasElement, args, self.canvasScope)
+                    labelCanvasElement.rotation = rotation
+                    labelCanvasElement
+                }
+            )
+            callback.callWithScope(result)
+            if(result.over != null) {
+                segments = result.over.segments
+                if((segments == null) || (segments.length == 0)) {
+                    error("over must define at least one segment")
+                }
+                self.start = result.over.start
+                self.contents = result.over.segments
+            } {
+                if (self.contents.length == 1) {
+                    segment = self.contents.get(0)
+                    self.start.edits.set(
+                        "${DefaultEditTypes.MOVE_LPOS_POS}",
+                        createAddEdit(callback, "'over = start(' & pos & ').axisAligned(0.5, end(0.5))'")
+                    )
+                    segment.end.edits.set(
+                        "${DefaultEditTypes.MOVE_LPOS_POS}",
+                        createAddEdit(callback, "'over = start(0).axisAligned(0.5, end(' & pos & '))'")
+                    )
+                    segment.edits.set(
+                        "${DefaultEditTypes.AXIS_ALIGNED_SEGMENT_POS}",
+                        createAddEdit(callback, "'over = start(0).axisAligned(' & pos & ', end(0.5))'")
+                    )
+                    segment.edits.set(
+                        "${DefaultEditTypes.SPLIT_CANVAS_AXIS_ALIGNED_SEGMENT}",
+                        createAddEdit(callback, "'over = start(0).axisAligned(' & pos & ', apos(' & x & ', ' & y & '), ' & nextPos & ', end(0.5))'")
+                    )
+                }
             }
-        `
-    ),
+        }
+
+        _canvasPointOrElementWith = {
+            (self, callback) = args
+            this.contents = self.canvasScope.contents
+            result = object(
+                label = {
+                    (labelContent, x, y, rotation) = args
+                    if("".proto == labelContent.proto) {
+                        labelContent = list(span(text = labelContent))
+                    }
+                    labelCanvasElement = canvasElement(
+                        content = text(contents = labelContent, class = list("label")),
+                        pos = self.canvasScope.rpos(self, x, y),
+                        class = list("label-element")
+                    )
+                    scope.internal.registerCanvasElement(labelCanvasElement, args, self.canvasScope)
+                    labelCanvasElement.rotation = rotation
+                    labelCanvasElement
+                }
+            )
+            callback.callWithScope(result)
+        }
+    `,
     id(SCOPE).assignField(
         "layout",
         fun(
@@ -581,14 +576,12 @@ const scopeExpressions: ExecutableExpression[] = [
             Collapse: "collapse"
         })
     ),
-    ...parse(
-        `
-            scopeEnhancer(scope)
-            callback.callWithScope(scope)
-            diagramCanvas = canvas(contents = scope.contents)
-            createDiagram(diagramCanvas, scope.internal.styles, scope.fonts)
-        `
-    )
+    `
+        scopeEnhancer(scope)
+        callback.callWithScope(scope)
+        diagramCanvas = canvas(contents = scope.contents)
+        createDiagram(diagramCanvas, scope.internal.styles, scope.fonts)
+    `
 ];
 
 /**
@@ -601,7 +594,7 @@ export const dslModule = InterpreterModule.create(
     [
         assign(
             "generateDiagramEnvironment",
-            fun([...parse("scopeEnhancer = it ?? { }"), fun(scopeExpressions)], {
+            fun(["scopeEnhancer = it ?? { }", fun(scopeExpressions)], {
                 docs: `
                         Creates a function which can be then used as a DSL function to create a diagram.
                         The function takes a callback, which is invoked with a custom scope.

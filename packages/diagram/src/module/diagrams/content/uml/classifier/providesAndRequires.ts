@@ -1,4 +1,4 @@
-import { fun, id, InterpreterModule, numberType, object, objectType, optional, parse, stringType } from "@hylimo/core";
+import { fun, id, InterpreterModule, numberType, object, objectType, optional, stringType } from "@hylimo/core";
 import { LinePointLayoutConfig } from "../../../../../layout/elements/canvas/linePointLayoutConfig.js";
 import { SCOPE } from "../../../../base/dslModule.js";
 import { canvasContentType } from "../../../../base/types.js";
@@ -32,14 +32,12 @@ export const providesAndRequiresModule = InterpreterModule.create(
                 object([
                     {
                         value: fun([
-                            ...parse(
-                                `
-                                    this.callScope = args.callScope
-                                    this.canvasScope = args.canvasScope
-                                    this.element = args.element
-                                    callScope.ports = list()
-                                `
-                            ),
+                            `
+                                this.callScope = args.callScope
+                                this.canvasScope = args.canvasScope
+                                this.element = args.element
+                                callScope.ports = list()
+                            `,
                             id("callScope").assignField(
                                 "provides",
                                 fun(
@@ -168,12 +166,10 @@ export const providesAndRequiresModule = InterpreterModule.create(
                                     }
                                 )
                             ),
-                            ...parse(
-                                `
-                                    args.element.provides = callScope.provides
-                                    args.element.requires = callScope.requires
-                                `
-                            )
+                            `
+                                args.element.provides = callScope.provides
+                                args.element.requires = callScope.requires
+                            `
                         ])
                     },
                     {
@@ -181,55 +177,53 @@ export const providesAndRequiresModule = InterpreterModule.create(
                     }
                 ])
             ),
-        ...parse(
-            `
-                scope.dependsOn = {
-                    (start, end) = args
-                    canvasScope = args.self
-                    scope.internal.createConnection(
-                        canvasScope.rpos(start),
-                        canvasScope.rpos(end),
-                        list("dashed-connection", "depends-on-connection"),
-                        args,
-                        canvasScope,
-                        endMarkerFactory = scope.defaultMarkers.arrow
-                    )
-                }
+        `
+            scope.dependsOn = {
+                (start, end) = args
+                canvasScope = args.self
+                scope.internal.createConnection(
+                    canvasScope.rpos(start),
+                    canvasScope.rpos(end),
+                    list("dashed-connection", "depends-on-connection"),
+                    args,
+                    canvasScope,
+                    endMarkerFactory = scope.defaultMarkers.arrow
+                )
+            }
 
-                scope.styles {
-                    vars {
-                        requiredInterfaceSize = 45
-                        providedInterfaceSize = 30
-                    }
-                    cls("provided-interface") {
-                        width = var("providedInterfaceSize")
-                        height = var("providedInterfaceSize")
-                    }
-                    cls("required-interface") {
-                        width = var("requiredInterfaceSize")
-                        height = var("requiredInterfaceSize")
-                        stretch = "uniform"
-                    }
-                    cls("depends-on-connection") {
-                        type("marker") {
-                            type("path") {
-                                marginRight = var("providedInterfaceSize")
-                                hAlign = "right"
-                            }
-                            width = var("providedInterfaceSize")
-                            lineStart = 0
-                            refX = 0.5
-                            refY = 0.5
+            scope.styles {
+                vars {
+                    requiredInterfaceSize = 45
+                    providedInterfaceSize = 30
+                }
+                cls("provided-interface") {
+                    width = var("providedInterfaceSize")
+                    height = var("providedInterfaceSize")
+                }
+                cls("required-interface") {
+                    width = var("requiredInterfaceSize")
+                    height = var("requiredInterfaceSize")
+                    stretch = "uniform"
+                }
+                cls("depends-on-connection") {
+                    type("marker") {
+                        type("path") {
+                            marginRight = var("providedInterfaceSize")
+                            hAlign = "right"
                         }
-                    }
-                    cls("provided-interface-label-pos") {
-                        offsetY = var("providedInterfaceSize") / 2
-                    }
-                    cls("required-interface-label-pos") {
-                        offsetY = var("requiredInterfaceSize") / 2
+                        width = var("providedInterfaceSize")
+                        lineStart = 0
+                        refX = 0.5
+                        refY = 0.5
                     }
                 }
-            `
-        )
+                cls("provided-interface-label-pos") {
+                    offsetY = var("providedInterfaceSize") / 2
+                }
+                cls("required-interface-label-pos") {
+                    offsetY = var("requiredInterfaceSize") / 2
+                }
+            }
+        `
     ]
 );

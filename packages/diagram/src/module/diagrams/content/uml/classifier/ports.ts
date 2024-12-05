@@ -1,4 +1,4 @@
-import { fun, functionType, id, InterpreterModule, object, optional, parse } from "@hylimo/core";
+import { fun, functionType, id, InterpreterModule, object, optional } from "@hylimo/core";
 import { SCOPE } from "../../../../base/dslModule.js";
 import { LinePointLayoutConfig } from "../../../../../layout/elements/canvas/linePointLayoutConfig.js";
 
@@ -17,14 +17,12 @@ export const portsModule = InterpreterModule.create(
                 object([
                     {
                         value: fun([
-                            ...parse(
-                                `
-                                    this.callScope = args.callScope
-                                    this.canvasScope = args.canvasScope
-                                    this.element = args.element
-                                    callScope.ports = list()
-                                `
-                            ),
+                            `
+                                this.callScope = args.callScope
+                                this.canvasScope = args.canvasScope
+                                this.element = args.element
+                                callScope.ports = list()
+                            `,
                             id("callScope").assignField(
                                 "port",
                                 fun(
@@ -67,11 +65,9 @@ export const portsModule = InterpreterModule.create(
                                     }
                                 )
                             ),
-                            ...parse(
-                                `
-                                    args.element.port = callScope.port
-                                `
-                            )
+                            `
+                                args.element.port = callScope.port
+                            `
                         ])
                     },
                     {
@@ -79,26 +75,24 @@ export const portsModule = InterpreterModule.create(
                     }
                 ])
             ),
-        ...parse(
-            `
-                scope.styles {
-                    vars {
-                        portSize = 20
-                    }
-                    cls("port-element") {
-                        vAlign = "center"
-                        hAlign = "center"
-                        width = var("portSize")
-                        height = var("portSize")
-                        cls("port") {
-                            fill = var("background")
-                        }
-                    }
-                    cls("port-pos") {
-                        distance = var("strokeWidth") / -2
+        `
+            scope.styles {
+                vars {
+                    portSize = 20
+                }
+                cls("port-element") {
+                    vAlign = "center"
+                    hAlign = "center"
+                    width = var("portSize")
+                    height = var("portSize")
+                    cls("port") {
+                        fill = var("background")
                     }
                 }
-            `
-        )
+                cls("port-pos") {
+                    distance = var("strokeWidth") / -2
+                }
+            }
+        `
     ]
 );

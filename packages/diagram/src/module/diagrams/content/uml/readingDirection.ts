@@ -1,4 +1,4 @@
-import { fun, id, InterpreterModule, parse, stringType } from "@hylimo/core";
+import { fun, id, InterpreterModule, stringType } from "@hylimo/core";
 import { SCOPE } from "../../../base/dslModule.js";
 
 /**
@@ -35,17 +35,15 @@ export const readingDirectionModule = InterpreterModule.create(
                 }
             )
         ),
-        ...parse(
-            `
-                scope.styles {
-                    type("text") {
-                        cls("direction-triangle") {
-                            fontFamily = "Source Code Pro"
-                            fontSize = 20
-                        }
+        `
+            scope.styles {
+                type("text") {
+                    cls("direction-triangle") {
+                        fontFamily = "Source Code Pro"
+                        fontSize = 20
                     }
                 }
-            `
-        )
+            }
+        `
     ]
 );

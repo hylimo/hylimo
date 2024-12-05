@@ -24,7 +24,6 @@ import {
     objectType,
     optional,
     or,
-    parse,
     SemanticFieldNames,
     str,
     stringType,
@@ -366,28 +365,24 @@ export class DiagramModule implements InterpreterModule {
                         }
                     )
                 ),
-                ...parse(
-                    `
-                        this.type = selector("type")
-                        this.cls = selector("class")
-                        this.anySelector = selector("any")
-                        this.any = {
-                            this.anySelector("", it, self = args.self)
-                        }
-                    `
-                ),
+                `
+                    this.type = selector("type")
+                    this.cls = selector("class")
+                    this.anySelector = selector("any")
+                    this.any = {
+                        this.anySelector("", it, self = args.self)
+                    }
+                `,
                 fun(
                     [
-                        ...parse(
-                            `
-                                (callback, res, validateStyles) = args
-                                this.stylesArgs = args
-                                res.type = type
-                                res.cls = cls
-                                res.any = any
-                                res.vars = vars
-                            `
-                        ),
+                        `
+                            (callback, res, validateStyles) = args
+                            this.stylesArgs = args
+                            res.type = type
+                            res.cls = cls
+                            res.any = any
+                            res.vars = vars
+                        `,
                         ...selectorProxiedOperators.map((operator) =>
                             id("res").assignField(
                                 operator,
@@ -430,15 +425,13 @@ export class DiagramModule implements InterpreterModule {
                                 )
                             )
                         ),
-                        ...parse(
-                            `
-                                callback.callWithScope(res)
-                                if(validateStyles == true) {
-                                    validateSelector(res, callback)
-                                }
-                                res
-                            `
-                        )
+                        `
+                            callback.callWithScope(res)
+                            if(validateStyles == true) {
+                                validateSelector(res, callback)
+                            }
+                            res
+                        `
                     ],
                     {
                         docs: 'Creates a new styles object. Use "cls", "type", and "any" to create rules.',

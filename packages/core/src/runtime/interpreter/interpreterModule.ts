@@ -1,4 +1,5 @@
 import { ExecutableExpression } from "../ast/executableExpression.js";
+import { parse, ParseableExpressions } from "../executableAstHelper.js";
 
 /**
  * Module which can be loaded into the interpreter.
@@ -60,13 +61,13 @@ export namespace InterpreterModule {
         name: string,
         dependencies: string[],
         runtimeDependencies: string[],
-        expressions: ExecutableExpression[]
+        expressions: ParseableExpressions
     ): InterpreterModule {
         return {
             name,
             dependencies,
             runtimeDependencies,
-            expressions: expressions
+            expressions: parse(expressions)
         };
     }
 

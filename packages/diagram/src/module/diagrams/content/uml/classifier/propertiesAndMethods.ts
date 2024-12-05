@@ -14,7 +14,6 @@ import {
     num,
     NumberLiteralExpression,
     OperatorExpression,
-    parse,
     RuntimeError,
     StringLiteralExpression
 } from "@hylimo/core";
@@ -31,11 +30,9 @@ export const propertiesAndMethodsModule = InterpreterModule.create(
         assign(
             "_classifierEntryScopeGenerator",
             fun([
-                ...parse(
-                    `
-                        (visibility, scope) = args
-                    `
-                ),
+                `
+                    (visibility, scope) = args
+                `,
                 jsFun(
                     (args, context) => {
                         const scopeFunction = args.getLocalFieldOrUndefined(0)!.value;
@@ -91,21 +88,19 @@ export const propertiesAndMethodsModule = InterpreterModule.create(
                 )
             ])
         ),
-        ...parse(
-            `
-                scope.internal.propertiesAndMethodsContentHandler = [
-                    {
-                        this.callScope = args.callScope
-                        callScope.public = _classifierEntryScopeGenerator("+ ", callScope.section)
-                        callScope.protected = _classifierEntryScopeGenerator("# ", callScope.section)
-                        callScope.private = _classifierEntryScopeGenerator("- ", callScope.section)
-                        callScope.package = _classifierEntryScopeGenerator("~ ", callScope.section)
-                        callScope.default = _classifierEntryScopeGenerator("", callScope.section)
-                    },
-                    { }
-                ]
-            `
-        )
+        `
+            scope.internal.propertiesAndMethodsContentHandler = [
+                {
+                    this.callScope = args.callScope
+                    callScope.public = _classifierEntryScopeGenerator("+ ", callScope.section)
+                    callScope.protected = _classifierEntryScopeGenerator("# ", callScope.section)
+                    callScope.private = _classifierEntryScopeGenerator("- ", callScope.section)
+                    callScope.package = _classifierEntryScopeGenerator("~ ", callScope.section)
+                    callScope.default = _classifierEntryScopeGenerator("", callScope.section)
+                },
+                { }
+            ]
+        `
     ]
 );
 
