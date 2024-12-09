@@ -16,7 +16,7 @@ export const packageModule = InterpreterModule.create(
                     (name, optionalCallback, keywords) = args
     
                     callback = optionalCallback ?? {}
-                    result = object(contents = list())
+                    result = [contents = list()]
                     callback.callWithScope(result)
     
                     packageElement = canvasElement(

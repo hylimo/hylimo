@@ -8,7 +8,7 @@ export const defaultMarkersModule = InterpreterModule.create(
     [],
     [],
     `
-        scope.defaultMarkers = object(
+        scope.defaultMarkers = [
             diamond = {
                 marker(
                     content = path(
@@ -54,7 +54,7 @@ export const defaultMarkersModule = InterpreterModule.create(
                     class=list("triangle-marker", "marker")
                 )
             }
-        )
+        ]
 
         scope.styles {
             cls("arrow-marker") {

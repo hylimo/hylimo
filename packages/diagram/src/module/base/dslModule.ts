@@ -79,14 +79,14 @@ const canvasConnectionWithScopeProperties = [
 const scopeExpressions: ParseableExpressions = [
     `
         callback = it
-        scope = object(
+        scope = [
             fonts = list(defaultFonts.roboto, defaultFonts.openSans, defaultFonts.sourceCodePro),
             contents = list(),
-            internal = object(
+            internal = [
                 classCounter = 0,
-                styles = object(styles = list())
-            )
-        )
+                styles = [styles = list()]
+            ]
+        ]
     `,
     id(SCOPE).assignField(
         "apos",
@@ -166,19 +166,19 @@ const scopeExpressions: ParseableExpressions = [
                     }
                     resultingStyle = styles(
                         second,
-                        object(
+                        [
                             selectorType = "class",
                             selectorValue = className,
                             styles = list(),
                             class = first.class,
                             ${allStyleAttributes.map((attr) => `${attr.name} = null`).join(",")}
-                        ),
+                        ],
                         true
                     )
                     scope.internal.styles.styles.add(resultingStyle)
                     first
                 } {
-                    resultStyles = styles(first, object(styles = list()))
+                    resultStyles = styles(first, [styles = list()])
                     scope.internal.styles.styles.addAll(resultStyles.styles)
                 }
             `,
@@ -201,7 +201,7 @@ const scopeExpressions: ParseableExpressions = [
         })
     ),
     `
-        lineBuilderProto = object()
+        lineBuilderProto = []
         lineBuilderProto.line = listWrapper {
             positions = it
             target = args
@@ -209,10 +209,9 @@ const scopeExpressions: ParseableExpressions = [
             positions.forEach {
                 (point, index) = args
                 segment = canvasLineSegment(end = point)
-                segment.edits.set(
-                    "${DefaultEditTypes.SPLIT_CANVAS_LINE_SEGMENT}",
-                    createAddArgEdit(target, index - 0.5, "'apos(' & x & ', ' & y & ')'")
-                )
+                segment.edits[
+                    "${DefaultEditTypes.SPLIT_CANVAS_LINE_SEGMENT}"
+                ] = createAddArgEdit(target, index - 0.5, "'apos(' & x & ', ' & y & ')'")
                 segments += segment
             }
             args.self
@@ -226,10 +225,9 @@ const scopeExpressions: ParseableExpressions = [
                     end = positions.get(2 * it + 1),
                     verticalPos = positions.get(2 * it)
                 )
-                segment.edits.set(
-                    "${DefaultEditTypes.SPLIT_CANVAS_AXIS_ALIGNED_SEGMENT}",
-                    createAddArgEdit(target, 2 * it - 0.5, "pos & ', apos(' & x & ', ' & y & ')'")
-                )
+                segment.edits[
+                    "${DefaultEditTypes.SPLIT_CANVAS_AXIS_ALIGNED_SEGMENT}"
+                ] = createAddArgEdit(target, 2 * it - 0.5, "pos & ', apos(' & x & ', ' & y & ')'")
                 segments += this.segment
             }
             args.self
@@ -261,10 +259,9 @@ const scopeExpressions: ParseableExpressions = [
                     ),
                     end = endPoint
                 )
-                segment.edits.set(
-                    "${DefaultEditTypes.SPLIT_CANVAS_BEZIER_SEGMENT}",
-                    createAddArgEdit(target, 3 * it + 1.5, "'apos(' & x & ', ' & y & '), ' & cx1 & ', ' & cy1")
-                )
+                segment.edits[
+                    "${DefaultEditTypes.SPLIT_CANVAS_BEZIER_SEGMENT}"
+                ] = createAddArgEdit(target, 3 * it + 1.5, "'apos(' & x & ', ' & y & '), ' & cx1 & ', ' & cy1")
                 segments += segment
                 startPoint = endPoint
             }
@@ -283,10 +280,9 @@ const scopeExpressions: ParseableExpressions = [
                 ),
                 end = endPoint
             )
-            segment.edits.set(
-                "${DefaultEditTypes.SPLIT_CANVAS_BEZIER_SEGMENT}",
-                createAddArgEdit(target, 3 * segmentCount - 1.5, "'apos(' & x & ', ' & y & '), ' & cx1 & ', ' & cy1")
-            )
+            segment.edits[
+                "${DefaultEditTypes.SPLIT_CANVAS_BEZIER_SEGMENT}"
+            ] = createAddArgEdit(target, 3 * segmentCount - 1.5, "'apos(' & x & ', ' & y & '), ' & cx1 & ', ' & cy1")
             segments += segment
             args.self
         }
@@ -294,12 +290,12 @@ const scopeExpressions: ParseableExpressions = [
         _canvasConnectionWith = {
             (self, callback) = args
             this.contents = self.canvasScope.contents
-            result = object(
+            result = [
                 over = null,
                 end = self.endProvider,
                 start = {
                     pos = self.startProvider(it)
-                    object(proto = lineBuilderProto, segments = list(), start = pos)
+                    [proto = lineBuilderProto, segments = list(), start = pos]
                 },
                 label = {
                     (labelContent, pos, distance, rotation) = args
@@ -315,7 +311,7 @@ const scopeExpressions: ParseableExpressions = [
                     labelCanvasElement.rotation = rotation
                     labelCanvasElement
                 }
-            )
+            ]
             callback.callWithScope(result)
             _validateCanvasConnectionWithScope(result, args)
             if(result.over != null) {
@@ -328,22 +324,18 @@ const scopeExpressions: ParseableExpressions = [
             } {
                 if (self.contents.length == 1) {
                     segment = self.contents.get(0)
-                    self.start.edits.set(
-                        "${DefaultEditTypes.MOVE_LPOS_POS}",
-                        createAddEdit(callback, "'over = start(' & pos & ').axisAligned(0.5, end(0.5))'")
-                    )
-                    segment.end.edits.set(
-                        "${DefaultEditTypes.MOVE_LPOS_POS}",
-                        createAddEdit(callback, "'over = start(0).axisAligned(0.5, end(' & pos & '))'")
-                    )
-                    segment.edits.set(
-                        "${DefaultEditTypes.AXIS_ALIGNED_SEGMENT_POS}",
-                        createAddEdit(callback, "'over = start(0).axisAligned(' & pos & ', end(0.5))'")
-                    )
-                    segment.edits.set(
-                        "${DefaultEditTypes.SPLIT_CANVAS_AXIS_ALIGNED_SEGMENT}",
-                        createAddEdit(callback, "'over = start(0).axisAligned(' & pos & ', apos(' & x & ', ' & y & '), ' & nextPos & ', end(0.5))'")
-                    )
+                    self.start.edits[
+                        "${DefaultEditTypes.MOVE_LPOS_POS}"
+                    ] = createAddEdit(callback, "'over = start(' & pos & ').axisAligned(0.5, end(0.5))'")
+                    segment.end.edits[
+                        "${DefaultEditTypes.MOVE_LPOS_POS}"
+                    ] = createAddEdit(callback, "'over = start(0).axisAligned(0.5, end(' & pos & '))'")
+                    segment.edits[
+                        "${DefaultEditTypes.AXIS_ALIGNED_SEGMENT_POS}"
+                    ] = createAddEdit(callback, "'over = start(0).axisAligned(' & pos & ', end(0.5))'")
+                    segment.edits[
+                        "${DefaultEditTypes.SPLIT_CANVAS_AXIS_ALIGNED_SEGMENT}"
+                    ] = createAddEdit(callback, "'over = start(0).axisAligned(' & pos & ', apos(' & x & ', ' & y & '), ' & nextPos & ', end(0.5))'")
                 }
             }
         }
@@ -351,7 +343,7 @@ const scopeExpressions: ParseableExpressions = [
         _canvasPointOrElementWith = {
             (self, callback) = args
             this.contents = self.canvasScope.contents
-            result = object(
+            result = [
                 label = {
                     (labelContent, x, y, rotation) = args
                     if("".proto == labelContent.proto) {
@@ -366,7 +358,7 @@ const scopeExpressions: ParseableExpressions = [
                     labelCanvasElement.rotation = rotation
                     labelCanvasElement
                 }
-            )
+            ]
             callback.callWithScope(result)
         }
     `,
@@ -383,30 +375,30 @@ const scopeExpressions: ParseableExpressions = [
         fun(
             `
                 (self, callback) = args
-                result = object(pos = null, width = null, height = null, rotation = null)
+                result = [pos = null, width = null, height = null, rotation = null]
                 callback.callWithScope(result)
                 _validateLayoutScope(result, args)
                 if(result.pos != null) {
                     self.pos = result.pos
                 } {
                     this.moveEdit = createAddEdit(callback, "'pos = apos(' & dx & ', ' & dy & ')'")
-                    self.edits.set("${DefaultEditTypes.MOVE_X}", this.moveEdit)
-                    self.edits.set("${DefaultEditTypes.MOVE_Y}", this.moveEdit)
+                    self.edits["${DefaultEditTypes.MOVE_X}"] = this.moveEdit
+                    self.edits["${DefaultEditTypes.MOVE_Y}"] = this.moveEdit
                 }
                 if(result.width != null) {
                     self.width = result.width
                 } {
-                    self.edits.set("${DefaultEditTypes.RESIZE_WIDTH}", createAddEdit(callback, "'width = ' & width"))
+                    self.edits["${DefaultEditTypes.RESIZE_WIDTH}"] = createAddEdit(callback, "'width = ' & width")
                 }
                 if(result.height != null) {
                     self.height = result.height
                 } {
-                    self.edits.set("${DefaultEditTypes.RESIZE_HEIGHT}", createAddEdit(callback, "'height = ' & height"))
+                    self.edits["${DefaultEditTypes.RESIZE_HEIGHT}"] = createAddEdit(callback, "'height = ' & height")
                 }
                 if(result.rotation != null) {
                     self.rotation = result.rotation
                 } {
-                    self.edits.set("${DefaultEditTypes.ROTATE}", createAddEdit(callback, "'rotation = ' & rotation"))
+                    self.edits["${DefaultEditTypes.ROTATE}"] = createAddEdit(callback, "'rotation = ' & rotation")
                 }
                 self
             `,
@@ -463,10 +455,9 @@ const scopeExpressions: ParseableExpressions = [
                 startPoint = start
                 startProvider = if((start.type == "canvasElement") || (start.type == "canvasConnection")) {
                     startPoint = canvasScope.lpos(start, 0)
-                    startPoint.edits.set(
-                        "${DefaultEditTypes.MOVE_LPOS_POS}",
-                        createAppendScopeEdit(target, "with", "'over = start(' & pos & ').axisAligned(0.5, end(0.5))'")
-                    )
+                    startPoint.edits[
+                        "${DefaultEditTypes.MOVE_LPOS_POS}"
+                    ] = createAppendScopeEdit(target, "with", "'over = start(' & pos & ').axisAligned(0.5, end(0.5))'")
                     { 
                         startPoint.pos = it
                         startPoint
@@ -477,10 +468,9 @@ const scopeExpressions: ParseableExpressions = [
                 endPoint = end
                 endProvider = if ((end.type == "canvasElement") || (end.type == "canvasConnection")) {
                     endPoint = canvasScope.lpos(end, 0.5)
-                    endPoint.edits.set(
-                        "${DefaultEditTypes.MOVE_LPOS_POS}",
-                        createAppendScopeEdit(target, "with", "'over = start(0).axisAligned(0.5, end(' & pos & '))'")
-                    )
+                    endPoint.edits[
+                        "${DefaultEditTypes.MOVE_LPOS_POS}"
+                    ] = createAppendScopeEdit(target, "with", "'over = start(0).axisAligned(0.5, end(' & pos & '))'")
                     {
                         endPoint.pos = it
                         endPoint
@@ -489,14 +479,12 @@ const scopeExpressions: ParseableExpressions = [
                     { end }
                 }
                 this.segment = canvasAxisAlignedSegment(end = endPoint, verticalPos = 0.5)
-                segment.edits.set(
-                    "${DefaultEditTypes.AXIS_ALIGNED_SEGMENT_POS}",
-                    createAppendScopeEdit(target, "with", "'over = start(0).axisAligned(' & pos & ', end(0.5))'")
-                )
-                segment.edits.set(
-                    "${DefaultEditTypes.SPLIT_CANVAS_AXIS_ALIGNED_SEGMENT}",
-                    createAppendScopeEdit(target, "with", "'over = start(0).axisAligned(' & pos & ', apos(' & x & ', ' & y & '), ' & nextPos & ', end(0.5))'")
-                )
+                segment.edits[
+                    "${DefaultEditTypes.AXIS_ALIGNED_SEGMENT_POS}"
+                ] = createAppendScopeEdit(target, "with", "'over = start(0).axisAligned(' & pos & ', end(0.5))'")
+                segment.edits[
+                    "${DefaultEditTypes.SPLIT_CANVAS_AXIS_ALIGNED_SEGMENT}"
+                ] = createAppendScopeEdit(target, "with", "'over = start(0).axisAligned(' & pos & ', apos(' & x & ', ' & y & '), ' & nextPos & ', end(0.5))'")
                 connection = canvasConnection(
                     start = startPoint,
                     contents = list(
@@ -549,16 +537,16 @@ const scopeExpressions: ParseableExpressions = [
                     scope.internal.registerCanvasContent(element, source, canvasScope)
 
                     this.moveEdit = createAppendScopeEdit(source, "layout", "'pos = apos(' & dx & ', ' & dy & ')'")
-                    element.edits.set("${DefaultEditTypes.MOVE_X}", this.moveEdit)
-                    element.edits.set("${DefaultEditTypes.MOVE_Y}", this.moveEdit)
-                    element.edits.set("${DefaultEditTypes.ROTATE}", createAppendScopeEdit(source, "layout", "'rotation = ' & rotation"))
+                    element.edits["${DefaultEditTypes.MOVE_X}"] = this.moveEdit
+                    element.edits["${DefaultEditTypes.MOVE_Y}"] = this.moveEdit
+                    element.edits["${DefaultEditTypes.ROTATE}"] = createAppendScopeEdit(source, "layout", "'rotation = ' & rotation")
                     this.resizeEdit = createAppendScopeEdit(
                         source,
                         "layout",
                         "( $w := $exists(width) ? 'width = ' & width : []; $h := $exists(height) ? 'height = ' & height : []; $join($append($w, $h), '\\n') )"
                     )
-                    element.edits.set("${DefaultEditTypes.RESIZE_WIDTH}", this.resizeEdit)
-                    element.edits.set("${DefaultEditTypes.RESIZE_HEIGHT}", this.resizeEdit)
+                    element.edits["${DefaultEditTypes.RESIZE_WIDTH}"] = this.resizeEdit
+                    element.edits["${DefaultEditTypes.RESIZE_HEIGHT}"] = this.resizeEdit
 
                     element
                 `
@@ -605,7 +593,7 @@ const scopeExpressions: ParseableExpressions = [
                 `
                     (name, value) = args
                     if(scope.get(name) == null) {
-                        scope.set(name, value)
+                        scope[name] = value
                     }
                 `
             )

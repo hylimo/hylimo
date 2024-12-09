@@ -20,21 +20,21 @@ export const associationsModule = InterpreterModule.create(
             startMarkerFactory = scope.defaultMarkers.arrow,
             endMarkerFactory = scope.defaultMarkers.arrow
         )
-        scope.set("..", create(
+        scope[".."] = create(
             class = list("dashed-connection")
-        ))
-        scope.set("..>", create(
+        )
+        scope["..>"] = create(
             endMarkerFactory = scope.defaultMarkers.arrow,
             class = list("dashed-connection")
-        ))
-        scope.set("<..", create(
+        )
+        scope["<.."] = create(
             startMarkerFactory = scope.defaultMarkers.arrow,
             class = list("dashed-connection")
-        ))
-        scope.set("<..>", create(
+        )
+        scope["<..>"] = create(
             startMarkerFactory = scope.defaultMarkers.arrow,
             endMarkerFactory = scope.defaultMarkers.arrow,
             class = list("dashed-connection")
-        ))
+        )
     `
 );

@@ -54,19 +54,19 @@ export class RelativePointLayoutConfig extends CanvasPointLayoutConfig {
     override createPrototype(): ExecutableAbstractFunctionExpression {
         return fun(
             `
-                elementProto = object(proto = it)
+                elementProto = [proto = it]
 
                 elementProto.defineProperty("offsetX") {
                     args.self._offsetX
                 } {
                     args.self._offsetX = it
-                    args.self.edits.set("${DefaultEditTypes.MOVE_X}", createAdditiveEdit(it, "dx"))
+                    args.self.edits["${DefaultEditTypes.MOVE_X}"] = createAdditiveEdit(it, "dx")
                 }
                 elementProto.defineProperty("offsetY") {
                     args.self._offsetY
                 } {
                     args.self._offsetY = it
-                    args.self.edits.set("${DefaultEditTypes.MOVE_Y}", createAdditiveEdit(it, "dy"))
+                    args.self.edits["${DefaultEditTypes.MOVE_Y}"] = createAdditiveEdit(it, "dy")
                 }
                 
                 elementProto

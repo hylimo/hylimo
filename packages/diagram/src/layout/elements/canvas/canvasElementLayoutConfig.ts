@@ -111,25 +111,25 @@ export class CanvasElementLayoutConfig extends EditableCanvasContentLayoutConfig
     override createPrototype(): ExecutableAbstractFunctionExpression {
         return fun(
             `
-                elementProto = object(proto = it)
+                elementProto = [proto = it]
 
                 elementProto.defineProperty("width") {
                     args.self._width
                 } {
                     args.self._width = it
-                    args.self.edits.set("${DefaultEditTypes.RESIZE_WIDTH}", createAdditiveEdit(it, "dw"))
+                    args.self.edits["${DefaultEditTypes.RESIZE_WIDTH}"] = createAdditiveEdit(it, "dw")
                 }
                 elementProto.defineProperty("height") {
                     args.self._height
                 } {
                     args.self._height = it
-                    args.self.edits.set("${DefaultEditTypes.RESIZE_HEIGHT}", createAdditiveEdit(it, "dh"))
+                    args.self.edits["${DefaultEditTypes.RESIZE_HEIGHT}"] = createAdditiveEdit(it, "dh")
                 }
                 elementProto.defineProperty("rotation") {
                     args.self._rotation
                 } {
                     args.self._rotation = it
-                    args.self.edits.set("${DefaultEditTypes.ROTATE}", createReplaceEdit(it, "$string(rotation)"))
+                    args.self.edits["${DefaultEditTypes.ROTATE}"] = createReplaceEdit(it, "$string(rotation)")
                 }
                 
                 elementProto

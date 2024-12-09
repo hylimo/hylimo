@@ -184,7 +184,7 @@ export abstract class ElementLayoutConfig implements LayoutConfig {
      * @returns the prototype generation function
      */
     createPrototype(): ExecutableAbstractFunctionExpression {
-        return fun("object(proto = it)");
+        return fun("[proto = it]");
     }
 
     /**

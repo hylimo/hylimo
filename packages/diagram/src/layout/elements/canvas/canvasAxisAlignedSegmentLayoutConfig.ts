@@ -39,13 +39,13 @@ export class CanvasAxisAlignedSegmentLayoutConfig extends CanvasConnectionSegmen
     override createPrototype(): ExecutableAbstractFunctionExpression {
         return fun(
             `
-                elementProto = object(proto = it)
+                elementProto = [proto = it]
 
                 elementProto.defineProperty("verticalPos") {
                     args.self._verticalPos
                 } {
                     args.self._verticalPos = it
-                    args.self.edits.set("${DefaultEditTypes.AXIS_ALIGNED_SEGMENT_POS}", createReplaceEdit(it, "$string(pos)"))
+                    args.self.edits["${DefaultEditTypes.AXIS_ALIGNED_SEGMENT_POS}"] = createReplaceEdit(it, "$string(pos)")
                 }
                 
                 elementProto

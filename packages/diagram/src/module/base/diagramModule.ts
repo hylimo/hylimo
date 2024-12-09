@@ -237,7 +237,7 @@ export class DiagramModule implements InterpreterModule {
                         if(contentsCardinality > 0) {
                             this.callback = elementArgs.get(0)
                             if(callback != null) {
-                                scopeObject = object()
+                                scopeObject = []
                                 if(contentsCardinality == 1) {
                                     scopeObject.addContent = {
                                         element.content = it
@@ -274,7 +274,7 @@ export class DiagramModule implements InterpreterModule {
             fun(
                 `
                     (name) = args
-                    object(name = name, _type = "var")
+                    [name = name, _type = "var"]
                 `,
                 {
                     docs: "Creates a variable reference which can be used everywhere a style value is expected.",
@@ -303,13 +303,13 @@ export class DiagramModule implements InterpreterModule {
                             (type) = args
                             {
                                 (value, callback) = args
-                                this.selector = object(
+                                this.selector = [
                                     selectorType = type,
                                     selectorValue = value,
                                     styles = list(),
-                                    variables = object(),
+                                    variables = [],
                                     ${allStyleAttributes.map((attr) => `${attr.name} = null`).join(",")}
-                                )
+                                ]
                                 args.self.styles.add(selector)
                                 selector.proto = ${selectorProto}
                                 callback.callWithScope(selector)
@@ -329,13 +329,13 @@ export class DiagramModule implements InterpreterModule {
                     fun(
                         `
                             (callback) = args
-                            res = object()
+                            res = []
                             callback.callWithScope(res)
                             args.self.any {
                                 variables = this.variables
                                 res.forEach {
                                     (value, key) = args
-                                    variables.set(key, value)
+                                    variables[key] = value
                                 }
                             }
                             null
@@ -435,13 +435,13 @@ export class DiagramModule implements InterpreterModule {
             fun(
                 `
                     (fontFamily) = args
-                    object(
+                    [
                         fontFamily = fontFamily,
                         normal = args.normal,
                         italic = args.italic,
                         bold = args.bold,
                         boldItalic = args.boldItalic
-                    )
+                    ]
                 `,
                 {
                     docs: "Creates a new font family.",
@@ -461,7 +461,7 @@ export class DiagramModule implements InterpreterModule {
             fun(
                 `
                     (url, variationSettings) = args
-                    object(url = url, variationSettings = variationSettings)
+                    [url = url, variationSettings = variationSettings]
                 `,
                 {
                     docs: "Creates a new font, should be used with fontFamily.",
