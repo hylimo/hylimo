@@ -5,12 +5,22 @@ import {
     functionType,
     id,
     InterpreterModule,
+    jsFun,
+    listType,
     numberType,
+    objectType,
     optional,
     ParseableExpressions
 } from "@hylimo/core";
-import { canvasContentType, elementType } from "./types.js";
-import { CanvasConnection, CanvasElement, DefaultEditTypes } from "@hylimo/diagram-common";
+import { canvasContentType, canvasPointType, elementType, validateScope } from "./types.js";
+import {
+    CanvasAxisAlignedSegment,
+    CanvasBezierSegment,
+    CanvasConnection,
+    CanvasElement,
+    CanvasLineSegment,
+    DefaultEditTypes
+} from "@hylimo/diagram-common";
 import { LinePointLayoutConfig } from "../../layout/elements/canvas/linePointLayoutConfig.js";
 import { DiagramModuleNames } from "../diagramModuleNames.js";
 import { allStyleAttributes } from "./diagramModule.js";
@@ -19,6 +29,49 @@ import { allStyleAttributes } from "./diagramModule.js";
  * Identifier for the scope variable
  */
 export const SCOPE = "scope";
+
+/**
+ * Types for all layout scope properties
+ */
+const layoutScopeProperties = [
+    {
+        name: "width",
+        type: optional(numberType)
+    },
+    {
+        name: "height",
+        type: optional(numberType)
+    },
+    {
+        name: "pos",
+        type: optional(canvasPointType)
+    },
+    {
+        name: "rotation",
+        type: optional(numberType)
+    }
+];
+
+/**
+ * Types for the canvas connection with scope properties
+ */
+const canvasConnectionWithScopeProperties = [
+    {
+        name: "over",
+        type: optional(
+            objectType(
+                new Map([
+                    [
+                        "segments",
+                        listType(
+                            elementType(CanvasBezierSegment.TYPE, CanvasLineSegment.TYPE, CanvasAxisAlignedSegment.TYPE)
+                        )
+                    ]
+                ])
+            )
+        )
+    }
+];
 
 /**
  * Expressions which create the initial scope which is passed to the callback of all diagram DSL functions
@@ -139,6 +192,14 @@ const scopeExpressions: ParseableExpressions = [
             }
         )
     ),
+    assign(
+        "_validateCanvasConnectionWithScope",
+        jsFun((args, context) => {
+            const value = args.getFieldValue(0, context);
+            validateScope(value, context, canvasConnectionWithScopeProperties);
+            return context.null;
+        })
+    ),
     `
         lineBuilderProto = object()
         lineBuilderProto.line = listWrapper {
@@ -256,6 +317,7 @@ const scopeExpressions: ParseableExpressions = [
                 }
             )
             callback.callWithScope(result)
+            _validateCanvasConnectionWithScope(result, args)
             if(result.over != null) {
                 segments = result.over.segments
                 if((segments == null) || (segments.length == 0)) {
@@ -308,6 +370,14 @@ const scopeExpressions: ParseableExpressions = [
             callback.callWithScope(result)
         }
     `,
+    assign(
+        "_validateLayoutScope",
+        jsFun((args, context) => {
+            const value = args.getFieldValue(0, context);
+            validateScope(value, context, layoutScopeProperties);
+            return context.null;
+        })
+    ),
     id(SCOPE).assignField(
         "layout",
         fun(
@@ -315,6 +385,7 @@ const scopeExpressions: ParseableExpressions = [
                 (self, callback) = args
                 result = object(pos = null, width = null, height = null, rotation = null)
                 callback.callWithScope(result)
+                _validateLayoutScope(result, args)
                 if(result.pos != null) {
                     self.pos = result.pos
                 } {

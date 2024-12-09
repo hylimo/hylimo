@@ -148,17 +148,7 @@ export function fun(
     expressions: (ExecutableExpression | string)[] | string,
     documentation?: FunctionDocumentation
 ): ExecutableFunctionExpression {
-    let parsedExpressions: ExecutableExpression[];
-    if (typeof expressions === "string") {
-        parsedExpressions = parse(expressions);
-    } else {
-        parsedExpressions = expressions.map((expression) => {
-            if (typeof expression === "string") {
-                return parse(expression)[0];
-            }
-            return expression;
-        });
-    }
+    const parsedExpressions = parse(expressions);
     return new ExecutableFunctionExpression(undefined, parsedExpressions, documentation);
 }
 

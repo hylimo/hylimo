@@ -1,6 +1,4 @@
 import {
-    assertFunction,
-    assertObject,
     assign,
     BaseObject,
     booleanType,
@@ -26,13 +24,12 @@ import {
     or,
     SemanticFieldNames,
     str,
-    stringType,
-    validate
+    stringType
 } from "@hylimo/core";
 import { openSans, roboto, sourceCodePro } from "@hylimo/fonts";
 import { AttributeConfig, ContentCardinality, LayoutConfig } from "../../layout/layoutElement.js";
 import { layouts } from "../../layout/layouts.js";
-import { elementType } from "./types.js";
+import { elementType, validateScope } from "./types.js";
 import { DiagramModuleNames } from "../diagramModuleNames.js";
 import { LayoutEngine } from "../../layout/engine/layoutEngine.js";
 
@@ -295,19 +292,7 @@ export class DiagramModule implements InterpreterModule {
                     "validateSelector",
                     jsFun((args, context) => {
                         const value = args.getFieldValue(0, context);
-                        const createFunction = args.getFieldValue(1, context);
-                        assertObject(value);
-                        assertFunction(createFunction);
-                        for (const attribute of allStyleAttributes) {
-                            const attributeValue = value.getLocalField(attribute.name, context).value;
-                            validate(
-                                attribute.type,
-                                `Invalid value for ${attribute.name}`,
-                                attributeValue,
-                                context,
-                                () => createFunction.definition
-                            );
-                        }
+                        validateScope(value, context, allStyleAttributes);
                         return context.null;
                     })
                 ),
@@ -328,7 +313,7 @@ export class DiagramModule implements InterpreterModule {
                                 args.self.styles.add(selector)
                                 selector.proto = ${selectorProto}
                                 callback.callWithScope(selector)
-                                validateSelector(selector, callback)
+                                validateSelector(selector)
                                 selector
                             }
                         `,
