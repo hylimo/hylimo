@@ -7,7 +7,8 @@ import {
     isObject,
     LabeledValue,
     isNull,
-    ExecutableConstExpression
+    ExecutableConstExpression,
+    validateObject
 } from "@hylimo/core";
 import { Line, Point, Size } from "@hylimo/diagram-common";
 import { FontCollection } from "../font/fontCollection.js";
@@ -181,6 +182,7 @@ export class Layout {
         const cls = nativeToList(element.getLocalFieldOrUndefined("class")?.value?.toNative() ?? {});
         const id = this.generateId(parent);
         const layoutConfig = this.engine.layoutConfigs.get(type)!;
+        validateObject(element, this.context, [...layoutConfig.attributes, ...layoutConfig.styleAttributes]);
         const layoutElement: LayoutElement = {
             id,
             element,

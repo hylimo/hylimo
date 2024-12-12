@@ -24,12 +24,13 @@ import {
     or,
     SemanticFieldNames,
     str,
-    stringType
+    stringType,
+    validateObject
 } from "@hylimo/core";
 import { openSans, roboto, sourceCodePro } from "@hylimo/fonts";
 import { AttributeConfig, ContentCardinality, LayoutConfig } from "../../layout/layoutElement.js";
 import { layouts } from "../../layout/layouts.js";
-import { elementType, validateScope } from "./types.js";
+import { elementType } from "./types.js";
 import { DiagramModuleNames } from "../diagramModuleNames.js";
 import { LayoutEngine } from "../../layout/engine/layoutEngine.js";
 
@@ -110,9 +111,7 @@ function createElementFunction(element: LayoutConfig): ExecutableExpression {
                 docs: `Creates a new ${element.type} element`,
                 params: [
                     ...element.attributes.map((attr) => [attr.name, attr.description, attr.type] as const),
-                    ...element.styleAttributes.map(
-                        (attr) => [attr.name, attr.description, or(nullType, attr.type, styleValueType)] as const
-                    ),
+                    ...element.styleAttributes.map((attr) => [attr.name, attr.description, attr.type] as const),
                     ...contentAttributes.map((attr) => [attr.name, attr.description, optional(attr.type)] as const),
                     [0, "builder scope function", optional(functionType)]
                 ],
@@ -292,7 +291,7 @@ export class DiagramModule implements InterpreterModule {
                     "validateSelector",
                     jsFun((args, context) => {
                         const value = args.getFieldValue(0, context);
-                        validateScope(value, context, allStyleAttributes);
+                        validateObject(value, context, allStyleAttributes);
                         return context.null;
                     })
                 ),

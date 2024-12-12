@@ -1,7 +1,6 @@
-import { optional } from "@hylimo/core";
+import { Expression, optional, wrapperObjectType } from "@hylimo/core";
 import { AttributeConfig } from "../../layoutElement.js";
 import { CanvasContentLayoutConfig } from "./canvasContentLayoutConfig.js";
-import { elementType } from "../../../module/base/types.js";
 
 /**
  * Base layout config for CanvasElementLayoutConfig and CanvasConnectionLayoutConfig
@@ -18,9 +17,8 @@ export abstract class EditableCanvasContentLayoutConfig extends CanvasContentLay
             [
                 {
                     name: "source",
-                    description:
-                        "the CanvasContent itself, used for the metadata, should be assigned to an expression where infix functions can be added",
-                    type: optional(elementType())
+                    description: "the CanvasContent itself, used for the metadata",
+                    type: optional(wrapperObjectType("Expression", (value) => value.wrapped instanceof Expression))
                 },
                 ...additionalAttributes
             ],

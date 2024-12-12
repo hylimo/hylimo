@@ -1,14 +1,4 @@
-import {
-    assertObject,
-    BaseObject,
-    InterpreterContext,
-    literal,
-    namedType,
-    objectType,
-    or,
-    Type,
-    validate
-} from "@hylimo/core";
+import { literal, namedType, objectType, or, Type } from "@hylimo/core";
 import { AbsolutePoint, CanvasConnection, CanvasElement, LinePoint, RelativePoint } from "@hylimo/diagram-common";
 
 /**
@@ -41,27 +31,3 @@ export const canvasContentType = elementType(
     RelativePoint.TYPE,
     LinePoint.TYPE
 );
-
-/**
- * Validates a scope object
- * Checks that all fields are valid
- *
- * @param scope the scope object
- * @param context the interpreter context
- * @param properties the properties of the scope object
- * @throws if the scope object is invalid
- */
-export function validateScope(
-    scope: BaseObject,
-    context: InterpreterContext,
-    properties: {
-        name: string;
-        type: Type;
-    }[]
-): void {
-    assertObject(scope);
-    for (const property of properties) {
-        const propertyValue = scope.getLocalField(property.name, context).value;
-        validate(property.type, `Invalid value for ${property.name}`, propertyValue, context);
-    }
-}

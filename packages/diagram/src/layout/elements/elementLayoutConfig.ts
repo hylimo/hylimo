@@ -28,6 +28,11 @@ export abstract class ElementLayoutConfig implements LayoutConfig {
     ];
 
     /**
+     * Supported style attributes
+     */
+    readonly styleAttributes: AttributeConfig[];
+
+    /**
      * What type of element is supported
      */
     abstract readonly type: string;
@@ -46,11 +51,13 @@ export abstract class ElementLayoutConfig implements LayoutConfig {
      * @param additionalAttributes additional non-style attributes
      * @param styleAttributes the supported style attributes
      */
-    constructor(
-        additionalAttributes: AttributeConfig[],
-        readonly styleAttributes: AttributeConfig[]
-    ) {
+    constructor(additionalAttributes: AttributeConfig[], styleAttributes: AttributeConfig[]) {
         this.attributes.push(...additionalAttributes);
+        this.styleAttributes = styleAttributes.map((attribute) => ({
+            name: attribute.name,
+            description: attribute.description,
+            type: optional(attribute.type)
+        }));
     }
 
     /**

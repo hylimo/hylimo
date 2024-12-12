@@ -10,9 +10,10 @@ import {
     numberType,
     objectType,
     optional,
-    ParseableExpressions
+    ParseableExpressions,
+    validateObject
 } from "@hylimo/core";
-import { canvasContentType, canvasPointType, elementType, validateScope } from "./types.js";
+import { canvasContentType, canvasPointType, elementType } from "./types.js";
 import {
     CanvasAxisAlignedSegment,
     CanvasBezierSegment,
@@ -196,7 +197,7 @@ const scopeExpressions: ParseableExpressions = [
         "_validateCanvasConnectionWithScope",
         jsFun((args, context) => {
             const value = args.getFieldValue(0, context);
-            validateScope(value, context, canvasConnectionWithScopeProperties);
+            validateObject(value, context, canvasConnectionWithScopeProperties);
             return context.null;
         })
     ),
@@ -366,7 +367,7 @@ const scopeExpressions: ParseableExpressions = [
         "_validateLayoutScope",
         jsFun((args, context) => {
             const value = args.getFieldValue(0, context);
-            validateScope(value, context, layoutScopeProperties);
+            validateObject(value, context, layoutScopeProperties);
             return context.null;
         })
     ),
