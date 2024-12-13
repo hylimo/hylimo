@@ -1,6 +1,6 @@
 import { FullObject, numberType, optional, ExecutableAbstractFunctionExpression, fun } from "@hylimo/core";
 import { Size, Point, Element, CanvasElement, DefaultEditTypes } from "@hylimo/diagram-common";
-import { canvasPointType, elementType } from "../../../module/base/types.js";
+import { canvasPointType, simpleElementType } from "../../../module/base/types.js";
 import {
     ContentCardinality,
     HorizontalAlignment,
@@ -18,17 +18,10 @@ import { EditableCanvasContentLayoutConfig } from "./editableCanvasContentLayout
 export class CanvasElementLayoutConfig extends EditableCanvasContentLayoutConfig {
     override isLayoutContent = false;
     override type = CanvasElement.TYPE;
-    override contentType = elementType();
-    override contentCardinality = ContentCardinality.ExactlyOne;
 
     constructor() {
         super(
             [
-                {
-                    name: "content",
-                    description: "the inner element",
-                    type: elementType()
-                },
                 {
                     name: "pos",
                     description: "the position of the canvasElement",
@@ -44,7 +37,9 @@ export class CanvasElementLayoutConfig extends EditableCanvasContentLayoutConfig
                 },
                 ...sizeStyleAttributes,
                 ...visibilityStyleAttributes
-            ]
+            ],
+            simpleElementType,
+            ContentCardinality.ExactlyOne
         );
     }
 
@@ -104,7 +99,11 @@ export class CanvasElementLayoutConfig extends EditableCanvasContentLayoutConfig
         if (pos == undefined) {
             return undefined;
         } else {
-            return layout.getElementId(pos);
+            const posId = layout.getElementId(pos);
+            if (!layout.isChildElement(element.parent!, layout.layoutElementLookup.get(posId)!)) {
+                throw new Error("The pos of a canvas element must be part of the same canvas or a sub-canvas");
+            }
+            return posId;
         }
     }
 

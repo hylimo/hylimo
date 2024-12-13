@@ -1,4 +1,4 @@
-import { FullObject, objectToList, optional, listType } from "@hylimo/core";
+import { FullObject, objectToList, optional } from "@hylimo/core";
 import {
     Size,
     Point,
@@ -26,22 +26,10 @@ const markerType = optional(elementType(Marker.TYPE));
 export class CanvasConnectionLayoutConfig extends EditableCanvasContentLayoutConfig {
     override isLayoutContent = false;
     override type = CanvasConnection.TYPE;
-    override contentType = elementType(
-        CanvasBezierSegment.TYPE,
-        CanvasLineSegment.TYPE,
-        CanvasAxisAlignedSegment.TYPE,
-        Marker.TYPE
-    );
-    override contentCardinality = ContentCardinality.AtLeastOne;
 
     constructor() {
         super(
             [
-                {
-                    name: "contents",
-                    description: "the inner elements",
-                    type: listType(elementType())
-                },
                 {
                     name: "startMarker",
                     description: "the marker at the start of the connection",
@@ -58,7 +46,9 @@ export class CanvasConnectionLayoutConfig extends EditableCanvasContentLayoutCon
                     type: canvasPointType
                 }
             ],
-            [...strokeStyleAttributes]
+            [...strokeStyleAttributes],
+            elementType(CanvasBezierSegment.TYPE, CanvasLineSegment.TYPE, CanvasAxisAlignedSegment.TYPE, Marker.TYPE),
+            ContentCardinality.AtLeastOne
         );
     }
 

@@ -1,7 +1,7 @@
 import { FullObject, objectToList } from "@hylimo/core";
 import { AttributeConfig, ContentCardinality, LayoutElement } from "../layoutElement.js";
 import { StyledElementLayoutConfig } from "./styledElementLayoutConfig.js";
-import { elementType } from "../../module/base/types.js";
+import { simpleElementType } from "../../module/base/types.js";
 import { Point, Size, Line } from "@hylimo/diagram-common";
 import { Layout } from "../engine/layout.js";
 
@@ -9,9 +9,6 @@ import { Layout } from "../engine/layout.js";
  * Base class for all layout configs which contain contents
  */
 export abstract class PanelLayoutConfig extends StyledElementLayoutConfig {
-    override contentType = elementType();
-    override contentCardinality = ContentCardinality.Many;
-
     /**
      * Creates a new StyledElementLayoutConfig
      *
@@ -19,7 +16,7 @@ export abstract class PanelLayoutConfig extends StyledElementLayoutConfig {
      * @param styleAttributes the supported style attributes
      */
     constructor(additionalAttributes: AttributeConfig[], additionalStyleAttributes: AttributeConfig[]) {
-        super(additionalAttributes, additionalStyleAttributes);
+        super(additionalAttributes, additionalStyleAttributes, simpleElementType, ContentCardinality.Many);
     }
 
     override getChildren(element: LayoutElement): FullObject[] {

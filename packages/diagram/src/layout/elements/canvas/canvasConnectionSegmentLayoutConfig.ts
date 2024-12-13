@@ -9,9 +9,6 @@ import { ElementLayoutConfig } from "../elementLayoutConfig.js";
  * Base class for all canvas connection segment layout configs
  */
 export abstract class CanvasConnectionSegmentLayoutConfig extends ElementLayoutConfig {
-    override contentType = nullType;
-    override contentCardinality = ContentCardinality.None;
-
     /**
      * Creates a new CanvasConnectionSegmentLayoutConfig
      *
@@ -28,7 +25,9 @@ export abstract class CanvasConnectionSegmentLayoutConfig extends ElementLayoutC
                 },
                 ...additionalAttributes
             ],
-            additionalStyleAttributes
+            additionalStyleAttributes,
+            nullType,
+            ContentCardinality.None
         );
     }
 

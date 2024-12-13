@@ -10,11 +10,9 @@ import { elementType } from "../../module/base/types.js";
  */
 export class TextLayoutConfig extends StyledElementLayoutConfig {
     override type = Text.TYPE;
-    override contentType = elementType("span");
-    override contentCardinality = ContentCardinality.AtLeastOne;
 
     constructor() {
-        super([], []);
+        super([], [], elementType("span"), ContentCardinality.Many);
     }
 
     override measure(layout: Layout, element: LayoutElement, constraints: SizeConstraints): Size {
@@ -38,7 +36,7 @@ export class TextLayoutConfig extends StyledElementLayoutConfig {
     }
 
     override layout(layout: Layout, element: LayoutElement, position: Point, size: Size, id: string): Element[] {
-        if (element.isHidden) {
+        if (element.isHidden || element.children.length === 0) {
             return [];
         }
         const elements = element.layoutedContents as Text[];

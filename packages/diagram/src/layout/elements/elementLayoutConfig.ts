@@ -33,31 +33,68 @@ export abstract class ElementLayoutConfig implements LayoutConfig {
     readonly styleAttributes: AttributeConfig[];
 
     /**
+     * The content or contents attribute if present, otherwise an empty array
+     */
+    readonly contentAttributes: AttributeConfig[];
+
+    /**
      * What type of element is supported
      */
     abstract readonly type: string;
-    /**
-     * The type of the contents attribute
-     */
-    abstract readonly contentType: Type;
-    /**
-     * The cardinality of the contents attribute
-     */
-    abstract readonly contentCardinality: ContentCardinality;
 
     /**
      * Assigns type and styleAttributes
      *
      * @param additionalAttributes additional non-style attributes
      * @param styleAttributes the supported style attributes
+     * @param contentType the type of the contents attribute
+     * @param contentCardinality the cardinality of the contents attribute
      */
-    constructor(additionalAttributes: AttributeConfig[], styleAttributes: AttributeConfig[]) {
+    constructor(
+        additionalAttributes: AttributeConfig[],
+        styleAttributes: AttributeConfig[],
+        readonly contentType: Type,
+        readonly contentCardinality: ContentCardinality
+    ) {
         this.attributes.push(...additionalAttributes);
         this.styleAttributes = styleAttributes.map((attribute) => ({
             name: attribute.name,
             description: attribute.description,
             type: optional(attribute.type)
         }));
+        this.contentAttributes = this.computeContentAttributes();
+    }
+
+    /**
+     * Computs the attribute configs for the content or contents attribute
+     *
+     * @returns an array of the content or contents attribute config or an empty array
+     */
+    private computeContentAttributes(): AttributeConfig[] {
+        const isManyContent =
+            this.contentCardinality === ContentCardinality.Many ||
+            this.contentCardinality === ContentCardinality.AtLeastOne;
+        const contentAttributes: AttributeConfig[] = [];
+        if (this.contentCardinality === ContentCardinality.ExactlyOne) {
+            contentAttributes.push({
+                name: "content",
+                description: "the content of the element",
+                type: this.contentType
+            });
+        } else if (this.contentCardinality === ContentCardinality.Optional) {
+            contentAttributes.push({
+                name: "content",
+                description: "the content of the element",
+                type: optional(this.contentType)
+            });
+        } else if (isManyContent) {
+            contentAttributes.push({
+                name: "contents",
+                description: "the contents of the element",
+                type: optional(listType(this.contentType))
+            });
+        }
+        return contentAttributes;
     }
 
     /**

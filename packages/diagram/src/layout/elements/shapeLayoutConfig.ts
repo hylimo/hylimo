@@ -1,7 +1,8 @@
 import { Shape } from "@hylimo/diagram-common";
-import { LayoutElement, AttributeConfig } from "../layoutElement.js";
+import { LayoutElement, AttributeConfig, ContentCardinality } from "../layoutElement.js";
 import { extractFillStyleAttributes, extractStrokeStyleAttributes, shapeStyleAttributes } from "./attributes.js";
 import { StyledElementLayoutConfig } from "./styledElementLayoutConfig.js";
+import { Type } from "@hylimo/core";
 
 /**
  * Helper interface for shape properties
@@ -17,9 +18,21 @@ export abstract class ShapeLayoutConfig extends StyledElementLayoutConfig {
      *
      * @param additionalAttributes additional non-style attributes
      * @param additionalStyleAttributes the supported additional style attributes
+     * @param contentType the type of the contents attribute
+     * @param contentCardinality the cardinality of the contents attribute
      */
-    constructor(additionalAttributes: AttributeConfig[], additionalStyleAttributes: AttributeConfig[]) {
-        super(additionalAttributes, [...shapeStyleAttributes, ...additionalStyleAttributes]);
+    constructor(
+        additionalAttributes: AttributeConfig[],
+        additionalStyleAttributes: AttributeConfig[],
+        contentType: Type,
+        contentCardinality: ContentCardinality
+    ) {
+        super(
+            additionalAttributes,
+            [...shapeStyleAttributes, ...additionalStyleAttributes],
+            contentType,
+            contentCardinality
+        );
     }
 
     /**

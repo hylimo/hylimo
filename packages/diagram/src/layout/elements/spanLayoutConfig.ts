@@ -10,8 +10,6 @@ import { fillStyleAttributes } from "./attributes.js";
  */
 export class SpanLayoutConfig extends ElementLayoutConfig {
     override type = "span";
-    override contentType = nullType;
-    override contentCardinality = ContentCardinality.ExactlyOne;
 
     /**
      * Creates a new SpanLayoutConfig
@@ -80,7 +78,9 @@ export class SpanLayoutConfig extends ElementLayoutConfig {
                         "space between dashes, only used if strikethroughDash is set, defaults to strikethroughDash",
                     type: numberType
                 }
-            ]
+            ],
+            nullType,
+            ContentCardinality.None
         );
     }
 

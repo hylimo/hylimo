@@ -3,25 +3,17 @@ import { Size, Point, Element, Marker } from "@hylimo/diagram-common";
 import { ContentCardinality, LayoutElement, SizeConstraints } from "../../layoutElement.js";
 import { Layout } from "../../engine/layout.js";
 import { StyledElementLayoutConfig } from "../styledElementLayoutConfig.js";
-import { elementType } from "../../../module/base/types.js";
+import { simpleElementType } from "../../../module/base/types.js";
 
 /**
  * Layout config for marker
  */
 export class MarkerLayoutConfig extends StyledElementLayoutConfig {
     override type = Marker.TYPE;
-    override contentType = elementType();
-    override contentCardinality = ContentCardinality.ExactlyOne;
 
     constructor() {
         super(
-            [
-                {
-                    name: "content",
-                    description: "the inner element",
-                    type: elementType()
-                }
-            ],
+            [],
             [
                 {
                     name: "lineStart",
@@ -38,7 +30,9 @@ export class MarkerLayoutConfig extends StyledElementLayoutConfig {
                     description: "The y coordinate of the reference point",
                     type: numberType
                 }
-            ]
+            ],
+            simpleElementType,
+            ContentCardinality.ExactlyOne
         );
     }
 

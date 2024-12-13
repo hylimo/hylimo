@@ -39,6 +39,9 @@ export class RelativePointLayoutConfig extends CanvasPointLayoutConfig {
         const offsetXValue = element.element.getLocalFieldOrUndefined("_offsetX");
         const offsetYValue = element.element.getLocalFieldOrUndefined("_offsetY");
         const target = layout.getElementId(element.element.getLocalFieldOrUndefined("target")!.value as FullObject);
+        if (!layout.isChildElement(element.parent!, layout.layoutElementLookup.get(target)!)) {
+            throw new Error("The target of a relative point must be part of the same canvas or a sub-canvas");
+        }
         const result: RelativePoint = {
             type: RelativePoint.TYPE,
             id,

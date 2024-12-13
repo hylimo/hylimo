@@ -182,7 +182,11 @@ export class Layout {
         const cls = nativeToList(element.getLocalFieldOrUndefined("class")?.value?.toNative() ?? {});
         const id = this.generateId(parent);
         const layoutConfig = this.engine.layoutConfigs.get(type)!;
-        validateObject(element, this.context, [...layoutConfig.attributes, ...layoutConfig.styleAttributes]);
+        validateObject(element, this.context, [
+            ...layoutConfig.attributes,
+            ...layoutConfig.styleAttributes,
+            ...layoutConfig.contentAttributes
+        ]);
         const layoutElement: LayoutElement = {
             id,
             element,
@@ -451,6 +455,24 @@ export class Layout {
             throw new RuntimeError("Id of element not found");
         }
         return elementId;
+    }
+
+    /**
+     * Checks if an element is a child of another element
+     *
+     * @param parent the potential parent element
+     * @param child the potential child element
+     * @returns true if the child is a child of the parent, otherwise false
+     */
+    isChildElement(parent: LayoutElement, child: LayoutElement): boolean {
+        let currentElement: LayoutElement | undefined = child;
+        while (currentElement != undefined) {
+            if (currentElement === parent) {
+                return true;
+            }
+            currentElement = currentElement.parent;
+        }
+        return false;
     }
 }
 

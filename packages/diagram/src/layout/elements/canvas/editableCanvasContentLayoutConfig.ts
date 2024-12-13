@@ -1,5 +1,5 @@
-import { Expression, optional, wrapperObjectType } from "@hylimo/core";
-import { AttributeConfig } from "../../layoutElement.js";
+import { Expression, optional, Type, wrapperObjectType } from "@hylimo/core";
+import { AttributeConfig, ContentCardinality } from "../../layoutElement.js";
 import { CanvasContentLayoutConfig } from "./canvasContentLayoutConfig.js";
 
 /**
@@ -7,12 +7,19 @@ import { CanvasContentLayoutConfig } from "./canvasContentLayoutConfig.js";
  */
 export abstract class EditableCanvasContentLayoutConfig extends CanvasContentLayoutConfig {
     /**
-     * Creates a CanvasCoEditableCanvasContentLayoutConfigntentLayoutconfig
+     * Creates a EditableCanvasContentLayoutConfig
      *
      * @param additionalAttributes additional non-style attributes
      * @param styleAttributes the supported style attributes
+     * @param contentType the type of the contents attribute
+     * @param contentCardinality the cardinality of the contents attribute
      */
-    constructor(additionalAttributes: AttributeConfig[], styleAttributes: AttributeConfig[]) {
+    constructor(
+        additionalAttributes: AttributeConfig[],
+        styleAttributes: AttributeConfig[],
+        contentType: Type,
+        contentCardinality: ContentCardinality
+    ) {
         super(
             [
                 {
@@ -22,7 +29,9 @@ export abstract class EditableCanvasContentLayoutConfig extends CanvasContentLay
                 },
                 ...additionalAttributes
             ],
-            styleAttributes
+            styleAttributes,
+            contentType,
+            contentCardinality
         );
     }
 }

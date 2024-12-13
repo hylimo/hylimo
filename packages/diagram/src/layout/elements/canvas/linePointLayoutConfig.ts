@@ -72,6 +72,9 @@ export class LinePointLayoutConfig extends CanvasPointLayoutConfig {
         const lineProvider = layout.getElementId(
             element.element.getLocalFieldOrUndefined("lineProvider")!.value as FullObject
         );
+        if (!layout.isChildElement(element.parent!, layout.layoutElementLookup.get(lineProvider)!)) {
+            throw new Error("The lineProvider of a line point must be part of the same canvas or a sub-canvas");
+        }
         let pos: number;
         let segment: number | undefined;
         if (positionField == undefined) {

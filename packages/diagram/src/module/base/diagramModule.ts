@@ -30,7 +30,7 @@ import {
 import { openSans, roboto, sourceCodePro } from "@hylimo/fonts";
 import { AttributeConfig, ContentCardinality, LayoutConfig } from "../../layout/layoutElement.js";
 import { layouts } from "../../layout/layouts.js";
-import { elementType } from "./types.js";
+import { simpleElementType } from "./types.js";
 import { DiagramModuleNames } from "../diagramModuleNames.js";
 import { LayoutEngine } from "../../layout/engine/layoutEngine.js";
 
@@ -73,7 +73,7 @@ export const allStyleAttributes = computeAllStyleAttributes();
  * @returns the callback which provides the create element function
  */
 function createElementFunction(element: LayoutConfig): ExecutableExpression {
-    const { cardinalityNumber, contentAttributes } = extractContentAttributeAndCardinality(element);
+    const contentCardinality = extractContentCardinality(element);
 
     return fun([
         id(SemanticFieldNames.THIS).assignField(
@@ -100,7 +100,7 @@ function createElementFunction(element: LayoutConfig): ExecutableExpression {
                             value: new ExecutableConstExpression({ value: args })
                         },
                         {
-                            value: num(cardinalityNumber)
+                            value: num(contentCardinality)
                         }
                     ],
                     context
@@ -112,7 +112,9 @@ function createElementFunction(element: LayoutConfig): ExecutableExpression {
                 params: [
                     ...element.attributes.map((attr) => [attr.name, attr.description, attr.type] as const),
                     ...element.styleAttributes.map((attr) => [attr.name, attr.description, attr.type] as const),
-                    ...contentAttributes.map((attr) => [attr.name, attr.description, optional(attr.type)] as const),
+                    ...element.contentAttributes.map(
+                        (attr) => [attr.name, attr.description, optional(attr.type)] as const
+                    ),
                     [0, "builder scope function", optional(functionType)]
                 ],
                 returns: "the created element"
@@ -127,33 +129,14 @@ function createElementFunction(element: LayoutConfig): ExecutableExpression {
  * @param element the element to extract the content attribute and cardinality from
  * @returns the cardinality number and the content attributes
  */
-function extractContentAttributeAndCardinality(element: LayoutConfig): {
-    cardinalityNumber: number;
-    contentAttributes: AttributeConfig[];
-} {
+function extractContentCardinality(element: LayoutConfig): number {
     const contentCardinality = element.contentCardinality;
-    const contentAttributes: AttributeConfig[] = [];
-    const isOneContent =
-        contentCardinality === ContentCardinality.ExactlyOne || contentCardinality === ContentCardinality.Optional;
-    const isManyContent =
-        contentCardinality === ContentCardinality.Many || contentCardinality === ContentCardinality.AtLeastOne;
-    let cardinalityNumber = 0;
-    if (isOneContent) {
-        contentAttributes.push({
-            name: "content",
-            description: "the content of the element",
-            type: element.contentType
-        });
-        cardinalityNumber = 1;
-    } else if (isManyContent) {
-        contentAttributes.push({
-            name: "contents",
-            description: "the contents of the element",
-            type: listType(element.contentType)
-        });
-        cardinalityNumber = Number.POSITIVE_INFINITY;
+    if (contentCardinality === ContentCardinality.ExactlyOne || contentCardinality === ContentCardinality.Optional) {
+        return 1;
+    } else if (contentCardinality === ContentCardinality.Many || contentCardinality === ContentCardinality.AtLeastOne) {
+        return Number.POSITIVE_INFINITY;
     }
-    return { cardinalityNumber, contentAttributes };
+    return 0;
 }
 
 /**
@@ -526,7 +509,7 @@ export class DiagramModule implements InterpreterModule {
                 {
                     docs: "Creates a new diagram, consisting of a ui element, styles and fonts",
                     params: [
-                        [0, "the root ui element", elementType()],
+                        [0, "the root ui element", simpleElementType],
                         [1, "the styles object created by the styles function", objectType()],
                         [2, "a list of font family objects", listType(objectType())]
                     ],
