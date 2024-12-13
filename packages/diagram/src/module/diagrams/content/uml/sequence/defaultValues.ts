@@ -14,9 +14,12 @@ export const defaultValues = InterpreterModule.create(
         scope.activityWidth = 10
         scope.activityShift = 3
         scope.instanceDistance = 200
-        scope.eventDistance = 30
+        scope.eventDistance = 25 /* Not 30 as that looks bad on the lifeline - that is a dotted line, and the dots always seem to be missing on 30pixels */
         scope.destroyingCrossSize = 20
         scope.externalMessageDiameter = 20
+        scope.enableDebugging = false
+        scope.frameMarginX = 20
+        scope.frameMarginY = scope.margin
         // This one is calculated so that the resulting dot will be centered on the '100' grid lines when connecting against an activity indicator
         // If you want to center it against a lifeline only, use '100' instead
         scope.externalMessageDistance = 100 - (scope.activityWidth / 2)

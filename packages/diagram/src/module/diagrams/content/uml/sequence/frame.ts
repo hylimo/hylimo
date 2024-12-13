@@ -1,4 +1,4 @@
-import { booleanType, fun, id, InterpreterModule, optional, stringType } from "@hylimo/core";
+import { booleanType, fun, id, InterpreterModule, optional, parse, stringType } from "@hylimo/core";
 import { SCOPE } from "../../../../base/dslModule.js";
 import { eventCoordinateType } from "./types.js";
 
@@ -14,36 +14,89 @@ export const sequenceDiagramFrameModule = InterpreterModule.create(
     ["uml/sequence/defaultValues"],
     [],
     [
+        ...parse(`
+          scope.internal.createSequenceDiagramFrame = {
+            // First, explicitly declare and initialize all parameters
+            if(args.args == null) {
+              scope.error("createSequenceDiagramFrame is missing its 'args = args' parameter")
+            }
+            args = args.args
+
+            // We must differentiate four different version to set margin:
+            // 1. No margin set -> use scope.frameMarginX/Y
+            // 2. Everything has the same margin -> use args.margin
+            // 3. x and y have the same margin respectively (top-bottom, left-right)
+            // 4. Everything has an individual margin
+            defaultMarginX = args.marginX
+            if(defaultMarginX == null) {
+              defaultMarginX = scope.frameMarginX
+            }
+            defaultMarginY = args.marginY
+            if(defaultMarginY == null) {
+              defaultMarginY = scope.frameMarginY
+            }
+            topLeft = args.topLeft
+            bottomRight = args.bottomRight
+            
+            marginRight = args.marginRight ?? defaultMarginX
+            marginBottom = args.marginBottom ?? defaultMarginY
+            marginLeft = args.marginLeft ?? defaultMarginX
+            marginTop = args.marginTop ?? defaultMarginY
+            
+            // Calculate the rectangle position
+            x = topLeft.x - marginLeft
+            y = topLeft.y - marginTop
+            width = bottomRight.x - topLeft.x + marginLeft + marginRight
+            height = bottomRight.y - topLeft.y + marginTop + marginBottom
+            
+            // Add the frame
+            frameElement = canvasElement(
+                    content = rect(class = list("frame")),
+                    class = list("frame-element"),
+                    width = width,
+                    height = height
+                )
+            frameElement.pos = scope.apos(x, y)
+ 
+            scope.internal.registerCanvasElement(frameElement, args, args.self)
+            frameElement
+          }
+        `),
         id(SCOPE).assignField(
             "frame",
-            fun(``, {
-                docs: "Creates a frame around two endpoints",
-                params: [
-                    ["text", "The text to display in the upper-left corner", optional(stringType)],
-                    [
-                        "subtext",
-                        "The text to display right of the main text, i.e. a condition for an if or while",
-                        optional(stringType)
+            fun(
+                `
+              scope.internal.createSequenceDiagramFrame(args = args)
+            `,
+                {
+                    docs: "Creates a frame around two endpoints",
+                    params: [
+                        ["text", "The text to display in the upper-left corner", optional(stringType)],
+                        [
+                            "subtext",
+                            "The text to display right of the main text, i.e. a condition for an if or while",
+                            optional(stringType)
+                        ],
+                        [
+                            "hasIcon",
+                            "Whether to draw the UML border around the text. If false, only the outer boundary will be drawn",
+                            optional(booleanType)
+                        ],
+                        [
+                            "topLeft",
+                            "The top-left coordinate (event) to draw the border around. The border will be extended by 'frameMargin' on each side",
+                            eventCoordinateType
+                        ],
+                        [
+                            "bottomRight",
+                            "The bottom-right coordinate (event) to draw the border around. The border will be extended by 'frameMargin' on each side",
+                            eventCoordinateType
+                        ]
                     ],
-                    [
-                        "hasIcon",
-                        "Whether to draw the UML border around the text. If false, only the outer boundary will be drawn",
-                        optional(booleanType)
-                    ],
-                    [
-                        "topLeft",
-                        "The top-left coordinate (event) to draw the border around. The border will be extended by 'frameMargin' on each side",
-                        eventCoordinateType
-                    ],
-                    [
-                        "bottomRight",
-                        "The bottom-right coordinate (event) to draw the border around. The border will be extended by 'frameMargin' on each side",
-                        eventCoordinateType
-                    ]
-                ],
-                snippet: `($1)`,
-                returns: "The created frame"
-            })
+                    snippet: `(topLeft = $1, bottomRight = $1)`,
+                    returns: "The created frame"
+                }
+            )
         )
     ]
 );

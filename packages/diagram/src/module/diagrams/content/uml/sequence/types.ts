@@ -1,5 +1,7 @@
-import { booleanType, functionType, listType, numberType, objectType, optional, stringType } from "@hylimo/core";
+import { booleanType, functionType, listType, numberType, objectType, optional, or, stringType } from "@hylimo/core";
 import { canvasContentType, canvasPointType } from "../../../../base/types.js";
+
+// Contains all Types used within sequence diagrams
 
 export const eventType = objectType(
     new Map([
@@ -22,6 +24,8 @@ export const eventCoordinateType = objectType(
             "right" /* participant element or right xy position of the most recent activity indicator wrapped inside a function, so something that can create a connection */,
             functionType
         ],
+        ["x" /* from the center to the root of the diagram */, numberType],
+        ["y" /* from the center to the root of the diagram */, numberType],
         ["parentEvent", optional(eventType) /* null for top level participants*/],
         ["participantName" /* i.e. 'Bob' when this object is called as 'event.Bob' */, stringType]
     ]),
@@ -44,8 +48,8 @@ export const participantType = objectType(
         ["lifeline", canvasContentType],
         ["events", listType(canvasPointType)],
         ["activeActivityIndicators", listType(activityIndicatorType)],
-        ["y" /* to the root of the diagram */, numberType],
-        ["x" /* to the root of the diagram */, numberType]
+        ["x" /* to the root of the diagram */, numberType],
+        ["y" /* to the root of the diagram */, numberType]
     ]),
     "UML sequence diagram participant (instance or actor)"
 );
@@ -59,13 +63,27 @@ export const externalMessageType = objectType(
     "Lost or Found message"
 );
 
+export const fragmentType = objectType(
+    new Map([
+        ["text", optional(stringType)],
+        ["subtext", optional(stringType)],
+        ["hasIcon", optional(booleanType)],
+        [
+            "topY", // the y-coordinate (event) where to draw the line separating the previous fragment from this fragment
+            or(eventCoordinateType, numberType)
+        ]
+    ]),
+    "UML sequence diagram frame"
+);
+
 export const frameType = objectType(
     new Map([
         ["text", optional(stringType)],
         ["subtext", optional(stringType)],
         ["hasIcon", optional(booleanType)],
-        ["start", eventCoordinateType],
-        ["end", eventCoordinateType]
+        ["topLeft", eventCoordinateType],
+        ["bottomRight", eventCoordinateType],
+        ["fragments", listType(fragmentType)]
     ]),
-    "UML sequence diagram instance or actor"
+    "UML sequence diagram frame"
 );
