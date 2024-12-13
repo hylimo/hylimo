@@ -41,7 +41,7 @@ export const eventModule = InterpreterModule.create(
                     
                     it.events += eventPosition // for the position calculation
                     
-                    // When we have a activity indicator, we have to relocate the arrow to the end of the most recent activity indicator, either on the left or on the right side of the activity indicator
+                    // When we have an activity indicator, we have to relocate the arrow to the end of the most recent activity indicator, either on the left or on the right side of the activity indicator
                     // Additionally, since activity indicators are defined after the event creating them, we must shift the position the moment we create an association since only then the currently active activity indicators are known
                     leftX = 0
                     rightX = 0
@@ -54,7 +54,8 @@ export const eventModule = InterpreterModule.create(
                         }
                     }
 
-                    eventObject[it.name] = [
+                    name = it.name
+                    eventObject[name] = [
                         left = {
                             activityShifter()
                             scope.rpos(eventPosition, leftX, 0)
@@ -64,22 +65,24 @@ export const eventModule = InterpreterModule.create(
                             activityShifter()
                             scope.rpos(eventPosition, rightX, 0) // for arrows, i.e. 'event.shop --> event.cart', the left/right is unwrapped by the arrow itself
                         },
+                        x = it.x,
+                        y = eventObject.y,
                         parentEvent = eventObject,
-                        participantName = it.name
+                        participantName = name
                     ]
                     
-                    /*
-                    // only for debugging purposes:
-                    _left = canvasElement(content = ellipse(fill = "red", stroke = "unset"), width=5, height=5, fill = "red", stroke = "unset")
-                    _left.pos = eventObject[it.name].left()
-                    scope.internal.registerCanvasElement(_left, originalArgs, originalArgs.self)
-                    _center = canvasElement(content = ellipse(fill = "red", stroke = "unset"), width=5, height=5, fill = "red", stroke = "unset")
-                    _center.pos = eventObject[it.name].center
-                    scope.internal.registerCanvasElement(_center, originalArgs, originalArgs.self)
-                    _right = canvasElement(content = ellipse(fill = "red", stroke = "unset"), width=5, height=5, fill = "red", stroke = "unset")
-                    _right.pos = eventObject[it.name].right()
-                    scope.internal.registerCanvasElement(_right, originalArgs, originalArgs.self)
-                    */
+                    // When in debugging mode, visualize the coordinates of all events
+                    if(scope.enableDebugging) {
+                      _left = canvasElement(content = ellipse(fill = "red", stroke = "unset"), width=7, height=7, fill = "red", stroke = "unset", hAlign = "center", vAlign = "center")
+                      _left.pos = eventObject[name].left()
+                      scope.internal.registerCanvasElement(_left, originalArgs, originalArgs.self)
+                      _center = canvasElement(content = ellipse(fill = "red", stroke = "unset"), width=7, height=7, fill = "red", stroke = "unset", hAlign = "center", vAlign = "center")
+                      _center.pos = eventObject[name].center
+                      scope.internal.registerCanvasElement(_center, originalArgs, originalArgs.self)
+                      _right = canvasElement(content = ellipse(fill = "red", stroke = "unset"), width=7, height=7, fill = "red", stroke = "unset", hAlign = "center", vAlign = "center")
+                      _right.pos = eventObject[name].right()
+                      scope.internal.registerCanvasElement(_right, originalArgs, originalArgs.self)
+                    }
 
                     // change the length of the instance line (its end position) to the new last position + 3*margin
                     // (+3 margin so that a activity indicator that is still present there can end, and there's still a bit of the line left over)
