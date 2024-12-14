@@ -7,7 +7,6 @@ import {
     Parser,
     RuntimeError,
     SemanticFieldNames,
-    assertWrapperObject,
     defaultModules,
     id,
     isWrapperObject,
