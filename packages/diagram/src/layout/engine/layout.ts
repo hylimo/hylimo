@@ -569,7 +569,7 @@ class StyleValueParser {
             return variableValue;
         }
         if (variableValue === null) {
-            throw new Error(`You cannot define variables such as ${name} with itself`);
+            throw new Error(`Circular dependency detected! Variable ${name} depends on itself with itself`);
         }
         this.variableValues.set(name, null);
         for (const variables of this.variables) {

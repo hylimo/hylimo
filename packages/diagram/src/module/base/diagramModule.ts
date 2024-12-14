@@ -43,6 +43,40 @@ const styleValueType = namedType(
 );
 
 /**
+ * Type for a selector
+ */
+const selectorType = objectType(
+    new Map([
+        ["selectorType", stringType],
+        ["selectorValue", stringType]
+    ])
+);
+
+/**
+ * Type for a font object
+ */
+const fontType = objectType(
+    new Map([
+        ["url", stringType],
+        ["name", optional(stringType)],
+        ["variationSettings", optional(objectType())]
+    ])
+);
+
+/**
+ * Type for a font family object
+ */
+const fontFamilyType = objectType(
+    new Map([
+        ["fontFamily", stringType],
+        ["normal", fontType],
+        ["italic", fontType],
+        ["bold", fontType],
+        ["boldItalic", fontType]
+    ])
+);
+
+/**
  * Gets a list of all known style attributes
  *
  * @returns the list of style attributes
@@ -149,17 +183,6 @@ const selectorProto = "selectorProto";
  * on the selector prototype to support calculated style values
  */
 const selectorProxiedOperators = ["+", "-", "*", "/", "%", "&", "|", ">", ">=", "<", "<=", ">>", "<<"];
-
-/**
- * Type for a font object
- */
-const fontType = objectType(
-    new Map([
-        ["url", stringType],
-        ["name", optional(stringType)],
-        ["variationSettings", optional(objectType())]
-    ])
-);
 
 /**
  * Helper function to create a font object
@@ -510,8 +533,12 @@ export class DiagramModule implements InterpreterModule {
                     docs: "Creates a new diagram, consisting of a ui element, styles and fonts",
                     params: [
                         [0, "the root ui element", simpleElementType],
-                        [1, "the styles object created by the styles function", objectType()],
-                        [2, "a list of font family objects", listType(objectType())]
+                        [
+                            1,
+                            "the styles object created by the styles function",
+                            objectType(new Map([["styles", listType(selectorType)]]))
+                        ],
+                        [2, "a list of font family objects", listType(fontFamilyType)]
                     ],
                     returns: "the created diagram object"
                 }

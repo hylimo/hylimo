@@ -81,19 +81,19 @@ export interface LayoutedPath {
 /**
  * The root element of the layout with the layout
  */
-export interface LayoutWithRoot {
+export class LayoutWithRoot {
     /**
-     * The root element of the layout
+     * Creates a new layout with root
+     *
+     * @param root - The root element of the layout
+     * @param layout - The layout
+     * @param fontFamilies - The fonts root uses
      */
-    root: LayoutElement;
-    /**
-     * The layout
-     */
-    layout: Layout;
-    /**
-     * The fonts root uses
-     */
-    fontFamilies: FontFamilyConfig[];
+    constructor(
+        public readonly root: LayoutElement,
+        public readonly layout: Layout,
+        public readonly fontFamilies: FontFamilyConfig[]
+    ) {}
 }
 
 /**
@@ -163,11 +163,7 @@ export class LayoutEngine {
             context
         );
         const layoutElement = layout.create(element, undefined);
-        return {
-            root: layoutElement,
-            layout,
-            fontFamilies: nativeFonts
-        };
+        return new LayoutWithRoot(layoutElement, layout, nativeFonts);
     }
 
     /**
