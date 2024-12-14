@@ -61,10 +61,14 @@ export class CanvasConnectionLayoutConfig extends EditableCanvasContentLayoutCon
 
     override layout(layout: Layout, element: LayoutElement, position: Point, size: Size, id: string): Element[] {
         const contents = element.children;
+        const start = layout.getElementId(element.element.getLocalFieldOrUndefined("start")!.value as FullObject);
+        if (!layout.isChildElement(element.parent!, layout.layoutElementLookup.get(start)!)) {
+            throw new Error("The start of a canvas connection must be part of the same canvas or a sub-canvas");
+        }
         const result: CanvasConnection = {
             id,
             type: CanvasConnection.TYPE,
-            start: layout.getElementId(element.element.getLocalFieldOrUndefined("start")!.value as FullObject),
+            start,
             children: contents
                 .filter((content) => content.layoutConfig.type != Marker.TYPE)
                 .flatMap((content) => layout.layout(content, position, content.measuredSize!)),
