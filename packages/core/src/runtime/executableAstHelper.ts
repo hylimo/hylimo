@@ -145,7 +145,7 @@ export function parse(expressions: ParseableExpressions): ExecutableExpression[]
  * @returns the created FunctionExpression
  */
 export function fun(
-    expressions: (ExecutableExpression | string)[] | string,
+    expressions: ParseableExpressions,
     documentation?: FunctionDocumentation
 ): ExecutableFunctionExpression {
     const parsedExpressions = parse(expressions);
