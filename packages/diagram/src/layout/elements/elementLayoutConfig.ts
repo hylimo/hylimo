@@ -66,7 +66,7 @@ export abstract class ElementLayoutConfig implements LayoutConfig {
     }
 
     /**
-     * Computs the attribute configs for the content or contents attribute
+     * Computes the attribute configs for the content or contents attribute
      *
      * @returns an array of the content or contents attribute config or an empty array
      */
