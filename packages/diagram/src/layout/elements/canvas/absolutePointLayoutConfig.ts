@@ -45,19 +45,19 @@ export class AbsolutePointLayoutConfig extends CanvasPointLayoutConfig {
     override createPrototype(): ExecutableAbstractFunctionExpression {
         return fun(
             `
-                elementProto = object(proto = it)
+                elementProto = [proto = it]
 
                 elementProto.defineProperty("x") {
                     args.self._x
                 } {
                     args.self._x = it
-                    args.self.edits.set("${DefaultEditTypes.MOVE_X}", createAdditiveEdit(it, "dx"))
+                    args.self.edits["${DefaultEditTypes.MOVE_X}"] = createAdditiveEdit(it, "dx")
                 }
                 elementProto.defineProperty("y") {
                     args.self._y
                 } {
                     args.self._y = it
-                    args.self.edits.set("${DefaultEditTypes.MOVE_Y}", createAdditiveEdit(it, "dy"))
+                    args.self.edits["${DefaultEditTypes.MOVE_Y}"] = createAdditiveEdit(it, "dy")
                 }
                 
                 elementProto

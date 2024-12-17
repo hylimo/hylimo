@@ -39,6 +39,9 @@ export class RelativePointLayoutConfig extends CanvasPointLayoutConfig {
         const offsetXValue = element.element.getLocalFieldOrUndefined("_offsetX");
         const offsetYValue = element.element.getLocalFieldOrUndefined("_offsetY");
         const target = layout.getElementId(element.element.getLocalFieldOrUndefined("target")!.value as FullObject);
+        if (!layout.isChildElement(element.parent!, layout.layoutElementLookup.get(target)!)) {
+            throw new Error("The target of a relative point must be part of the same canvas or a sub-canvas");
+        }
         const result: RelativePoint = {
             type: RelativePoint.TYPE,
             id,
@@ -54,19 +57,19 @@ export class RelativePointLayoutConfig extends CanvasPointLayoutConfig {
     override createPrototype(): ExecutableAbstractFunctionExpression {
         return fun(
             `
-                elementProto = object(proto = it)
+                elementProto = [proto = it]
 
                 elementProto.defineProperty("offsetX") {
                     args.self._offsetX
                 } {
                     args.self._offsetX = it
-                    args.self.edits.set("${DefaultEditTypes.MOVE_X}", createAdditiveEdit(it, "dx"))
+                    args.self.edits["${DefaultEditTypes.MOVE_X}"] = createAdditiveEdit(it, "dx")
                 }
                 elementProto.defineProperty("offsetY") {
                     args.self._offsetY
                 } {
                     args.self._offsetY = it
-                    args.self.edits.set("${DefaultEditTypes.MOVE_Y}", createAdditiveEdit(it, "dy"))
+                    args.self.edits["${DefaultEditTypes.MOVE_Y}"] = createAdditiveEdit(it, "dy")
                 }
                 
                 elementProto

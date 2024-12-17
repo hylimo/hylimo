@@ -72,6 +72,9 @@ export class LinePointLayoutConfig extends CanvasPointLayoutConfig {
         const lineProvider = layout.getElementId(
             element.element.getLocalFieldOrUndefined("lineProvider")!.value as FullObject
         );
+        if (!layout.isChildElement(element.parent!, layout.layoutElementLookup.get(lineProvider)!)) {
+            throw new Error("The lineProvider of a line point must be part of the same canvas or a sub-canvas");
+        }
         let pos: number;
         let segment: number | undefined;
         if (positionField == undefined) {
@@ -102,19 +105,19 @@ export class LinePointLayoutConfig extends CanvasPointLayoutConfig {
     override createPrototype(): ExecutableAbstractFunctionExpression {
         return fun(
             `
-                elementProto = object(proto = it)
+                elementProto = [proto = it]
 
                 elementProto.defineProperty("pos") {
                     args.self._pos
                 } {
                     args.self._pos = it
-                    args.self.edits.set("${DefaultEditTypes.MOVE_LPOS_POS}", createReplaceEdit(it, "$replace($string(pos), ',', ', ')"))
+                    args.self.edits["${DefaultEditTypes.MOVE_LPOS_POS}"] = createReplaceEdit(it, "$replace($string(pos), ',', ', ')")
                 }
                 elementProto.defineProperty("distance") {
                     args.self._distance
                 } {
                     args.self._distance = it
-                    args.self.edits.set("${DefaultEditTypes.MOVE_LPOS_DIST}", createReplaceEdit(it, "$string(dist)"))
+                    args.self.edits["${DefaultEditTypes.MOVE_LPOS_DIST}"] = createReplaceEdit(it, "$string(dist)")
                 }
                 
                 elementProto

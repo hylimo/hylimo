@@ -7,14 +7,14 @@ import {
     Parser,
     RuntimeError,
     SemanticFieldNames,
-    assertWrapperObject,
     defaultModules,
     id,
+    isWrapperObject,
     object,
     str,
     toExecutable
 } from "@hylimo/core";
-import { LayoutEngine } from "./layout/engine/layoutEngine.js";
+import { LayoutEngine, LayoutWithRoot } from "./layout/engine/layoutEngine.js";
 import { DiagramConfig } from "@hylimo/diagram-common";
 import { LayoutedDiagram } from "./layout/diagramLayoutResult.js";
 import { createBaseDiagramModules, defaultDiagramModules } from "./module/diagramModules.js";
@@ -99,8 +99,15 @@ export class DiagramEngine {
         const layoutErrors: Error[] = [];
         const interpretationResult = this.execute(expressions, config);
         if (interpretationResult.result != undefined) {
-            assertWrapperObject(interpretationResult.result, "Returned diagram");
-            layoutedDiagram = await this.layoutEngine.layout(interpretationResult.result.wrapped, config);
+            try {
+                const diagram = interpretationResult.result;
+                if (!isWrapperObject(diagram) || !(diagram.wrapped instanceof LayoutWithRoot)) {
+                    throw new RuntimeError("No diagram returned");
+                }
+                layoutedDiagram = await this.layoutEngine.layout(diagram.wrapped, config);
+            } catch (e) {
+                layoutErrors.push(e as Error);
+            }
         }
         return {
             layoutedDiagram,

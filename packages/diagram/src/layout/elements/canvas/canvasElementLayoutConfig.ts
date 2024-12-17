@@ -1,6 +1,6 @@
 import { FullObject, numberType, optional, ExecutableAbstractFunctionExpression, fun } from "@hylimo/core";
 import { Size, Point, Element, CanvasElement, DefaultEditTypes } from "@hylimo/diagram-common";
-import { canvasPointType, elementType } from "../../../module/base/types.js";
+import { canvasPointType, simpleElementType } from "../../../module/base/types.js";
 import {
     ContentCardinality,
     HorizontalAlignment,
@@ -18,17 +18,10 @@ import { EditableCanvasContentLayoutConfig } from "./editableCanvasContentLayout
 export class CanvasElementLayoutConfig extends EditableCanvasContentLayoutConfig {
     override isLayoutContent = false;
     override type = CanvasElement.TYPE;
-    override contentType = elementType();
-    override contentCardinality = ContentCardinality.ExactlyOne;
 
     constructor() {
         super(
             [
-                {
-                    name: "content",
-                    description: "the inner element",
-                    type: elementType()
-                },
                 {
                     name: "pos",
                     description: "the position of the canvasElement",
@@ -44,7 +37,9 @@ export class CanvasElementLayoutConfig extends EditableCanvasContentLayoutConfig
                 },
                 ...sizeStyleAttributes,
                 ...visibilityStyleAttributes
-            ]
+            ],
+            simpleElementType,
+            ContentCardinality.ExactlyOne
         );
     }
 
@@ -104,32 +99,36 @@ export class CanvasElementLayoutConfig extends EditableCanvasContentLayoutConfig
         if (pos == undefined) {
             return undefined;
         } else {
-            return layout.getElementId(pos);
+            const posId = layout.getElementId(pos);
+            if (!layout.isChildElement(element.parent!, layout.layoutElementLookup.get(posId)!)) {
+                throw new Error("The pos of a canvas element must be part of the same canvas or a sub-canvas");
+            }
+            return posId;
         }
     }
 
     override createPrototype(): ExecutableAbstractFunctionExpression {
         return fun(
             `
-                elementProto = object(proto = it)
+                elementProto = [proto = it]
 
                 elementProto.defineProperty("width") {
                     args.self._width
                 } {
                     args.self._width = it
-                    args.self.edits.set("${DefaultEditTypes.RESIZE_WIDTH}", createAdditiveEdit(it, "dw"))
+                    args.self.edits["${DefaultEditTypes.RESIZE_WIDTH}"] = createAdditiveEdit(it, "dw")
                 }
                 elementProto.defineProperty("height") {
                     args.self._height
                 } {
                     args.self._height = it
-                    args.self.edits.set("${DefaultEditTypes.RESIZE_HEIGHT}", createAdditiveEdit(it, "dh"))
+                    args.self.edits["${DefaultEditTypes.RESIZE_HEIGHT}"] = createAdditiveEdit(it, "dh")
                 }
                 elementProto.defineProperty("rotation") {
                     args.self._rotation
                 } {
                     args.self._rotation = it
-                    args.self.edits.set("${DefaultEditTypes.ROTATE}", createReplaceEdit(it, "$string(rotation)"))
+                    args.self.edits["${DefaultEditTypes.ROTATE}"] = createReplaceEdit(it, "$string(rotation)")
                 }
                 
                 elementProto

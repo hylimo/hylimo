@@ -1,14 +1,4 @@
-import {
-    booleanType,
-    fun,
-    functionType,
-    id,
-    InterpreterModule,
-    listType,
-    optional,
-    parse,
-    stringType
-} from "@hylimo/core";
+import { booleanType, fun, functionType, id, InterpreterModule, listType, optional, stringType } from "@hylimo/core";
 import { SCOPE } from "../../../base/dslModule.js";
 
 /**
@@ -24,18 +14,16 @@ export const interfaceModule = InterpreterModule.create(
     ],
     [],
     [
-        ...parse(
-            `
-                _interface = scope.internal.createClassifier(
-                    "interface",
-                    list(
-                        scope.internal.defaultTitleContentHandler,
-                        scope.internal.sectionsContentHandler,
-                        scope.internal.propertiesAndMethodsContentHandler
-                    )
+        `
+            _interface = scope.internal.createClassifier(
+                "interface",
+                list(
+                    scope.internal.defaultTitleContentHandler,
+                    scope.internal.sectionsContentHandler,
+                    scope.internal.propertiesAndMethodsContentHandler
                 )
-            `
-        ),
+            )
+        `,
         id(SCOPE).assignField(
             "interface",
             fun(

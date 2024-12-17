@@ -7,8 +7,7 @@ import {
     functionType,
     InterpreterModule,
     jsFun,
-    num,
-    parse
+    num
 } from "@hylimo/core";
 import { convertStringOrIdentifier } from "./propertiesAndMethods.js";
 
@@ -24,11 +23,9 @@ export const entriesModule = InterpreterModule.create(
         assign(
             "_literalsScopeGenerator",
             fun([
-                ...parse(
-                    `
-                        (scope) = args
-                    `
-                ),
+                `
+                    (scope) = args
+                `,
                 jsFun(
                     (args, context) => {
                         const scopeFunction = args.getLocalFieldOrUndefined(0)!.value;
@@ -73,16 +70,14 @@ export const entriesModule = InterpreterModule.create(
                 )
             ])
         ),
-        ...parse(
-            `
-                scope.internal.entriesContentHandler = [
-                    {
-                        args.callScope.entries = _literalsScopeGenerator(args.callScope.section)
-                    },
-                    { }
-                ]
-            `
-        )
+        `
+            scope.internal.entriesContentHandler = [
+                {
+                    args.callScope.entries = _literalsScopeGenerator(args.callScope.section)
+                },
+                { }
+            ]
+        `
     ]
 );
 

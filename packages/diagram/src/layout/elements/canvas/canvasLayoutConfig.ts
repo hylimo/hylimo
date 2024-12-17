@@ -1,4 +1,4 @@
-import { FullObject, listType, objectToList, or } from "@hylimo/core";
+import { FullObject, objectToList } from "@hylimo/core";
 import {
     Size,
     Point,
@@ -17,7 +17,7 @@ import {
 import { ContentCardinality, LayoutElement } from "../../layoutElement.js";
 import { Layout } from "../../engine/layout.js";
 import { StyledElementLayoutConfig } from "../styledElementLayoutConfig.js";
-import { canvasPointType, elementType } from "../../../module/base/types.js";
+import { elementType } from "../../../module/base/types.js";
 import { CanvasContentLayoutConfig } from "./canvasContentLayoutConfig.js";
 
 /**
@@ -25,25 +25,19 @@ import { CanvasContentLayoutConfig } from "./canvasContentLayoutConfig.js";
  */
 export class CanvasLayoutConfig extends StyledElementLayoutConfig {
     override type = Canvas.TYPE;
-    override contentType = elementType(
-        CanvasElement.TYPE,
-        CanvasConnection.TYPE,
-        AbsolutePoint.TYPE,
-        RelativePoint.TYPE,
-        LinePoint.TYPE
-    );
-    override contentCardinality = ContentCardinality.Many;
 
     constructor() {
         super(
-            [
-                {
-                    name: "contents",
-                    description: "the inner elements",
-                    type: listType(or(canvasPointType, elementType(CanvasElement.TYPE, CanvasConnection.TYPE)))
-                }
-            ],
-            []
+            [],
+            [],
+            elementType(
+                CanvasElement.TYPE,
+                CanvasConnection.TYPE,
+                AbsolutePoint.TYPE,
+                RelativePoint.TYPE,
+                LinePoint.TYPE
+            ),
+            ContentCardinality.Many
         );
     }
 

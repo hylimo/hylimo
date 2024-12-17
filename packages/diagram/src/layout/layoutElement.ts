@@ -245,6 +245,10 @@ export interface LayoutConfig {
      */
     attributes: AttributeConfig[];
     /**
+     * The content or contents attribute if present, otherwise an empty array
+     */
+    contentAttributes: AttributeConfig[];
+    /**
      * The type of the contents attribute
      */
     contentType: Type;

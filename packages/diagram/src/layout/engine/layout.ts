@@ -7,7 +7,8 @@ import {
     isObject,
     LabeledValue,
     isNull,
-    ExecutableConstExpression
+    ExecutableConstExpression,
+    validateObject
 } from "@hylimo/core";
 import { Line, Point, Size } from "@hylimo/diagram-common";
 import { FontCollection } from "../font/fontCollection.js";
@@ -181,6 +182,11 @@ export class Layout {
         const cls = nativeToList(element.getLocalFieldOrUndefined("class")?.value?.toNative() ?? {});
         const id = this.generateId(parent);
         const layoutConfig = this.engine.layoutConfigs.get(type)!;
+        validateObject(element, this.context, [
+            ...layoutConfig.attributes,
+            ...layoutConfig.styleAttributes,
+            ...layoutConfig.contentAttributes
+        ]);
         const layoutElement: LayoutElement = {
             id,
             element,
@@ -450,6 +456,24 @@ export class Layout {
         }
         return elementId;
     }
+
+    /**
+     * Checks if an element is a child of another element
+     *
+     * @param parent the potential parent element
+     * @param child the potential child element
+     * @returns true if the child is a child of the parent, otherwise false
+     */
+    isChildElement(parent: LayoutElement, child: LayoutElement): boolean {
+        let currentElement: LayoutElement | undefined = child;
+        while (currentElement != undefined) {
+            if (currentElement === parent) {
+                return true;
+            }
+            currentElement = currentElement.parent;
+        }
+        return false;
+    }
 }
 
 /**
@@ -545,7 +569,7 @@ class StyleValueParser {
             return variableValue;
         }
         if (variableValue === null) {
-            throw new Error(`You cannot define variables such as ${name} with itself`);
+            throw new Error(`Circular dependency detected! Variable ${name} depends on itself with itself`);
         }
         this.variableValues.set(name, null);
         for (const variables of this.variables) {

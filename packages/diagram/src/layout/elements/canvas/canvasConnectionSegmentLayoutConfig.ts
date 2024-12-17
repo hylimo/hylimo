@@ -9,9 +9,6 @@ import { ElementLayoutConfig } from "../elementLayoutConfig.js";
  * Base class for all canvas connection segment layout configs
  */
 export abstract class CanvasConnectionSegmentLayoutConfig extends ElementLayoutConfig {
-    override contentType = nullType;
-    override contentCardinality = ContentCardinality.None;
-
     /**
      * Creates a new CanvasConnectionSegmentLayoutConfig
      *
@@ -28,7 +25,9 @@ export abstract class CanvasConnectionSegmentLayoutConfig extends ElementLayoutC
                 },
                 ...additionalAttributes
             ],
-            additionalStyleAttributes
+            additionalStyleAttributes,
+            nullType,
+            ContentCardinality.None
         );
     }
 
@@ -50,6 +49,12 @@ export abstract class CanvasConnectionSegmentLayoutConfig extends ElementLayoutC
      */
     getContentId(layout: Layout, element: LayoutElement, pointField: string): string {
         const point = element.element.getLocalFieldOrUndefined(pointField)?.value;
-        return layout.getElementId(point as FullObject);
+        const pointId = layout.getElementId(point as FullObject);
+        if (!layout.isChildElement(element.parent!.parent!, layout.layoutElementLookup.get(pointId)!)) {
+            throw new Error(
+                `The ${pointField} point of a ${this.type} must be part of the same canvas or a sub-canvas`
+            );
+        }
+        return pointId;
     }
 }

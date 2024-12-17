@@ -106,12 +106,29 @@ export function namedArg(name: string, value: Expression): ListEntry {
 const parser = new Parser();
 
 /**
+ * Type for expressions which can be parsed
+ * Either a string or an array of strings and ExecutableExpressions
+ */
+export type ParseableExpressions = (ExecutableExpression | string)[] | string;
+
+/**
  * Helper to parse some expressions
  *
  * @param expressions the expressions to parse
  * @returns the parsed expressions
  */
-export function parse(expressions: string): ExecutableExpression[] {
+export function parse(expressions: ParseableExpressions): ExecutableExpression[] {
+    if (Array.isArray(expressions)) {
+        const parsedExpressions: ExecutableExpression[] = [];
+        for (const expression of expressions) {
+            if (typeof expression === "string") {
+                parsedExpressions.push(...parse(expression));
+            } else {
+                parsedExpressions.push(expression);
+            }
+        }
+        return parsedExpressions;
+    }
     const parserResult = parser.parse(expressions);
     if (parserResult.lexingErrors.length > 0 || parserResult.parserErrors.length > 0) {
         throw new Error("Invalid fun to parse");
@@ -128,15 +145,10 @@ export function parse(expressions: string): ExecutableExpression[] {
  * @returns the created FunctionExpression
  */
 export function fun(
-    expressions: ExecutableExpression[] | string,
+    expressions: ParseableExpressions,
     documentation?: FunctionDocumentation
 ): ExecutableFunctionExpression {
-    let parsedExpressions: ExecutableExpression[];
-    if (typeof expressions === "string") {
-        parsedExpressions = parse(expressions);
-    } else {
-        parsedExpressions = expressions;
-    }
+    const parsedExpressions = parse(expressions);
     return new ExecutableFunctionExpression(undefined, parsedExpressions, documentation);
 }
 

@@ -1,5 +1,16 @@
 import { literal, namedType, objectType, or, Type } from "@hylimo/core";
-import { AbsolutePoint, CanvasConnection, CanvasElement, LinePoint, RelativePoint } from "@hylimo/diagram-common";
+import {
+    AbsolutePoint,
+    Canvas,
+    CanvasConnection,
+    CanvasElement,
+    Ellipse,
+    LinePoint,
+    Path,
+    Rect,
+    RelativePoint,
+    Text
+} from "@hylimo/diagram-common";
 
 /**
  * Function which creates an element type
@@ -30,4 +41,18 @@ export const canvasContentType = elementType(
     AbsolutePoint.TYPE,
     RelativePoint.TYPE,
     LinePoint.TYPE
+);
+
+/**
+ * Type for any simple element which can e.g. be used inside a vbox or hbox
+ */
+export const simpleElementType = elementType(
+    Canvas.TYPE,
+    Text.TYPE,
+    Rect.TYPE,
+    Ellipse.TYPE,
+    Path.TYPE,
+    "vbox",
+    "hbox",
+    "stack"
 );
