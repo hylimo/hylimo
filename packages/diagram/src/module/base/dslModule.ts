@@ -7,6 +7,7 @@ import {
     InterpreterModule,
     jsFun,
     listType,
+    namedType,
     numberType,
     objectType,
     optional,
@@ -60,15 +61,22 @@ const canvasConnectionWithScopeProperties = [
     {
         name: "over",
         type: optional(
-            objectType(
-                new Map([
-                    [
-                        "segments",
-                        listType(
-                            elementType(CanvasBezierSegment.TYPE, CanvasLineSegment.TYPE, CanvasAxisAlignedSegment.TYPE)
-                        )
-                    ]
-                ])
+            namedType(
+                objectType(
+                    new Map([
+                        [
+                            "segments",
+                            listType(
+                                elementType(
+                                    CanvasBezierSegment.TYPE,
+                                    CanvasLineSegment.TYPE,
+                                    CanvasAxisAlignedSegment.TYPE
+                                )
+                            )
+                        ]
+                    ])
+                ),
+                "LineSegmentList"
             )
         )
     }

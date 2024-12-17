@@ -15,7 +15,7 @@
     "dependencies": {
         "@hylimo/diagram": "^1.1.2",
         "@hylimo/diagram-render-svg": "^1.1.2",
-        "pdfkit": "^0.15.1"
+        "pdfkit": "^0.15.2"
     },
     "devDependencies": {
         "@types/pdfkit": "^0.13.7"

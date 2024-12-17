@@ -16,8 +16,8 @@
         "harfbuzzjs": "^0.4.3"
     },
     "devDependencies": {
-        "@rollup/plugin-node-resolve": "^15.3.0",
-        "@rollup/plugin-typescript": "^12.1.1",
+        "@rollup/plugin-node-resolve": "^16.0.0",
+        "@rollup/plugin-typescript": "^12.1.2",
         "@rollup/plugin-wasm": "^6.2.2"
     }
 }
