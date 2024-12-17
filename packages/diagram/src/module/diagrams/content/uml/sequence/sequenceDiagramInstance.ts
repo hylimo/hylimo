@@ -53,14 +53,12 @@ export const sequenceDiagramInstanceModule = InterpreterModule.create(
                 }
             )
         ),
-        ...parse(
-            `
-                scope.styles {
-                    cls("instance-element") {
-                        minWidth = 50
-                    }
+        `
+            scope.styles {
+                cls("instance-element") {
+                    minWidth = 50
                 }
-            `
-        )
+            }
+        `
     ]
 );

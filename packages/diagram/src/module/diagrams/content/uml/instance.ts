@@ -15,19 +15,17 @@ export const instanceModule = InterpreterModule.create(
     ],
     [],
     [
-        ...parse(
-            `
-                scope.internal.createInstance = scope.internal.createClassifier(
-                    "instance",
-                    list(
-                        scope.internal.defaultTitleContentHandler,
-                        scope.internal.sectionsContentHandler,
-                        scope.internal.propertiesAndMethodsContentHandler,
-                        scope.internal.contentContentHandler
-                    )
-                )
-            `
-        ),
+        `
+        scope.internal.createInstance = scope.internal.createClassifier(
+            "instance",
+            list(
+                scope.internal.defaultTitleContentHandler,
+                scope.internal.sectionsContentHandler,
+                scope.internal.propertiesAndMethodsContentHandler,
+                scope.internal.contentContentHandler
+            )
+        )
+        `,
         id(SCOPE).assignField(
             "instance",
             fun(

@@ -12,39 +12,37 @@ export const actorModule = InterpreterModule.create(
     [],
     [],
     [
-        ...parse(
-            `
-            scope.internal.createActor = {
-                (name) = args
-                elements = list(path(path = "${stickmanIconPath}", stretch = "uniform"))
-                if(name != null) {
-                    elements += text(contents = list(span(text = name)))
-                }
-                
-                actorElement = canvasElement(
-                    content = rect(
-                        content = vbox(contents = elements),
-                        class = list("actor"),
-                        stroke = "unset"
-                    ),
-                    class = list("actor-element")
-                )
-                
-                if(name != null) {
-                  scope.internal.registerInDiagramScope(name, actorElement)
-                }
-                
-                scope.internal.registerCanvasElement(actorElement, args.args, args.args.self)
+        `
+        scope.internal.createActor = {
+            (name) = args
+            elements = list(path(path = "${stickmanIconPath}", stretch = "uniform"))
+            if(name != null) {
+                elements += text(contents = list(span(text = name)))
             }
-            `
-        ),
+            
+            actorElement = canvasElement(
+                content = rect(
+                    content = vbox(contents = elements),
+                    class = list("actor"),
+                    stroke = "unset"
+                ),
+                class = list("actor-element")
+            )
+            
+            if(name != null) {
+              scope.internal.registerInDiagramScope(name, actorElement)
+            }
+            
+            scope.internal.registerCanvasElement(actorElement, args.args, args.args.self)
+        }
+        `,
         id(SCOPE).assignField(
             "actor",
             fun(
                 `
-                    (name) = args
-                    scope.internal.createActor(name, args = args)
-                `,
+                (name) = args
+                scope.internal.createActor(name, args = args)
+            `,
                 {
                     docs: "Creates an actor.",
                     params: [[0, "the optional name of the actor", optional(stringType)]],
@@ -53,21 +51,19 @@ export const actorModule = InterpreterModule.create(
                 }
             )
         ),
-        ...parse(
-            `
-                scope.styles {
-                    cls("actor") {
-                        vAlign = "center"
-                        type("text") {
-                          hAlign = "center"
-                        }
-                    }
-                    cls("actor-element") {
-                        width = 30
-                        hAlign = "center"
+        `
+            scope.styles {
+                cls("actor") {
+                    vAlign = "center"
+                    type("text") {
+                      hAlign = "center"
                     }
                 }
-            `
-        )
+                cls("actor-element") {
+                    width = 30
+                    hAlign = "center"
+                }
+            }
+        `
     ]
 );

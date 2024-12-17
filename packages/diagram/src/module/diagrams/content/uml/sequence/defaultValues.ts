@@ -8,7 +8,7 @@ export const defaultValues = InterpreterModule.create(
     [],
     [],
     [
-        ...parse(`
+        `
         // Exposed and changable variables
         scope.margin = 5
         scope.activityWidth = 10
@@ -29,6 +29,6 @@ export const defaultValues = InterpreterModule.create(
         scope.internal.previouslyExistingSequenceDiagramParticipants = [] // Only the participants that have been deleted, mapped by their name
         scope.internal.lastSequenceDiagramParticipant = null // the next element will be positioned at 'elem + rpos(elem, instanceDistance, 0)'
         scope.internal.lastSequenceDiagramEvent = null // the next event will be positioned at 'event + rpos(event, 0, eventDistance)'
-    `)
+        `
     ]
 );

@@ -14,7 +14,7 @@ export const sequenceDiagramFrameModule = InterpreterModule.create(
     ["uml/sequence/defaultValues"],
     [],
     [
-        ...parse(`
+        `
           scope.internal.createSequenceDiagramFrame = {
             // First, explicitly declare and initialize all parameters
             if(args.args == null) {
@@ -61,7 +61,7 @@ export const sequenceDiagramFrameModule = InterpreterModule.create(
             scope.internal.registerCanvasElement(frameElement, args, args.self)
             frameElement
           }
-        `),
+        `,
         id(SCOPE).assignField(
             "frame",
             fun(
