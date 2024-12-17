@@ -126,10 +126,14 @@ export class RuntimeAstTransformer extends ASTVisitor<undefined, ExecutableExpre
     }
 
     override visitNumberLiteralExpression(expression: NumberLiteralExpression): ExecutableExpression<any> {
-        return new ExecutableConstExpression({
-            value: new NumberObject(expression.value),
-            source: this.optionalExpression(expression)
-        });
+        const source = this.optionalExpression(expression);
+        return new ExecutableConstExpression(
+            {
+                value: new NumberObject(expression.value),
+                source
+            },
+            source
+        );
     }
 
     override visitFieldSelfInvocationExpression(expression: FieldSelfInvocationExpression): ExecutableExpression<any> {
@@ -153,10 +157,14 @@ export class RuntimeAstTransformer extends ASTVisitor<undefined, ExecutableExpre
     override visistStringLiteralExpression(expression: StringLiteralExpression): ExecutableExpression<any> {
         const parts = expression.parts;
         if (parts.length === 1 && "content" in parts[0]) {
-            return new ExecutableConstExpression({
-                value: new StringObject(parts[0].content),
-                source: this.optionalExpression(expression)
-            });
+            const source = this.optionalExpression(expression);
+            return new ExecutableConstExpression(
+                {
+                    value: new StringObject(parts[0].content),
+                    source
+                },
+                source
+            );
         }
         return new ExecutableStringLiteralExpression(
             this.optionalExpression(expression),
