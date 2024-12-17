@@ -1,4 +1,4 @@
-import { booleanType, fun, id, InterpreterModule, optional, parse, stringType } from "@hylimo/core";
+import { booleanType, fun, id, InterpreterModule, optional, stringType } from "@hylimo/core";
 import { SCOPE } from "../../../../base/dslModule.js";
 import { eventCoordinateType } from "./types.js";
 
@@ -15,12 +15,37 @@ export const sequenceDiagramFrameModule = InterpreterModule.create(
     [],
     [
         `
+          scope.internal.createSequenceDiagramFragment = {
+            (topLineEvent) = args
+            if(topLineEvent == null) {
+                scope.error("No event (coordinate) was passed to 'fragment'")
+            }
+            
+            // Best effort guess to see if the given event is either an event or an event coordinate
+            if((topLineEvent.name == null) && (topLineEvent.participantName == null) || (topLineEvent.y.proto != 1.proto)) {
+                scope.error("The event passed to 'fragment' is neither an event nor an event coordinate")
+            }
+            
+            parentLeftX = args.parentLeftXCoordinate
+            parentRightX = args.parentRightXCoordinate
+            y = topLineEvent.y
+            width = parentRightX - parentLeftX
+            
+            // TODO: Finish from here on
+            separatingLineElement = canvasElement(content = path())
+            
+            
+          }
+        
           scope.internal.createSequenceDiagramFrame = {
             // First, explicitly declare and initialize all parameters
             if(args.args == null) {
               scope.error("createSequenceDiagramFrame is missing its 'args = args' parameter")
             }
             args = args.args
+            
+            (fragmentFunction) = args
+            fragmentFunction = fragmentFunction ?? {}
 
             // We must differentiate four different version to set margin:
             // 1. No margin set -> use scope.frameMarginX/Y
