@@ -25,7 +25,7 @@ export const actorModule = InterpreterModule.create(
                     content = rect(
                         content = vbox(contents = elements),
                         class = list("actor"),
-                        stroke = unset
+                        stroke = "unset"
                     ),
                     class = list("actor-element")
                 )
