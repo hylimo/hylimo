@@ -9,13 +9,13 @@ import {
     IdentifierExpression,
     InterpreterContext,
     InterpreterModule,
-    InvocationExpression,
     jsFun,
     NumberLiteralExpression,
     StringObject,
     FunctionExpression,
     RuntimeError,
-    MissingArgumentSource
+    MissingArgumentSource,
+    OperatorExpression
 } from "@hylimo/core";
 import { DiagramModuleNames } from "../diagramModuleNames.js";
 
@@ -209,22 +209,21 @@ export const editModule = InterpreterModule.create(
                         return generateReplaceOrAddArgEdit(target, { value: context.newString(expression) }, context);
                     }
 
-                    if (target instanceof InvocationExpression) {
-                        const operator = target.target;
+                    if (target instanceof OperatorExpression) {
+                        const operator = target.operator;
                         if (
                             operator instanceof IdentifierExpression &&
                             (operator.identifier === "+" || operator.identifier === "-") &&
-                            target.argumentExpressions.length === 2 &&
-                            target.argumentExpressions[1].value instanceof NumberLiteralExpression
+                            target.right instanceof NumberLiteralExpression
                         ) {
-                            const rightHandValue = target.argumentExpressions[1].value.value;
+                            const rightHandValue = target.right.value;
                             const replacedValue = operator.identifier === "+" ? rightHandValue : -rightHandValue;
                             const sum = `${replacedValue} + ${deltaExp}`;
                             const operatorAndSum = `($res := ${sum}; $res >= 0 ? " + " & $res : " - " & -$res)`;
                             const operatorAndSumExp = context.newString(operatorAndSum);
                             return generateReplaceEdit(
                                 target,
-                                [target.argumentExpressions[0].value.toWrapperObject(context), operatorAndSumExp],
+                                [target.left.toWrapperObject(context), operatorAndSumExp],
                                 context
                             );
                         }

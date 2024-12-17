@@ -2,7 +2,6 @@ import {
     assertString,
     assign,
     ExecutableConstExpression,
-    ExecutableNumberLiteralExpression,
     Expression,
     fun,
     FunctionObject,
@@ -12,9 +11,9 @@ import {
     InterpreterModule,
     InvocationExpression,
     jsFun,
+    num,
     NumberLiteralExpression,
     OperatorExpression,
-    parse,
     RuntimeError,
     StringLiteralExpression
 } from "@hylimo/core";
@@ -31,11 +30,9 @@ export const propertiesAndMethodsModule = InterpreterModule.create(
         assign(
             "_classifierEntryScopeGenerator",
             fun([
-                ...parse(
-                    `
-                        (visibility, scope) = args
-                    `
-                ),
+                `
+                    (visibility, scope) = args
+                `,
                 jsFun(
                     (args, context) => {
                         const scopeFunction = args.getLocalFieldOrUndefined(0)!.value;
@@ -60,7 +57,7 @@ export const propertiesAndMethodsModule = InterpreterModule.create(
                                         })),
                                         {
                                             name: "section",
-                                            value: new ExecutableNumberLiteralExpression(undefined, index)
+                                            value: num(index)
                                         }
                                     ],
                                     context
@@ -91,21 +88,19 @@ export const propertiesAndMethodsModule = InterpreterModule.create(
                 )
             ])
         ),
-        ...parse(
-            `
-                scope.internal.propertiesAndMethodsContentHandler = [
-                    {
-                        this.scope = args.scope
-                        scope.public = _classifierEntryScopeGenerator("+ ", scope.section)
-                        scope.protected = _classifierEntryScopeGenerator("# ", scope.section)
-                        scope.private = _classifierEntryScopeGenerator("- ", scope.section)
-                        scope.package = _classifierEntryScopeGenerator("~ ", scope.section)
-                        scope.default = _classifierEntryScopeGenerator("", scope.section)
-                    },
-                    { }
-                ]
-            `
-        )
+        `
+            scope.internal.propertiesAndMethodsContentHandler = [
+                {
+                    this.callScope = args.callScope
+                    callScope.public = _classifierEntryScopeGenerator("+ ", callScope.section)
+                    callScope.protected = _classifierEntryScopeGenerator("# ", callScope.section)
+                    callScope.private = _classifierEntryScopeGenerator("- ", callScope.section)
+                    callScope.package = _classifierEntryScopeGenerator("~ ", callScope.section)
+                    callScope.default = _classifierEntryScopeGenerator("", callScope.section)
+                },
+                { }
+            ]
+        `
     ]
 );
 
@@ -118,12 +113,26 @@ export const propertiesAndMethodsModule = InterpreterModule.create(
  */
 export function convertStringOrIdentifier(expression: Expression): string {
     if (expression instanceof StringLiteralExpression) {
-        return expression.value;
+        return convertString(expression);
     } else if (expression instanceof IdentifierExpression) {
         return expression.identifier;
     } else {
         throw new RuntimeError("Expression is neither a string nor an identifier", expression);
     }
+}
+
+/**
+ * Converts a string literal expression to a string
+ * If the expression uses string template expressions, an error is thrown.
+ *
+ * @param expression the expression to convert
+ * @returns the string representation of the expression
+ */
+export function convertString(expression: StringLiteralExpression): string {
+    if (expression.parts.length > 1 || !("content" in expression.parts[0])) {
+        throw new RuntimeError("String template expressions are not supported here", expression);
+    }
+    return expression.parts[0]?.content ?? "";
 }
 
 /**
@@ -151,7 +160,7 @@ function convertNumberOrIdentifier(expression: Expression): string {
  */
 function convertMultiplicityElement(expression: Expression): string {
     if (expression instanceof StringLiteralExpression) {
-        return expression.value;
+        return convertString(expression);
     } else if (expression instanceof OperatorExpression && isRangeOperator(expression)) {
         const left = expression.left;
         const right = expression.right;

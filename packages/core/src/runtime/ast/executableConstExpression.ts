@@ -1,4 +1,3 @@
-import { InterpreterContext } from "../interpreter/interpreterContext.js";
 import { LabeledValue } from "../objects/labeledValue.js";
 import { ExecutableExpression } from "./executableExpression.js";
 
@@ -15,7 +14,7 @@ export class ExecutableConstExpression extends ExecutableExpression {
         super(undefined);
     }
 
-    override evaluateInternal(_context: InterpreterContext): LabeledValue {
+    override evaluateInternal(): LabeledValue {
         return this.value;
     }
 }

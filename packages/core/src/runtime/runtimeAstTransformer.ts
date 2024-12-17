@@ -20,7 +20,6 @@ import { ExecutableFieldAccessExpression } from "./ast/executableFieldAccessExpr
 import { ExecutableFunctionExpression } from "./ast/executableFunctionExpression.js";
 import { ExecutableIdentifierExpression } from "./ast/executableIdentifierExpression.js";
 import { ExecutableInvocationExpression } from "./ast/executableInvocationExpression.js";
-import { ExecutableNumberLiteralExpression } from "./ast/executableNumberLiteralExpression.js";
 import { ExecutableFieldSelfInvocationExpression } from "./ast/executableFieldSelfInvocationExpression.js";
 import { ExecutableStringLiteralExpression } from "./ast/executableStringLiteralExpression.js";
 import { ObjectExpression } from "../ast/objectExpression.js";
@@ -35,6 +34,9 @@ import { FieldAssignmentExpression } from "../ast/fieldAssignmentExpression.js";
 import { ExecutableFieldAssignmentExpression } from "./ast/executableFieldAssignmentExpression.js";
 import { IndexAssignmentExpression } from "../ast/indexAssignmentExpression.js";
 import { ExecutableIndexAssignmentExpression } from "./ast/executableIndexAssignmentExpression.js";
+import { ExecutableConstExpression } from "./ast/executableConstExpression.js";
+import { NumberObject } from "./objects/numberObject.js";
+import { StringObject } from "./objects/stringObject.js";
 
 /**
  * Transforms the AST into an executable AST
@@ -124,7 +126,10 @@ export class RuntimeAstTransformer extends ASTVisitor<undefined, ExecutableExpre
     }
 
     override visitNumberLiteralExpression(expression: NumberLiteralExpression): ExecutableExpression<any> {
-        return new ExecutableNumberLiteralExpression(this.optionalExpression(expression), expression.value);
+        return new ExecutableConstExpression({
+            value: new NumberObject(expression.value),
+            source: this.optionalExpression(expression)
+        });
     }
 
     override visitFieldSelfInvocationExpression(expression: FieldSelfInvocationExpression): ExecutableExpression<any> {
@@ -146,7 +151,23 @@ export class RuntimeAstTransformer extends ASTVisitor<undefined, ExecutableExpre
     }
 
     override visistStringLiteralExpression(expression: StringLiteralExpression): ExecutableExpression<any> {
-        return new ExecutableStringLiteralExpression(this.optionalExpression(expression), expression.value);
+        const parts = expression.parts;
+        if (parts.length === 1 && "content" in parts[0]) {
+            return new ExecutableConstExpression({
+                value: new StringObject(parts[0].content),
+                source: this.optionalExpression(expression)
+            });
+        }
+        return new ExecutableStringLiteralExpression(
+            this.optionalExpression(expression),
+            expression.parts.map((part) => {
+                if ("content" in part) {
+                    return { content: part.content };
+                } else {
+                    return { expression: this.visit(part.expression) };
+                }
+            })
+        );
     }
 
     override visitObjectExpression(expression: ObjectExpression): ExecutableExpression<any> {

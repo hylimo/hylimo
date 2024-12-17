@@ -7,31 +7,31 @@ export const monarchTokenProvider: languages.IMonarchLanguage = {
     defaultToken: "default",
     includeLF: true,
     start: "expression",
+    unicode: true,
 
     tokenizer: {
         expression: [
             //function call
             [
-                /((([!#%&'+\-:;<=>?@\\^`|~]|\*(?!\/)|\/(?![/*])|\.{2,}|([_$](?![_$]*[a-zA-Z0-9])))+)|([a-zA-Z_$][a-zA-Z0-9_$]*)(?=[^\S\n]*[{(]))/,
+                /((([!#%&'+\-:;<=>?@\\^`|~]|\*(?!\/)|\/(?![/*])|\.{2,}|[$_]+(?![\p{ID_Continue}$]))+)|([\p{ID_Start}_$][\p{ID_Continue}$]*)(?=[^\S\n]*[{(]))/u,
                 { token: "entity.name.function", switchTo: "@expression.after" }
             ],
 
             //variable
             [
-                /(([!#%&'+\-:;<=>?@\\^`|~]|\*(?!\/)|\/(?![/*])|\.{2,}|([_$](?![_$]*[a-zA-Z0-9])))+)|([a-zA-Z_$][a-zA-Z0-9_$]*)/,
+                /(([!#%&'+\-:;<=>?@\\^`|~]|\*(?!\/)|\/(?![/*])|\.{2,}|[$_]+(?![\p{ID_Continue}$]))+)|([\p{ID_Start}_$][\p{ID_Continue}$]*)/u,
                 { token: "variable", switchTo: "@expression.after" }
             ],
 
             // number
-            [/[0-9]+(\.[0-9]+)?([eE]-?[0-9]+)?/, { token: "constant.numerical", switchTo: "@expression.after" }],
+            [/[0-9]+(\.[0-9]+)?([eE]-?[0-9]+)?/u, { token: "constant.numerical", switchTo: "@expression.after" }],
 
             // strings
-            [/"([^"\\]|\\.)*$/, "string.invalid"], // non-teminated string
-            [/"/, { token: "string.quote", bracket: "@open", switchTo: "@string" }],
+            [/"/u, { token: "string.quote", bracket: "@open", switchTo: "@string" }],
 
             // open brackets
             [
-                /\(/,
+                /\(/u,
                 {
                     token: "delimiter.round.open",
                     bracket: "@open",
@@ -39,15 +39,14 @@ export const monarchTokenProvider: languages.IMonarchLanguage = {
                 }
             ],
             [
-                /{/,
+                /\{/u,
                 {
-                    token: "delimiter.curly.open",
-                    bracket: "@open",
-                    switchTo: "@expression"
+                    token: "@rematch",
+                    switchTo: "@expression.after"
                 }
             ],
             [
-                /\[/,
+                /\[/u,
                 {
                     token: "delimiter.square.open",
                     bracket: "@open",
@@ -57,7 +56,7 @@ export const monarchTokenProvider: languages.IMonarchLanguage = {
 
             // close brackets
             [
-                /\)/,
+                /\)/u,
                 {
                     token: "delimiter.round.close",
                     bracket: "@close",
@@ -65,15 +64,15 @@ export const monarchTokenProvider: languages.IMonarchLanguage = {
                 }
             ],
             [
-                /}/,
+                /\}/u,
                 {
                     token: "delimiter.curly.close",
                     bracket: "@close",
-                    switchTo: "@expression.after"
+                    next: "@pop"
                 }
             ],
             [
-                /]/,
+                /\]/u,
                 {
                     token: "delimiter.square.close",
                     bracket: "@close",
@@ -82,28 +81,38 @@ export const monarchTokenProvider: languages.IMonarchLanguage = {
             ],
 
             // comma
-            [/,/, { token: "delimiter.comma", switchTo: "@expression" }],
+            [/,/u, { token: "delimiter.comma", switchTo: "@expression" }],
 
             // whitespace
             { include: "@whitespace" },
 
             //newline
-            [/\n/, "white"]
+            [/\n/u, "white"]
         ],
 
         "expression.after": [
             // dot
-            [/\.(?!\.)/, { token: "delimiter.dot", switchTo: "@expression.after.access" }],
+            [/\.(?!\.)/u, { token: "delimiter.dot", switchTo: "@expression.after.access" }],
 
             // newline
             [/\n/, { token: "white", switchTo: "@expression" }],
 
             // variable
             [
-                /((([!#%&'+\-:;<=>?@\\^`|~]|\*(?!\/)|\/(?![/*])|\.{2,}|([_$](?![_$]*[a-zA-Z0-9])))+)|([a-zA-Z_$][a-zA-Z0-9_$]*|\.)+)/,
+                /((([!#%&'+\-:;<=>?@\\^`|~]|\*(?!\/)|\/(?![/*])|\.{2,}|([_$](?![_$]*[a-zA-Z0-9])))+)|([a-zA-Z_$][a-zA-Z0-9_$]*|\.)+)/u,
                 {
                     token: "operator",
                     switchTo: "@expression"
+                }
+            ],
+
+            // open curly bracket
+            [
+                /\{/u,
+                {
+                    token: "delimiter.curly.open",
+                    bracket: "@open",
+                    next: "@expression"
                 }
             ],
 
@@ -114,7 +123,7 @@ export const monarchTokenProvider: languages.IMonarchLanguage = {
         "expression.after.access": [
             //function call
             [
-                /((([!#%&'+\-:;<=>?@\\^`|~]|\*(?!\/)|\/(?![/*])|\.{2,}|([_$](?![_$]*[a-zA-Z0-9])))+)|([a-zA-Z_$][a-zA-Z0-9_$]*)(?=[^\S\n]*[{(]))/,
+                /((([!#%&'+\-:;<=>?@\\^`|~]|\*(?!\/)|\/(?![/*])|\.{2,}|[$_]+(?![\p{ID_Continue}$]))+)|([\p{ID_Start}_$][\p{ID_Continue}$]*)(?=[^\S\n]*[{(]))/u,
                 {
                     token: "entity.name.function",
                     switchTo: "expression.after"
@@ -123,9 +132,18 @@ export const monarchTokenProvider: languages.IMonarchLanguage = {
 
             //variable
             [
-                /(([!#%&'+\-:;<=>?@\\^`|~]|\*(?!\/)|\/(?![/*])|\.{2,}|([_$](?![_$]*[a-zA-Z0-9])))+)|([a-zA-Z_$][a-zA-Z0-9_$]*)/,
+                /(([!#%&'+\-:;<=>?@\\^`|~]|\*(?!\/)|\/(?![/*])|\.{2,}|[$_]+(?![\p{ID_Continue}$]))+)|([\p{ID_Start}_$][\p{ID_Continue}$]*)/u,
                 {
                     token: "variable.property",
+                    switchTo: "@expression.after"
+                }
+            ],
+
+            // open curly bracket
+            [
+                /\{/u,
+                {
+                    token: "@rematch",
                     switchTo: "@expression.after"
                 }
             ],
@@ -135,22 +153,23 @@ export const monarchTokenProvider: languages.IMonarchLanguage = {
         ],
 
         string: [
-            [/[a-zA-Z0-9!#$%&'()*+,\-./:;<=>?@[\]^_`{|}~ ]+/, "string"],
-            [/\\([\\"nt]|u[0-9a-fA-F]{4})/, "string.escape"],
-            [/\\./, "string.escape.invalid"],
-            [/"/, { token: "string.quote", bracket: "@close", switchTo: "@expression.after" }]
+            [/\$\{/u, { token: "delimiter.curly.open", bracket: "@open", next: "@expression" }],
+            [/([^\\$"\n]|\$(?!\{))+/u, "string"],
+            [/\\([\\"nt]|u[0-9a-fA-F]{4})/u, "string.escape"],
+            [/\\./u, "string.escape.invalid"],
+            [/"/u, { token: "string.quote", bracket: "@close", switchTo: "@expression.after" }]
         ],
 
         whitespace: [
-            [/[^\S\n]+/, "white"],
-            [/\/\*/, "comment", "@comment"],
-            [/\/\/.*/, "comment"]
+            [/[^\S\n]+/u, "white"],
+            [/\/\*/u, "comment", "@comment"],
+            [/\/\/.*/u, "comment"]
         ],
 
         comment: [
-            [/[^/*]+/, "comment"],
-            [/\*\//, "comment", "@pop"],
-            [/[/*]/, "comment"]
+            [/[^/*]+/u, "comment"],
+            [/\*\//u, "comment", "@pop"],
+            [/[/*]/u, "comment"]
         ]
     }
 };
@@ -174,8 +193,18 @@ export const languageConfiguration: languages.LanguageConfiguration = {
     brackets: [
         ["{", "}"],
         ["(", ")"],
+        ["[", "]"],
+        ["${", "}"]
+    ],
+    colorizedBracketPairs: [
+        ["{", "}"],
+        ["(", ")"],
         ["[", "]"]
-    ]
+    ],
+    comments: {
+        lineComment: "//",
+        blockComment: ["/*", "*/"]
+    }
 };
 
 /**
@@ -191,7 +220,7 @@ export const customDarkTheme: editor.IStandaloneThemeData = {
         },
         {
             token: "entity.name.function",
-            foreground: "#DCDCAA"
+            foreground: "#dcdcaa"
         },
         {
             token: "variable",
@@ -211,7 +240,11 @@ export const customDarkTheme: editor.IStandaloneThemeData = {
         },
         {
             token: "constant.numerical",
-            foreground: "#DCDCAA"
+            foreground: "#dcdcaa"
+        },
+        {
+            token: "delimiter.curly",
+            foreground: "#569cd6"
         }
     ],
     colors: {}
@@ -251,6 +284,10 @@ export const customLightTheme: editor.IStandaloneThemeData = {
         {
             token: "constant.numerical",
             foreground: "#098658"
+        },
+        {
+            token: "delimiter.curly",
+            foreground: "#0000ff"
         }
     ],
     colors: {}

@@ -1,4 +1,13 @@
-import { Root, Rect, Path, Text, Canvas, Element, convertFontsToCssStyle, Ellipse } from "@hylimo/diagram-common";
+import {
+    Root,
+    Rect,
+    Path,
+    Canvas,
+    Element,
+    convertFontsToCssStyle,
+    Ellipse,
+    SimplifiedText
+} from "@hylimo/diagram-common";
 import { SimplifiedDiagramVisitor } from "@hylimo/diagram-common";
 import {
     extractFillAttributes,
@@ -160,18 +169,16 @@ class SVGDiagramVisitor extends SimplifiedDiagramVisitor<undefined, SVGNode[]> {
         return [result];
     }
 
-    override visitText(element: Text): SVGNode[] {
+    override visitText(element: SimplifiedText): SVGNode[] {
         const result: SVGNode = {
             type: "text",
             children: [element.text],
             ...extractLayoutAttributes(element),
             ...extractFillAttributes(element),
             "font-family": element.fontFamily,
-            "font-size": element.fontSize,
-            "font-style": element.fontStyle,
-            "font-weight": element.fontWeight
+            "font-size": element.fontSize
         };
-        return [result];
+        return [result, ...this.visitChildren(element)];
     }
 
     override visitCanvas(element: Canvas): SVGNode[] {

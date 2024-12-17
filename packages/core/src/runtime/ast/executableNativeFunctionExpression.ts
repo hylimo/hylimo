@@ -36,12 +36,7 @@ export class ExecutableNativeFunctionExpression extends ExecutableAbstractFuncti
 
     override evaluateInternal(context: InterpreterContext): LabeledValue {
         return {
-            value: new NativeFunctionObject(
-                this,
-                context.currentScope,
-                context.functionPrototype,
-                this.convertDocumentationToObject(context)
-            )
+            value: new NativeFunctionObject(this, context.currentScope, this.convertDocumentationToObject(context))
         };
     }
 }

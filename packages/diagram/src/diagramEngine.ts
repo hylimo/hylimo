@@ -3,17 +3,21 @@ import {
     ExecutableExpression,
     InterpretationResult,
     Interpreter,
+    InterpreterModule,
     Parser,
     RuntimeError,
     SemanticFieldNames,
+    defaultModules,
     id,
+    isWrapperObject,
     object,
     str,
     toExecutable
 } from "@hylimo/core";
-import { LayoutEngine } from "./layout/engine/layoutEngine.js";
+import { LayoutEngine, LayoutWithRoot } from "./layout/engine/layoutEngine.js";
 import { DiagramConfig } from "@hylimo/diagram-common";
 import { LayoutedDiagram } from "./layout/diagramLayoutResult.js";
+import { createBaseDiagramModules, defaultDiagramModules } from "./module/diagramModules.js";
 
 /**
  * All errors that can occur during rendering of a diagram
@@ -31,14 +35,6 @@ export interface RenderErrors extends Pick<CstResult, "lexingErrors" | "parserEr
 
 export interface RenderResult {
     /**
-     * The result of the parser
-     */
-    cstResult: CstResult;
-    /**
-     * The result of the interpreter
-     */
-    interpretationResult?: InterpretationResult;
-    /**
      * All errors combined
      */
     errors: RenderErrors;
@@ -53,17 +49,31 @@ export interface RenderResult {
  */
 export class DiagramEngine {
     /**
+     * The parser to use
+     */
+    private readonly parser = new Parser(false);
+    /**
+     * The interpreter to use
+     */
+    private readonly interpreter: Interpreter;
+    /**
+     * The layout engine to use
+     */
+    private readonly layoutEngine = new LayoutEngine();
+
+    /**
      * Creates a new DiagramEngine
      *
-     * @param parser the parser to use
-     * @param interpreter the interpreter to use
-     * @param layoutEngine the layout engine to use
+     * @param additionalInterpreterModules additional modules to use in the interpreter
+     * @param maxExecutionSteps the maximum number of execution steps
      */
-    constructor(
-        private readonly parser: Parser,
-        private readonly interpreter: Interpreter,
-        private readonly layoutEngine: LayoutEngine
-    ) {}
+    constructor(additionalInterpreterModules: InterpreterModule[], maxExecutionSteps: number) {
+        this.interpreter = new Interpreter(
+            [...additionalInterpreterModules, ...createBaseDiagramModules(this.layoutEngine), ...defaultDiagramModules],
+            defaultModules,
+            maxExecutionSteps
+        );
+    }
 
     /**
      * Renders a diagram
@@ -74,33 +84,52 @@ export class DiagramEngine {
      */
     async render(source: string, config: DiagramConfig): Promise<RenderResult> {
         const parserResult = this.parser.parse(source);
-        let interpretationResult: InterpretationResult | undefined = undefined;
+        if (parserResult.ast == undefined) {
+            return {
+                errors: {
+                    lexingErrors: parserResult.lexingErrors,
+                    parserErrors: parserResult.parserErrors,
+                    interpreterErrors: [],
+                    layoutErrors: []
+                }
+            };
+        }
+        const expressions = toExecutable(parserResult.ast, true);
         let layoutedDiagram: LayoutedDiagram | undefined = undefined;
         const layoutErrors: Error[] = [];
-        if (parserResult.ast != undefined) {
-            interpretationResult = this.interpreter.run([
-                ...this.convertConfig(config),
-                ...toExecutable(parserResult.ast, true)
-            ]);
-            if (interpretationResult.result != undefined) {
-                try {
-                    layoutedDiagram = await this.layoutEngine.layout(interpretationResult.result);
-                } catch (e: any) {
-                    layoutErrors.push(e);
+        const interpretationResult = this.execute(expressions, config);
+        if (interpretationResult.result != undefined) {
+            try {
+                const diagram = interpretationResult.result;
+                if (!isWrapperObject(diagram) || !(diagram.wrapped instanceof LayoutWithRoot)) {
+                    throw new RuntimeError("No diagram returned");
                 }
+                layoutedDiagram = await this.layoutEngine.layout(diagram.wrapped, config);
+            } catch (e) {
+                layoutErrors.push(e as Error);
             }
         }
         return {
-            cstResult: parserResult,
-            interpretationResult,
             layoutedDiagram,
             errors: {
-                lexingErrors: parserResult.lexingErrors,
-                parserErrors: parserResult.parserErrors,
-                interpreterErrors: interpretationResult?.error != undefined ? [interpretationResult.error] : [],
+                lexingErrors: [],
+                parserErrors: [],
+                interpreterErrors: interpretationResult.error != undefined ? [interpretationResult.error] : [],
                 layoutErrors
             }
         };
+    }
+
+    /**
+     * Executes the given expressions
+     * Also generates and adds expressions for the given config
+     *
+     * @param expressions the expressions to execute
+     * @param config the config to use
+     * @returns the interpretation result
+     */
+    execute(expressions: ExecutableExpression[], config: DiagramConfig): InterpretationResult {
+        return this.interpreter.run([...this.convertConfig(config), ...expressions]);
     }
 
     /**

@@ -1,14 +1,4 @@
-import {
-    booleanType,
-    fun,
-    functionType,
-    id,
-    InterpreterModule,
-    listType,
-    optional,
-    parse,
-    stringType
-} from "@hylimo/core";
+import { booleanType, fun, functionType, id, InterpreterModule, listType, optional, stringType } from "@hylimo/core";
 import { SCOPE } from "../../../base/dslModule.js";
 
 /**
@@ -25,19 +15,17 @@ export const enumModule = InterpreterModule.create(
     ],
     [],
     [
-        ...parse(
-            `
-                _enum = scope.internal.createClassifier(
-                    "enum",
-                    list(
-                        scope.internal.defaultTitleContentHandler,
-                        scope.internal.sectionsContentHandler,
-                        scope.internal.propertiesAndMethodsContentHandler,
-                        scope.internal.entriesContentHandler
-                    )
+        `
+            _enum = scope.internal.createClassifier(
+                "enum",
+                list(
+                    scope.internal.defaultTitleContentHandler,
+                    scope.internal.sectionsContentHandler,
+                    scope.internal.propertiesAndMethodsContentHandler,
+                    scope.internal.entriesContentHandler
                 )
-            `
-        ),
+            )
+        `,
         id(SCOPE).assignField(
             "enum",
             fun(

@@ -1,4 +1,5 @@
-import { AttributeConfig } from "../layoutElement.js";
+import { Type } from "@hylimo/core";
+import { AttributeConfig, ContentCardinality } from "../layoutElement.js";
 import { defaultStyleAttributes } from "./attributes.js";
 import { ElementLayoutConfig } from "./elementLayoutConfig.js";
 
@@ -11,8 +12,20 @@ export abstract class StyledElementLayoutConfig extends ElementLayoutConfig {
      *
      * @param additionalAttributes additional non-style attributes
      * @param styleAttributes the supported style attributes
+     * @param contentType the type of the contents attribute
+     * @param contentCardinality the cardinality of the contents attribute
      */
-    constructor(additionalAttributes: AttributeConfig[], additionalStyleAttributes: AttributeConfig[]) {
-        super(additionalAttributes, [...defaultStyleAttributes, ...additionalStyleAttributes]);
+    constructor(
+        additionalAttributes: AttributeConfig[],
+        additionalStyleAttributes: AttributeConfig[],
+        contentType: Type,
+        contentCardinality: ContentCardinality
+    ) {
+        super(
+            additionalAttributes,
+            [...defaultStyleAttributes, ...additionalStyleAttributes],
+            contentType,
+            contentCardinality
+        );
     }
 }

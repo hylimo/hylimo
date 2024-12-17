@@ -1,4 +1,12 @@
-import { ExecutableAbstractFunctionExpression, Type, fun, listType, optional, stringType } from "@hylimo/core";
+import {
+    ExecutableAbstractFunctionExpression,
+    FullObject,
+    Type,
+    fun,
+    listType,
+    optional,
+    stringType
+} from "@hylimo/core";
 import { ArcSegment, Element, Line, LineSegment, Point, Size } from "@hylimo/diagram-common";
 import { LayoutElement, LayoutConfig, SizeConstraints, AttributeConfig, ContentCardinality } from "../layoutElement.js";
 import { Layout } from "../engine/layout.js";
@@ -20,30 +28,82 @@ export abstract class ElementLayoutConfig implements LayoutConfig {
     ];
 
     /**
+     * Supported style attributes
+     */
+    readonly styleAttributes: AttributeConfig[];
+
+    /**
+     * The content or contents attribute if present, otherwise an empty array
+     */
+    readonly contentAttributes: AttributeConfig[];
+
+    /**
      * What type of element is supported
      */
     abstract readonly type: string;
-    /**
-     * The type of the contents attribute
-     */
-    abstract readonly contentType: Type;
-    /**
-     * The cardinality of the contents attribute
-     */
-    abstract readonly contentCardinality: ContentCardinality;
 
     /**
      * Assigns type and styleAttributes
      *
      * @param additionalAttributes additional non-style attributes
      * @param styleAttributes the supported style attributes
+     * @param contentType the type of the contents attribute
+     * @param contentCardinality the cardinality of the contents attribute
      */
     constructor(
         additionalAttributes: AttributeConfig[],
-        readonly styleAttributes: AttributeConfig[]
+        styleAttributes: AttributeConfig[],
+        readonly contentType: Type,
+        readonly contentCardinality: ContentCardinality
     ) {
         this.attributes.push(...additionalAttributes);
+        this.styleAttributes = styleAttributes.map((attribute) => ({
+            name: attribute.name,
+            description: attribute.description,
+            type: optional(attribute.type)
+        }));
+        this.contentAttributes = this.computeContentAttributes();
     }
+
+    /**
+     * Computes the attribute configs for the content or contents attribute
+     *
+     * @returns an array of the content or contents attribute config or an empty array
+     */
+    private computeContentAttributes(): AttributeConfig[] {
+        const isManyContent =
+            this.contentCardinality === ContentCardinality.Many ||
+            this.contentCardinality === ContentCardinality.AtLeastOne;
+        const contentAttributes: AttributeConfig[] = [];
+        if (this.contentCardinality === ContentCardinality.ExactlyOne) {
+            contentAttributes.push({
+                name: "content",
+                description: "the content of the element",
+                type: this.contentType
+            });
+        } else if (this.contentCardinality === ContentCardinality.Optional) {
+            contentAttributes.push({
+                name: "content",
+                description: "the content of the element",
+                type: optional(this.contentType)
+            });
+        } else if (isManyContent) {
+            contentAttributes.push({
+                name: "contents",
+                description: "the contents of the element",
+                type: optional(listType(this.contentType))
+            });
+        }
+        return contentAttributes;
+    }
+
+    /**
+     * Returns the children of the element
+     *
+     * @param element the element to get the children of
+     * @returns the children of the element
+     */
+    abstract getChildren(element: LayoutElement): FullObject[];
 
     /**
      * Called to determine the size the element requires
@@ -168,18 +228,7 @@ export abstract class ElementLayoutConfig implements LayoutConfig {
      * @returns the prototype generation function
      */
     createPrototype(): ExecutableAbstractFunctionExpression {
-        return fun("object(proto = it)");
-    }
-
-    /**
-     * Called to postprocess the extracted styles
-     *
-     * @param _element the element to postprocess
-     * @param styles the extracted styles
-     * @returns the postprocessed styles
-     */
-    postprocessStyles(_element: LayoutElement, styles: Record<string, any>): Record<string, any> {
-        return styles;
+        return fun("[proto = it]");
     }
 
     /**

@@ -62,8 +62,9 @@ export abstract class CanvasLayoutEngine {
     /**
      * Cache of points
      * Each entry contains the point and the id of the canvas it is part of
+     * During computation, a point is set to null to detect circular dependencies
      */
-    private readonly points: Map<string, PointWithContext> = new Map();
+    private readonly points: Map<string, PointWithContext | null> = new Map();
 
     /**
      * Segment engines to use
@@ -72,8 +73,9 @@ export abstract class CanvasLayoutEngine {
 
     /**
      * Cache of connection layouts
+     * During computation, a connection is set to null to detect circular dependencies
      */
-    private readonly connectionCache: Map<string, CanvasConnectionLayout> = new Map();
+    private readonly connectionCache: Map<string, CanvasConnectionLayout | null> = new Map();
 
     /**
      * Cache of local to ancestor transformations
@@ -97,31 +99,38 @@ export abstract class CanvasLayoutEngine {
      */
     layoutConnection(connection: CanvasConnection): CanvasConnectionLayout {
         const context = this.getParentElement(connection.id);
-        if (!this.connectionCache.has(connection.id)) {
-            const transformedConnection = this.transformConnection(connection, context);
-            const startMarkerInformation = this.layoutStartMarker(transformedConnection, context);
-            const endMarkerInformation = this.layoutEndMarker(transformedConnection, context);
-            const [line, segmentLayouts] = this.generateLine(
-                transformedConnection,
-                startMarkerInformation,
-                endMarkerInformation,
-                context
-            );
-            const start = line.start;
-            const path =
-                `M ${start.x} ${start.y}` +
-                transformedConnection.segments
-                    .map((segment, i) => this.generatePathString(segment, segmentLayouts[i], context))
-                    .join("");
-            this.connectionCache.set(connection.id, {
-                startMarker: startMarkerInformation ?? undefined,
-                endMarker: endMarkerInformation ?? undefined,
-                line,
-                segments: segmentLayouts,
-                path
-            });
+        const cachedConnection = this.connectionCache.get(connection.id);
+        if (cachedConnection === null) {
+            throw new Error(`Circular dependency detected for connection ${connection.id}`);
         }
-        return this.connectionCache.get(connection.id)!;
+        if (cachedConnection != undefined) {
+            return cachedConnection;
+        }
+        this.connectionCache.set(connection.id, null);
+        const transformedConnection = this.transformConnection(connection, context);
+        const startMarkerInformation = this.layoutStartMarker(transformedConnection, context);
+        const endMarkerInformation = this.layoutEndMarker(transformedConnection, context);
+        const [line, segmentLayouts] = this.generateLine(
+            transformedConnection,
+            startMarkerInformation,
+            endMarkerInformation,
+            context
+        );
+        const start = line.start;
+        const path =
+            `M ${start.x} ${start.y}` +
+            transformedConnection.segments
+                .map((segment, i) => this.generatePathString(segment, segmentLayouts[i], context))
+                .join("");
+        const resultingConnection = {
+            startMarker: startMarkerInformation ?? undefined,
+            endMarker: endMarkerInformation ?? undefined,
+            line,
+            segments: segmentLayouts,
+            path
+        };
+        this.connectionCache.set(connection.id, resultingConnection);
+        return resultingConnection;
     }
 
     /**
@@ -305,15 +314,31 @@ export abstract class CanvasLayoutEngine {
      * @returns the point the canvas point is positioned at
      */
     getPoint(id: string, context: string): Point {
-        if (!this.points.has(id)) {
-            this.points.set(id, this.getPointInternal(id));
+        const cachedPoint = this.points.get(id);
+        if (cachedPoint === null) {
+            throw new Error(`Circular dependency detected for point ${id}`);
         }
-        const { point, context: pointContext } = this.points.get(id)!;
-        if (pointContext == context) {
-            return point;
+        if (cachedPoint != undefined) {
+            return this.computePointForContext(cachedPoint, context);
         }
-        const matrix = this.localToAncestor(pointContext, context);
-        return applyToPoint(matrix, point);
+        this.points.set(id, null);
+        this.points.set(id, this.getPointInternal(id));
+        return this.computePointForContext(this.points.get(id)!, context);
+    }
+
+    /**
+     * Computes the point relative to a coordinate system of given context
+     *
+     * @param point the point to compute
+     * @param context the context of which coordinate system to use
+     * @returns the computed point
+     */
+    private computePointForContext(point: PointWithContext, context: string): Point {
+        if (point.context == context) {
+            return point.point;
+        }
+        const matrix = this.localToAncestor(point.context, context);
+        return applyToPoint(matrix, point.point);
     }
 
     /**

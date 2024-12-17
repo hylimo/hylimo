@@ -98,7 +98,9 @@ const diagramModule = new ContainerModule((bind, unbind, isBound, rebind) => {
     configureModelElement(context, CanvasConnection.TYPE, SCanvasConnection, CanvasConnectionView, {
         enable: [selectFeature, moveFeature]
     });
-    configureModelElement(context, Marker.TYPE, SMarker, MarkerView);
+    configureModelElement(context, Marker.TYPE, SMarker, MarkerView, {
+        enable: [selectFeature, moveFeature]
+    });
     registerModelElement(context, CanvasLineSegment.TYPE, SCanvasLineSegment);
     registerModelElement(context, CanvasBezierSegment.TYPE, SCanvasBezierSegment);
     registerModelElement(context, CanvasAxisAlignedSegment.TYPE, SCanvasAxisAlignedSegment);

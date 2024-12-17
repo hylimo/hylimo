@@ -1,39 +1,80 @@
 import {
-    assertFunction,
-    assertObject,
     assign,
+    BaseObject,
+    booleanType,
     DefaultModuleNames,
     ExecutableConstExpression,
     ExecutableExpression,
     ExecutableListEntry,
-    ExecutableNumberLiteralExpression,
+    FullObject,
     fun,
     functionType,
     id,
     InterpreterModule,
+    isObject,
+    isString,
     jsFun,
     listType,
     literal,
     namedType,
     nullType,
+    num,
     objectType,
     optional,
     or,
     SemanticFieldNames,
     str,
     stringType,
-    validate
+    validateObject
 } from "@hylimo/core";
 import { openSans, roboto, sourceCodePro } from "@hylimo/fonts";
 import { AttributeConfig, ContentCardinality, LayoutConfig } from "../../layout/layoutElement.js";
 import { layouts } from "../../layout/layouts.js";
-import { elementType } from "./types.js";
+import { simpleElementType } from "./types.js";
 import { DiagramModuleNames } from "../diagramModuleNames.js";
+import { LayoutEngine } from "../../layout/engine/layoutEngine.js";
 
 /**
  * Type for unset, default style values
  */
-const styleValueType = namedType(objectType(new Map([["_type", or(literal("unset"), literal("var"))]])), "unset | var");
+const styleValueType = namedType(
+    objectType(new Map([["_type", or(literal("unset"), literal("var"), literal("calc"))]])),
+    "unset | var | calc"
+);
+
+/**
+ * Type for a selector
+ */
+const selectorType = objectType(
+    new Map([
+        ["selectorType", stringType],
+        ["selectorValue", stringType]
+    ])
+);
+
+/**
+ * Type for a font object
+ */
+const fontType = objectType(
+    new Map([
+        ["url", stringType],
+        ["name", optional(stringType)],
+        ["variationSettings", optional(objectType())]
+    ])
+);
+
+/**
+ * Type for a font family object
+ */
+const fontFamilyType = objectType(
+    new Map([
+        ["fontFamily", stringType],
+        ["normal", fontType],
+        ["italic", fontType],
+        ["bold", fontType],
+        ["boldItalic", fontType]
+    ])
+);
 
 /**
  * Gets a list of all known style attributes
@@ -57,7 +98,7 @@ function computeAllStyleAttributes(): AttributeConfig[] {
 /**
  * All style atributes
  */
-const allStyleAttributes = computeAllStyleAttributes();
+export const allStyleAttributes = computeAllStyleAttributes();
 
 /**
  * Creates a function which evaluates to the function to create a specific element
@@ -66,7 +107,7 @@ const allStyleAttributes = computeAllStyleAttributes();
  * @returns the callback which provides the create element function
  */
 function createElementFunction(element: LayoutConfig): ExecutableExpression {
-    const { cardinalityNumber, contentAttributes } = extractContentAttributeAndCardinality(element);
+    const contentCardinality = extractContentCardinality(element);
 
     return fun([
         id(SemanticFieldNames.THIS).assignField(
@@ -93,7 +134,7 @@ function createElementFunction(element: LayoutConfig): ExecutableExpression {
                             value: new ExecutableConstExpression({ value: args })
                         },
                         {
-                            value: new ExecutableNumberLiteralExpression(undefined, cardinalityNumber)
+                            value: num(contentCardinality)
                         }
                     ],
                     context
@@ -104,10 +145,10 @@ function createElementFunction(element: LayoutConfig): ExecutableExpression {
                 docs: `Creates a new ${element.type} element`,
                 params: [
                     ...element.attributes.map((attr) => [attr.name, attr.description, attr.type] as const),
-                    ...element.styleAttributes.map(
-                        (attr) => [attr.name, attr.description, or(nullType, attr.type, styleValueType)] as const
+                    ...element.styleAttributes.map((attr) => [attr.name, attr.description, attr.type] as const),
+                    ...element.contentAttributes.map(
+                        (attr) => [attr.name, attr.description, optional(attr.type)] as const
                     ),
-                    ...contentAttributes.map((attr) => [attr.name, attr.description, optional(attr.type)] as const),
                     [0, "builder scope function", optional(functionType)]
                 ],
                 returns: "the created element"
@@ -122,33 +163,14 @@ function createElementFunction(element: LayoutConfig): ExecutableExpression {
  * @param element the element to extract the content attribute and cardinality from
  * @returns the cardinality number and the content attributes
  */
-function extractContentAttributeAndCardinality(element: LayoutConfig): {
-    cardinalityNumber: number;
-    contentAttributes: AttributeConfig[];
-} {
+function extractContentCardinality(element: LayoutConfig): number {
     const contentCardinality = element.contentCardinality;
-    const contentAttributes: AttributeConfig[] = [];
-    const isOneContent =
-        contentCardinality === ContentCardinality.ExactlyOne || contentCardinality === ContentCardinality.Optional;
-    const isManyContent =
-        contentCardinality === ContentCardinality.Many || contentCardinality === ContentCardinality.AtLeastOne;
-    let cardinalityNumber = 0;
-    if (isOneContent) {
-        contentAttributes.push({
-            name: "content",
-            description: "the content of the element",
-            type: element.contentType
-        });
-        cardinalityNumber = 1;
-    } else if (isManyContent) {
-        contentAttributes.push({
-            name: "contents",
-            description: "the contents of the element",
-            type: listType(element.contentType)
-        });
-        cardinalityNumber = Number.POSITIVE_INFINITY;
+    if (contentCardinality === ContentCardinality.ExactlyOne || contentCardinality === ContentCardinality.Optional) {
+        return 1;
+    } else if (contentCardinality === ContentCardinality.Many || contentCardinality === ContentCardinality.AtLeastOne) {
+        return Number.POSITIVE_INFINITY;
     }
-    return { cardinalityNumber, contentAttributes };
+    return 0;
 }
 
 /**
@@ -157,15 +179,10 @@ function extractContentAttributeAndCardinality(element: LayoutConfig): {
 const selectorProto = "selectorProto";
 
 /**
- * Type for a font object
+ * The list of operators that have a proxy implementation
+ * on the selector prototype to support calculated style values
  */
-const fontType = objectType(
-    new Map([
-        ["url", stringType],
-        ["name", optional(stringType)],
-        ["variationSettings", optional(objectType())]
-    ])
-);
+const selectorProxiedOperators = ["+", "-", "*", "/", "%", "&", "|", ">", ">=", "<", "<=", ">>", "<<"];
 
 /**
  * Helper function to create a font object
@@ -182,13 +199,37 @@ function font(name: string, url: string): ExecutableListEntry {
 }
 
 /**
- * Diagram module providing standard diagram UI elements
+ * Checks if a value is a var or calc object
+ *
+ * @param value the value to check
+ * @returns true if the value is a var or calc object
  */
-export const diagramModule = InterpreterModule.create(
-    DiagramModuleNames.DIAGRAM,
-    [...Object.values(DefaultModuleNames), DiagramModuleNames.EDIT],
-    [],
-    [
+function isVarOrCalc(value: BaseObject) {
+    if (!isObject(value)) {
+        return false;
+    }
+    const type = value.getLocalFieldOrUndefined("_type")?.value;
+    if (type == undefined || !isString(type)) {
+        return false;
+    }
+    return type.value === "var" || type.value === "calc";
+}
+
+/**
+ * Diagram module providing default diagram UI elements
+ */
+export class DiagramModule implements InterpreterModule {
+    /**
+     * Creates a new diagram module
+     *
+     * @param layoutEngine the layout engine to use for layouting
+     */
+    constructor(readonly layoutEngine: LayoutEngine) {}
+
+    name = DiagramModuleNames.DIAGRAM;
+    dependencies = [...Object.values(DefaultModuleNames), DiagramModuleNames.EDIT];
+    runtimeDependencies = [];
+    expressions = [
         fun([
             assign("_elementProto", id("object").call({ name: "_type", value: str("element") })),
             assign(
@@ -201,7 +242,7 @@ export const diagramModule = InterpreterModule.create(
                         if(contentsCardinality > 0) {
                             this.callback = elementArgs.get(0)
                             if(callback != null) {
-                                scopeObject = object()
+                                scopeObject = []
                                 if(contentsCardinality == 1) {
                                     scopeObject.addContent = {
                                         element.content = it
@@ -238,7 +279,7 @@ export const diagramModule = InterpreterModule.create(
             fun(
                 `
                     (name) = args
-                    object(name = name, _type = "var")
+                    [name = name, _type = "var"]
                 `,
                 {
                     docs: "Creates a variable reference which can be used everywhere a style value is expected.",
@@ -256,19 +297,7 @@ export const diagramModule = InterpreterModule.create(
                     "validateSelector",
                     jsFun((args, context) => {
                         const value = args.getFieldValue(0, context);
-                        const createFunction = args.getFieldValue(1, context);
-                        assertObject(value);
-                        assertFunction(createFunction);
-                        for (const attribute of allStyleAttributes) {
-                            const attributeValue = value.getLocalField(attribute.name, context).value;
-                            validate(
-                                attribute.type,
-                                `Invalid value for ${attribute.name}`,
-                                attributeValue,
-                                context,
-                                () => createFunction.definition
-                            );
-                        }
+                        validateObject(value, context, allStyleAttributes);
                         return context.null;
                     })
                 ),
@@ -279,17 +308,17 @@ export const diagramModule = InterpreterModule.create(
                             (type) = args
                             {
                                 (value, callback) = args
-                                this.selector = object(
+                                this.selector = [
                                     selectorType = type,
                                     selectorValue = value,
                                     styles = list(),
-                                    variables = object(),
+                                    variables = [],
                                     ${allStyleAttributes.map((attr) => `${attr.name} = null`).join(",")}
-                                )
+                                ]
                                 args.self.styles.add(selector)
                                 selector.proto = ${selectorProto}
                                 callback.callWithScope(selector)
-                                validateSelector(selector, callback)
+                                validateSelector(selector)
                                 selector
                             }
                         `,
@@ -305,13 +334,13 @@ export const diagramModule = InterpreterModule.create(
                     fun(
                         `
                             (callback) = args
-                            res = object()
+                            res = []
                             callback.callWithScope(res)
                             args.self.any {
                                 variables = this.variables
                                 res.forEach {
                                     (value, key) = args
-                                    variables.set(key, value)
+                                    variables[key] = value
                                 }
                             }
                             null
@@ -326,23 +355,81 @@ export const diagramModule = InterpreterModule.create(
                         }
                     )
                 ),
+                `
+                    this.type = selector("type")
+                    this.cls = selector("class")
+                    this.anySelector = selector("any")
+                    this.any = {
+                        this.anySelector("", it, self = args.self)
+                    }
+                `,
                 fun(
-                    `
-                        (callback) = args
-                        res = object(styles = list())
-                        res.type = selector("type")
-                        res.cls = selector("class")
-                        anySelector = selector("any")
-                        res.any = { 
-                            anySelector("", it, self = args.self)
-                        }
-                        res.vars = vars
-                        callback.callWithScope(res)
-                        res
-                    `,
+                    [
+                        `
+                            (callback, res, validateStyles) = args
+                            this.stylesArgs = args
+                            res.type = type
+                            res.cls = cls
+                            res.any = any
+                            res.vars = vars
+                        `,
+                        ...selectorProxiedOperators.map((operator) =>
+                            id("res").assignField(
+                                operator,
+                                jsFun(
+                                    (args, context) => {
+                                        const left = args.getField(0, context);
+                                        const right = args.getField(1, context);
+                                        const executableOperator = context
+                                            .getField("stylesArgs")
+                                            .getFieldValue("self", context)
+                                            .getField(operator, context);
+                                        if (isVarOrCalc(left.value) || isVarOrCalc(right.value)) {
+                                            const result = context.newObject();
+                                            result.setLocalField(
+                                                "_type",
+                                                { value: context.newString("calc") },
+                                                context
+                                            );
+                                            result.setLocalField("left", left, context);
+                                            result.setLocalField("right", right, context);
+                                            result.setLocalField("operator", executableOperator, context);
+                                            return result;
+                                        }
+                                        return executableOperator.value.invoke(
+                                            [
+                                                { value: new ExecutableConstExpression(left) },
+                                                { value: new ExecutableConstExpression(right) }
+                                            ],
+                                            context
+                                        );
+                                    },
+                                    {
+                                        docs: `The ${operator} operator, expects two arguments, calls ${operator} on the first argument with the second argument.`,
+                                        params: [
+                                            [0, `the target where ${operator} is invoked`],
+                                            [1, `the value passed to the ${operator} function`]
+                                        ],
+                                        returns: `The result of the invocation of ${operator} on the first argument`
+                                    }
+                                )
+                            )
+                        ),
+                        `
+                            callback.callWithScope(res)
+                            if(validateStyles == true) {
+                                validateSelector(res, callback)
+                            }
+                            res
+                        `
+                    ],
                     {
-                        docs: 'Creates a new styles object. Use "cls" and "type" to create rules.',
-                        params: [],
+                        docs: 'Creates a new styles object. Use "cls", "type", and "any" to create rules.',
+                        params: [
+                            [0, "the callback to invoke", functionType],
+                            [1, "the scope object to use which is provided to the callback end returned", objectType()],
+                            [2, "validate style attributes", optional(booleanType)]
+                        ],
                         returns: "The created styles object"
                     }
                 )
@@ -353,13 +440,13 @@ export const diagramModule = InterpreterModule.create(
             fun(
                 `
                     (fontFamily) = args
-                    object(
+                    [
                         fontFamily = fontFamily,
                         normal = args.normal,
                         italic = args.italic,
                         bold = args.bold,
                         boldItalic = args.boldItalic
-                    )
+                    ]
                 `,
                 {
                     docs: "Creates a new font family.",
@@ -378,16 +465,15 @@ export const diagramModule = InterpreterModule.create(
             "font",
             fun(
                 `
-                    (url, name, variationSettings) = args
-                    object(url = url, name = name, variationSettings = variationSettings)
+                    (url, variationSettings) = args
+                    [url = url, variationSettings = variationSettings]
                 `,
                 {
                     docs: "Creates a new font, should be used with fontFamily.",
                     params: [
                         [0, "the url where the font can be found, e.g. a google fonts url", stringType],
-                        [1, "if a collection font file is used, the name of the font to use", optional(stringType)],
                         [
-                            2,
+                            1,
                             "if a variation font file is used, either the name of the named variation or an object with values for variation axes",
                             optional(objectType())
                         ]
@@ -433,21 +519,30 @@ export const diagramModule = InterpreterModule.create(
         ),
         assign(
             "createDiagram",
-            fun(
-                `
-                    (element, stylesObject, fonts) = args
-                    object(element = element, styles = stylesObject, fonts = fonts)
-                `,
+            jsFun(
+                (args, context) => {
+                    const layoutWithRoot = this.layoutEngine.createLayout(
+                        args.getField(0, context).value as FullObject,
+                        args.getField(1, context).value as FullObject,
+                        args.getField(2, context).value as FullObject,
+                        context
+                    );
+                    return context.newWrapperObject(layoutWithRoot, new Map());
+                },
                 {
                     docs: "Creates a new diagram, consisting of a ui element, styles and fonts",
                     params: [
-                        [0, "the root ui element", elementType()],
-                        [1, "the styles object created by the styles function", objectType()],
-                        [2, "a list of font family objects", listType(objectType())]
+                        [0, "the root ui element", simpleElementType],
+                        [
+                            1,
+                            "the styles object created by the styles function",
+                            objectType(new Map([["styles", listType(selectorType)]]))
+                        ],
+                        [2, "a list of font family objects", listType(fontFamilyType)]
                     ],
                     returns: "the created diagram object"
                 }
             )
         )
-    ]
-);
+    ];
+}

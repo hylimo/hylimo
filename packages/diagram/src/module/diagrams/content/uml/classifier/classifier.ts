@@ -1,4 +1,4 @@
-import { fun, id, InterpreterModule, parse } from "@hylimo/core";
+import { fun, id, InterpreterModule } from "@hylimo/core";
 import { SCOPE } from "../../../../base/dslModule.js";
 
 /**
@@ -37,7 +37,7 @@ export const classifierModule = InterpreterModule.create(
                             )
                             contentHandlers.forEach {
                                 it[0](
-                                    scope = result,
+                                    callScope = result,
                                     args = classifierArgs,
                                     element = classifierElement,
                                     contents = classifierContents,
@@ -56,7 +56,7 @@ export const classifierModule = InterpreterModule.create(
 
                             contentHandlers.forEach {
                                 it[1](
-                                    scope = result,
+                                    callScope = result,
                                     args = classifierArgs,
                                     element = classifierElement,
                                     contents = classifierContents,
@@ -88,47 +88,45 @@ export const classifierModule = InterpreterModule.create(
                     }
                 )
             ),
-        ...parse(
-            `
-                scope.styles {
-                    cls("classifier-element") {
-                        vAlign = "center"
-                        hAlign = "center"
-                        minWidth = 300
+        `
+            scope.styles {
+                cls("classifier-element") {
+                    vAlign = "center"
+                    hAlign = "center"
+                    minWidth = 300
 
-                        cls("classifier") {
-                            type("vbox") {
-                                margin = 5
-                            }
-                        }
-                        cls("separator") {
-                            marginTop = 5
-                            marginBottom = 5
-                            marginLeft = -5
-                            marginRight = -5
-                        }
-                        cls("abstract") {
-                            cls("title") {
-                                type("span") {
-                                    fontStyle = "italic"
-                                }
-                            }
-                        }
-                        cls("title") {
-                            hAlign = "center"
-                            type("span") {
-                                fontWeight = "bold"
-                            }
-                        }
-                        cls("keyword") {
-                            hAlign = "center"
-                        }
-                        cls("classifier-canvas") {
-                            margin = var("subcanvasMargin")
+                    cls("classifier") {
+                        type("vbox") {
+                            margin = 5
                         }
                     }
+                    cls("separator") {
+                        marginTop = 5
+                        marginBottom = 5
+                        marginLeft = -5
+                        marginRight = -5
+                    }
+                    cls("abstract") {
+                        cls("title") {
+                            type("span") {
+                                fontStyle = "italic"
+                            }
+                        }
+                    }
+                    cls("title") {
+                        hAlign = "center"
+                        type("span") {
+                            fontWeight = "bold"
+                        }
+                    }
+                    cls("keyword") {
+                        hAlign = "center"
+                    }
+                    cls("classifier-canvas") {
+                        margin = var("subcanvasMargin")
+                    }
                 }
-            `
-        )
+            }
+        `
     ]
 );

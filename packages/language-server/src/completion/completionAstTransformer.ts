@@ -1,7 +1,6 @@
 import {
     AssignmentExpression,
     CompletionExpressionMetadata,
-    ExecutableNumberLiteralExpression,
     Expression,
     FieldAccessExpression,
     IdentifierExpression,
@@ -12,7 +11,8 @@ import {
     AbstractInvocationExpression,
     ExecutableExpression,
     FieldAssignmentExpression,
-    RuntimeAstTransformer
+    RuntimeAstTransformer,
+    num
 } from "@hylimo/core";
 import { CompletableFieldSelfInvocationExpression } from "./completableFieldSelfInvocationExpression.js";
 import { CompletableIndexSelfInvocationExpression } from "./completableIndexSelfInvocationExpression.js";
@@ -128,7 +128,7 @@ export class CompletionAstTransformer extends RuntimeAstTransformer {
     }
 
     override visitNoopExpression(): ExecutableExpression<any> {
-        return new ExecutableNumberLiteralExpression(undefined, 0);
+        return num(0);
     }
 
     /**

@@ -1,4 +1,4 @@
-import { InterpreterModule, parse } from "@hylimo/core";
+import { InterpreterModule } from "@hylimo/core";
 
 /**
  * Module providing the sections content handler
@@ -7,44 +7,40 @@ export const sectionsModule = InterpreterModule.create(
     "uml/classifier/sections",
     [],
     [],
-    [
-        ...parse(
-            `
-                scope.internal.sectionsContentHandler = [
-                    {
-                        this.scope = args.scope
-                        scope.sections = list()
-                        scope.section = listWrapper {
-                            sectionIndex = args.section
-                            newSection = it
-                            if(sectionIndex == null) {
-                                scope.sections += newSection
-                            } {
-                                while { scope.sections.length <= sectionIndex } {
-                                    scope.sections += null
-                                }
-                                if(scope.sections.get(sectionIndex) == null) {
-                                    scope.sections.set(sectionIndex, list())
-                                }
-                                scope.sections.get(sectionIndex).addAll(newSection)
-                            }
+    `
+        scope.internal.sectionsContentHandler = [
+            {
+                this.callScope = args.callScope
+                callScope.sections = list()
+                callScope.section = listWrapper {
+                    sectionIndex = args.section
+                    newSection = it
+                    if(sectionIndex == null) {
+                        callScope.sections += newSection
+                    } {
+                        while { callScope.sections.length <= sectionIndex } {
+                            callScope.sections += null
                         }
-                    },
-                    {
-                        this.contents = args.contents
+                        if(callScope.sections.get(sectionIndex) == null) {
+                            callScope.sections.set(sectionIndex, list())
+                        }
+                        callScope.sections.get(sectionIndex).addAll(newSection)
+                    }
+                }
+            },
+            {
+                this.contents = args.contents
 
-                        args.scope.sections.forEach {
-                            this.section = it
-                            if (section != null) {
-                                contents += path(path = "M 0 0 L 1 0", class = list("separator"))
-                                section.forEach {
-                                    contents += text(contents = list(span(text = it)))
-                                }
-                            }
+                args.callScope.sections.forEach {
+                    this.section = it
+                    if (section != null) {
+                        contents += path(path = "M 0 0 L 1 0", class = list("separator"))
+                        section.forEach {
+                            contents += text(contents = list(span(text = it)))
                         }
                     }
-                ]
-            `
-        )
-    ]
+                }
+            }
+        ]
+    `
 );

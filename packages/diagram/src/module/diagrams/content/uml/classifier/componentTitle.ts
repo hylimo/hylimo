@@ -1,4 +1,4 @@
-import { InterpreterModule, parse } from "@hylimo/core";
+import { InterpreterModule } from "@hylimo/core";
 
 /**
  * Path to the component icon
@@ -13,40 +13,36 @@ export const componentTitleModule = InterpreterModule.create(
     "uml/classifier/componentTitle",
     ["uml/classifier/defaultTitle"],
     [],
-    [
-        ...parse(
-            `
-                scope.internal.componentTitleContentHandler = [
-                    { },
-                    {
-                        args.contents += stack(
-                            contents = list(
+    `
+        scope.internal.componentTitleContentHandler = [
+            { },
+            {
+                args.contents += stack(
+                    contents = list(
                                 scope.internal.defaultTitle(args.args.title, args.args.keywords),
-                                path(path = "${componentIconPath}", class = list("component-icon"))
-                            ),
-                            class = list("component-title-container")
-                        )
-                    }  
-                ]
+                        path(path = "${componentIconPath}", class = list("component-icon"))
+                    ),
+                    class = list("component-title-container")
+                )
+            }  
+        ]
 
-                scope.styles {
-                    vars {
-                        componentIconSize = 25
-                    }
-                    cls("component-title-container") {
-                        cls("title-container") {
-                            marginLeft = var("componentIconSize")
-                            marginRight = var("componentIconSize")
-                        }
-                        cls("component-icon") {
-                            width = var("componentIconSize")
-                            hAlign = "right"
-                            stretch = "uniform"
-                            strokeWidth = 1
-                        }
-                    }
+        scope.styles {
+            vars {
+                componentIconSize = 25
+            }
+            cls("component-title-container") {
+                cls("title-container") {
+                    marginLeft = var("componentIconSize")
+                    marginRight = var("componentIconSize")
                 }
-            `
-        )
-    ]
+                cls("component-icon") {
+                    width = var("componentIconSize")
+                    hAlign = "right"
+                    stretch = "uniform"
+                    strokeWidth = 1
+                }
+            }
+        }
+    `
 );

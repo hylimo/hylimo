@@ -2,7 +2,6 @@ import { ExecutableNativeExpression } from "../../runtime/ast/executableNativeEx
 import { assign, fun, id, jsFun, native } from "../../runtime/executableAstHelper.js";
 import { InterpreterModule } from "../../runtime/interpreter/interpreterModule.js";
 import { BooleanObject } from "../../runtime/objects/booleanObject.js";
-import { FullObject } from "../../runtime/objects/fullObject.js";
 import { SemanticFieldNames } from "../../runtime/semanticFieldNames.js";
 import { booleanType } from "../../types/boolean.js";
 import { DefaultModuleNames } from "../defaultModuleNames.js";
@@ -24,18 +23,8 @@ export const booleanModule = InterpreterModule.create(
     [
         fun([
             assign(booleanProto, new ExecutableNativeExpression((context) => ({ value: context.booleanPrototype }))),
-            id(SemanticFieldNames.PROTO).assignField(
-                "true",
-                jsFun((args, context) => new BooleanObject(true, args.getFieldValue(0, context) as FullObject)).call(
-                    id(booleanProto)
-                )
-            ),
-            id(SemanticFieldNames.PROTO).assignField(
-                "false",
-                jsFun((args, context) => new BooleanObject(false, args.getFieldValue(0, context) as FullObject)).call(
-                    id(booleanProto)
-                )
-            ),
+            id(SemanticFieldNames.PROTO).assignField("true", jsFun(() => new BooleanObject(true)).call()),
+            id(SemanticFieldNames.PROTO).assignField("false", jsFun(() => new BooleanObject(false)).call()),
             id(booleanProto).assignField(
                 "&&",
                 native(
@@ -87,6 +76,44 @@ export const booleanModule = InterpreterModule.create(
                                 "the right side of the logical or, only evaluated if the left side is false",
                                 booleanType
                             ]
+                        ],
+                        returns: "The result of the logical or"
+                    }
+                )
+            ),
+            id(booleanProto).assignField(
+                "&",
+                jsFun(
+                    (args, context) => {
+                        return context.newBoolean(
+                            assertBoolean(args.getFieldValue(SemanticFieldNames.SELF, context)) &&
+                                assertBoolean(args.getFieldValue(0, context))
+                        );
+                    },
+                    {
+                        docs: "Performs logical and (&&) WITHOUT short circuit evaluation! The second argument is always evaluated",
+                        params: [
+                            [SemanticFieldNames.SELF, "the left side of the logical and", booleanType],
+                            [0, "the right side of the logical and", booleanType]
+                        ],
+                        returns: "The result of the logical and"
+                    }
+                )
+            ),
+            id(booleanProto).assignField(
+                "|",
+                jsFun(
+                    (args, context) => {
+                        return context.newBoolean(
+                            assertBoolean(args.getFieldValue(SemanticFieldNames.SELF, context)) ||
+                                assertBoolean(args.getFieldValue(0, context))
+                        );
+                    },
+                    {
+                        docs: "Performs logical or (||) WITHOUT short circuit evaluation! The second argument is always evaluated",
+                        params: [
+                            [SemanticFieldNames.SELF, "the left side of the logical or", booleanType],
+                            [0, "the right side of the logical or", booleanType]
                         ],
                         returns: "The result of the logical or"
                     }

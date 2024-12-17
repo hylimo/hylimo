@@ -1,6 +1,7 @@
 import { SCanvas } from "./sCanvas.js";
 import { SCanvasConnection } from "./sCanvasConnection.js";
 import { SCanvasContent } from "./sCanvasContent.js";
+import { SMarker } from "./sMarker.js";
 
 /**
  * Manages a lookup for visible points
@@ -35,17 +36,33 @@ export class PointVisibilityManager {
     constructor(canvas: SCanvas) {
         for (const child of canvas.children) {
             if (child instanceof SCanvasContent) {
-                const id = child.id;
-                const dependencies = child.dependencies;
-                for (const dependency of dependencies) {
-                    this.getDependantsList(dependency).push(id);
-                }
-                this.getDependenciesList(id).push(...dependencies);
-                if (child instanceof SCanvasConnection) {
-                    for (const dependency of dependencies) {
-                        this.getPeerDependenciesList(dependency).push(id);
-                    }
-                }
+                this.registerElement(child);
+            }
+        }
+    }
+
+    /**
+     * Registers a new element in the visibility manager
+     * Initializes the (peer) dependencies and dependants
+     *
+     * @param element the element to register
+     */
+    private registerElement(element: SCanvasContent | SMarker): void {
+        const id = element.id;
+        const dependencies = element.dependencies;
+        for (const dependency of dependencies) {
+            this.getDependantsList(dependency).push(id);
+        }
+        this.getDependenciesList(id).push(...dependencies);
+        if (element instanceof SCanvasConnection) {
+            for (const dependency of dependencies) {
+                this.getPeerDependenciesList(dependency).push(id);
+            }
+            if (element.startMarker != undefined) {
+                this.registerElement(element.startMarker);
+            }
+            if (element.endMarker != undefined) {
+                this.registerElement(element.endMarker);
             }
         }
     }
@@ -108,7 +125,7 @@ export class PointVisibilityManager {
      * @param element the element to update the state of
      * @param isSelected the new selection state
      */
-    setSelectionState(element: SCanvasContent, isSelected: boolean): void {
+    setSelectionState(element: SCanvasContent | SMarker, isSelected: boolean): void {
         if (isSelected) {
             this.setSelected(element);
         } else {
@@ -121,7 +138,7 @@ export class PointVisibilityManager {
      *
      * @param element the now selected element
      */
-    private setSelected(element: SCanvasContent): void {
+    private setSelected(element: SCanvasContent | SMarker): void {
         const visibilityReason = this.getOrCreateVisibilityReason(element.id);
         visibilityReason.self = true;
         this.makeDependenciesVisible(element.id);
@@ -134,7 +151,7 @@ export class PointVisibilityManager {
      *
      * @param element the now unselected element
      */
-    private setUnselected(element: SCanvasContent): void {
+    private setUnselected(element: SCanvasContent | SMarker): void {
         const visibilityReason = this.visibleContents.get(element.id);
         if (visibilityReason !== undefined) {
             visibilityReason.self = false;

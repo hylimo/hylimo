@@ -26,12 +26,7 @@ export class ExecutableFunctionExpression extends ExecutableAbstractFunctionExpr
 
     override evaluateInternal(context: InterpreterContext): LabeledValue {
         return {
-            value: new FunctionObject(
-                this,
-                context.currentScope,
-                context.functionPrototype,
-                this.convertDocumentationToObject(context)
-            )
+            value: new FunctionObject(this, context.currentScope, this.convertDocumentationToObject(context))
         };
     }
 }

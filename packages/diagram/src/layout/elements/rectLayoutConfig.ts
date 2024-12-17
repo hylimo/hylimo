@@ -1,4 +1,4 @@
-import { FullObject, numberType } from "@hylimo/core";
+import { numberType } from "@hylimo/core";
 import { Element, Size, Rect, Point, Line, ArcSegment, LineSegment } from "@hylimo/diagram-common";
 import { LayoutElement, SizeConstraints, addToConstraints, addToSize } from "../layoutElement.js";
 import { Layout } from "../engine/layout.js";
@@ -26,14 +26,12 @@ export class RectLayoutConfig extends ContentShapeLayoutConfig {
     override measure(layout: Layout, element: LayoutElement, constraints: SizeConstraints): Size {
         this.normalizeStrokeWidth(element);
         const strokeWidth = element.styles.strokeWidth;
-        const content = element.element.getLocalFieldOrUndefined("content")?.value as FullObject | undefined;
+        const content = element.children[0];
         if (content) {
             const contentElement = layout.measure(
                 content,
-                element,
                 addToConstraints(constraints, -2 * strokeWidth, -2 * strokeWidth)
             );
-            element.content = contentElement;
             const size = addToSize(contentElement.measuredSize!, 2 * strokeWidth, 2 * strokeWidth);
             return size;
         } else {
@@ -57,7 +55,8 @@ export class RectLayoutConfig extends ContentShapeLayoutConfig {
             children: [],
             edits: element.edits
         };
-        if (element.content) {
+        const content = element.children[0];
+        if (content) {
             let contentSize = size;
             let contentPosition = position;
             const strokeWidth = result.stroke?.width;
@@ -65,9 +64,13 @@ export class RectLayoutConfig extends ContentShapeLayoutConfig {
                 contentSize = addToSize(contentSize, -2 * strokeWidth, -2 * strokeWidth);
                 contentPosition = { x: position.x + strokeWidth, y: position.y + strokeWidth };
             }
-            result.children.push(...layout.layout(element.content, contentPosition, contentSize));
+            result.children.push(...layout.layout(content, contentPosition, contentSize));
         }
-        return [result];
+        if (element.isHidden) {
+            return result.children;
+        } else {
+            return [result];
+        }
     }
 
     override outline(layout: Layout, element: LayoutElement, position: Point, size: Size, id: string): Line {

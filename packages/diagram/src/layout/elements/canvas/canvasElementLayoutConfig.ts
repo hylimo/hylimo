@@ -1,6 +1,6 @@
 import { FullObject, numberType, optional, ExecutableAbstractFunctionExpression, fun } from "@hylimo/core";
 import { Size, Point, Element, CanvasElement, DefaultEditTypes } from "@hylimo/diagram-common";
-import { canvasPointType, elementType } from "../../../module/base/types.js";
+import { canvasPointType, simpleElementType } from "../../../module/base/types.js";
 import {
     ContentCardinality,
     HorizontalAlignment,
@@ -9,7 +9,7 @@ import {
     VerticalAlignment
 } from "../../layoutElement.js";
 import { Layout } from "../../engine/layout.js";
-import { alignStyleAttributes, sizeStyleAttributes } from "../attributes.js";
+import { alignStyleAttributes, sizeStyleAttributes, visibilityStyleAttributes } from "../attributes.js";
 import { EditableCanvasContentLayoutConfig } from "./editableCanvasContentLayoutConfig.js";
 
 /**
@@ -18,17 +18,10 @@ import { EditableCanvasContentLayoutConfig } from "./editableCanvasContentLayout
 export class CanvasElementLayoutConfig extends EditableCanvasContentLayoutConfig {
     override isLayoutContent = false;
     override type = CanvasElement.TYPE;
-    override contentType = elementType();
-    override contentCardinality = ContentCardinality.ExactlyOne;
 
     constructor() {
         super(
             [
-                {
-                    name: "content",
-                    description: "the inner element",
-                    type: elementType()
-                },
                 {
                     name: "pos",
                     description: "the position of the canvasElement",
@@ -42,20 +35,22 @@ export class CanvasElementLayoutConfig extends EditableCanvasContentLayoutConfig
                     description: "the rotation in degrees",
                     type: numberType
                 },
-                ...sizeStyleAttributes
-            ]
+                ...sizeStyleAttributes,
+                ...visibilityStyleAttributes
+            ],
+            simpleElementType,
+            ContentCardinality.ExactlyOne
         );
     }
 
     override measure(layout: Layout, element: LayoutElement, constraints: SizeConstraints): Size {
-        const content = element.element.getLocalFieldOrUndefined("content")?.value as FullObject;
-        const contentElement = layout.measure(content, element, constraints);
-        element.content = contentElement;
+        const content = element.children[0];
+        const contentElement = layout.measure(content, constraints);
         return contentElement.measuredSize!;
     }
 
     override layout(layout: Layout, element: LayoutElement, position: Point, size: Size, id: string): Element[] {
-        const content = element.content as LayoutElement;
+        const content = element.children[0];
         let dx = 0;
         const hAlign = element.styles.hAlign;
         if (hAlign === HorizontalAlignment.RIGHT) {
@@ -86,6 +81,11 @@ export class CanvasElementLayoutConfig extends EditableCanvasContentLayoutConfig
         return [result];
     }
 
+    override getChildren(element: LayoutElement): FullObject[] {
+        const content = element.element.getLocalFieldOrUndefined("content")?.value as FullObject;
+        return [content];
+    }
+
     /**
      * Extracts the position from the element
      * If the element has a pos field, the position is extracted.
@@ -99,52 +99,40 @@ export class CanvasElementLayoutConfig extends EditableCanvasContentLayoutConfig
         if (pos == undefined) {
             return undefined;
         } else {
-            return layout.getElementId(pos);
+            const posId = layout.getElementId(pos);
+            if (!layout.isChildElement(element.parent!, layout.layoutElementLookup.get(posId)!)) {
+                throw new Error("The pos of a canvas element must be part of the same canvas or a sub-canvas");
+            }
+            return posId;
         }
     }
 
     override createPrototype(): ExecutableAbstractFunctionExpression {
         return fun(
             `
-                elementProto = object(proto = it)
+                elementProto = [proto = it]
 
                 elementProto.defineProperty("width") {
                     args.self._width
                 } {
                     args.self._width = it
-                    args.self.edits.set("${DefaultEditTypes.RESIZE_WIDTH}", createAdditiveEdit(it, "dw"))
+                    args.self.edits["${DefaultEditTypes.RESIZE_WIDTH}"] = createAdditiveEdit(it, "dw")
                 }
                 elementProto.defineProperty("height") {
                     args.self._height
                 } {
                     args.self._height = it
-                    args.self.edits.set("${DefaultEditTypes.RESIZE_HEIGHT}", createAdditiveEdit(it, "dh"))
+                    args.self.edits["${DefaultEditTypes.RESIZE_HEIGHT}"] = createAdditiveEdit(it, "dh")
                 }
                 elementProto.defineProperty("rotation") {
                     args.self._rotation
                 } {
                     args.self._rotation = it
-                    args.self.edits.set("${DefaultEditTypes.ROTATE}", createReplaceEdit(it, "$string(rotation)"))
+                    args.self.edits["${DefaultEditTypes.ROTATE}"] = createReplaceEdit(it, "$string(rotation)")
                 }
                 
                 elementProto
             `
         );
-    }
-
-    override postprocessStyles(element: LayoutElement, styles: Record<string, any>): Record<string, any> {
-        const width = element.element.getLocalFieldOrUndefined("_width")?.value?.toNative();
-        if (width != undefined) {
-            styles.width = width;
-        }
-        const height = element.element.getLocalFieldOrUndefined("_height")?.value?.toNative();
-        if (height != undefined) {
-            styles.height = height;
-        }
-        const rotation = element.element.getLocalFieldOrUndefined("_rotation")?.value?.toNative();
-        if (rotation != undefined) {
-            styles.rotation = rotation;
-        }
-        return styles;
     }
 }

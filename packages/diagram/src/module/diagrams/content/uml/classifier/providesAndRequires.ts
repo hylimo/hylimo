@@ -1,7 +1,21 @@
-import { fun, id, InterpreterModule, numberType, object, optional, parse, stringType } from "@hylimo/core";
+import { fun, id, InterpreterModule, numberType, object, objectType, optional, stringType } from "@hylimo/core";
 import { LinePointLayoutConfig } from "../../../../../layout/elements/canvas/linePointLayoutConfig.js";
 import { SCOPE } from "../../../../base/dslModule.js";
 import { canvasContentType } from "../../../../base/types.js";
+
+/**
+ * Type for the optional name label position
+ * The first value is the x offset, the second the y offset,
+ * both relative to the connection end.
+ */
+const nameLabelPosType = optional(
+    objectType(
+        new Map([
+            [0, optional(numberType)],
+            [1, optional(numberType)]
+        ])
+    )
+);
 
 /**
  * Module providing helper function to create provided and required interfaces for a classifier
@@ -18,15 +32,13 @@ export const providesAndRequiresModule = InterpreterModule.create(
                 object([
                     {
                         value: fun([
-                            ...parse(
-                                `
-                                    this.scope = args.scope
-                                    this.canvasScope = args.canvasScope
-                                    this.element = args.element
-                                    scope.ports = list()
-                                `
-                            ),
-                            id("scope").assignField(
+                            `
+                                this.callScope = args.callScope
+                                this.canvasScope = args.canvasScope
+                                this.element = args.element
+                                callScope.ports = list()
+                            `,
+                            id("callScope").assignField(
                                 "provides",
                                 fun(
                                     `
@@ -57,6 +69,15 @@ export const providesAndRequiresModule = InterpreterModule.create(
                                         )
                                         interfaceConnection.contents[0]._verticalPos = 1
                                         scope.internal.registerInDiagramScope(name, interfaceConnection)
+                                        (xLabelOffset, yLabelOffset) = args.namePos ?? [null, null]
+                                        nameLabelPos = canvasScope.rpos(interfaceConnection, xLabelOffset, yLabelOffset)
+                                        nameLabelPos.class = list("provided-interface-label-pos")
+                                        nameLabel = canvasElement(
+                                            content = text(contents = list(span(text = name)), class = list("label")),
+                                            class = list("label-element"),
+                                            pos = nameLabelPos
+                                        )
+                                        scope.internal.registerCanvasContent(nameLabel, args, canvasScope)
                                         interfaceConnection
                                     `,
                                     {
@@ -77,13 +98,14 @@ export const providesAndRequiresModule = InterpreterModule.create(
                                                 "dist",
                                                 "Distance of the provided interface to the classifier",
                                                 optional(numberType)
-                                            ]
+                                            ],
+                                            ["namePos", "X and Y offset for the name label", nameLabelPosType]
                                         ],
                                         returns: "The created provided interface"
                                     }
                                 )
                             ),
-                            id("scope").assignField(
+                            id("callScope").assignField(
                                 "requires",
                                 fun(
                                     `
@@ -112,6 +134,15 @@ export const providesAndRequiresModule = InterpreterModule.create(
                                         )
                                         interfaceConnection.contents[0]._verticalPos = 1
                                         scope.internal.registerInDiagramScope(name, interfaceConnection)
+                                        (xLabelOffset, yLabelOffset) = args.namePos ?? [null, null]
+                                        nameLabelPos = canvasScope.rpos(interfaceConnection, xLabelOffset, yLabelOffset)
+                                        nameLabelPos.class = list("required-interface-label-pos")
+                                        nameLabel = canvasElement(
+                                            content = text(contents = list(span(text = name)), class = list("label")),
+                                            class = list("label-element"),
+                                            pos = nameLabelPos
+                                        )
+                                        scope.internal.registerCanvasContent(nameLabel, args, canvasScope)
                                         interfaceConnection
                                     `,
                                     {
@@ -128,18 +159,17 @@ export const providesAndRequiresModule = InterpreterModule.create(
                                                 "dist",
                                                 "Distance of the required interface to the classifier",
                                                 optional(numberType)
-                                            ]
+                                            ],
+                                            ["namePos", "X and Y offset for the name label", nameLabelPosType]
                                         ],
                                         returns: "The created required interface"
                                     }
                                 )
                             ),
-                            ...parse(
-                                `
-                                    args.element.provides = scope.provides
-                                    args.element.requires = scope.requires
-                                `
-                            )
+                            `
+                                args.element.provides = callScope.provides
+                                args.element.requires = callScope.requires
+                            `
                         ])
                     },
                     {
@@ -147,49 +177,53 @@ export const providesAndRequiresModule = InterpreterModule.create(
                     }
                 ])
             ),
-        ...parse(
-            `
-                scope.dependsOn = {
-                    (start, end) = args
-                    canvasScope = args.self
-                    scope.internal.createConnection(
-                        canvasScope.rpos(start),
-                        canvasScope.rpos(end),
-                        list("dashed-connection", "depends-on-connection"),
-                        args,
-                        canvasScope,
-                        endMarkerFactory = scope.defaultMarkers.arrow
-                    )
-                }
+        `
+            scope.dependsOn = {
+                (start, end) = args
+                canvasScope = args.self
+                scope.internal.createConnection(
+                    canvasScope.rpos(start),
+                    canvasScope.rpos(end),
+                    list("dashed-connection", "depends-on-connection"),
+                    args,
+                    canvasScope,
+                    endMarkerFactory = scope.defaultMarkers.arrow
+                )
+            }
 
-                scope.styles {
-                    vars {
-                        requiredInterfaceSize = 45
-                        providedInterfaceSize = 30
-                    }
-                    cls("provided-interface") {
-                        width = var("providedInterfaceSize")
-                        height = var("providedInterfaceSize")
-                    }
-                    cls("required-interface") {
-                        width = var("requiredInterfaceSize")
-                        height = var("requiredInterfaceSize")
-                        stretch = "uniform"
-                    }
-                    cls("depends-on-connection") {
-                        type("marker") {
-                            type("path") {
-                                marginRight = var("providedInterfaceSize")
-                                hAlign = "right"
-                            }
-                            width = var("providedInterfaceSize")
-                            lineStart = 0
-                            refX = 0.5
-                            refY = 0.5
+            scope.styles {
+                vars {
+                    requiredInterfaceSize = 45
+                    providedInterfaceSize = 30
+                }
+                cls("provided-interface") {
+                    width = var("providedInterfaceSize")
+                    height = var("providedInterfaceSize")
+                }
+                cls("required-interface") {
+                    width = var("requiredInterfaceSize")
+                    height = var("requiredInterfaceSize")
+                    stretch = "uniform"
+                }
+                cls("depends-on-connection") {
+                    type("marker") {
+                        type("path") {
+                            marginRight = var("providedInterfaceSize")
+                            hAlign = "right"
                         }
+                        width = var("providedInterfaceSize")
+                        lineStart = 0
+                        refX = 0.5
+                        refY = 0.5
                     }
                 }
-            `
-        )
+                cls("provided-interface-label-pos") {
+                    offsetY = var("providedInterfaceSize") / 2
+                }
+                cls("required-interface-label-pos") {
+                    offsetY = var("requiredInterfaceSize") / 2
+                }
+            }
+        `
     ]
 );

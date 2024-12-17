@@ -1,4 +1,4 @@
-import { assign, fun, id, InterpreterModule, parse, stringType } from "@hylimo/core";
+import { assign, fun, id, InterpreterModule, stringType } from "@hylimo/core";
 import { SCOPE } from "../../../base/dslModule.js";
 
 /**
@@ -59,40 +59,38 @@ export const commentModule = InterpreterModule.create(
                 }
             )
         ),
-        ...parse(
-            `
-                scope.styles {
-                    vars {
-                        commentTriangleSize = 20
-                    }
-                    cls("comment-element") {
-                        vAlign = "center"
-                        hAlign = "center"
-                        minWidth = 80
-                        maxWidth = 300
+        `
+            scope.styles {
+                vars {
+                    commentTriangleSize = 20
+                }
+                cls("comment-element") {
+                    vAlign = "center"
+                    hAlign = "center"
+                    minWidth = 80
+                    maxWidth = 300
 
-                        cls("comment") {
-                            marginRight = 5
-                            marginLeft = 5
-                            marginBottom = 5
-                        }
-                        cls("comment-right") {
-                            marginTop = var("commentTriangleSize")
-                        }
-                        cls("comment-top") {
-                            marginRight = var("commentTriangleSize")
-                        }
-                        cls("comment-triangle") {
-                            width = var("commentTriangleSize")
-                            height = var("commentTriangleSize")
-                        }
-                        type("path") {
-                            stroke = var("primary")
-                            strokeWidth = var("strokeWidth")
-                        }
+                    cls("comment") {
+                        marginRight = 5
+                        marginLeft = 5
+                        marginBottom = 5
+                    }
+                    cls("comment-right") {
+                        marginTop = var("commentTriangleSize")
+                    }
+                    cls("comment-top") {
+                        marginRight = var("commentTriangleSize")
+                    }
+                    cls("comment-triangle") {
+                        width = var("commentTriangleSize")
+                        height = var("commentTriangleSize")
+                    }
+                    type("path") {
+                        stroke = var("primary")
+                        strokeWidth = var("strokeWidth")
                     }
                 }
-            `
-        )
+            }
+        `
     ]
 );

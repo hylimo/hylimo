@@ -52,15 +52,20 @@ onClickOutside(dialog, () => {
     width: 100%;
     height: 100%;
     display: flex;
-    align-items: start;
-    justify-content: center;
+    flex-direction: column;
+    align-items: center;
     background: var(--vp-backdrop-bg-color);
     transition: opacity 0.5s;
 }
 
 .modal-container {
+    display: flex;
+    flex-direction: column;
     width: min(calc(100% - 40px), 400px);
+    min-height: 0;
+    flex: 0 1 auto;
     margin-top: calc(var(--vp-nav-height) + 20px);
+    margin-bottom: 20px;
     background-color: var(--vp-c-bg);
     border-radius: 12px;
     transition: all 0.3s ease;

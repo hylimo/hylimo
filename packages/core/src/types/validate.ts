@@ -2,6 +2,7 @@ import { Expression } from "../ast/expression.js";
 import { InterpreterContext } from "../runtime/interpreter/interpreterContext.js";
 import { BaseObject } from "../runtime/objects/baseObject.js";
 import { RuntimeError } from "../runtime/runtimeError.js";
+import { assertObject } from "../stdlib/typeHelpers.js";
 import { Type } from "./base.js";
 
 /**
@@ -36,5 +37,29 @@ export function validate(
             error.interpretationStack.push(source);
         }
         throw error;
+    }
+}
+
+/**
+ * Validates an object
+ * Checks that all fields are valid
+ *
+ * @param object the scope object
+ * @param context the interpreter context
+ * @param properties the properties of the scope object
+ * @throws if the scope object is invalid
+ */
+export function validateObject(
+    object: BaseObject,
+    context: InterpreterContext,
+    properties: {
+        name: string;
+        type: Type;
+    }[]
+): void {
+    assertObject(object);
+    for (const property of properties) {
+        const propertyValue = object.getLocalField(property.name, context).value;
+        validate(property.type, `Invalid value for ${property.name}`, propertyValue, context);
     }
 }

@@ -43,7 +43,7 @@ export class MovedElementsSelector {
      * @param index index for element lookup
      */
     constructor(
-        selected: (SCanvasElement | SCanvasPoint)[],
+        selected: (SCanvasElement | SCanvasPoint | SMarker)[],
         private readonly index: IModelIndex
     ) {
         this.registerElements(new Set(selected));
@@ -56,13 +56,15 @@ export class MovedElementsSelector {
      *
      * @param points the points to move
      */
-    private registerElements(elements: Set<SCanvasPoint | SCanvasElement>) {
-        let currentElements: Set<SCanvasContent> = elements;
+    private registerElements(elements: Set<SCanvasPoint | SCanvasElement | SMarker>) {
+        let currentElements: Set<SCanvasContent | SMarker> = elements;
         while (currentElements.size > 0) {
             const newElements = new Set<SCanvasContent>();
             for (const element of currentElements) {
                 if (element instanceof SCanvasConnection) {
                     newElements.add(this.index.getById(element.segments.at(-1)!.end) as SCanvasContent);
+                } else if (element instanceof SMarker) {
+                    newElements.add(this.index.getById(element.posId) as SCanvasContent);
                 } else {
                     this.movedElements.add(element as SCanvasPoint | SCanvasElement);
                 }

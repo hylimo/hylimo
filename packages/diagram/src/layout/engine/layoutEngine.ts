@@ -1,15 +1,27 @@
-import { BaseObject, FullObject, nativeToList } from "@hylimo/core";
-import { Size, Point, Stroke, Canvas, Bounds } from "@hylimo/diagram-common";
-import { FontManager } from "../../font/fontManager.js";
-import { TextLayoutResult, TextLayouter } from "../../font/textLayouter.js";
+import { FullObject, InterpreterContext, nativeToList } from "@hylimo/core";
+import {
+    Size,
+    Point,
+    Stroke,
+    Canvas,
+    Bounds,
+    FontFamilyConfig,
+    Element,
+    FontData,
+    DiagramConfig
+} from "@hylimo/diagram-common";
+import { FontManager, SubsetFontKey } from "../font/fontManager.js";
+import { TextLayoutResult, TextLayouter } from "../font/textLayouter.js";
 import { generateStyles } from "../../styles.js";
 import { LayoutedDiagram } from "../diagramLayoutResult.js";
-import { LayoutConfig, SizeConstraints } from "../layoutElement.js";
+import { LayoutConfig, LayoutElement, SizeConstraints } from "../layoutElement.js";
 import { layouts } from "../layouts.js";
-import { FontCollection } from "../../font/fontCollection.js";
+import { FontCollection } from "../font/fontCollection.js";
 import { LayoutCache } from "./layoutCache.js";
 import { StretchMode } from "../elements/pathLayoutConfig.js";
 import { Layout } from "./layout.js";
+import { SubsettedFont } from "../font/fontFamily.js";
+import { SubsetCollector } from "../font/subsetCollector.js";
 
 /**
  * The amount of iterations which are cached
@@ -67,6 +79,24 @@ export interface LayoutedPath {
 }
 
 /**
+ * The root element of the layout with the layout
+ */
+export class LayoutWithRoot {
+    /**
+     * Creates a new layout with root
+     *
+     * @param root - The root element of the layout
+     * @param layout - The layout
+     * @param fontFamilies - The fonts root uses
+     */
+    constructor(
+        public readonly root: LayoutElement,
+        public readonly layout: Layout,
+        public readonly fontFamilies: FontFamilyConfig[]
+    ) {}
+}
+
+/**
  * Performs layout, generates a model as a result
  */
 export class LayoutEngine {
@@ -74,11 +104,6 @@ export class LayoutEngine {
      * Lookup for layout configs
      */
     readonly layoutConfigs: Map<string, LayoutConfig> = new Map();
-
-    /**
-     * Used to get fonts
-     */
-    readonly fontManager = new FontManager();
 
     /**
      * Text layout engine
@@ -96,6 +121,16 @@ export class LayoutEngine {
     readonly pathCache = new LayoutCache<PathCacheKey, LayoutedPath>(CACHE_TTL);
 
     /**
+     * Cache for subsetted fonts
+     */
+    readonly subsetFontCache = new LayoutCache<SubsetFontKey, Promise<SubsettedFont>>(CACHE_TTL);
+
+    /**
+     * Used to get fonts
+     */
+    readonly fontManager = new FontManager(this.subsetFontCache);
+
+    /**
      * Creates a new layout engine
      */
     constructor() {
@@ -105,67 +140,49 @@ export class LayoutEngine {
     }
 
     /**
-     * Layouts a diagram defined using syncscript
+     * Creates a layout for a root element
      *
-     * @param diagram the diagram to layout
-     * @returns the layouted diagram
+     * @param element the element to layout
+     * @param styles the styles to use
+     * @param fonts the fonts to use
+     * @param context the context to use
+     * @returns the layout with the LayoutElement created for {@link element}
      */
-    async layout(diagram: BaseObject): Promise<LayoutedDiagram> {
-        this.assertDiagram(diagram);
-        const nativeFonts = diagram.getLocalFieldOrUndefined("fonts")?.value?.toNative();
-        let cacheMiss = false;
-        const fontFamilies = await Promise.all(
-            nativeToList(nativeFonts).map(async (config) => {
-                const { fontFamily, cacheHit } = await this.fontManager.getFontFamily(config);
-                cacheMiss = cacheMiss || !cacheHit;
-                return fontFamily;
-            })
-        );
-        if (cacheMiss) {
-            this.textCache.clear();
-        } else {
-            this.textCache.nextIteration();
-        }
-        this.pathCache.nextIteration();
-        const fontFamilyConfigs = fontFamilies.map((family) => family.config);
+    createLayout(
+        element: FullObject,
+        styles: FullObject,
+        fonts: FullObject,
+        context: InterpreterContext
+    ): LayoutWithRoot {
+        const nativeFonts = nativeToList(fonts.toNative());
         const layout = new Layout(
             this,
-            generateStyles(diagram.getLocalFieldOrUndefined("styles")?.value as FullObject),
-            new FontCollection(fontFamilies),
-            fontFamilies[0]
+            generateStyles(styles),
+            new FontCollection(),
+            nativeFonts[0].fontFamily,
+            context
         );
-        const layoutElement = layout.measure(
-            diagram.getLocalFieldOrUndefined("element")?.value as FullObject,
-            undefined,
-            {
-                min: {
-                    width: 0,
-                    height: 0
-                },
-                max: {
-                    width: Number.POSITIVE_INFINITY,
-                    height: Number.POSITIVE_INFINITY
-                }
-            }
-        );
-        const elements = layout.layout(layoutElement, Point.ORIGIN, layoutElement.measuredSize!);
-        let bounds: Bounds;
-        if (elements.length == 1 && elements[0].type == Canvas.TYPE) {
-            const canvas = elements[0] as Canvas;
-            bounds = { position: { x: -canvas.dx, y: -canvas.dy }, size: layoutElement.measuredSize! };
-            canvas.dx = 0;
-            canvas.dy = 0;
-        } else {
-            bounds = { position: Point.ORIGIN, size: layoutElement.measuredSize! };
-        }
+        const layoutElement = layout.create(element, undefined);
+        return new LayoutWithRoot(layoutElement, layout, nativeFonts);
+    }
+
+    /**
+     * Layouts a diagram defined using syncscript
+     *
+     * @param layoutWithRoot the layout with the root element
+     * @param config the configuration to use
+     * @returns the layouted diagram
+     */
+    async layout({ root, layout, fontFamilies }: LayoutWithRoot, config: DiagramConfig): Promise<LayoutedDiagram> {
+        await this.initFonts(root, fontFamilies, layout, config);
+
         return {
             rootElement: {
                 type: "root",
                 id: "root",
-                children: elements,
-                fonts: fontFamilyConfigs,
-                edits: {},
-                rootBounds: bounds
+                ...this.layoutElement(layout, root),
+                fonts: this.generateSubsettedFontData(layout),
+                edits: {}
             },
             elementLookup: layout.elementLookup,
             layoutElementLookup: layout.layoutElementLookup
@@ -173,16 +190,105 @@ export class LayoutEngine {
     }
 
     /**
-     * Asserts that the provided diagram is a valid diagram
-     *
-     * @param diagram the diagram to check
+     * Starts the next iteration for each cache
      */
-    private assertDiagram(diagram: BaseObject): asserts diagram is FullObject {
-        if (!(diagram instanceof FullObject)) {
-            throw new Error("A Diagram must be an Object");
+    nextCacheGeneration(): void {
+        this.textCache.nextIteration();
+        this.pathCache.nextIteration();
+        this.subsetFontCache.nextIteration();
+    }
+
+    /**
+     * Generates the subsetted font data
+     *
+     * @param layout the layout to use
+     * @returns the subsetted font data
+     */
+    private generateSubsettedFontData(layout: Layout): FontData[] {
+        const fonts: SubsettedFont[] = [];
+        for (const fontFamily of layout.fonts.fontFamilies.values()) {
+            if (fontFamily.normal != undefined) {
+                fonts.push(fontFamily.normal);
+            }
+            if (fontFamily.italic != undefined) {
+                fonts.push(fontFamily.italic);
+            }
+            if (fontFamily.bold != undefined) {
+                fonts.push(fontFamily.bold);
+            }
+            if (fontFamily.boldItalic != undefined) {
+                fonts.push(fontFamily.boldItalic);
+            }
         }
-        if (!diagram.hasField("element") || !diagram.hasField("fonts") || !diagram.hasField("styles")) {
-            throw new Error("A Diagram must have an element, fonts and styles fields");
+        return fonts.map((font) => ({
+            fontFamily: font.id,
+            data: font.subsettedFontEncoded
+        }));
+    }
+
+    /**
+     * Layouts the root element
+     * First measures the element, then layouts it
+     *
+     * @param layout the layout to use
+     * @param layoutElement the element to layout
+     * @returns all children of the root element and the bounds of the root element
+     */
+    private layoutElement(layout: Layout, layoutElement: LayoutElement): { children: Element[]; rootBounds: Bounds } {
+        layout.measure(layoutElement, {
+            min: {
+                width: 0,
+                height: 0
+            },
+            max: {
+                width: Number.POSITIVE_INFINITY,
+                height: Number.POSITIVE_INFINITY
+            }
+        });
+        const children = layout.layout(layoutElement, Point.ORIGIN, layoutElement.measuredSize!);
+        let bounds: Bounds;
+        if (children.length == 1 && children[0].type == Canvas.TYPE) {
+            const canvas = children[0] as Canvas;
+            bounds = { position: { x: -canvas.dx, y: -canvas.dy }, size: layoutElement.measuredSize! };
+            canvas.dx = 0;
+            canvas.dy = 0;
+        } else {
+            bounds = { position: Point.ORIGIN, size: layoutElement.measuredSize! };
+        }
+        return { children, rootBounds: bounds };
+    }
+
+    /**
+     * Initializes the fonts for the layout
+     * Also handles font related caching
+     *
+     * @param layoutElement the root layout element
+     * @param fontFamilies the font families to initialize
+     * @param layout the layout to use
+     * @param diagramConfig the diagram config
+     */
+    private async initFonts(
+        layoutElement: LayoutElement,
+        fontFamilies: FontFamilyConfig[],
+        layout: Layout,
+        diagramConfig: DiagramConfig
+    ): Promise<void> {
+        const subsetCollector = new SubsetCollector(layoutElement, fontFamilies[0].fontFamily);
+        let cacheMiss = false;
+        await Promise.all(
+            fontFamilies.map(async (config) => {
+                const { fontFamily, cacheHit } = await this.fontManager.getFontFamily(
+                    config,
+                    subsetCollector.subsets.get(config.fontFamily) ?? {},
+                    diagramConfig
+                );
+                cacheMiss ||= !cacheHit;
+                layout.fonts.registerFont(fontFamily);
+                return fontFamily;
+            })
+        );
+        if (cacheMiss) {
+            this.textCache.clear();
         }
     }
 }

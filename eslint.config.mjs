@@ -5,7 +5,13 @@ import eslint from "@eslint/js";
 
 export default tseslint.config(
     {
-        ignores: ["packages/*/lib/", "website/.vitepress/dist/", "website/.vitepress/cache/", "website/dev-dist/"]
+        ignores: [
+            "packages/*/lib/",
+            "packages/*/.rollup.cache/",
+            "website/.vitepress/dist/",
+            "website/.vitepress/cache/",
+            "website/dev-dist/"
+        ]
     },
     eslint.configs.recommended,
     prettierRecommended,

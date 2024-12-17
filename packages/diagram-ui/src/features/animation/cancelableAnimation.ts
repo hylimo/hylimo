@@ -20,7 +20,7 @@ export abstract class CancelableAnimation extends Animation {
         super(context);
     }
 
-    tween(t: number, context: CommandExecutionContext): SModelRootImpl {
+    override tween(t: number, context: CommandExecutionContext): SModelRootImpl {
         if (CancelableCommandExecutionContext.isCanceled(context)) {
             if (CancelableCommandExecutionContext.isCanceledAndSkipped(context)) {
                 return this.tweenAndUpdateChangeRevision(1, context);

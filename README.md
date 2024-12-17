@@ -65,3 +65,4 @@ This deploys the website at http://localhost:5173
 - @hylimo/diagram-ui: [EPL-2.0](packages/diagram-ui/LICENSE)
 - @hylimo/fonts: [MIT](packages/fonts/LICENSE)
 - @hylimo/language-server: [MIT](packages/language-server/LICENSE)
+- @hylimo/wasm-libs: [MIT](packages/wasm-libs/LICENSE)

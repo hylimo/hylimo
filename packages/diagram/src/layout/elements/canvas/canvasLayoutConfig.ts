@@ -1,4 +1,4 @@
-import { FullObject, listType, objectToList, or } from "@hylimo/core";
+import { FullObject, objectToList } from "@hylimo/core";
 import {
     Size,
     Point,
@@ -17,7 +17,7 @@ import {
 import { ContentCardinality, LayoutElement } from "../../layoutElement.js";
 import { Layout } from "../../engine/layout.js";
 import { StyledElementLayoutConfig } from "../styledElementLayoutConfig.js";
-import { canvasPointType, elementType } from "../../../module/base/types.js";
+import { elementType } from "../../../module/base/types.js";
 import { CanvasContentLayoutConfig } from "./canvasContentLayoutConfig.js";
 
 /**
@@ -25,37 +25,30 @@ import { CanvasContentLayoutConfig } from "./canvasContentLayoutConfig.js";
  */
 export class CanvasLayoutConfig extends StyledElementLayoutConfig {
     override type = Canvas.TYPE;
-    override contentType = elementType(
-        CanvasElement.TYPE,
-        CanvasConnection.TYPE,
-        AbsolutePoint.TYPE,
-        RelativePoint.TYPE,
-        LinePoint.TYPE
-    );
-    override contentCardinality = ContentCardinality.Many;
 
     constructor() {
         super(
-            [
-                {
-                    name: "contents",
-                    description: "the inner elements",
-                    type: listType(or(canvasPointType, elementType(CanvasElement.TYPE, CanvasConnection.TYPE)))
-                }
-            ],
-            []
+            [],
+            [],
+            elementType(
+                CanvasElement.TYPE,
+                CanvasConnection.TYPE,
+                AbsolutePoint.TYPE,
+                RelativePoint.TYPE,
+                LinePoint.TYPE
+            ),
+            ContentCardinality.Many
         );
     }
 
     override measure(layout: Layout, element: LayoutElement): Size {
-        const contents = this.getContents(element);
+        const contents = element.children;
         const layoutedContents = contents.map((content) =>
-            layout.measure(content, element, {
+            layout.measure(content, {
                 min: { width: 0, height: 0 },
                 max: { width: Number.POSITIVE_INFINITY, height: Number.POSITIVE_INFINITY }
             })
         );
-        element.contents = layoutedContents;
 
         const children: Element[] = [];
         const layoutChildren: Element[] = [];
@@ -76,7 +69,7 @@ export class CanvasLayoutConfig extends StyledElementLayoutConfig {
             }
         }
         const bounds = Math2D.mergeBounds(...childBounds);
-        element.children = [...children, ...layoutChildren];
+        element.childElements = [...children, ...layoutChildren];
         element.canvasBounds = bounds;
 
         return bounds.size;
@@ -84,7 +77,7 @@ export class CanvasLayoutConfig extends StyledElementLayoutConfig {
 
     override layout(layout: Layout, element: LayoutElement, position: Point, size: Size, id: string): Element[] {
         const bounds = element.canvasBounds as Bounds;
-        const children = element.children as Element[];
+        const children = element.childElements as Element[];
         const result: Canvas = {
             type: Canvas.TYPE,
             id,
@@ -206,13 +199,7 @@ export class CanvasLayoutConfig extends StyledElementLayoutConfig {
         );
     }
 
-    /**
-     * Gets the contents of a panel
-     *
-     * @param element the element containing the contents
-     * @returns the contents
-     */
-    private getContents(element: LayoutElement): FullObject[] {
+    override getChildren(element: LayoutElement): FullObject[] {
         const contents = element.element.getLocalFieldOrUndefined("contents")?.value as FullObject | undefined;
         if (contents) {
             return objectToList(contents) as FullObject[];
