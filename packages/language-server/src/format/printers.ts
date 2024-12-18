@@ -36,7 +36,11 @@ export const printers: Record<Rules, ({ ctx, path, print }: PrintContext) => Doc
  */
 function printLiteral({ ctx, path, print }: PrintContext): Doc {
     if (ctx.StringStart) {
-        return ['"', ...path.map(print, Rules.STRING_PART), '"'];
+        if (ctx.stringPart) {
+            return ['"', ...path.map(print, Rules.STRING_PART), '"'];
+        } else {
+            return '""';
+        }
     } else {
         const token = ctx.Number[0] as IToken;
         if (ctx.SignMinus) {
