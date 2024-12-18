@@ -1,4 +1,4 @@
-import { fun, id, InterpreterModule, optional, parse, stringType } from "@hylimo/core";
+import { fun, id, InterpreterModule, optional, stringType } from "@hylimo/core";
 import { SCOPE } from "../../../base/dslModule.js";
 
 const stickmanIconPath =
@@ -23,14 +23,19 @@ export const actorModule = InterpreterModule.create(
             actorElement = canvasElement(
                 content = rect(
                     content = vbox(contents = elements),
-                    class = list("actor"),
-                    stroke = "unset"
+                    class = list("actor")
                 ),
                 class = list("actor-element")
             )
             
             if(name != null) {
               scope.internal.registerInDiagramScope(name, actorElement)
+            }
+            
+            scope.styles {
+              cls("actor") {
+                stroke = "unset"
+              }
             }
             
             scope.internal.registerCanvasElement(actorElement, args.args, args.args.self)

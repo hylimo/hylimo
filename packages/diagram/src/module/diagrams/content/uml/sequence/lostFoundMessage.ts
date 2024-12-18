@@ -1,4 +1,4 @@
-import { fun, id, InterpreterModule, numberType, optional, parse, stringType } from "@hylimo/core";
+import { fun, id, InterpreterModule, numberType, optional, parse } from "@hylimo/core";
 import { SCOPE } from "../../../../base/dslModule.js";
 
 /**
@@ -10,17 +10,24 @@ import { SCOPE } from "../../../../base/dslModule.js";
 function message(type: string): string {
     return `
   distance = args.distance ?? scope.externalMessageDistance
-  fill = args.fill ?? scope.var("primary")
   diameter = args.diameter ?? scope.externalMessageDiameter
   dot = canvasElement(
-    content = ellipse(class = list("${type}-message"), fill = fill),
+    content = ellipse(class = list("${type}-message")),
     width = diameter,
     height = diameter,
-    class = list("${type}-message-element}"),
-    vAlign = "center",
-    hAlign = "center",
-    stroke = unset
+    class = list("${type}-message-element}")
     )
+    
+  scope.styles {
+    cls("${type}-message") {
+      fill = var("primary")
+    }
+    cls("${type}-message-element") {
+      vAlign = "center",
+      hAlign = "center",
+      stroke = "unset"
+    }
+  }
   
   // We need to change the properties of the canvasElement directly and return it as a connection requires a point or element as parameter
   dot.diameter = diameter
@@ -52,7 +59,6 @@ export const lostFoundMessageModule = InterpreterModule.create(
                         "the optional distance of the message on the x axis. Defaults to 'externalMessageDistance'",
                         optional(numberType)
                     ],
-                    ["fill", "the optional fill of the dot. Defaults to the primary color", optional(stringType)],
                     [
                         "diameter",
                         "the optional diameter of the dot. Defaults to 'externalMessageDiameter'",
@@ -73,7 +79,6 @@ export const lostFoundMessageModule = InterpreterModule.create(
                         "the optional distance of the message on the x axis. Defaults to 'externalMessageDistance'",
                         optional(numberType)
                     ],
-                    ["fill", "the optional fill of the dot. Defaults to the primary color", optional(stringType)],
                     [
                         "diameter",
                         "the optional diameter of the dot. Defaults to 'externalMessageDiameter'",

@@ -71,7 +71,7 @@ export const activityIndicatorModule = InterpreterModule.create(
                 width = scope.activityWidth
                 
                 activityIndicatorElement = canvasElement(
-                    content = rect(class = list("activity-indicator"), fill = var("background")),
+                    content = rect(class = list("activity-indicator")),
                     class = list("activity-indicator-element"),
                     width = width,
                     height = height
@@ -89,6 +89,14 @@ export const activityIndicatorModule = InterpreterModule.create(
                 
                 scope.internal.registerCanvasElement(activityIndicatorElement, args, args.self)
                 instance.activeActivityIndicators += activityIndicatorElement
+                
+                scope.styles {
+                  cls("activity-indicator") {
+                    fill = var("background")
+                  }
+                }
+                
+                activityIndicatorElement
             `,
                 {
                     docs: "Activates an activity indicator at the most recent event you declared. activity indicators are ranges of time during which an instance is active. You can activate an activity indicator multiple times simultaneously for the same participant",

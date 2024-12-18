@@ -1,4 +1,4 @@
-import { fun, functionType, id, InterpreterModule, listType, optional, or, parse, stringType } from "@hylimo/core";
+import { fun, functionType, id, InterpreterModule, listType, optional, or, stringType } from "@hylimo/core";
 import { SCOPE } from "../../../base/dslModule.js";
 
 /**

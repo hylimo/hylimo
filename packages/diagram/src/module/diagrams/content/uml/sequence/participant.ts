@@ -1,4 +1,4 @@
-import { fun, id, InterpreterModule, numberType, optional, parse } from "@hylimo/core";
+import { fun, id, InterpreterModule, numberType, optional } from "@hylimo/core";
 import { SCOPE } from "../../../../base/dslModule.js";
 import { participantType } from "./types.js";
 
@@ -105,9 +105,15 @@ export const participantModule = InterpreterModule.create(
                               ),
                               class = list("destroy-cross-path-element"),
                               width = crossSize,
-                              height = crossSize,
-                              vAlign = "center",
-                              hAlign = "center")
+                              height = crossSize
+                              )
+                scope.styles {
+                  cls("destroy-cross-path-element") {
+                    vAlign = "center",
+                    hAlign = "center"
+                  }
+                }
+
                 // We must change the position by '2*margin' compared to the last event as the lifeline continues to be drawn by two additional margins
                 cross.pos = scope.rpos(participant.events.get(participant.events.length - 1), 0, 2*scope.margin)
                 scope.internal.registerCanvasElement(cross, originalArgs, originalArgs.self)
