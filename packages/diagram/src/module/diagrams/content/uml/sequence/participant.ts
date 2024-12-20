@@ -109,7 +109,7 @@ export const participantModule = InterpreterModule.create(
                               )
                 scope.styles {
                   cls("destroy-cross-path-element") {
-                    vAlign = "center",
+                    vAlign = "center"
                     hAlign = "center"
                   }
                 }

@@ -23,8 +23,8 @@ function message(type: string): string {
       fill = var("primary")
     }
     cls("${type}-message-element") {
-      vAlign = "center",
-      hAlign = "center",
+      vAlign = "center"
+      hAlign = "center"
       stroke = "unset"
     }
   }
