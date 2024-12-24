@@ -70,8 +70,9 @@ export namespace Text {
 
     /**
      * Checks if an element is a Text
-     * @param value
-     * @returns
+     *
+     * @param value the element to check
+     * @returns true if the element is a Text
      */
     export function isText(value: Element): value is Text {
         return value.type === TYPE;

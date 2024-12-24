@@ -7,9 +7,10 @@ import { SCanvasElement } from "../../model/canvas/sCanvasElement.js";
 import { SCanvasPoint } from "../../model/canvas/sCanvasPoint.js";
 import { SLinePoint } from "../../model/canvas/sLinePoint.js";
 import { SRelativePoint } from "../../model/canvas/sRelativePoint.js";
-import { SCanvas } from "../../model/canvas/sCanvas.js";
 import { SMarker } from "../../model/canvas/sMarker.js";
 import { SCanvasBezierSegment } from "../../model/canvas/sCanvasBezierSegment.js";
+import { CanvasLike } from "../../model/canvas/canvasLike.js";
+import { SElement } from "../../model/sElement.js";
 
 /**
  * Helper to select the points and elements which have to be modified during a move edit.
@@ -210,7 +211,7 @@ export class MovedElementsSelector {
      * @returns true if the element is moved implicitly by a parent canvas, otherwise false
      */
     private isParentCanvasImplicitlyMoved(element: SCanvasElement | SAbsolutePoint): boolean {
-        const canvas = element.parent as SCanvas;
+        const canvas = element.parent as CanvasLike & SElement;
         const isCanvasMoved = this.isMovedLookup.get(canvas.id);
         if (isCanvasMoved != undefined) {
             return isCanvasMoved;

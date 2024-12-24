@@ -1,15 +1,5 @@
 import { FullObject, InterpreterContext, nativeToList } from "@hylimo/core";
-import {
-    Size,
-    Point,
-    Stroke,
-    Canvas,
-    Bounds,
-    FontFamilyConfig,
-    Element,
-    FontData,
-    DiagramConfig
-} from "@hylimo/diagram-common";
+import { Size, Point, Stroke, Canvas, FontFamilyConfig, FontData, DiagramConfig } from "@hylimo/diagram-common";
 import { FontManager, SubsetFontKey } from "../font/fontManager.js";
 import { TextLayoutResult, TextLayouter } from "../font/textLayouter.js";
 import { generateStyles } from "../../styles.js";
@@ -175,14 +165,18 @@ export class LayoutEngine {
      */
     async layout({ root, layout, fontFamilies }: LayoutWithRoot, config: DiagramConfig): Promise<LayoutedDiagram> {
         await this.initFonts(root, fontFamilies, layout, config);
-
+        const canvas = this.layoutElement(layout, root);
         return {
             rootElement: {
                 type: "root",
-                id: "root",
-                ...this.layoutElement(layout, root),
-                fonts: this.generateSubsettedFontData(layout),
-                edits: {}
+                id: canvas.id,
+                children: canvas.children,
+                edits: canvas.edits,
+                rootBounds: {
+                    position: { x: -canvas.dx, y: -canvas.dy },
+                    size: { width: canvas.width, height: canvas.height }
+                },
+                fonts: this.generateSubsettedFontData(layout)
             },
             elementLookup: layout.elementLookup,
             layoutElementLookup: layout.layoutElementLookup
@@ -232,9 +226,9 @@ export class LayoutEngine {
      *
      * @param layout the layout to use
      * @param layoutElement the element to layout
-     * @returns all children of the root element and the bounds of the root element
+     * @returns the layouted canvas child element
      */
-    private layoutElement(layout: Layout, layoutElement: LayoutElement): { children: Element[]; rootBounds: Bounds } {
+    private layoutElement(layout: Layout, layoutElement: LayoutElement): Canvas {
         layout.measure(layoutElement, {
             min: {
                 width: 0,
@@ -246,16 +240,10 @@ export class LayoutEngine {
             }
         });
         const children = layout.layout(layoutElement, Point.ORIGIN, layoutElement.measuredSize!);
-        let bounds: Bounds;
-        if (children.length == 1 && children[0].type == Canvas.TYPE) {
-            const canvas = children[0] as Canvas;
-            bounds = { position: { x: -canvas.dx, y: -canvas.dy }, size: layoutElement.measuredSize! };
-            canvas.dx = 0;
-            canvas.dy = 0;
-        } else {
-            bounds = { position: Point.ORIGIN, size: layoutElement.measuredSize! };
+        if (children.length != 1 || children[0].type != Canvas.TYPE) {
+            throw new Error("Root element must be a canvas");
         }
-        return { children, rootBounds: bounds };
+        return children[0] as Canvas;
     }
 
     /**

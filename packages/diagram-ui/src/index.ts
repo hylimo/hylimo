@@ -22,6 +22,8 @@ export * from "./features/navigation/di.config.js";
 export * from "./features/navigation/navigationMouseListener.js";
 export * from "./features/split-canvas-segment/di.config.js";
 export * from "./features/split-canvas-segment/splitCanvasSegmentMouseListener.js";
+export * from "./features/toobox/ci.config.js";
+export * from "./features/toobox/toolbox.js";
 export * from "./features/transaction/di.config.js";
 export * from "./features/transaction/transactionIdProvider.js";
 export * from "./features/undo-redo/di.config.js";

@@ -1,15 +1,17 @@
-import { FontData, convertFontsToCssStyle } from "@hylimo/diagram-common";
+import { EditSpecification, FontData, convertFontsToCssStyle } from "@hylimo/diagram-common";
 import { ModelIndexImpl, ViewportRootElementImpl } from "sprotty";
 import { SCanvasAxisAlignedSegment } from "./canvas/sCanvasAxisAlignedSegment.js";
 import { SCanvasLayoutEngine } from "./canvas/sCanvasLayoutEngine.js";
 import { Matrix, compose, translate, scale } from "transformation-matrix";
 import { Bounds } from "sprotty-protocol";
 import { Bounds as HylimoBounds } from "@hylimo/diagram-common";
+import { CanvasLike } from "./canvas/canvasLike.js";
+import { PointVisibilityManager } from "./canvas/pointVisibilityManager.js";
 
 /**
  * Root element.
  */
-export class SRoot extends ViewportRootElementImpl {
+export class SRoot extends ViewportRootElementImpl implements CanvasLike {
     /**
      * The default point size
      */
@@ -39,10 +41,36 @@ export class SRoot extends ViewportRootElementImpl {
      * The layout engine for the canvases
      */
     private currentLayoutEngine: SCanvasLayoutEngine | undefined;
+
     /**
      * The version of the layout engine
      */
     private layoutEngineVersion = -1;
+
+    /**
+     * Internal cached version of the PointVisibilityManager
+     */
+    private _pointVisibilityManager?: PointVisibilityManager;
+
+    /**
+     * Gets the PointVisibilityManager
+     */
+    get pointVisibilityManager(): PointVisibilityManager {
+        if (!this._pointVisibilityManager) {
+            this._pointVisibilityManager = new PointVisibilityManager(this);
+        }
+        return this._pointVisibilityManager;
+    }
+
+    /**
+     * The edit specification for this element
+     */
+    edits!: EditSpecification;
+
+    /**
+     * The global rotation of the canvas, always 0 for the root element
+     */
+    globalRotation = 0;
 
     constructor(index = new ModelIndexImpl()) {
         super(index);
@@ -74,7 +102,7 @@ export class SRoot extends ViewportRootElementImpl {
      *
      * @returns the transformation matrix
      */
-    getZoomScrollTransformationMatrix(): Matrix {
+    getMouseTransformationMatrix(): Matrix {
         const rect = this.canvasBounds;
         return compose(translate(this.scroll.x, this.scroll.y), scale(1 / this.zoom), translate(-rect.x, -rect.y));
     }

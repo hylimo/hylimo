@@ -21,6 +21,7 @@ import { ExecutableListEntry } from "./ast/executableListEntry.js";
 import { ExecutableConstExpression } from "./ast/executableConstExpression.js";
 import { StringObject } from "./objects/stringObject.js";
 import { NumberObject } from "./objects/numberObject.js";
+import { BooleanObject } from "./objects/booleanObject.js";
 
 /**
  * Helper function to create an IdentifierExpression without a position
@@ -53,6 +54,16 @@ export function num(value: number): ExecutableConstExpression {
 }
 
 /**
+ * Helper function to create boolean literals
+ *
+ * @param value the value of the literal
+ * @returns the created literal expression
+ */
+export function bool(value: boolean): ExecutableConstExpression {
+    return new ExecutableConstExpression({ value: new BooleanObject(value) });
+}
+
+/**
  * Helper function to create an ExecutableAssignmentExpression without a target
  * (uses scope as target)
  *
@@ -65,7 +76,7 @@ export function assign(field: string, value: ExecutableExpression): ExecutableAs
 }
 
 /**
- * Helpe rfunction to create an ExecutableObjectExpression
+ * Helper function to create an ExecutableObjectExpression
  *
  * @param fields the fields of the object
  * @returns the created ExecutableObjectExpression
@@ -115,14 +126,15 @@ export type ParseableExpressions = (ExecutableExpression | string)[] | string;
  * Helper to parse some expressions
  *
  * @param expressions the expressions to parse
+ * @param keepExpressions if true, the parsed expressions have the original expression assigned
  * @returns the parsed expressions
  */
-export function parse(expressions: ParseableExpressions): ExecutableExpression[] {
+export function parse(expressions: ParseableExpressions, keepExpressions: boolean = false): ExecutableExpression[] {
     if (Array.isArray(expressions)) {
         const parsedExpressions: ExecutableExpression[] = [];
         for (const expression of expressions) {
             if (typeof expression === "string") {
-                parsedExpressions.push(...parse(expression));
+                parsedExpressions.push(...parse(expression, keepExpressions));
             } else {
                 parsedExpressions.push(expression);
             }
@@ -133,7 +145,7 @@ export function parse(expressions: ParseableExpressions): ExecutableExpression[]
     if (parserResult.lexingErrors.length > 0 || parserResult.parserErrors.length > 0) {
         throw new Error("Invalid fun to parse");
     }
-    return toExecutable(parserResult.ast!, false);
+    return toExecutable(parserResult.ast!, keepExpressions);
 }
 
 /**

@@ -20,8 +20,9 @@ export namespace Rect {
 
     /**
      * Checks if an element is a Rect
-     * @param value
-     * @returns
+     *
+     * @param value the element to check
+     * @returns true if the element is a Rect
      */
     export function isRect(value: Element): value is Rect {
         return value.type === TYPE;

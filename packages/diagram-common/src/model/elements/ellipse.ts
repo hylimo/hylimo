@@ -16,8 +16,9 @@ export namespace Ellipse {
 
     /**
      * Checks if an element is a Ellipse
-     * @param value
-     * @returns
+     *
+     * @param value the element to check
+     * @returns true if the element is a Ellipse
      */
     export function isEllipse(value: Element): value is Ellipse {
         return value.type === TYPE;

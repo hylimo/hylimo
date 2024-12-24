@@ -1,12 +1,13 @@
 import { Selectable } from "sprotty-protocol";
 import { SElement } from "../sElement.js";
-import { SCanvas } from "./sCanvas.js";
+import { SParentElementImpl } from "sprotty";
+import { CanvasLike } from "./canvasLike.js";
 
 /**
  * Base class for all canvas contents
  */
 export abstract class SCanvasContent extends SElement implements Selectable {
-    override parent!: SCanvas;
+    override parent!: SParentElementImpl & CanvasLike;
     private _selected = false;
 
     get selected(): boolean {
