@@ -2,7 +2,7 @@ import { booleanType, fun, functionType, id, InterpreterModule, optional, or, st
 import { SCOPE } from "../../../../base/dslModule.js";
 import { eventCoordinateType, participantType } from "./types.js";
 
-const operatorRectangleSVG = "M 0 0 H 20 V 5 L 16 9 H 0 V 0";
+const fragmentNameBorderSVG = "M 0 0 H 20 V 5 L 16 9 H 0 V 0";
 
 /**
  * Defines a frame.<br>
@@ -18,32 +18,128 @@ export const sequenceDiagramFrameModule = InterpreterModule.create(
     [
         `
           scope.internal.createSequenceDiagramFragment = {
+            parentArgs = parentArgs ?? args.parentArgs
             (topLineEvent) = args
             if(topLineEvent == null) {
               scope.error("No event (coordinate) was passed to 'fragment'")
             }
             
-            parentFrame = args.parentFrame
-            
-            // Best effort guess to see if the given event is either an event or an event coordinate
-            if((topLineEvent.name == null) && (topLineEvent.participantName == null) || (topLineEvent.y.proto != 1.proto)) {
+            // Best effort guess to see if the given event is either an event, an event coordinate, or a position
+            if((
+            (topLineEvent.name == null) || (topLineEvent.participantName == null)) 
+              && (topLineEvent.y.proto != 1.proto)
+              // TODO: Allow canvaspoint types
+            ) {
               scope.error("The event passed to 'fragment' is neither an event nor an event coordinate")
             }
             
-            parentLeftX = args.parentLeftXCoordinate
-            parentRightX = args.parentRightXCoordinate
-            y = topLineEvent.y
+            parent = parent ?? args.parent
+            scope.println("parent=" +  parent)
+            parentLeftX = parent.x
+            parentRightX = parentLeftX + parent.width
             width = parentRightX - parentLeftX
+            x = parentLeftX
+            y = topLineEvent.y
             
-            // TODO: Finish from here on
-            separatingLine = canvasElement(
-              content = path(path = "H 1", class = list("fragment-line")),
-              class = list("fragment-line-element"))
-            separatingLine.pos = scope.apos()
+            // The frame is offset by 'margin' from the event, but we want to connect the name to the frame border/fragment line
+            marginTop = marginTop ?? args.marginTop
+            y = y - marginTop 
+            
 
-            scope.internal.registerCanvasElement(frameElement, args, args.self)
+            fragmentText = args.text
+            fragmentSubtext = args.subtext
+            hasLine = args.hasLine
+            hasIcon = args.hasIcon
+
+            fragment = [text = fragmentText, subtext = fragmentSubtext, hasIcon = hasIcon, hasLine = hasLine, topY = topLineEvent]
             
+            // Draw the line on top of the fragment
+            if(args.hasLine) {
+              separatingLine = canvasElement(
+                content = path(path = "H 1", class = list("fragment-line")),
+                class = list("fragment-line-element"))
+              separatingLine.pos = scope.apos(x, y)
+              scope.internal.registerCanvasElement(separatingLine, parentArgs, parentArgs.self)
+              fragment.line = separatingLine
+            }
             
+            // Calculate the auxilliary parts of the fragment - first the 'name' and its border in the upper left corner
+            borderElement = null
+            nameElement = null
+            
+            if(hasIcon) {
+              borderElement = path(path = "${fragmentNameBorderSVG}", class = list("fragment-name-border"))
+            }
+            
+            if(fragmentText != null) {
+              nameElement = text(contents = list(span(text = fragmentText)), class = list("fragment-name"))
+            }
+            
+            // Case 1: Both name and border are present
+            if((borderElement != null) && (nameElement != null)) {
+              name = canvasElement(
+                content = stack(contents = list(borderElement, nameElement)),
+                class = list("fragment-name-element")
+                )
+              name.pos = scope.apos(x, y)
+              scope.internal.registerCanvasElement(name, parentArgs, parentArgs.self)
+              fragment.nameElement = name
+            } {
+            
+              // Case 2: Only border is present
+              if(borderElement != null) {
+                border = canvasElement(
+                  content = borderElement,
+                  class = list("fragment-name-element")
+                  )
+                border.pos = scope.apos(x, y)
+                border.width = 20
+                border.height = 10
+                scope.internal.registerCanvasElement(border, parentArgs, parentArgs.self)
+                fragment.nameElement = border
+              }
+
+              // Case 3: Only name is present
+              if(nameElement != null) {
+                name = canvasElement(
+                  content = nameElement,
+                  class = list("fragment-name-element")
+                  )
+                name.pos = scope.apos(x, y)
+                scope.internal.registerCanvasElement(name, parentArgs, parentArgs.self)
+                fragment.nameElement = name
+              }
+            }
+            
+            // And lastly, the subtext if present
+            if(fragmentSubtext != null) {
+                label = canvasElement(content = text(contents = list(span(text = fragmentSubtext)), class = list("fragment-subtext")), class = list("fragment-subtext-element"))
+                if(fragment.nameElement != null) {
+                  // For some reason, the rpos without lpos means relative to the left instead of the right side  
+                  label.pos = scope.rpos(scope.lpos(fragment.nameElement, 0.90), 20, 0)
+                }
+                scope.internal.registerCanvasElement(label, parentArgs, parentArgs.self)
+            }
+            
+            parent.fragments += fragment
+            
+            scope.styles {
+              cls("fragment-name") {
+                marginLeft = 5
+                marginRight = 7
+                marginTop = 2
+                marginBottom = 2
+              }
+              cls("fragment-name-border") {
+                fill = var("background")
+              }
+              cls("fragment-subtext") {
+                marginTop = 2
+                marginBottom = 2
+              }
+            }
+            
+            fragment
           }
         
           scope.internal.createSequenceDiagramFrame = {
@@ -57,7 +153,7 @@ export const sequenceDiagramFrameModule = InterpreterModule.create(
             (fragmentFunction) = args
             fragmentFunction = fragmentFunction ?? {}
             
-            text = args.text
+            frameText = args.text
             hasIcon = args.hasIcon ?? (text != null)
             subtext = args.subtext
 
@@ -104,34 +200,16 @@ export const sequenceDiagramFrameModule = InterpreterModule.create(
             frameElement.subtext = subtext
  
             frameElement.pos = scope.apos(x, y)
+            frameElement.x = x
+            frameElement.y = y
+            frameElement.width = width
+            frameElement.height = height
  
             scope.internal.registerCanvasElement(frameElement, args, args.self)
- 
-            // Calculate the auxilliary parts of the frame - first the 'nearly' rectangle in the upper left corner
-            if(hasIcon) {
-              operatorRectangleElement = canvasElement(content = 
-                path(path = "${operatorRectangleSVG}", class = list("operator-rectangle")),
-                class = list("operator-rectangle-element"))
-              upperLeftCornerElement.pos = scope.apos(x, y)
-              scope.internal.registerCanvasElement(operatorRectangleElement, argsCopy, argsCopy.self)
-            }
-            
-            scope.styles {
-              cls("operator-rectangle") {
-                
-              }
-            }
-            
-            // Then the frame text
-            if(text != null) {
-            }
-            
-            // And the subtext if present
-            if(subtext != null) {
-            } 
-            
+
             // Lastly, generate all fragments for the given frame
-            fragmentFunction.callWithScope([parent = frameElement, fragment = scope.internal.createSequenceDiagramFragment ])
+            scope.internal.createSequenceDiagramFragment(topLeft, marginTop = marginTop, parentArgs = args, parent = frameElement, hasIcon = hasIcon, hasLine = false, text = frameText, subtext = subtext)
+            fragmentFunction.callWithScope([parent = frameElement, parentArgs = args, marginTop = marginTop, fragment = scope.internal.createSequenceDiagramFragment ])
             
             frameElement
           }

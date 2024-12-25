@@ -67,10 +67,14 @@ export const fragmentType = objectType(
     new Map([
         ["text", optional(stringType)],
         ["subtext", optional(stringType)],
-        ["hasIcon", optional(booleanType)],
+        ["hasNameBorder", booleanType],
+        ["hasLine", booleanType],
+        ["nameElement", optional(canvasContentType)],
+        ["subtextElement", optional(canvasContentType)],
+        ["line", optional(canvasContentType)],
         [
             "topY", // the y-coordinate (event) where to draw the line separating the previous fragment from this fragment
-            or(eventCoordinateType, numberType)
+            or(eventCoordinateType, canvasPointType, numberType)
         ]
     ]),
     "UML sequence diagram frame"
@@ -78,11 +82,10 @@ export const fragmentType = objectType(
 
 export const frameType = objectType(
     new Map([
-        ["text", optional(stringType)],
-        ["subtext", optional(stringType)],
-        ["hasIcon", optional(booleanType)],
         ["topLeft", eventCoordinateType],
         ["bottomRight", eventCoordinateType],
+        ["x", numberType],
+        ["width", numberType],
         ["fragments", listType(fragmentType)]
     ]),
     "UML sequence diagram frame"
