@@ -299,6 +299,33 @@ Is exactly the same as `foundMessage`, the meaning comes from the direction in w
 
 **returns**: the created dot
 
+## Available class names
+
+The following class names are available for styling/layout purposes within sequence diagrams:
+- `activity-indicator` to style activity indicators
+- `activity-indicator-element` to layout activity indicator elements
+- `lost-message` to style lost messages
+- `lost-message-element` to layout lost message elements
+- `found-message` to style found messages
+- `found-message-element` to layout found message elements
+- `fragment-line` to style the lines separating fragments from each other
+- `fragment-line-element` to layout the lines separating fragments from each other
+- `fragment-name-border` to style the border around fragment names
+- `fragment-name` to style the text display of fragment names
+- `fragment-name-element` to layout both the border and name of fragments
+- `fragment-subtext` to style the subtext of fragments
+- `fragment-subtext-element` to layout the subtext of fragments
+- `frame` to style frames
+- `frame-element` to layout the subtext of frames
+- `top-level-participant` to style any participant before any event was declared, so its `y` is `0`
+- `non-top-level-participant` to style any participant after an event was declared, so its `y` is not `0`
+- `destroy-cross-path` to style the cross of a destroyed participant
+- `destroy-cross-path-element` to layout the cross of a destroyed participant
+- `actor` to style actors
+- `actor-element` to layout actors
+- `instance` to style instances
+- `instance-element` to layout instances
+
 ## Example
 Here is an example for a webshop order:
 
