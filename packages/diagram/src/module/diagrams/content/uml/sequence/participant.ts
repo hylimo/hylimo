@@ -30,7 +30,7 @@ export const participantModule = InterpreterModule.create(
                 below.x
             } {
                 if(previous != null) {
-                    previous.x + scope.instanceDistance
+                    previous.x + scope.participantDistance
                 } {
                     0
                 }
@@ -120,6 +120,8 @@ export const participantModule = InterpreterModule.create(
 
                 // Also shorten the lifeline if necessary
                 participant.lifeline.contents.get(participant.lifeline.contents.length - 1).end = cross.pos
+                
+                cross
               }
               `,
                 {
@@ -132,7 +134,7 @@ export const participantModule = InterpreterModule.create(
                             optional(numberType)
                         ]
                     ],
-                    returns: "nothing"
+                    returns: "the created cross"
                 }
             )
         )

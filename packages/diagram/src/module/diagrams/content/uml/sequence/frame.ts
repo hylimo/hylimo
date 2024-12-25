@@ -39,7 +39,7 @@ export const sequenceDiagramFrameModule = InterpreterModule.create(
             parentRightX = parentLeftX + parent.width
             width = parentRightX - parentLeftX
             x = parentLeftX
-            y = topLineEvent.y
+            y = if(topLineEvent.proto == 1.proto) { topLineEvent } { topLineEvent.y }
             
             // The frame is offset by 'margin' from the event, but we want to connect the name to the frame border/fragment line
             marginTop = marginTop ?? args.marginTop
@@ -49,7 +49,7 @@ export const sequenceDiagramFrameModule = InterpreterModule.create(
             fragmentText = args.text
             fragmentSubtext = args.subtext
             hasLine = args.hasLine
-            hasIcon = args.hasIcon
+            hasIcon = args.hasIcon ?? (fragmentText != null)
 
             fragment = [text = fragmentText, subtext = fragmentSubtext, hasIcon = hasIcon, hasLine = hasLine, topY = topLineEvent]
             
@@ -157,11 +157,9 @@ export const sequenceDiagramFrameModule = InterpreterModule.create(
             hasIcon = args.hasIcon ?? (text != null)
             subtext = args.subtext
 
-            // We must differentiate four different version to set margin:
+            // We must differentiate the following approaches to set margin:
             // 1. No margin set -> use scope.frameMarginX/Y
-            // 2. Everything has the same margin -> use args.margin
-            // 3. x and y have the same margin respectively (top-bottom, left-right)
-            // 4. Everything has an individual margin
+            // 2. Everything has an individual margin
             defaultMarginX = args.marginX
             if(defaultMarginX == null) {
               defaultMarginX = scope.frameMarginX
@@ -241,7 +239,7 @@ export const sequenceDiagramFrameModule = InterpreterModule.create(
                         ],
                         [
                             "topLeft",
-                            "The top-left coordinate (event) to draw the border around. The border will be extended by 'frameMargin' on each side",
+                            "The top-left coordinate (event) to draw the border around. The border will be extended by 'frameMarginX' to the left and 'frameMarginY' to the top",
                             or(eventCoordinateType, participantType)
                         ],
                         [

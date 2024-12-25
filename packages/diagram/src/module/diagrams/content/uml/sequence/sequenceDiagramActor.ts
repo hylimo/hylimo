@@ -28,6 +28,7 @@ export const sequenceDiagramActorModule = InterpreterModule.create(
                     }
                     
                     scope.internal.createSequenceDiagramParticipant(name, this.actor, below = args.below)
+                    this.actor
                 `,
                 {
                     docs: "Creates an actor. An actor is a stickman with an optional name",

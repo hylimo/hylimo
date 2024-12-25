@@ -134,7 +134,7 @@ export const activityIndicatorModule = InterpreterModule.create(
             `,
                 {
                     docs: "Deactivates the most recent activity indicator",
-                    params: [[0, "the instance to deactivate", participantType]],
+                    params: [[0, "the participant to deactivate", participantType]],
                     snippet: `($1)`,
                     returns: "nothing"
                 }
