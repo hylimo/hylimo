@@ -106,7 +106,7 @@ export function createToolboxEdit(edit: string, createElementCode: string): Exec
                 },
                 {
                     name: "edit",
-                    value: str(`'${dedent(createElementCode)} layout {\n    pos = apos(' & x & ', ' & y & ')\n}'`)
+                    value: str(`'\n${dedent(createElementCode)} layout {\n    pos = apos(' & x & ', ' & y & ')\n}'`)
                 }
             ])
         );

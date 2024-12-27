@@ -2,8 +2,8 @@
     position: absolute;
     top: 15px;
     right: 15px;
-    max-width: calc(min(40%, 300px));
-    max-height: 60%;
+    width: calc(min(40%, 300px));
+    max-height: 50%;
     display: flex;
     flex-direction: column;
     box-shadow: var(--toolbox-box-shadow);
@@ -20,11 +20,22 @@
             display: flex;
             padding: 10px 10px 5px 10px;
             background: var(--toolbox-header-background);
+            font-weight: 600;
+        }
+
+        @supports selector(::-webkit-scrollbar) {
+            ::-webkit-scrollbar {
+                height: 4px;
+                width: 4px;
+            }
+
+            ::-webkit-scrollbar-thumb {
+                background: var(--toolbox-scrollbar-thumb-background);
+            }
         }
 
         .items {
             overflow-y: auto;
-            scrollbar-width: thin;
             margin-bottom: 10px;
 
             .group {
@@ -35,6 +46,7 @@
 
                 .group-header {
                     background: var(--toolbox-group-header-background);
+                    font-weight: 500;
                 }
 
                 .item {
@@ -50,10 +62,6 @@
                     background: var(--toolbox-item-hover-background);
                 }
             }
-        }
-
-        ::-webkit-scrollbar-button {
-            display: none;
         }
     }
 }
