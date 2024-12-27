@@ -1,7 +1,8 @@
 import { ContainerModule } from "inversify";
-import { configureActionHandler, configureCommand, TYPES } from "sprotty";
+import { configureActionHandler, TYPES } from "sprotty";
 import { Toolbox } from "./toolbox.js";
 import { SetModelAction, UpdateModelAction } from "sprotty-protocol";
+import { TransactionalAction } from "@hylimo/diagram-protocol";
 
 /**
  * Toolbox module
@@ -12,4 +13,5 @@ export const toolboxModule = new ContainerModule((bind, _unbind, isBound) => {
     bind(TYPES.IUIExtension).toService(Toolbox);
     configureActionHandler(context, UpdateModelAction.KIND, Toolbox);
     configureActionHandler(context, SetModelAction.KIND, Toolbox);
+    configureActionHandler(context, TransactionalAction.KIND, Toolbox);
 });

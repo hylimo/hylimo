@@ -1,0 +1,63 @@
+.hylimo.toolbox-wrapper {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    max-width: calc(min(40%, 300px));
+    max-height: 60%;
+    display: flex;
+    flex-direction: column;
+    box-shadow: var(--toolbox-box-shadow);
+    border-radius: 12px;
+    overflow: hidden;
+
+    .toolbox {
+        display: flex;
+        flex-direction: column;
+        background: var(--toolbox-background);
+        min-height: 0;
+
+        .toolbox-header {
+            display: flex;
+            padding: 10px 10px 5px 10px;
+            background: var(--toolbox-header-background);
+        }
+
+        .items {
+            overflow-y: auto;
+            scrollbar-width: thin;
+            margin-bottom: 10px;
+
+            .group {
+                .group-header,
+                .item {
+                    padding: 0 10px;
+                }
+
+                .group-header {
+                    background: var(--toolbox-group-header-background);
+                }
+
+                .item {
+                    display: block;
+                    width: 100%;
+                    font-size: inherit;
+                    text-align: left;
+                    outline: none;
+                }
+
+                .item:hover,
+                .item:focus-within {
+                    background: var(--toolbox-item-hover-background);
+                }
+            }
+        }
+
+        ::-webkit-scrollbar-button {
+            display: none;
+        }
+    }
+}
+
+.hylimo.toolbox-wrapper:has(.pointer-events-disabled) {
+    pointer-events: none;
+}

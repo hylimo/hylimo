@@ -17,7 +17,11 @@ export class SRootView implements IView {
         const transform = `scale(${model.zoom}) translate(${-model.scroll.x},${-model.scroll.y})`;
         return svg(
             "svg",
-            null,
+            {
+                class: {
+                    hylimo: true
+                }
+            },
             svg("style", null, model.generateStyle(this.options.baseDiv)),
             svg(
                 "defs",

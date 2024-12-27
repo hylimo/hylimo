@@ -13,7 +13,6 @@ import {
     object,
     objectType,
     optional,
-    parse,
     ParseableExpressions,
     str,
     validateObject
@@ -107,7 +106,7 @@ export function createToolboxEdit(edit: string, createElementCode: string): Exec
                 },
                 {
                     name: "edit",
-                    value: str(`'${dedent(createElementCode)} layout {\n    pos = apos(' & dx & ', ' & dy & ')\n}'`)
+                    value: str(`'${dedent(createElementCode)} layout {\n    pos = apos(' & x & ', ' & y & ')\n}'`)
                 }
             ])
         );

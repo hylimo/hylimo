@@ -146,6 +146,11 @@
     --diagram-layout-color-selected: #00c6f2;
     --diagram-layout-color-overlay: #88888855;
     --diagram-grid: #bbb;
+    --toolbox-background: var(--vp-c-bg-alt);
+    --toolbox-box-shadow: var(--vp-shadow-3);
+    --toolbox-header-background: var(--vp-c-gray-1);
+    --toolbox-group-header-background: var(--vp-c-gray-2);
+    --toolbox-item-hover-background: var(--vp-c-gray-3);
 }
 
 .dark {

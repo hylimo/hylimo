@@ -68,7 +68,8 @@ import { splitCanvasSegmentModule } from "./features/split-canvas-segment/di.con
 import { resetCanvasBoundsModule } from "./features/canvas-bounds/di.config.js";
 import { viewportModule } from "./features/viewport/di.config.js";
 import { undoRedoModule } from "./features/undo-redo/di.config.js";
-import { toolboxModule } from "./features/toobox/ci.config.js";
+import { toolboxModule } from "./features/toolbox/ci.config.js";
+import { createAndMoveModule } from "./features/create-move/di.config.js";
 
 /**
  * The module used
@@ -135,7 +136,8 @@ export function createContainer(widgetId: string): Container {
         splitCanvasSegmentModule,
         viewportModule,
         undoRedoModule,
-        toolboxModule
+        toolboxModule,
+        createAndMoveModule
     );
     container.load(diagramModule);
 

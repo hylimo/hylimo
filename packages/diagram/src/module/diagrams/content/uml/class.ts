@@ -72,7 +72,7 @@ export const classModule = InterpreterModule.create(
             `
         ),
         createToolboxEdit(
-            "Nested class with properties",
+            "Class/Nested class with properties",
             `
                 class("Example") {
 
