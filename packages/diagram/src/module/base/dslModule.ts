@@ -530,11 +530,17 @@ const scopeExpressions: ParseableExpressions = [
                         [2, "the class of the connection"],
                         [3, "the target expression referenced by edits"],
                         [4, "the scope to which canvas contents should be added"],
-                        ["startMarkerFactory", "?"],
-                        ["endMarkerFactory", "?"],
+                        [
+                            "startMarkerFactory",
+                            "What to print at the start of the arrow, most commonly one of the 'scope.defaultMarkers' values"
+                        ],
+                        [
+                            "endMarkerFactory",
+                            "What to print at the end of the arrow, most commonly one of the 'scope.defaultMarkers' values"
+                        ],
                         [
                             "linetype",
-                            'Optional, one of "axisAligned", "line". Determines which linetype should be chosen. Defaults to "axisAligned"',
+                            'Determines what sort of segment should be created. Defaults to "axisAligned". Optional, one of "axisAligned" (line that either moves on the x-axis, or the y-axis, but not both simultaneously), "line" (straight line).',
                             optional(or(literal("axisAligned"), literal("line")))
                         ]
                     ],
