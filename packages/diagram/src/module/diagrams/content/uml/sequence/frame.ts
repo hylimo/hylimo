@@ -34,7 +34,6 @@ export const sequenceDiagramFrameModule = InterpreterModule.create(
             }
             
             parent = parent ?? args.parent
-            scope.println("parent=" +  parent)
             parentLeftX = parent.x
             parentRightX = parentLeftX + parent.width
             width = parentRightX - parentLeftX

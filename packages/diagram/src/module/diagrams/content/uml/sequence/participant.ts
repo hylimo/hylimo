@@ -58,19 +58,19 @@ export const participantModule = InterpreterModule.create(
             // We want to bottom align top level participants, and only them
             // Later participants should be center aligned
             if(event == null) {
-              participantElement.class += "top-level-participant-element"
+              participantElement.content.class += "top-level-participant"
             } {
-              participantElement.class += "non-top-level-participant-element"
+              participantElement.content.class += "non-top-level-participant"
             }
 
             participantElement
         }
 
         scope.styles {
-            cls("top-level-participant-element") {
+            cls("top-level-participant") {
                 vAlign = "bottom"
             }
-            cls("non-top-level-participant-element") {
+            cls("non-top-level-participant") {
                 vAlign = "center"
             }
         }
