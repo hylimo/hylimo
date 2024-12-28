@@ -278,7 +278,7 @@ export class FullObject extends BaseObject {
      * @param key the string or number to check
      */
     private checkValidKey(key: string | number) {
-        if (typeof key === "number" && !(Number.isInteger(key) && key >= 0)) {
+        if (typeof key === "number" && (!Number.isInteger(key) || key < 0)) {
             throw new RuntimeError("Only Integers >= 0 are supported as numerical keys");
         }
     }

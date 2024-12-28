@@ -5,6 +5,8 @@ import { SemanticFieldNames } from "../../runtime/semanticFieldNames.js";
 import { numberType } from "../../types/number.js";
 import { DefaultModuleNames } from "../defaultModuleNames.js";
 import { assertNumber } from "../typeHelpers.js";
+import { listType } from "../../types/list.js";
+import { or } from "../../types/or.js";
 
 /**
  * Name of the temporary field where the number prototype is assigned
@@ -238,6 +240,48 @@ export const numberModule = InterpreterModule.create(
                             docs: "Rounds a number to the nearest integer.",
                             params: [[0, "the number to round", numberType]],
                             returns: "The rounded number"
+                        }
+                    )
+                ),
+                id(mathObject).assignField(
+                    "max",
+                    jsFun(
+                        (args, context) => {
+                            return context.newNumber(
+                                Math.max(
+                                    assertNumber(args.getFieldValue(0, context)),
+                                    assertNumber(args.getFieldValue(1, context))
+                                )
+                            );
+                        },
+                        {
+                            docs: "Returns the maximum number of the two numbers",
+                            params: [
+                                [0, "the first number to compare", numberType],
+                                [1, "the second number to compare", numberType]
+                            ],
+                            returns: "The maximum number of the given arguments"
+                        }
+                    )
+                ),
+                id(mathObject).assignField(
+                    "min",
+                    jsFun(
+                        (args, context) => {
+                            return context.newNumber(
+                                Math.min(
+                                    assertNumber(args.getFieldValue(0, context)),
+                                    assertNumber(args.getFieldValue(1, context))
+                                )
+                            );
+                        },
+                        {
+                            docs: "Returns the minimum number of the two numbers",
+                            params: [
+                                [0, "the first number to compare", numberType],
+                                [1, "the second number to compare", numberType]
+                            ],
+                            returns: "The minimum number of the given arguments"
                         }
                     )
                 ),

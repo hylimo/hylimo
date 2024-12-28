@@ -21,12 +21,31 @@ export const eventModule = InterpreterModule.create(
                     error("Cannot construct event '" + name + "' as this variable is already declared somewhere else")
                 }
                 
+                originalArgs = args
+                
                 // The event itself must store its y-coordinate so that the calculation of the activity indicators and co works correctly
                 previousEvent = scope.internal.lastSequenceDiagramEvent
                 eventObject.deltaY = if(yDistance != null) { yDistance } { scope.eventDistance }
                 eventObject.y = if(previousEvent != null) { previousEvent.y } { 0 } + eventObject.deltaY 
                 
-                originalArgs = args
+                // When in debugging mode, print the event name on the left to give an overview where we are
+                  if(scope.enableDebugging) {
+                    start = scope.apos(-100, eventObject.y) // a little bit to the left of the diagram to leave space for the participants
+                    
+                    name = canvasElement(content = text(contents = list(span(text = name, fill = "red", stroke = "unset"))), hAlign = "right", vAlign = "center")
+                    name.pos = start
+                    scope.internal.registerCanvasElement(name, originalArgs, originalArgs.self)
+                    
+                    maximum = 0
+                    scope.internal.sequenceDiagramParticipants.forEach {
+                      maximum = Math.max(maximum, it.x)
+                    }
+                    maximum = maximum - start.x + (scope.participantDistance * 0.25)
+                    
+                    scope["--"](name, scope.rpos(name, maximum, 0)) scope.styles {
+                      stroke = "red"
+                    }
+                  }
                 
                 // Position the event for each instance relative to the latest previous event
                 // and add all events as per the user facing definition of events, i.e. 'start.User', 'start.Shop', …
@@ -73,13 +92,13 @@ export const eventModule = InterpreterModule.create(
                     
                     // When in debugging mode, visualize the coordinates of all events
                     if(scope.enableDebugging) {
-                      _left = canvasElement(content = ellipse(fill = "red", stroke = "unset"), width=7, height=7, fill = "red", stroke = "unset", hAlign = "center", vAlign = "center")
+                      _left = canvasElement(content = ellipse(fill = "orange", stroke = "unset"), width=7, height=7, hAlign = "center", vAlign = "center")
                       _left.pos = eventObject[name].left()
                       scope.internal.registerCanvasElement(_left, originalArgs, originalArgs.self)
-                      _center = canvasElement(content = ellipse(fill = "red", stroke = "unset"), width=7, height=7, fill = "red", stroke = "unset", hAlign = "center", vAlign = "center")
+                      _center = canvasElement(content = ellipse(fill = "orange", stroke = "unset"), width=7, height=7, hAlign = "center", vAlign = "center")
                       _center.pos = eventObject[name].center
                       scope.internal.registerCanvasElement(_center, originalArgs, originalArgs.self)
-                      _right = canvasElement(content = ellipse(fill = "red", stroke = "unset"), width=7, height=7, fill = "red", stroke = "unset", hAlign = "center", vAlign = "center")
+                      _right = canvasElement(content = ellipse(fill = "orange", stroke = "unset"), width=7, height=7, hAlign = "center", vAlign = "center")
                       _right.pos = eventObject[name].right()
                       scope.internal.registerCanvasElement(_right, originalArgs, originalArgs.self)
                     }

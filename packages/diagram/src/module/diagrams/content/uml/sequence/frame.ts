@@ -142,12 +142,12 @@ export const sequenceDiagramFrameModule = InterpreterModule.create(
             fragment
           }
         
-          scope.internal.createSequenceDiagramFrame = {
-            // First, explicitly declare and initialize all parameters
-            if(args.args == null) {
-              scope.error("createSequenceDiagramFrame is missing its 'args = args' parameter")
-            }
-            args = args.args
+        `,
+        id(SCOPE).assignField(
+            "frame",
+            fun(
+                [
+                    `
             argsCopy = args
             
             (fragmentFunction) = args
@@ -205,19 +205,47 @@ export const sequenceDiagramFrameModule = InterpreterModule.create(
  
             scope.internal.registerCanvasElement(frameElement, args, args.self)
 
-            // Lastly, generate all fragments for the given frame
+            // Lastly, generate all fragments for the given frame, including the implicit top fragment
             scope.internal.createSequenceDiagramFragment(topLeft, marginTop = marginTop, parentArgs = args, parent = frameElement, hasIcon = hasIcon, hasLine = false, text = frameText, subtext = subtext)
-            fragmentFunction.callWithScope([parent = frameElement, parentArgs = args, marginTop = marginTop, fragment = scope.internal.createSequenceDiagramFragment ])
             
-            frameElement
-          }
-        `,
-        id(SCOPE).assignField(
-            "frame",
-            fun(
-                `
-              scope.internal.createSequenceDiagramFrame(args = args)
+            
             `,
+                    id("scope")
+                        .field("internal")
+                        .assignField(
+                            "sequenceDiagramFragmentFunction",
+                            fun(
+                                `scope.internal.createSequenceDiagramFragment(topLeft, marginTop = marginTop, parentArgs = argsCopy, parent = frameElement, hasIcon = args.hasIcon, hasLine = args.hasLine ?? true, text = args.text, subtext = args.subtext)`,
+                                {
+                                    docs: "Creates a new fragment inside this frame. A fragment is a separate section within the frame, optionally with name and subtext",
+                                    params: [
+                                        ["text", "The text to display in the upper-left corner", optional(stringType)],
+                                        [
+                                            "subtext",
+                                            "The text to display right of the main text, i.e. a condition for an else if",
+                                            optional(stringType)
+                                        ],
+                                        [
+                                            "hasIcon",
+                                            "Whether to draw the border around the text. If false, only the outer boundary will be drawn. Will be shown by default when the frame should have text",
+                                            optional(booleanType)
+                                        ],
+                                        [
+                                            "hasLine",
+                                            "Whether to draw the line on top of the fragment. 'true' by default",
+                                            optional(booleanType)
+                                        ]
+                                    ],
+                                    snippet: `($1, text = $2, subtext = $3)`,
+                                    returns: "The created fragment"
+                                }
+                            )
+                        ),
+                    `
+            fragmentFunction.callWithScope([fragment = scope.internal.sequenceDiagramFragmentFunction])
+            frameElement
+            `
+                ],
                 {
                     docs: "Creates a frame around two endpoints",
                     params: [

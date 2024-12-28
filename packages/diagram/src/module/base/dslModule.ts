@@ -1,17 +1,21 @@
 import {
     assign,
     enumObject,
+    enumType,
     fun,
     functionType,
     id,
     InterpreterModule,
     jsFun,
     listType,
+    literal,
     namedType,
     numberType,
     objectType,
     optional,
+    or,
     ParseableExpressions,
+    stringType,
     validateObject
 } from "@hylimo/core";
 import { canvasContentType, canvasPointType, elementType } from "./types.js";
@@ -461,6 +465,7 @@ const scopeExpressions: ParseableExpressions = [
                 (start, end, class, target, canvasScope) = args
                 startMarkerFactory = args.startMarkerFactory
                 endMarkerFactory = args.endMarkerFactory
+                linetype = args.linetype ?? "axisAligned"
                 startPoint = start
                 startProvider = if((start.type == "canvasElement") || (start.type == "canvasConnection")) {
                     startPoint = canvasScope.lpos(start, 0)
@@ -487,13 +492,21 @@ const scopeExpressions: ParseableExpressions = [
                 } {
                     { end }
                 }
-                this.segment = canvasAxisAlignedSegment(end = endPoint, verticalPos = 0.5)
-                segment.edits[
+                this.segment = null
+                if(linetype == "axisAligned") {
+                  segment = canvasAxisAlignedSegment(end = endPoint, verticalPos = 0.5)
+                  segment.edits[
                     "${DefaultEditTypes.AXIS_ALIGNED_SEGMENT_POS}"
-                ] = createAppendScopeEdit(target, "with", "'over = start(0).axisAligned(' & pos & ', end(0.5))'")
-                segment.edits[
+                  ] = createAppendScopeEdit(target, "with", "'over = start(0).axisAligned(' & pos & ', end(0.5))'")
+                  segment.edits[
                     "${DefaultEditTypes.SPLIT_CANVAS_AXIS_ALIGNED_SEGMENT}"
-                ] = createAppendScopeEdit(target, "with", "'over = start(0).axisAligned(' & pos & ', apos(' & x & ', ' & y & '), ' & nextPos & ', end(0.5))'")
+                  ] = createAppendScopeEdit(target, "with", "'over = start(0).axisAligned(' & pos & ', apos(' & x & ', ' & y & '), ' & nextPos & ', end(0.5))'")
+                } {
+                  if(linetype == "line") {
+                  segment = canvasLineSegment(end = endPoint)
+                  segment.edits["${DefaultEditTypes.SPLIT_CANVAS_LINE_SEGMENT}"] =  createAppendScopeEdit(target, "with", "'over = start(0).line(apos(' & x & ', ' & y & '), end(0.5))'")
+                  }
+                }
                 connection = canvasConnection(
                     start = startPoint,
                     contents = list(
@@ -516,7 +529,14 @@ const scopeExpressions: ParseableExpressions = [
                         [1, "the end element", canvasContentType],
                         [2, "the class of the connection"],
                         [3, "the target expression referenced by edits"],
-                        [4, "the scope to which canvas contents should be added"]
+                        [4, "the scope to which canvas contents should be added"],
+                        ["startMarkerFactory", "?"],
+                        ["endMarkerFactory", "?"],
+                        [
+                            "linetype",
+                            'Optional, one of "axisAligned", "line". Determines which linetype should be chosen. Defaults to "axisAligned"',
+                            optional(or(literal("axisAligned"), literal("line")))
+                        ]
                     ],
                     returns: "The created CanvasConnection"
                 }
