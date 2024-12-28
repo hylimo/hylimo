@@ -12,6 +12,8 @@ import { CloseAction, ErrorAction } from "vscode-languageclient";
 import {
     ConfigNotification,
     DynamicLanguageServerConfig,
+    EditorConfig,
+    UpdateEditorConfigNotification,
     LanguageServerSettings,
     RemoteNotification,
     RemoteRequest,
@@ -69,6 +71,10 @@ export interface LanguageServerConfig {
      * Diagram configuration
      */
     diagramConfig: Ref<DiagramConfig>;
+    /**
+     * Graphical editor configuration
+     */
+    editorConfig: Ref<EditorConfig>;
 }
 
 /**
@@ -92,9 +98,11 @@ export const lspPlugin: Plugin = {
             enableFontSubsetting: true,
             enableExternalFonts: false
         });
+        const editorConfig = useLocalStorage<EditorConfig>("editorConfig", { toolboxDisabled: false });
         app.provide(languageServerConfigKey, {
             settings: languageServerSettings,
-            diagramConfig
+            diagramConfig,
+            editorConfig
         });
         const languageServerConfig = computed<DynamicLanguageServerConfig>(() => {
             return {
@@ -109,7 +117,8 @@ export const lspPlugin: Plugin = {
                     enableFontSubsetting: diagramConfig.value.enableFontSubsetting,
                     enableExternalFonts: diagramConfig.value.enableExternalFonts
                 },
-                settings: languageServerSettings.value
+                settings: languageServerSettings.value,
+                editorConfig: editorConfig.value
             };
         });
         const isDark = app.runWithContext(() => {
@@ -121,6 +130,9 @@ export const lspPlugin: Plugin = {
         app.provide(languageClientKey, shallowRef(client));
 
         client.then((value) => {
+            value.onNotification(UpdateEditorConfigNotification.type, (config) => {
+                editorConfig.value = config;
+            });
             watch(isDark, (value) => {
                 monaco.editor.setTheme(value ? "custom-dark" : "custom-light");
             });
@@ -131,7 +143,8 @@ export const lspPlugin: Plugin = {
                     if (value) {
                         value.sendNotification(ConfigNotification.type, {
                             diagramConfig: toRaw(configValue.diagramConfig),
-                            settings: toRaw(configValue.settings)
+                            settings: toRaw(configValue.settings),
+                            editorConfig: toRaw(configValue.editorConfig)
                         });
                     }
                 },

@@ -252,7 +252,7 @@ export class LanguageServer {
         if (!diagram) {
             throw new Error(`Unknown diagram: ${params.diagramUri}`);
         }
-        this.diagramServerManager.addClient(params.clientId, diagram);
+        this.diagramServerManager.addClient(params.clientId, diagram, this.diagramUtils.config.editorConfig);
     }
 
     /**
@@ -289,6 +289,7 @@ export class LanguageServer {
      */
     private onUpdateConfig(params: DynamicLanguageServerConfig): void {
         this.diagramUtils.config = new Config(params);
+        this.diagramServerManager.onDidChangeConfig(this.diagramUtils.config);
         for (const diagram of this.diagrams.values()) {
             diagram.onDidChangeConfig();
         }

@@ -1,6 +1,7 @@
 import { DiagramConfig } from "@hylimo/diagram-common";
 import { NotificationType } from "vscode-languageserver-protocol";
 import { LanguageServerSettings } from "./settings.js";
+import { EditorConfig } from "../diagram/editor-config/editorConfig.js";
 
 /**
  * Configuration for a diagram language server
@@ -12,9 +13,13 @@ export interface DynamicLanguageServerConfig {
     diagramConfig: DiagramConfig;
     /**
      * The settings for the language server
-     * The are permanent values which can be modified by the user
+     * These are permanent values which can be modified by the user
      */
     settings: LanguageServerSettings;
+    /**
+     * The configuration for the graphical editor
+     */
+    editorConfig: EditorConfig;
 }
 
 /**
@@ -25,4 +30,14 @@ export namespace ConfigNotification {
      * Notification type for sending a new configuration to the language server
      */
     export const type = new NotificationType<DynamicLanguageServerConfig>("diagram/config");
+}
+
+/**
+ * Namespace for the update editor config notification
+ */
+export namespace UpdateEditorConfigNotification {
+    /**
+     * Notification type that the editor configuration should be updated
+     */
+    export const type = new NotificationType<EditorConfig>("diagram/updateEditorConfig");
 }

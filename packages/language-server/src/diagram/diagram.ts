@@ -3,9 +3,11 @@ import { SharedDiagramUtils } from "../sharedDiagramUtils.js";
 import { CompletionItem, Diagnostic, Position, TextDocumentEdit } from "vscode-languageserver";
 import { TransactionManager } from "../edit/transactionManager.js";
 import {
+    UpdateEditorConfigNotification,
     NavigateToSourceAction,
     PublishDocumentRevealNotification,
-    TransactionalAction
+    TransactionalAction,
+    UpdateEditorConfigAction
 } from "@hylimo/diagram-protocol";
 import { DiagramImplementation } from "./diagramImplementation.js";
 import { BaseLayoutedDiagram } from "@hylimo/diagram-common";
@@ -145,6 +147,16 @@ export class Diagram {
                 range
             });
         }
+    }
+
+    /**
+     * Handles a editor config update action
+     * Forwards the config to the language client
+     *
+     * @param action the action to handle
+     */
+    async handleUpdateEditorConfigAction(action: UpdateEditorConfigAction): Promise<void> {
+        return this.utils.connection.sendNotification(UpdateEditorConfigNotification.type, action.config);
     }
 
     /**

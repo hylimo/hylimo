@@ -1,3 +1,6 @@
+export * from "./diagram/editor-config/editorConfig.js";
+export * from "./diagram/editor-config/editorConfigUpdatedAction.js";
+export * from "./diagram/editor-config/updateEditorConfigAction.js";
 export * from "./diagram/navigation/navigateToSourceAction.js";
 export * from "./diagram/transaction/defaultEditTypes.js";
 export * from "./diagram/transaction/edit.js";

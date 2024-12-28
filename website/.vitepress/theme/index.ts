@@ -4,6 +4,7 @@ import "./style.css";
 import "./icons.css";
 import "@hylimo/diagram-ui/css/hylimo.css";
 import "@hylimo/diagram-ui/css/toolbox.css";
+import "@vscode/codicons/dist/codicon.css";
 import EmbeddedHylimoEditor from "../components/EmbeddedHylimoEditor.vue";
 import NavTeleportTarget from "../components/NavTeleportTarget.vue";
 import Settings from "../components/settings/Settings.vue";

@@ -3,5 +3,6 @@
  */
 export const TYPES = {
     TransactionIdProvider: Symbol("TransactionIdProvider"),
-    CreateAndMoveMouseListener: Symbol("CreateAndMoveMouseListener")
+    CreateAndMoveMouseListener: Symbol("CreateAndMoveMouseListener"),
+    ConfigManager: Symbol("ConfigManager")
 };

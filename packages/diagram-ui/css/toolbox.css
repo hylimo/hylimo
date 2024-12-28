@@ -9,6 +9,12 @@
     box-shadow: var(--toolbox-box-shadow);
     border-radius: 12px;
     overflow: hidden;
+    transition:
+        width 0.3s ease,
+        max-height 0.3s ease;
+
+    --toolbox-margin: 10px;
+    --codicon-button-size: 24px;
 
     .toolbox {
         display: flex;
@@ -18,9 +24,17 @@
 
         .toolbox-header {
             display: flex;
-            padding: 10px 10px 5px 10px;
+            padding: var(--toolbox-margin) var(--toolbox-margin) 5px var(--toolbox-margin);
             background: var(--toolbox-header-background);
             font-weight: 600;
+            align-items: center;
+            transition: background-color 0.3s ease;
+
+            .title {
+                flex: 1 1 0;
+                min-width: 0;
+                overflow: hidden;
+            }
         }
 
         @supports selector(::-webkit-scrollbar) {
@@ -36,12 +50,12 @@
 
         .items {
             overflow-y: auto;
-            margin-bottom: 10px;
+            margin-bottom: var(--toolbox-margin);
 
             .group {
                 .group-header,
                 .item {
-                    padding: 0 10px;
+                    padding: 0 var(--toolbox-margin);
                 }
 
                 .group-header {
@@ -64,8 +78,43 @@
             }
         }
     }
+
+    .codicon-button {
+        width: var(--codicon-button-size);
+        height: var(--codicon-button-size);
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        i.codicon {
+            font-size: 18px;
+        }
+    }
+
+    .codicon-button:hover {
+        background: var(--toolbox-item-hover-background);
+    }
 }
 
 .hylimo.toolbox-wrapper:has(.pointer-events-disabled) {
     pointer-events: none;
+}
+
+.hylimo.toolbox-wrapper:has(.closed) {
+    --closed-toolbox-size: calc(var(--codicon-button-size) + var(--toolbox-margin) * 2);
+    width: var(--closed-toolbox-size);
+    max-height: var(--closed-toolbox-size);
+
+    .toolbox {
+        .toolbox-header {
+            background: transparent;
+
+            button:last-child {
+                margin: calc(var(--toolbox-margin) * -1);
+                width: var(--closed-toolbox-size);
+                height: var(--closed-toolbox-size);
+            }
+        }
+    }
 }

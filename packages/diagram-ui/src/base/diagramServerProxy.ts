@@ -2,7 +2,8 @@ import {
     NavigateToSourceAction,
     TransactionalAction,
     RemoteUndoAction,
-    RemoteRedoAction
+    RemoteRedoAction,
+    UpdateEditorConfigAction
 } from "@hylimo/diagram-protocol";
 import { injectable } from "inversify";
 import { ActionHandlerRegistry, DiagramServerProxy as SprottyDiagramServerProxy } from "sprotty";
@@ -25,6 +26,7 @@ export abstract class DiagramServerProxy extends SprottyDiagramServerProxy {
         registry.register(NavigateToSourceAction.KIND, this);
         registry.register(RemoteUndoAction.KIND, this);
         registry.register(RemoteRedoAction.KIND, this);
+        registry.register(UpdateEditorConfigAction.KIND, this);
     }
 
     protected override handleLocally(action: Action): boolean {

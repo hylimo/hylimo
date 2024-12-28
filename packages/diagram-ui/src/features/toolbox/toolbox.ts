@@ -1,10 +1,19 @@
 import { inject, injectable } from "inversify";
-import { AbstractUIExtension, IActionDispatcher, IActionHandler, ICommand, PatcherProvider, TYPES } from "sprotty";
+import {
+    AbstractUIExtension,
+    IActionDispatcher,
+    IActionHandler,
+    ICommand,
+    PatcherProvider,
+    TYPES as SPROTTY_TYPES
+} from "sprotty";
 import { Action, SetModelAction, UpdateModelAction } from "sprotty-protocol";
 import { VNode, h } from "snabbdom";
 import { Root } from "@hylimo/diagram-common";
 import { CreateAndMoveAction } from "../create-move/createAndMoveAction.js";
-import { TransactionalAction } from "@hylimo/diagram-protocol";
+import { EditorConfigUpdatedAction, TransactionalAction } from "@hylimo/diagram-protocol";
+import { TYPES } from "../types.js";
+import { ConfigManager } from "../config/configManager.js";
 
 @injectable()
 export class Toolbox extends AbstractUIExtension implements IActionHandler {
@@ -29,14 +38,29 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler {
     private pointerEventsDisabled: boolean = false;
 
     /**
+     * If true, the toolbox is closed.
+     */
+    private isClosed: boolean;
+
+    /**
      * The patcher provider.
      */
-    @inject(TYPES.PatcherProvider) private readonly patcherProvider!: PatcherProvider;
+    @inject(SPROTTY_TYPES.PatcherProvider) private readonly patcherProvider!: PatcherProvider;
 
     /**
      * The action dispatcher.
      */
-    @inject(TYPES.IActionDispatcher) private readonly actionDispatcher!: IActionDispatcher;
+    @inject(SPROTTY_TYPES.IActionDispatcher) private readonly actionDispatcher!: IActionDispatcher;
+
+    /**
+     * Creates a new toolbox.
+     *
+     * @param configManager The config manager
+     */
+    constructor(@inject(TYPES.ConfigManager) private readonly configManager: ConfigManager) {
+        super();
+        this.isClosed = configManager.config?.toolboxDisabled ?? false;
+    }
 
     handle(action: Action): ICommand | Action | void {
         if (action.kind === UpdateModelAction.KIND || action.kind === SetModelAction.KIND) {
@@ -50,6 +74,9 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler {
                 this.pointerEventsDisabled = false;
                 this.update();
             }
+        } else if (EditorConfigUpdatedAction.is(action)) {
+            this.isClosed = action.config.toolboxDisabled;
+            this.update();
         }
     }
 
@@ -88,18 +115,75 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler {
         this.currentVNode = this.patcherProvider.patcher(toolbox, h("div"));
     }
 
+    /**
+     * Generates the toolbox UI.
+     *
+     * @param root The current root element
+     * @returns The toolbox UI
+     */
     private generateToolbox(root: Root): VNode {
+        const toolboxButton = this.isClosed
+            ? this.generateCodiconButton("tools", "Open Toolbox", () => this.toggleToolbox())
+            : this.generateCodiconButton("chrome-close", "Close Toolbox", () => this.toggleToolbox());
         return h(
             "div.toolbox",
             {
                 class: {
-                    "pointer-events-disabled": this.pointerEventsDisabled
+                    "pointer-events-disabled": this.pointerEventsDisabled,
+                    closed: this.isClosed
                 }
             },
-            [h("div.toolbox-header", ["Toolbox"]), h("div.items", this.generateToolboxItems(root))]
+            [
+                h("div.toolbox-header", [h("span.title", "Toolbox"), toolboxButton]),
+                h("div.items", this.generateToolboxItems(root))
+            ]
         );
     }
 
+    /**
+     * Toggles the toolbox.
+     */
+    private toggleToolbox(): void {
+        this.isClosed = !this.isClosed;
+        this.update();
+        this.configManager.updateConfig({ toolboxDisabled: this.isClosed });
+    }
+
+    /**
+     * Generates a codicon button.
+     *
+     * @param icon the name of the codicon
+     * @param title the title of the button
+     * @param action the action to execute when the button is clicked
+     * @returns the codicon button
+     */
+    private generateCodiconButton(icon: string, title: string, action: () => void): VNode {
+        return h(
+            "button.codicon-button",
+            {
+                on: {
+                    click: action
+                }
+            },
+            [
+                h("i.codicon", {
+                    attrs: {
+                        title
+                    },
+                    class: {
+                        [`codicon-${icon}`]: true
+                    }
+                })
+            ]
+        );
+    }
+
+    /**
+     * Generates the UI for the toolbox items.
+     *
+     * @param root The root element providing the toolbox edits
+     * @returns The UI for the toolbox items
+     */
     private generateToolboxItems(root: Root): VNode[] {
         const aggregatedEdits = new Map<string, ToolboxEdit[]>();
         for (const toolboxEdit of this.getToolboxEdits(root)) {
@@ -114,6 +198,13 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler {
             .map(([group, toolboxEdits]) => this.generateToolboxItemGroup(group, toolboxEdits));
     }
 
+    /**
+     * Generates the UI for a toolbox item group.
+     *
+     * @param group The group name
+     * @param toolboxEdits The toolbox edits in the group
+     * @returns The UI for the toolbox item group
+     */
     private generateToolboxItemGroup(group: string, toolboxEdits: ToolboxEdit[]): VNode {
         return h("div.group", [
             h("div.group-header", group),
@@ -121,6 +212,12 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler {
         ]);
     }
 
+    /**
+     * Generates the UI for a toolbox edit.
+     *
+     * @param toolboxEdit The toolbox edit to generate the UI for
+     * @returns The UI for the toolbox edit
+     */
     private generateToolboxItem(toolboxEdit: ToolboxEdit): VNode {
         return h(
             "button.item",
@@ -143,6 +240,12 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler {
         );
     }
 
+    /**
+     * Extracts the toolbox edits from the root element.
+     *
+     * @param root The root element
+     * @returns The toolbox edits
+     */
     private getToolboxEdits(root: Root): ToolboxEdit[] {
         return Object.keys(root.edits)
             .filter((key) => key.startsWith("toolbox/"))
