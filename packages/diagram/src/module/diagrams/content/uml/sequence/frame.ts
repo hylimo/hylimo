@@ -1,6 +1,16 @@
-import { booleanType, fun, functionType, id, InterpreterModule, optional, or, stringType } from "@hylimo/core";
+import {
+    booleanType,
+    fun,
+    functionType,
+    id,
+    InterpreterModule,
+    numberType,
+    optional,
+    or,
+    stringType
+} from "@hylimo/core";
 import { SCOPE } from "../../../../base/dslModule.js";
-import { eventCoordinateType, participantType } from "./types.js";
+import { eventCoordinateType, eventType, participantType } from "./types.js";
 
 const fragmentNameBorderSVG = "M 0 0 H 20 V 5 L 16 9 H 0 V 0";
 
@@ -17,20 +27,11 @@ export const sequenceDiagramFrameModule = InterpreterModule.create(
     [],
     [
         `
-          scope.internal.createSequenceDiagramFragment = {
+          this.createSequenceDiagramFragment = {
             parentArgs = parentArgs ?? args.parentArgs
             (topLineEvent) = args
             if(topLineEvent == null) {
               scope.error("No event (coordinate) was passed to 'fragment'")
-            }
-            
-            // Best effort guess to see if the given event is either an event, an event coordinate, or a position
-            if((
-            (topLineEvent.name == null) || (topLineEvent.participantName == null)) 
-              && (topLineEvent.y.proto != 1.proto)
-              // TODO: Allow canvaspoint types
-            ) {
-              scope.error("The event passed to 'fragment' is neither an event nor an event coordinate")
             }
             
             parent = parent ?? args.parent
@@ -201,43 +202,46 @@ export const sequenceDiagramFrameModule = InterpreterModule.create(
             scope.internal.registerCanvasElement(frameElement, args, args.self)
 
             // Lastly, generate all fragments for the given frame, including the implicit top fragment
-            scope.internal.createSequenceDiagramFragment(topLeft, marginTop = marginTop, parentArgs = args, parent = frameElement, hasIcon = hasIcon, hasLine = false, text = frameText, subtext = subtext)
+            createSequenceDiagramFragment(topLeft, marginTop = marginTop, parentArgs = args, parent = frameElement, hasIcon = hasIcon, hasLine = false, text = frameText, subtext = subtext)
             
             
             `,
-                    id("scope")
-                        .field("internal")
-                        .assignField(
-                            "sequenceDiagramFragmentFunction",
-                            fun(
-                                `scope.internal.createSequenceDiagramFragment(args[0], marginTop = marginTop, parentArgs = argsCopy, parent = frameElement, hasIcon = args.hasIcon, hasLine = args.hasLine ?? true, text = args.text, subtext = args.subtext)`,
-                                {
-                                    docs: "Creates a new fragment inside this frame. A fragment is a separate section within the frame, optionally with name and subtext",
-                                    params: [
-                                        ["text", "The text to display in the upper-left corner", optional(stringType)],
-                                        [
-                                            "subtext",
-                                            "The text to display right of the main text, i.e. a condition for an else if",
-                                            optional(stringType)
-                                        ],
-                                        [
-                                            "hasIcon",
-                                            "Whether to draw the border around the text. If false, only the outer boundary will be drawn. Will be shown by default when the frame should have text",
-                                            optional(booleanType)
-                                        ],
-                                        [
-                                            "hasLine",
-                                            "Whether to draw the line on top of the fragment. 'true' by default",
-                                            optional(booleanType)
-                                        ]
+                    id("this").assignField(
+                        "sequenceDiagramFragmentFunction",
+                        fun(
+                            `createSequenceDiagramFragment(args[0], marginTop = marginTop, parentArgs = argsCopy, parent = frameElement, hasIcon = args.hasIcon, hasLine = args.hasLine ?? true, text = args.text, subtext = args.subtext)`,
+                            {
+                                docs: "Creates a new fragment inside this frame. A fragment is a separate section within the frame, optionally with name and subtext",
+                                params: [
+                                    [
+                                        0,
+                                        "The y coordinate where to start the the fragment. Either an event, an event coordinate, or a number",
+                                        or(eventType, eventCoordinateType, numberType)
                                     ],
-                                    snippet: `($1, text = $2, subtext = $3)`,
-                                    returns: "The created fragment"
-                                }
-                            )
-                        ),
+                                    ["text", "The text to display in the upper-left corner", optional(stringType)],
+                                    [
+                                        "subtext",
+                                        "The text to display right of the main text, i.e. a condition for an else if",
+                                        optional(stringType)
+                                    ],
+                                    [
+                                        "hasIcon",
+                                        "Whether to draw the border around the text. If false, only the outer boundary will be drawn. Will be shown by default when the frame should have text",
+                                        optional(booleanType)
+                                    ],
+                                    [
+                                        "hasLine",
+                                        "Whether to draw the line on top of the fragment. 'true' by default",
+                                        optional(booleanType)
+                                    ]
+                                ],
+                                snippet: `($1, text = $2, subtext = $3)`,
+                                returns: "The created fragment"
+                            }
+                        )
+                    ),
                     `
-            fragmentFunction.callWithScope([fragment = scope.internal.sequenceDiagramFragmentFunction, parentArgs = argsCopy, parent = frameElement])
+            fragmentFunction.callWithScope([fragment = sequenceDiagramFragmentFunction, parentArgs = argsCopy, parent = frameElement])
             frameElement
             `
                 ],
