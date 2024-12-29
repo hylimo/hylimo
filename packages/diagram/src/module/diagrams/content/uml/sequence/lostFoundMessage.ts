@@ -15,7 +15,7 @@ function message(type: string): string {
         content = ellipse(class = list("${type}-message")),
         width = diameter,
         height = diameter,
-        class = list("${type}-message-element}")
+        class = list("${type}-message-element")
     )
 
     // We need to change the properties of the canvasElement directly and return it as a connection requires a point or element as parameter
