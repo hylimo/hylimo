@@ -54,11 +54,7 @@ export const sequenceDiagramFrameModule = InterpreterModule.create(
             
             // Draw the line on top of the fragment
             if(args.hasLine) {
-              separatingLine = canvasElement(
-                content = path(path = "H 1", class = list("fragment-line")),
-                class = list("fragment-line-element"))
-              separatingLine.pos = scope.apos(x, y)
-              scope.internal.registerCanvasElement(separatingLine, parentArgs, parentArgs.self)
+              separatingLine = scope[".."](scope.apos(x, y), scope.apos(x + width, y))
               fragment.line = separatingLine
             }
             
@@ -214,7 +210,7 @@ export const sequenceDiagramFrameModule = InterpreterModule.create(
                         .assignField(
                             "sequenceDiagramFragmentFunction",
                             fun(
-                                `scope.internal.createSequenceDiagramFragment(topLeft, marginTop = marginTop, parentArgs = argsCopy, parent = frameElement, hasIcon = args.hasIcon, hasLine = args.hasLine ?? true, text = args.text, subtext = args.subtext)`,
+                                `scope.internal.createSequenceDiagramFragment(args[0], marginTop = marginTop, parentArgs = argsCopy, parent = frameElement, hasIcon = args.hasIcon, hasLine = args.hasLine ?? true, text = args.text, subtext = args.subtext)`,
                                 {
                                     docs: "Creates a new fragment inside this frame. A fragment is a separate section within the frame, optionally with name and subtext",
                                     params: [
@@ -241,7 +237,7 @@ export const sequenceDiagramFrameModule = InterpreterModule.create(
                             )
                         ),
                     `
-            fragmentFunction.callWithScope([fragment = scope.internal.sequenceDiagramFragmentFunction])
+            fragmentFunction.callWithScope([fragment = scope.internal.sequenceDiagramFragmentFunction, parentArgs = argsCopy, parent = frameElement])
             frameElement
             `
                 ],
