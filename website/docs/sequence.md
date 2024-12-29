@@ -34,7 +34,7 @@ Below, you'll find the order in which you should declare things so that they wor
 Hylimo walks through the diagram from left to right, and then from top to bottom.
 
 First, declare all participants (`instance`, `actor`) in the order you want to display them as they will be positioned on the x axis in this order:
-```hyl
+```hylimo
 instance("Bob")
 instance("Shop")
 actor("Admin")
@@ -45,7 +45,7 @@ Now that we've populated our `x` axis, let's move on with the `y` axis.
 
 The main way to move forward on the `y` axis in a sequence diagram is through `events`.\
 An `event` needs a name to refer to it later on and automatically moves downward on the y axis:
-```hyl
+```hylimo
 event("startPayment")
 ```
 As you can see above, the name should be understandable for you to know exactly which action is symbolized by this event.
@@ -53,7 +53,7 @@ This name will never be shown anywhere.
 
 For most cases, the  default value for how far away the next event will be good-enough.
 Nevertheless, in cases where you want an explicit distance to the predecessor, you are free to do so:
-```hyl
+```hylimo
 event("startPayment", 50)
 ```
 
@@ -64,7 +64,7 @@ Instead, you can also move the previous event up by that amount and invert their
 Both `event` and `participant` names will be registered as variables if they didn't exist already.
 In case they existed already, the existing name takes precedence.
 If their name is already used by something else, you can assign the result of these functions to a variable of your own choosing:
-```hyl
+```hylimo
 Bob = true
 user = instance("Bob")
 event("buy")
@@ -79,13 +79,13 @@ Now, we have the basic knowledge to go on with the remaining features that are a
 
 There is a bunch of things you can do with participants, depending on if there is a latest defined event:
 - you can postpone the creation of a participant by defining it after an event:
-```hyl
+```hylimo
 instance("A")
 event("smth")
 instance("B")
 ```
 - You can destroy a participant:
-```hyl
+```hylimo
 instance("A")
 instance("B")
 event("E1")
@@ -93,7 +93,7 @@ destroy(A)
 event("E2")
 ```
 - You can reanimate a dead participant:
-```hyl
+```hylimo
 instance("A")
 instance("B")
 event("E1")
@@ -103,7 +103,7 @@ event("E3")
 instance("A²", below = A)
 ```
 - You can activate and deactivate a participant, meaning that it is actively working on something:
-```hyl
+```hylimo
 instance("A")
 instance("B")
 event("E1")
@@ -112,7 +112,7 @@ event("E2")
 deactivate(A)
 ```
 - Even multiple times simultaneously:
-```hyl
+```hylimo
 instance("A")
 instance("B")
 event("E1")
@@ -133,7 +133,7 @@ Messages are sent after `activate` operations.\
 ## Messages
 
 The following messages are available within sequence diagrams (in both directions, of course):
-```hyl
+```hylimo
 instance("A")
 instance("B")
 event("E1")
@@ -223,7 +223,7 @@ Creates a new event.
 
 Creates the dot signaling a message from an external source.
 Should always be used inline as a message from something else:
-```hyl
+```hylimo
 instance("Bob")
 event("E")
 foundMessage() -->> E.Bob
@@ -286,7 +286,7 @@ Creates an instance which is an abstract concept of someone who participates in 
 
 Creates the dot signaling a message to an external source.
 Should always be used inline as a message to something else:
-```hyl
+```hylimo
 instance("Bob")
 event("E")
 E.Bob -->> lostMessage()
@@ -327,7 +327,7 @@ The following class names are available for styling/layout purposes within seque
 ## Example
 Here is an example for a webshop order:
 
-```hyl
+```hylimo
 sequenceDiagram {
   bob = instance("user")
   instance("ourShop", "Shop")
