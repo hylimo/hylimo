@@ -27,7 +27,7 @@ export const defaultTitleModule = InterpreterModule.create(
         scope.internal.defaultTitleContentHandler = [
             { },
             {
-                        args.contents += scope.internal.defaultTitle(args.args.title, args.args.keywords) 
+                args.contents += scope.internal.defaultTitle(args.args.title, args.args.keywords) 
             }
         ]
     `

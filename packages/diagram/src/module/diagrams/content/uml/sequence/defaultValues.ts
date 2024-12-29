@@ -7,8 +7,7 @@ export const defaultValues = InterpreterModule.create(
     "uml/sequence/defaultValues",
     [],
     [],
-    [
-        `
+    `
         // Exposed and changable variables
         scope.activityShift = 3
         scope.activityWidth = 10
@@ -29,6 +28,5 @@ export const defaultValues = InterpreterModule.create(
         scope.internal.previouslyExistingSequenceDiagramParticipants = [] // Only the participants that have been deleted, mapped by their name
         scope.internal.lastSequenceDiagramParticipant = null // the next element will be positioned at 'elem + rpos(elem, participantDistance, 0)'
         scope.internal.lastSequenceDiagramEvent = null // the next event will be positioned at 'event + rpos(event, 0, eventDistance)'
-        `
-    ]
+    `
 );

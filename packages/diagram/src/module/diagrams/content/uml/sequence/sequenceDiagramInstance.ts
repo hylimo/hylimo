@@ -24,7 +24,7 @@ export const sequenceDiagramInstanceModule = InterpreterModule.create(
                             title = name + ":" + class
                         } {
                             if(callback != null) {
-                                error("Both the class name and body of instance '" + name + "' are set to functions which is not allowed. Either provide a class name string as second argument, or pass at most two arguments")
+                                error("Both the class name and body of instance '\${name}' are set to functions which is not allowed. Either provide a class name string as second argument, or pass at most two arguments")
                             }
                             callback = class // shift $1 -> $2 when necessary, both the class name and the callback function are optional
                         }

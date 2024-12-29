@@ -1,6 +1,10 @@
 import { fun, id, InterpreterModule, optional, stringType } from "@hylimo/core";
 import { SCOPE } from "../../../base/dslModule.js";
 
+/**
+ * SVG path to draw a stickman with a head, two arms, and two legs.<br>
+ * Intended to symbolize a user.
+ */
 const stickmanIconPath =
     "M 50 10 A 40 40 0 1 1 50 90 A 40 40 0 1 1 50 10 M 0 130 h 100 M 50 90 v 100 M 0 240 L 50 190 M 100 240 L 50 190";
 
@@ -45,8 +49,8 @@ export const actorModule = InterpreterModule.create(
             "actor",
             fun(
                 `
-                (name) = args
-                scope.internal.createActor(name, args = args)
+                    (name) = args
+                    scope.internal.createActor(name, args = args)
             `,
                 {
                     docs: "Creates an actor.",
@@ -61,7 +65,7 @@ export const actorModule = InterpreterModule.create(
                 cls("actor") {
                     vAlign = "center"
                     type("text") {
-                      hAlign = "center"
+                        hAlign = "center"
                     }
                 }
                 cls("actor-element") {

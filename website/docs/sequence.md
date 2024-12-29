@@ -221,8 +221,8 @@ The same participant can be activated multiple times simultaneously.
 **params**:
 
 - 0: the participant (instance or actor) to activate
-- `xshift`: an optional shift on the x-axis when using multiple activity indicators simultaneously on the same instance. Defaults to `activityShift`
-- `yoffset`: an optional offset on the y-axis where to start being active. Defaults to `margin`
+- `xShift`: an optional shift on the x-axis when using multiple activity indicators simultaneously on the same instance. Defaults to `activityShift`
+- `yOffset`: an optional offset on the y-axis where to start being active. Defaults to `margin`
 
 **returms**: the created indicator
 

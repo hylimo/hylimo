@@ -19,7 +19,7 @@ export const componentTitleModule = InterpreterModule.create(
             {
                 args.contents += stack(
                     contents = list(
-                                scope.internal.defaultTitle(args.args.title, args.args.keywords),
+                        scope.internal.defaultTitle(args.args.title, args.args.keywords),
                         path(path = "${componentIconPath}", class = list("component-icon"))
                     ),
                     class = list("component-title-container")

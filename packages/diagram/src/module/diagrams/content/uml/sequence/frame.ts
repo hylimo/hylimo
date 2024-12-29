@@ -76,7 +76,7 @@ export const sequenceDiagramFrameModule = InterpreterModule.create(
                     name = canvasElement(
                         content = stack(contents = list(borderElement, nameElement)),
                         class = list("fragment-name-element")
-                        )
+                    )
                     name.pos = scope.apos(x, y)
                     scope.internal.registerCanvasElement(name, parentArgs, parentArgs.self)
                     fragment.nameElement = name
@@ -143,66 +143,66 @@ export const sequenceDiagramFrameModule = InterpreterModule.create(
             fun(
                 [
                     `
-                argsCopy = args
+                        argsCopy = args
 
-                (fragmentFunction) = args
-                fragmentFunction = fragmentFunction ?? {}
+                        (fragmentFunction) = args
+                        fragmentFunction = fragmentFunction ?? {}
 
-                frameText = args.text
-                hasIcon = args.hasIcon ?? (text != null)
-                subtext = args.subtext
+                        frameText = args.text
+                        hasIcon = args.hasIcon ?? (text != null)
+                        subtext = args.subtext
 
-                // We must differentiate the following approaches to set margin:
-                // 1. No margin set -> use scope.frameMarginX/Y
-                // 2. Everything has an individual margin
-                defaultMarginX = args.marginX
-                if(defaultMarginX == null) {
-                    defaultMarginX = scope.frameMarginX
-                }
-                defaultMarginY = args.marginY
-                if(defaultMarginY == null) {
-                    defaultMarginY = scope.frameMarginY
-                }
-                topLeft = args.topLeft
-                bottomRight = args.bottomRight
+                        // We must differentiate the following approaches to set margin:
+                        // 1. No margin set -> use scope.frameMarginX/Y
+                        // 2. Everything has an individual margin
+                        defaultMarginX = args.marginX
+                        if(defaultMarginX == null) {
+                            defaultMarginX = scope.frameMarginX
+                        }
+                        defaultMarginY = args.marginY
+                        if(defaultMarginY == null) {
+                            defaultMarginY = scope.frameMarginY
+                        }
+                        topLeft = args.topLeft
+                        bottomRight = args.bottomRight
 
-                marginRight = args.marginRight ?? defaultMarginX
-                marginBottom = args.marginBottom ?? defaultMarginY
-                marginLeft = args.marginLeft ?? defaultMarginX
-                marginTop = args.marginTop ?? defaultMarginY
+                        marginRight = args.marginRight ?? defaultMarginX
+                        marginBottom = args.marginBottom ?? defaultMarginY
+                        marginLeft = args.marginLeft ?? defaultMarginX
+                        marginTop = args.marginTop ?? defaultMarginY
 
-                // Calculate the rectangle position
-                x = topLeft.x - marginLeft
-                y = topLeft.y - marginTop
-                width = bottomRight.x - topLeft.x + marginLeft + marginRight
-                height = bottomRight.y - topLeft.y + marginTop + marginBottom
+                        // Calculate the rectangle position
+                        x = topLeft.x - marginLeft
+                        y = topLeft.y - marginTop
+                        width = bottomRight.x - topLeft.x + marginLeft + marginRight
+                        height = bottomRight.y - topLeft.y + marginTop + marginBottom
 
 
-                // Add the frame
-                frameElement = canvasElement(
-                    content = rect(class = list("frame")),
-                        class = list("frame-element"),
-                        width = width,
-                        height = height
-                    )
-                frameElement.topLeft = topLeft
-                frameElement.bottomRight = bottomRight
-                frameElement.fragments = list()
-                frameElement.text = text
-                frameElement.hasIcon = icon
-                frameElement.subtext = subtext
+                        // Add the frame
+                        frameElement = canvasElement(
+                            content = rect(class = list("frame")),
+                            class = list("frame-element"),
+                            width = width,
+                            height = height
+                        )
+                        frameElement.topLeft = topLeft
+                        frameElement.bottomRight = bottomRight
+                        frameElement.fragments = list()
+                        frameElement.text = text
+                        frameElement.hasIcon = icon
+                        frameElement.subtext = subtext
 
-                frameElement.pos = scope.apos(x, y)
-                frameElement.x = x
-                frameElement.y = y
-                frameElement.width = width
-                frameElement.height = height
+                        frameElement.pos = scope.apos(x, y)
+                        frameElement.x = x
+                        frameElement.y = y
+                        frameElement.width = width
+                        frameElement.height = height
 
-                scope.internal.registerCanvasElement(frameElement, args, args.self)
+                        scope.internal.registerCanvasElement(frameElement, args, args.self)
 
-                // Lastly, generate all fragments for the given frame, including the implicit top fragment
-                createSequenceDiagramFragment(topLeft, marginTop = marginTop, parentArgs = args, parent = frameElement, hasIcon = hasIcon, hasLine = false, text = frameText, subtext = subtext)
-            `,
+                        // Lastly, generate all fragments for the given frame, including the implicit top fragment
+                        createSequenceDiagramFragment(topLeft, marginTop = marginTop, parentArgs = args, parent = frameElement, hasIcon = hasIcon, hasLine = false, text = frameText, subtext = subtext)
+                    `,
                     id("this").assignField(
                         "sequenceDiagramFragmentFunction",
                         fun(

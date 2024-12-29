@@ -463,7 +463,7 @@ const scopeExpressions: ParseableExpressions = [
                 (start, end, class, target, canvasScope) = args
                 startMarkerFactory = args.startMarkerFactory
                 endMarkerFactory = args.endMarkerFactory
-                linetype = args.linetype ?? "axisAligned"
+                lineType = args.lineType ?? "axisAligned"
                 startPoint = start
                 startProvider = if((start.type == "canvasElement") || (start.type == "canvasConnection")) {
                     startPoint = canvasScope.lpos(start, 0)
@@ -491,19 +491,17 @@ const scopeExpressions: ParseableExpressions = [
                     { end }
                 }
                 this.segment = null
-                if(linetype == "axisAligned") {
-                  segment = canvasAxisAlignedSegment(end = endPoint, verticalPos = 0.5)
-                  segment.edits[
-                    "${DefaultEditTypes.AXIS_ALIGNED_SEGMENT_POS}"
-                  ] = createAppendScopeEdit(target, "with", "'over = start(0).axisAligned(' & pos & ', end(0.5))'")
-                  segment.edits[
-                    "${DefaultEditTypes.SPLIT_CANVAS_AXIS_ALIGNED_SEGMENT}"
-                  ] = createAppendScopeEdit(target, "with", "'over = start(0).axisAligned(' & pos & ', apos(' & x & ', ' & y & '), ' & nextPos & ', end(0.5))'")
+                if(lineType == "axisAligned") {
+                    segment = canvasAxisAlignedSegment(end = endPoint, verticalPos = 0.5)
+                    segment.edits[
+                        "${DefaultEditTypes.AXIS_ALIGNED_SEGMENT_POS}"
+                    ] = createAppendScopeEdit(target, "with", "'over = start(0).axisAligned(' & pos & ', end(0.5))'")
+                    segment.edits[
+                        "${DefaultEditTypes.SPLIT_CANVAS_AXIS_ALIGNED_SEGMENT}"
+                    ] = createAppendScopeEdit(target, "with", "'over = start(0).axisAligned(' & pos & ', apos(' & x & ', ' & y & '), ' & nextPos & ', end(0.5))'")
                 } {
-                  if(linetype == "line") {
-                  segment = canvasLineSegment(end = endPoint)
-                  segment.edits["${DefaultEditTypes.SPLIT_CANVAS_LINE_SEGMENT}"] =  createAppendScopeEdit(target, "with", "'over = start(0).line(apos(' & x & ', ' & y & '), end(0.5))'")
-                  }
+                    segment = canvasLineSegment(end = endPoint)
+                    segment.edits["${DefaultEditTypes.SPLIT_CANVAS_LINE_SEGMENT}"] =  createAppendScopeEdit(target, "with", "'over = start(0).line(apos(' & x & ', ' & y & '), end(0.5))'")
                 }
                 connection = canvasConnection(
                     start = startPoint,
@@ -537,7 +535,7 @@ const scopeExpressions: ParseableExpressions = [
                             "What to print at the end of the arrow, most commonly one of the 'scope.defaultMarkers' values"
                         ],
                         [
-                            "linetype",
+                            "lineType",
                             'Determines what sort of segment should be created. Defaults to "axisAligned". Optional, one of "axisAligned" (line that either moves on the x-axis, or the y-axis, but not both simultaneously), "line" (straight line).',
                             optional(or(literal("axisAligned"), literal("line")))
                         ]

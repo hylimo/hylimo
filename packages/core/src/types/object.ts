@@ -8,10 +8,9 @@ import { Type } from "./base.js";
  * @param name an optional name for this type
  * @returns the generated type
  */
-export function objectType(types: Map<string | number, Type> = new Map(), name: string | undefined = undefined): Type {
+export function objectType(types: Map<string | number, Type> = new Map()): Type {
     return {
         name() {
-            if (name) return name;
             return `{ ${[...types.entries()].map(([key, type]) => `${key}: ${type.name()}`).join(", ")} }`;
         },
         matches(value, context) {

@@ -33,19 +33,19 @@ export const activityIndicatorModule = InterpreterModule.create(
                     startPositionRaw = event[instance.name]
                     if(startPositionRaw == null) {
                         if(scope.internal.previouslyExistingSequenceDiagramParticipants[instance.name] != null) {
-                            error("'" + instance.name + "' has already been destroyed and thus cannot be activated anymore")
+                            error("'\${instance.name}' has already been destroyed and thus cannot be activated anymore")
                         } {
-                            error("'" + event.name + "." + instance.name + "' does not exist which should not happen")
+                            error("'\${event.name}.\${instance.name}' does not exist which should not happen")
                         }
                     }
                     startPosition = startPositionRaw.center
                     if(startPosition == null) {
-                        error("'" + event.name + "." + instance.name + "' has no 'center' property which should not happen")
+                        error("'\${event.name}.\${instance.name}' has no 'center' property which should not happen")
                     }
 
                     activityIndicators = instance.activeActivityIndicators
                     defaultLineshift = scope.activityShift
-                    xshift = args.xshift
+                    xshift = args.xShift
 
                     // xshift is relative to the most recent activity indicator, not to the root one
                     xshift = if(xshift == null) {
@@ -56,7 +56,7 @@ export const activityIndicatorModule = InterpreterModule.create(
                         }
                     } {
                         if(activityIndicators.length == 0) {
-                            error("'xshift' can only be set when another activity indicator is already active")
+                            error("'xShift' can only be set when another activity indicator is already active")
                         }
                         activityIndicators.get(activityIndicators.length - 1).xshift + xshift
                     }
@@ -64,7 +64,7 @@ export const activityIndicatorModule = InterpreterModule.create(
                     // By default, start the indicator 'margin' above on the y-axis as it looks visually nicer not to have an arrow directly pointing at the corner of the indicator
                     // However, to be UML compliant, it must also be possible to start it at a corner
                     // Additionally, since it should be ABOVE the event, we must negate the argument
-                    yStart = args.yoffset
+                    yStart = args.yOffset
                     yStart = -1 * if (yStart != null) { yStart } { scope.margin }
                     height = scope.margin - yStart // make the pillar a bit more aesthetically pleasing by adding a bit of margin on both sides - at least if the user wants it (yStart is supposed to be negative, so add it on top of the height)
 
@@ -103,12 +103,12 @@ export const activityIndicatorModule = InterpreterModule.create(
                     params: [
                         [0, "the participant (instance or actor) to activate", participantType],
                         [
-                            "xshift",
+                            "xShift",
                             "an optional shift on the x-axis when using multiple activity indicators simultaneously on the same instance. Defaults to 'activityShift'",
                             optional(numberType)
                         ],
                         [
-                            "yoffset",
+                            "yOffset",
                             "an optional offset on the y-axis where to start being active. Defaults to 'margin'",
                             optional(numberType)
                         ]
@@ -122,16 +122,16 @@ export const activityIndicatorModule = InterpreterModule.create(
             "deactivate",
             fun(
                 `
-                (instance) = args
-                if(instance == null) {
-                    error("Cannot deactivate a non-existing instance")
-                }
+                    (instance) = args
+                    if(instance == null) {
+                        error("Cannot deactivate a non-existing instance")
+                    }
 
-                if(instance.activeActivityIndicators.length == 0) {
-                    error("Cannot deactivate instance '"+ instance.name + "' as it has not been activated")
-                }
-                activityIndicator = instance.activeActivityIndicators.remove()
-            `,
+                    if(instance.activeActivityIndicators.length == 0) {
+                        error("Cannot deactivate instance '\${instance.name}' as it has not been activated")
+                    }
+                    activityIndicator = instance.activeActivityIndicators.remove()
+                `,
                 {
                     docs: "Deactivates the most recent activity indicator",
                     params: [[0, "the participant to deactivate", participantType]],

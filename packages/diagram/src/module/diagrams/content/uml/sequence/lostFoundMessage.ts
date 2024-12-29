@@ -6,24 +6,25 @@ import { SCOPE } from "../../../../base/dslModule.js";
  * However, we cannot assign it within the expressions to not pollute the global namespace.
  *
  * @param type the type of message to use as class name for the generated element
+ * @return the syncscript function string for the given message type
  */
 function message(type: string): string {
     return `
-    distance = args.distance ?? scope.externalMessageDistance
-    diameter = args.diameter ?? scope.externalMessageDiameter
-    dot = canvasElement(
-        content = ellipse(class = list("${type}-message")),
-        width = diameter,
-        height = diameter,
-        class = list("${type}-message-element")
-    )
+                distance = args.distance ?? scope.externalMessageDistance
+                diameter = args.diameter ?? scope.externalMessageDiameter
+                dot = canvasElement(
+                    content = ellipse(class = list("${type}-message")),
+                    width = diameter,
+                    height = diameter,
+                    class = list("${type}-message-element")
+                )
 
-    // We need to change the properties of the canvasElement directly and return it as a connection requires a point or element as parameter
-    dot.diameter = diameter
-    dot.distance = distance
-    dot.externalMessageType = "${type}"
-    scope.internal.registerCanvasElement(dot, args, args.self)
-    dot
+                // We need to change the properties of the canvasElement directly and return it as a connection requires a point or element as parameter
+                dot.diameter = diameter
+                dot.distance = distance
+                dot.externalMessageType = "${type}"
+                scope.internal.registerCanvasElement(dot, args, args.self)
+                dot
 `;
 }
 

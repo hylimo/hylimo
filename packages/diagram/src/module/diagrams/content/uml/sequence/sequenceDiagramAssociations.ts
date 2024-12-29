@@ -64,7 +64,7 @@ export const sequenceDiagramAssociationsModule = InterpreterModule.create(
                         args.self,
                         startMarkerFactory = startMarkerFactory,
                         endMarkerFactory = endMarkerFactory,
-                        linetype = "line"
+                        lineType = "line"
                     )
                 }
             }

@@ -11,10 +11,11 @@ import { functionType } from "../../types/function.js";
 import { listType } from "../../types/list.js";
 import { objectType } from "../../types/object.js";
 import { DefaultModuleNames } from "../defaultModuleNames.js";
-import { assertBoolean, assertFunction, assertNumber, isBoolean } from "../typeHelpers.js";
+import { assertBoolean, assertFunction, assertNumber, assertString, isBoolean } from "../typeHelpers.js";
 import { numberType } from "../../types/number.js";
 import { optional } from "../../types/null.js";
 import { ExecutableListEntry } from "../../runtime/ast/executableListEntry.js";
+import { NumberLiteralExpression } from "../../ast/numberLiteralExpression.js";
 
 /**
  * Name of the temporary field where the list prototype is assigned
@@ -309,15 +310,50 @@ export const listModule = InterpreterModule.create(
                     (args, context) => {
                         const self = args.getFieldValue(SemanticFieldNames.SELF, context);
                         const length = assertNumber(self.getFieldValue(lengthField, context), "length field of a list");
-                        const fields = [];
+                        const maxDepthObject = args.getField("maxDepth", context).value;
+                        const maxDepth = maxDepthObject.isNull ? 4 : assertNumber(maxDepthObject);
+                        const fields: string[] = [];
                         for (let i = 0; i < length; i++) {
-                            fields.push(self.getField(i, context).value.toString(context, 3));
+                            const next = self.getField(i, context).value;
+                            const nextCall = next.getFieldValue("toString", context);
+                            if (nextCall.isNull) {
+                                fields.push(next.toString(context, maxDepth - 1));
+                            } else {
+                                assertFunction(
+                                    nextCall,
+                                    `'toString()' is expected to be a function for ${next.toString(context, maxDepth - 1)}`
+                                );
+                                const resultingString = nextCall.invoke(
+                                    [
+                                        {
+                                            name: "maxDepth",
+                                            value: new ExecutableConstExpression({
+                                                value: context.newNumber(maxDepth - 1)
+                                            })
+                                        }
+                                    ],
+                                    context
+                                );
+                                fields.push(
+                                    assertString(
+                                        resultingString.value,
+                                        `Output of 'toString()' for ${next.toString(context, maxDepth - 1)} is not a string`
+                                    )
+                                );
+                            }
                         }
                         return context.newString(`[${fields.join(", ")}]`);
                     },
                     {
                         docs: "Converts this list into a human readable string",
-                        params: [[SemanticFieldNames.SELF, "the list to stringify", listType()]],
+                        params: [
+                            [SemanticFieldNames.SELF, "the list to stringify", listType()],
+                            [
+                                "maxDepth",
+                                "how many layers of objects to recurse into. Defaults to 3.",
+                                optional(numberType)
+                            ]
+                        ],
                         returns: "The string version of this list"
                     }
                 )

@@ -2,7 +2,7 @@ import { DefaultModuleNames } from "../defaultModuleNames.js";
 import { InterpreterModule } from "../../runtime/interpreter/interpreterModule.js";
 import { assign, fun, id, jsFun, native, num, str } from "../../runtime/executableAstHelper.js";
 import { SemanticFieldNames } from "../../runtime/semanticFieldNames.js";
-import { assertFunction, assertIndex, assertObject } from "../typeHelpers.js";
+import { assertFunction, assertIndex, assertNumber, assertObject } from "../typeHelpers.js";
 import { LabeledValue } from "../../runtime/objects/labeledValue.js";
 import { generateArgs } from "../../runtime/objects/generateArgs.js";
 import { or } from "../../types/or.js";
@@ -12,6 +12,7 @@ import { objectType } from "../../types/object.js";
 import { functionType } from "../../types/function.js";
 import { ExecutableConstExpression } from "../../runtime/ast/executableConstExpression.js";
 import { ExecutableNativeExpression } from "../../runtime/ast/executableNativeExpression.js";
+import { optional } from "../../types/null.js";
 
 /**
  * Name of the temporary field where the object prototype is assigned
@@ -34,11 +35,20 @@ export const objectModule = InterpreterModule.create(
                 jsFun(
                     (args, context) => {
                         const self = args.getField(SemanticFieldNames.SELF, context).value;
-                        return context.newString(self.toString(context, 3));
+                        const maxDepthObject = args.getField("maxDepth", context).value;
+                        const maxDepth = maxDepthObject.isNull ? 3 : assertNumber(maxDepthObject);
+                        return context.newString(self.toString(context, maxDepth));
                     },
                     {
                         docs: "Creates and returns a string representation.",
-                        params: [[SemanticFieldNames.SELF, "the input which is transformed to a string"]],
+                        params: [
+                            [SemanticFieldNames.SELF, "the input which is transformed to a string"],
+                            [
+                                "maxDepth",
+                                "how many layers of objects to recurse into. Defaults to 3.",
+                                optional(numberType)
+                            ]
+                        ],
                         returns: "The string representation"
                     }
                 )
