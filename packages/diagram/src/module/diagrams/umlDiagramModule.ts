@@ -14,6 +14,8 @@ import { extendsAndImplementsModule } from "./content/uml/extendsAndImplements.j
 import { readingDirectionModule } from "./content/uml/readingDirection.js";
 import { componentModule } from "./content/uml/component.js";
 import { DiagramModuleNames } from "../diagramModuleNames.js";
+import { classDiagramToolboxEditsModule } from "./content/uml/classDiagramToolboxEdits.js";
+import { componentDiagramToolboxEditsModule } from "./content/uml/componentDiagramToolboxEdits.js";
 
 /**
  * Module for (arbitrary) UML diagrams
@@ -35,6 +37,8 @@ export const umlDiagramModule = InterpreterModule.create(
         nonNavigableAssociationsModule,
         compositionAndAggregationModule,
         extendsAndImplementsModule,
-        readingDirectionModule
+        readingDirectionModule,
+        classDiagramToolboxEditsModule,
+        componentDiagramToolboxEditsModule
     ])
 );

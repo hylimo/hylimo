@@ -9,6 +9,7 @@ import {
 import { CancelableCommandExecutionContext } from "../features/animation/cancelableCommandExecutionContext.js";
 import { UpdateModelCommand } from "../features/update/updateModel.js";
 import { IncrementalUpdateModelCommand } from "../features/update/incrementalUpdateModel.js";
+import { Action } from "sprotty-protocol";
 
 /**
  * CommandStack with support for CancelableAnimations.
@@ -64,5 +65,9 @@ export class CommandStack extends SprottyCommandStack {
         };
         this.lastContext = context;
         return context;
+    }
+
+    override updateHidden(_model: SModelRootImpl, _cause?: Action): void {
+        // No-op to prevent hidden model from ever being rendered
     }
 }

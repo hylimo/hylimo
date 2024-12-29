@@ -99,14 +99,6 @@ export const packageModule = InterpreterModule.create(
                 }
             }
         `,
-        createToolboxEdit("Package/Package", 'package("Example")'),
-        createToolboxEdit(
-            "Package/Package with class",
-            `
-                package("Example") {
-                    class("ExampleClass")
-                }
-            `
-        )
+        createToolboxEdit("Package/Package", 'package("Example")')
     ]
 );
