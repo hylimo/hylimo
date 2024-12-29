@@ -1,7 +1,7 @@
 ---
-hidden: true
+outline: deep
 ---
-# Sequence Diagrams
+# UML Sequence Diagram
 
 Hylimo is able to efficiently draw sequence diagrams.
 On top of that, it is the most efficient tool we know to draw any typical sequence diagram:
@@ -35,9 +35,11 @@ Hylimo walks through the diagram from left to right, and then from top to bottom
 
 First, declare all participants (`instance`, `actor`) in the order you want to display them as they will be positioned on the x axis in this order:
 ```hylimo
-instance("Bob")
-instance("Shop")
-actor("Admin")
+sequenceDiagram {
+    instance("Bob")
+    instance("Shop")
+    actor("Admin")
+}
 ```
 This example creates three participants, reading from left to right as `Bob`, `Shop` and lastly a user called `Admin`.
 
@@ -46,7 +48,9 @@ Now that we've populated our `x` axis, let's move on with the `y` axis.
 The main way to move forward on the `y` axis in a sequence diagram is through `events`.\
 An `event` needs a name to refer to it later on and automatically moves downward on the y axis:
 ```hylimo
-event("startPayment")
+sequenceDiagram {
+    event("startPayment")
+}
 ```
 As you can see above, the name should be understandable for you to know exactly which action is symbolized by this event.
 This name will never be shown anywhere.
@@ -54,7 +58,9 @@ This name will never be shown anywhere.
 For most cases, the  default value for how far away the next event will be good-enough.
 Nevertheless, in cases where you want an explicit distance to the predecessor, you are free to do so:
 ```hylimo
-event("startPayment", 50)
+sequenceDiagram {
+    event("startPayment", 50)
+}
 ```
 
 This positions the event `50` pixels below its predecessor.
@@ -65,13 +71,17 @@ Both `event` and `participant` names will be registered as variables if they did
 In case they existed already, the existing name takes precedence.
 If their name is already used by something else, you can assign the result of these functions to a variable of your own choosing:
 ```hylimo
-Bob = true
-user = instance("Bob")
-event("buy")
-event("stop")
-buy.Bob --> stop.Bob
+sequenceDiagram {
+    enableDebugging = true
+    Bob = true
+    user = instance("Bob")
+    event("buy")
+    event("stop")
+    buy.Bob --> stop.Bob
+}
 ```
 In this example, we also see that to refer to a specific xy-coordinate, we can always use `eventname.participant`.
+Additionally, we can enable the debugging mode to understand what's happening inside our diagram by setting `enableDebugging = true`.
 
 Now, we have the basic knowledge to go on with the remaining features that are all relative to the latest event.
 
@@ -80,48 +90,58 @@ Now, we have the basic knowledge to go on with the remaining features that are a
 There is a bunch of things you can do with participants, depending on if there is a latest defined event:
 - you can postpone the creation of a participant by defining it after an event:
 ```hylimo
-instance("A")
-event("smth")
-instance("B")
+sequenceDiagram {
+    instance("A")
+    event("smth")
+    instance("B")
+}
 ```
 - You can destroy a participant:
 ```hylimo
-instance("A")
-instance("B")
-event("E1")
-destroy(A)
-event("E2")
+sequenceDiagram {
+    instance("A")
+    instance("B")
+    event("E1")
+    destroy(A)
+    event("E2")
+}
 ```
 - You can reanimate a dead participant:
 ```hylimo
-instance("A")
-instance("B")
-event("E1")
-destroy(A)
-event("E2")
-event("E3")
-instance("A²", below = A)
+sequenceDiagram {
+    instance("A")
+    instance("B")
+    event("E1")
+    destroy(A)
+    event("E2")
+    event("E3")
+    instance("A²", below = A)
+}
 ```
 - You can activate and deactivate a participant, meaning that it is actively working on something:
 ```hylimo
-instance("A")
-instance("B")
-event("E1")
-activate(A)
-event("E2")
-deactivate(A)
+sequenceDiagram {
+    instance("A")
+    instance("B")
+    event("E1")
+    activate(A)
+    event("E2")
+    deactivate(A)
+}
 ```
 - Even multiple times simultaneously:
 ```hylimo
-instance("A")
-instance("B")
-event("E1")
-activate(A)
-event("E1margin", 5)
-activate(A)
-deactivate(A)
-event("E2")
-deactivate(A)
+sequenceDiagram {
+    instance("A")
+    instance("B")
+    event("E1")
+    activate(A)
+    event("E1margin", 5)
+    activate(A)
+    deactivate(A)
+    event("E2")
+    deactivate(A)
+}
 ```
 As you can see in this example, you can also use events to simulate margins, as we explicitly defined a pseudo-event whose only purpose is to add 5 pixels on the y-axis between the first indicator and the second one.
 
@@ -134,22 +154,24 @@ Messages are sent after `activate` operations.\
 
 The following messages are available within sequence diagrams (in both directions, of course):
 ```hylimo
-instance("A")
-instance("B")
-event("E1")
-E1.A -- E1.B // asynchronous undirected message
-event("E2")
-E2.A --> E2.B // asynchronous directed message, object creation message
-event("E3")
-E3.A -->> E3.B // synchronous directed message
-event("E4")
-E4.A <.. E4.B // asynchronous return message
-event("E5")
-E5.A <<.. E5.B // synchronous return message
-event("E6")
-E6.A --! E6.B // destroy message
-event("E7")
-E7.A ..! E7.B // destroy return message
+sequenceDiagram {
+    instance("A")
+    instance("B")
+    event("E1")
+    E1.A -- E1.B // asynchronous undirected message
+    event("E2")
+    E2.A --> E2.B // asynchronous directed message, object creation message
+    event("E3")
+    E3.A -->> E3.B // synchronous directed message
+    event("E4")
+    E4.A <.. E4.B // asynchronous return message
+    event("E5")
+    E5.A <<.. E5.B // synchronous return message
+    event("E6")
+    E6.A --! E6.B // destroy message
+    event("E7")
+    E7.A ..! E7.B // destroy return message
+}
 ```
 
 ## Global variables within sequence diagrams
@@ -224,9 +246,11 @@ Creates a new event.
 Creates the dot signaling a message from an external source.
 Should always be used inline as a message from something else:
 ```hylimo
-instance("Bob")
-event("E")
-foundMessage() -->> E.Bob
+sequenceDiagram {
+    instance("Bob")
+    event("E")
+    foundMessage() -->> E.Bob
+}
 ```
 Is exactly the same as `lostMessage`, the meaning comes from the direction in which you declare the message
 
@@ -287,9 +311,11 @@ Creates an instance which is an abstract concept of someone who participates in 
 Creates the dot signaling a message to an external source.
 Should always be used inline as a message to something else:
 ```hylimo
-instance("Bob")
-event("E")
-E.Bob -->> lostMessage()
+sequenceDiagram {
+    instance("Bob")
+    event("E")
+    E.Bob -->> lostMessage()
+}
 ```
 Is exactly the same as `foundMessage`, the meaning comes from the direction in which you declare the message
 
@@ -329,35 +355,38 @@ Here is an example for a webshop order:
 
 ```hylimo
 sequenceDiagram {
-  bob = instance("user")
-  instance("ourShop", "Shop")
-  instance("Cart")
-  instance("Payment")
+    enableDebugging = true
+    bob = instance("user")
+    instance("ourShop", "Shop")
+    instance("Cart")
+    instance("Payment")
 
-  activate(bob)
-  activate(ourShop)
-  event("initialRequest")
-  initialRequest.User --> initialRequest.Shop
-  deactivate(bob)
+    event("initialRequest")
+    activate(bob)
+    activate(ourShop)
+    initialRequest.user --> initialRequest.ourShop
+    deactivate(bob)
 
-  activate(Cart)
-  event("cartRequest")
-  cartRequest.Shop --> cartRequest.Cart
+    activate(Cart)
+    event("cartRequest")
+    cartRequest.ourShop --> cartRequest.Cart
 
-  event("cartResponse")
-  cartResponse.Shop <.. cartResponse.Cart
-  deactivate(Cart)
+    event("cartResponse")
+    cartResponse.ourShop <.. cartResponse.Cart
+    deactivate(Cart)
 
-  activate(Payment)
-  event("startPayment")
-  startPayment.Shop ..> startPayment.Payment
-  deactivate(Payment)
+    activate(Payment)
+    event("startPayment", 140)
+    startPayment.ourShop ..> startPayment.Payment
+    deactivate(Payment)
 
-  event("notifyUser", 30)
-  notifyUser.User <.. notifyUser.Shop
-  deactivate(Shop)
+    event("notifyUser", 70)
+    notifyUser.user <.. notifyUser.ourShop
+    deactivate(ourShop)
 
-  frame(contained = list(cartResponse.Shop, cartResponse.Cart, notifyUser.User, notifyUser.Shop), name = "if", condition = "[response successful]", margin=30)
+    frame(topLeft = cartResponse.user, bottomRight = notifyUser.ourShop, text = "if", subtext = "[response successful]", margin=30) {
+        fragment(startPayment, text = "else", subtext = "[nothing was done]")
+    }
 }
 ```
 
