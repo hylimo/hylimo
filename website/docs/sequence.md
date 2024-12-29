@@ -302,12 +302,12 @@ A fragment is the following:
 **params**:
 
 - 0: the event or y axis coordinate to use for the top line, so the uppermost y coordinate of this frame
-- `text`: the optional name of this fragment
-- `subtext`: the optional subtext of this fragment
+- `text`: The optional name of this fragment
+- `subtext`: The optional subtext of this fragment
 - `hasLine`: Whether to draw the line on top. Defaults to `true`
 - `hasIcon`: Whether to draw the border around the name. Defaults to `text != null`
 
-**returns**: a data object containing all this data plus the newly created elements
+**returns**: A data object containing all this data plus the newly created elements
 
 ### frame
 
@@ -317,13 +317,15 @@ Creates a new frame around the given coordinates.
 
 - `topLeft`: The top left coordinate (event) to draw the frame around. The border will be extended by `frameMarginX` to the left and `frameMarginY` to the top by default
 - `bottomRight`: The bottom right coordinate (event) to draw the frame around. The border will be extended by `frameMarginX` to the right and `frameMarginY` at the bottom by default
-- `text`: the optional name of this frame, i.e. `if` or `while`
-- `subtext`: the optional subtext of this fragment, i.e. a condition
+- `text`: The optional name of this frame, i.e. `if` or `while`
+- `subtext`: The optional subtext of this fragment, i.e. a condition
 - `hasIcon`: Whether to draw the border around the name. Defaults to `text != null`
 - `marginRight`: An optional margin to use on the right side
 - `marginBelow`: An optional margin to use on the bottom
 - `marginLeft`: An optional margin to use on the left side
 - `marginTop`: An optional margin to use on the top
+
+**returns**: The created frame
 
 ### instance
 

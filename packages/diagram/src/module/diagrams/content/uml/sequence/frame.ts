@@ -43,7 +43,7 @@ export const sequenceDiagramFrameModule = InterpreterModule.create(
 
                 // The frame is offset by 'margin' from the event, but we want to connect the name to the frame border/fragment line
                 marginTop = marginTop ?? args.marginTop
-                y = y - marginTop 
+                y = y - marginTop
 
 
                 fragmentText = args.text
@@ -51,7 +51,7 @@ export const sequenceDiagramFrameModule = InterpreterModule.create(
                 hasLine = args.hasLine
                 hasIcon = args.hasIcon ?? (fragmentText != null)
 
-                fragment = [text = fragmentText, subtext = fragmentSubtext, hasIcon = hasIcon, hasLine = hasLine, topY = topLineEvent]
+                fragment = [text = fragmentText, subtext = fragmentSubtext, hasIcon = hasIcon, hasLine = hasLine, topY = y]
 
                 // Draw the line on top of the fragment
                 if(args.hasLine) {

@@ -1,4 +1,14 @@
-import { booleanType, functionType, listType, numberType, objectType, optional, or, stringType } from "@hylimo/core";
+import {
+    booleanType,
+    functionType,
+    listType,
+    literal,
+    numberType,
+    objectType,
+    optional,
+    or,
+    stringType
+} from "@hylimo/core";
 import { canvasContentType, canvasPointType } from "../../../../base/types.js";
 
 // Contains all Types used within sequence diagrams
@@ -58,7 +68,7 @@ export const externalMessageType = objectType(
     new Map([
         ["distance", numberType], // on the x-axis compared to where it is pointing
         ["diameter", numberType],
-        ["externalMessageType", booleanType] // The type of external message to use in error messages
+        ["externalMessageType", or(literal("lost"), literal("found"))] // The type of external message to use in error messages
     ]),
     "Lost or Found message"
 );
@@ -74,7 +84,7 @@ export const fragmentType = objectType(
         ["line", optional(canvasContentType)],
         [
             "topY", // the y-coordinate (event) where to draw the line separating the previous fragment from this fragment
-            or(eventCoordinateType, canvasPointType, numberType)
+            numberType
         ]
     ]),
     "UML sequence diagram frame"

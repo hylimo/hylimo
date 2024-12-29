@@ -18,17 +18,6 @@ function message(type: string): string {
         class = list("${type}-message-element}")
     )
 
-    scope.styles {
-        cls("${type}-message") {
-            fill = var("primary")
-        }
-        cls("${type}-message-element") {
-        vAlign = "center"
-        hAlign = "center"
-        stroke = "unset"
-        }
-    }
-
     // We need to change the properties of the canvasElement directly and return it as a connection requires a point or element as parameter
     dot.diameter = diameter
     dot.distance = distance
@@ -49,6 +38,26 @@ export const lostFoundMessageModule = InterpreterModule.create(
     ["uml/sequence/defaultValues"],
     [],
     [
+        `
+            scope.styles {
+                cls("found-message") {
+                    fill = var("primary")
+                    stroke = "unset"
+                }
+                cls("lost-message") {
+                    fill = var("primary")
+                    stroke = "unset"
+                }
+                cls("found-message-element") {
+                    vAlign = "center"
+                    hAlign = "center"
+                }
+                cls("lost-message-element") {
+                    vAlign = "center"
+                    hAlign = "center"
+                }
+            }
+        `,
         id(SCOPE).assignField(
             "lostMessage",
             fun(message("lost"), {
