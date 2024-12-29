@@ -40,7 +40,7 @@ export const sequenceDiagramAssociationsModule = InterpreterModule.create(
                         } {
                             endEvent.left()
                         }
-                    }{
+                    } {
                         endEvent
                     } 
 

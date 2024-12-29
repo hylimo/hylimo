@@ -85,7 +85,7 @@ export const activityIndicatorModule = InterpreterModule.create(
                     // - start: the (x,y) coordinate of the given event-actor combi
                     // - x=-0.5*activity indicatorwidth + xshift: In Hylimo coordinates, x is the upper left corner but we want it to be the center of the x-axis instead (unless there are multiple activity indicators simultaneously, then we want to offset them)
                     // - y=-margin: The line should not start at the event, but [margin] ahead  
-                    activityIndicatorElement.pos = scope.rpos(startPosition, -0.5*scope.activityWidth + xshift, yStart)
+                    activityIndicatorElement.pos = scope.rpos(startPosition, -0.5 * scope.activityWidth + xshift, yStart)
 
                     scope.internal.registerCanvasElement(activityIndicatorElement, args, args.self)
                     instance.activeActivityIndicators += activityIndicatorElement

@@ -99,7 +99,8 @@ export const participantModule = InterpreterModule.create(
                 // Draw the cross symbolizing the end of this participant, if there was any event so far
                 originalArgs = args
                 if(participant.events.length > 0) {
-                    cross = canvasElement(content = path(
+                    cross = canvasElement(
+                        content = path(
                             path = "M 0 0 L 1 1 M 1 0 L 0 1",
                             class = list("destroy-cross-path")
                         ),
