@@ -14,34 +14,47 @@ import { canvasContentType, canvasPointType } from "../../../../base/types.js";
 
 // Contains all Types used within sequence diagrams
 
+/**
+ * Stores an event, i.e. `event("startShopping")`.
+ *
+ * param explanations:
+ * - `deltaY`: y coordinate relative to the previous event
+ * - `y`: absolute y coordinate
+ */
 export const eventType = namedType(
     objectType(
         new Map([
             ["name", stringType],
-            ["deltaY" /* to the last event */, numberType],
-            ["y" /* to the root of the diagram */, numberType]
-            // And a bunch of 'eventCoordinateType's, always under the names of the currently available participants, i.e. 'event.Bob'
+            ["deltaY", numberType],
+            ["y", numberType]
+            // And a bunch of dynamic 'eventCoordinateType's, always under the names of the currently available participants, i.e. 'event.Bob'
         ])
     ),
     "UML sequence diagram event"
 );
 
+/**
+ * Stores an event coordinate, i.e. `instance("Bob") \n event("shopping").Bob`
+ *
+ * param explanations:
+ * - `left`: function that produces a connectable point resembling the left x position of the underlying participant (at the given y coordinate) (differs from center when there is an active activity indicator)
+ * - `center`: precise xy position of the event
+ * - `right`: function that produces a connectable point resembling the right x position of the underlying participant (at the given y coordinate) (differs from center when there is an active activity indicator)
+ * - `x`: Absolute `x` coordinate relative to the diagram root, equal to `center.x` (which we don't know due to the design of Hylimo)
+ * - `y`: Absolute `y` coordinate relative to the diagram root, equal to `center.y` (which we don't know due to the design of Hylimo)
+ * - `parentEvent`: Can only be `null` when a top level participant is used as event coordinate (object creation messages)
+ * - `participantName`: i.e. 'Bob' when this object is called as 'event.Bob'
+ */
 export const eventCoordinateType = namedType(
     objectType(
         new Map([
-            [
-                "left" /* participant element or left xy position of the most recent activity indicator wrapped inside a function, so something that can create a connection */,
-                functionType
-            ],
-            ["center" /* precise xy position of the event */, canvasPointType],
-            [
-                "right" /* participant element or right xy position of the most recent activity indicator wrapped inside a function, so something that can create a connection */,
-                functionType
-            ],
-            ["x" /* from the center to the root of the diagram */, numberType],
-            ["y" /* from the center to the root of the diagram */, numberType],
+            ["left", functionType],
+            ["center", canvasPointType],
+            ["right", functionType],
+            ["x", numberType],
+            ["y", numberType],
             ["parentEvent", optional(eventType) /* null for top level participants*/],
-            ["participantName" /* i.e. 'Bob' when this object is called as 'event.Bob' */, stringType]
+            ["participantName", stringType]
         ])
     ),
     "UML sequence diagram event for a specific x coordinate"
@@ -59,6 +72,13 @@ export const activityIndicatorType = namedType(
     "UML sequence diagram activity indicator"
 );
 
+/**
+ * Stores the data of a single participant.
+ *
+ * param explanations:
+ * - `x`: absolute to the root of the diagram
+ * - `y`: absolute to the root of the diagram
+ */
 export const participantType = namedType(
     objectType(
         new Map([
@@ -66,24 +86,37 @@ export const participantType = namedType(
             ["lifeline", canvasContentType],
             ["events", listType(canvasPointType)],
             ["activeActivityIndicators", listType(activityIndicatorType)],
-            ["x" /* to the root of the diagram */, numberType],
-            ["y" /* to the root of the diagram */, numberType]
+            ["x", numberType],
+            ["y", numberType]
         ])
     ),
     "UML sequence diagram participant (instance or actor)"
 );
 
+/**
+ * Stores a lost/found message
+ *
+ * param explanations:
+ * - `distance`: length of the message, so value in pixels on the x-axis from where it is pointing at
+ * - `externalMessageType`: the type of external message we have here to use in error messages
+ */
 export const externalMessageType = namedType(
     objectType(
         new Map([
-            ["distance", numberType], // on the x-axis compared to where it is pointing
+            ["distance", numberType],
             ["diameter", numberType],
-            ["externalMessageType", or(literal("lost"), literal("found"))] // The type of external message to use in error messages
+            ["externalMessageType", or(literal("lost"), literal("found"))]
         ])
     ),
     "Lost or Found message"
 );
 
+/**
+ * Stores the data for a single fragment of one frame.
+ *
+ * param explanations:
+ * - `topY`: the absolute `y` coordinate where the line separating this fragment from its predecessor should be drawn
+ */
 export const fragmentType = namedType(
     objectType(
         new Map([
@@ -94,10 +127,7 @@ export const fragmentType = namedType(
             ["nameElement", optional(canvasContentType)],
             ["subtextElement", optional(canvasContentType)],
             ["line", optional(canvasContentType)],
-            [
-                "topY", // the y-coordinate (event) where to draw the line separating the previous fragment from this fragment
-                numberType
-            ]
+            ["topY", numberType]
         ])
     ),
     "UML sequence diagram frame fragment"
