@@ -308,8 +308,6 @@ The following class names are available for styling/layout purposes within seque
 - `lost-message-element` to layout lost message elements
 - `found-message` to style found messages
 - `found-message-element` to layout found message elements
-- `fragment-line` to style the lines separating fragments from each other
-- `fragment-line-element` to layout the lines separating fragments from each other
 - `fragment-name-border` to style the border around fragment names
 - `fragment-name` to style the text display of fragment names
 - `fragment-name-element` to layout both the border and name of fragments
@@ -317,8 +315,8 @@ The following class names are available for styling/layout purposes within seque
 - `fragment-subtext-element` to layout the subtext of fragments
 - `frame` to style frames
 - `frame-element` to layout the subtext of frames
-- `top-level-participant` to style any participant before any event was declared, so its `y` is `0`
-- `non-top-level-participant` to style any participant after an event was declared, so its `y` is not `0`
+- `top-level-participant-element` to style any participant before any event was declared, so its `y` is `0`
+- `non-top-level-participant-element` to style any participant after an event was declared, so its `y` is not `0`
 - `destroy-cross-path` to style the cross of a destroyed participant
 - `destroy-cross-path-element` to layout the cross of a destroyed participant
 - `actor` to style actors

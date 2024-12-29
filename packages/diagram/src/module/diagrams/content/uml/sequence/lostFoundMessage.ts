@@ -1,4 +1,4 @@
-import { fun, id, InterpreterModule, numberType, optional, parse } from "@hylimo/core";
+import { fun, id, InterpreterModule, numberType, optional } from "@hylimo/core";
 import { SCOPE } from "../../../../base/dslModule.js";
 
 /**
@@ -88,16 +88,6 @@ export const lostFoundMessageModule = InterpreterModule.create(
                 snippet: `($1)`,
                 returns: "The created found message to be used with a message operator"
             })
-        ),
-        ...parse(
-            `
-                scope.styles {
-                    cls("instance-element") {
-                        vAlign = "bottom"
-                        minWidth = 50
-                    }
-                }
-            `
         )
     ]
 );
