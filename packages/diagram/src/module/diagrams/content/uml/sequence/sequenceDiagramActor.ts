@@ -17,16 +17,16 @@ export const sequenceDiagramActorModule = InterpreterModule.create(
             fun(
                 `
                     (name) = args
- 
+
                     this.actor = scope.internal.createActor(name, args = args)
-                    
+
                     // Actors have an optional name, so we must supply one for the first actor for the first actor in the diagram for example for arrows: 'event.User --> event.Shop' or 'activate(User)'
                     // Note however, that this name should not be displayed, so it cannot be used above
                     if(name == null) {
                         name = "User"
                         scope.internal.registerInDiagramScope(name, this.actor)
                     }
-                    
+
                     scope.internal.createSequenceDiagramParticipant(name, this.actor, below = args.below)
                     this.actor
                 `,

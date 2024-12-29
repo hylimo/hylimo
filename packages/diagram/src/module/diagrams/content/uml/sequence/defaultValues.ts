@@ -23,7 +23,7 @@ export const defaultValues = InterpreterModule.create(
         scope.frameMarginX = 20
         scope.frameMarginY = scope.margin
         scope.participantDistance = 200
-        
+
         // Used for internal layout
         scope.internal.sequenceDiagramParticipants = list() // Only the currently active participants, not including participants that were already terminated
         scope.internal.previouslyExistingSequenceDiagramParticipants = [] // Only the participants that have been deleted, mapped by their name

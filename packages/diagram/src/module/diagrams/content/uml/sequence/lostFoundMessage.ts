@@ -9,32 +9,32 @@ import { SCOPE } from "../../../../base/dslModule.js";
  */
 function message(type: string): string {
     return `
-  distance = args.distance ?? scope.externalMessageDistance
-  diameter = args.diameter ?? scope.externalMessageDiameter
-  dot = canvasElement(
-    content = ellipse(class = list("${type}-message")),
-    width = diameter,
-    height = diameter,
-    class = list("${type}-message-element}")
+    distance = args.distance ?? scope.externalMessageDistance
+    diameter = args.diameter ?? scope.externalMessageDiameter
+    dot = canvasElement(
+        content = ellipse(class = list("${type}-message")),
+        width = diameter,
+        height = diameter,
+        class = list("${type}-message-element}")
     )
-    
-  scope.styles {
-    cls("${type}-message") {
-      fill = var("primary")
+
+    scope.styles {
+        cls("${type}-message") {
+            fill = var("primary")
+        }
+        cls("${type}-message-element") {
+        vAlign = "center"
+        hAlign = "center"
+        stroke = "unset"
+        }
     }
-    cls("${type}-message-element") {
-      vAlign = "center"
-      hAlign = "center"
-      stroke = "unset"
-    }
-  }
-  
-  // We need to change the properties of the canvasElement directly and return it as a connection requires a point or element as parameter
-  dot.diameter = diameter
-  dot.distance = distance
-  dot.externalMessageType = "${type}"
-  scope.internal.registerCanvasElement(dot, args, args.self)
-  dot
+
+    // We need to change the properties of the canvasElement directly and return it as a connection requires a point or element as parameter
+    dot.diameter = diameter
+    dot.distance = distance
+    dot.externalMessageType = "${type}"
+    scope.internal.registerCanvasElement(dot, args, args.self)
+    dot
 `;
 }
 

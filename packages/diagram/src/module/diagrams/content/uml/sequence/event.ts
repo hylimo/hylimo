@@ -15,51 +15,51 @@ export const eventModule = InterpreterModule.create(
             fun(
                 `
                 (name, yDistance) = args
-                
+
                 eventObject = [name = name]
                 if(!(scope.internal.registerInDiagramScope(name, eventObject))) {
                     error("Cannot construct event '" + name + "' as this variable is already declared somewhere else")
                 }
-                
+
                 originalArgs = args
-                
+
                 // The event itself must store its y-coordinate so that the calculation of the activity indicators and co works correctly
                 previousEvent = scope.internal.lastSequenceDiagramEvent
                 eventObject.deltaY = if(yDistance != null) { yDistance } { scope.eventDistance }
                 eventObject.y = if(previousEvent != null) { previousEvent.y } { 0 } + eventObject.deltaY 
-                
+
                 // When in debugging mode, print the event name on the left to give an overview where we are
-                  if(scope.enableDebugging) {
+                if(scope.enableDebugging) {
                     start = scope.apos(-100, eventObject.y) // a little bit to the left of the diagram to leave space for the participants
-                    
+
                     name = canvasElement(content = text(contents = list(span(text = name, fill = "red", stroke = "unset"))), hAlign = "right", vAlign = "center")
                     name.pos = start
                     scope.internal.registerCanvasElement(name, originalArgs, originalArgs.self)
-                    
+
                     maximum = 0
                     scope.internal.sequenceDiagramParticipants.forEach {
-                      maximum = Math.max(maximum, it.x)
+                        maximum = Math.max(maximum, it.x)
                     }
                     maximum = maximum - start.x + (scope.participantDistance * 0.25)
-                    
+
                     scope["--"](name, scope.rpos(name, maximum, 0)) scope.styles {
-                      stroke = "red"
+                        stroke = "red"
                     }
-                  }
-                
+                }
+
                 // Position the event for each instance relative to the latest previous event
                 // and add all events as per the user facing definition of events, i.e. 'start.User', 'start.Shop', …
                 scope.internal.sequenceDiagramParticipants.forEach {
-                
+
                     // Use either the position below the instance, the position below the last event, or the user supplied position
                     eventPosition = scope.rpos(it.pos, 0, eventObject.deltaY)
                     events = it.events
                     if(events.length > 0) {
                         eventPosition = scope.rpos(events.get(events.length - 1), 0, eventObject.deltaY)
                     }
-                    
+
                     it.events += eventPosition // for the position calculation
-                    
+
                     // When we have an activity indicator, we have to relocate the arrow to the end of the most recent activity indicator, either on the left or on the right side of the activity indicator
                     // Additionally, since activity indicators are defined after the event creating them, we must shift the position the moment we create an association since only then the currently active activity indicators are known
                     leftX = 0
@@ -89,18 +89,18 @@ export const eventModule = InterpreterModule.create(
                         parentEvent = eventObject,
                         participantName = name
                     ]
-                    
+
                     // When in debugging mode, visualize the coordinates of all events
                     if(scope.enableDebugging) {
-                      _left = canvasElement(content = ellipse(fill = "orange", stroke = "unset"), width=7, height=7, hAlign = "center", vAlign = "center")
-                      _left.pos = eventObject[name].left()
-                      scope.internal.registerCanvasElement(_left, originalArgs, originalArgs.self)
-                      _center = canvasElement(content = ellipse(fill = "orange", stroke = "unset"), width=7, height=7, hAlign = "center", vAlign = "center")
-                      _center.pos = eventObject[name].center
-                      scope.internal.registerCanvasElement(_center, originalArgs, originalArgs.self)
-                      _right = canvasElement(content = ellipse(fill = "orange", stroke = "unset"), width=7, height=7, hAlign = "center", vAlign = "center")
-                      _right.pos = eventObject[name].right()
-                      scope.internal.registerCanvasElement(_right, originalArgs, originalArgs.self)
+                        _left = canvasElement(content = ellipse(fill = "orange", stroke = "unset"), width=7, height=7, hAlign = "center", vAlign = "center")
+                        _left.pos = eventObject[name].left()
+                        scope.internal.registerCanvasElement(_left, originalArgs, originalArgs.self)
+                        _center = canvasElement(content = ellipse(fill = "orange", stroke = "unset"), width=7, height=7, hAlign = "center", vAlign = "center")
+                        _center.pos = eventObject[name].center
+                        scope.internal.registerCanvasElement(_center, originalArgs, originalArgs.self)
+                        _right = canvasElement(content = ellipse(fill = "orange", stroke = "unset"), width=7, height=7, hAlign = "center", vAlign = "center")
+                        _right.pos = eventObject[name].right()
+                        scope.internal.registerCanvasElement(_right, originalArgs, originalArgs.self)
                     }
 
                     // change the length of the instance line (its end position) to the new last position + 3*margin

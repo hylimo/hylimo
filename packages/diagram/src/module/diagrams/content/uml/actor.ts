@@ -13,33 +13,33 @@ export const actorModule = InterpreterModule.create(
     [],
     [
         `
-        scope.internal.createActor = {
-            (name) = args
-            elements = list(path(path = "${stickmanIconPath}", stretch = "uniform"))
-            if(name != null) {
-                elements += text(contents = list(span(text = name)))
+            scope.internal.createActor = {
+                (name) = args
+                elements = list(path(path = "${stickmanIconPath}", stretch = "uniform"))
+                if(name != null) {
+                    elements += text(contents = list(span(text = name)))
+                }
+
+                actorElement = canvasElement(
+                    content = rect(
+                        content = vbox(contents = elements),
+                        class = list("actor")
+                    ),
+                    class = list("actor-element")
+                )
+
+                if(name != null) {
+                    scope.internal.registerInDiagramScope(name, actorElement)
+                }
+
+                scope.styles {
+                    cls("actor") {
+                        stroke = "unset"
+                    }
+                }
+
+                scope.internal.registerCanvasElement(actorElement, args.args, args.args.self)
             }
-            
-            actorElement = canvasElement(
-                content = rect(
-                    content = vbox(contents = elements),
-                    class = list("actor")
-                ),
-                class = list("actor-element")
-            )
-            
-            if(name != null) {
-              scope.internal.registerInDiagramScope(name, actorElement)
-            }
-            
-            scope.styles {
-              cls("actor") {
-                stroke = "unset"
-              }
-            }
-            
-            scope.internal.registerCanvasElement(actorElement, args.args, args.args.self)
-        }
         `,
         id(SCOPE).assignField(
             "actor",
