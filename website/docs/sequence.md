@@ -1,6 +1,7 @@
 ---
 outline: deep
 ---
+
 # UML Sequence Diagram
 
 Hylimo is able to efficiently draw sequence diagrams.
@@ -13,10 +14,10 @@ Since sequence diagrams model **when** (and where) something happens, it should 
 In other words: Order matters!\
 The sequence diagram always knows only the currently available information and nothing on top.
 
-
 ## Terminology
 
 In a sequence diagram, we have the following concepts:
+
 - Participant: A component that "participates" in the diagram, so something/someone whose behavior should be modeled.\
   It can be one of the following:
   - an `instance` without a name (`User`)
@@ -34,6 +35,7 @@ Below, you'll find the order in which you should declare things so that they wor
 Hylimo walks through the diagram from left to right, and then from top to bottom.
 
 First, declare all participants (`instance`, `actor`) in the order you want to display them as they will be positioned on the x axis in this order:
+
 ```hylimo
 sequenceDiagram {
     instance("Bob")
@@ -41,22 +43,26 @@ sequenceDiagram {
     actor("Admin")
 }
 ```
+
 This example creates three participants, reading from left to right as `Bob`, `Shop` and lastly a user called `Admin`.
 
 Now that we've populated our `x` axis, let's move on with the `y` axis.
 
 The main way to move forward on the `y` axis in a sequence diagram is through `events`.\
 An `event` needs a name to refer to it later on and automatically moves downward on the y axis:
+
 ```hylimo
 sequenceDiagram {
     event("startPayment")
 }
 ```
+
 As you can see above, the name should be understandable for you to know exactly which action is symbolized by this event.
 This name will never be shown anywhere.
 
-For most cases, the  default value for how far away the next event will be good-enough.
+For most cases, the default value for how far away the next event will be good-enough.
 Nevertheless, in cases where you want an explicit distance to the predecessor, you are free to do so:
+
 ```hylimo
 sequenceDiagram {
     event("startPayment", 50)
@@ -70,6 +76,7 @@ Instead, you can also move the previous event up by that amount and invert their
 Both `event` and `participant` names will be registered as variables if they didn't exist already.
 In case they existed already, the existing name takes precedence.
 If their name is already used by something else, you can assign the result of these functions to a variable of your own choosing:
+
 ```hylimo
 sequenceDiagram {
     enableDebugging = true
@@ -80,6 +87,7 @@ sequenceDiagram {
     buy.Bob --> stop.Bob
 }
 ```
+
 In this example, we also see that to refer to a specific xy-coordinate, we can always use `eventname.participant`.
 Additionally, we can enable the debugging mode to understand what's happening inside our diagram by setting `enableDebugging = true`.
 
@@ -88,7 +96,9 @@ Now, we have the basic knowledge to go on with the remaining features that are a
 ## Interacting with participants
 
 There is a bunch of things you can do with participants, depending on if there is a latest defined event:
+
 - you can postpone the creation of a participant by defining it after an event:
+
 ```hylimo
 sequenceDiagram {
     instance("A")
@@ -96,7 +106,9 @@ sequenceDiagram {
     instance("B")
 }
 ```
+
 - You can destroy a participant:
+
 ```hylimo
 sequenceDiagram {
     instance("A")
@@ -106,7 +118,9 @@ sequenceDiagram {
     event("E2")
 }
 ```
+
 - You can reanimate a dead participant:
+
 ```hylimo
 sequenceDiagram {
     instance("A")
@@ -118,7 +132,9 @@ sequenceDiagram {
     instance("A²", below = A)
 }
 ```
+
 - You can activate and deactivate a participant, meaning that it is actively working on something:
+
 ```hylimo
 sequenceDiagram {
     instance("A")
@@ -129,7 +145,9 @@ sequenceDiagram {
     deactivate(A)
 }
 ```
+
 - Even multiple times simultaneously:
+
 ```hylimo
 sequenceDiagram {
     instance("A")
@@ -143,6 +161,7 @@ sequenceDiagram {
     deactivate(A)
 }
 ```
+
 As you can see in this example, you can also use events to simulate margins, as we explicitly defined a pseudo-event whose only purpose is to add 5 pixels on the y-axis between the first indicator and the second one.
 
 **important**: Since Hylimo only has access to the currently known state, we recommend the following order of execution:\
@@ -153,6 +172,7 @@ Messages are sent after `activate` operations.\
 ## Messages
 
 The following messages are available within sequence diagrams (in both directions, of course):
+
 ```hylimo
 sequenceDiagram {
     instance("A")
@@ -185,7 +205,7 @@ The following global variables are available and modifiable within sequence diag
 |`enableDebugging`| Toggles the debugging mode for sequence diagrams printing additional info | false |Rarely useful|
 |`eventDistance`| How far to move downward on the y axis with the next event | 25 |Do not use a multiple of 10 for your own sake|
 |`externalMessageDiameter`| Width and height of the circle of lost and found messages | 20 |-|
-|`externalMessageDistance`| How far away on the x axis a lost or found message should be drawn | 95 | 100-(0.5*activityWidth), chosen so that it aligns on the grid when sending a message against one activity indicator |
+|`externalMessageDistance`| How far away on the x axis a lost or found message should be drawn | 95 | 100-(0.5\*activityWidth), chosen so that it aligns on the grid when sending a message against one activity indicator |
 |`frameMarginX`| Default margin to apply on the left and right side of frames | 20 |-|
 |`frameMarginY`| Default margin to apply on the top and bottom of frames | 5 | `margin`, we recommend keeping them in sync |
 |`margin`| Margin to add to almost any interaction, i.e. to activity indicator endings |5| A non-`0` value makes the diagram slightly inaccurate but more visually appealing |
@@ -199,6 +219,7 @@ Activates a participant at the y coordinate (minus `margin`) of the most recent 
 The same participant can be activated multiple times simultaneously.
 
 **params**:
+
 - 0: the participant (instance or actor) to activate
 - `xshift`: an optional shift on the x-axis when using multiple activity indicators simultaneously on the same instance. Defaults to `activityShift`
 - `yoffset`: an optional offset on the y-axis where to start being active. Defaults to `margin`
@@ -210,6 +231,7 @@ The same participant can be activated multiple times simultaneously.
 Creates a stickman figure symbolising a user.
 
 **params**:
+
 - 0: the optional name of the user. Defaults to `User`
 - `below`: the optional participant below which this actor should be placed. If set, this actor will have the same x coordinate as the given value and the y coordinate of the current event
 
@@ -220,6 +242,7 @@ Creates a stickman figure symbolising a user.
 Deactivates the most recent indicator of the given participant
 
 **params**:
+
 - 0: the participant to deactivate
 
 ### destroy
@@ -227,6 +250,7 @@ Deactivates the most recent indicator of the given participant
 Destroys the given participant.
 
 **params**:
+
 - 0: the participant to destroy
 - `crossSize`: The width and height of the cross to draw. Defaults to `destroyingCrossSize`
 
@@ -236,6 +260,7 @@ Destroys the given participant.
 
 Creates a new event.
 **params**:
+
 - 0: the name of the event. Can be used as variable afterward if not already declared
 - 1: an optional distance on the y-axis to the previous event. Defaults to `eventDistance`
 
@@ -245,6 +270,7 @@ Creates a new event.
 
 Creates the dot signaling a message from an external source.
 Should always be used inline as a message from something else:
+
 ```hylimo
 sequenceDiagram {
     instance("Bob")
@@ -252,9 +278,11 @@ sequenceDiagram {
     foundMessage() -->> E.Bob
 }
 ```
+
 Is exactly the same as `lostMessage`, the meaning comes from the direction in which you declare the message
 
 **params**:
+
 - `distance`: the optional distance of the message on the x axis. Defaults to `externalMessageDistance`
 - `diameter`: the optional diameter of the dot. Defaults to `externalMessageDiameter`
 
@@ -265,12 +293,14 @@ Is exactly the same as `lostMessage`, the meaning comes from the direction in wh
 Only available within the function of a `frame`.
 Adds a new fragment to this frame.
 A fragment is the following:
+
 - An optional line on top separating the previous fragment,
 - An optional name of this fragment (i.e. `if`, `else`, `while`, …)
 - An optional border around the name
 - An optional subtext, i.e. a condition
 
 **params**:
+
 - 0: the event or y axis coordinate to use for the top line, so the uppermost y coordinate of this frame
 - `text`: the optional name of this fragment
 - `subtext`: the optional subtext of this fragment
@@ -284,6 +314,7 @@ A fragment is the following:
 Creates a new frame around the given coordinates.
 
 **params**:
+
 - `topLeft`: The top left coordinate (event) to draw the frame around. The border will be extended by `frameMarginX` to the left and `frameMarginY` to the top by default
 - `bottomRight`: The bottom right coordinate (event) to draw the frame around. The border will be extended by `frameMarginX` to the right and `frameMarginY` at the bottom by default
 - `text`: the optional name of this frame, i.e. `if` or `while`
@@ -299,6 +330,7 @@ Creates a new frame around the given coordinates.
 Creates an instance which is an abstract concept of someone who participates in the diagram.
 
 **params**:
+
 - 0: the optional name of the instance. If the next argument is missing, this will be treated as the class name of the instance
 - 1: the optional class name of the instance
 - 2: A function determining the content of the instance
@@ -310,6 +342,7 @@ Creates an instance which is an abstract concept of someone who participates in 
 
 Creates the dot signaling a message to an external source.
 Should always be used inline as a message to something else:
+
 ```hylimo
 sequenceDiagram {
     instance("Bob")
@@ -317,9 +350,11 @@ sequenceDiagram {
     E.Bob -->> lostMessage()
 }
 ```
+
 Is exactly the same as `foundMessage`, the meaning comes from the direction in which you declare the message
 
 **params**:
+
 - `distance`: the optional distance of the message on the x axis. Defaults to `externalMessageDistance`
 - `diameter`: the optional diameter of the dot. Defaults to `externalMessageDiameter`
 
@@ -328,6 +363,7 @@ Is exactly the same as `foundMessage`, the meaning comes from the direction in w
 ## Available class names
 
 The following class names are available for styling/layout purposes within sequence diagrams:
+
 - `activity-indicator` to style activity indicators
 - `activity-indicator-element` to layout activity indicator elements
 - `lost-message` to style lost messages
@@ -351,6 +387,7 @@ The following class names are available for styling/layout purposes within seque
 - `instance-element` to layout instances
 
 ## Example
+
 Here is an example for a webshop order:
 
 ```hylimo
@@ -389,4 +426,3 @@ sequenceDiagram {
     }
 }
 ```
-

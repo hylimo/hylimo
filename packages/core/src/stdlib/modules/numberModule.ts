@@ -5,8 +5,6 @@ import { SemanticFieldNames } from "../../runtime/semanticFieldNames.js";
 import { numberType } from "../../types/number.js";
 import { DefaultModuleNames } from "../defaultModuleNames.js";
 import { assertNumber } from "../typeHelpers.js";
-import { listType } from "../../types/list.js";
-import { or } from "../../types/or.js";
 
 /**
  * Name of the temporary field where the number prototype is assigned

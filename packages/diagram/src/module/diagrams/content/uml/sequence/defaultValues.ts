@@ -1,4 +1,4 @@
-import { InterpreterModule, parse } from "@hylimo/core";
+import { InterpreterModule } from "@hylimo/core";
 
 /**
  * Provides a default margin - the additional (vertical) length that is added to each line on top of its normally calculated borders

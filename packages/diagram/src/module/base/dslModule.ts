@@ -1,7 +1,6 @@
 import {
     assign,
     enumObject,
-    enumType,
     fun,
     functionType,
     id,
@@ -15,7 +14,6 @@ import {
     optional,
     or,
     ParseableExpressions,
-    stringType,
     validateObject
 } from "@hylimo/core";
 import { canvasContentType, canvasPointType, elementType } from "./types.js";

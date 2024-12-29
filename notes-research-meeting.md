@@ -22,7 +22,7 @@
   - draw.io - has an icon button
 - how to align them?
   - one per row - eternal vertical scrolling
-  - multiple 
+  - multiple
 - required: a search box
 - preferred: icon, at best with description (tooltip?, preview on hover?)
 - how to create associations?
@@ -40,11 +40,10 @@
   - optframe
   - …
 - correct arrow head
-  - sync  (-->>)
+  - sync (-->>)
   - async (-->)
   - reply (..>> or ..>)
 - lifeline is not activity indicator -> fix terminology
 - instance is not the general term, the general term is `participant`
 - lifelines must be destroyable
 - multiple participants per x coordinate must be possible (but different y-coordinate)
-
