@@ -15,7 +15,6 @@ import { assertBoolean, assertFunction, assertNumber, assertString, isBoolean } 
 import { numberType } from "../../types/number.js";
 import { optional } from "../../types/null.js";
 import { ExecutableListEntry } from "../../runtime/ast/executableListEntry.js";
-import { NumberLiteralExpression } from "../../ast/numberLiteralExpression.js";
 
 /**
  * Name of the temporary field where the list prototype is assigned
