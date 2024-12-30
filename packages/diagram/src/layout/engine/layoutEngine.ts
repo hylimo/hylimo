@@ -91,6 +91,11 @@ export class LayoutWithRoot {
  */
 export class LayoutEngine {
     /**
+     * The class used to mark prediction elements
+     */
+    static readonly PREDICTION_CLASS = "prediction-element";
+
+    /**
      * Lookup for layout configs
      */
     readonly layoutConfigs: Map<string, LayoutConfig> = new Map();
@@ -161,10 +166,18 @@ export class LayoutEngine {
      *
      * @param layoutWithRoot the layout with the root element
      * @param config the configuration to use
+     * @param predictionMode whether to use prediction mode
      * @returns the layouted diagram
      */
-    async layout({ root, layout, fontFamilies }: LayoutWithRoot, config: DiagramConfig): Promise<LayoutedDiagram> {
+    async layout(
+        { root, layout, fontFamilies }: LayoutWithRoot,
+        config: DiagramConfig,
+        predictionMode: boolean
+    ): Promise<LayoutedDiagram> {
         await this.initFonts(root, fontFamilies, layout, config);
+        if (predictionMode) {
+            this.hideNonPredictionElements(root);
+        }
         const canvas = this.layoutElement(layout, root);
         return {
             rootElement: {
@@ -181,6 +194,21 @@ export class LayoutEngine {
             elementLookup: layout.elementLookup,
             layoutElementLookup: layout.layoutElementLookup
         };
+    }
+
+    /**
+     * Hides all non-prediction elements
+     * These are all direct children of the root element with the class {@link LayoutEngine.PREDICTION_CLASS}
+     *
+     * @param root the root element
+     */
+    private hideNonPredictionElements(root: LayoutElement): void {
+        for (const element of root.children) {
+            if (!element.class.has(LayoutEngine.PREDICTION_CLASS)) {
+                element.isCollapsed = true;
+                element.isHidden = true;
+            }
+        }
     }
 
     /**

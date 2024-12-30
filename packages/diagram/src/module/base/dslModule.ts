@@ -30,6 +30,7 @@ import { LinePointLayoutConfig } from "../../layout/elements/canvas/linePointLay
 import { DiagramModuleNames } from "../diagramModuleNames.js";
 import { allStyleAttributes } from "./diagramModule.js";
 import dedent from "dedent";
+import { LayoutEngine } from "../../layout/engine/layoutEngine.js";
 
 /**
  * Identifier for the scope variable
@@ -106,7 +107,9 @@ export function createToolboxEdit(edit: string, createElementCode: string): Exec
                 },
                 {
                     name: "edit",
-                    value: str(`'\n${dedent(createElementCode)} layout {\n    pos = apos(' & x & ', ' & y & ')\n}'`)
+                    value: str(
+                        `'\n${dedent(createElementCode)} layout {\n    pos = apos(' & x & ', ' & y & ')\n}' & (prediction ? ' styles { class += "${LayoutEngine.PREDICTION_CLASS}" }' : '')`
+                    )
                 }
             ])
         );

@@ -35,6 +35,7 @@ import { DiagramImplementationManager } from "./diagram/diagramImplementationMan
 import { RemoteDiagramImplementationManager } from "./diagram/remote/remoteDiagramImplementationManager.js";
 import { CompletionEngine } from "./completion/completionEngine.js";
 import { Config } from "./config.js";
+import { defaultEditRegistry } from "./edit/handlers/editHandlerRegistry.js";
 
 /**
  * Config for creating a new language server
@@ -119,7 +120,8 @@ export class LanguageServer {
             parser,
             diagramEngine,
             diagramServerManager: this.diagramServerManager,
-            completionEngine: new CompletionEngine(diagramEngine)
+            completionEngine: new CompletionEngine(diagramEngine),
+            editHandlerRegistry: defaultEditRegistry
         };
         this.layoutedDiagramManager = new RemoteDiagramImplementationManager(this.diagramUtils);
         this.formatter = new Formatter(this.diagramUtils.parser);

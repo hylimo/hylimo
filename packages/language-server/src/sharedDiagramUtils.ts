@@ -4,6 +4,7 @@ import { Connection } from "vscode-languageserver";
 import { DiagramServerManager } from "./diagramServerManager.js";
 import { CompletionEngine } from "./completion/completionEngine.js";
 import { Config } from "./config.js";
+import { EditHandlerRegistry } from "./edit/handlers/editHandlerRegistry.js";
 
 /**
  * Shared utils for each diagram
@@ -33,4 +34,8 @@ export interface SharedDiagramUtils {
      * Completion engine to use
      */
     readonly completionEngine: CompletionEngine;
+    /**
+     * Registry for edit handlers
+     */
+    readonly editHandlerRegistry: EditHandlerRegistry;
 }

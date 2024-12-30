@@ -7,12 +7,14 @@ import {
     NavigateToSourceAction,
     PublishDocumentRevealNotification,
     TransactionalAction,
-    UpdateEditorConfigAction
+    UpdateEditorConfigAction,
+    ToolboxEditPredictionRequestAction,
+    ToolboxEditPredictionResponseAction
 } from "@hylimo/diagram-protocol";
 import { DiagramImplementation } from "./diagramImplementation.js";
 import { BaseLayoutedDiagram } from "@hylimo/diagram-common";
-import { defaultEditRegistry } from "../edit/handlers/editHandlerRegistry.js";
 import { DiagramImplementationManager } from "./diagramImplementationManager.js";
+import { TransactionalEdit } from "../edit/edit/transactionalEdit.js";
 
 /**
  * Holds the state for a specific diagram
@@ -33,7 +35,7 @@ export class Diagram {
     /**
      * Handles TransactionActions
      */
-    private transactionManager = new TransactionManager(this, defaultEditRegistry, this.utils);
+    private transactionManager = new TransactionManager(this, this.utils);
 
     /**
      * The implementation to which all requests are delegated
@@ -157,6 +159,34 @@ export class Diagram {
      */
     async handleUpdateEditorConfigAction(action: UpdateEditorConfigAction): Promise<void> {
         return this.utils.connection.sendNotification(UpdateEditorConfigNotification.type, action.config);
+    }
+
+    /**
+     * Handles a toolbox edit prediction request action
+     *
+     * @param action the action to handle
+     * @returns the response action
+     */
+    async handleToolboxEditPredictionRequestAction(
+        action: ToolboxEditPredictionRequestAction
+    ): Promise<ToolboxEditPredictionResponseAction> {
+        const transactionalAction: TransactionalAction = {
+            kind: TransactionalAction.KIND,
+            transactionId: "",
+            sequenceNumber: 0,
+            committed: false,
+            edits: [action.edit]
+        };
+        const edit = new TransactionalEdit(transactionalAction, this, this.utils.editHandlerRegistry);
+        const textDocumentEdit = await edit.applyAction(transactionalAction);
+        const updatedDiagram = TextDocument.applyEdits(this.document, textDocumentEdit.edits);
+        const implementation = this.implementationManager.getNewDiagramImplementation(this.document.uri);
+        const root = await implementation.renderPredictionDiagram(updatedDiagram, this.utils.config.diagramConfig);
+        return {
+            kind: ToolboxEditPredictionResponseAction.KIND,
+            root,
+            responseId: action.requestId
+        };
     }
 
     /**

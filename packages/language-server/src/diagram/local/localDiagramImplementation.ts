@@ -11,7 +11,7 @@ import {
 import { TextDocument } from "vscode-languageserver-textdocument";
 import { DiagramImplementation, DiagramUpdateResult } from "../diagramImplementation.js";
 import { SharedDiagramUtils } from "../../sharedDiagramUtils.js";
-import { DiagramConfig } from "@hylimo/diagram-common";
+import { DiagramConfig, Root } from "@hylimo/diagram-common";
 import { Expression, isWrapperObject } from "@hylimo/core";
 
 /**
@@ -170,5 +170,10 @@ export class LocalDiagramImplementation extends DiagramImplementation {
         }
         const [start, end] = range;
         return Range.create(this.document.positionAt(start), this.document.positionAt(end));
+    }
+
+    override async renderPredictionDiagram(source: string, config: DiagramConfig): Promise<Root | undefined> {
+        const renderResult = await this.utils.diagramEngine.render(source, config, true);
+        return renderResult.layoutedDiagram?.rootElement;
     }
 }
