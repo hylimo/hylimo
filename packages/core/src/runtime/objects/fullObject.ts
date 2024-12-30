@@ -288,11 +288,13 @@ export class FullObject extends BaseObject {
         for (const [name, value] of this.fields.entries()) {
             if (name != SemanticFieldNames.THIS && name != SemanticFieldNames.PROTO) {
                 const escapedName = typeof name === "string" ? `"${name}"` : name.toString();
-                if (maxDepth > 0)
+                if (maxDepth > 0) {
                     res += `  ${escapedName}: ${value.value
                         .toString(context, maxDepth - 1)
                         .replaceAll("\n", "\n  ")}\n`;
-                else res += `  ${escapedName}: <more data>`;
+                } else {
+                    res += `  ${escapedName}: <more data>`;
+                }
             }
         }
         res += "}";

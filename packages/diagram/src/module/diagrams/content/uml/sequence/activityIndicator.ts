@@ -45,20 +45,20 @@ export const activityIndicatorModule = InterpreterModule.create(
 
                     activityIndicators = instance.activeActivityIndicators
                     defaultLineshift = scope.activityShift
-                    xshift = args.xShift
+                    xShift = args.xShift
 
-                    // xshift is relative to the most recent activity indicator, not to the root one
-                    xshift = if(xshift == null) {
+                    // xShift is relative to the most recent activity indicator, not to the root one
+                    xShift = if(xShift == null) {
                         if(activityIndicators.length == 0) {
                             0
                         } {
-                            activityIndicators.get(activityIndicators.length - 1).xshift + defaultLineshift
+                            activityIndicators.get(activityIndicators.length - 1).xShift + defaultLineshift
                         }
                     } {
                         if(activityIndicators.length == 0) {
                             error("'xShift' can only be set when another activity indicator is already active")
                         }
-                        activityIndicators.get(activityIndicators.length - 1).xshift + xshift
+                        activityIndicators.get(activityIndicators.length - 1).xShift + xShift
                     }
 
                     // By default, start the indicator 'margin' above on the y-axis as it looks visually nicer not to have an arrow directly pointing at the corner of the indicator
@@ -77,15 +77,15 @@ export const activityIndicatorModule = InterpreterModule.create(
                         height = height
                     )
 
-                    activityIndicatorElement.xshift = xshift
-                    activityIndicatorElement.leftX = xshift - (0.5 * width)
+                    activityIndicatorElement.xshift = xShift
+                    activityIndicatorElement.leftX = xShift - (0.5 * width)
                     activityIndicatorElement.rightX = activityIndicatorElement.leftX + width
 
                     // Explanation of the position:
                     // - start: the (x,y) coordinate of the given event-actor combi
-                    // - x=-0.5*activity indicatorwidth + xshift: In Hylimo coordinates, x is the upper left corner but we want it to be the center of the x-axis instead (unless there are multiple activity indicators simultaneously, then we want to offset them)
+                    // - x=-0.5*activity indicatorwidth + xShift: In Hylimo coordinates, x is the upper left corner but we want it to be the center of the x-axis instead (unless there are multiple activity indicators simultaneously, then we want to offset them)
                     // - y=-margin: The line should not start at the event, but [margin] ahead  
-                    activityIndicatorElement.pos = scope.rpos(startPosition, -0.5 * scope.activityWidth + xshift, yStart)
+                    activityIndicatorElement.pos = scope.rpos(startPosition, -0.5 * scope.activityWidth + xShift, yStart)
 
                     scope.internal.registerCanvasElement(activityIndicatorElement, args, args.self)
                     instance.activeActivityIndicators += activityIndicatorElement

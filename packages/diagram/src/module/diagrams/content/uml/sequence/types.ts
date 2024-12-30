@@ -53,13 +53,20 @@ export const eventCoordinateType = namedType(
             ["right", functionType],
             ["x", numberType],
             ["y", numberType],
-            ["parentEvent", optional(eventType) /* null for top level participants*/],
+            ["parentEvent", optional(eventType)],
             ["participantName", stringType]
         ])
     ),
     "UML sequence diagram event for a specific x coordinate"
 );
 
+/**
+ * Stores the data for an activity indicator
+ *
+ * param explanations:
+ * - `xshift`: how much this indicator was shifted on the x axis compared to its expected position (the center of the lifeline)
+ * - `pos`: the starting position of this indicator seen from the top
+ */
 export const activityIndicatorType = namedType(
     objectType(
         new Map([
@@ -133,6 +140,12 @@ export const fragmentType = namedType(
     "UML sequence diagram frame fragment"
 );
 
+/**
+ * Stores the data for a frame.
+ *
+ * param explanations:
+ * - `topLeft`/`bottomRight`: The corners of this rectangle (except for some margin)
+ */
 export const frameType = namedType(
     objectType(
         new Map([

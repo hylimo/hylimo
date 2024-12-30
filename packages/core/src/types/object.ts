@@ -5,7 +5,6 @@ import { Type } from "./base.js";
  * Generates an object type
  *
  * @param types the variables this type must have
- * @param name an optional name for this type
  * @returns the generated type
  */
 export function objectType(types: Map<string | number, Type> = new Map()): Type {
