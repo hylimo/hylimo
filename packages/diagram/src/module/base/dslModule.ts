@@ -501,7 +501,7 @@ const scopeExpressions: ParseableExpressions = [
                     ] = createAppendScopeEdit(target, "with", "'over = start(0).axisAligned(' & pos & ', apos(' & x & ', ' & y & '), ' & nextPos & ', end(0.5))'")
                 } {
                     segment = canvasLineSegment(end = endPoint)
-                    segment.edits["${DefaultEditTypes.SPLIT_CANVAS_LINE_SEGMENT}"] =  createAppendScopeEdit(target, "with", "'over = start(0).line(apos(' & x & ', ' & y & '), end(0.5))'")
+                    segment.edits["${DefaultEditTypes.SPLIT_CANVAS_LINE_SEGMENT}"] = createAppendScopeEdit(target, "with", "'over = start(0).line(apos(' & x & ', ' & y & '), end(0.5))'")
                 }
                 connection = canvasConnection(
                     start = startPoint,

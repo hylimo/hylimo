@@ -64,11 +64,11 @@ export const sequenceDiagramFrameModule = InterpreterModule.create(
                 nameElement = null
 
                 if(hasIcon) {
-                  borderElement = path(path = "${fragmentNameBorderSVG}", class = list("fragment-name-border"))
+                    borderElement = path(path = "${fragmentNameBorderSVG}", class = list("fragment-name-border"))
                 }
 
                 if(fragmentText != null) {
-                  nameElement = text(contents = list(span(text = fragmentText)), class = list("fragment-name"))
+                    nameElement = text(contents = list(span(text = fragmentText)), class = list("fragment-name"))
                 }
 
                 // Case 1: Both name and border are present
