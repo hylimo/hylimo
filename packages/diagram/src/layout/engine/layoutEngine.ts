@@ -176,7 +176,7 @@ export class LayoutEngine {
     ): Promise<LayoutedDiagram> {
         await this.initFonts(root, fontFamilies, layout, config);
         if (predictionMode) {
-            this.hideNonPredictionElements(root);
+            this.collapseNonPredictionElements(root);
         }
         const canvas = this.layoutElement(layout, root);
         return {
@@ -202,12 +202,24 @@ export class LayoutEngine {
      *
      * @param root the root element
      */
-    private hideNonPredictionElements(root: LayoutElement): void {
+    private collapseNonPredictionElements(root: LayoutElement): void {
         for (const element of root.children) {
             if (!element.class.has(LayoutEngine.PREDICTION_CLASS)) {
-                element.isCollapsed = true;
-                element.isHidden = true;
+                this.collapseElementRecursively(element);
             }
+        }
+    }
+
+    /**
+     * Collapses an element and all its children
+     *
+     * @param element the element to collapse
+     */
+    private collapseElementRecursively(element: LayoutElement): void {
+        element.isCollapsed = true;
+        element.isHidden = true;
+        for (const child of element.children) {
+            this.collapseElementRecursively(child);
         }
     }
 

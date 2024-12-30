@@ -4,14 +4,21 @@ import {
     IActionDispatcher,
     IActionHandler,
     ICommand,
+    IModelFactory,
+    ModelRenderer,
+    ModelRendererFactory,
     PatcherProvider,
     TYPES as SPROTTY_TYPES
 } from "sprotty";
-import { Action, SetModelAction, UpdateModelAction } from "sprotty-protocol";
+import { Action, generateRequestId, SetModelAction, UpdateModelAction } from "sprotty-protocol";
 import { VNode, h } from "snabbdom";
 import { Root } from "@hylimo/diagram-common";
 import { CreateAndMoveAction } from "../create-move/createAndMoveAction.js";
-import { EditorConfigUpdatedAction, TransactionalAction } from "@hylimo/diagram-protocol";
+import {
+    EditorConfigUpdatedAction,
+    ToolboxEditPredictionRequestAction,
+    TransactionalAction
+} from "@hylimo/diagram-protocol";
 import { TYPES } from "../types.js";
 import { ConfigManager } from "../config/configManager.js";
 
@@ -43,6 +50,22 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler {
     private isClosed: boolean;
 
     /**
+     * The edit for which to show a preview.
+     * If undefined, no preview is shown.
+     */
+    private showPreviewFor?: string;
+
+    /**
+     * Cached rendered element previews.
+     */
+    private elementPreviews: Map<string, VNode | undefined> = new Map();
+
+    /**
+     * The model renderer.
+     */
+    private readonly renderer: ModelRenderer;
+
+    /**
      * The patcher provider.
      */
     @inject(SPROTTY_TYPES.PatcherProvider) private readonly patcherProvider!: PatcherProvider;
@@ -53,13 +76,23 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler {
     @inject(SPROTTY_TYPES.IActionDispatcher) private readonly actionDispatcher!: IActionDispatcher;
 
     /**
+     * The model factory, used to render previews.
+     */
+    @inject(SPROTTY_TYPES.IModelFactory) private readonly modelFactory!: IModelFactory;
+
+    /**
      * Creates a new toolbox.
      *
      * @param configManager The config manager
+     * @param modelRendererFactory The model renderer factory, used to obtain the model renderer
      */
-    constructor(@inject(TYPES.ConfigManager) private readonly configManager: ConfigManager) {
+    constructor(
+        @inject(TYPES.ConfigManager) private readonly configManager: ConfigManager,
+        @inject(SPROTTY_TYPES.ModelRendererFactory) modelRendererFactory: ModelRendererFactory
+    ) {
         super();
         this.isClosed = configManager.config?.toolboxDisabled ?? false;
+        this.renderer = modelRendererFactory("popup", []);
     }
 
     handle(action: Action): ICommand | Action | void {
@@ -68,6 +101,7 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler {
                 const root = (action as UpdateModelAction | SetModelAction).newRoot as Root;
                 this.currentRoot = root;
                 this.initializeToolbox();
+                this.elementPreviews.clear();
             }
         } else if (TransactionalAction.isTransactionalAction(action)) {
             if (action.committed) {
@@ -233,10 +267,48 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler {
                         this.pointerEventsDisabled = true;
                         this.update();
                         this.actionDispatcher.dispatch(action);
+                    },
+                    mouseenter: () => {
+                        this.showPreview(toolboxEdit);
+                    },
+                    mouseleave: () => {
+                        this.showPreviewFor = undefined;
                     }
                 }
             },
-            toolboxEdit.name
+            [toolboxEdit.name, this.generatePreviewIfAvailable(toolboxEdit)]
+        );
+    }
+
+    /**
+     * Generates the preview for a toolbox edit if available.
+     * If no preview is available, undefined is returned.
+     *
+     * @param toolboxEdit The toolbox edit
+     * @returns The preview or undefined
+     */
+    private generatePreviewIfAvailable(toolboxEdit: ToolboxEdit): VNode | undefined {
+        if (this.showPreviewFor != toolboxEdit.edit) {
+            return undefined;
+        }
+        const preview = this.elementPreviews.get(toolboxEdit.edit);
+        if (preview == undefined) {
+            return undefined;
+        }
+        return h(
+            "div.preview",
+            {
+                hook: {
+                    insert: (vnode) => {
+                        const element = vnode.elm as HTMLElement;
+                        const parent = element.parentElement!;
+                        const toolbox = parent.closest(".toolbox")!;
+                        const offset = parent.getBoundingClientRect().top - toolbox.getBoundingClientRect().top;
+                        element.style.top = `${offset}px`;
+                    }
+                }
+            },
+            preview
         );
     }
 
@@ -251,8 +323,52 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler {
             .filter((key) => key.startsWith("toolbox/"))
             .map((key) => {
                 const [group, name] = key.substring("toolbox/".length).split("/");
-                return { group, name, edit: key };
+                return { group, name, edit: key as `toolbox/${string}` };
             });
+    }
+
+    /**
+     * Shows a preview for a toolbox edit.
+     * If no preview is available, a prediction is requested.
+     *
+     * @param edit The toolbox edit to show a preview for
+     */
+    private showPreview(edit: ToolboxEdit): void {
+        this.showPreviewFor = edit.edit;
+        if (!this.elementPreviews.has(edit.edit)) {
+            this.requestPrediction(edit);
+        } else {
+            this.update();
+        }
+    }
+
+    /**
+     * Requests a prediction for a toolbox edit.
+     *
+     * @param edit The toolbox edit to request a prediction for
+     */
+    private async requestPrediction(edit: ToolboxEdit): Promise<void> {
+        const request: ToolboxEditPredictionRequestAction = {
+            kind: ToolboxEditPredictionRequestAction.KIND,
+            edit: {
+                types: [edit.edit],
+                values: {
+                    x: 0,
+                    y: 0,
+                    prediction: true
+                },
+                elements: [this.currentRoot!.id]
+            },
+            requestId: generateRequestId()
+        };
+        const result = await this.actionDispatcher.request(request);
+        let preview: VNode | undefined = undefined;
+        if (result.root != undefined) {
+            const model = this.modelFactory.createRoot(result.root);
+            preview = this.renderer.renderElement(model);
+        }
+        this.elementPreviews.set(edit.edit, preview);
+        this.update();
     }
 }
 
@@ -271,5 +387,5 @@ interface ToolboxEdit {
     /**
      * The full key of the edit
      */
-    edit: string;
+    edit: `toolbox/${string}`;
 }

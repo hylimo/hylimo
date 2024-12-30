@@ -6,21 +6,21 @@
     max-height: 50%;
     display: flex;
     flex-direction: column;
+    border-radius: var(--toolbox-border-radius);
     box-shadow: var(--toolbox-box-shadow);
-    border-radius: 12px;
-    overflow: hidden;
     transition:
-        width 0.2s ease,
+        width 0.15s ease,
         max-height 0.3s ease;
 
     --toolbox-margin: 10px;
+    --toolbox-border-radius: 12px;
     --codicon-button-size: 24px;
 
     .toolbox {
         display: flex;
         flex-direction: column;
-        background: var(--toolbox-background);
         min-height: 0;
+        position: relative;
 
         .toolbox-header {
             display: flex;
@@ -29,6 +29,7 @@
             font-weight: 600;
             align-items: center;
             transition: background-color 0.3s ease;
+            border-radius: var(--toolbox-border-radius) var(--toolbox-border-radius) 0 0;
 
             .title {
                 flex: 1 1 0;
@@ -50,7 +51,9 @@
 
         .items {
             overflow-y: auto;
-            margin-bottom: var(--toolbox-margin);
+            padding-bottom: var(--toolbox-margin);
+            border-radius: 0 0 var(--toolbox-border-radius) var(--toolbox-border-radius);
+            background: var(--toolbox-background);
 
             .group {
                 .group-header,
@@ -69,11 +72,32 @@
                     font-size: inherit;
                     text-align: left;
                     outline: none;
+
+                    .preview {
+                        position: absolute;
+                        right: calc(100% + 8px);
+                        width: 100%;
+                        padding: 0px;
+                        border-radius: var(--toolbox-border-radius);
+                        border: 5px solid var(--toolbox-background);
+                        box-shadow: var(--toolbox-box-shadow);
+                        overflow: hidden;
+                        display: none;
+
+                        svg {
+                            padding: 10px;
+                            background: var(--diagram-background);
+                        }
+                    }
                 }
 
                 .item:hover,
                 .item:focus-within {
                     background: var(--toolbox-item-hover-background);
+
+                    .preview {
+                        display: block;
+                    }
                 }
             }
         }
@@ -106,7 +130,7 @@
     width: var(--closed-toolbox-size);
     max-height: var(--closed-toolbox-size);
     transition:
-        width 0.2s 0.1s ease,
+        width 0.15s 0.15s ease,
         max-height 0.3s ease;
 
     .toolbox {
