@@ -18,8 +18,11 @@ import { NullObject } from "../runtime/objects/nullObject.js";
  * @param description the description of the value, part of the error message
  * @returns the value of the StringObject
  */
-export function assertString(value: BaseObject, description = ""): string {
+export function assertString(value: BaseObject, description: string | (() => string) = ""): string {
     if (!(value instanceof StringObject)) {
+        if (typeof description !== "string") {
+            description = description();
+        }
         throw new RuntimeError(`${description} is not a string`);
     }
     return value.value;
@@ -105,8 +108,14 @@ export function isBoolean(value: BaseObject): value is BooleanObject {
  * @param value the value to check
  * @param description the description of the value, part of the error message
  */
-export function assertFunction(value: BaseObject, description = ""): asserts value is AbstractFunctionObject<any> {
+export function assertFunction(
+    value: BaseObject,
+    description: string | (() => string) = ""
+): asserts value is AbstractFunctionObject<any> {
     if (!(value instanceof AbstractFunctionObject)) {
+        if (typeof description !== "string") {
+            description = description();
+        }
         throw new RuntimeError(`${description} is not a function`);
     }
 }

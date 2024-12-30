@@ -206,7 +206,7 @@ export const sequenceDiagramFrameModule = InterpreterModule.create(
                     id("this").assignField(
                         "sequenceDiagramFragmentFunction",
                         fun(
-                            `createSequenceDiagramFragment(args[0], marginTop = marginTop, parentArgs = argsCopy, parent = frameElement, hasIcon = args.hasIcon, hasLine = args.hasLine ?? true, text = args.text, subtext = args.subtext)`,
+                            `createSequenceDiagramFragment(it, marginTop = marginTop, parentArgs = argsCopy, parent = frameElement, hasIcon = args.hasIcon, hasLine = args.hasLine ?? true, text = args.text, subtext = args.subtext)`,
                             {
                                 docs: "Creates a new fragment inside this frame. A fragment is a separate section within the frame, optionally with name and subtext",
                                 params: [

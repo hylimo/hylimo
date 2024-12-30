@@ -318,27 +318,33 @@ export const listModule = InterpreterModule.create(
                             if (nextCall.isNull) {
                                 fields.push(next.toString(context, maxDepth - 1));
                             } else {
-                                assertFunction(
-                                    nextCall,
-                                    `'toString()' is expected to be a function for ${next.toString(context, maxDepth - 1)}`
-                                );
-                                const resultingString = nextCall.invoke(
-                                    [
-                                        {
-                                            name: "maxDepth",
-                                            value: new ExecutableConstExpression({
-                                                value: context.newNumber(maxDepth - 1)
-                                            })
-                                        }
-                                    ],
-                                    context
-                                );
-                                fields.push(
-                                    assertString(
-                                        resultingString.value,
-                                        `Output of 'toString()' for ${next.toString(context, maxDepth - 1)} is not a string`
-                                    )
-                                );
+                                if (maxDepth < 0) {
+                                    fields.push("<too deeply nested element>");
+                                } else {
+                                    assertFunction(
+                                        nextCall,
+                                        () =>
+                                            `'toString()' is expected to be a function for ${next.toString(context, maxDepth - 1)}`
+                                    );
+                                    const resultingString = nextCall.invoke(
+                                        [
+                                            {
+                                                name: "maxDepth",
+                                                value: new ExecutableConstExpression({
+                                                    value: context.newNumber(maxDepth - 1)
+                                                })
+                                            }
+                                        ],
+                                        context
+                                    );
+                                    fields.push(
+                                        assertString(
+                                            resultingString.value,
+                                            () =>
+                                                `Output of 'toString()' for ${next.toString(context, maxDepth - 1)} is not a string`
+                                        )
+                                    );
+                                }
                             }
                         }
                         return context.newString(`[${fields.join(", ")}]`);
@@ -349,7 +355,7 @@ export const listModule = InterpreterModule.create(
                             [SemanticFieldNames.SELF, "the list to stringify", listType()],
                             [
                                 "maxDepth",
-                                "how many layers of objects to recurse into. Defaults to 3.",
+                                "how many layers of objects to recurse into. Defaults to 4 but decreases by one as this list counts as one layer.",
                                 optional(numberType)
                             ]
                         ],
