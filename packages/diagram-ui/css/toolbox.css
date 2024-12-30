@@ -8,6 +8,7 @@
     flex-direction: column;
     border-radius: var(--toolbox-border-radius);
     box-shadow: var(--toolbox-box-shadow);
+    background: var(--toolbox-background);
     transition:
         width 0.15s ease,
         max-height 0.3s ease;
@@ -51,9 +52,9 @@
 
         .items {
             overflow-y: auto;
-            padding-bottom: var(--toolbox-margin);
+            overflow-x: hidden;
+            margin-bottom: var(--toolbox-margin);
             border-radius: 0 0 var(--toolbox-border-radius) var(--toolbox-border-radius);
-            background: var(--toolbox-background);
 
             .group {
                 .group-header,
