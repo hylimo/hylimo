@@ -182,6 +182,7 @@ const scopeExpressions: ParseableExpressions = [
                             selectorValue = className,
                             styles = list(),
                             class = first.class,
+                            variables = [],
                             ${allStyleAttributes.map((attr) => `${attr.name} = null`).join(",")}
                         ],
                         true
