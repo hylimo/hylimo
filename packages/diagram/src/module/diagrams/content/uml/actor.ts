@@ -51,7 +51,7 @@ export const actorModule = InterpreterModule.create(
                 `
                     (name) = args
                     scope.internal.createActor(name, args = args)
-            `,
+                `,
                 {
                     docs: "Creates an actor.",
                     params: [[0, "the optional name of the actor", optional(stringType)]],
