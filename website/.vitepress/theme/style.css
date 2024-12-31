@@ -147,6 +147,7 @@
     --diagram-layout-color-overlay: #88888855;
     --diagram-grid: #bbb;
     --toolbox-background: var(--vp-c-bg);
+    --toolbox-primary: var(--vp-c-brand);
     --toolbox-box-shadow: var(--vp-shadow-4);
     --toolbox-header-background: var(--vp-c-gray-1);
     --toolbox-group-header-background: var(--vp-c-gray-2);

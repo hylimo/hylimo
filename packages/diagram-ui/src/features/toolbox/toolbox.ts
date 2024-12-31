@@ -21,6 +21,7 @@ import {
 } from "@hylimo/diagram-protocol";
 import { TYPES } from "../types.js";
 import { ConfigManager } from "../config/configManager.js";
+import MiniSearch, { SearchResult } from "minisearch";
 
 @injectable()
 export class Toolbox extends AbstractUIExtension implements IActionHandler {
@@ -54,6 +55,18 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler {
      * If undefined, no preview is shown.
      */
     private showPreviewFor?: string;
+
+    /**
+     * The search string.
+     * If set, the search box is shown.
+     * If set to a non-empty string, the search is active.
+     */
+    private searchString?: string;
+
+    /**
+     * The search index.
+     */
+    private searchIndex?: MiniSearch<ToolboxEdit>;
 
     /**
      * Cached rendered element previews.
@@ -102,6 +115,7 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler {
                 this.currentRoot = root;
                 this.initializeToolbox();
                 this.elementPreviews.clear();
+                this.searchIndex = undefined;
             }
         } else if (TransactionalAction.isTransactionalAction(action)) {
             if (action.committed) {
@@ -156,9 +170,6 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler {
      * @returns The toolbox UI
      */
     private generateToolbox(root: Root): VNode {
-        const toolboxButton = this.isClosed
-            ? this.generateCodiconButton("tools", "Open Toolbox", () => this.toggleToolbox())
-            : this.generateCodiconButton("chrome-close", "Close Toolbox", () => this.toggleToolbox());
         return h(
             "div.toolbox",
             {
@@ -168,10 +179,87 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler {
                 }
             },
             [
-                h("div.toolbox-header", [h("span.title", "Toolbox"), toolboxButton]),
+                h("div.toolbox-header", [h("span.title", "Toolbox"), ...this.generateToolboxButtons()]),
+                this.generateSearchBox(),
                 h("div.items", this.generateToolboxItems(root))
             ]
         );
+    }
+
+    /**
+     * Generates the toolbox buttons.
+     *
+     * @returns The toolbox buttons
+     */
+    private generateToolboxButtons(): VNode[] {
+        const buttons: VNode[] = [];
+        if (this.isClosed) {
+            buttons.push(this.generateCodiconButton("tools", "Open Toolbox", () => this.toggleToolbox()));
+        } else {
+            buttons.push(
+                this.generateCodiconButton(
+                    "search",
+                    "Search",
+                    () => {
+                        this.searchString = this.searchString != undefined ? undefined : "";
+                        this.update();
+                    },
+                    this.searchString != undefined
+                )
+            );
+            buttons.push(this.generateCodiconButton("chrome-close", "Close Toolbox", () => this.toggleToolbox()));
+        }
+        return buttons;
+    }
+
+    /**
+     * Generates the search box.
+     * If the search string is undefined or if the toolbox is closed, no search box is generated.
+     *
+     * @returns The search box or undefined
+     */
+    private generateSearchBox(): VNode | undefined {
+        if (this.searchString == undefined || this.isClosed) {
+            return undefined;
+        }
+        const searchInput = this.generateSearchInput();
+        const icon = this.generateCodicon("search", "");
+        const closeButton = this.generateCodiconButton("close", "", () => {
+            this.searchString = undefined;
+            this.update();
+        });
+        return h("div.search-container", [h("div.search-box", [icon, searchInput, closeButton])]);
+    }
+
+    /**
+     * Generates the search input element.
+     *
+     * @returns The search input element
+     */
+    private generateSearchInput() {
+        return h("input", {
+            props: {
+                placeholder: "Search"
+            },
+            hook: {
+                insert: (vnode) => {
+                    const element = vnode.elm as HTMLInputElement;
+                    element.focus();
+                }
+            },
+            on: {
+                input: (event) => {
+                    this.searchString = (event.target as HTMLInputElement).value;
+                    this.update();
+                },
+                keydown: (event) => {
+                    if (event.key === "Escape") {
+                        this.searchString = undefined;
+                        this.update();
+                    }
+                }
+            }
+        });
     }
 
     /**
@@ -189,27 +277,40 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler {
      * @param icon the name of the codicon
      * @param title the title of the button
      * @param action the action to execute when the button is clicked
+     * @param active if true, the active class is added
      * @returns the codicon button
      */
-    private generateCodiconButton(icon: string, title: string, action: () => void): VNode {
+    private generateCodiconButton(icon: string, title: string, action: () => void, active: boolean = false): VNode {
         return h(
             "button.codicon-button",
             {
                 on: {
                     click: action
+                },
+                class: {
+                    active
                 }
             },
-            [
-                h("i.codicon", {
-                    attrs: {
-                        title
-                    },
-                    class: {
-                        [`codicon-${icon}`]: true
-                    }
-                })
-            ]
+            [this.generateCodicon(icon, title)]
         );
+    }
+
+    /**
+     * Generates a codicon.
+     *
+     * @param icon the name of the codicon
+     * @param title the title of the codicon
+     * @returns the codicon
+     */
+    private generateCodicon(icon: string, title: string): VNode {
+        return h("i.codicon", {
+            attrs: {
+                title
+            },
+            class: {
+                [`codicon-${icon}`]: true
+            }
+        });
     }
 
     /**
@@ -218,7 +319,22 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler {
      * @param root The root element providing the toolbox edits
      * @returns The UI for the toolbox items
      */
-    private generateToolboxItems(root: Root): VNode[] {
+    private generateToolboxItems(root: Root): VNode[] | VNode {
+        if (this.searchString != undefined && this.searchString.length > 0) {
+            return this.generateFilteredToolboxItems(this.searchString);
+        } else {
+            return this.generateGroupedToolboxItems(root);
+        }
+    }
+
+    /**
+     * Generates the UI for the toolbox items grouped by group.
+     * Used if no search is active.
+     *
+     * @param root The root element providing the toolbox edits
+     * @returns The UI for the toolbox items
+     */
+    private generateGroupedToolboxItems(root: Root): VNode[] {
         const aggregatedEdits = new Map<string, ToolboxEdit[]>();
         for (const toolboxEdit of this.getToolboxEdits(root)) {
             const key = toolboxEdit.group;
@@ -230,6 +346,20 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler {
         return [...aggregatedEdits.entries()]
             .sort(([a], [b]) => a.localeCompare(b))
             .map(([group, toolboxEdits]) => this.generateToolboxItemGroup(group, toolboxEdits));
+    }
+
+    /**
+     * Generates the UI for the toolbox items filtered by a search string.
+     *
+     * @param filter The search string
+     * @returns The UI for the toolbox items
+     */
+    private generateFilteredToolboxItems(filter: string): VNode {
+        const searchIndex = this.getSearchIndex();
+        const results = searchIndex.search(filter);
+        return h("div.group", [
+            ...results.map((toolboxEdit) => this.generateToolboxItem(toolboxEdit as ToolboxEdit & SearchResult))
+        ]);
     }
 
     /**
@@ -369,6 +499,30 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler {
         }
         this.elementPreviews.set(edit.edit, preview);
         this.update();
+    }
+
+    /**
+     * Returns the search index.
+     * If the search index is not yet available, it is created.
+     *
+     * @returns The search index
+     */
+    private getSearchIndex(): MiniSearch<ToolboxEdit> {
+        if (this.searchIndex == undefined) {
+            this.searchIndex = new MiniSearch({
+                fields: ["name", "group"],
+                storeFields: ["name", "group", "edit"],
+                searchOptions: {
+                    prefix: true,
+                    fuzzy: 0.2,
+                    boost: { name: 2 }
+                }
+            });
+            this.searchIndex.addAll(
+                this.getToolboxEdits(this.currentRoot!).map((edit) => ({ ...edit, id: edit.edit }))
+            );
+        }
+        return this.searchIndex;
     }
 }
 

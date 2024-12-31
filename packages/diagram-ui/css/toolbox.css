@@ -15,7 +15,7 @@
 
     --toolbox-margin: 10px;
     --toolbox-border-radius: 12px;
-    --codicon-button-size: 24px;
+    --codicon-button-size: 26px;
 
     .toolbox {
         display: flex;
@@ -39,6 +39,33 @@
             }
         }
 
+        .search-container {
+            background: var(--toolbox-header-background);
+
+            .search-box {
+                margin: var(--toolbox-margin);
+                margin-top: 0;
+                background: var(--toolbox-item-hover-background);
+                border-radius: 8px;
+                display: flex;
+                align-items: center;
+                padding: 4px 0px 4px 8px;
+                border: 1px solid transparent;
+
+                input {
+                    margin-left: 4px;;
+                    font-size: inherit;
+                    min-width: 0;
+                    flex: 1 1 0;
+                }
+            }
+
+            .search-box:focus-within {
+                border: 1px solid var(--toolbox-primary);
+                box-sizing: border-box
+            }
+        }
+
         @supports selector(::-webkit-scrollbar) {
             ::-webkit-scrollbar {
                 height: 4px;
@@ -54,7 +81,6 @@
             overflow-y: auto;
             overflow-x: hidden;
             margin-bottom: var(--toolbox-margin);
-            border-radius: 0 0 var(--toolbox-border-radius) var(--toolbox-border-radius);
 
             .group {
                 .group-header,
@@ -111,14 +137,20 @@
         display: flex;
         align-items: center;
         justify-content: center;
+        margin-left: 3px;
 
         i.codicon {
             font-size: 18px;
         }
     }
 
+    .codicon-button.active,
     .codicon-button:hover {
         background: var(--toolbox-item-hover-background);
+
+        i.codicon {
+            color: var(--toolbox-primary);
+        }
     }
 }
 
