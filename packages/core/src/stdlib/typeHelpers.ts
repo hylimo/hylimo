@@ -21,7 +21,7 @@ function describe(input: Description): string {
  * Helper to check that an object is a StringObject, throws an error if not
  *
  * @param value the value to check
- * @param description the description of the value, part of the error message
+ * @param description the description of the value, part of the error message. Either a string or a function producing the string for deferred string interpolation.
  * @returns the value of the StringObject
  */
 export function assertString(value: BaseObject, description: Description = ""): string {
@@ -45,7 +45,7 @@ export function isString(value: BaseObject): value is StringObject {
  * Helper to check that an object is a NumberObject, throws an error if not
  *
  * @param value the value to check
- * @param description the description of the value, part of the error message
+ * @param description the description of the value, part of the error message. Either a string or a function producing the string for deferred string interpolation.
  * @returns the value of the NumberObject
  */
 export function assertNumber(value: BaseObject, description: Description = ""): number {
@@ -85,7 +85,7 @@ export function assertIndex(value: BaseObject): string | number {
  * Helper to check that an object is a BooleanObject, throws an error if not
  *
  * @param value the value to check
- * @param description the description of the value, part of the error message
+ * @param description the description of the value, part of the error message. Either a string or a function producing the string for deferred string interpolation.
  * @returns the value of the BooleanObject
  */
 export function assertBoolean(value: BaseObject, description: Description = ""): boolean {
@@ -109,7 +109,7 @@ export function isBoolean(value: BaseObject): value is BooleanObject {
  * Helper to check that an object is a AbstractFunctionObject, throws an error if not
  *
  * @param value the value to check
- * @param description the description of the value, part of the error message
+ * @param description the description of the value, part of the error message. Either a string or a function producing the string for deferred string interpolation.
  */
 export function assertFunction(
     value: BaseObject,
@@ -124,7 +124,7 @@ export function assertFunction(
  * Helper to check that an object is a FullObject, throws an error if not
  *
  * @param value the value to check
- * @param description the description of the value, part of the error message
+ * @param description the description of the value, part of the error message. Either a string or a function producing the string for deferred string interpolation.
  */
 export function assertObject(value: BaseObject, description: Description = ""): asserts value is FullObject {
     if (!(value instanceof FullObject)) {
@@ -146,7 +146,7 @@ export function isObject(value: BaseObject): value is FullObject {
  * Helper to check that an object is a WrapperObject, throws an error if not
  *
  * @param value the value to check
- * @param description the description of the value, part of the error message
+ * @param description the description of the value, part of the error message. Either a string or a function producing the string for deferred string interpolation.
  */
 export function assertWrapperObject(
     value: BaseObject,
@@ -182,7 +182,7 @@ export function isNull(value: BaseObject): value is NullObject {
  * Throws an error otherwise
  *
  * @param args the arguments to evaluate
- * @param description the name of the function
+ * @param description the name of the function, part of the error message. Either a string or a function producing the string for deferred string interpolation.
  * @returns the expressions of first (self) and second (positional) argument
  */
 export function assertSelfShortCircuitArguments(
