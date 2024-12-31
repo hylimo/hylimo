@@ -238,9 +238,9 @@ export const sequenceDiagramFrameModule = InterpreterModule.create(
                         )
                     ),
                     `
-            fragmentFunction.callWithScope([fragment = sequenceDiagramFragmentFunction, parentArgs = argsCopy, parent = frameElement])
-            frameElement
-            `
+                        fragmentFunction.callWithScope([fragment = sequenceDiagramFragmentFunction, parentArgs = argsCopy, parent = frameElement])
+                        frameElement
+                    `
                 ],
                 {
                     docs: "Creates a frame around two endpoints",

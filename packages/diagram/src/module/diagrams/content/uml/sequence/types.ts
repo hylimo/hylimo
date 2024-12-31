@@ -64,13 +64,13 @@ export const eventCoordinateType = namedType(
  * Stores the data for an activity indicator
  *
  * param explanations:
- * - `xshift`: how much this indicator was shifted on the x axis compared to its expected position (the center of the lifeline)
+ * - `xShift`: how much this indicator was shifted on the x axis compared to its expected position (the center of the lifeline)
  * - `pos`: the starting position of this indicator seen from the top
  */
 export const activityIndicatorType = namedType(
     objectType(
         new Map([
-            ["xshift", numberType],
+            ["xShift", numberType],
             ["leftX", numberType],
             ["rightX", numberType],
             ["pos", canvasPointType]

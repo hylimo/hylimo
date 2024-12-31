@@ -33,9 +33,12 @@ export const sequenceDiagramAssociationsModule = InterpreterModule.create(
                     } 
 
                     // For the end point, there's a specialty: If both events point at the same participant (self message, so same x coordinate), don't use the left point but the right one instead so that x is indeed the same
+                    // Additionally, in this case, we don't want to draw a straight line but an axis aligned one by default
                     // Unfortunately, we can only validate this using name equivalency right now, so good luck in case of a name conflict
+                    lineType = "line"
                     end = if(endEvent.left != null && (endEvent.left.proto == {}.proto)) {
                         if(endEvent.participantName == startEvent.participantName && ((endEvent.right != null) && (endEvent.right.proto == {}.proto))) {
+                            lineType = "axisAligned"
                             endEvent.right()
                         } {
                             endEvent.left()
@@ -64,7 +67,7 @@ export const sequenceDiagramAssociationsModule = InterpreterModule.create(
                         args.self,
                         startMarkerFactory = startMarkerFactory,
                         endMarkerFactory = endMarkerFactory,
-                        lineType = "line"
+                        lineType = lineType
                     )
                 }
             }

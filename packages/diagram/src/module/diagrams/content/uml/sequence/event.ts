@@ -18,7 +18,7 @@ export const eventModule = InterpreterModule.create(
 
                     eventObject = [name = name]
                     if(!(scope.internal.registerInDiagramScope(name, eventObject))) {
-                        error("Cannot construct event '" + name + "' as this variable is already declared somewhere else")
+                        error("Cannot construct event '\${name}' as this variable is already declared somewhere else")
                     }
 
                     originalArgs = args

@@ -16,6 +16,7 @@ export const activityIndicatorModule = InterpreterModule.create(
             "activate",
             fun(
                 `
+                    originalArgs = args
                     (instance) = args
                     if(instance == null) {
                         error("Cannot activate a non-existing instance")
@@ -77,7 +78,7 @@ export const activityIndicatorModule = InterpreterModule.create(
                         height = height
                     )
 
-                    activityIndicatorElement.xshift = xShift
+                    activityIndicatorElement.xShift = xShift
                     activityIndicatorElement.leftX = xShift - (0.5 * width)
                     activityIndicatorElement.rightX = activityIndicatorElement.leftX + width
 
@@ -86,9 +87,22 @@ export const activityIndicatorModule = InterpreterModule.create(
                     // - x=-0.5*activity indicatorwidth + xShift: In Hylimo coordinates, x is the upper left corner but we want it to be the center of the x-axis instead (unless there are multiple activity indicators simultaneously, then we want to offset them)
                     // - y=-margin: The line should not start at the event, but [margin] ahead  
                     activityIndicatorElement.pos = scope.rpos(startPosition, -0.5 * scope.activityWidth + xShift, yStart)
+                    
 
                     scope.internal.registerCanvasElement(activityIndicatorElement, args, args.self)
                     instance.activeActivityIndicators += activityIndicatorElement
+
+                    // When in debugging mode, visualize the coordinates of the new activity indicator here - they cannot be captured by 'event(...)' as this indicator didn't exist back then: 'event(...);activate(...)'
+                    // Also works with multiple indicators as then the right point will simply be hidden behind the new indicator
+                    if(scope.enableDebugging) {
+                        _left = canvasElement(content = ellipse(fill = "orange", stroke = "unset"), width=7, height=7, hAlign = "center", vAlign = "center")
+                        _left.pos = scope.rpos(startPosition, activityIndicatorElement.leftX, 0)
+                        scope.internal.registerCanvasElement(_left, originalArgs, originalArgs.self)
+                        // No 'center' as this doesn't make sense when we have multiple indicators
+                        _right = canvasElement(content = ellipse(fill = "orange", stroke = "unset"), width=7, height=7, hAlign = "center", vAlign = "center")
+                        _right.pos = scope.rpos(startPosition, activityIndicatorElement.rightX, 0)
+                        scope.internal.registerCanvasElement(_right, originalArgs, originalArgs.self)
+                    }
 
                     scope.styles {
                         cls("activity-indicator") {
