@@ -37,6 +37,7 @@ Hylimo walks through the diagram from left to right, and then from top to bottom
 First, declare all participants (`instance`, `actor`) in the order you want to display them as they will be positioned on the x axis in this order:
 
 :::info
+
 ```hylimo
 sequenceDiagram {
     instance("Bob")
@@ -44,6 +45,7 @@ sequenceDiagram {
     actor("Admin")
 }
 ```
+
 :::
 
 This example creates three participants, reading from left to right as `Bob`, `Shop` and lastly a user called `Admin`.
@@ -58,6 +60,7 @@ This is the precise purpose of it: It should help you understand what action wil
 Of course, once you want to finish your diagram, we recommend to turn it off again to not confuse your diagram readers.
 
 :::info
+
 ```hylimo
 sequenceDiagram {
     enableDebugging = true
@@ -66,6 +69,7 @@ sequenceDiagram {
     event("stopPayment")
 }
 ```
+
 :::
 
 As you can see above, the name should be understandable for you to know exactly which action is symbolized by this event.
@@ -75,6 +79,7 @@ For most cases, the default value for how far away the next event will be good-e
 Nevertheless, in cases where you want an explicit distance to the predecessor, you are free to do so:
 
 :::info
+
 ```hylimo
 sequenceDiagram {
     enableDebugging = true
@@ -83,6 +88,7 @@ sequenceDiagram {
     event("stopPayment", 100)
 }
 ```
+
 :::
 
 This positions the event `50` pixels below its predecessor.
@@ -94,6 +100,7 @@ In case they existed already, the existing name takes precedence.
 If their name is already used by something else, you can assign the result of these functions to a variable of your own choosing:
 
 :::info
+
 ```hylimo
 sequenceDiagram {
     enableDebugging = true
@@ -106,6 +113,7 @@ sequenceDiagram {
     }
 }
 ```
+
 :::
 
 In this example, we also see that to refer to a specific xy-coordinate, we can always use `eventname.participant`.
@@ -119,6 +127,7 @@ There is a bunch of things you can do with participants, depending on if there i
 - you can postpone the creation of a participant by defining it after an event:
 
 :::info
+
 ```hylimo
 sequenceDiagram {
     enableDebugging = true
@@ -127,11 +136,13 @@ sequenceDiagram {
     instance("B")
 }
 ```
+
 :::
 
 - You can destroy a participant:
 
 :::info
+
 ```hylimo
 sequenceDiagram {
     enableDebugging = true
@@ -142,11 +153,13 @@ sequenceDiagram {
     event("E2")
 }
 ```
+
 :::
 
 - You can reanimate a dead participant:
 
 :::info
+
 ```hylimo
 sequenceDiagram {
     instance("A")
@@ -158,11 +171,13 @@ sequenceDiagram {
     instance("A²", below = A)
 }
 ```
+
 :::
 
 - You can activate and deactivate a participant, meaning that it is actively working on something:
 
 :::info
+
 ```hylimo
 sequenceDiagram {
     enableDebugging = true
@@ -174,6 +189,7 @@ sequenceDiagram {
     deactivate(A)
 }
 ```
+
 :::
 
 Note as well that there are three dots when an event meets an activity indicator, except for the initial event. This has the following reason:\
@@ -183,6 +199,7 @@ The third point, the `center` shows where the event would have been located orig
 - Even multiple times simultaneously:
 
 :::info
+
 ```hylimo
 sequenceDiagram {
     instance("A")
@@ -196,6 +213,7 @@ sequenceDiagram {
     deactivate(A)
 }
 ```
+
 :::
 
 As you can see in this example, you can also use events to simulate margins, as we explicitly defined a pseudo-event whose only purpose is to add 5 pixels on the y-axis between the first indicator and the second one.
@@ -210,6 +228,7 @@ Messages are sent after `activate` operations.\
 The following messages are available within sequence diagrams (in both directions, of course):
 
 :::info
+
 ```hylimo
 sequenceDiagram {
     instance("A")
@@ -230,6 +249,7 @@ sequenceDiagram {
     E7.A ..! E7.B // destroy return message
 }
 ```
+
 :::
 
 ## Global variables within sequence diagrams
@@ -310,6 +330,7 @@ Creates the dot signaling a message from an external source.
 Should always be used inline as a message from something else:
 
 :::info
+
 ```hylimo
 sequenceDiagram {
     instance("Bob")
@@ -317,6 +338,7 @@ sequenceDiagram {
     foundMessage() -->> E.Bob
 }
 ```
+
 :::
 
 Is exactly the same as `lostMessage`, the meaning comes from the direction in which you declare the message
@@ -386,6 +408,7 @@ Creates the dot signaling a message to an external source.
 Should always be used inline as a message to something else:
 
 :::info
+
 ```hylimo
 sequenceDiagram {
     instance("Bob")
@@ -393,6 +416,7 @@ sequenceDiagram {
     E.Bob -->> lostMessage()
 }
 ```
+
 :::
 
 Is exactly the same as `foundMessage`, the meaning comes from the direction in which you declare the message
@@ -435,6 +459,7 @@ The following class names are available for styling/layout purposes within seque
 Here is an example for a webshop order:
 
 :::info
+
 ```hylimo
 sequenceDiagram {
     enableDebugging = true
@@ -471,4 +496,5 @@ sequenceDiagram {
     }
 }
 ```
+
 :::
