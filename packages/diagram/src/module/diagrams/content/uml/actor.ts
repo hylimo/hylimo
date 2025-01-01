@@ -19,14 +19,15 @@ export const actorModule = InterpreterModule.create(
         `
             scope.internal.createActor = {
                 (name) = args
-                elements = list(path(path = "${stickmanIconPath}", stretch = "uniform"))
+                elements = list()
                 if(name != null) {
                     elements += text(contents = list(span(text = name)))
                 }
+                elements += path(path = "${stickmanIconPath}", stretch = "uniform")
 
                 actorElement = canvasElement(
                     content = rect(
-                        content = vbox(contents = elements),
+                        content = vbox(contents = elements, inverse = true),
                         class = list("actor")
                     ),
                     class = list("actor-element")
@@ -34,12 +35,6 @@ export const actorModule = InterpreterModule.create(
 
                 if(name != null) {
                     scope.internal.registerInDiagramScope(name, actorElement)
-                }
-
-                scope.styles {
-                    cls("actor") {
-                        stroke = "unset"
-                    }
                 }
 
                 scope.internal.registerCanvasElement(actorElement, args.args, args.args.self)
@@ -63,13 +58,17 @@ export const actorModule = InterpreterModule.create(
         `
             scope.styles {
                 cls("actor") {
-                    vAlign = "center"
+                    stroke = unset
+
                     type("text") {
+                        hAlign = "center"
+                    }
+                    type("path") {
                         hAlign = "center"
                     }
                 }
                 cls("actor-element") {
-                    width = 30
+                    minHeight = 80
                     hAlign = "center"
                 }
             }
