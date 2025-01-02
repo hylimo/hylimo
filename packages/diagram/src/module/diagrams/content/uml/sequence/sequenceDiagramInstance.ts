@@ -9,7 +9,7 @@ import { participantType } from "./types.js";
  * - they receive a default position based on the previous elements
  */
 export const sequenceDiagramInstanceModule = InterpreterModule.create(
-    "uml/sequenceDiagramInstance",
+    "uml/sequence/instance",
     ["uml/sequence/defaultValues", "uml/instance", "uml/sequence/participant", "uml/associations"],
     [],
     [

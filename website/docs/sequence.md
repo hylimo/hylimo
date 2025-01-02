@@ -286,14 +286,20 @@ The same participant can be activated multiple times simultaneously.
 
 ### actor
 
-Creates a stickman figure symbolising a user.
+Creates a stickman figure symbolising a user.\
+An actor can optionally be instanced, meaning that they possess certain attributes.\
+An instanced actor is an actor that has a stickman on top and an `instance` below it.
 
 **params**:
 
 - 0: the optional name of the user. Defaults to `User`
+- 1: A function that sets the instance values of this actor, making this actor instanced.\
+  If this function is set, the stickman will be placed on top of a newly created `instance`\
+  The stickman specifically can then be styled/layouted using `instanced-actor(-element)`.\
+  To access the created instance, use `<return value>.instance`
 - `below`: the optional participant below which this actor should be placed. If set, this actor will have the same x coordinate as the given value and the y coordinate of the current event
 
-**returns**: the created actor
+**returns**: the created stickman. If this actor is instanced, you can access the instance using `<return value>.instance`
 
 ### deactivate
 
@@ -432,27 +438,185 @@ Is exactly the same as `foundMessage`, the meaning comes from the direction in w
 
 The following class names are available for styling/layout purposes within sequence diagrams:
 
-- `activity-indicator` to style activity indicators
 - `activity-indicator-element` to layout activity indicator elements
-- `lost-message` to style lost messages
-- `lost-message-element` to layout lost message elements
-- `found-message` to style found messages
-- `found-message-element` to layout found message elements
-- `fragment-name-border` to style the border around fragment names
-- `fragment-name` to style the text display of fragment names
-- `fragment-name-element` to layout both the border and name of fragments
-- `fragment-subtext` to style the subtext of fragments
-- `fragment-subtext-element` to layout the subtext of fragments
-- `frame` to style frames
-- `frame-element` to layout the subtext of frames
-- `top-level-participant-element` to style any participant before any event was declared, so its `y` is `0`
-- `non-top-level-participant-element` to style any participant after an event was declared, so its `y` is not `0`
-- `destroy-cross-path` to style the cross of a destroyed participant
-- `destroy-cross-path-element` to layout the cross of a destroyed participant
-- `actor` to style actors
+- `activity-indicator` to style activity indicators
 - `actor-element` to layout actors
-- `instance` to style instances
+- `actor` to style actors
+- `destroy-cross-path-element` to layout the cross of a destroyed participant
+- `destroy-cross-path` to style the cross of a destroyed participant
+- `found-message-element` to layout found message elements
+- `found-message` to style found messages
+- `fragment-name-border` to style the border around fragment names
+- `fragment-name-element` to layout both the border and name of fragments
+- `fragment-name` to style the text display of fragment names
+- `fragment-subtext-element` to layout the subtext of fragments
+- `fragment-subtext` to style the subtext of fragments
+- `frame-element` to layout the subtext of frames
+- `frame` to style frames
 - `instance-element` to layout instances
+- `instance` to style instances
+- `instanced-actor-element` to layout the stickman of instanced actors
+- `instanced-actor` to style the stickman of instanced actors
+- `lost-message-element` to layout lost message elements
+- `lost-message` to style lost messages
+- `non-top-level-participant-element` to style any participant after an event was declared, so its `y` is not `0`
+- `top-level-participant-element` to style any participant before any event was declared, so its `y` is `0`
+
+## Advanced functionality
+
+Sequence diagrams offer many features that are rather intended for experienced users.
+
+### Frames
+
+A `frame` is a rectangle containing a bunch of events, optionally with a text naming it and a subtext for further explanation.\
+To declare a frame, you have to supply two mandatory attributes:\
+Its top-left and bottom-right corner.\
+Or in Hylimo terms, event coordinates symbolising these two corners.
+
+Here's an example frame:
+
+:::info
+
+```hylimo
+sequenceDiagram {
+    instance("Alice")
+    instance("Bob")
+    instance("Charlie")
+    
+    event("start")
+    event("communicate")
+    communicate.Alice --> communicate.Bob with {
+        label("Ping", 0.25, -5)
+    }
+    event("end")
+    
+    frame(topLeft = start.Alice, bottomRight = end.Charlie, text = "while", subtext = "[condition]")
+}
+```
+
+:::
+
+Unfortunately, as you need to know both start and end to create a frame, frames will always need to be the most recent component and thus hide any underlying element.
+We haven't found a better way around that yet.
+If you want to graphically edit i.e. a message below a frame, please comment out the frame and then edit the message for the time being.
+
+### Nested Frames
+
+You can nest frames arbitrarily if you have enough events and participants.\
+Simply declare a frame containing a subset of events/participants after the first one, and your subframe:
+
+:::info
+
+```hylimo
+sequenceDiagram {
+    y = instance("alice")
+    a = instance("bob")
+    actor("Dave")
+
+    event("hi")
+    event("hi2")
+    instance("last")
+
+    destroy(bob)
+    event("hi3", 120)
+    activate(last)
+    z = instance("Cat", below = bob)
+    hi3.alice --> z
+    event("hi4")
+    event("hi5")
+    hi5.Dave <<-- hi5.last with {
+        label("notify", 0.5)
+    }
+    event("hi6")
+    event("hi7")
+
+    frame(topLeft = hi2.alice, bottomRight = hi7.last, text = "outer", marginRight = 40, marginTop = 25)
+    frame(topLeft = hi4.Dave, bottomRight = hi6.last, marginRight = 10, marginY = 12.4, text = "if", subtext = "[finished]")
+}
+```
+
+:::
+
+
+### Frames with fragments
+
+A frame can receive a number of fragments.\
+A fragment is a separate section inside the frame, i.e. a `else if` for an `if`.\
+In other words, a frame can have an optional line on the top to separate it from its predecessor, and text/subtext just like the frame.\
+To declare a fragment, pass a function behind the frame where you can use the `fragment` function:
+
+:::info
+
+```hylimo
+sequenceDiagram {
+    y = instance("alice")
+    a = instance("bob")
+    actor("Dave")
+
+    event("hi")
+    event("hi2")
+    instance("last")
+
+    destroy(bob)
+    event("hi3", 120)
+    activate(last)
+    z = instance("Cat", below = bob)
+    hi3.alice --> z
+    event("hi4")
+    event("hi5")
+    hi5.Dave <<-- hi5.last with {
+        label("notify", 0.5)
+    }
+    event("hi6")
+    event("hi7")
+
+    frame(topLeft = hi2.alice, bottomRight = hi7.last, text = "if", subtext = "[work to do]", marginRight = 40, marginTop = 25) {
+        fragment(hi3, text = "else if", subtext = "[environment variable set]")
+        fragment(hi5, text = "else")
+    }
+}
+
+```
+
+:::
+
+### Instanced actors
+
+An actor can be seen as an `instance` too if you need it to.
+In this case, the actor is an `instance` with a stickman on top.
+To build an instanced actor, pass the second parameter to `actor`, the function declaring instance variables:
+
+:::info
+
+```hylimo
+sequenceDiagram {
+    actor("user") {
+        public {
+            age: "30"
+            isGrownUp: "true"
+        }
+    }
+    
+    instance("other")
+    event("start")
+    activate(user)
+    activate(other)
+    start.user -->> start.other
+    deactivate(user)
+    deactivate(other)
+    event("end")
+}
+```
+
+:::
+
+### Frames as per the UML standard
+
+Use the following code snippets to create frames that are explicitly recommended according to the UML specification:
+
+#### alt-frame
+
+**\<TODO>**
 
 ## Example
 

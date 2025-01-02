@@ -270,6 +270,32 @@ export const sequenceDiagramFrameModule = InterpreterModule.create(
                             "bottomRight",
                             "The bottom-right coordinate (event) to draw the border around. The border will be extended by 'frameMargin' on each side",
                             or(eventCoordinateType, participantType)
+                        ],
+                        [
+                            "marginX",
+                            "How much margin to use both left and right. Defaults to 'frameMarginX'",
+                            optional(numberType)
+                        ],
+                        [
+                            "marginY",
+                            "How much margin to use both on the top and bottom. Defaults to 'frameMarginX'",
+                            optional(numberType)
+                        ],
+                        [
+                            "marginLeft",
+                            "How much margin to use on the left. Defaults to 'marginX'",
+                            optional(numberType)
+                        ],
+                        ["marginTop", "How much margin to use on the top. Defaults to 'marginY'", optional(numberType)],
+                        [
+                            "marginRight",
+                            "How much margin to use on the right. Defaults to 'marginX'",
+                            optional(numberType)
+                        ],
+                        [
+                            "marginBottom",
+                            "How much margin to use on the bottom. Defaults to 'marginY'",
+                            optional(numberType)
                         ]
                     ],
                     snippet: `(topLeft = $1, bottomRight = $2, text = "$3", subtext = "$4")`,
