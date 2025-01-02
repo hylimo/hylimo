@@ -1,12 +1,22 @@
 import { Point, Line } from "@hylimo/diagram-common";
 import { PanelLayoutConfig } from "./panelLayoutConfig.js";
+import { booleanType } from "@hylimo/core";
 
 /**
  * Base class for vbox/hbox layout config which provides helpers for outline calculation
  */
 export abstract class BoxLayoutConfig extends PanelLayoutConfig {
     constructor() {
-        super([], []);
+        super(
+            [],
+            [
+                {
+                    name: "inverse",
+                    description: "Whether the primary axis is inverted",
+                    type: booleanType
+                }
+            ]
+        );
     }
 
     /**

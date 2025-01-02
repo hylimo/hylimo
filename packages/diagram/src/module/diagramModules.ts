@@ -5,6 +5,7 @@ import { editModule } from "./base/editModule.js";
 import { baseDiagramModule } from "./diagrams/baseDiagramModule.js";
 import { classDiagramModule } from "./diagrams/classDiagramModule.js";
 import { componentDiagramModule } from "./diagrams/componentDiagramModule.js";
+import { sequenceDiagramModule } from "./diagrams/sequenceDiagramModule.js";
 import { umlDiagramModule } from "./diagrams/umlDiagramModule.js";
 import { LayoutEngine } from "../layout/engine/layoutEngine.js";
 
@@ -28,4 +29,10 @@ export function createBaseDiagramModules(layoutEngine: LayoutEngine): Interprete
  * - UML component diagram: componentDiagram
  * - (arbitrary) UML diagram: umlDiagram
  */
-export const defaultDiagramModules = [baseDiagramModule, classDiagramModule, componentDiagramModule, umlDiagramModule];
+export const defaultDiagramModules = [
+    baseDiagramModule,
+    classDiagramModule,
+    componentDiagramModule,
+    sequenceDiagramModule,
+    umlDiagramModule
+];

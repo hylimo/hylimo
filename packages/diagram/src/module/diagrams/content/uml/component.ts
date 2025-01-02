@@ -40,7 +40,7 @@ export const componentModule = InterpreterModule.create(
                     if(otherKeywords != null) {
                         keywords.addAll(otherKeywords)
                     }
-                    _component(name, callback, keywords = keywords, abstract = args.abstract, args = args)
+                    _component(name, callback, title = name, keywords = keywords, abstract = args.abstract, args = args)
                 `,
                 {
                     docs: "Creates a component.",

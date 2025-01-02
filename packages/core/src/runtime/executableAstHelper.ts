@@ -131,7 +131,15 @@ export function parse(expressions: ParseableExpressions): ExecutableExpression[]
     }
     const parserResult = parser.parse(expressions);
     if (parserResult.lexingErrors.length > 0 || parserResult.parserErrors.length > 0) {
-        throw new Error("Invalid fun to parse");
+        const errors: string[] = [
+            ...parserResult.lexingErrors.map(
+                (error) => `${error.message} at line ${error.line}, column ${error.column}`
+            ),
+            ...parserResult.parserErrors.map(
+                (error) => `${error.message} in '${error.token.image}' at index ${error.token.startOffset}`
+            )
+        ];
+        throw new Error(`Invalid fun to parse: ${errors}`);
     }
     return toExecutable(parserResult.ast!, false);
 }
@@ -140,8 +148,7 @@ export function parse(expressions: ParseableExpressions): ExecutableExpression[]
  * Helper to create a ExecutableFunctionExpression
  *
  * @param expressions body of the function, if a string is provided it is parsed first
- * @param decorators decorators applied to the function
- * @param types argument types to check
+ * @param documentation documentation of this function, including parameter types and a snippet to execute where every `$i` is the `i`-th position to jump to when pressing `Tab`
  * @returns the created FunctionExpression
  */
 export function fun(

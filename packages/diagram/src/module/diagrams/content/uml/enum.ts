@@ -36,7 +36,7 @@ export const enumModule = InterpreterModule.create(
                     if(otherKeywords != null) {
                         keywords.addAll(otherKeywords)
                     }
-                    _enum(name, callback, keywords = keywords, abstract = args.abstract, args = args, hasEntries = true)
+                    _enum(name, callback, title = name, keywords = keywords, abstract = args.abstract, args = args, hasEntries = true)
                 `,
                 {
                     docs: "Creates an enum.",

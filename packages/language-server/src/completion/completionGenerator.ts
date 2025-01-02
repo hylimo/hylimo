@@ -74,7 +74,7 @@ function getNamedArgs(
         .filter(([key, entry]) => key !== SemanticFieldNames.PROTO && !entry.value.isNull)
         .filter(([key, _]) => typeof key === "string")
         .map(([param, description]) =>
-            createNamedArgCompletionItem(param, description.value.toString(context), error.completionRange)
+            createNamedArgCompletionItem(param, description.value.toString(context, 3), error.completionRange)
         );
 }
 

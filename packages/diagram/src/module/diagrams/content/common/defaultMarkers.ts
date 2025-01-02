@@ -53,6 +53,15 @@ export const defaultMarkersModule = InterpreterModule.create(
                     ),
                     class=list("triangle-marker", "marker")
                 )
+            },
+            filledTriangle = {
+                marker(
+                    content = path(
+                        path = "M 0 0 L 10 6 L 0 12 Z",
+                        class = list("filled-triangle-marker-path", "marker-path", "filled-marker-path")
+                    ),
+                    class=list("filled-triangle-marker", "marker")
+                )
             }
         ]
 

@@ -241,6 +241,48 @@ export const numberModule = InterpreterModule.create(
                         }
                     )
                 ),
+                id(mathObject).assignField(
+                    "max",
+                    jsFun(
+                        (args, context) => {
+                            return context.newNumber(
+                                Math.max(
+                                    assertNumber(args.getFieldValue(0, context)),
+                                    assertNumber(args.getFieldValue(1, context))
+                                )
+                            );
+                        },
+                        {
+                            docs: "Returns the maximum number of the two numbers",
+                            params: [
+                                [0, "the first number to compare", numberType],
+                                [1, "the second number to compare", numberType]
+                            ],
+                            returns: "The maximum number of the given arguments"
+                        }
+                    )
+                ),
+                id(mathObject).assignField(
+                    "min",
+                    jsFun(
+                        (args, context) => {
+                            return context.newNumber(
+                                Math.min(
+                                    assertNumber(args.getFieldValue(0, context)),
+                                    assertNumber(args.getFieldValue(1, context))
+                                )
+                            );
+                        },
+                        {
+                            docs: "Returns the minimum number of the two numbers",
+                            params: [
+                                [0, "the first number to compare", numberType],
+                                [1, "the second number to compare", numberType]
+                            ],
+                            returns: "The minimum number of the given arguments"
+                        }
+                    )
+                ),
                 id(mathObject)
             ]).call()
         )
