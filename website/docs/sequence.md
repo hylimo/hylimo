@@ -482,14 +482,14 @@ sequenceDiagram {
     instance("Alice")
     instance("Bob")
     instance("Charlie")
-    
+
     event("start")
     event("communicate")
     communicate.Alice --> communicate.Bob with {
         label("Ping", 0.25, -5)
     }
     event("end")
-    
+
     frame(topLeft = start.Alice, bottomRight = end.Charlie, text = "while", subtext = "[condition]")
 }
 ```
@@ -536,7 +536,6 @@ sequenceDiagram {
 ```
 
 :::
-
 
 ### Frames with fragments
 
@@ -596,7 +595,7 @@ sequenceDiagram {
             isGrownUp: "true"
         }
     }
-    
+
     instance("other")
     event("start")
     activate(user)
