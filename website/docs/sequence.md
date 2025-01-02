@@ -766,6 +766,35 @@ sequenceDiagram {
 
 :::
 
+#### ref-frame
+
+A `ref` frame signifies that another part of this diagram/ another sequence diagram should be executed for the components contained inside of it.\
+It represents a method call in code.\
+It can be used for example as follows:
+
+:::info
+
+```hylimo
+sequenceDiagram {
+    instance("Alice")
+    instance("Bob")
+    instance("Charlie")
+
+    event("start")
+    event("communicate")
+    communicate.Alice --> communicate.Bob with {
+        label("Ping", 0.25, -5)
+    }
+    event("handleErrorsStart", 50)
+    event("handleErrorsEnd")
+    event("end")
+
+    frame(topLeft = handleErrorsStart.Alice, bottomRight = handleErrorsEnd.Bob, text = "ref", subtext = "handle errors")
+}
+```
+
+:::
+
 ## Example
 
 Here is an example for a webshop order:
