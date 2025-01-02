@@ -232,7 +232,7 @@ export const sequenceDiagramFrameModule = InterpreterModule.create(
                                         optional(booleanType)
                                     ]
                                 ],
-                                snippet: `($1, text = $2, subtext = $3)`,
+                                snippet: `($1, text = "$2", subtext = "$3")`,
                                 returns: "The created fragment"
                             }
                         )
@@ -272,7 +272,7 @@ export const sequenceDiagramFrameModule = InterpreterModule.create(
                             or(eventCoordinateType, participantType)
                         ]
                     ],
-                    snippet: `(topLeft = $1, bottomRight = $1)`,
+                    snippet: `(topLeft = $1, bottomRight = $2, text = "$3", subtext = "$4")`,
                     returns: "The created frame"
                 }
             )
