@@ -113,7 +113,12 @@ export const sequenceDiagramFrameModule = InterpreterModule.create(
                     if(fragment.nameElement != null) {
                         // For some reason, the rpos without lpos means relative to the left instead of the right side  
                         label.pos = scope.rpos(scope.lpos(fragment.nameElement, 0.90), 20, 0)
+                    } {
+                        // Hardcode the position a little bit below to the right of the top-left corner if no text is present
+                        // Don't interfere with the default left frame margin (20) for visually better results
+                        label.pos = scope.apos(x + 25, y + 5)
                     }
+                    fragment.subtextElement = label
                     scope.internal.registerCanvasElement(label, parentArgs, parentArgs.self)
                 }
 
@@ -149,7 +154,7 @@ export const sequenceDiagramFrameModule = InterpreterModule.create(
                         fragmentFunction = fragmentFunction ?? {}
 
                         frameText = args.text
-                        hasIcon = args.hasIcon ?? (text != null)
+                        hasIcon = args.hasIcon ?? (frameText != null)
                         subtext = args.subtext
 
                         // We must differentiate the following approaches to set margin:

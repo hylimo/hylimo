@@ -615,7 +615,156 @@ Use the following code snippets to create frames that are explicitly recommended
 
 #### alt-frame
 
-**\<TODO>**
+An `alt` frame only executes the given code only if the condition applies.\
+It represents an `if (else)` in the code.\
+It can be used for example as follows:
+
+:::info
+
+```hylimo
+sequenceDiagram {
+    y = instance("alice")
+    a = instance("bob")
+    actor("Dave")
+
+    event("hi")
+    event("hi2")
+    instance("last")
+
+    destroy(bob)
+    event("hi3", 120)
+    activate(last)
+    z = instance("Cat", below = bob)
+    hi3.alice --> z
+    event("hi4")
+    event("hi5")
+    hi5.Dave <<-- hi5.last with {
+        label("notify", 0.5)
+    }
+    event("hi6")
+    event("hi7")
+
+    frame(topLeft = hi2.alice, bottomRight = hi7.last, text = "alt", subtext = "[work to do]", marginRight = 40, marginTop = 25) {
+        fragment(hi3, subtext = "[environment variable set]")
+        fragment(hi5, subtext = "[else]")
+    }
+}
+```
+
+:::
+
+#### opt-frame
+
+An `opt` frame only executes the fragment where the condition is true.\
+It represents a `switch` in the code.\
+It can be used for example as follows:
+
+:::info
+
+```hylimo
+sequenceDiagram {
+    y = instance("alice")
+    a = instance("bob")
+    actor("Dave")
+
+    event("hi")
+    event("hi2")
+    instance("last")
+
+    destroy(bob)
+    event("hi3", 120)
+    activate(last)
+    z = instance("Cat", below = bob)
+    hi3.alice --> z
+    event("hi4")
+    event("hi5")
+    hi5.Dave <<-- hi5.last with {
+        label("notify", 0.5)
+    }
+    event("hi6")
+    event("hi7")
+
+    frame(topLeft = hi2.alice, bottomRight = hi7.last, text = "opt", subtext = "[status == pending]", marginRight = 40, marginTop = 25) {
+        fragment(hi3, subtext = "[status == executing]")
+        fragment(hi5, subtext = "[status == terminated]")
+    }
+}
+```
+
+:::
+
+#### loop-frame
+
+A `loop` frame executes the code within the frame as long as the condition is true.\
+It represents a `switch` in the code.\
+You can optionally stop executing early using a nested `break` frame.
+When the `break` frame is encountered and its condition (the subtext) is true, the loop is exited.
+
+It can be used for example as follows:
+
+:::info
+
+```hylimo
+sequenceDiagram {
+    instance("Alice")
+    instance("Bob")
+    instance("Charlie")
+
+    event("start")
+    event("communicate")
+    communicate.Alice --> communicate.Bob with {
+        label("Ping", 0.25, -5)
+    }
+    event("breakStart", 40)
+    event("breakEnd")
+    event("sendMessage")
+    sendMessage.Alice -->> sendMessage.Charlie with {
+        label("sendMessage", 0.25)
+    }
+    event("end")
+
+    frame(topLeft = start.Alice, bottomRight = end.Charlie, text = "loop", subtext = "[message in messages]")
+    frame(topLeft = breakStart.Alice, bottomRight = breakEnd.Charlie, text = "break", subtext = "[all messages have been sent]", marginX = 5)
+}
+```
+
+:::
+
+#### par-frame
+
+A `par` frame executes its fragments simultaneously.\
+It represents parallel execution in code.\
+It can be used for example as follows:
+
+:::info
+
+```hylimo
+sequenceDiagram {
+    instance("Alice")
+    instance("Bob")
+    instance("Charlie")
+
+    event("start")
+    event("communicateA")
+    communicateA.Alice --> communicateA.Bob with {
+        label("Ping", 0.25, -5)
+    }
+    event("communicateB", 50)
+    communicateB.Alice <-- communicateB.Bob with {
+        label("Ping", 0.25, -5)
+    }
+    event("communicateC", 50)
+    communicateC.Bob --> communicateC.Charlie
+    event("end")
+
+    frame(topLeft = start.Alice, bottomRight = end.Charlie, text = "par") {
+        fragment(communicateB)
+        fragment(communicateC)
+    }
+}
+```
+
+:::
 
 ## Example
 
