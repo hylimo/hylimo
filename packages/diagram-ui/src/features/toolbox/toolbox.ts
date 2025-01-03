@@ -139,6 +139,9 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler {
         this.update();
     }
 
+    /**
+     * Updates the toolbox by re-rendering it.
+     */
     private update(): void {
         if (this.currentRoot != undefined) {
             this.currentVNode = this.patcherProvider.patcher(

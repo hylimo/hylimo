@@ -10,7 +10,7 @@ import { CreateAndMoveAction } from "./createAndMoveAction.js";
 
 /**
  * The maximum number of updates that can be performed on the same revision.
- * As no prediction is done, this can be more strictly limited than the general move listener
+ * As no prediction is done, this can be more strictly limited than the general move listener.
  */
 const maxUpdatesPerRevision = 1;
 
@@ -70,7 +70,7 @@ export class CreateAndMoveMouseListener extends MouseListener {
         };
         this.sequenceNumber = 0;
         root.sequenceNumber = 0;
-        this.actionDispatcher.dispatchAll(this.generateAction(root, action.event, false));
+        this.actionDispatcher.dispatchAll(this.generateEditAction(root, action.event, false));
     }
 
     override mouseMove(target: SModelElementImpl, event: MouseEvent): (Action | Promise<Action>)[] {
@@ -79,22 +79,30 @@ export class CreateAndMoveMouseListener extends MouseListener {
         if (outstandingUpdates > maxUpdatesPerRevision) {
             return [];
         }
-        return this.generateAction(target, event, false);
+        return this.generateEditAction(target, event, false);
     }
 
     override mouseUp(target: SModelElementImpl, event: MouseEvent): (Action | Promise<Action>)[] {
-        return this.generateAction(target, event, true);
+        return this.generateEditAction(target, event, true);
     }
 
     override mouseEnter(target: SModelElementImpl, event: MouseEvent): (Action | Promise<Action>)[] {
         if (event.buttons === 0) {
-            return this.generateAction(target, event, true);
+            return this.generateEditAction(target, event, true);
         } else {
             return [];
         }
     }
 
-    private generateAction(target: SModelElementImpl, event: MouseEvent, committed: boolean): Action[] {
+    /**
+     * Generates the edit action based on the target and the event
+     *
+     * @param target the target element of the event
+     * @param event the mouse event providing the coordinates
+     * @param committed passed through to the action
+     * @returns the edit action
+     */
+    private generateEditAction(target: SModelElementImpl, event: MouseEvent, committed: boolean): Action[] {
         if (this.context == undefined) {
             return [];
         }
@@ -116,6 +124,13 @@ export class CreateAndMoveMouseListener extends MouseListener {
         return [action];
     }
 
+    /**
+     * Creates the variables for the edit, based on the target and the event
+     *
+     * @param target the target element of the event, only relevant if targetMode is true
+     * @param event the mouse event providing the coordinates
+     * @returns the variables for the edit
+     */
     private createVariables(
         target: SModelElementImpl,
         event: MouseEvent
