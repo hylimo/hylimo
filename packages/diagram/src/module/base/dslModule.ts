@@ -100,20 +100,11 @@ export function createToolboxEdit(edit: string, createElementCode: string): Exec
     return id(SCOPE)
         .field("internal")
         .field("toolboxEdits")
-        .callField(
-            "add",
-            object([
-                {
-                    name: "name",
-                    value: str(`toolbox/${edit}`)
-                },
-                {
-                    name: "edit",
-                    value: str(
-                        `'\n${dedent(createElementCode)} layout {\n    pos = apos(' & x & ', ' & y & ')\n}' & (prediction ? ' styles { class += "${LayoutEngine.PREDICTION_CLASS}" }' : '')`
-                    )
-                }
-            ])
+        .assignField(
+            `toolbox/${edit}`,
+            str(
+                `'\n${dedent(createElementCode)} layout {\n    pos = apos(' & x & ', ' & y & ')\n}' & (prediction ? ' styles { class += "${LayoutEngine.PREDICTION_CLASS}" }' : '')`
+            )
         );
 }
 
@@ -129,7 +120,7 @@ const scopeExpressions: ParseableExpressions = [
             internal = [
                 classCounter = 0,
                 styles = [styles = list()],
-                toolboxEdits = list()
+                toolboxEdits = []
             ]
         ]
     `,
@@ -708,7 +699,10 @@ const scopeExpressions: ParseableExpressions = [
         callback.callWithScope(scope)
         canvasEdits = []
         scope.internal.toolboxEdits.forEach {
-            canvasEdits[it.name] = createAddEdit(callback, it.edit)
+            (value, key) = args
+            if(key != "proto") {
+                canvasEdits[key] = createAddEdit(callback, value)
+            } 
         }
         diagramCanvas = canvas(contents = scope.contents, edits = canvasEdits)
         createDiagram(diagramCanvas, scope.internal.styles, scope.fonts)

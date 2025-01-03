@@ -1,5 +1,5 @@
 import { fun, functionType, id, InterpreterModule, listType, optional, or, stringType } from "@hylimo/core";
-import { SCOPE } from "../../../base/dslModule.js";
+import { createToolboxEdit, SCOPE } from "../../../base/dslModule.js";
 
 /**
  * Module providing the UML 'instance' function for object/sequence diagrams
@@ -60,6 +60,8 @@ export const instanceModule = InterpreterModule.create(
                     returns: "The created class"
                 }
             )
-        )
+        ),
+        createToolboxEdit("Instance/Instance", 'instance("Example")'),
+        createToolboxEdit("Instance/Instance with name", 'instance("example", "Example")'),
     ]
 );
