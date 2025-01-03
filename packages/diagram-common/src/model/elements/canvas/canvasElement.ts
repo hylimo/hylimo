@@ -37,8 +37,9 @@ export namespace CanvasElement {
 
     /**
      * Checks if an element is a CanvasElement
-     * @param value
-     * @returns
+     *
+     * @param value the element to check
+     * @returns true if the element is a CanvasElement
      */
     export function isCanvasElement(value: Element): value is CanvasElement {
         return value.type === TYPE;

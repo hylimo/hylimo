@@ -1,4 +1,9 @@
-import { NavigateToSourceAction, TransactionalAction } from "@hylimo/diagram-protocol";
+import {
+    NavigateToSourceAction,
+    ToolboxEditPredictionRequestAction,
+    TransactionalAction,
+    UpdateEditorConfigAction
+} from "@hylimo/diagram-protocol";
 import { Action, DiagramServer as SprottyDiagramServer, DiagramServices } from "sprotty-protocol";
 import { Diagram } from "../diagram/diagram.js";
 
@@ -26,6 +31,10 @@ export class DiagramServer extends SprottyDiagramServer {
             return this.diagram.handleTransactionalAction(action);
         } else if (NavigateToSourceAction.is(action)) {
             return this.diagram.handleNavigateToSourceAction(action);
+        } else if (UpdateEditorConfigAction.is(action)) {
+            return this.diagram.handleUpdateEditorConfigAction(action);
+        } else if (ToolboxEditPredictionRequestAction.is(action)) {
+            this.dispatch(await this.diagram.handleToolboxEditPredictionRequestAction(action));
         } else {
             return super.handleAction(action);
         }

@@ -1,5 +1,5 @@
 import { DiagramConfig } from "@hylimo/diagram-common";
-import { DynamicLanguageServerConfig, LanguageServerSettings } from "@hylimo/diagram-protocol";
+import { DynamicLanguageServerConfig, EditorConfig, LanguageServerSettings } from "@hylimo/diagram-protocol";
 
 /**
  * Dynamic configuration for a diagram language server
@@ -14,6 +14,10 @@ export class Config implements DynamicLanguageServerConfig {
      * The are permanent values which can be modified by the user
      */
     readonly settings: LanguageServerSettings;
+    /**
+     * The configuration for the graphical editor
+     */
+    readonly editorConfig: EditorConfig;
 
     /**
      * Creates a new Config object based on the given configuration
@@ -23,6 +27,7 @@ export class Config implements DynamicLanguageServerConfig {
     constructor(config: DynamicLanguageServerConfig) {
         this.settings = config.settings;
         this.diagramConfig = config.diagramConfig;
+        this.editorConfig = config.editorConfig;
     }
 
     /**

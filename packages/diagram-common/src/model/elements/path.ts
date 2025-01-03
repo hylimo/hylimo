@@ -21,8 +21,9 @@ export namespace Path {
 
     /**
      * Checks if an element is a Path
-     * @param value
-     * @returns
+     *
+     * @param value the element to check
+     * @returns true if the element is a Path
      */
     export function isPath(value: Element): value is Path {
         return value.type === TYPE;

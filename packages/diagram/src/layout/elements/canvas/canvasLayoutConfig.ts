@@ -54,7 +54,7 @@ export class CanvasLayoutConfig extends StyledElementLayoutConfig {
         const layoutChildren: Element[] = [];
         for (const content of layoutedContents) {
             const newChildren = layout.layout(content, Point.ORIGIN, content.measuredSize!);
-            if ((content.layoutConfig as CanvasContentLayoutConfig).isLayoutContent) {
+            if ((content.layoutConfig as CanvasContentLayoutConfig).isLayoutContent || content.isHidden) {
                 layoutChildren.push(...newChildren);
             } else {
                 children.push(...newChildren);

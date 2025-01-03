@@ -1,5 +1,5 @@
 import { booleanType, fun, functionType, id, InterpreterModule, listType, optional, stringType } from "@hylimo/core";
-import { SCOPE } from "../../../base/dslModule.js";
+import { createToolboxEdit, SCOPE } from "../../../base/dslModule.js";
 
 /**
  * Module providing the component element
@@ -54,6 +54,32 @@ export const componentModule = InterpreterModule.create(
                     returns: "The created component"
                 }
             )
+        ),
+        createToolboxEdit("Component/Component", 'component("Example")'),
+        createToolboxEdit("Component/Abstract component", 'component("Example", abstract = true)'),
+        createToolboxEdit(
+            "Component/Nested component",
+            `
+                component("Example") {
+                    component("Inner")
+                }
+            `
+        ),
+        createToolboxEdit(
+            "Component/Component with provided interface",
+            `
+                component("Example") {
+                    provides("API")
+                }
+            `
+        ),
+        createToolboxEdit(
+            "Component/Component with required interface",
+            `
+                component("Example") {
+                    requires("API")
+                }
+            `
         )
     ]
 );

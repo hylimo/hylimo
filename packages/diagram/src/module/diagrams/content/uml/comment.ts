@@ -1,5 +1,5 @@
 import { assign, fun, id, InterpreterModule, stringType } from "@hylimo/core";
-import { SCOPE } from "../../../base/dslModule.js";
+import { createToolboxEdit, SCOPE } from "../../../base/dslModule.js";
 
 /**
  * Module providing the comment element
@@ -91,6 +91,7 @@ export const commentModule = InterpreterModule.create(
                     }
                 }
             }
-        `
+        `,
+        createToolboxEdit("Comment/Comment", 'comment("Example comment")')
     ]
 );

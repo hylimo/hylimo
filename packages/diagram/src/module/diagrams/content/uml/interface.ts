@@ -1,5 +1,5 @@
 import { booleanType, fun, functionType, id, InterpreterModule, listType, optional, stringType } from "@hylimo/core";
-import { SCOPE } from "../../../base/dslModule.js";
+import { createToolboxEdit, SCOPE } from "../../../base/dslModule.js";
 
 /**
  * Module providing the interface element
@@ -48,6 +48,20 @@ export const interfaceModule = InterpreterModule.create(
                     returns: "The created interface"
                 }
             )
+        ),
+        createToolboxEdit("Interface/Interface", 'interface("Example")'),
+        createToolboxEdit(
+            "Interface/Interface with properties",
+            `
+                interface("Example") {
+                    public {
+                        name : string
+                    }
+                    private {
+                        test() : void
+                    }
+                }
+            `
         )
     ]
 );

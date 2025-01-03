@@ -13,7 +13,7 @@ export interface Root extends Element {
     /**
      * The id of the element
      */
-    id: typeof Root.TYPE;
+    id: string;
     /**
      * Defined font families
      */

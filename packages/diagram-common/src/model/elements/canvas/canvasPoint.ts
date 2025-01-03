@@ -21,8 +21,9 @@ export namespace AbsolutePoint {
 
     /**
      * Checks if an element is a AbsolutePoint
-     * @param value
-     * @returns
+     *
+     * @param value the element to check
+     * @returns true if the element is a AbsolutePoint
      */
     export function isAbsolutePoint(value: Element): value is AbsolutePoint {
         return value.type === TYPE;
@@ -65,8 +66,9 @@ export namespace RelativePoint {
 
     /**
      * Checks if an element is a RelativePoint
-     * @param value
-     * @returns
+     *
+     * @param value the element to check
+     * @returns true if the element is a RelativePoint
      */
     export function isRelativePoint(value: Element): value is RelativePoint {
         return value.type === TYPE;
@@ -113,8 +115,9 @@ export namespace LinePoint {
 
     /**
      * Checks if an element is a LinePoint
-     * @param value
-     * @returns
+     *
+     * @param value the element to check
+     * @returns true if the element is a LinePoint
      */
     export function isLinePoint(value: Element): value is LinePoint {
         return value.type === TYPE;

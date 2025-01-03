@@ -43,8 +43,9 @@ export namespace Marker {
 
     /**
      * Checks if an element is a Marker
-     * @param value
-     * @returns
+     *
+     * @param value the element to check
+     * @returns true if the element is a Marker
      */
     export function isMarker(value: Element): value is Marker {
         return value.type === TYPE;

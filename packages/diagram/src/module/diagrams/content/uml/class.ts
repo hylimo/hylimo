@@ -1,5 +1,5 @@
 import { booleanType, fun, functionType, id, InterpreterModule, listType, optional, stringType } from "@hylimo/core";
-import { SCOPE } from "../../../base/dslModule.js";
+import { createToolboxEdit, SCOPE } from "../../../base/dslModule.js";
 
 /**
  * Module providing the UML class model element
@@ -47,6 +47,43 @@ export const classModule = InterpreterModule.create(
                     returns: "The created class"
                 }
             )
+        ),
+        createToolboxEdit("Class/Class", 'class("Example")'),
+        createToolboxEdit("Class/Abstract class", 'class("Example", abstract = true)'),
+        createToolboxEdit(
+            "Class/Class with properties",
+            `
+                class("Example") {
+                    public {
+                        name : string
+                    }
+                    private {
+                        test() : void
+                    }
+                }
+            `
+        ),
+        createToolboxEdit(
+            "Class/Nested class",
+            `
+                class("Example") {
+                    class("Inner")
+                }
+            `
+        ),
+        createToolboxEdit(
+            "Class/Nested class with properties",
+            `
+                class("Example") {
+
+                    public {
+                        name : string
+                        test() : void
+                    }
+                    
+                    class("Inner")
+                }
+            `
         )
     ]
 );

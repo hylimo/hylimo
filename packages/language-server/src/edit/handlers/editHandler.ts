@@ -11,7 +11,7 @@ export interface EditHandler<E extends Edit> {
     /**
      * The type of the action
      */
-    type: NonNullable<E["types"]>[0];
+    type: NonNullable<E["types"]>[0] | RegExp;
 
     /**
      * Predicts the action diff based on the layouted diagram and the last applied action

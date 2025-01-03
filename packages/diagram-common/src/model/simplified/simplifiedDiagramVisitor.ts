@@ -49,19 +49,13 @@ export class DiagramSimplifier {
      */
     simplify(element: Element): Element {
         switch (element.type) {
-            case Root.TYPE: {
-                const children = element.children.map(this.simplify.bind(this));
-                return {
-                    ...element,
-                    children
-                };
-            }
             case Rect.TYPE:
             case Path.TYPE:
             case Ellipse.TYPE:
                 return this.simplifyLayoutedElement(element as LayoutedElement);
+            case Root.TYPE:
             case Canvas.TYPE:
-                return this.simplifyCanvas(element as Canvas);
+                return this.simplifyCanvasLike(element as Canvas);
             case Text.TYPE:
                 return this.simplifyText(element as Text);
             default:
@@ -83,12 +77,12 @@ export class DiagramSimplifier {
     }
 
     /**
-     * Simplifies a canvas and its children
+     * Simplifies a canvas like element and its children
      *
      * @param canvas the canvas to simplify
      * @returns the simplified canvas
      */
-    private simplifyCanvas(canvas: Canvas): Canvas {
+    private simplifyCanvasLike<T extends Element>(canvas: T): T {
         const children = canvas.children.flatMap((child) => {
             if (CanvasElement.isCanvasElement(child)) {
                 return this.simplifyCanvasElement(child);

@@ -1,5 +1,5 @@
 import { booleanType, fun, functionType, id, InterpreterModule, listType, optional, stringType } from "@hylimo/core";
-import { SCOPE } from "../../../base/dslModule.js";
+import { createToolboxEdit, SCOPE } from "../../../base/dslModule.js";
 
 /**
  * Module providing the enum element
@@ -50,6 +50,18 @@ export const enumModule = InterpreterModule.create(
                     returns: "The created enum"
                 }
             )
+        ),
+        createToolboxEdit("Enum/Enum", 'enum("Example")'),
+        createToolboxEdit(
+            "Enum/Enum with entries",
+            `
+                enum("Example") {
+                    entries {
+                        A
+                        B
+                    }
+                }
+            `
         )
     ]
 );

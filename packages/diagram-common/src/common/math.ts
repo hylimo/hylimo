@@ -76,12 +76,16 @@ export namespace Math2D {
 
     /**
      * Normalizes a vector, meaning it will have a length of 1
+     * Except for the zero vector, which will stay the zero vector
      *
      * @param a the vector to normalize
      * @returns the normalized vector
      */
     export function normalize(a: Vector): Vector {
         const length = Math.sqrt(a.x * a.x + a.y * a.y);
+        if (length === 0) {
+            return { x: 0, y: 0 };
+        }
         return { x: a.x / length, y: a.y / length };
     }
 
@@ -94,7 +98,11 @@ export namespace Math2D {
      * @returns the angle between the two vectors
      */
     export function angleBetween(a: Vector, b: Vector): number {
-        return Math.acos(dot(a, b) / Math.sqrt((a.x * a.x + a.y * a.y) * (b.x * b.x + b.y * b.y)));
+        const denominator = Math.sqrt((a.x * a.x + a.y * a.y) * (b.x * b.x + b.y * b.y));
+        if (denominator === 0) {
+            return 0;
+        }
+        return Math.acos(dot(a, b) / denominator);
     }
 
     /**

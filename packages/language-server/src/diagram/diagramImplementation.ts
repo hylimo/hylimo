@@ -50,4 +50,14 @@ export abstract class DiagramImplementation {
      * @returns the source range of the element
      */
     abstract getSourceRange(element: string): Promise<Range | undefined>;
+
+    /**
+     * Renders a diagram in prediction mode
+     * This is usually used to only render a part of the diagram
+     *
+     * @param source the source code of the diagram
+     * @param config the config of the diagram
+     * @returns the rendered diagram
+     */
+    abstract renderPredictionDiagram(source: string, config: DiagramConfig): Promise<Root | undefined>;
 }

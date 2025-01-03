@@ -1,5 +1,5 @@
 import { assign, fun, functionType, id, InterpreterModule, listType, optional, stringType } from "@hylimo/core";
-import { SCOPE } from "../../../base/dslModule.js";
+import { createToolboxEdit, SCOPE } from "../../../base/dslModule.js";
 
 /**
  * Module providing the package element
@@ -98,6 +98,7 @@ export const packageModule = InterpreterModule.create(
                     }
                 }
             }
-        `
+        `,
+        createToolboxEdit("Package/Package", 'package("Example")')
     ]
 );

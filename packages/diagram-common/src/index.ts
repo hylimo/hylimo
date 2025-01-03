@@ -41,7 +41,6 @@ export * from "./model/elements/canvas/canvasElement.js";
 export * from "./model/elements/canvas/canvasLineSegment.js";
 export * from "./model/elements/canvas/canvasPoint.js";
 export * from "./model/elements/canvas/marker.js";
-export * from "./model/elements/circle.js";
 export * from "./model/elements/defaultEditTypes.js";
 export * from "./model/elements/editSpecification.js";
 export * from "./model/elements/ellipse.js";

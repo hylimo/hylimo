@@ -7,6 +7,11 @@ import { SCanvasContent } from "./sCanvasContent.js";
  */
 export abstract class SCanvasPoint extends SCanvasContent implements CanvasPoint, PositionProvider {
     /**
+     * The default point size
+     */
+    static readonly POINT_SIZE = 16;
+
+    /**
      * The provided position
      */
     position!: Point;

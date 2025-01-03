@@ -3,6 +3,7 @@ import { SLayoutedElement } from "../sLayoutedElement.js";
 import { PointVisibilityManager } from "./pointVisibilityManager.js";
 import { LinearAnimatable } from "../../features/animation/model.js";
 import { decomposeTSR } from "transformation-matrix";
+import { CanvasLike } from "./canvasLike.js";
 
 /**
  * Animated fields for SCanvas
@@ -12,7 +13,7 @@ const canvasAnimatedFields = new Set(["dx", "dy"]);
 /**
  * Canvas model element
  */
-export class SCanvas extends SLayoutedElement implements Canvas, LinearAnimatable {
+export class SCanvas extends SLayoutedElement implements Canvas, LinearAnimatable, CanvasLike {
     override type!: typeof Canvas.TYPE;
     /**
      * The x offset applied to its coordinate system

@@ -17,7 +17,6 @@ import {
 } from "sprotty";
 import { Action } from "sprotty-protocol";
 import { SAbsolutePoint } from "../../model/canvas/sAbsolutePoint.js";
-import { SCanvas } from "../../model/canvas/sCanvas.js";
 import { SCanvasElement } from "../../model/canvas/sCanvasElement.js";
 import { SCanvasPoint } from "../../model/canvas/sCanvasPoint.js";
 import { SLinePoint } from "../../model/canvas/sLinePoint.js";
@@ -38,6 +37,7 @@ import { AxisAligedSegmentEditHandler } from "./axisAlignedSegmentEditHandler.js
 import { Matrix, compose, translate, applyToPoint, inverse, decomposeTSR, scale, rotate } from "transformation-matrix";
 import { MovedElementsSelector } from "./movedElementsSelector.js";
 import { SMarker } from "../../model/canvas/sMarker.js";
+import { isCanvasLike } from "../../model/canvas/canvasLike.js";
 
 /**
  * The maximum number of updates that can be performed on the same revision.
@@ -87,7 +87,7 @@ export class MoveMouseListener extends MouseListener {
         if (event.button === 0 && !(event.ctrlKey || event.altKey)) {
             const moveableTarget = findParentByFeature(target, isMoveable);
             if (moveableTarget != undefined) {
-                const parentCanvas = findParentByFeature(target, (element) => element instanceof SCanvas);
+                const parentCanvas = findParentByFeature(target, isCanvasLike);
                 if (parentCanvas == undefined) {
                     throw new Error("Cannot move an element without a parent canvas");
                 }
@@ -509,7 +509,7 @@ export class MoveMouseListener extends MouseListener {
         const currentMatrix = root.layoutEngine.localToAncestor(this.context!.canvasContext, root.id);
         const transformationLookup = new Map<string, string>();
         for (const element of elements) {
-            const parentCanvas = findParentByFeature(element, (element) => element instanceof SCanvas) as SCanvas;
+            const parentCanvas = findParentByFeature(element, isCanvasLike)!;
             if (!transformationLookup.has(parentCanvas.id)) {
                 const transformationMatrix = root.layoutEngine.localToAncestor(parentCanvas.id, root.id);
                 const matrix = compose(inverse(transformationMatrix), currentMatrix);

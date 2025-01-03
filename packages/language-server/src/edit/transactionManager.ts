@@ -2,7 +2,6 @@ import { BaseLayoutedDiagram } from "@hylimo/diagram-common";
 import { IncrementalUpdate, TransactionalAction } from "@hylimo/diagram-protocol";
 import { TextDocumentContentChangeEvent } from "vscode-languageserver-textdocument";
 import { Diagram } from "../diagram/diagram.js";
-import { EditHandlerRegistry } from "./handlers/editHandlerRegistry.js";
 import { SharedDiagramUtils } from "../sharedDiagramUtils.js";
 import { TransactionalEdit } from "./edit/transactionalEdit.js";
 
@@ -43,12 +42,10 @@ export class TransactionManager {
      * Creates a new TransactionManager which handles edits to the specified textDocument
      *
      * @param diagram the associated Diagram
-     * @param registry the registry to use
      * @param utils the shared diagram utils
      */
     constructor(
         private readonly diagram: Diagram,
-        private readonly registry: EditHandlerRegistry,
         private readonly utils: SharedDiagramUtils
     ) {}
 
@@ -71,7 +68,7 @@ export class TransactionManager {
         }
         this.currentTransactionId = action.transactionId;
         if (this.edit == undefined) {
-            this.edit = new TransactionalEdit(action, this.diagram, this.registry);
+            this.edit = new TransactionalEdit(action, this.diagram, this.utils.editHandlerRegistry);
         }
         this.edit.transformEdit(action, this.utils.config);
         const result = this.createHandleActionResult(action);

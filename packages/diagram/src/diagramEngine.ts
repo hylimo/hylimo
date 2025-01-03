@@ -80,9 +80,10 @@ export class DiagramEngine {
      *
      * @param source the source to execute
      * @param config additional config
+     * @param predictionMode whether to use prediction mode
      * @returns the render result including the potential diagram and all errors
      */
-    async render(source: string, config: DiagramConfig): Promise<RenderResult> {
+    async render(source: string, config: DiagramConfig, predictionMode: boolean = false): Promise<RenderResult> {
         const parserResult = this.parser.parse(source);
         if (parserResult.ast == undefined) {
             return {
@@ -104,7 +105,7 @@ export class DiagramEngine {
                 if (!isWrapperObject(diagram) || !(diagram.wrapped instanceof LayoutWithRoot)) {
                     throw new RuntimeError("No diagram returned");
                 }
-                layoutedDiagram = await this.layoutEngine.layout(diagram.wrapped, config);
+                layoutedDiagram = await this.layoutEngine.layout(diagram.wrapped, config, predictionMode);
             } catch (e) {
                 layoutErrors.push(e as Error);
             }

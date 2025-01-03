@@ -4,7 +4,7 @@ import { VNode } from "snabbdom";
 import { IView, IViewArgs, RenderingContext, svg } from "sprotty";
 import { findViewportZoom } from "../../base/findViewportZoom.js";
 import { SCanvasElement } from "../../model/canvas/sCanvasElement.js";
-import { SCanvas } from "../../model/canvas/sCanvas.js";
+import { CanvasLike } from "../../model/canvas/canvasLike.js";
 
 /**
  * IView that represents a CanvasElement
@@ -178,7 +178,7 @@ export class CanvasElementView implements IView {
      * @returns the offset for the rotation of the canvas element
      */
     private computeResizeIconOffset(model: Readonly<SCanvasElement>) {
-        const canvasRotation = (model.parent as SCanvas).globalRotation;
+        const canvasRotation = (model.parent as CanvasLike).globalRotation;
         const iconOffset = Math.round(((model.rotation + canvasRotation) / 45) % 8);
         return iconOffset;
     }

@@ -6,7 +6,6 @@ import { Math2D } from "../../../common/math.js";
 /**
  * Connection line segment
  */
-
 export interface CanvasConnectionSegment extends Element {
     /**
      * The id of the end point
