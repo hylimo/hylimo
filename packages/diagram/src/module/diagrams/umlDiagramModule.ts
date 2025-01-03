@@ -16,6 +16,8 @@ import { componentModule } from "./content/uml/component.js";
 import { DiagramModuleNames } from "../diagramModuleNames.js";
 import { classDiagramToolboxEditsModule } from "./content/uml/classDiagramToolboxEdits.js";
 import { componentDiagramToolboxEditsModule } from "./content/uml/componentDiagramToolboxEdits.js";
+import { instanceModule } from "./content/uml/instance.js";
+import { actorModule } from "./content/uml/actor.js";
 
 /**
  * Module for (arbitrary) UML diagrams
@@ -25,20 +27,22 @@ export const umlDiagramModule = InterpreterModule.create(
     [DiagramModuleNames.DIAGRAM, DiagramModuleNames.DSL],
     [],
     createDiagramModule("umlDiagram", [
-        elementModule,
-        defaultStylesModule,
-        classModule,
-        interfaceModule,
-        enumModule,
-        packageModule,
-        componentModule,
-        commentModule,
+        actorModule,
         associationsModule,
-        nonNavigableAssociationsModule,
-        compositionAndAggregationModule,
-        extendsAndImplementsModule,
-        readingDirectionModule,
         classDiagramToolboxEditsModule,
-        componentDiagramToolboxEditsModule
+        classModule,
+        commentModule,
+        componentDiagramToolboxEditsModule,
+        componentModule,
+        compositionAndAggregationModule,
+        defaultStylesModule,
+        elementModule,
+        enumModule,
+        extendsAndImplementsModule,
+        instanceModule,
+        interfaceModule,
+        nonNavigableAssociationsModule,
+        packageModule,
+        readingDirectionModule
     ])
 );

@@ -9,7 +9,7 @@ import { FullObject } from "./fullObject.js";
 
 /**
  * BaseObject supporting neither get or set field, or call.
- * There shouls only be one instance during the lifetime of an interpreter
+ * There should only be one instance during the lifetime of an interpreter
  */
 export class NullObject extends BaseObject {
     override get isNull(): boolean {
@@ -17,7 +17,7 @@ export class NullObject extends BaseObject {
     }
 
     override getField(key: string | number, _context: InterpreterContext, _self: BaseObject): LabeledValue {
-        throw new RuntimeError(`Getting fields on null not supported: try to get ${key}`);
+        throw new RuntimeError(`Cannot get '${key}' as the parent object is null`);
     }
 
     override getFields(_context: InterpreterContext, _self: BaseObject): Map<string | number, LabeledValue> {
@@ -30,7 +30,7 @@ export class NullObject extends BaseObject {
         _context: InterpreterContext,
         _self: BaseObject
     ): void {
-        throw new RuntimeError(`Setting fields on null not supported: try to set ${key}`);
+        throw new RuntimeError(`Cannot set '${key}' as the parent object is null`);
     }
 
     override setLocalField(
@@ -39,11 +39,11 @@ export class NullObject extends BaseObject {
         _context: InterpreterContext,
         _self: BaseObject
     ): void {
-        throw new RuntimeError(`Setting fields on null not supported: try to set ${key}`);
+        throw new RuntimeError(`Cannot set '${key}' as the parent object is null`);
     }
 
     override deleteField(key: string | number, _context: InterpreterContext): void {
-        throw new RuntimeError(`Deleting fields on null not supported: try to delete ${key}`);
+        throw new RuntimeError(`Cannot delete '${key}' as the parent object is null`);
     }
 
     override invoke(
@@ -52,7 +52,7 @@ export class NullObject extends BaseObject {
         _scope?: FullObject,
         _callExpression?: AbstractInvocationExpression | OperatorExpression
     ): LabeledValue {
-        throw new RuntimeError("Invoking null is not supported");
+        throw new RuntimeError("cannot call method: method is null");
     }
 
     override toString(): string {

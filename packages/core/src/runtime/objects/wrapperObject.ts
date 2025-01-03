@@ -82,12 +82,16 @@ export class WrapperObject<T> extends BaseObject {
         throw new RuntimeError("Invoke not supported");
     }
 
-    override toString(context: InterpreterContext): string {
+    override toString(context: InterpreterContext, maxDepth: number = 3): string {
         let res = "{\n";
         for (const [name, value] of this.entries.entries()) {
             if (name != SemanticFieldNames.THIS && name != SemanticFieldNames.PROTO) {
                 const escapedName = typeof name === "string" ? `"${name}"` : name.toString();
-                res += `  ${escapedName}: ${value(this.wrapped, context).toString(context).replaceAll("\n", "\n  ")}\n`;
+                if (maxDepth > 0)
+                    res += `  ${escapedName}: ${value(this.wrapped, context)
+                        .toString(context, maxDepth - 1)
+                        .replaceAll("\n", "\n  ")}\n`;
+                else res += `  ${escapedName}: <more data>`;
             }
         }
         res += "}";

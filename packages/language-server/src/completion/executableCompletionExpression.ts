@@ -115,7 +115,7 @@ export class ExecutableCompletionExpression extends ExecutableExpression<Express
         }
         const description = docs.getFieldValue("docs", context);
         return (
-            description.toString(context) +
+            description.toString(context, 3) +
             "\n\n" +
             ["Fields", "Params", "Returns", "Snippet"]
                 .map((field) => [field, this.getDocField(docs, field.toLowerCase(), context)])
@@ -141,7 +141,7 @@ export class ExecutableCompletionExpression extends ExecutableExpression<Express
         if (snippet.isNull) {
             return undefined;
         }
-        return snippet.toString(context);
+        return snippet.toString(context, 3);
     }
 
     /**
@@ -165,7 +165,7 @@ export class ExecutableCompletionExpression extends ExecutableExpression<Express
         if (fieldDocs.isNull) {
             return undefined;
         }
-        return fieldDocs.toString(context);
+        return fieldDocs.toString(context, 3);
     }
 
     /**
@@ -185,10 +185,10 @@ export class ExecutableCompletionExpression extends ExecutableExpression<Express
         if (docField instanceof FullObject) {
             return [...docField.fields.entries()]
                 .filter(([key, entry]) => key !== SemanticFieldNames.PROTO && !entry.value.isNull)
-                .map(([key, entry]) => `- ${key}: ${entry.value.toString(context)}`)
+                .map(([key, entry]) => `- ${key}: ${entry.value.toString(context, 3)}`)
                 .join("\n");
         } else {
-            return docField.toString(context);
+            return docField.toString(context, 3);
         }
     }
 

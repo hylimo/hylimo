@@ -8,11 +8,13 @@ import {
     InterpreterModule,
     jsFun,
     listType,
+    literal,
     namedType,
     numberType,
     object,
     objectType,
     optional,
+    or,
     ParseableExpressions,
     str,
     validateObject
@@ -496,6 +498,7 @@ const scopeExpressions: ParseableExpressions = [
                 (start, end, class, target, canvasScope) = args
                 startMarkerFactory = args.startMarkerFactory
                 endMarkerFactory = args.endMarkerFactory
+                lineType = args.lineType ?? "axisAligned"
                 startPoint = start
                 startProvider = if((start.type == "canvasElement") || (start.type == "canvasConnection")) {
                     startPoint = canvasScope.lpos(start, 0)
@@ -522,13 +525,19 @@ const scopeExpressions: ParseableExpressions = [
                 } {
                     { end }
                 }
-                this.segment = canvasAxisAlignedSegment(end = endPoint, verticalPos = 0.5)
-                segment.edits[
-                    "${DefaultEditTypes.AXIS_ALIGNED_SEGMENT_POS}"
-                ] = createAppendScopeEdit(target, "with", "'over = start(0).axisAligned(' & pos & ', end(0.5))'")
-                segment.edits[
-                    "${DefaultEditTypes.SPLIT_CANVAS_AXIS_ALIGNED_SEGMENT}"
-                ] = createAppendScopeEdit(target, "with", "'over = start(0).axisAligned(' & pos & ', apos(' & x & ', ' & y & '), ' & nextPos & ', end(0.5))'")
+                this.segment = null
+                if(lineType == "axisAligned") {
+                    segment = canvasAxisAlignedSegment(end = endPoint, verticalPos = 0.5)
+                    segment.edits[
+                        "${DefaultEditTypes.AXIS_ALIGNED_SEGMENT_POS}"
+                    ] = createAppendScopeEdit(target, "with", "'over = start(0).axisAligned(' & pos & ', end(0.5))'")
+                    segment.edits[
+                        "${DefaultEditTypes.SPLIT_CANVAS_AXIS_ALIGNED_SEGMENT}"
+                    ] = createAppendScopeEdit(target, "with", "'over = start(0).axisAligned(' & pos & ', apos(' & x & ', ' & y & '), ' & nextPos & ', end(0.5))'")
+                } {
+                    segment = canvasLineSegment(end = endPoint)
+                    segment.edits["${DefaultEditTypes.SPLIT_CANVAS_LINE_SEGMENT}"] = createAppendScopeEdit(target, "with", "'over = start(0).line(apos(' & x & ', ' & y & '), end(0.5))'")
+                }
                 connection = canvasConnection(
                     start = startPoint,
                     contents = list(
@@ -551,7 +560,20 @@ const scopeExpressions: ParseableExpressions = [
                         [1, "the end element", canvasContentType],
                         [2, "the class of the connection"],
                         [3, "the target expression referenced by edits"],
-                        [4, "the scope to which canvas contents should be added"]
+                        [4, "the scope to which canvas contents should be added"],
+                        [
+                            "startMarkerFactory",
+                            "What to print at the start of the arrow, most commonly one of the 'scope.defaultMarkers' values"
+                        ],
+                        [
+                            "endMarkerFactory",
+                            "What to print at the end of the arrow, most commonly one of the 'scope.defaultMarkers' values"
+                        ],
+                        [
+                            "lineType",
+                            'Determines what sort of segment should be created. Defaults to "axisAligned". Optional, one of "axisAligned" (line that either moves on the x-axis, or the y-axis, but not both simultaneously), "line" (straight line).',
+                            optional(or(literal("axisAligned"), literal("line")))
+                        ]
                     ],
                     returns: "The created CanvasConnection"
                 }
@@ -636,9 +658,11 @@ const scopeExpressions: ParseableExpressions = [
             fun(
                 `
                     (name, value) = args
-                    if(scope.get(name) == null) {
+                    isNew = scope[name] == null
+                    if(isNew) {
                         scope[name] = value
                     }
+                    isNew // Return true if the name has actually been added
                 `
             )
         ),

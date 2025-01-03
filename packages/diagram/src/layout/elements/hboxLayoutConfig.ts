@@ -19,13 +19,12 @@ export class HBoxLayoutConfig extends BoxLayoutConfig {
             let width = 0;
             let height = constraints.min.height;
             const contentElements: LayoutElement[] = [];
-            const minConstraints = {
-                width: 0,
-                height: constraints.min.height
-            };
-            for (const content of contents) {
+            contents.forEach((content, index) => {
                 const contentConstraints: SizeConstraints = {
-                    min: minConstraints,
+                    min: {
+                        width: index == contents.length - 1 ? constraints.min.width - width : 0,
+                        height: constraints.min.height
+                    },
                     max: {
                         width: constraints.max.width - width,
                         height: constraints.max.height
@@ -35,7 +34,7 @@ export class HBoxLayoutConfig extends BoxLayoutConfig {
                 contentElements.push(layoutedContent);
                 width += layoutedContent.measuredSize!.width;
                 height = Math.max(height, layoutedContent.measuredSize!.height);
-            }
+            });
             return { width, height };
         } else {
             return constraints.min;
@@ -45,7 +44,8 @@ export class HBoxLayoutConfig extends BoxLayoutConfig {
     override layout(layout: Layout, element: LayoutElement, position: Point, size: Size): Element[] {
         const elements: Element[] = [];
         const contents = element.children;
-        let x = position.x;
+        const inverse = element.styles.inverse ?? false;
+        let dx = 0;
         for (let i = 0; i < contents.length; i++) {
             const content = contents[i];
             const contentSize = {
@@ -53,10 +53,11 @@ export class HBoxLayoutConfig extends BoxLayoutConfig {
                 height: size.height
             };
             if (i == contents.length - 1) {
-                contentSize.width = Math.max(contentSize.width, position.x + size.width - x);
+                contentSize.width = Math.max(contentSize.width, size.width - dx);
             }
+            const x = inverse ? position.x + size.width - dx - contentSize.width : position.x + dx;
             elements.push(...layout.layout(content, { x, y: position.y }, contentSize));
-            x += contentSize.width;
+            dx += contentSize.width;
         }
         return elements;
     }

@@ -33,7 +33,7 @@ export const classModule = InterpreterModule.create(
             fun(
                 `
                     (name, callback) = args
-                    _class(name, callback, keywords = args.keywords, abstract = args.abstract, args = args)
+                    _class(name, callback, title = name, keywords = args.keywords, abstract = args.abstract, args = args)
                 `,
                 {
                     docs: "Creates a class.",

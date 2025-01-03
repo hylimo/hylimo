@@ -305,7 +305,6 @@ export class Layout {
      * @param element the element to layout
      * @param position the position of the element
      * @param size the size of the element
-     * @param id the id of the element
      * @returns the layouted element
      */
     layout(element: LayoutElement, position: Point, size: Size): Element[] {
@@ -452,7 +451,7 @@ export class Layout {
     getElementId(element: FullObject): string {
         const elementId = this.elementIdLookup.get(element);
         if (!elementId) {
-            throw new RuntimeError("Id of element not found");
+            throw new RuntimeError(`Could not find ID of the element. Did you register ${element} in the canvas?`);
         }
         return elementId;
     }
