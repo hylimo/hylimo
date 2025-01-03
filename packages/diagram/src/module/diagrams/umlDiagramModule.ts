@@ -27,6 +27,7 @@ export const umlDiagramModule = InterpreterModule.create(
     [DiagramModuleNames.DIAGRAM, DiagramModuleNames.DSL],
     [],
     createDiagramModule("umlDiagram", [
+        defaultStylesModule,
         actorModule,
         associationsModule,
         classDiagramToolboxEditsModule,
@@ -35,7 +36,6 @@ export const umlDiagramModule = InterpreterModule.create(
         componentDiagramToolboxEditsModule,
         componentModule,
         compositionAndAggregationModule,
-        defaultStylesModule,
         elementModule,
         enumModule,
         extendsAndImplementsModule,
