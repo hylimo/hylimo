@@ -62,6 +62,6 @@ export const instanceModule = InterpreterModule.create(
             )
         ),
         createToolboxEdit("Instance/Instance", 'instance("Example")'),
-        createToolboxEdit("Instance/Instance with name", 'instance("example", "Example")'),
+        createToolboxEdit("Instance/Instance with name", 'instance("example", "Example")')
     ]
 );

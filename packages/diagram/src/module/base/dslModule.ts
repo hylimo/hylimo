@@ -11,7 +11,6 @@ import {
     literal,
     namedType,
     numberType,
-    object,
     objectType,
     optional,
     or,

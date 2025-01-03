@@ -126,15 +126,14 @@ export type ParseableExpressions = (ExecutableExpression | string)[] | string;
  * Helper to parse some expressions
  *
  * @param expressions the expressions to parse
- * @param keepExpressions if true, the parsed expressions have the original expression assigned
  * @returns the parsed expressions
  */
-export function parse(expressions: ParseableExpressions, keepExpressions: boolean = false): ExecutableExpression[] {
+export function parse(expressions: ParseableExpressions): ExecutableExpression[] {
     if (Array.isArray(expressions)) {
         const parsedExpressions: ExecutableExpression[] = [];
         for (const expression of expressions) {
             if (typeof expression === "string") {
-                parsedExpressions.push(...parse(expression, keepExpressions));
+                parsedExpressions.push(...parse(expression));
             } else {
                 parsedExpressions.push(expression);
             }
@@ -153,7 +152,7 @@ export function parse(expressions: ParseableExpressions, keepExpressions: boolea
         ];
         throw new Error(`Invalid fun to parse: ${errors}`);
     }
-    return toExecutable(parserResult.ast!, keepExpressions);
+    return toExecutable(parserResult.ast!, false);
 }
 
 /**
