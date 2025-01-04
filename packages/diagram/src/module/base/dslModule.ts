@@ -91,8 +91,8 @@ const canvasConnectionWithScopeProperties = [
 /**
  * Creates a toolbox edit which is registered in `scope.internal.toolboxEdits`
  *
- * @param edit the name of the edit, prefixed with `toolbox/`
- * @param createElementCode the code which creates the element, expected to return a CanvasElement
+ * @param edit the name of the edit, implicitly prefixed with `toolbox/`. To be added correctly to the toolbox, follow the format `Group/Name`, so i.e. `Class/Class with nested class`.
+ * @param createElementCode the code which creates the element, expected to return a CanvasElement, i.e. `class("Example")`
  * @returns the executable expression which creates the toolbox edit
  */
 export function createToolboxEdit(edit: string, createElementCode: string): ExecutableExpression {

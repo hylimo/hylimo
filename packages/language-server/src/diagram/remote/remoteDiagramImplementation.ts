@@ -100,7 +100,7 @@ export class RemoteDiagramImplementation extends DiagramImplementation {
             return result.result;
         } else {
             throw new Error(
-                `Unexpected message type: expected: ${ReplyRenderPredictionDiagramMessage.type}, actual: ${result.type}`
+                `Unexpected message type for the predicted diagram result: expected: ${ReplyRenderPredictionDiagramMessage.type}, actual: ${result.type}`
             );
         }
     }

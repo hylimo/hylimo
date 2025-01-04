@@ -198,7 +198,7 @@ export class LayoutEngine {
 
     /**
      * Hides all non-prediction elements
-     * These are all direct children of the root element with the class {@link LayoutEngine.PREDICTION_CLASS}
+     * These are all direct children of the root element without the class {@link LayoutEngine.PREDICTION_CLASS}
      *
      * @param root the root element
      */
