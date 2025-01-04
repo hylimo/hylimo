@@ -37,10 +37,6 @@ export class CreateAndMoveMouseListener extends MouseListener {
          */
         edit: string;
         /**
-         * If true, if available, a target is used instead of coordinates
-         */
-        targetMode: boolean;
-        /**
          * A transformation matrix which directly outputs x/y in the root canvas coordinate system.
          */
         transformationMatrix: Matrix;
@@ -64,7 +60,6 @@ export class CreateAndMoveMouseListener extends MouseListener {
     startMove(root: SRoot, action: CreateAndMoveAction): void {
         this.context = {
             edit: action.edit,
-            targetMode: action.targetMode,
             transformationMatrix: root.getMouseTransformationMatrix(),
             transactionId: this.transactionIdProvider.generateId()
         };
@@ -137,9 +132,6 @@ export class CreateAndMoveMouseListener extends MouseListener {
     ): { x: number; y: number } | { target: string } {
         if (this.context === undefined) {
             throw new Error("No context");
-        }
-        if (this.context.targetMode) {
-            throw new Error("Not implemented");
         }
         return applyToPoint(this.context.transformationMatrix, { x: event.pageX, y: event.pageY });
     }

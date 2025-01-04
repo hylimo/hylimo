@@ -10,10 +10,6 @@ export interface CreateAndMoveAction extends Action {
      */
     edit: string;
     /**
-     * If true, if available, a target is used instead of coordinates
-     */
-    targetMode: boolean;
-    /**
      * The mouse event which started the action
      */
     event: MouseEvent;

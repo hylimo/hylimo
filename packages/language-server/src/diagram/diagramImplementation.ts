@@ -53,7 +53,7 @@ export abstract class DiagramImplementation {
 
     /**
      * Renders a diagram in prediction mode
-     * This is usually used to only render a part of the diagram, i.e. to render the probable result within the toolbox as an icon
+     * This is usually used to only render a part of the diagram, i.e. to render the probable result within the toolbox as a preview
      *
      * @param source the source code of the diagram
      * @param config the config of the diagram

@@ -46,9 +46,9 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler {
     private pointerEventsDisabled: boolean = false;
 
     /**
-     * If true, the toolbox is closed.
+     * If true, the toolbox is open.
      */
-    private isClosed: boolean;
+    private isOpen: boolean;
 
     /**
      * The edit for which to show a preview.
@@ -104,7 +104,7 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler {
         @inject(SPROTTY_TYPES.ModelRendererFactory) modelRendererFactory: ModelRendererFactory
     ) {
         super();
-        this.isClosed = configManager.config?.toolboxDisabled ?? false;
+        this.isOpen = configManager.config?.toolboxEnabled ?? true;
         this.renderer = modelRendererFactory("popup", []);
     }
 
@@ -123,7 +123,7 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler {
                 this.update();
             }
         } else if (EditorConfigUpdatedAction.is(action)) {
-            this.isClosed = action.config.toolboxDisabled;
+            this.isOpen = action.config.toolboxEnabled;
             this.update();
         }
     }
@@ -178,7 +178,7 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler {
             {
                 class: {
                     "pointer-events-disabled": this.pointerEventsDisabled,
-                    closed: this.isClosed
+                    closed: !this.isOpen
                 }
             },
             [
@@ -196,9 +196,7 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler {
      */
     private generateToolboxButtons(): VNode[] {
         const buttons: VNode[] = [];
-        if (this.isClosed) {
-            buttons.push(this.generateCodiconButton("tools", "Open Toolbox", () => this.toggleToolbox()));
-        } else {
+        if (this.isOpen) {
             buttons.push(
                 this.generateCodiconButton(
                     "search",
@@ -211,6 +209,8 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler {
                 )
             );
             buttons.push(this.generateCodiconButton("chrome-close", "Close Toolbox", () => this.toggleToolbox()));
+        } else {
+            buttons.push(this.generateCodiconButton("tools", "Open Toolbox", () => this.toggleToolbox()));
         }
         return buttons;
     }
@@ -222,7 +222,7 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler {
      * @returns The search box or undefined
      */
     private generateSearchBox(): VNode | undefined {
-        if (this.searchString == undefined || this.isClosed) {
+        if (this.searchString == undefined || !this.isOpen) {
             return undefined;
         }
         const searchInput = this.generateSearchInput();
@@ -269,9 +269,9 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler {
      * Toggles the toolbox.
      */
     private toggleToolbox(): void {
-        this.isClosed = !this.isClosed;
+        this.isOpen = !this.isOpen;
         this.update();
-        this.configManager.updateConfig({ toolboxDisabled: this.isClosed });
+        this.configManager.updateConfig({ toolboxEnabled: this.isOpen });
     }
 
     /**
@@ -394,7 +394,6 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler {
                         const action: CreateAndMoveAction = {
                             kind: CreateAndMoveAction.KIND,
                             edit: toolboxEdit.edit,
-                            targetMode: false,
                             event
                         };
                         this.pointerEventsDisabled = true;

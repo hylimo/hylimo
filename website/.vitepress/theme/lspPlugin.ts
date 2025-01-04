@@ -98,7 +98,7 @@ export const lspPlugin: Plugin = {
             enableFontSubsetting: true,
             enableExternalFonts: false
         });
-        const editorConfig = useLocalStorage<EditorConfig>("editorConfig", { toolboxDisabled: false });
+        const editorConfig = useLocalStorage<EditorConfig>("editorConfig", { toolboxEnabled: true });
         app.provide(languageServerConfigKey, {
             settings: languageServerSettings,
             diagramConfig,

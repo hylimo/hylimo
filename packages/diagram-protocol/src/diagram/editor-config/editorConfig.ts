@@ -3,7 +3,7 @@
  */
 export interface EditorConfig {
     /**
-     * Whether the toolbox is disabled
+     * Whether the toolbox is enabled
      */
-    toolboxDisabled: boolean;
+    toolboxEnabled: boolean;
 }

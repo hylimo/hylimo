@@ -17,7 +17,7 @@ const languageServer = new LanguageServer({
         },
         settings: {},
         editorConfig: {
-            toolboxDisabled: false
+            toolboxEnabled: true
         }
     },
     connection,
