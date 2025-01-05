@@ -12,7 +12,7 @@ export interface CanvasLike {
     pointVisibilityManager: PointVisibilityManager;
 
     /**
-     * The global rotation of the canvas
+     * The global rotation of the canvas in 45° steps
      * (used for UI elements which depend on global roation, e.g. cursor icons)
      */
     globalRotation: number;
