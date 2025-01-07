@@ -397,7 +397,6 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler {
                             handlerProvider: (root) => new CreateElementMoveHandler(toolboxEdit.edit, root)
                         };
                         this.pointerEventsDisabled = true;
-                        //(event.target as HTMLElement).blur();
                         event.preventDefault();
                         this.update();
                         this.actionDispatcher.dispatch(action);

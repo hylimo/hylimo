@@ -1,4 +1,4 @@
-import { Rules } from "@hylimo/core";
+import { identifierNeedsQuotes, Rules } from "@hylimo/core";
 import { IToken } from "chevrotain";
 import { doc, Doc } from "prettier";
 import { uinteger } from "vscode-languageserver";
@@ -176,7 +176,13 @@ function printCallExpression(context: PrintContext): Doc {
     const { ctx, path, print } = context;
     let baseExpression: Doc;
     if (ctx.Identifier != undefined) {
-        baseExpression = ctx.Identifier[0].image;
+        const image = ctx.Identifier[0].image;
+        if (image.startsWith("`")) {
+            const withoutQuotes = image.substring(1, image.length - 1);
+            baseExpression = identifierNeedsQuotes(withoutQuotes) ? image : withoutQuotes;
+        } else {
+            baseExpression = image;
+        }
     } else if (ctx.literal != undefined) {
         baseExpression = path.map(print, Rules.LITERAL);
     } else if (ctx.function != undefined) {

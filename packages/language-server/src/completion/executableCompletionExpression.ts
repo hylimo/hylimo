@@ -6,18 +6,14 @@ import {
     Expression,
     FullObject,
     InterpreterContext,
+    nameToAccessExpression,
+    nameToExpression,
     Range,
     SemanticFieldNames
 } from "@hylimo/core";
 import { CompletionError } from "./completionError.js";
 import { CompletionItemKind, InsertTextFormat, InsertTextMode, MarkupKind } from "vscode-languageserver";
 import { CompletionItem } from "./completionItem.js";
-
-/**
- * Pattern for identifiers which can be used directly without indexing
- */
-const identifierPattern =
-    /^((([!#%&'+\-:;<=>?@\\^`|~]|\*(?!\/)|\/(?![/*])|\.{2,}|[$_]+(?![\p{ID_Continue}$]))+)|([\p{ID_Start}_$][\p{ID_Continue}$]*))$/u;
 
 /**
  * An expression which throws an CompletionError on evaluation
@@ -207,13 +203,7 @@ export class ExecutableCompletionExpression extends ExecutableExpression<Express
         range: Range,
         kind: CompletionItemKind
     ): CompletionItem {
-        const requiresIndex = typeof key === "number" || !identifierPattern.test(key);
-        let text: string;
-        if (this.isAccess) {
-            text = requiresIndex ? `[${this.keyToString(key)}]` : `.${key}`;
-        } else {
-            text = requiresIndex ? `this[${this.keyToString(key)}]` : key;
-        }
+        const text = this.isAccess ? nameToAccessExpression(key) : nameToExpression(key);
         return {
             label: key.toString(),
             detail: key.toString(),
@@ -228,41 +218,6 @@ export class ExecutableCompletionExpression extends ExecutableExpression<Express
             },
             kind
         };
-    }
-
-    /**
-     * Converts a key to a string
-     * If the key is a number, it is converted to a string directly.
-     * Otherwise, it is put in quotes and non-ASCII characters are escaped.
-     *
-     * @param key the key to convert
-     * @returns the key as a string
-     */
-    private keyToString(key: string | number): string {
-        if (typeof key === "number") {
-            return key.toString();
-        }
-
-        // eslint-disable-next-line no-control-regex
-        const disallowedPattern = /[\\"\u0000-\u001f\u2028\u2029\u0085\u007f\n]|(\$\{)/g;
-        const escapedKey = key.replaceAll(disallowedPattern, (match) => {
-            if (match === "\n") {
-                return "\\n";
-            } else if (match === "\t") {
-                return "\\t";
-            } else if (match === '"') {
-                return '\\"';
-            } else if (match === "\\") {
-                return "\\\\";
-            } else if (match === "${") {
-                return "\\${";
-            } else {
-                const code = match.charCodeAt(0);
-                return "\\u" + code.toString(16).padStart(4, "0");
-            }
-        });
-
-        return `"${escapedKey}"`;
     }
 
     /**

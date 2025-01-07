@@ -14,6 +14,8 @@ export * from "./features/config/editorConfigUpdatedCommand.js";
 export * from "./features/create-move/createAndMoveAction.js";
 export * from "./features/create-move/createAndMoveCommand.js";
 export * from "./features/create-move/createAndMoveMouseListener.js";
+export * from "./features/create-move/createElementMoveHandler.js";
+export * from "./features/create-move/createMoveHandler.js";
 export * from "./features/create-move/di.config.js";
 export * from "./features/layout/positionProvider.js";
 export * from "./features/move/axisAlignedSegmentEditHandler.js";
