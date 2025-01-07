@@ -7,6 +7,7 @@ import { SRoot } from "../../model/sRoot.js";
 import { applyToPoint, Matrix } from "transformation-matrix";
 import { TransactionalAction } from "@hylimo/diagram-protocol";
 import { CreateAndMoveAction } from "./createAndMoveAction.js";
+import { CreateMoveHandler } from "./createMoveHandler.js";
 
 /**
  * The maximum number of updates that can be performed on the same revision.
@@ -33,10 +34,6 @@ export class CreateAndMoveMouseListener extends MouseListener {
      */
     private context?: {
         /**
-         * The edit to perform
-         */
-        edit: string;
-        /**
          * A transformation matrix which directly outputs x/y in the root canvas coordinate system.
          */
         transformationMatrix: Matrix;
@@ -44,6 +41,10 @@ export class CreateAndMoveMouseListener extends MouseListener {
          * The transaction id to use
          */
         transactionId: string;
+        /**
+         * The handler to generate the edits for the move
+         */
+        handler: CreateMoveHandler;
     };
 
     /**
@@ -59,13 +60,12 @@ export class CreateAndMoveMouseListener extends MouseListener {
      */
     startMove(root: SRoot, action: CreateAndMoveAction): void {
         this.context = {
-            edit: action.edit,
             transformationMatrix: root.getMouseTransformationMatrix(),
-            transactionId: this.transactionIdProvider.generateId()
+            transactionId: this.transactionIdProvider.generateId(),
+            handler: action.handlerProvider(root)
         };
         this.sequenceNumber = 0;
         root.sequenceNumber = 0;
-        this.actionDispatcher.dispatchAll(this.generateEditAction(root, action.event, false));
     }
 
     override mouseMove(target: SModelElementImpl, event: MouseEvent): (Action | Promise<Action>)[] {
@@ -101,38 +101,17 @@ export class CreateAndMoveMouseListener extends MouseListener {
         if (this.context == undefined) {
             return [];
         }
-        const edit = {
-            values: this.createVariables(target, event),
-            types: [this.context.edit],
-            elements: [target.root.id]
-        };
+        const { x, y } = applyToPoint(this.context.transformationMatrix, { x: event.pageX, y: event.pageY });
         const action: TransactionalAction = {
             kind: TransactionalAction.KIND,
             transactionId: this.context.transactionId,
             sequenceNumber: this.sequenceNumber++,
             committed,
-            edits: [edit]
+            edits: [this.context.handler.generateEdit(x, y, committed, target.root as SRoot)]
         };
         if (committed) {
             this.context = undefined;
         }
         return [action];
-    }
-
-    /**
-     * Creates the variables for the edit, based on the target and the event
-     *
-     * @param target the target element of the event, only relevant if targetMode is true
-     * @param event the mouse event providing the coordinates
-     * @returns the variables for the edit
-     */
-    private createVariables(
-        target: SModelElementImpl,
-        event: MouseEvent
-    ): { x: number; y: number } | { target: string } {
-        if (this.context === undefined) {
-            throw new Error("No context");
-        }
-        return applyToPoint(this.context.transformationMatrix, { x: event.pageX, y: event.pageY });
     }
 }

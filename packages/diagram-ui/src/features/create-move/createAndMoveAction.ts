@@ -1,4 +1,6 @@
 import { Action } from "sprotty-protocol";
+import { CreateMoveHandler } from "./createMoveHandler.js";
+import { SRoot } from "../../model/sRoot.js";
 
 /**
  * Action to create and move a diagram element
@@ -6,13 +8,9 @@ import { Action } from "sprotty-protocol";
 export interface CreateAndMoveAction extends Action {
     kind: typeof CreateAndMoveAction.KIND;
     /**
-     * The edit to perform
+     * The provider for the create and move handler
      */
-    edit: string;
-    /**
-     * The mouse event which started the action
-     */
-    event: MouseEvent;
+    handlerProvider: (root: SRoot) => CreateMoveHandler;
 }
 
 export namespace CreateAndMoveAction {

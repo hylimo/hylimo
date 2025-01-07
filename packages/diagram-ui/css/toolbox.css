@@ -121,7 +121,9 @@
                 .item:hover,
                 .item:focus-within {
                     background: var(--toolbox-item-hover-background);
+                }
 
+                .item:hover {
                     .preview {
                         display: block;
                     }

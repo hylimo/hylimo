@@ -22,6 +22,7 @@ import {
 import { TYPES } from "../types.js";
 import { ConfigManager } from "../config/configManager.js";
 import MiniSearch, { SearchResult } from "minisearch";
+import { CreateElementMoveHandler } from "../create-move/createElementMoveHandler.js";
 
 @injectable()
 export class Toolbox extends AbstractUIExtension implements IActionHandler {
@@ -393,10 +394,11 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler {
                     mousedown: (event) => {
                         const action: CreateAndMoveAction = {
                             kind: CreateAndMoveAction.KIND,
-                            edit: toolboxEdit.edit,
-                            event
+                            handlerProvider: (root) => new CreateElementMoveHandler(toolboxEdit.edit, root)
                         };
                         this.pointerEventsDisabled = true;
+                        //(event.target as HTMLElement).blur();
+                        event.preventDefault();
                         this.update();
                         this.actionDispatcher.dispatch(action);
                     },
