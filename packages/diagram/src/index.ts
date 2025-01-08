@@ -57,6 +57,7 @@ export * from "./module/diagrams/content/uml/classifier/ports.js";
 export * from "./module/diagrams/content/uml/classifier/propertiesAndMethods.js";
 export * from "./module/diagrams/content/uml/classifier/providesAndRequires.js";
 export * from "./module/diagrams/content/uml/classifier/sections.js";
+export * from "./module/diagrams/content/uml/classifier/values.js";
 export * from "./module/diagrams/content/uml/sequence/activityIndicator.js";
 export * from "./module/diagrams/content/uml/sequence/defaultValues.js";
 export * from "./module/diagrams/content/uml/sequence/event.js";

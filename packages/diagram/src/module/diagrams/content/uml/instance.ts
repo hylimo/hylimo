@@ -11,6 +11,7 @@ export const instanceModule = InterpreterModule.create(
         "uml/classifier/defaultTitle",
         "uml/classifier/sections",
         "uml/classifier/propertiesAndMethods",
+        "uml/classifier/values",
         "uml/classifier/content"
     ],
     [],
@@ -22,6 +23,7 @@ export const instanceModule = InterpreterModule.create(
                     scope.internal.defaultTitleContentHandler,
                     scope.internal.sectionsContentHandler,
                     scope.internal.propertiesAndMethodsContentHandler,
+                    scope.internal.valuesContentHandler,
                     scope.internal.contentContentHandler
                 )
             )
@@ -35,12 +37,12 @@ export const instanceModule = InterpreterModule.create(
                     if(class != null) {
                         if(class.proto == "".proto) {
                             title = name + ":" + class
-                        } 
-                    } {
-                        if(callback != null) {
-                            error("Both the class name and body of instance '\${name}' are set to functions which is not allowed. Either provide a class name string as second argument, or pass at most two arguments")
+                        } {
+                            if(callback != null) {
+                                error("Both the class name and body of instance '\${name}' are set to functions which is not allowed. Either provide a class name string as second argument, or pass at most two arguments")
+                            }
+                            callback = class // shift $1 -> $2 when necessary, both the class name and the callback function are optional
                         }
-                        callback = class // shift $1 -> $2 when necessary, both the class name and the callback function are optional
                     }
                     scope.internal.createInstance(name, callback, title = title, keywords = args.keywords, args = args)
                 `,
