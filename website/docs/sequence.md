@@ -105,7 +105,7 @@ If their name is already used by something else, you can assign the result of th
 sequenceDiagram {
     enableDebugging = true
     Bob = true
-    user = instance("Bob")
+    instance("Bob")
     event("buy")
     event("stop")
     buy.Bob --> stop.Bob with {
@@ -117,6 +117,47 @@ sequenceDiagram {
 :::
 
 In this example, we also see that to refer to a specific xy-coordinate, we can always use `eventname.participant`.
+
+From time to time, we need to display names containing special chars.\
+While Hylimo itself can handle this just fine, it is unpleasant to look at and write:
+
+:::info
+
+```hylimo
+sequenceDiagram {
+    instance("An instance")
+    event("ugly event name")
+    event("stop")
+    this["ugly event name"]["An instance"] --> stop["An instance"] with {
+        over = start(0).axisAligned(1, apos(0, 25), 1, apos(25, 25), 0, end(0.5))
+    }
+}
+```
+
+:::
+
+Since this is really ugly to look at and potentially unavoidable in the case of participants, Hylimo offers the following workaround to improve the readability:\
+Event names should never contain any special chars such as `-` or ` `. `_` is alright, or you use `pascalCaseForEventNames`.\
+You can easily do this as event names are never shown in the final diagram.\
+For participants, you can also pass `as` when creating it to give it a name of your own choosing that is only relevant for the textual syntax:
+
+:::info
+
+```hylimo
+sequenceDiagram {
+    instance("An instance", as = "bob")
+    event("doSomething")
+    event("stop")
+    doSomething.bob --> stop.bob with {
+        over = start(0).axisAligned(1, apos(0, 25), 1, apos(25, 25), 0, end(0.5))
+    }
+}
+```
+
+:::
+
+This one produces the same result but is a lot more readable.\
+Note, however, that you cannot access something using your original participant name anymore if you alias it.
 
 Now, we have the basic knowledge to go on with the remaining features that are all relative to the latest event.
 

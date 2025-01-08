@@ -30,6 +30,14 @@ export const sequenceDiagramInstanceModule = InterpreterModule.create(
                         }
                     }
                     this.instance = scope.internal.createInstance(name, callback, title = title, keywords = args.keywords, args = args)
+                    
+                    // Allow using an easier name for instances when the instance name contains special chars, i.e. '-' or ' ' which can happen in user-visible content
+                    argsCopy = args
+                    if(argsCopy.as != null) {
+                        name = argsCopy.as
+                        scope.internal.registerInDiagramScope(name, instance)
+                    }
+                    
                     scope.internal.createSequenceDiagramParticipant(name, this.instance, below = args.below)
                 `,
                 {
@@ -46,6 +54,11 @@ export const sequenceDiagramInstanceModule = InterpreterModule.create(
                             "below",
                             "the optional participant below which the instance should be placed. If set, this instance will have the same x coordinate as the given value and the y coordinate of the current event",
                             optional(participantType)
+                        ],
+                        [
+                            "as",
+                            "an optional name to use for the textual syntax for when the instance name contains special chars such as '-' or ' '",
+                            optional(stringType)
                         ]
                     ],
                     snippet: `("$1"$2)`,

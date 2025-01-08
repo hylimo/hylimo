@@ -28,8 +28,11 @@ export const sequenceDiagramActorModule = InterpreterModule.create(
                     // We don't want to display the actor name when attributes are present. That will be handled by the underlying instance
                     actorName = if(callback != null) { null } { originalName }
                     this.actor = scope.internal.createActor(actorName, args = args)
-                    name = originalName
-                    
+
+                    // Allow overriding the name to something easier to read for the textual syntax in the text by setting 'as'
+                    // After all, the actor name may often contain '-' or ' ' as it is user visible input
+                    name = if(argsCopy.as != null) { argsCopy.as } { originalName }
+ 
                     // Actors have an optional name, so we must supply one for the first actor for the first actor in the diagram for example for arrows: 'event.User --> event.Shop' or 'activate(User)'
                     // Note however, that this name should not be displayed, so it cannot be done before the actor was created
                     if(name == null) {
@@ -67,6 +70,11 @@ export const sequenceDiagramActorModule = InterpreterModule.create(
                             "below",
                             "the optional participant below which the actor should be placed. If set, this actor will have the same x coordinate as the given value and the y coordinate of the current event",
                             optional(participantType)
+                        ],
+                        [
+                            "as",
+                            "an optional name of this actor for the textual syntax. Should be set when the name contains special chars, i.e. '-' or ' ', to make the textual syntax more readable",
+                            optional(stringType)
                         ]
                     ],
                     snippet: `($1)`,
