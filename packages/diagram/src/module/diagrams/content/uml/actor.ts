@@ -1,4 +1,4 @@
-import { fun, id, InterpreterModule, optional, stringType } from "@hylimo/core";
+import { fun, id, InterpreterModule, optional, ParseableExpressions, stringType } from "@hylimo/core";
 import { createToolboxEdit, SCOPE } from "../../../base/dslModule.js";
 
 /**
@@ -73,6 +73,16 @@ export const actorModule = InterpreterModule.create(
                 }
             }
         `,
-        createToolboxEdit("Actor/Actor", 'actor("Example")')
+        ...actorToolboxEdits(true)
     ]
 );
+
+/**
+ * Creates toolbox edits for the actor function
+ *
+ * @param enableDragging whether dragging should be enabled
+ * @returns the toolbox edits
+ */
+export function actorToolboxEdits(enableDragging: boolean): ParseableExpressions {
+    return [createToolboxEdit("Actor/Actor", 'actor("Example")', enableDragging)];
+}

@@ -496,7 +496,8 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler {
         };
         const result = await this.actionDispatcher.request(request);
         let preview: VNode | undefined = undefined;
-        if (result.root != undefined) {
+        const size = result.root?.rootBounds?.size;
+        if (result.root != undefined && size?.height && size?.width) {
             const model = this.modelFactory.createRoot(result.root);
             preview = this.renderer.renderElement(model);
         }

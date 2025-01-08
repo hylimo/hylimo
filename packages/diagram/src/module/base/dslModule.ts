@@ -93,18 +93,20 @@ const canvasConnectionWithScopeProperties = [
  *
  * @param edit the name of the edit, implicitly prefixed with `toolbox/`. To be added correctly to the toolbox, follow the format `Group/Name`, so i.e. `Class/Class with nested class`.
  * @param createElementCode the code which creates the element, expected to return a CanvasElement, i.e. `class("Example")`
+ * @param enableDragging whether the element should be draggable
  * @returns the executable expression which creates the toolbox edit
  */
-export function createToolboxEdit(edit: string, createElementCode: string): ExecutableExpression {
-    return id(SCOPE)
-        .field("internal")
-        .field("toolboxEdits")
-        .assignField(
-            `toolbox/${edit}`,
-            str(
-                `'\n${dedent(createElementCode)} layout {\n    pos = apos(' & x & ', ' & y & ')\n}' & (prediction ? ' styles { class += "${LayoutEngine.PREDICTION_CLASS}" }' : '')`
-            )
-        );
+export function createToolboxEdit(
+    edit: string,
+    createElementCode: string,
+    enableDragging: boolean = true
+): ExecutableExpression {
+    let modifiedEdit = `'\n${dedent(createElementCode)}'`;
+    if (enableDragging) {
+        modifiedEdit += "& ' layout {\n    pos = apos(' & x & ', ' & y & ')\n}'";
+    }
+    modifiedEdit += `& (prediction ? ' styles { class += "${LayoutEngine.PREDICTION_CLASS}" }' : '')`;
+    return id(SCOPE).field("internal").field("toolboxEdits").assignField(`toolbox/${edit}`, str(modifiedEdit));
 }
 
 /**

@@ -1,6 +1,7 @@
 import { fun, functionType, id, InterpreterModule, optional, or, stringType } from "@hylimo/core";
 import { SCOPE } from "../../../../base/dslModule.js";
 import { participantType } from "./types.js";
+import { instanceToolboxEdits } from "../instance.js";
 
 /**
  * Module providing the UML 'instance' function for sequence diagrams - they differ from normal instances in that
@@ -59,6 +60,7 @@ export const sequenceDiagramInstanceModule = InterpreterModule.create(
                     minWidth = 50
                 }
             }
-        `
+        `,
+        ...instanceToolboxEdits(false)
     ]
 );

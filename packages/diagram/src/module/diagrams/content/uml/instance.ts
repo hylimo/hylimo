@@ -1,4 +1,14 @@
-import { fun, functionType, id, InterpreterModule, listType, optional, or, stringType } from "@hylimo/core";
+import {
+    fun,
+    functionType,
+    id,
+    InterpreterModule,
+    listType,
+    optional,
+    or,
+    ParseableExpressions,
+    stringType
+} from "@hylimo/core";
 import { createToolboxEdit, SCOPE } from "../../../base/dslModule.js";
 
 /**
@@ -10,7 +20,6 @@ export const instanceModule = InterpreterModule.create(
         "uml/classifier/classifier",
         "uml/classifier/defaultTitle",
         "uml/classifier/sections",
-        "uml/classifier/propertiesAndMethods",
         "uml/classifier/values",
         "uml/classifier/content"
     ],
@@ -22,7 +31,6 @@ export const instanceModule = InterpreterModule.create(
                 list(
                     scope.internal.defaultTitleContentHandler,
                     scope.internal.sectionsContentHandler,
-                    scope.internal.propertiesAndMethodsContentHandler,
                     scope.internal.valuesContentHandler,
                     scope.internal.contentContentHandler
                 )
@@ -63,7 +71,31 @@ export const instanceModule = InterpreterModule.create(
                 }
             )
         ),
-        createToolboxEdit("Instance/Instance", 'instance("Example")'),
-        createToolboxEdit("Instance/Instance with name", 'instance("example", "Example")')
+        ...instanceToolboxEdits(true)
     ]
 );
+
+/**
+ * Creates toolbox edits for the instance function
+ *
+ * @param enableDragging Whether dragging is enabled
+ * @returns The toolbox edits
+ */
+export function instanceToolboxEdits(enableDragging: boolean): ParseableExpressions {
+    return [
+        createToolboxEdit("Instance/Instance", 'instance("Example")', enableDragging),
+        createToolboxEdit("Instance/Instance with name", 'instance("example", "Example")', enableDragging),
+        createToolboxEdit(
+            "Instance/Instance with values",
+            `
+                instance("example", "Example") {
+                    values {
+                        hello = "World"
+                        number = 42
+                    }
+                }
+            `,
+            enableDragging
+        )
+    ];
+}

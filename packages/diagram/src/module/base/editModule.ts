@@ -15,7 +15,11 @@ import {
     FunctionExpression,
     RuntimeError,
     MissingArgumentSource,
-    OperatorExpression
+    OperatorExpression,
+    or,
+    stringType,
+    numberType,
+    nameToExpression
 } from "@hylimo/core";
 import { DiagramModuleNames } from "../diagramModuleNames.js";
 
@@ -272,6 +276,22 @@ export const editModule = InterpreterModule.create(
                         [2, "the expression to append"]
                     ],
                     returns: "the created edit or null if the target is not editable"
+                }
+            )
+        ),
+        assign(
+            "nameToExpression",
+            jsFun(
+                (args, context) => {
+                    const name = args.getFieldValue(0, context).toNative();
+                    const expression = nameToExpression(name);
+                    const escapedExpression = `"${expression.replaceAll(/\\/g, "\\\\").replaceAll(/"/g, '\\"')}"`;
+                    return context.newString(escapedExpression);
+                },
+                {
+                    docs: "Converts a name to a jsonata expression",
+                    params: [[0, "the name of the identifier to convert", or(stringType, numberType)]],
+                    returns: "the jsonata expression"
                 }
             )
         )
