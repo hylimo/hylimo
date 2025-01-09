@@ -13,7 +13,7 @@ import {
 import { Action, generateRequestId, SetModelAction, UpdateModelAction } from "sprotty-protocol";
 import { VNode, h } from "snabbdom";
 import { Root } from "@hylimo/diagram-common";
-import { CreateAndMoveAction } from "../create-move/createAndMoveAction.js";
+import { TransactionalMoveAction } from "../move/transactionalMoveAction.js";
 import {
     EditorConfigUpdatedAction,
     ToolboxEditPredictionRequestAction,
@@ -22,7 +22,7 @@ import {
 import { TYPES } from "../types.js";
 import { ConfigManager } from "../config/configManager.js";
 import MiniSearch, { SearchResult } from "minisearch";
-import { CreateElementMoveHandler } from "../create-move/createElementMoveHandler.js";
+import { CreateElementMoveHandler } from "./createElementMoveHandler.js";
 
 @injectable()
 export class Toolbox extends AbstractUIExtension implements IActionHandler {
@@ -392,9 +392,10 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler {
             {
                 on: {
                     mousedown: (event) => {
-                        const action: CreateAndMoveAction = {
-                            kind: CreateAndMoveAction.KIND,
-                            handlerProvider: (root) => new CreateElementMoveHandler(toolboxEdit.edit, root)
+                        const action: TransactionalMoveAction = {
+                            kind: TransactionalMoveAction.KIND,
+                            handlerProvider: (root) => new CreateElementMoveHandler(toolboxEdit.edit, root),
+                            maxUpdatesPerRevision: 1
                         };
                         this.pointerEventsDisabled = true;
                         event.preventDefault();

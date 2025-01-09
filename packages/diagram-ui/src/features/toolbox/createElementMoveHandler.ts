@@ -1,16 +1,11 @@
 import { Edit, ToolboxEdit } from "@hylimo/diagram-protocol";
-import { CreateMoveHandler } from "./createMoveHandler.js";
+import { MoveHandler } from "../move/moveHandler.js";
 import { SRoot } from "../../model/sRoot.js";
 
 /**
  * Create move handler to create canvas elements, typically used for toolbox edits
  */
-export class CreateElementMoveHandler extends CreateMoveHandler {
-    /**
-     * If true, the mouse has been moved
-     */
-    private hasMoved = false;
-
+export class CreateElementMoveHandler extends MoveHandler {
     /**
      * Creates a new create element move handler
      *
@@ -21,13 +16,10 @@ export class CreateElementMoveHandler extends CreateMoveHandler {
         private readonly edit: `toolbox/${string}`,
         private readonly root: SRoot
     ) {
-        super();
+        super(root.getMouseTransformationMatrix(), false);
     }
 
-    override generateEdit(x: number, y: number, committed: boolean): Edit {
-        if (!committed) {
-            this.hasMoved = true;
-        }
+    override generateEdits(x: number, y: number): Edit[] {
         let values: { x: number; y: number };
         if (this.hasMoved) {
             values = { x, y };
@@ -37,10 +29,12 @@ export class CreateElementMoveHandler extends CreateMoveHandler {
                 y: this.root.scroll.y + this.root.canvasBounds.height / this.root.zoom / 2
             };
         }
-        return {
-            types: [this.edit],
-            values,
-            elements: [this.root.id]
-        } satisfies ToolboxEdit;
+        return [
+            {
+                types: [this.edit],
+                values,
+                elements: [this.root.id]
+            } satisfies ToolboxEdit
+        ];
     }
 }

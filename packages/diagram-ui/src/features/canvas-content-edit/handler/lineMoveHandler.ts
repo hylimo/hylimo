@@ -1,38 +1,34 @@
-import { DefaultEditTypes, LineEngine, Point, TransformedLine } from "@hylimo/diagram-common";
-import { MoveHandler } from "./moveHandler.js";
+import { DefaultEditTypes, LineEngine, TransformedLine } from "@hylimo/diagram-common";
 import { Edit, MoveLposEdit } from "@hylimo/diagram-protocol";
+import { Matrix } from "transformation-matrix";
+import { MoveHandler } from "../../move/moveHandler.js";
 
 /**
  * Move handler for line point moves
+ * Expects relative coordinates to the point in the parent canvas coordinate system.
  */
 export class LineMoveHandler extends MoveHandler {
     /**
      * Creats a new LineMoveHandler
      *
      * @param point the id of the point to move
-     * @param transactionId the id of the transaction
-     * @param initialPosition the initial position of the point
      * @param onLine if true, the point should be moved on the line only, otherwise a relative point to the line is calculated
      * @param hasSegment if true, the segment index is defined
      * @param line the line on which the point is
+     * @param transformationMatrix the transformation matrix to apply to obtain the relative position
      */
     constructor(
         readonly point: string,
-        transactionId: string,
-        readonly initialPosition: Point,
         readonly onLine: boolean,
         readonly hasSegment: boolean,
-        readonly line: TransformedLine
+        readonly line: TransformedLine,
+        transformMatrix: Matrix
     ) {
-        super(transactionId);
+        super(transformMatrix);
     }
 
-    protected override generateEdits(dx: number, dy: number): Edit[] {
-        const newPosition: Point = {
-            x: this.initialPosition.x + dx,
-            y: this.initialPosition.y + dy
-        };
-        const nearest = LineEngine.DEFAULT.projectPoint(newPosition, this.line);
+    override generateEdits(x: number, y: number): Edit[] {
+        const nearest = LineEngine.DEFAULT.projectPoint({ x, y }, this.line);
         let pos: number | [number, number];
         if (this.hasSegment) {
             pos = [nearest.segment, nearest.relativePos];
