@@ -69,7 +69,8 @@ export class CanvasElementView implements IView {
                     transform: `translate(${position.x}, ${position.y}) rotate(${model.rotation})`
                 },
                 class: {
-                    "canvas-element": true
+                    "canvas-element": true,
+                    selectable: true
                 }
             },
             ...children

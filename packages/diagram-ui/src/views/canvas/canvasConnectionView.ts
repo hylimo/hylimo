@@ -42,7 +42,17 @@ export class CanvasConnectionView implements IView {
                 })
             );
         }
-        return svg("g", null, ...childPaths, ...childMarkers, ...childControlElements);
+        return svg(
+            "g",
+            {
+                class: {
+                    selectable: true
+                }
+            },
+            ...childPaths,
+            ...childMarkers,
+            ...childControlElements
+        );
     }
 
     /**

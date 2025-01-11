@@ -17,6 +17,10 @@ svg.hylimo {
     .selected-rect {
         fill: var(--diagram-layout-color-overlay);
         stroke: var(--diagram-layout-color-selected);
+    }
+
+    .selected-rect,
+    .create-connection-outline {
         stroke-width: calc(5px / var(--diagram-zoom));
         stroke-dasharray: calc(16px / var(--diagram-zoom));
     }
@@ -96,5 +100,41 @@ svg.hylimo {
     }
     .axis-aligned-segment-edit-y {
         cursor: ew-resize;
+    }
+
+    .create-connection-outline {
+        stroke: var(--diagram-layout-color);
+        fill: none;
+        cursor: default;
+    }
+
+    .create-connection {
+        transform: scale(calc(1 / var(--diagram-zoom)));
+    }
+
+    .create-connection-point {
+        stroke-linecap: round;
+        stroke: var(--diagram-layout-color-selected);
+    }
+
+    .create-connection-arrow {
+        stroke: var(--diagram-layout-color);
+        fill: none;
+        stroke-width: 4px;
+    }
+
+    .create-connection:hover .create-connection-arrow {
+        stroke: var(--diagram-layout-color-selected);
+    }
+
+    .create-connection-hover-line {
+        stroke: transparent;
+        stroke-width: 12px;
+        fill: none;
+        pointer-events: visibleStroke;
+    }
+
+    .selectable {
+        cursor: pointer;
     }
 }

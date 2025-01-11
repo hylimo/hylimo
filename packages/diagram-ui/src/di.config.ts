@@ -63,13 +63,15 @@ import { SCanvasAxisAlignedSegment } from "./model/canvas/sCanvasAxisAlignedSegm
 import { SEllipse } from "./model/sEllipse.js";
 import { EllipseView } from "./views/ellipseView.js";
 import { navigationModule } from "./features/navigation/di.config.js";
-import { canvasContentEditModule } from "./features/canvas-content-edit/di.config.js";
+import { canvasContentMoveEditModule } from "./features/canvas-content-move-edit/di.config.js";
 import { resetCanvasBoundsModule } from "./features/canvas-bounds/di.config.js";
 import { viewportModule } from "./features/viewport/di.config.js";
 import { undoRedoModule } from "./features/undo-redo/di.config.js";
 import { toolboxModule } from "./features/toolbox/ci.config.js";
 import { moveModule } from "./features/move/di.config.js";
 import { configModule } from "./features/config/di.config.js";
+import { splitCanvasSegmentModule } from "./features/split-canvas-segment/di.config.js";
+import { connectionCreationModule } from "./features/connection-creation/di.config.js";
 
 /**
  * The module used
@@ -133,11 +135,13 @@ export function createContainer(widgetId: string): Container {
         moveModule,
         resetCanvasBoundsModule,
         navigationModule,
-        canvasContentEditModule,
+        canvasContentMoveEditModule,
+        splitCanvasSegmentModule,
         viewportModule,
         undoRedoModule,
         toolboxModule,
-        configModule
+        configModule,
+        connectionCreationModule
     );
     container.load(diagramModule);
 

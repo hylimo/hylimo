@@ -1,11 +1,12 @@
 import { EditSpecification, FontData, convertFontsToCssStyle } from "@hylimo/diagram-common";
-import { ModelIndexImpl, ViewportRootElementImpl } from "sprotty";
+import { isSelectable, ModelIndexImpl, SModelElementImpl, ViewportRootElementImpl } from "sprotty";
 import { SCanvasLayoutEngine } from "./canvas/sCanvasLayoutEngine.js";
 import { Matrix, compose, translate, scale } from "transformation-matrix";
 import { Bounds } from "sprotty-protocol";
 import { Bounds as HylimoBounds } from "@hylimo/diagram-common";
 import { CanvasLike } from "./canvas/canvasLike.js";
 import { PointVisibilityManager } from "./canvas/pointVisibilityManager.js";
+import { ConnectionCreationPreviewProvider } from "../features/connection-creation/connectionCreationPreview.js";
 
 /**
  * Root element.
@@ -45,6 +46,11 @@ export class SRoot extends ViewportRootElementImpl implements CanvasLike {
      * Internal cached version of the PointVisibilityManager
      */
     private _pointVisibilityManager?: PointVisibilityManager;
+
+    /**
+     * If defined, can provide information on how the connection creation preview should be displayed
+     */
+    connectionCreationPreviewProvider?: ConnectionCreationPreviewProvider;
 
     /**
      * Gets the PointVisibilityManager
@@ -88,6 +94,13 @@ export class SRoot extends ViewportRootElementImpl implements CanvasLike {
             width: this.rootBounds.size.width,
             height: this.rootBounds.size.height
         };
+    }
+
+    /**
+     * Gets all elements which are selected.
+     */
+    get selectedElements(): SModelElementImpl[] {
+        return [...this.index.all().filter((child) => isSelectable(child) && child.selected)];
     }
 
     /**

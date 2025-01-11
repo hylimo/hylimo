@@ -1,4 +1,4 @@
-import { applyToPoint, inverse } from "transformation-matrix";
+import { applyToPoint, compose, decomposeTSR, inverse, rotate, scale } from "transformation-matrix";
 import { Point } from "../../common/point.js";
 import { LinePoint } from "../../model/elements/canvas/canvasPoint.js";
 import { ArcSegment } from "../model/arcSegment.js";
@@ -87,9 +87,53 @@ export class LineEngine {
      * @returns the point on the line
      */
     getPoint(position: number, segment: number | undefined, distance: number, transformedLine: TransformedLine): Point {
-        const { line } = transformedLine;
+        const { line, transform } = transformedLine;
+        const { relativePosition, segment: segmentIndex } = this.normalizePosition(position, segment, line);
+        const segmentStartPos = segmentIndex == 0 ? line.start : line.segments[segmentIndex - 1].end;
+        const lineSegment = line.segments[segmentIndex];
+        const engine = this.getEngine(lineSegment);
+        const localPoint = engine.getPoint(relativePosition, distance, lineSegment, segmentStartPos);
+        return applyToPoint(transform, localPoint);
+    }
+
+    /**
+     * Gets the normal vector for a point on a segment
+     *
+     * @param position the position of the point on the segment, a number between 0 and 1
+     * @param segment the segment to which position is relative to (if undefined position is relative to the whole line)
+     * @param transformedLine line with associated transform
+     * @returns the normal vector
+     */
+    getNormalVector(position: number, segment: number | undefined, transformedLine: TransformedLine): Point {
+        const { line, transform } = transformedLine;
+        const { relativePosition, segment: segmentIndex } = this.normalizePosition(position, segment, line);
+        const segmentStartPos = segmentIndex == 0 ? line.start : line.segments[segmentIndex - 1].end;
+        const lineSegment = line.segments[segmentIndex];
+        const engine = this.getEngine(line.segments[segmentIndex]);
+        const localVector = engine.getNormalVector(relativePosition, lineSegment, segmentStartPos);
+        const {
+            scale: { sx, sy },
+            rotation: { angle }
+        } = decomposeTSR(transform);
+        return applyToPoint(compose(scale(sx, sy), rotate(angle)), localVector);
+    }
+
+    /**
+     * Normalizes the position and segment index
+     * If the segment does not exist, the position is normalized to the closest existing segment
+     *
+     * @param position the position of the point on the segment, a number between 0 and 1
+     * @param segment the segment to which position is relative to (if undefined position is relative to the whole line)
+     * @param line the line to normalize the position for
+     * @returns the normalized position and segment index
+     */
+    private normalizePosition(
+        position: number,
+        segment: number | undefined,
+        line: Line
+    ): { relativePosition: number; segment: number } {
         if (line.segments.length == 0) {
-            return line.start;
+            return { relativePosition: 0, segment: 0 };
         }
         let segmentIndex: number;
         let relativePosition: number;
@@ -103,39 +147,33 @@ export class LineEngine {
         if (!this.doesSegmentExist(line, segmentIndex)) {
             for (let i = segmentIndex - 1; i >= 0; i--) {
                 if (this.doesSegmentExist(line, i)) {
-                    return this.getPointInternal(1, i, distance, transformedLine);
+                    return { relativePosition: 1, segment: i };
                 }
             }
             for (let i = segmentIndex + 1; i < line.segments.length; i++) {
                 if (this.doesSegmentExist(line, i)) {
-                    return this.getPointInternal(0, i, distance, transformedLine);
+                    return { relativePosition: 0, segment: i };
                 }
             }
         }
-        return this.getPointInternal(relativePosition, segmentIndex, distance, transformedLine);
+        return { relativePosition, segment: segmentIndex };
     }
 
     /**
-     * Gets a point on a segment
+     * Gets the SVG path for a line
      *
-     * @param relativePosition the position of the point on the segment, a number between 0 and 1
-     * @param segment the segment to which position is relative to
-     * @param distance the distance to the line at which the point should be located
-     * @param transformedLine line with associated transform
-     * @returns the point on the line
+     * @param line the line to get the path for
+     * @returns the SVG path
      */
-    private getPointInternal(
-        relativePosition: number,
-        segment: number,
-        distance: number,
-        transformedLine: TransformedLine
-    ): Point {
-        const { line, transform } = transformedLine;
-        const segmentStartPos = segment == 0 ? line.start : line.segments[segment - 1].end;
-        const lineSegment = line.segments[segment];
-        const engine = this.getEngine(lineSegment);
-        const localPoint = engine.getPoint(relativePosition, distance, lineSegment, segmentStartPos);
-        return applyToPoint(transform, localPoint);
+    getSvgPath(line: Line): string {
+        let path = `M ${line.start.x} ${line.start.y}`;
+        let startPosition = line.start;
+        for (const segment of line.segments) {
+            const engine = this.getEngine(segment);
+            path += ` ${engine.toSvgPath(segment, startPosition)}`;
+            startPosition = segment.end;
+        }
+        return path;
     }
 
     /**

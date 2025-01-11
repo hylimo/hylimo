@@ -1,4 +1,4 @@
-import { Expression, optional, Type, wrapperObjectType } from "@hylimo/core";
+import { Expression, optional, stringType, Type, wrapperObjectType } from "@hylimo/core";
 import { AttributeConfig, ContentCardinality } from "../../layoutElement.js";
 import { CanvasContentLayoutConfig } from "./canvasContentLayoutConfig.js";
 
@@ -26,6 +26,11 @@ export abstract class EditableCanvasContentLayoutConfig extends CanvasContentLay
                     name: "source",
                     description: "the CanvasContent itself, used for the metadata",
                     type: optional(wrapperObjectType("Expression", (value) => value.wrapped instanceof Expression))
+                },
+                {
+                    name: "editExpression",
+                    description: "an expression which can be used by edits to obtain this element in an edit",
+                    type: optional(stringType)
                 },
                 ...additionalAttributes
             ],

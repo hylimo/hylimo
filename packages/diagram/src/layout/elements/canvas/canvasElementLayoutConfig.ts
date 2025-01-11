@@ -76,7 +76,8 @@ export class CanvasElementLayoutConfig extends EditableCanvasContentLayoutConfig
             rotation: element.element.getLocalFieldOrUndefined("_rotation")?.value?.toNative() ?? 0,
             children: layout.layout(content, { x: dx, y: dy }, size),
             outline: layout.outline(content),
-            edits: element.edits
+            edits: element.edits,
+            editExpression: element.element.getLocalFieldOrUndefined("editExpression")?.value?.toNative()
         };
         return [result];
     }

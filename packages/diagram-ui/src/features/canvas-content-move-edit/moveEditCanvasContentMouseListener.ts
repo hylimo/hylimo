@@ -1,12 +1,5 @@
 import { EditSpecification, DefaultEditTypes, EditSpecificationEntry, groupBy } from "@hylimo/diagram-common";
-import {
-    findParentByFeature,
-    isMoveable,
-    isSelectable,
-    MouseListener,
-    SModelElementImpl,
-    SModelRootImpl
-} from "sprotty";
+import { findParentByFeature, isMoveable, MouseListener, SModelElementImpl } from "sprotty";
 import { Action } from "sprotty-protocol";
 import { SAbsolutePoint } from "../../model/canvas/sAbsolutePoint.js";
 import { SCanvasElement } from "../../model/canvas/sCanvasElement.js";
@@ -39,6 +32,7 @@ import { SMarker } from "../../model/canvas/sMarker.js";
 import { isCanvasLike } from "../../model/canvas/canvasLike.js";
 import { TransactionalMoveAction } from "../move/transactionalMoveAction.js";
 import { NoopMoveHandler } from "./handler/noopMoveHandler.js";
+import { SElement } from "../../model/sElement.js";
 
 /**
  * The maximum number of updates that can be performed on the same revision.
@@ -62,7 +56,7 @@ export class MoveEditCanvasContentMouseListener extends MouseListener {
     override mouseDown(target: SModelElementImpl, event: MouseEvent): Action[] {
         if (event.button === 0 && !(event.ctrlKey || event.altKey)) {
             const moveableTarget = findParentByFeature(target, isMoveable);
-            if (moveableTarget != undefined) {
+            if (moveableTarget != undefined && moveableTarget instanceof SElement) {
                 const parentCanvas = findParentByFeature(target, isCanvasLike);
                 if (parentCanvas == undefined) {
                     throw new Error("Cannot move an element without a parent canvas");
@@ -85,7 +79,7 @@ export class MoveEditCanvasContentMouseListener extends MouseListener {
      * @param event the mouse event
      * @returns the move handler if move is supported, otherwise undefined
      */
-    private createHandler(target: SModelElementImpl, event: MouseEvent): MoveHandler | undefined {
+    private createHandler(target: SElement, event: MouseEvent): MoveHandler | undefined {
         const targetElement = event.target as Element;
         const classList = targetElement?.classList;
         if (target instanceof SCanvasElement && classList != undefined) {
@@ -148,7 +142,7 @@ export class MoveEditCanvasContentMouseListener extends MouseListener {
         classList: DOMTokenList,
         event: MouseEvent
     ): ResizeHandler | undefined {
-        const resizedElements = this.getSelectedElements(target.root).filter(
+        const resizedElements = target.root.selectedElements.filter(
             (element) => element instanceof SCanvasElement
         ) as SCanvasElement[];
         const scaleX = this.computeXResizeFactor(resizedElements, classList, target);
@@ -302,8 +296,8 @@ export class MoveEditCanvasContentMouseListener extends MouseListener {
      * @param event the mouse event
      * @returns the move handler if move is supported, otherwise undefined
      */
-    private createMoveHandler(target: SModelElementImpl, event: MouseEvent): MoveHandler | undefined {
-        const selected = this.getSelectedElements(target.root).filter(
+    private createMoveHandler(target: SElement, event: MouseEvent): MoveHandler | undefined {
+        const selected = target.root.selectedElements.filter(
             (element) =>
                 element instanceof SCanvasPoint || element instanceof SCanvasElement || element instanceof SMarker
         ) as (SCanvasPoint | SCanvasElement | SMarker)[];
@@ -435,16 +429,6 @@ export class MoveEditCanvasContentMouseListener extends MouseListener {
             entries.get(transformationLookup.get(parentCanvas.id)!)!.elements.push(element);
         }
         return [...entries.values()];
-    }
-
-    /**
-     * Gets all elements which are selected.
-     *
-     * @param root the root element of the model
-     * @returns all selected elements
-     */
-    private getSelectedElements(root: SModelRootImpl): SModelElementImpl[] {
-        return [...root.index.all().filter((child) => isSelectable(child) && child.selected)];
     }
 
     /**

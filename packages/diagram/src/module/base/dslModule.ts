@@ -658,6 +658,26 @@ const scopeExpressions: ParseableExpressions = [
                 `
             )
         ),
+    id(SCOPE)
+        .field("internal")
+        .assignField(
+            "registerCanvasContentEditExpressions",
+            fun(
+                `
+                    scope.forEach {
+                        (value, key) = args
+                        if ((value != null) && ((value.type == "${CanvasElement.TYPE}") || (value.type == "${CanvasConnection.TYPE}"))) {
+                            value.editExpression = nameToExpression(key)
+                        }
+                    }
+                `,
+                {
+                    docs: "Iterates over scope and assigns the edit expressions to all found canvas elements and connections",
+                    params: [],
+                    returns: "null"
+                }
+            )
+        ),
     id(SCOPE).assignField(
         "Position",
         enumObject({
@@ -705,6 +725,7 @@ const scopeExpressions: ParseableExpressions = [
                 canvasEdits[key] = createAddEdit(callback, value)
             } 
         }
+        scope.internal.registerCanvasContentEditExpressions()
         diagramCanvas = canvas(contents = scope.contents, edits = canvasEdits)
         createDiagram(diagramCanvas, scope.internal.styles, scope.fonts)
     `
