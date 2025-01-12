@@ -57,3 +57,36 @@ export type SplitCanvasBezierSegmentEdit = Edit<
  * Toolbox edit
  */
 export type ToolboxEdit = Edit<{ x: number; y: number; prediction?: boolean }, `toolbox/${string}`>;
+
+/**
+ * Start/end for a connection created by a connection edit.
+ * Either
+ * - an expression evaluating to a CanvasConnection or CanvasElement and a position on the line it provides
+ * - or an x/y coordinate in the root coordinate system
+ */
+export type ConnectionEnd =
+    | {
+          /**
+           * Expression evaluating to a CanvasConnection or CanvasElement
+           */
+          expression: string;
+          /**
+           * Position on the line the element provides
+           */
+          pos: number;
+      }
+    | {
+          /**
+           * X coordinate in the root coordinate system
+           */
+          x: number;
+          /**
+           * Y coordinate in the root coordinate system
+           */
+          y: number;
+      };
+
+/**
+ * Connection edit
+ */
+export type ConnectionEdit = Edit<{ start: ConnectionEnd; end: ConnectionEnd }, `connection/${string}`>;

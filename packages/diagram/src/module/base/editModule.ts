@@ -119,6 +119,16 @@ function generateAddArgEdit(
 }
 
 /**
+ * Creates a jsonata string literal based on the given value
+ *
+ * @param value the value to create the jsonata string literal for
+ * @returns the jsonata string literal
+ */
+export function jsonataStringLiteral(value: string): string {
+    return `"${value.replaceAll(/\\/g, "\\\\").replaceAll(/"/g, '\\"')}"`;
+}
+
+/**
  * Edit module providing edit generation function
  */
 export const editModule = InterpreterModule.create(
@@ -285,7 +295,7 @@ export const editModule = InterpreterModule.create(
                 (args, context) => {
                     const name = args.getFieldValue(0, context).toNative();
                     const expression = nameToExpression(name);
-                    const escapedExpression = `"${expression.replaceAll(/\\/g, "\\\\").replaceAll(/"/g, '\\"')}"`;
+                    const escapedExpression = jsonataStringLiteral(expression);
                     return context.newString(escapedExpression);
                 },
                 {

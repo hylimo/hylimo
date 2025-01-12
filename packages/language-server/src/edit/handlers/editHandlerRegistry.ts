@@ -1,4 +1,5 @@
 import { axisAlignedSegmentPosHandler } from "./axisAlignedSegmentPosHandler.js";
+import { connectionHandler } from "./connectionHandler.js";
 import { EditHandler } from "./editHandler.js";
 import { moveLineDistHandler } from "./moveLineDistHandler.js";
 import { moveLinePosHandler } from "./moveLinePosHandler.js";
@@ -71,5 +72,6 @@ export const defaultEditRegistry = new EditHandlerRegistry([
     splitCanvasLineSegmentHandler,
     splitCanvasAxisAlignedSegmentHandler,
     splitCanvasBezierSegmentHandler,
-    toolboxHandler
+    toolboxHandler,
+    connectionHandler
 ]);

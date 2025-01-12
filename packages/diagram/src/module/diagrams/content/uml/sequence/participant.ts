@@ -8,7 +8,7 @@ import { participantType } from "./types.js";
  */
 export const participantModule = InterpreterModule.create(
     "uml/sequence/participant",
-    ["uml/sequence/defaultValues", "uml/associations"],
+    ["uml/sequence/defaultValues"],
     [],
     [
         `
@@ -63,9 +63,9 @@ export const participantModule = InterpreterModule.create(
                     participantElement.class += "non-top-level-participant"
                 }
 
-                scope.internal.toolboxEdits["toolbox/Activate instance or actor/\${name}"] = "'activate(' & \${nameToExpression(name)} & ')'"
-                scope.internal.toolboxEdits["toolbox/Deactive instance or actor/\${name}"] = "'deactivate(' & \${nameToExpression(name)} & ')'"
-                scope.internal.toolboxEdits["toolbox/Destroy instance or actor/\${name}"] = "'destroy(' & \${nameToExpression(name)} & ')'"
+                scope.internal.canvasAddEdits["toolbox/Activate instance or actor/\${name}"] = "'activate(' & \${nameToExpression(name)} & ')'"
+                scope.internal.canvasAddEdits["toolbox/Deactive instance or actor/\${name}"] = "'deactivate(' & \${nameToExpression(name)} & ')'"
+                scope.internal.canvasAddEdits["toolbox/Destroy instance or actor/\${name}"] = "'destroy(' & \${nameToExpression(name)} & ')'"
 
                 participantElement
             }
