@@ -8,12 +8,13 @@ import { participantType } from "./types.js";
  */
 export const participantModule = InterpreterModule.create(
     "uml/sequence/participant",
-    ["uml/sequence/defaultValues", "uml/associations"],
+    ["uml/sequence/defaultValues", "uml/sequence/associations"],
     [],
     [
         `
             scope.internal.createSequenceDiagramParticipant = {
                 (name, participantElement) = args
+                participantElement.alive = true
                 participantElement.name = name
                 participantElement.below = args.below
 
@@ -22,6 +23,9 @@ export const participantModule = InterpreterModule.create(
                 participantElement.y = if(event != null) {
                     event.y
                 } { 0 }
+                participantElement.declaringEvent = event
+
+                scope.println("Hello World 7")
 
                 // Calculate x
                 below = args.below
@@ -36,22 +40,41 @@ export const participantModule = InterpreterModule.create(
                     }
                 }
 
+                scope.println("Hello World 8")
+
                 participantElement.pos = scope.apos(participantElement.x, participantElement.y) 
 
                 // Create the lifeline of this participantElement now so that it will always be rendered behind everything else
                 this.bottomcenter = scope.lpos(participantElement, 0.25)
                 participantElement.lifeline = scope[".."](bottomcenter, scope.rpos(bottomcenter, 0, scope.margin))
-                participantElement.events = list() // Needed for the autolayouting of events
                 participantElement.activeActivityIndicators = list() // Needed for the activity indicator autolayouting
 
                 scope.internal.sequenceDiagramParticipants += participantElement
                 scope.internal.lastSequenceDiagramParticipant = participantElement
 
-                // the following attributes are necessary to cast the participantElement into a (pseudo) event that can be the target of associations as well
-                // passing only the participant for left and right is correct as Hylimo uses the center point of canvas elements for connections and stops the arrow on the element border
-                participantElement.left = { participantElement }
+                scope.println("Hello World 9")
+
+                // To calculate an event specific coordinate, we must first know how much space the active activity indicators take up
+                // Calculate the left coordinate of this participant at the current event - especially for when there are currently activity indicators
+                participantElement.left = {
+                    event = it ?? scope.internal.lastSequenceDiagramEvent
+                    if((event == null) || (event == participantElement.declaringEvent)) {
+                        scope.lpos(participantElement, 0.5) // On the left of the participant
+                    } {
+                        leftX = if(participantElement.activeActivityIndicators.length > 0) { participantElement.activeActivityIndicators.get(participantElement.activeActivityIndicators.length - 1).leftX } { participantElement.x }
+                        scope.apos(leftX, event.y)
+                    }
+                }
                 participantElement.center = pos
-                participantElement.right = { participantElement }
+                participantElement.right = {
+                    event = it ?? scope.internal.lastSequenceDiagramEvent
+                    if((event == null) || (event == participantElement.declaringEvent)) {
+                        scope.lpos(participantElement, 0.0) // On the right of the participant
+                    } {
+                        rightX = if(participantElement.activeActivityIndicators.length > 0) { participantElement.activeActivityIndicators.get(participantElement.activeActivityIndicators.length - 1).rightX } { participantElement.x }
+                        scope.apos(rightX, event.y)
+                    }}
+
                 participantElement.parentEvent = event
                 participantElement.participantName = participantElement.name
 
@@ -62,6 +85,8 @@ export const participantModule = InterpreterModule.create(
                 } {
                     participantElement.class += "non-top-level-participant"
                 }
+
+                scope.println("Hello World 10")
 
                 participantElement
             }
@@ -82,6 +107,10 @@ export const participantModule = InterpreterModule.create(
                 (participant) = args
                 crossSize = args.crossSize ?? scope.destroyingCrossSize
 
+                if(participant.alive != true) {
+                    scope.error("\${participant.name} has already been destroyed")
+                }
+
                 // Remove active activity indicators
                 while({participant.activeActivityIndicators.length > 0}) {
                     scope.deactivate(participant)
@@ -92,13 +121,12 @@ export const participantModule = InterpreterModule.create(
                     (storedParticipant) = args
                     participant != storedParticipant 
                 })
-
-                // Register the participant as "existed previously"
-                scope.internal.previouslyExistingSequenceDiagramParticipants[participant.name] = participant
+                
+                participant.alive = false
 
                 // Draw the cross symbolizing the end of this participant, if there was any event so far
                 originalArgs = args
-                if(participant.events.length > 0) {
+                if(participant.declaringEvent != scope.internal.lastSequenceDiagramEvent) {
                     cross = canvasElement(
                         content = path(
                             path = "M 0 0 L 1 1 M 1 0 L 0 1",
@@ -115,8 +143,7 @@ export const participantModule = InterpreterModule.create(
                         }
                     }
 
-                    // We must change the position by '2*margin' compared to the last event as the lifeline continues to be drawn by two additional margins
-                    cross.pos = scope.rpos(participant.events.get(participant.events.length - 1), 0, 2*scope.margin)
+                    cross.pos = scope.apos(participant.x, scope.internal.lastSequenceDiagramEvent.y)
                     scope.internal.registerCanvasElement(cross, originalArgs, originalArgs.self)
 
                     // Also shorten the lifeline if necessary

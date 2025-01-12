@@ -25,7 +25,6 @@ export const defaultValues = InterpreterModule.create(
 
         // Used for internal layout
         scope.internal.sequenceDiagramParticipants = list() // Only the currently active participants, not including participants that were already terminated
-        scope.internal.previouslyExistingSequenceDiagramParticipants = [] // Only the participants that have been deleted, mapped by their name
         scope.internal.lastSequenceDiagramParticipant = null // the next element will be positioned at 'elem + rpos(elem, participantDistance, 0)'
         scope.internal.lastSequenceDiagramEvent = null // the next event will be positioned at 'event + rpos(event, 0, eventDistance)'
     `

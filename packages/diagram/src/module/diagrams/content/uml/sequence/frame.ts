@@ -10,7 +10,7 @@ import {
     stringType
 } from "@hylimo/core";
 import { SCOPE } from "../../../../base/dslModule.js";
-import { eventCoordinateType, eventType, participantType } from "./types.js";
+import { eventType, participantType } from "./types.js";
 
 const fragmentNameBorderSVG = "M 0 0 H 20 V 5 L 16 9 H 0 V 0";
 
@@ -31,7 +31,7 @@ export const sequenceDiagramFrameModule = InterpreterModule.create(
                 parentArgs = parentArgs ?? args.parentArgs
                 (topLineEvent) = args
                 if(topLineEvent == null) {
-                    scope.error("No event (coordinate) was passed to 'fragment'")
+                    scope.error("No event/y coordinate was passed to 'fragment'")
                 }
 
                 parent = parent ?? args.parent
@@ -44,7 +44,6 @@ export const sequenceDiagramFrameModule = InterpreterModule.create(
                 // The frame is offset by 'margin' from the event, but we want to connect the name to the frame border/fragment line
                 marginTop = marginTop ?? args.marginTop
                 y = y - marginTop
-
 
                 fragmentText = args.text
                 fragmentSubtext = args.subtext
@@ -168,19 +167,22 @@ export const sequenceDiagramFrameModule = InterpreterModule.create(
                         if(defaultMarginY == null) {
                             defaultMarginY = scope.frameMarginY
                         }
-                        topLeft = args.topLeft
-                        bottomRight = args.bottomRight
 
                         marginRight = args.marginRight ?? defaultMarginX
                         marginBottom = args.marginBottom ?? defaultMarginY
                         marginLeft = args.marginLeft ?? defaultMarginX
                         marginTop = args.marginTop ?? defaultMarginY
 
+                        top = args.top
+                        right = args.right
+                        bottom = args.bottom
+                        left = args.left
+
                         // Calculate the rectangle position
-                        x = topLeft.x - marginLeft
-                        y = topLeft.y - marginTop
-                        width = bottomRight.x - topLeft.x + marginLeft + marginRight
-                        height = bottomRight.y - topLeft.y + marginTop + marginBottom
+                        x = left.x - marginLeft
+                        y = top.y - marginTop
+                        width = right.x - left.x + marginLeft + marginRight
+                        height = bottom.y - top.y + marginTop + marginBottom
 
 
                         // Add the frame
@@ -190,8 +192,10 @@ export const sequenceDiagramFrameModule = InterpreterModule.create(
                             width = width,
                             height = height
                         )
-                        frameElement.topLeft = topLeft
-                        frameElement.bottomRight = bottomRight
+                        frameElement.top = top
+                        frameElement.right = right
+                        frameElement.bottom = bottom
+                        frameElement.left = left
                         frameElement.fragments = list()
                         frameElement.text = text
                         frameElement.hasIcon = icon
@@ -206,7 +210,7 @@ export const sequenceDiagramFrameModule = InterpreterModule.create(
                         scope.internal.registerCanvasElement(frameElement, args, args.self)
 
                         // Lastly, generate all fragments for the given frame, including the implicit top fragment
-                        createSequenceDiagramFragment(topLeft, marginTop = marginTop, parentArgs = args, parent = frameElement, hasIcon = hasIcon, hasLine = false, text = frameText, subtext = subtext)
+                        createSequenceDiagramFragment(top, marginTop = marginTop, parentArgs = args, parent = frameElement, hasIcon = hasIcon, hasLine = false, text = frameText, subtext = subtext)
                     `,
                     id("this").assignField(
                         "sequenceDiagramFragmentFunction",
@@ -217,8 +221,8 @@ export const sequenceDiagramFrameModule = InterpreterModule.create(
                                 params: [
                                     [
                                         0,
-                                        "The y coordinate where to start the the fragment. Either an event, an event coordinate, or a number",
-                                        or(eventType, eventCoordinateType, numberType)
+                                        "The y coordinate where to start the the fragment. Either an event, or a number",
+                                        or(eventType, numberType)
                                     ],
                                     ["text", "The text to display in the upper-left corner", optional(stringType)],
                                     [
@@ -267,14 +271,24 @@ export const sequenceDiagramFrameModule = InterpreterModule.create(
                             optional(booleanType)
                         ],
                         [
-                            "topLeft",
-                            "The top-left coordinate (event) to draw the border around. The border will be extended by 'frameMarginX' to the left and 'frameMarginY' to the top",
-                            or(eventCoordinateType, participantType)
+                            "top",
+                            "The event marking the upper border of the frame. The border will be extended by 'frameMarginY' to the top",
+                            eventType
                         ],
                         [
-                            "bottomRight",
-                            "The bottom-right coordinate (event) to draw the border around. The border will be extended by 'frameMargin' on each side",
-                            or(eventCoordinateType, participantType)
+                            "right",
+                            "The participant marking the left border of the frame. The border will be extended by 'frameMarginX' to the right",
+                            participantType
+                        ],
+                        [
+                            "bottom",
+                            "The event marking the bottom border of the frame. The border will be extended by 'frameMarginY' to the bottom",
+                            eventType
+                        ],
+                        [
+                            "left",
+                            "The participant marking the left border of the frame. The border will be extended by 'frameMarginX' to the left",
+                            participantType
                         ],
                         [
                             "marginX",
@@ -303,7 +317,7 @@ export const sequenceDiagramFrameModule = InterpreterModule.create(
                             optional(numberType)
                         ]
                     ],
-                    snippet: `(topLeft = $1, bottomRight = $2, text = "$3", subtext = "$4")`,
+                    snippet: `(top = $1, right = $2, bottom = $3, left = $4, text = "$5", subtext = "$6")`,
                     returns: "The created frame"
                 }
             )

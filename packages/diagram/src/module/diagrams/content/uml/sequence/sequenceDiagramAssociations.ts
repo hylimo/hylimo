@@ -23,39 +23,40 @@ export const sequenceDiagramAssociationsModule = InterpreterModule.create(
                 class = args.class
 
                 {
-                    (startEvent, endEvent) = args
-
+                    (a, b) = args
+ 
                     // If necessary, unwrap to the left/ right side of the most recent activity indicator - calculated through the given left/right functions
-                    start = if(startEvent.right != null && (startEvent.right.proto == {}.proto)) {
-                        startEvent.right()
+                    start = if(a.right != null && (a.right.proto == {}.proto)) {
+                        a.right()
                     } {
-                        startEvent
-                    } 
+                        a
+                    }
 
                     // For the end point, there's a specialty: If both events point at the same participant (self message, so same x coordinate), don't use the left point but the right one instead so that x is indeed the same
                     // Additionally, in this case, we don't want to draw a straight line but an axis aligned one by default
                     // Unfortunately, we can only validate this using name equivalency right now, so good luck in case of a name conflict
+                    // TODO: How do I want to handle this case with the new 'event.on(instance)' syntax?
                     lineType = "line"
-                    end = if(endEvent.left != null && (endEvent.left.proto == {}.proto)) {
-                        if(endEvent.participantName == startEvent.participantName && ((endEvent.right != null) && (endEvent.right.proto == {}.proto))) {
+                    end = if(b.left != null && (b.left.proto == {}.proto)) {
+                        if(b.participantName == a.participantName && ((b.right != null) && (b.right.proto == {}.proto))) {
                             lineType = "axisAligned"
-                            endEvent.right()
+                            b.right()
                         } {
-                            endEvent.left()
+                            b.left()
                         }
                     } {
-                        endEvent
-                    } 
+                        b
+                    }
 
                     // For lostMessage()/foundMessage(), we only calculate their position now, relative to the opposite side
-                    if((startEvent.externalMessageType != null) && (endEvent.externalMessageType != null)) {
-                        scope.error("Both left and right side of the relation calculate their position on the counterpart. Thus, no position can be calculated for \${startEvent.externalMessageType} message on the left and \${endEvent.externalMessageType} on the right")
-                    } 
-                    if((startEvent.externalMessageType != null) && (startEvent.distance != null)) {
-                        startEvent.pos = scope.rpos(end, startEvent.distance * -1 /* Go left */, 0)
+                    if((a.externalMessageType != null) && (b.externalMessageType != null)) {
+                        scope.error("Both left and right side of the relation calculate their position on the counterpart. Thus, no position can be calculated for \${a.externalMessageType} message on the left and \${b.externalMessageType} on the right")
                     }
-                    if((endEvent.externalMessageType != null) && (endEvent.distance != null)) {
-                        endEvent.pos = scope.rpos(start, endEvent.distance, 0)
+                    if((a.externalMessageType != null) && (a.distance != null)) {
+                        a.pos = scope.rpos(end, a.distance * -1 /* Go left */, 0)
+                    }
+                    if((b.externalMessageType != null) && (b.distance != null)) {
+                        b.pos = scope.rpos(start, b.distance, 0)
                     }
 
                     // Finally, the edge cases have been dealt with, do the normal thing

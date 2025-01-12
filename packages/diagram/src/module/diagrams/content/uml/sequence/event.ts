@@ -15,6 +15,8 @@ export const eventModule = InterpreterModule.create(
             fun(
                 `
                     (name, yDistance) = args
+                    
+                    scope.println("Hello World 1")
 
                     eventObject = [name = name]
                     if(!(scope.internal.registerInDiagramScope(name, eventObject))) {
@@ -27,6 +29,8 @@ export const eventModule = InterpreterModule.create(
                     previousEvent = scope.internal.lastSequenceDiagramEvent
                     eventObject.deltaY = if(yDistance != null) { yDistance } { scope.eventDistance }
                     eventObject.y = if(previousEvent != null) { previousEvent.y } { 0 } + eventObject.deltaY 
+
+                    scope.println("Hello World 2")
 
                     // When in debugging mode, print the event name on the left to give an overview where we are
                     if(scope.enableDebugging) {
@@ -46,73 +50,42 @@ export const eventModule = InterpreterModule.create(
                             stroke = "red"
                         }
                     }
+                    scope.println("Hello World 3")
 
                     // Position the event for each instance relative to the latest previous event
                     // and add all events as per the user facing definition of events, i.e. 'start.User', 'start.Shop', …
                     scope.internal.sequenceDiagramParticipants.forEach {
 
-                        // Use either the position below the instance, the position below the last event, or the user supplied position
-                        eventPosition = scope.rpos(it.pos, 0, eventObject.deltaY)
-                        events = it.events
-                        if(events.length > 0) {
-                            eventPosition = scope.rpos(events.get(events.length - 1), 0, eventObject.deltaY)
-                        }
-
-                        it.events += eventPosition // for the position calculation
-
-                        // When we have an activity indicator, we have to relocate the arrow to the end of the most recent activity indicator, either on the left or on the right side of the activity indicator
-                        // Additionally, since activity indicators are defined after the event creating them, we must shift the position the moment we create an association since only then the currently active activity indicators are known
-                        leftX = 0
-                        rightX = 0
-                        activeActivityIndicators = it.activeActivityIndicators
-                        activityShifter = {
-                            if(activeActivityIndicators.length > 0) {
-                                lastActivityIndicator = activeActivityIndicators.get(activeActivityIndicators.length - 1)
-                                leftX = lastActivityIndicator.leftX
-                                rightX = lastActivityIndicator.rightX
-                            }
-                        }
-
-                        name = it.name
-                        eventObject[name] = [
-                            left = {
-                                activityShifter()
-                                scope.rpos(eventPosition, leftX, 0)
-                            },
-                            center = eventPosition,
-                            right = {
-                                activityShifter()
-                                scope.rpos(eventPosition, rightX, 0) // for arrows, i.e. 'event.shop --> event.cart', the left/right is unwrapped by the arrow itself
-                            },
-                            x = it.x,
-                            y = eventObject.y,
-                            parentEvent = eventObject,
-                            participantName = name
-                        ]
+                        participant = it
 
                         // When in debugging mode, visualize the coordinates of all events
                         if(scope.enableDebugging) {
                             _left = canvasElement(content = ellipse(fill = "orange", stroke = "unset"), width=7, height=7, hAlign = "center", vAlign = "center")
-                            _left.pos = eventObject[name].left()
+                            _left.pos = participant.left(eventObject)
                             scope.internal.registerCanvasElement(_left, originalArgs, originalArgs.self)
                             _center = canvasElement(content = ellipse(fill = "orange", stroke = "unset"), width=7, height=7, hAlign = "center", vAlign = "center")
-                            _center.pos = eventObject[name].center
+                            _center.pos = scope.apos(participant.x, eventObject.y)
                             scope.internal.registerCanvasElement(_center, originalArgs, originalArgs.self)
                             _right = canvasElement(content = ellipse(fill = "orange", stroke = "unset"), width=7, height=7, hAlign = "center", vAlign = "center")
-                            _right.pos = eventObject[name].right()
+                            _right.pos = participant.right(eventObject)
                             scope.internal.registerCanvasElement(_right, originalArgs, originalArgs.self)
                         }
 
+                        scope.println("Hello World 4")
+
                         // change the length of the instance line (its end position) to the new last position + 3*margin
                         // (+3 margin so that a activity indicator that is still present there can end, and there's still a bit of the line left over)
-                        endpos = scope.rpos(eventPosition, 0, 3*scope.margin)
+                        endpos = scope.apos(it.x, eventObject.y + (3*scope.margin))
                         it.lifeline.contents.get(it.lifeline.contents.length - 1).end = endpos
+
+                        scope.println("Hello World 5")
 
                         // Also enlarge all active activity indicators
                         it.activeActivityIndicators.forEach {
                             it.height = it.height + eventObject.deltaY
                         }
 
+                        scope.println("Hello World 6")
                     }
                     scope.internal.lastSequenceDiagramEvent = eventObject
                 `,
