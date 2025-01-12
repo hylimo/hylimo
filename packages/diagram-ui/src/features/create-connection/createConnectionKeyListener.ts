@@ -1,17 +1,19 @@
+import { injectable } from "inversify";
 import { KeyListener, SModelElementImpl } from "sprotty";
 import { Action } from "sprotty-protocol";
-import { UpdateConnectionPreviewAction } from "./updateConnectionPreview.js";
+import { UpdateCreateConnectionDataAction } from "./updateCreateConnectionData.js";
 
 /**
- * Key listener for updating the connection creation preview based on the shift key
+ * Key listener for updating the connection creation UI based on the shift key
  */
-export class ConnectionCreationKeyListener extends KeyListener {
+@injectable()
+export class CreateConnectionKeyListener extends KeyListener {
     override keyDown(element: SModelElementImpl, event: KeyboardEvent): Action[] {
         if (event.key !== "Shift") {
             return [];
         }
-        const action: UpdateConnectionPreviewAction = {
-            kind: UpdateConnectionPreviewAction.KIND,
+        const action: UpdateCreateConnectionDataAction = {
+            kind: UpdateCreateConnectionDataAction.KIND,
             isVisible: true
         };
         return [action];
@@ -21,8 +23,8 @@ export class ConnectionCreationKeyListener extends KeyListener {
         if (event.key !== "Shift") {
             return [];
         }
-        const action: UpdateConnectionPreviewAction = {
-            kind: UpdateConnectionPreviewAction.KIND,
+        const action: UpdateCreateConnectionDataAction = {
+            kind: UpdateCreateConnectionDataAction.KIND,
             isVisible: false
         };
         return [action];

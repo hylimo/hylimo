@@ -77,11 +77,16 @@ export class CanvasElementView extends EditableCanvasContentView implements IVie
             },
             ...children
         );
-        if (createConnection !== undefined) {
-            return svg("g", null, element, createConnection);
-        } else {
-            return element;
-        }
+        return svg(
+            "g",
+            {
+                attrs: {
+                    "pointer-events": "visible"
+                }
+            },
+            element,
+            createConnection
+        );
     }
 
     /**

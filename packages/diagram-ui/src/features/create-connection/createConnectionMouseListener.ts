@@ -1,8 +1,9 @@
+import { injectable } from "inversify";
 import { findParentByFeature, MouseListener, SModelElementImpl } from "sprotty";
 import { Action } from "sprotty-protocol";
 import { SCanvasElement } from "../../model/canvas/sCanvasElement.js";
 import { SCanvasConnection } from "../../model/canvas/sCanvasConnection.js";
-import { UpdateConnectionPreviewAction } from "./updateConnectionPreview.js";
+import { UpdateCreateConnectionDataAction } from "./updateCreateConnectionData.js";
 import { CreateConnectionData } from "./createConnectionData.js";
 import { LineEngine } from "@hylimo/diagram-common";
 import { applyToPoint } from "transformation-matrix";
@@ -10,16 +11,17 @@ import { TransactionalMoveAction } from "../move/transactionalMoveAction.js";
 import { CreateConnectionMoveHandler } from "./createConnectionMoveHandler.js";
 
 /**
- * Mouse listener for updating the connection creation preview based on mouse movements
+ * Mouse listener for updating the connection creation UI based on mouse movements
  */
-export class ConnectionCreationMouseListener extends MouseListener {
+@injectable()
+export class CreateConnectionMouseListener extends MouseListener {
     override mouseMove(target: SModelElementImpl, event: MouseEvent): Action[] {
         const canvasElement = findParentByFeature(target, isCreateConnectionTarget);
         if (canvasElement == undefined) {
             return [];
         }
-        const action: UpdateConnectionPreviewAction = {
-            kind: UpdateConnectionPreviewAction.KIND,
+        const action: UpdateCreateConnectionDataAction = {
+            kind: UpdateCreateConnectionDataAction.KIND,
             isVisible: event.shiftKey,
             providerWithTarget: {
                 target: canvasElement.id,
@@ -37,8 +39,8 @@ export class ConnectionCreationMouseListener extends MouseListener {
         ) {
             return [];
         }
-        const action: UpdateConnectionPreviewAction = {
-            kind: UpdateConnectionPreviewAction.KIND,
+        const action: UpdateCreateConnectionDataAction = {
+            kind: UpdateCreateConnectionDataAction.KIND,
             isVisible: false,
             providerWithTarget: null
         };

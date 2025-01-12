@@ -7,8 +7,8 @@ import { SRoot } from "../../model/sRoot.js";
 /**
  * Action to update the connection preview based on the current mouse position and/or shift status
  */
-export interface UpdateConnectionPreviewAction extends Action {
-    kind: typeof UpdateConnectionPreviewAction.KIND;
+export interface UpdateCreateConnectionDataAction extends Action {
+    kind: typeof UpdateCreateConnectionDataAction.KIND;
     /**
      * Whether the preview is currently visible.
      */
@@ -23,24 +23,24 @@ export interface UpdateConnectionPreviewAction extends Action {
     } | null;
 }
 
-export namespace UpdateConnectionPreviewAction {
+export namespace UpdateCreateConnectionDataAction {
     /**
-     * Kind of UpdateConnectionPreviewActions
+     * Kind of UpdateCreateConnectionDataActions
      */
-    export const KIND = "updateConnectionPreview";
+    export const KIND = "updateCreateConnectionData";
 }
 
 /**
- * Command for UpdateConnectionPreviewAction
+ * Command for UpdateCreateConnectionDataAction
  * Updates the connection preview provider of the root element
  */
-export class UpdateConnectionPreviewCommand extends Command {
-    static readonly KIND = UpdateConnectionPreviewAction.KIND;
+export class UpdateCreateConnectionDataCommand extends Command {
+    static readonly KIND = UpdateCreateConnectionDataAction.KIND;
 
     /**
      * The action to execute
      */
-    @inject(TYPES.Action) private action!: UpdateConnectionPreviewAction;
+    @inject(TYPES.Action) private action!: UpdateCreateConnectionDataAction;
 
     override execute(context: CommandExecutionContext): CommandReturn {
         const root = context.root as SRoot;

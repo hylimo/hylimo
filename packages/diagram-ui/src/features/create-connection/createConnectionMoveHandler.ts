@@ -2,7 +2,7 @@ import { ConnectionEdit, ConnectionEnd, Edit } from "@hylimo/diagram-protocol";
 import { findParentByFeature, SModelElementImpl } from "sprotty";
 import { MoveHandler } from "../move/moveHandler.js";
 import { Matrix } from "transformation-matrix";
-import { isCreateConnectionTarget } from "./connectionCreationMouseListener.js";
+import { isCreateConnectionTarget } from "./createConnectionMouseListener.js";
 import { LineEngine } from "@hylimo/diagram-common";
 
 export class CreateConnectionMoveHandler extends MoveHandler {

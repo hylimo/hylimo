@@ -2,7 +2,7 @@ import { Selectable } from "sprotty-protocol";
 import { SElement } from "../sElement.js";
 import { SParentElementImpl } from "sprotty";
 import { CanvasLike } from "./canvasLike.js";
-import { CreateConnectionDataProvider } from "../../features/connection-creation/createConnectionData.js";
+import { CreateConnectionDataProvider } from "../../features/create-connection/createConnectionData.js";
 
 /**
  * Base class for all canvas contents

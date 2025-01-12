@@ -1,3 +1,4 @@
+import { injectable } from "inversify";
 import { EditSpecification, DefaultEditTypes, EditSpecificationEntry, groupBy } from "@hylimo/diagram-common";
 import { findParentByFeature, isMoveable, MouseListener, SModelElementImpl } from "sprotty";
 import { Action } from "sprotty-protocol";
@@ -52,6 +53,7 @@ const maxResizeScale = 10;
  * - rotating canvas elements
  * - moving axis aligned canvas connection segments
  */
+@injectable()
 export class MoveEditCanvasContentMouseListener extends MouseListener {
     override mouseDown(target: SModelElementImpl, event: MouseEvent): Action[] {
         if (event.button === 0 && !(event.ctrlKey || event.altKey)) {

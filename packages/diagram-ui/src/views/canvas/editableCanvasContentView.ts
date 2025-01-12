@@ -2,7 +2,7 @@ import { injectable } from "inversify";
 import { VNode } from "snabbdom";
 import { svg } from "sprotty";
 import { SCanvasElement } from "../../model/canvas/sCanvasElement.js";
-import { CreateConnectionData } from "../../features/connection-creation/createConnectionData.js";
+import { CreateConnectionData } from "../../features/create-connection/createConnectionData.js";
 import { LineEngine } from "@hylimo/diagram-common";
 import { SCanvasPoint } from "../../model/canvas/sCanvasPoint.js";
 import { toSVG } from "transformation-matrix";

@@ -71,7 +71,7 @@ import { toolboxModule } from "./features/toolbox/ci.config.js";
 import { moveModule } from "./features/move/di.config.js";
 import { configModule } from "./features/config/di.config.js";
 import { splitCanvasSegmentModule } from "./features/split-canvas-segment/di.config.js";
-import { connectionCreationModule } from "./features/connection-creation/di.config.js";
+import { createConnectionModule } from "./features/create-connection/di.config.js";
 
 /**
  * The module used
@@ -141,7 +141,7 @@ export function createContainer(widgetId: string): Container {
         undoRedoModule,
         toolboxModule,
         configModule,
-        connectionCreationModule
+        createConnectionModule
     );
     container.load(diagramModule);
 

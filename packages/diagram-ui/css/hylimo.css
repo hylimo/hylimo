@@ -9,11 +9,6 @@ svg.hylimo {
         user-select: none;
     }
 
-    .canvas-element,
-    .marker {
-        pointer-events: visible;
-    }
-
     .selected-rect {
         fill: var(--diagram-layout-color-overlay);
         stroke: var(--diagram-layout-color-selected);
@@ -54,7 +49,6 @@ svg.hylimo {
         stroke-width: calc(12px / var(--diagram-zoom));
         fill: none;
         stroke: transparent;
-        pointer-events: visibleStroke;
     }
 
     .canvas-rotate-icon > path {
@@ -131,10 +125,10 @@ svg.hylimo {
         stroke: transparent;
         stroke-width: 12px;
         fill: none;
-        pointer-events: visibleStroke;
     }
 
     .selectable {
         cursor: pointer;
     }
+
 }

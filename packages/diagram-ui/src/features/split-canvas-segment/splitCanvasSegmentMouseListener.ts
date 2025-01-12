@@ -1,4 +1,4 @@
-import { inject } from "inversify";
+import { inject, injectable } from "inversify";
 import { MouseListener, SModelElementImpl } from "sprotty";
 import { Action } from "sprotty-protocol";
 import { SCanvasConnection } from "../../model/canvas/sCanvasConnection.js";
@@ -30,6 +30,7 @@ import { applyToPoint } from "transformation-matrix";
 /**
  * Listener for splitting canvas connection segments by shift-clicking on them
  */
+@injectable()
 export class SplitCanvasSegmentMouseListener extends MouseListener {
     /**
      * The transaction id provider

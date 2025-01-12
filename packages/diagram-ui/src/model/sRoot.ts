@@ -6,7 +6,7 @@ import { Bounds } from "sprotty-protocol";
 import { Bounds as HylimoBounds } from "@hylimo/diagram-common";
 import { CanvasLike } from "./canvas/canvasLike.js";
 import { PointVisibilityManager } from "./canvas/pointVisibilityManager.js";
-import { CreateConnectionDataProvider } from "../features/connection-creation/createConnectionData.js";
+import { CreateConnectionDataProvider } from "../features/create-connection/createConnectionData.js";
 
 /**
  * Root element.
