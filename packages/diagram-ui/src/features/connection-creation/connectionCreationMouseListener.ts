@@ -3,39 +3,73 @@ import { Action } from "sprotty-protocol";
 import { SCanvasElement } from "../../model/canvas/sCanvasElement.js";
 import { SCanvasConnection } from "../../model/canvas/sCanvasConnection.js";
 import { UpdateConnectionPreviewAction } from "./updateConnectionPreview.js";
-import { ConnectionCreationPreview } from "./connectionCreationPreview.js";
+import { CreateConnectionData } from "./createConnectionData.js";
 import { LineEngine } from "@hylimo/diagram-common";
 import { applyToPoint } from "transformation-matrix";
+import { TransactionalMoveAction } from "../move/transactionalMoveAction.js";
+import { CreateConnectionMoveHandler } from "./createConnectionMoveHandler.js";
 
 /**
  * Mouse listener for updating the connection creation preview based on mouse movements
  */
 export class ConnectionCreationMouseListener extends MouseListener {
     override mouseMove(target: SModelElementImpl, event: MouseEvent): Action[] {
-        const lineProvider = findParentByFeature(target, isLineProvider);
-        if (lineProvider == undefined) {
+        const canvasElement = findParentByFeature(target, isCreateConnectionTarget);
+        if (canvasElement == undefined) {
             return [];
         }
         const action: UpdateConnectionPreviewAction = {
             kind: UpdateConnectionPreviewAction.KIND,
             isVisible: event.shiftKey,
-            provider: () => this.createPreview(event, lineProvider)
+            providerWithTarget: {
+                target: canvasElement.id,
+                provider: () => this.createPreview(event, canvasElement)
+            }
         };
         return [action];
     }
 
     override mouseOver(target: SModelElementImpl, event: MouseEvent): Action[] {
-        const lineProvider = findParentByFeature(target, isLineProvider);
+        const canvasElement = findParentByFeature(target, isCreateConnectionTarget);
         if (
-            lineProvider != undefined ||
-            (event.target as HTMLElement).classList.contains(ConnectionCreationPreview.CLASS)
+            canvasElement != undefined ||
+            (event.target as HTMLElement).classList.contains(CreateConnectionData.CLASS)
         ) {
             return [];
         }
         const action: UpdateConnectionPreviewAction = {
             kind: UpdateConnectionPreviewAction.KIND,
             isVisible: false,
-            provider: null
+            providerWithTarget: null
+        };
+        return [action];
+    }
+
+    override mouseDown(target: SModelElementImpl, event: MouseEvent): Action[] {
+        const element = event.target as HTMLElement;
+        if (
+            !element.classList.contains(CreateConnectionData.CLASS) ||
+            !(target instanceof SCanvasElement) ||
+            target.editExpression == undefined
+        ) {
+            return [];
+        }
+        const startData = target.createConnectionProvider?.provider();
+        if (startData == undefined) {
+            return [];
+        }
+        const action: TransactionalMoveAction = {
+            kind: TransactionalMoveAction.KIND,
+            maxUpdatesPerRevision: 1,
+            handlerProvider: () =>
+                new CreateConnectionMoveHandler(
+                    startData.edit,
+                    {
+                        expression: target.editExpression!,
+                        pos: startData.position
+                    },
+                    target.root.getMouseTransformationMatrix()
+                )
         };
         return [action];
     }
@@ -47,13 +81,13 @@ export class ConnectionCreationMouseListener extends MouseListener {
      * @param target the target element
      * @returns the connection creation preview
      */
-    private createPreview(event: MouseEvent, target: SCanvasElement | SCanvasConnection): ConnectionCreationPreview {
-        const root = target.root;
-        const line = root.layoutEngine.layoutLine(target, root.id);
-        const point = applyToPoint(root.getMouseTransformationMatrix(), { x: event.pageX, y: event.pageY });
+    private createPreview(event: MouseEvent, target: SCanvasElement | SCanvasConnection): CreateConnectionData {
+        const context = target.parent;
+        const line = target.root.layoutEngine.layoutLine(target, context.id);
+        const point = applyToPoint(context.getMouseTransformationMatrix(), { x: event.pageX, y: event.pageY });
         const nearest = LineEngine.DEFAULT.projectPoint(point, line);
         return {
-            startElementEditExpression: target.editExpression!,
+            edit: `connection/--`, //TODO
             line,
             position: nearest.pos
         };
@@ -61,13 +95,12 @@ export class ConnectionCreationMouseListener extends MouseListener {
 }
 
 /**
- * Finds the line provider for the given target element
- * Returns true if the element is a canvas element or connection with an edit expression
+ * Checks if the element is a canvas element or connection with an edit expression
  *
  * @param target the target element
- * @returns the line provider or undefined
+ * @returns true if the element is a canvas element or connection with an edit expression
  */
-function isLineProvider(element: SModelElementImpl): element is SCanvasElement | SCanvasConnection {
+export function isCreateConnectionTarget(element: SModelElementImpl): element is SCanvasElement | SCanvasConnection {
     return (
         (element instanceof SCanvasElement || element instanceof SCanvasConnection) &&
         element.editExpression != undefined

@@ -6,7 +6,7 @@ import { Config } from "../../config.js";
  * Handler for connection edits
  */
 export const connectionHandler: EditHandler<ConnectionEdit> = {
-    type: /toolbox\/.*/,
+    type: /connection\/.*/,
 
     predictActionDiff() {
         return [];

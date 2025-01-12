@@ -295,6 +295,21 @@ export const editModule = InterpreterModule.create(
                 (args, context) => {
                     const name = args.getFieldValue(0, context).toNative();
                     const expression = nameToExpression(name);
+                    return context.newString(expression);
+                },
+                {
+                    docs: "Converts a name to an expression",
+                    params: [[0, "the name of the identifier to convert", or(stringType, numberType)]],
+                    returns: "the expression"
+                }
+            )
+        ),
+        assign(
+            "nameToJsonataStringLiteral",
+            jsFun(
+                (args, context) => {
+                    const name = args.getFieldValue(0, context).toNative();
+                    const expression = nameToExpression(name);
                     const escapedExpression = jsonataStringLiteral(expression);
                     return context.newString(escapedExpression);
                 },

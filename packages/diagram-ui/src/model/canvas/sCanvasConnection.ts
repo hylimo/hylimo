@@ -49,7 +49,7 @@ export class SCanvasConnection extends SCanvasContent implements CanvasConnectio
      */
     line!: TransformedLine;
     /**
-     * An expression which can be used by edits to obtain this connection in an edit
+     * An expression which can be used by edits to obtain this element in an edit
      */
     editExpression?: string;
     /**

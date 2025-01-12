@@ -643,7 +643,7 @@ const scopeExpressions: ParseableExpressions = [
                     const start = connectionEditFragments("start");
                     const end = connectionEditFragments("end");
                     const segment = createLine ? "line(" : "axisAligned(0.5, ";
-                    const edit = `${start.startExpression} & ${escapedOperator} & ${end.startExpression} & 'with {\n    over = start(' & ${start.posExpression} & ').${segment}end(0.5))\n}'`;
+                    const edit = `'\n' & ${start.startExpression} & ${escapedOperator} & ${end.startExpression} & ' with {\n    over = start(' & ${start.posExpression} & ').${segment}end(' & ${end.posExpression} & '))\n}'`;
                     context
                         .getField(SCOPE)
                         .getFieldValue("internal", context)
@@ -748,7 +748,7 @@ const scopeExpressions: ParseableExpressions = [
                     }
                 `,
                 {
-                    docs: "Iterates over scope and assigns the edit expressions to all found canvas elements and connections",
+                    docs: "Iterates over scope and assigns the edit expressions to all found canvas elements",
                     params: [],
                     returns: "null"
                 }

@@ -1,5 +1,5 @@
 import { Action } from "sprotty-protocol";
-import { ConnectionCreationPreview } from "./connectionCreationPreview.js";
+import { CreateConnectionData } from "./createConnectionData.js";
 import { Command, CommandExecutionContext, CommandReturn, TYPES } from "sprotty";
 import { inject } from "inversify";
 import { SRoot } from "../../model/sRoot.js";
@@ -14,10 +14,13 @@ export interface UpdateConnectionPreviewAction extends Action {
      */
     isVisible: boolean;
     /**
-     * The preview itself.
+     * The data provider and the id of the target
      * If undefined, the provider of the root element is used
      */
-    provider?: (() => ConnectionCreationPreview) | null;
+    providerWithTarget?: {
+        provider: () => CreateConnectionData;
+        target: string;
+    } | null;
 }
 
 export namespace UpdateConnectionPreviewAction {
@@ -41,19 +44,17 @@ export class UpdateConnectionPreviewCommand extends Command {
 
     override execute(context: CommandExecutionContext): CommandReturn {
         const root = context.root as SRoot;
-        let provider: (() => ConnectionCreationPreview) | undefined;
-        if (this.action.provider !== null) {
-            provider = this.action.provider ?? root.connectionCreationPreviewProvider?.provider;
-        }
-        if (provider != undefined) {
-            root.connectionCreationPreviewProvider = {
-                isVisible: this.action.isVisible,
-                provider
-            };
+        const targetAndProvider = this.action.providerWithTarget ?? root.createConnectionProvider;
+        if (this.action.providerWithTarget === null || targetAndProvider == undefined) {
+            root.createConnectionProvider = undefined;
         } else {
-            root.connectionCreationPreviewProvider = undefined;
+            root.createConnectionProvider = {
+                isVisible: this.action.isVisible,
+                provider: targetAndProvider.provider,
+                target: targetAndProvider.target
+            };
         }
-        return root;
+        return context.root;
     }
 
     override undo(_context: CommandExecutionContext): CommandReturn {

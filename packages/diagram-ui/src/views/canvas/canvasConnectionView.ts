@@ -6,12 +6,13 @@ import { SCanvasConnection } from "../../model/canvas/sCanvasConnection.js";
 import { SCanvasConnectionSegment } from "../../model/canvas/sCanvasConnectionSegment.js";
 import { SMarker } from "../../model/canvas/sMarker.js";
 import { extractStrokeAttriabutes } from "@hylimo/diagram-render-svg";
+import { EditableCanvasContentView } from "./editableCanvasContentView.js";
 
 /**
  * IView that represents a CanvasConnection
  */
 @injectable()
-export class CanvasConnectionView implements IView {
+export class CanvasConnectionView extends EditableCanvasContentView implements IView {
     render(
         model: Readonly<SCanvasConnection>,
         context: RenderingContext,
@@ -24,25 +25,10 @@ export class CanvasConnectionView implements IView {
         const { path, childControlElements } = this.renderPathAndControlElements(model, segments);
         const childPaths: VNode[] = [];
         if (model.stroke != undefined) {
-            childPaths.push(
-                svg("path", {
-                    attrs: {
-                        d: path,
-                        ...extractStrokeAttriabutes(model),
-                        fill: "none"
-                    }
-                }),
-                svg("path", {
-                    attrs: {
-                        d: path
-                    },
-                    class: {
-                        "select-canvas-connection": true
-                    }
-                })
-            );
+            childPaths.push(...this.renderConnectionPath(model, path));
         }
-        return svg(
+        const createConnectionPreview = this.renderCreateConnection(model);
+        const connection = svg(
             "g",
             {
                 class: {
@@ -53,6 +39,39 @@ export class CanvasConnectionView implements IView {
             ...childMarkers,
             ...childControlElements
         );
+        if (createConnectionPreview != undefined) {
+            return svg("g", null, connection, createConnectionPreview);
+        } else {
+            return connection;
+        }
+    }
+
+    /**
+     * Renders the path of the connection
+     * Renders a visisble path and an invisible path for selection
+     *
+     * @param model the model of the connection
+     * @param path the path string
+     * @returns the rendered path elements
+     */
+    private renderConnectionPath(model: Readonly<SCanvasConnection>, path: string): VNode[] {
+        return [
+            svg("path", {
+                attrs: {
+                    d: path,
+                    ...extractStrokeAttriabutes(model),
+                    fill: "none"
+                }
+            }),
+            svg("path", {
+                attrs: {
+                    d: path
+                },
+                class: {
+                    "select-canvas-connection": true
+                }
+            })
+        ];
     }
 
     /**

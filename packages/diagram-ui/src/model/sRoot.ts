@@ -6,7 +6,7 @@ import { Bounds } from "sprotty-protocol";
 import { Bounds as HylimoBounds } from "@hylimo/diagram-common";
 import { CanvasLike } from "./canvas/canvasLike.js";
 import { PointVisibilityManager } from "./canvas/pointVisibilityManager.js";
-import { ConnectionCreationPreviewProvider } from "../features/connection-creation/connectionCreationPreview.js";
+import { CreateConnectionDataProvider } from "../features/connection-creation/createConnectionData.js";
 
 /**
  * Root element.
@@ -48,11 +48,6 @@ export class SRoot extends ViewportRootElementImpl implements CanvasLike {
     private _pointVisibilityManager?: PointVisibilityManager;
 
     /**
-     * If defined, can provide information on how the connection creation preview should be displayed
-     */
-    connectionCreationPreviewProvider?: ConnectionCreationPreviewProvider;
-
-    /**
      * Gets the PointVisibilityManager
      */
     get pointVisibilityManager(): PointVisibilityManager {
@@ -71,6 +66,11 @@ export class SRoot extends ViewportRootElementImpl implements CanvasLike {
      * The global rotation of the canvas, always 0 for the root element
      */
     globalRotation = 0;
+
+    /**
+     * If defined, can provide information on how the connection creation UI should be displayed
+     */
+    createConnectionProvider?: CreateConnectionDataProvider;
 
     constructor(index = new ModelIndexImpl()) {
         super(index);

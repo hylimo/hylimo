@@ -5,12 +5,13 @@ import { IView, IViewArgs, RenderingContext, svg } from "sprotty";
 import { findViewportZoom } from "../../base/findViewportZoom.js";
 import { SCanvasElement } from "../../model/canvas/sCanvasElement.js";
 import { CanvasLike } from "../../model/canvas/canvasLike.js";
+import { EditableCanvasContentView } from "./editableCanvasContentView.js";
 
 /**
  * IView that represents a CanvasElement
  */
 @injectable()
-export class CanvasElementView implements IView {
+export class CanvasElementView extends EditableCanvasContentView implements IView {
     /**
      * The path to use for the rotate icon
      */
@@ -62,7 +63,8 @@ export class CanvasElementView implements IView {
             }
             children.push(...this.generateResizeBorder(model));
         }
-        return svg(
+        const createConnection = this.renderCreateConnection(model);
+        const element = svg(
             "g",
             {
                 attrs: {
@@ -75,6 +77,11 @@ export class CanvasElementView implements IView {
             },
             ...children
         );
+        if (createConnection !== undefined) {
+            return svg("g", null, element, createConnection);
+        } else {
+            return element;
+        }
     }
 
     /**
