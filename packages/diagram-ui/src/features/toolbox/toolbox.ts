@@ -194,8 +194,8 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler {
             },
             [
                 h("div.toolbox-header", [h("span.title", "Toolbox"), ...this.generateToolboxButtons()]),
+                this.generateConnectionSelect(),
                 this.generateSearchBox(),
-                this.generateConnectionGroup(),
                 h("div.items", this.generateToolboxItems(root))
             ]
         );
@@ -243,7 +243,7 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler {
             this.searchString = undefined;
             this.update();
         });
-        return h("div.search-container", [h("div.search-box.selectable-input", [icon, searchInput, closeButton])]);
+        return h("div.input-container", [h("div.search-box.selectable-input", [icon, searchInput, closeButton])]);
     }
 
     /**
@@ -377,56 +377,106 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler {
         ]);
     }
 
-    private generateConnectionGroup(): VNode | undefined {
+    /**
+     * Generates the connection select UI.
+     * If no connections are available, undefined is returned.
+     * 
+     * @returns the connection select UI or undefined
+     */
+    private generateConnectionSelect(): VNode | undefined {
         const connections = this.getConnectionEdits(this.currentRoot!);
         if (connections.length === 0) {
             return undefined;
         }
-        return h("div.group", [h("div.group-header", "Connections"), this.generateConnectionSelect(connections)]);
+        return h("div.input-container", [this.generateConnectionSelectButton(connections)]);
     }
 
-    private generateConnectionSelect(connections: string[]): VNode {
+    /**
+     * Generates the button for the connection operator select
+     *
+     * @param connections the list of available connection operators
+     * @returns the generate select
+     */
+    private generateConnectionSelectButton(connections: string[]): VNode {
         const currentConnection = this.getCurrentConnection(connections);
-        const select =  h(
+        return h(
             "button.connections-select.selectable-input",
             {
                 on: {
-                    click: () => {}
+                    click: () => {
+                        this.connectionSelectOpen = !this.connectionSelectOpen;
+                        this.update();
+                    },
+                    focusout: (event, vnode) => {
+                        const element = vnode.elm as HTMLElement;
+                        if (!element.contains(event.relatedTarget as Node) && this.connectionSelectOpen) {
+                            this.connectionSelectOpen = false;
+                            this.update();
+                        }
+                    }
                 }
             },
             [
-                h("span", currentConnection), this.generateCodicon("close", ""),
-                //this.generateConnectionSelectDropdown(connections, currentConnection)
+                h("span", currentConnection),
+                this.generateCodicon(this.connectionSelectOpen ? "chevron-up" : "chevron-down", ""),
+                this.generateConnectionSelectDropdown(connections, currentConnection)
             ]
         );
-        return h("div.connections-select-container", [select]);
     }
 
-    private generateConnectionSelectDropdown(connections: string[], currentConnection: string): VNode {
+    /**
+     * Generates the dropdown for the connection operator select
+     * 
+     * @param connections the entries for the dropdown
+     * @param currentConnection the currently selected connection operator
+     * @returns the generated dropdown
+     */
+    private generateConnectionSelectDropdown(connections: string[], currentConnection: string): VNode | undefined {
+        if (!this.connectionSelectOpen) {
+            return undefined;
+        }
         return h(
             "div.connections-select-dropdown",
-            connections.map((connection) => this.generateConnectionSelectItem(connection, currentConnection))
+            connections.map((connection) =>
+                this.generateConnectionSelectItem(connection, currentConnection === connection)
+            )
         );
     }
 
-    private generateConnectionSelectItem(connection: string, currentConnection: string): VNode {
+    /**
+     * Generates an item for the connection operator select dropdown
+     *
+     * @param connection the connection operator to generate the item for
+     * @param selected if true, the item is selected
+     * @returns the generated item
+     */
+    private generateConnectionSelectItem(connection: string, selected: boolean): VNode {
         return h(
             "button.item",
             {
                 on: {
-                    click: () => {
+                    click: (event) => {
                         this.selectedConnection = connection;
+                        this.connectionSelectOpen = false;
+                        event.stopPropagation();
                         this.update();
                     }
                 },
                 class: {
-                    selected: connection === currentConnection
+                    selected
                 }
             },
             [h("span", connection)]
         );
     }
 
+    /**
+     * Gets the current connection operator
+     * Uses {@link selectedConnection} if it is set and in the list of available connections
+     *
+     * @param connections the list of available connection operators
+     * @returns the current connection operator
+     */
     getCurrentConnection(connections: string[]): string {
         if (this.selectedConnection != undefined && connections.includes(this.selectedConnection)) {
             return this.selectedConnection;
