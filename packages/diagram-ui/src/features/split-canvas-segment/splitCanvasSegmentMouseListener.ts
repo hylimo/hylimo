@@ -38,7 +38,7 @@ export class SplitCanvasSegmentMouseListener extends MouseListener {
     @inject(TYPES.TransactionIdProvider) transactionIdProvider!: TransactionIdProvider;
 
     override mouseDown(target: SModelElementImpl, event: MouseEvent): Action[] {
-        if (event.shiftKey && target instanceof SCanvasConnection && !(event.ctrlKey || event.altKey)) {
+        if (event.shiftKey && target instanceof SCanvasConnection && !(event.ctrlKey || event.altKey) && target.selected) {
             const canvas = target.parent;
             const matrix = canvas.getMouseTransformationMatrix();
             const coordinates = applyToPoint(matrix, { x: event.clientX, y: event.clientY });

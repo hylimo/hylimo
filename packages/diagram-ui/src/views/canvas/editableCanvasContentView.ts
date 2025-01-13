@@ -20,7 +20,7 @@ export abstract class EditableCanvasContentView {
      * @returns the rendered create connection preview
      */
     protected renderCreateConnection(model: Readonly<SCanvasElement | SCanvasConnection>): VNode | undefined {
-        if (model.createConnectionProvider?.isVisible !== true || model.root.selectedElements.length > 0) {
+        if (model.createConnectionProvider?.isVisible !== true || model.selected) {
             return undefined;
         }
         const preview = model.createConnectionProvider.provider();
@@ -83,7 +83,7 @@ export abstract class EditableCanvasContentView {
         return [
             svg("path", {
                 attrs: {
-                    d: "M 12 0 L 42 0 m -10 -10 l 10 10 l -10 10",
+                    d: "M 12 0 L 32 0 m -8 -8 l 8 8 l -8 8",
                     transform: `rotate(${rotation})`
                 },
                 class: {
@@ -93,7 +93,7 @@ export abstract class EditableCanvasContentView {
             }),
             svg("path", {
                 attrs: {
-                    d: "M 0 0 L 42 0",
+                    d: "M 0 0 L 32 0",
                     transform: `rotate(${rotation})`
                 },
                 class: {

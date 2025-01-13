@@ -113,12 +113,14 @@ svg.hylimo {
 
     .create-connection-arrow {
         stroke: var(--diagram-layout-color);
+        opacity: 0.5;
         fill: none;
-        stroke-width: 4px;
+        stroke-width: 3px;
     }
 
     .create-connection:hover .create-connection-arrow {
         stroke: var(--diagram-layout-color-selected);
+        opacity: 1;
     }
 
     .create-connection-hover-line {

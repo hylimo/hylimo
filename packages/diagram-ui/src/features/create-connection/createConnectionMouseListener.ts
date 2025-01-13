@@ -22,7 +22,7 @@ export class CreateConnectionMouseListener extends MouseListener {
         }
         const action: UpdateCreateConnectionDataAction = {
             kind: UpdateCreateConnectionDataAction.KIND,
-            isVisible: event.shiftKey,
+            isVisible: event.shiftKey && event.buttons === 0,
             providerWithTarget: {
                 target: canvasElement.id,
                 provider: () => this.createPreview(event, canvasElement)
@@ -51,7 +51,7 @@ export class CreateConnectionMouseListener extends MouseListener {
         const element = event.target as HTMLElement;
         if (
             !element.classList.contains(CreateConnectionData.CLASS) ||
-            !(target instanceof SCanvasElement) ||
+            !(target instanceof SCanvasElement || target instanceof SCanvasConnection) ||
             target.editExpression == undefined
         ) {
             return [];
