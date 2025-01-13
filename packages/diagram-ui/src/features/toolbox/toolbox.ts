@@ -65,6 +65,16 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler {
     private searchString?: string;
 
     /**
+     * The selected connection.
+     */
+    private selectedConnection?: string;
+
+    /**
+     * If true, the connection select is open.
+     */
+    private connectionSelectOpen: boolean = false;
+
+    /**
      * The search index.
      */
     private searchIndex?: MiniSearch<ToolboxEdit>;
@@ -185,6 +195,7 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler {
             [
                 h("div.toolbox-header", [h("span.title", "Toolbox"), ...this.generateToolboxButtons()]),
                 this.generateSearchBox(),
+                this.generateConnectionGroup(),
                 h("div.items", this.generateToolboxItems(root))
             ]
         );
@@ -232,7 +243,7 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler {
             this.searchString = undefined;
             this.update();
         });
-        return h("div.search-container", [h("div.search-box", [icon, searchInput, closeButton])]);
+        return h("div.search-container", [h("div.search-box.selectable-input", [icon, searchInput, closeButton])]);
     }
 
     /**
@@ -323,7 +334,7 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler {
      * @param root The root element providing the toolbox edits
      * @returns The UI for the toolbox items
      */
-    private generateToolboxItems(root: Root): VNode[] | VNode {
+    private generateToolboxItems(root: Root): (VNode | undefined)[] | VNode {
         if (this.searchString != undefined && this.searchString.length > 0) {
             return this.generateFilteredToolboxItems(this.searchString);
         } else {
@@ -364,6 +375,63 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler {
         return h("div.group", [
             ...results.map((toolboxEdit) => this.generateToolboxItem(toolboxEdit as ToolboxEdit & SearchResult))
         ]);
+    }
+
+    private generateConnectionGroup(): VNode | undefined {
+        const connections = this.getConnectionEdits(this.currentRoot!);
+        if (connections.length === 0) {
+            return undefined;
+        }
+        return h("div.group", [h("div.group-header", "Connections"), this.generateConnectionSelect(connections)]);
+    }
+
+    private generateConnectionSelect(connections: string[]): VNode {
+        const currentConnection = this.getCurrentConnection(connections);
+        const select =  h(
+            "button.connections-select.selectable-input",
+            {
+                on: {
+                    click: () => {}
+                }
+            },
+            [
+                h("span", currentConnection), this.generateCodicon("close", ""),
+                //this.generateConnectionSelectDropdown(connections, currentConnection)
+            ]
+        );
+        return h("div.connections-select-container", [select]);
+    }
+
+    private generateConnectionSelectDropdown(connections: string[], currentConnection: string): VNode {
+        return h(
+            "div.connections-select-dropdown",
+            connections.map((connection) => this.generateConnectionSelectItem(connection, currentConnection))
+        );
+    }
+
+    private generateConnectionSelectItem(connection: string, currentConnection: string): VNode {
+        return h(
+            "button.item",
+            {
+                on: {
+                    click: () => {
+                        this.selectedConnection = connection;
+                        this.update();
+                    }
+                },
+                class: {
+                    selected: connection === currentConnection
+                }
+            },
+            [h("span", connection)]
+        );
+    }
+
+    getCurrentConnection(connections: string[]): string {
+        if (this.selectedConnection != undefined && connections.includes(this.selectedConnection)) {
+            return this.selectedConnection;
+        }
+        return connections[0];
     }
 
     /**
@@ -459,6 +527,18 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler {
                 const [group, name] = key.substring("toolbox/".length).split("/");
                 return { group, name, edit: key as `toolbox/${string}` };
             });
+    }
+
+    /**
+     * Extracts the connection edits from the root element.
+     *
+     * @param root The root element
+     * @returns The connection edits
+     */
+    private getConnectionEdits(root: Root): string[] {
+        return Object.keys(root.edits)
+            .filter((key) => key.startsWith("connection/"))
+            .map((key) => key.substring("connection/".length));
     }
 
     /**
