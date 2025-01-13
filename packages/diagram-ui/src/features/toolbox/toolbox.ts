@@ -23,9 +23,18 @@ import { TYPES } from "../types.js";
 import { ConfigManager } from "../config/configManager.js";
 import MiniSearch, { SearchResult } from "minisearch";
 import { CreateElementMoveHandler } from "./createElementMoveHandler.js";
+import { ConnectionEditProvider } from "./connectionEditProvider.js";
 
+/**
+ * UI Extension which displays the graphical toolbox.
+ * Supports
+ * - creating elements by dragging them from the toolbox or clicking them
+ * - searching for elements
+ * - showing previews for elements
+ * - selecting the connection operator used for creating connections
+ */
 @injectable()
-export class Toolbox extends AbstractUIExtension implements IActionHandler {
+export class Toolbox extends AbstractUIExtension implements IActionHandler, ConnectionEditProvider {
     /**
      * The unique identifier of the toolbox.
      */
@@ -380,7 +389,7 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler {
     /**
      * Generates the connection select UI.
      * If no connections are available, undefined is returned.
-     * 
+     *
      * @returns the connection select UI or undefined
      */
     private generateConnectionSelect(): VNode | undefined {
@@ -426,7 +435,7 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler {
 
     /**
      * Generates the dropdown for the connection operator select
-     * 
+     *
      * @param connections the entries for the dropdown
      * @param currentConnection the currently selected connection operator
      * @returns the generated dropdown
@@ -477,11 +486,27 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler {
      * @param connections the list of available connection operators
      * @returns the current connection operator
      */
-    getCurrentConnection(connections: string[]): string {
+    private getCurrentConnection(connections: string[]): string {
         if (this.selectedConnection != undefined && connections.includes(this.selectedConnection)) {
             return this.selectedConnection;
         }
         return connections[0];
+    }
+
+    /**
+     * Gets the current connection edit
+     *
+     * @returns the current connection edit or undefined if no connection edit is available
+     */
+    getConnectionEdit(): `connection/${string}` | undefined {
+        if (this.currentRoot == undefined) {
+            return undefined;
+        }
+        const connections = this.getConnectionEdits(this.currentRoot);
+        if (connections.length === 0) {
+            return undefined;
+        }
+        return `connection/${this.getCurrentConnection(connections)}`;
     }
 
     /**

@@ -12,6 +12,11 @@
     transition:
         width 0.15s ease,
         max-height 0.3s ease;
+    
+    * {
+        font-variant-ligatures: no-contextual;
+        font-size: inherit;
+    }
 
     --toolbox-margin: 10px;
     --toolbox-border-radius: 12px;
@@ -67,7 +72,6 @@
         .item {
             display: block;
             width: 100%;
-            font-size: inherit;
             text-align: left;
             outline: none;
             padding: 0 var(--toolbox-margin);
@@ -112,7 +116,6 @@
 
             input {
                 margin-left: 4px;
-                font-size: inherit;
                 min-width: 0;
                 flex: 1 1 0;
             }

@@ -38,6 +38,7 @@ export * from "./features/navigation/navigationMouseListener.js";
 export * from "./features/split-canvas-segment/di.config.js";
 export * from "./features/split-canvas-segment/splitCanvasSegmentMouseListener.js";
 export * from "./features/toolbox/ci.config.js";
+export * from "./features/toolbox/connectionEditProvider.js";
 export * from "./features/toolbox/createElementMoveHandler.js";
 export * from "./features/toolbox/toolbox.js";
 export * from "./features/transaction/di.config.js";

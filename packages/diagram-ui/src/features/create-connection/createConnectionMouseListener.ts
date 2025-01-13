@@ -1,4 +1,4 @@
-import { injectable } from "inversify";
+import { inject, injectable } from "inversify";
 import { findParentByFeature, MouseListener, SModelElementImpl } from "sprotty";
 import { Action } from "sprotty-protocol";
 import { SCanvasElement } from "../../model/canvas/sCanvasElement.js";
@@ -9,12 +9,19 @@ import { LineEngine } from "@hylimo/diagram-common";
 import { applyToPoint } from "transformation-matrix";
 import { TransactionalMoveAction } from "../move/transactionalMoveAction.js";
 import { CreateConnectionMoveHandler } from "./createConnectionMoveHandler.js";
+import { TYPES } from "../types.js";
+import { ConnectionEditProvider } from "../toolbox/connectionEditProvider.js";
 
 /**
  * Mouse listener for updating the connection creation UI based on mouse movements
  */
 @injectable()
 export class CreateConnectionMouseListener extends MouseListener {
+    /**
+     * Provides the selected connection edit expression
+     */
+    @inject(TYPES.ConnectionEditProvider) protected readonly connectionEditProvider!: ConnectionEditProvider;
+
     override mouseMove(target: SModelElementImpl, event: MouseEvent): Action[] {
         const canvasElement = findParentByFeature(target, isCreateConnectionTarget);
         if (canvasElement == undefined) {
@@ -25,7 +32,7 @@ export class CreateConnectionMouseListener extends MouseListener {
             isVisible: event.shiftKey && event.buttons === 0,
             providerWithTarget: {
                 target: canvasElement.id,
-                provider: () => this.createPreview(event, canvasElement)
+                provider: () => this.createConnection(event, canvasElement)
             }
         };
         return [action];
@@ -60,12 +67,16 @@ export class CreateConnectionMouseListener extends MouseListener {
         if (startData == undefined) {
             return [];
         }
+        const edit = this.connectionEditProvider.getConnectionEdit();
+        if (edit == undefined) {
+            return [];
+        }
         const action: TransactionalMoveAction = {
             kind: TransactionalMoveAction.KIND,
             maxUpdatesPerRevision: 1,
             handlerProvider: () =>
                 new CreateConnectionMoveHandler(
-                    startData.edit,
+                    edit,
                     {
                         expression: target.editExpression!,
                         pos: startData.position
@@ -77,19 +88,18 @@ export class CreateConnectionMouseListener extends MouseListener {
     }
 
     /**
-     * Creates a connection creation preview based on the current mouse position and the target element.
+     * Provides the connection creation data based on the current mouse position and the target element.
      *
      * @param event provider for the mouse position
      * @param target the target element
-     * @returns the connection creation preview
+     * @returns the connection creation data
      */
-    private createPreview(event: MouseEvent, target: SCanvasElement | SCanvasConnection): CreateConnectionData {
+    private createConnection(event: MouseEvent, target: SCanvasElement | SCanvasConnection): CreateConnectionData {
         const context = target.parent;
         const line = target.root.layoutEngine.layoutLine(target, context.id);
         const point = applyToPoint(context.getMouseTransformationMatrix(), { x: event.pageX, y: event.pageY });
         const nearest = LineEngine.DEFAULT.projectPoint(point, line);
         return {
-            edit: `connection/--`, //TODO
             line,
             position: nearest.pos
         };

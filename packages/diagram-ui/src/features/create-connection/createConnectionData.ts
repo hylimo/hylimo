@@ -5,10 +5,6 @@ import { TransformedLine } from "@hylimo/diagram-common";
  */
 export interface CreateConnectionData {
     /**
-     * The edit to perform
-     */
-    edit: `connection/${string}`;
-    /**
      * The position on the outline of the start element where the connection would start.
      */
     position: number;
