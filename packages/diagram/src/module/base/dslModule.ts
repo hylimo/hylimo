@@ -120,7 +120,7 @@ export function createToolboxEdit(
  * @param variable the variable to generate the fragments for
  * @returns the jsonata fragment expressions
  */
-function connectionEditFragments(variable: "start" | "end"): {
+export function connectionEditFragments(variable: "start" | "end"): {
     startExpression: string;
     posExpression: string;
 } {

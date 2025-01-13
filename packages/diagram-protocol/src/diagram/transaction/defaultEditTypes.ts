@@ -1,4 +1,4 @@
-import { DefaultEditTypes } from "@hylimo/diagram-common";
+import { DefaultEditTypes, Point } from "@hylimo/diagram-common";
 import { Edit } from "./edit.js";
 
 /**
@@ -60,31 +60,23 @@ export type ToolboxEdit = Edit<{ x: number; y: number; prediction?: boolean }, `
 
 /**
  * Start/end for a connection created by a connection edit.
- * Either
- * - an expression evaluating to a CanvasConnection or CanvasElement and a position on the line it provides
- * - or an x/y coordinate in the root coordinate system
+ * - x/y coordinates are in the root coordinate system
+ * - optional: expression and pos for a target to snap to
  */
-export type ConnectionEnd =
-    | {
-          /**
-           * Expression evaluating to a CanvasConnection or CanvasElement
-           */
-          expression: string;
-          /**
-           * Position on the line the element provides
-           */
-          pos: number;
-      }
-    | {
-          /**
-           * X coordinate in the root coordinate system
-           */
-          x: number;
-          /**
-           * Y coordinate in the root coordinate system
-           */
-          y: number;
-      };
+export type ConnectionEnd = Point &
+    (
+        | {
+              /**
+               * Expression evaluating to a CanvasConnection or CanvasElement
+               */
+              expression: string;
+              /**
+               * Position on the line the element provides
+               */
+              pos: number;
+          }
+        | object
+    );
 
 /**
  * Connection edit

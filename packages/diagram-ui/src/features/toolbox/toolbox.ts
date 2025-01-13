@@ -426,6 +426,7 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler, Conn
                 }
             },
             [
+                this.generateConnectionIcon(),
                 h("span", currentConnection),
                 this.generateCodicon(this.connectionSelectOpen ? "chevron-up" : "chevron-down", ""),
                 this.generateConnectionSelectDropdown(connections, currentConnection)
@@ -491,6 +492,21 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler, Conn
             return this.selectedConnection;
         }
         return connections[0];
+    }
+
+    private generateConnectionIcon(): VNode {
+        return h(
+            "svg",
+            {
+                attrs: {
+                    viewBox: "0 0 16 16"
+                },
+                class: {
+                    "connection-icon": true
+                }
+            },
+            [h("path", { attrs: { d: "M 2 13 H 7 V 5 H 14 m -3 -3 l 3 3 l -3 3" } })]
+        );
     }
 
     /**

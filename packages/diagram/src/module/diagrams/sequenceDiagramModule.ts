@@ -27,6 +27,9 @@ export const sequenceDiagramModule = InterpreterModule.create(
     [],
     createDiagramModule("sequenceDiagram", [
         defaultStylesModule,
+        associationsModule,
+        sequenceDiagramAssociationsModule,
+        nonNavigableAssociationsModule,
         sequenceDiagramCreateConnectionOperatorModule,
         elementModule,
         defaultValues,
@@ -37,9 +40,6 @@ export const sequenceDiagramModule = InterpreterModule.create(
         activityIndicatorModule,
         sequenceDiagramFrameModule,
         participantModule,
-        associationsModule,
-        sequenceDiagramAssociationsModule,
-        nonNavigableAssociationsModule,
         lostFoundMessageModule,
         readingDirectionModule
     ])

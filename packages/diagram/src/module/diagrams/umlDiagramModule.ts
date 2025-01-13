@@ -28,8 +28,10 @@ export const umlDiagramModule = InterpreterModule.create(
     [],
     createDiagramModule("umlDiagram", [
         defaultStylesModule,
-        actorModule,
         associationsModule,
+        nonNavigableAssociationsModule,
+        extendsAndImplementsModule,
+        actorModule,
         classDiagramToolboxEditsModule,
         classModule,
         commentModule,
@@ -38,10 +40,8 @@ export const umlDiagramModule = InterpreterModule.create(
         compositionAndAggregationModule,
         elementModule,
         enumModule,
-        extendsAndImplementsModule,
         instanceModule,
         interfaceModule,
-        nonNavigableAssociationsModule,
         packageModule,
         readingDirectionModule
     ])

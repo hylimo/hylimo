@@ -1,12 +1,12 @@
-import { assign, fun, id, InterpreterModule, stringType } from "@hylimo/core";
-import { createToolboxEdit, SCOPE } from "../../../base/dslModule.js";
+import { assign, fun, id, InterpreterModule, str, stringType } from "@hylimo/core";
+import { connectionEditFragments, createToolboxEdit, SCOPE } from "../../../base/dslModule.js";
 
 /**
  * Module providing the comment element
  */
 export const commentModule = InterpreterModule.create(
     "uml/comment",
-    [],
+    ["uml/associations"],
     [],
     [
         assign(
@@ -92,6 +92,31 @@ export const commentModule = InterpreterModule.create(
                 }
             }
         `,
-        createToolboxEdit("Comment/Comment", 'comment("Example comment")')
+        createToolboxEdit("Comment/Comment", 'comment("Example comment")'),
+        id(SCOPE)
+            .field("internal")
+            .field("canvasAddEdits")
+            .assignField("connection/comment", str(generateCommentConnectionEdit()))
     ]
 );
+
+/**
+ * Generates the create connection edit for comments
+ * Creates a comment with a connection to the start element
+ *
+ * @returns the generated connection edit
+ */
+function generateCommentConnectionEdit(): string {
+    const start = connectionEditFragments("start");
+    return [
+        `'comment("Example comment") layout{\n    pos = apos('`,
+        "end.x & ', ' & end.y",
+        "')\n} -- '",
+        start.startExpression,
+        "' with {\n    over = start('",
+        "((end.x - start.x) > 0 ? 0.5 : 0)",
+        "').line(end('",
+        start.posExpression,
+        "'))\n}'"
+    ].join("&");
+}

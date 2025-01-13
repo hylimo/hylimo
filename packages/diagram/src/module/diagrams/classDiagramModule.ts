@@ -23,17 +23,17 @@ export const classDiagramModule = InterpreterModule.create(
     [DiagramModuleNames.DIAGRAM, DiagramModuleNames.DSL],
     [],
     createDiagramModule("classDiagram", [
-        elementModule,
         defaultStylesModule,
+        associationsModule,
+        nonNavigableAssociationsModule,
+        compositionAndAggregationModule,
+        extendsAndImplementsModule,
+        elementModule,
         classModule,
         interfaceModule,
         enumModule,
         packageModule,
         commentModule,
-        associationsModule,
-        nonNavigableAssociationsModule,
-        compositionAndAggregationModule,
-        extendsAndImplementsModule,
         readingDirectionModule,
         classDiagramToolboxEditsModule
     ])

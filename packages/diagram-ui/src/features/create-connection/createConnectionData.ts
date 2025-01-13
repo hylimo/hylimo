@@ -9,7 +9,7 @@ export interface CreateConnectionData {
      */
     position: number;
     /**
-     * The line on which the connection would be created.
+     * The line on which the connection would be created in the context of the parent canvas.
      */
     line: TransformedLine;
 }

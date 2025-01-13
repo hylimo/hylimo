@@ -16,19 +16,15 @@ export class CreateConnectionMoveHandler extends MoveHandler {
 
     override generateEdits(x: number, y: number, event: MouseEvent, target: SModelElementImpl): Edit[] {
         const lineProvider = findParentByFeature(target, isCreateConnectionTarget);
-        let end: ConnectionEnd;
+        let end: ConnectionEnd = { x, y };
         if (lineProvider != undefined) {
             const root = lineProvider.root;
             const line = root.layoutEngine.layoutLine(lineProvider, root.id);
             const projection = LineEngine.DEFAULT.projectPoint({ x, y }, line);
             end = {
+                ...end,
                 expression: lineProvider.editExpression!,
                 pos: projection.pos
-            };
-        } else {
-            end = {
-                x,
-                y
             };
         }
         return [

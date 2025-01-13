@@ -71,20 +71,42 @@ export class CreateConnectionMouseListener extends MouseListener {
         if (edit == undefined) {
             return [];
         }
-        const action: TransactionalMoveAction = {
+        return [this.generateStartCreateConnectionAction(target, startData, edit)];
+    }
+
+    /**
+     * Generates the action to start the creation of a connection
+     * based on the target element and the connection creation data.
+     *
+     * @param target the target element
+     * @param startData the connection creation data
+     * @param edit the connection edit to use
+     * @returns the action to start the creation of a connection
+     */
+    private generateStartCreateConnectionAction(
+        target: SCanvasElement | SCanvasConnection,
+        startData: CreateConnectionData,
+        edit: `connection/${string}`
+    ): TransactionalMoveAction {
+        const { x, y } = applyToPoint(
+            target.root.layoutEngine.localToAncestor(target.parent.id, target.root.id),
+            LineEngine.DEFAULT.getPoint(startData.position, undefined, 0, startData.line)
+        );
+        return {
             kind: TransactionalMoveAction.KIND,
             maxUpdatesPerRevision: 1,
             handlerProvider: () =>
                 new CreateConnectionMoveHandler(
                     edit,
                     {
+                        x,
+                        y,
                         expression: target.editExpression!,
                         pos: startData.position
                     },
                     target.root.getMouseTransformationMatrix()
                 )
         };
-        return [action];
     }
 
     /**
