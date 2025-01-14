@@ -211,8 +211,7 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler, Conn
             },
             [
                 h("div.toolbox-header", [h("span.title", "Toolbox"), ...this.generateToolboxButtons()]),
-                this.generateConnectionSearchBox(),
-                this.generateSearchBox(),
+                h("div.toolbox-header-content", [this.generateConnectionSearchBox(), this.generateSearchBox()]),
                 h("div.items", this.generateToolboxItems(root))
             ]
         );
@@ -251,7 +250,7 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler, Conn
      * @returns The search box or undefined
      */
     private generateSearchBox(): VNode | undefined {
-        if (this.searchString == undefined || !this.isOpen) {
+        if (this.searchString == undefined) {
             return undefined;
         }
         const searchInput = this.generateSearchInput();
@@ -260,7 +259,7 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler, Conn
             this.searchString = undefined;
             this.update();
         });
-        return h("div.input-container", [h("div.search-box.selectable-input", [icon, searchInput, closeButton])]);
+        return h("div.input-container", [h("div.selectable-input", [icon, searchInput, closeButton])]);
     }
 
     /**
@@ -408,7 +407,7 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler, Conn
         }
         const currentConnection = this.getCurrentConnection(connections);
         const input = h(
-            "div.connections-select.selectable-input",
+            "div.selectable-input",
             {
                 on: {
                     click: () => {
@@ -537,7 +536,10 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler, Conn
      * @returns the current connection operator
      */
     private getCurrentConnection(connections: ConnectionEditEntry[]): string {
-        if (this.selectedConnection != undefined && connections.some(entry => entry.name === this.selectedConnection)) {
+        if (
+            this.selectedConnection != undefined &&
+            connections.some((entry) => entry.name === this.selectedConnection)
+        ) {
             return this.selectedConnection;
         }
         return connections[0].name;
@@ -634,7 +636,7 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler, Conn
      * @param editEntry The toolbox/connection edit
      * @returns The preview or undefined
      */
-    private generatePreviewIfAvailable(editEntry: ToolboxEditEntry |ConnectionEditEntry): VNode | undefined {
+    private generatePreviewIfAvailable(editEntry: ToolboxEditEntry | ConnectionEditEntry): VNode | undefined {
         if (this.showPreviewFor != editEntry.edit) {
             return undefined;
         }

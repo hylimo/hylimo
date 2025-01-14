@@ -94,7 +94,7 @@ const canvasConnectionWithScopeProperties = [
 /**
  * An jsonata expression which assigns the prediction class to an element if the prediction is true
  */
-export const PREDICTION_STYLE_CLASS_ASSIGNMENT_EXPRESSION = `(prediction ? ' styles { class += "${LayoutEngine.PREDICTION_CLASS}" }' : '')`
+export const PREDICTION_STYLE_CLASS_ASSIGNMENT_EXPRESSION = `(prediction ? ' styles { class += "${LayoutEngine.PREDICTION_CLASS}" }' : '')`;
 
 /**
  * Creates a toolbox edit which is registered in `scope.internal.canvasAddEdits`

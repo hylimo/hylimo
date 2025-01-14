@@ -12,7 +12,7 @@
     transition:
         width 0.15s ease,
         max-height 0.3s ease;
-    
+
     * {
         font-size: inherit;
     }
@@ -43,6 +43,12 @@
             }
         }
 
+        .toolbox-header-content {
+            flex: 0 1 auto;
+            min-height: 0;
+            overflow: hidden;
+        }
+
         @supports selector(::-webkit-scrollbar) {
             ::-webkit-scrollbar {
                 height: 4px;
@@ -58,6 +64,7 @@
             overflow-y: auto;
             overflow-x: hidden;
             margin-bottom: var(--toolbox-margin);
+            flex-shrink: 10000000000;
         }
 
         .group {
@@ -134,21 +141,15 @@
             box-shadow: 0 0 0 1px inset var(--toolbox-primary);
         }
 
-        .connections-select {
-            position: relative;
-            width: 100%;
-            outline: none;
+        .connection-icon {
+            width: 18px;
+            height: 18px;
+            flex: 0 0 auto;
 
-            .connection-icon {
-                width: 18px;
-                height: 18px;
-                flex: 0 0 auto;
-                
-                path {
-                    stroke-width: 1px;
-                    stroke: currentColor;
-                    fill: none;
-                }
+            path {
+                stroke-width: 1px;
+                stroke: currentColor;
+                fill: none;
             }
         }
     }

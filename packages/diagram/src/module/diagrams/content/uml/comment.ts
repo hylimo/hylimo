@@ -1,5 +1,10 @@
 import { assign, fun, id, InterpreterModule, str, stringType } from "@hylimo/core";
-import { connectionEditFragments, createToolboxEdit, PREDICTION_STYLE_CLASS_ASSIGNMENT_EXPRESSION, SCOPE } from "../../../base/dslModule.js";
+import {
+    connectionEditFragments,
+    createToolboxEdit,
+    PREDICTION_STYLE_CLASS_ASSIGNMENT_EXPRESSION,
+    SCOPE
+} from "../../../base/dslModule.js";
 
 /**
  * Module providing the comment element
