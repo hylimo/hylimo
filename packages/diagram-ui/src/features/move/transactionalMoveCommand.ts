@@ -6,7 +6,7 @@ import { MoveMouseListener } from "./moveMouseListener.js";
 import { SRoot } from "../../model/sRoot.js";
 
 /**
- * Command for CreateMoveAction
+ * Command for TransactionalMoveAction
  */
 @injectable()
 export class TransactionalMoveCommand extends Command {

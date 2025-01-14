@@ -5,7 +5,18 @@ import { Matrix } from "transformation-matrix";
 import { isCreateConnectionTarget } from "./createConnectionMouseListener.js";
 import { LineEngine } from "@hylimo/diagram-common";
 
+/**
+ * Move handler for creating connections
+ */
 export class CreateConnectionMoveHandler extends MoveHandler {
+    /**
+     * Creates a new CreateConnectionMoveHandler based on the start of the connection
+     * and the edit to create the connection
+     *
+     * @param edit the edit to create the connection
+     * @param start the start of the connection
+     * @param transformationMatrix matrix applied to event coordinates
+     */
     constructor(
         private readonly edit: `connection/${string}`,
         private readonly start: ConnectionEnd,
