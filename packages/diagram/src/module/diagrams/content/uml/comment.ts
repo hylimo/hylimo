@@ -1,5 +1,5 @@
 import { assign, fun, id, InterpreterModule, str, stringType } from "@hylimo/core";
-import { connectionEditFragments, createToolboxEdit, SCOPE } from "../../../base/dslModule.js";
+import { connectionEditFragments, createToolboxEdit, PREDICTION_STYLE_CLASS_ASSIGNMENT_EXPRESSION, SCOPE } from "../../../base/dslModule.js";
 
 /**
  * Module providing the comment element
@@ -109,7 +109,9 @@ export const commentModule = InterpreterModule.create(
 function generateCommentConnectionEdit(): string {
     const start = connectionEditFragments("start");
     return [
-        `'comment("Example comment") layout{\n    pos = apos('`,
+        `'comment("Example comment")'`,
+        PREDICTION_STYLE_CLASS_ASSIGNMENT_EXPRESSION,
+        `'layout{\n    pos = apos('`,
         "end.x & ', ' & end.y",
         "')\n} -- '",
         start.startExpression,
@@ -117,6 +119,7 @@ function generateCommentConnectionEdit(): string {
         "((end.x - start.x) > 0 ? 0.5 : 0)",
         "').line(end('",
         start.posExpression,
-        "'))\n}'"
+        "'))\n}'",
+        PREDICTION_STYLE_CLASS_ASSIGNMENT_EXPRESSION
     ].join("&");
 }

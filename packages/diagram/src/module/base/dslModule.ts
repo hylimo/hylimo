@@ -92,10 +92,15 @@ const canvasConnectionWithScopeProperties = [
 ];
 
 /**
+ * An jsonata expression which assigns the prediction class to an element if the prediction is true
+ */
+export const PREDICTION_STYLE_CLASS_ASSIGNMENT_EXPRESSION = `(prediction ? ' styles { class += "${LayoutEngine.PREDICTION_CLASS}" }' : '')`
+
+/**
  * Creates a toolbox edit which is registered in `scope.internal.canvasAddEdits`
  *
  * @param edit the name of the edit, implicitly prefixed with `toolbox/`. To be added correctly to the toolbox, follow the format `Group/Name`, so i.e. `Class/Class with nested class`.
- * @param createElementCode the code which creates the element, expected to return a CanvasElement, i.e. `class("Example")`
+ * @param createElementCode the code which creates the element, expected to return a CanvasElement, i.e. `class("Example")`. Dedented, NOT escaped
  * @param enableDragging whether the element should be draggable
  * @returns the executable expression which creates the toolbox edit
  */
@@ -108,7 +113,7 @@ export function createToolboxEdit(
     if (enableDragging) {
         modifiedEdit += "& ' layout {\n    pos = apos(' & x & ', ' & y & ')\n}'";
     }
-    modifiedEdit += `& (prediction ? ' styles { class += "${LayoutEngine.PREDICTION_CLASS}" }' : '')`;
+    modifiedEdit += `& ${PREDICTION_STYLE_CLASS_ASSIGNMENT_EXPRESSION}`;
     return id(SCOPE).field("internal").field("canvasAddEdits").assignField(`toolbox/${edit}`, str(modifiedEdit));
 }
 
@@ -643,7 +648,7 @@ const scopeExpressions: ParseableExpressions = [
                     const start = connectionEditFragments("start");
                     const end = connectionEditFragments("end");
                     const segment = createLine ? "line(" : "axisAligned(0.5, ";
-                    const edit = `'\n' & ${start.startExpression} & ${escapedOperator} & ${end.startExpression} & ' with {\n    over = start(' & ${start.posExpression} & ').${segment}end(' & ${end.posExpression} & '))\n}'`;
+                    const edit = `'\n' & ${start.startExpression} & ${escapedOperator} & ${end.startExpression} & ' with {\n    over = start(' & ${start.posExpression} & ').${segment}end(' & ${end.posExpression} & '))\n}' & ${PREDICTION_STYLE_CLASS_ASSIGNMENT_EXPRESSION}`;
                     context
                         .getField(SCOPE)
                         .getFieldValue("internal", context)

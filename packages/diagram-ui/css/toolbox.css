@@ -14,7 +14,6 @@
         max-height 0.3s ease;
     
     * {
-        font-variant-ligatures: no-contextual;
         font-size: inherit;
     }
 
@@ -94,6 +93,7 @@
             }
         }
 
+        .item.selected,
         .item:hover,
         .item:focus-within {
             background: var(--toolbox-item-hover-background);
@@ -111,7 +111,11 @@
             padding-top: 0;
         }
 
-        .search-box {
+        .selectable-input {
+            display: flex;
+            border-radius: 8px;
+            align-items: center;
+            background: var(--toolbox-item-hover-background);
             padding: 4px 0px 4px 8px;
 
             input {
@@ -119,13 +123,6 @@
                 min-width: 0;
                 flex: 1 1 0;
             }
-        }
-
-        .selectable-input {
-            display: flex;
-            border-radius: 8px;
-            align-items: center;
-            background: var(--toolbox-item-hover-background);
 
             span {
                 flex: 1 1 0;
@@ -140,35 +137,18 @@
         .connections-select {
             position: relative;
             width: 100%;
-            padding: 4px 4px 4px 8px;
+            outline: none;
 
             .connection-icon {
                 width: 18px;
                 height: 18px;
                 flex: 0 0 auto;
-                margin-right: 8px;
                 
                 path {
                     stroke-width: 1px;
                     stroke: currentColor;
                     fill: none;
                 }
-            }
-        }
-
-        .connections-select-dropdown {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            right: 0;
-            overflow-y: auto;
-            max-height: 200px;
-            background: var(--toolbox-background);
-            box-shadow: var(--toolbox-box-shadow);
-            border-radius: 8px;
-
-            .item.selected {
-                background: var(--toolbox-item-hover-background);
             }
         }
     }

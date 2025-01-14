@@ -1,16 +1,16 @@
 import { Action, RequestAction } from "sprotty-protocol";
 import { ToolboxEditPredictionResponseAction } from "./toolboxEditPredictionResponseAction.js";
-import { ToolboxEdit } from "../transaction/defaultEditTypes.js";
+import { ConnectionEdit, ToolboxEdit } from "../transaction/defaultEditTypes.js";
 
 /**
- * Action to request a prediction for a toolbox edit
+ * Action to request a prediction for a toolbox or connection edit
  */
 export interface ToolboxEditPredictionRequestAction extends RequestAction<ToolboxEditPredictionResponseAction> {
     kind: typeof ToolboxEditPredictionRequestAction.KIND;
     /**
      * The edit to generate the prediction for
      */
-    edit: ToolboxEdit;
+    edit: ToolboxEdit | ConnectionEdit;
 }
 
 export namespace ToolboxEditPredictionRequestAction {

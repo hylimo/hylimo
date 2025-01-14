@@ -81,4 +81,7 @@ export type ConnectionEnd = Point &
 /**
  * Connection edit
  */
-export type ConnectionEdit = Edit<{ start: ConnectionEnd; end: ConnectionEnd }, `connection/${string}`>;
+export type ConnectionEdit = Edit<
+    { start: ConnectionEnd; end: ConnectionEnd; prediction?: boolean },
+    `connection/${string}`
+>;
