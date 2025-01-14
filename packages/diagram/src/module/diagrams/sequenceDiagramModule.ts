@@ -27,10 +27,10 @@ export const sequenceDiagramModule = InterpreterModule.create(
     [],
     createDiagramModule("sequenceDiagram", [
         defaultStylesModule,
+        sequenceDiagramCreateConnectionOperatorModule,
         associationsModule,
         sequenceDiagramAssociationsModule,
         nonNavigableAssociationsModule,
-        sequenceDiagramCreateConnectionOperatorModule,
         elementModule,
         defaultValues,
         commentModule,
