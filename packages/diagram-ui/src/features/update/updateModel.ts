@@ -10,7 +10,7 @@ import {
     MatchResult,
     SModelElementImpl,
     SModelRootImpl,
-    TYPES,
+    TYPES as SPROTTY_TYPES,
     UpdateModelCommand as BaseUpdateModelCommand,
     ViewportRootElementImpl
 } from "sprotty";
@@ -22,13 +22,23 @@ import {
 import { computeCommonAnimatableFields, isLinearAnimatable } from "../animation/model.js";
 import { createFitToScreenAction } from "../viewport/fitToScreenAction.js";
 import { FluentIterable } from "sprotty/lib/utils/iterable.js";
+import { TYPES } from "../types.js";
+import { TransactionStateProvider } from "../transaction/transactionStateProvider.js";
 
 /**
  * Custom UpdateModelCommand which handles linear interpolation animations
  */
 @injectable()
 export class UpdateModelCommand extends BaseUpdateModelCommand {
-    @inject(TYPES.IActionDispatcher) private dispatcher!: IActionDispatcher;
+    /**
+     * The action dispatcher to dispatch
+     */
+    @inject(SPROTTY_TYPES.IActionDispatcher) private readonly dispatcher!: IActionDispatcher;
+
+    /**
+     * The transaction state provider
+     */
+    @inject(TYPES.TransactionStateProvider) private readonly transactionStateProvider!: TransactionStateProvider;
 
     protected override computeAnimation(
         newRoot: SModelRootImpl,
@@ -115,7 +125,9 @@ export class UpdateModelCommand extends BaseUpdateModelCommand {
     ): CommandReturn {
         (newRoot as SRoot).changeRevision = (oldRoot as SRoot).changeRevision + 1;
         (newRoot as SRoot).sequenceNumber = (oldRoot as SRoot).sequenceNumber;
-        layoutViewportIfNecessary(oldRoot.index.all(), newRoot.index.all(), this.dispatcher);
+        if (!this.transactionStateProvider.isInTransaction) {
+            layoutViewportIfNecessary(oldRoot.index.all(), newRoot.index.all(), this.dispatcher);
+        }
         return super.performUpdate(oldRoot, newRoot, context);
     }
 }

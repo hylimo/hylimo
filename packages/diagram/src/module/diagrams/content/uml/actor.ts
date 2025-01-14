@@ -1,5 +1,5 @@
-import { fun, id, InterpreterModule, optional, stringType } from "@hylimo/core";
-import { SCOPE } from "../../../base/dslModule.js";
+import { fun, id, InterpreterModule, optional, ParseableExpressions, stringType } from "@hylimo/core";
+import { createToolboxEdit, SCOPE } from "../../../base/dslModule.js";
 
 /**
  * SVG path to draw a stickman with a head, two arms, and two legs.<br>
@@ -72,6 +72,17 @@ export const actorModule = InterpreterModule.create(
                     hAlign = "center"
                 }
             }
-        `
+        `,
+        ...actorToolboxEdits(true)
     ]
 );
+
+/**
+ * Creates toolbox edits for the actor function
+ *
+ * @param enableDragging whether dragging should be enabled
+ * @returns the toolbox edits
+ */
+export function actorToolboxEdits(enableDragging: boolean): ParseableExpressions {
+    return [createToolboxEdit("Actor/Actor", 'actor("Example")', enableDragging)];
+}

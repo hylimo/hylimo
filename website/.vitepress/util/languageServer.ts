@@ -15,7 +15,10 @@ const languageServer = new LanguageServer({
             enableFontSubsetting: true,
             enableExternalFonts: false
         },
-        settings: {}
+        settings: {},
+        editorConfig: {
+            toolboxEnabled: true
+        }
     },
     connection,
     additionalInterpreterModules: [],

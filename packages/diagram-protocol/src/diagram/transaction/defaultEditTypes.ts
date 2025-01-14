@@ -52,3 +52,8 @@ export type SplitCanvasBezierSegmentEdit = Edit<
     { x: number; y: number; cx1: number; cy1: number; cx2: number; cy2: number },
     DefaultEditTypes.SPLIT_CANVAS_BEZIER_SEGMENT
 >;
+
+/**
+ * Toolbox edit
+ */
+export type ToolboxEdit = Edit<{ x: number; y: number; prediction?: boolean }, `toolbox/${string}`>;

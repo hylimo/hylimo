@@ -168,7 +168,7 @@ export const Identifier = createToken({
     pattern: {
         exec: (text, startOffset) => {
             const pattern =
-                /(([!#%&'+\-:;<=>?@\\^`|~]|\*(?!\/)|\/(?![/*])|\.{2,}|[$_]+(?![\p{ID_Continue}$]))+)|([\p{ID_Start}_$][\p{ID_Continue}$]*)/uy;
+                /((([!#%&'+\-:;<=>?@\\^|~]|\*(?!\/)|\/(?![/*])|\.{2,}|[$_]+(?![\p{ID_Continue}$]))+)|([\p{ID_Start}_$][\p{ID_Continue}$]*)|`[^\n`]+`)/uy;
             pattern.lastIndex = startOffset;
             return pattern.exec(text);
         }

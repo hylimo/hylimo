@@ -63,6 +63,10 @@ export const participantModule = InterpreterModule.create(
                     participantElement.class += "non-top-level-participant"
                 }
 
+                scope.internal.toolboxEdits["toolbox/Activate instance or actor/\${name}"] = "'activate(' & \${nameToExpression(name)} & ')'"
+                scope.internal.toolboxEdits["toolbox/Deactive instance or actor/\${name}"] = "'deactivate(' & \${nameToExpression(name)} & ')'"
+                scope.internal.toolboxEdits["toolbox/Destroy instance or actor/\${name}"] = "'destroy(' & \${nameToExpression(name)} & ')'"
+
                 participantElement
             }
 
@@ -75,6 +79,7 @@ export const participantModule = InterpreterModule.create(
                 }
             }
         `,
+
         id(SCOPE).assignField(
             "destroy",
             fun(

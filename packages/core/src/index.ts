@@ -96,3 +96,4 @@ export * from "./types/or.js";
 export * from "./types/string.js";
 export * from "./types/validate.js";
 export * from "./types/wrapperObject.js";
+export * from "./util/nameToExpression.js";

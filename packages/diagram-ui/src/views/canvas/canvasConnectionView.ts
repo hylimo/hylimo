@@ -22,27 +22,27 @@ export class CanvasConnectionView implements IView {
         ) as SCanvasConnectionSegment[];
         const childMarkers = this.renderMarkers(model, context);
         const { path, childControlElements } = this.renderPathAndControlElements(model, segments);
-        return svg(
-            "g",
-            null,
-            svg("path", {
-                attrs: {
-                    d: path,
-                    ...extractStrokeAttriabutes(model),
-                    fill: "none"
-                }
-            }),
-            svg("path", {
-                attrs: {
-                    d: path
-                },
-                class: {
-                    "select-canvas-connection": true
-                }
-            }),
-            ...childMarkers,
-            ...childControlElements
-        );
+        const childPaths: VNode[] = [];
+        if (model.stroke != undefined) {
+            childPaths.push(
+                svg("path", {
+                    attrs: {
+                        d: path,
+                        ...extractStrokeAttriabutes(model),
+                        fill: "none"
+                    }
+                }),
+                svg("path", {
+                    attrs: {
+                        d: path
+                    },
+                    class: {
+                        "select-canvas-connection": true
+                    }
+                })
+            );
+        }
+        return svg("g", null, ...childPaths, ...childMarkers, ...childControlElements);
     }
 
     /**

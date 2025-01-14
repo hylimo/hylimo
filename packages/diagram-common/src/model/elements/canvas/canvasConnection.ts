@@ -23,8 +23,9 @@ export namespace CanvasConnection {
 
     /**
      * Checks if an element is a CanvasConnection
-     * @param value
-     * @returns
+     *
+     * @param value the element to check
+     * @returns true if the element is a CanvasConnection
      */
     export function isCanvasConnection(value: Element): value is CanvasConnection {
         return value.type === TYPE;

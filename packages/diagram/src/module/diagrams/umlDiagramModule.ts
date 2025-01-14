@@ -14,6 +14,8 @@ import { extendsAndImplementsModule } from "./content/uml/extendsAndImplements.j
 import { readingDirectionModule } from "./content/uml/readingDirection.js";
 import { componentModule } from "./content/uml/component.js";
 import { DiagramModuleNames } from "../diagramModuleNames.js";
+import { classDiagramToolboxEditsModule } from "./content/uml/classDiagramToolboxEdits.js";
+import { componentDiagramToolboxEditsModule } from "./content/uml/componentDiagramToolboxEdits.js";
 import { instanceModule } from "./content/uml/instance.js";
 import { actorModule } from "./content/uml/actor.js";
 
@@ -25,13 +27,15 @@ export const umlDiagramModule = InterpreterModule.create(
     [DiagramModuleNames.DIAGRAM, DiagramModuleNames.DSL],
     [],
     createDiagramModule("umlDiagram", [
+        defaultStylesModule,
         actorModule,
         associationsModule,
+        classDiagramToolboxEditsModule,
         classModule,
         commentModule,
+        componentDiagramToolboxEditsModule,
         componentModule,
         compositionAndAggregationModule,
-        defaultStylesModule,
         elementModule,
         enumModule,
         extendsAndImplementsModule,

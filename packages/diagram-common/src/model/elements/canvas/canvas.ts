@@ -25,8 +25,9 @@ export namespace Canvas {
 
     /**
      * Checks if an element is a Canvas
-     * @param value
-     * @returns
+     *
+     * @param value the element to check
+     * @returns true if the element is a Canvas
      */
     export function isCanvas(value: Element): value is Canvas {
         return value.type === TYPE;

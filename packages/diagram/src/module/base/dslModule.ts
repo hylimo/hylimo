@@ -1,6 +1,7 @@
 import {
     assign,
     enumObject,
+    ExecutableExpression,
     fun,
     functionType,
     id,
@@ -14,6 +15,7 @@ import {
     optional,
     or,
     ParseableExpressions,
+    str,
     validateObject
 } from "@hylimo/core";
 import { canvasContentType, canvasPointType, elementType } from "./types.js";
@@ -28,6 +30,8 @@ import {
 import { LinePointLayoutConfig } from "../../layout/elements/canvas/linePointLayoutConfig.js";
 import { DiagramModuleNames } from "../diagramModuleNames.js";
 import { allStyleAttributes } from "./diagramModule.js";
+import dedent from "dedent";
+import { LayoutEngine } from "../../layout/engine/layoutEngine.js";
 
 /**
  * Identifier for the scope variable
@@ -85,6 +89,27 @@ const canvasConnectionWithScopeProperties = [
 ];
 
 /**
+ * Creates a toolbox edit which is registered in `scope.internal.toolboxEdits`
+ *
+ * @param edit the name of the edit, implicitly prefixed with `toolbox/`. To be added correctly to the toolbox, follow the format `Group/Name`, so i.e. `Class/Class with nested class`.
+ * @param createElementCode the code which creates the element, expected to return a CanvasElement, i.e. `class("Example")`
+ * @param enableDragging whether the element should be draggable
+ * @returns the executable expression which creates the toolbox edit
+ */
+export function createToolboxEdit(
+    edit: string,
+    createElementCode: string,
+    enableDragging: boolean = true
+): ExecutableExpression {
+    let modifiedEdit = `'\n${dedent(createElementCode)}'`;
+    if (enableDragging) {
+        modifiedEdit += "& ' layout {\n    pos = apos(' & x & ', ' & y & ')\n}'";
+    }
+    modifiedEdit += `& (prediction ? ' styles { class += "${LayoutEngine.PREDICTION_CLASS}" }' : '')`;
+    return id(SCOPE).field("internal").field("toolboxEdits").assignField(`toolbox/${edit}`, str(modifiedEdit));
+}
+
+/**
  * Expressions which create the initial scope which is passed to the callback of all diagram DSL functions
  */
 const scopeExpressions: ParseableExpressions = [
@@ -95,7 +120,8 @@ const scopeExpressions: ParseableExpressions = [
             contents = list(),
             internal = [
                 classCounter = 0,
-                styles = [styles = list()]
+                styles = [styles = list()],
+                toolboxEdits = []
             ]
         ]
     `,
@@ -672,7 +698,14 @@ const scopeExpressions: ParseableExpressions = [
     `
         scopeEnhancer(scope)
         callback.callWithScope(scope)
-        diagramCanvas = canvas(contents = scope.contents)
+        canvasEdits = []
+        scope.internal.toolboxEdits.forEach {
+            (value, key) = args
+            if(key != "proto") {
+                canvasEdits[key] = createAddEdit(callback, value)
+            } 
+        }
+        diagramCanvas = canvas(contents = scope.contents, edits = canvasEdits)
         createDiagram(diagramCanvas, scope.internal.styles, scope.fonts)
     `
 ];
