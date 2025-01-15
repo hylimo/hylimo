@@ -1,4 +1,4 @@
-import { injectable } from "inversify";
+import { inject, injectable } from "inversify";
 import { VNode } from "snabbdom";
 import { svg } from "sprotty";
 import { SCanvasElement } from "../../model/canvas/sCanvasElement.js";
@@ -7,6 +7,8 @@ import { LineEngine } from "@hylimo/diagram-common";
 import { SCanvasPoint } from "../../model/canvas/sCanvasPoint.js";
 import { toSVG } from "transformation-matrix";
 import { SCanvasConnection } from "../../model/canvas/sCanvasConnection.js";
+import { TYPES } from "../../features/types.js";
+import { TransactionStateProvider } from "../../features/transaction/transactionStateProvider.js";
 
 /**
  * Base class for CanvasElementView and CanvasConnectionView
@@ -14,13 +16,22 @@ import { SCanvasConnection } from "../../model/canvas/sCanvasConnection.js";
 @injectable()
 export abstract class EditableCanvasContentView {
     /**
+     * The transaction state provider
+     */
+    @inject(TYPES.TransactionStateProvider) protected transactionStateProvider!: TransactionStateProvider;
+
+    /**
      * Renders the create connection preview
      *
      * @param model the SRoot model
      * @returns the rendered create connection preview
      */
     protected renderCreateConnection(model: Readonly<SCanvasElement | SCanvasConnection>): VNode | undefined {
-        if (model.createConnectionProvider?.isVisible !== true || model.selected) {
+        if (
+            model.createConnectionProvider?.isVisible !== true ||
+            model.selected ||
+            this.transactionStateProvider.isInTransaction
+        ) {
             return undefined;
         }
         const preview = model.createConnectionProvider.provider();

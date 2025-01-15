@@ -1,6 +1,6 @@
 import { inject, injectable } from "inversify";
 import { findParentByFeature, MouseListener, SModelElementImpl } from "sprotty";
-import { Action } from "sprotty-protocol";
+import { Action, SelectAction } from "sprotty-protocol";
 import { SCanvasElement } from "../../model/canvas/sCanvasElement.js";
 import { SCanvasConnection } from "../../model/canvas/sCanvasConnection.js";
 import { UpdateCreateConnectionDataAction } from "./updateCreateConnectionData.js";
@@ -71,7 +71,12 @@ export class CreateConnectionMouseListener extends MouseListener {
         if (edit == undefined) {
             return [];
         }
-        return [this.generateStartCreateConnectionAction(target, startData, edit)];
+        const deselectAction: SelectAction = {
+            kind: SelectAction.KIND,
+            selectedElementsIDs: [],
+            deselectedElementsIDs: [target.id]
+        };
+        return [deselectAction, this.generateStartCreateConnectionAction(target, startData, edit)];
     }
 
     /**
