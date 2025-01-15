@@ -159,16 +159,13 @@ class SVGDiagramVisitor extends SimplifiedDiagramVisitor<SVGRendererContext, SVG
         const y = viewBox.position.y - this.margin;
         const width = viewBox.size.width + this.margin * 2;
         const height = viewBox.size.height + this.margin * 2;
-        let styles = "text { white-space: pre; }\n";
+        const additionalChildren: SVGNode[] = [];
         if (!this.textAsPath) {
-            styles += convertFontsToCssStyle(element.fonts);
-        }
-        const additionalChildren: SVGNode[] = [
-            {
+            additionalChildren.push({
                 type: "style",
-                children: [styles]
-            }
-        ];
+                children: ["text { white-space: pre; }\n" + convertFontsToCssStyle(element.fonts)]
+            });
+        }
         const result = {
             type: "svg",
             children: [...additionalChildren, ...this.visitChildren(element, context)],
