@@ -19,7 +19,12 @@
             </Teleport>
             <Teleport to="#export-diagram">
                 <VPFlyout icon="vpi-download" label="Download diagram" class="download-flyout">
-                    <button class="menu-button" :disabled="diagram == undefined" @click="downloadSVG">SVG</button>
+                    <button class="menu-button" :disabled="diagram == undefined" @click="downloadSVG(false)">
+                        SVG
+                    </button>
+                    <button class="menu-button" :disabled="diagram == undefined" @click="downloadSVG(true)">
+                        SVG (text as path)
+                    </button>
                     <button class="menu-button" :disabled="diagram == undefined" @click="downloadPDF">PDF</button>
                     <button class="menu-button" @click="downloadSource">Source</button>
                 </VPFlyout>
@@ -98,8 +103,8 @@ onKeyStroke("E", (event) => {
     downloadSVG();
 });
 
-function downloadSVG() {
-    const svgBlob = new Blob([svgRenderer.render(diagram.value!)], { type: "image/svg+xml;charset=utf-8" });
+function downloadSVG(textAsPath: boolean) {
+    const svgBlob = new Blob([svgRenderer.render(diagram.value!, textAsPath)], { type: "image/svg+xml;charset=utf-8" });
     fileSaver.saveAs(svgBlob, baseName.value + ".svg");
 }
 
