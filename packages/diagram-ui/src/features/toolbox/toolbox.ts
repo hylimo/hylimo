@@ -13,19 +13,30 @@ import {
 import { Action, generateRequestId, SetModelAction, UpdateModelAction } from "sprotty-protocol";
 import { VNode, h } from "snabbdom";
 import { Root } from "@hylimo/diagram-common";
-import { CreateAndMoveAction } from "../create-move/createAndMoveAction.js";
+import { TransactionalMoveAction } from "../move/transactionalMoveAction.js";
 import {
+    ConnectionEdit,
     EditorConfigUpdatedAction,
+    ToolboxEdit,
     ToolboxEditPredictionRequestAction,
     TransactionalAction
 } from "@hylimo/diagram-protocol";
 import { TYPES } from "../types.js";
 import { ConfigManager } from "../config/configManager.js";
 import MiniSearch, { SearchResult } from "minisearch";
-import { CreateElementMoveHandler } from "../create-move/createElementMoveHandler.js";
+import { CreateElementMoveHandler } from "./createElementMoveHandler.js";
+import { ConnectionEditProvider } from "./connectionEditProvider.js";
 
+/**
+ * UI Extension which displays the graphical toolbox.
+ * Supports
+ * - creating elements by dragging them from the toolbox or clicking them
+ * - searching for elements
+ * - showing previews for elements
+ * - selecting the connection operator used for creating connections
+ */
 @injectable()
-export class Toolbox extends AbstractUIExtension implements IActionHandler {
+export class Toolbox extends AbstractUIExtension implements IActionHandler, ConnectionEditProvider {
     /**
      * The unique identifier of the toolbox.
      */
@@ -65,9 +76,24 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler {
     private searchString?: string;
 
     /**
+     * The selected connection.
+     */
+    private selectedConnection?: string;
+
+    /**
+     * The search string for the connection select.
+     */
+    private connectionSearchString?: string;
+
+    /**
      * The search index.
      */
-    private searchIndex?: MiniSearch<ToolboxEdit>;
+    private searchIndex?: MiniSearch<ToolboxEditEntry>;
+
+    /**
+     * The connection search index.
+     */
+    private connectionSearchIndex?: MiniSearch<ConnectionEditEntry>;
 
     /**
      * Cached rendered element previews.
@@ -117,6 +143,7 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler {
                 this.initializeToolbox();
                 this.elementPreviews.clear();
                 this.searchIndex = undefined;
+                this.connectionSearchIndex = undefined;
             }
         } else if (TransactionalAction.isTransactionalAction(action)) {
             if (action.committed) {
@@ -184,7 +211,7 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler {
             },
             [
                 h("div.toolbox-header", [h("span.title", "Toolbox"), ...this.generateToolboxButtons()]),
-                this.generateSearchBox(),
+                h("div.toolbox-header-content", [this.generateConnectionSearchBox(), this.generateSearchBox()]),
                 h("div.items", this.generateToolboxItems(root))
             ]
         );
@@ -223,7 +250,7 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler {
      * @returns The search box or undefined
      */
     private generateSearchBox(): VNode | undefined {
-        if (this.searchString == undefined || !this.isOpen) {
+        if (this.searchString == undefined) {
             return undefined;
         }
         const searchInput = this.generateSearchInput();
@@ -232,7 +259,7 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler {
             this.searchString = undefined;
             this.update();
         });
-        return h("div.search-container", [h("div.search-box", [icon, searchInput, closeButton])]);
+        return h("div.input-container", [h("div.selectable-input", [icon, searchInput, closeButton])]);
     }
 
     /**
@@ -323,8 +350,10 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler {
      * @param root The root element providing the toolbox edits
      * @returns The UI for the toolbox items
      */
-    private generateToolboxItems(root: Root): VNode[] | VNode {
-        if (this.searchString != undefined && this.searchString.length > 0) {
+    private generateToolboxItems(root: Root): (VNode | undefined)[] | VNode {
+        if (this.connectionSearchString != undefined) {
+            return this.generateConnectionToolboxItems();
+        } else if (this.searchString != undefined && this.searchString.length > 0) {
             return this.generateFilteredToolboxItems(this.searchString);
         } else {
             return this.generateGroupedToolboxItems(root);
@@ -339,7 +368,7 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler {
      * @returns The UI for the toolbox items
      */
     private generateGroupedToolboxItems(root: Root): VNode[] {
-        const aggregatedEdits = new Map<string, ToolboxEdit[]>();
+        const aggregatedEdits = new Map<string, ToolboxEditEntry[]>();
         for (const toolboxEdit of this.getToolboxEdits(root)) {
             const key = toolboxEdit.group;
             if (!aggregatedEdits.has(key)) {
@@ -362,8 +391,206 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler {
         const searchIndex = this.getSearchIndex();
         const results = searchIndex.search(filter);
         return h("div.group", [
-            ...results.map((toolboxEdit) => this.generateToolboxItem(toolboxEdit as ToolboxEdit & SearchResult))
+            ...results.map((toolboxEdit) => this.generateToolboxItem(toolboxEdit as ToolboxEditEntry & SearchResult))
         ]);
+    }
+
+    /**
+     * Generates the UI for the connection operator search box.
+     *
+     * @returns The UI for the connection operator search box
+     */
+    private generateConnectionSearchBox(): VNode | undefined {
+        const connections = this.getConnectionEdits(this.currentRoot!);
+        if (connections.length === 0) {
+            return undefined;
+        }
+        const currentConnection = this.getCurrentConnection(connections);
+        const input = h(
+            "div.selectable-input",
+            {
+                on: {
+                    click: (event, vnode) => {
+                        this.connectionSearchString = "";
+                        this.searchString = undefined;
+                        (vnode.elm as HTMLDivElement).querySelector("input")?.focus();
+                        this.update();
+                    },
+                    focusout: () => {
+                        this.connectionSearchString = undefined;
+                        this.update();
+                    },
+                    mousedown: (event) => {
+                        if (!(event.target instanceof HTMLInputElement)) {
+                            event.preventDefault();
+                        }
+                    }
+                }
+            },
+            [this.generateConnectionIcon(), this.generateConnectionSearchInput(currentConnection)]
+        );
+        return h("div.input-container", [input]);
+    }
+
+    /**
+     * Generates the connection search input element
+     *
+     * @param currentConnection the currently selected connection operator
+     * @returns The search input element
+     */
+    private generateConnectionSearchInput(currentConnection: string): VNode {
+        return h("input", {
+            attrs: {
+                value: currentConnection
+            },
+            on: {
+                input: (event) => {
+                    this.connectionSearchString = (event.target as HTMLInputElement).value;
+                    this.update();
+                },
+                keydown: (event) => {
+                    if (event.key === "Escape") {
+                        this.connectionSearchString = undefined;
+                        this.update();
+                    }
+                }
+            },
+            hook: {
+                update: (oldVnode, vnode) => {
+                    if (this.connectionSearchString == undefined) {
+                        (vnode.elm as HTMLInputElement).value = currentConnection;
+                    }
+                }
+            }
+        });
+    }
+
+    /**
+     * Generates the UI for the connection operator toolbox items.
+     *
+     * @returns The UI for the connection operator toolbox items
+     */
+    private generateConnectionToolboxItems(): VNode {
+        const connections = this.getConnectionEdits(this.currentRoot!);
+        const filteredConnections = this.getFilteredConnections(connections);
+        const selectedConnection = this.getCurrentConnection(connections);
+        return h("div.group", [
+            ...filteredConnections.map((connection) =>
+                this.generateConnectionToolboxItem(connection, connection.name === selectedConnection)
+            )
+        ]);
+    }
+
+    /**
+     * Gets the filtered connection operators.
+     *
+     * @param connections The available connection operators
+     * @returns The filtered connection operators
+     */
+    private getFilteredConnections(connections: ConnectionEditEntry[]): ConnectionEditEntry[] {
+        let filteredConnections: ConnectionEditEntry[] = connections;
+        if (this.connectionSearchString != undefined && this.connectionSearchString.length > 0) {
+            const searchIndex = this.getConnectionSearchIndex();
+            const results = searchIndex.search(this.connectionSearchString);
+            filteredConnections = results.map((result) => result.edit);
+            const indexBasedConnections = new Set(filteredConnections);
+            for (const connection of connections) {
+                if (!indexBasedConnections.has(connection) && connection.name.includes(this.connectionSearchString)) {
+                    filteredConnections.push(connection);
+                }
+            }
+        }
+        return filteredConnections;
+    }
+
+    /**
+     * Generates an toolbox item for a connection
+     *
+     * @param connectionEdit the connection edit to generate the item for
+     * @param selected if true, the item is selected
+     * @param focused if true, the item is focused
+     * @returns the generated item
+     */
+    private generateConnectionToolboxItem(connectionEdit: ConnectionEditEntry, selected: boolean): VNode {
+        return h(
+            "button.item",
+            {
+                on: {
+                    click: (event) => {
+                        this.selectedConnection = connectionEdit.name;
+                        this.connectionSearchString = undefined;
+                        event.stopPropagation();
+                        this.update();
+                    },
+                    mouseenter: () => {
+                        this.showPreview(connectionEdit);
+                    },
+                    mouseleave: () => {
+                        this.showPreviewFor = undefined;
+                    },
+                    mousedown: (event) => {
+                        event.preventDefault();
+                    }
+                },
+                class: {
+                    selected
+                }
+            },
+            [connectionEdit.name, this.generatePreviewIfAvailable(connectionEdit)]
+        );
+    }
+
+    /**
+     * Gets the current connection operator
+     * Uses {@link selectedConnection} if it is set and in the list of available connections
+     *
+     * @param connections the list of available connection operators
+     * @returns the current connection operator
+     */
+    private getCurrentConnection(connections: ConnectionEditEntry[]): string {
+        if (
+            this.selectedConnection != undefined &&
+            connections.some((entry) => entry.name === this.selectedConnection)
+        ) {
+            return this.selectedConnection;
+        }
+        return connections[0].name;
+    }
+
+    /**
+     * Generates the connection icon.
+     *
+     * @returns The connection icon
+     */
+    private generateConnectionIcon(): VNode {
+        return h(
+            "svg",
+            {
+                attrs: {
+                    viewBox: "0 0 16 16"
+                },
+                class: {
+                    "connection-icon": true
+                }
+            },
+            [h("path", { attrs: { d: "M 2 13 H 7 V 5 H 14 m -3 -3 l 3 3 l -3 3" } })]
+        );
+    }
+
+    /**
+     * Gets the current connection edit
+     *
+     * @returns the current connection edit or undefined if no connection edit is available
+     */
+    getConnectionEdit(): `connection/${string}` | undefined {
+        if (this.currentRoot == undefined) {
+            return undefined;
+        }
+        const connections = this.getConnectionEdits(this.currentRoot);
+        if (connections.length === 0) {
+            return undefined;
+        }
+        return `connection/${this.getCurrentConnection(connections)}`;
     }
 
     /**
@@ -373,7 +600,7 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler {
      * @param toolboxEdits The toolbox edits in the group
      * @returns The UI for the toolbox item group
      */
-    private generateToolboxItemGroup(group: string, toolboxEdits: ToolboxEdit[]): VNode {
+    private generateToolboxItemGroup(group: string, toolboxEdits: ToolboxEditEntry[]): VNode {
         return h("div.group", [
             h("div.group-header", group),
             ...toolboxEdits.map((toolboxEdit) => this.generateToolboxItem(toolboxEdit))
@@ -386,15 +613,16 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler {
      * @param toolboxEdit The toolbox edit to generate the UI for
      * @returns The UI for the toolbox edit
      */
-    private generateToolboxItem(toolboxEdit: ToolboxEdit): VNode {
+    private generateToolboxItem(toolboxEdit: ToolboxEditEntry): VNode {
         return h(
             "button.item",
             {
                 on: {
                     mousedown: (event) => {
-                        const action: CreateAndMoveAction = {
-                            kind: CreateAndMoveAction.KIND,
-                            handlerProvider: (root) => new CreateElementMoveHandler(toolboxEdit.edit, root)
+                        const action: TransactionalMoveAction = {
+                            kind: TransactionalMoveAction.KIND,
+                            handlerProvider: (root) => new CreateElementMoveHandler(toolboxEdit.edit, root),
+                            maxUpdatesPerRevision: 1
                         };
                         this.pointerEventsDisabled = true;
                         event.preventDefault();
@@ -414,17 +642,17 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler {
     }
 
     /**
-     * Generates the preview for a toolbox edit if available.
+     * Generates the preview for a toolbox/connection edit if available.
      * If no preview is available, undefined is returned.
      *
-     * @param toolboxEdit The toolbox edit
+     * @param editEntry The toolbox/connection edit
      * @returns The preview or undefined
      */
-    private generatePreviewIfAvailable(toolboxEdit: ToolboxEdit): VNode | undefined {
-        if (this.showPreviewFor != toolboxEdit.edit) {
+    private generatePreviewIfAvailable(editEntry: ToolboxEditEntry | ConnectionEditEntry): VNode | undefined {
+        if (this.showPreviewFor != editEntry.edit) {
             return undefined;
         }
-        const preview = this.elementPreviews.get(toolboxEdit.edit);
+        const preview = this.elementPreviews.get(editEntry.edit);
         if (preview == undefined) {
             return undefined;
         }
@@ -451,7 +679,7 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler {
      * @param root The root element
      * @returns The toolbox edits
      */
-    private getToolboxEdits(root: Root): ToolboxEdit[] {
+    private getToolboxEdits(root: Root): ToolboxEditEntry[] {
         return Object.keys(root.edits)
             .filter((key) => key.startsWith("toolbox/"))
             .map((key) => {
@@ -461,17 +689,65 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler {
     }
 
     /**
+     * Extracts the connection edits from the root element.
+     *
+     * @param root The root element
+     * @returns The connection edits
+     */
+    private getConnectionEdits(root: Root): ConnectionEditEntry[] {
+        return Object.keys(root.edits)
+            .filter((key) => key.startsWith("connection/"))
+            .map((key) => ({ name: key.substring("connection/".length), edit: key as `connection/${string}` }));
+    }
+
+    /**
      * Shows a preview for a toolbox edit.
      * If no preview is available, a prediction is requested.
      *
      * @param edit The toolbox edit to show a preview for
      */
-    private showPreview(edit: ToolboxEdit): void {
+    private showPreview(edit: ToolboxEditEntry | ConnectionEditEntry): void {
         this.showPreviewFor = edit.edit;
         if (!this.elementPreviews.has(edit.edit)) {
-            this.requestPrediction(edit);
+            this.requestPrediction(this.generatePredictionEdit(edit), edit.edit);
         } else {
             this.update();
+        }
+    }
+
+    /**
+     * Creates a prediction edit for a toolbox/connection edit entry.
+     *
+     * @param edit The toolbox edit to generate a prediction for
+     * @returns The prediction edit
+     */
+    private generatePredictionEdit(edit: ToolboxEditEntry | ConnectionEditEntry): ToolboxEdit | ConnectionEdit {
+        if (edit.edit.startsWith("toolbox/")) {
+            return {
+                types: [edit.edit as `toolbox/${string}`],
+                values: {
+                    x: 0,
+                    y: 0,
+                    prediction: true
+                },
+                elements: [this.currentRoot!.id]
+            };
+        } else {
+            return {
+                types: [edit.edit as `connection/${string}`],
+                values: {
+                    start: {
+                        x: 0,
+                        y: 0
+                    },
+                    end: {
+                        x: 200,
+                        y: 0
+                    },
+                    prediction: true
+                },
+                elements: [this.currentRoot!.id]
+            };
         }
     }
 
@@ -479,19 +755,12 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler {
      * Requests a prediction for a toolbox edit.
      *
      * @param edit The toolbox edit to request a prediction for
+     * @param key The key under which the prediction is stored
      */
-    private async requestPrediction(edit: ToolboxEdit): Promise<void> {
+    private async requestPrediction(edit: ToolboxEdit | ConnectionEdit, key: string): Promise<void> {
         const request: ToolboxEditPredictionRequestAction = {
             kind: ToolboxEditPredictionRequestAction.KIND,
-            edit: {
-                types: [edit.edit],
-                values: {
-                    x: 0,
-                    y: 0,
-                    prediction: true
-                },
-                elements: [this.currentRoot!.id]
-            },
+            edit,
             requestId: generateRequestId()
         };
         const result = await this.actionDispatcher.request(request);
@@ -501,7 +770,7 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler {
             const model = this.modelFactory.createRoot(result.root);
             preview = this.renderer.renderElement(model);
         }
-        this.elementPreviews.set(edit.edit, preview);
+        this.elementPreviews.set(key, preview);
         this.update();
     }
 
@@ -511,7 +780,7 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler {
      *
      * @returns The search index
      */
-    private getSearchIndex(): MiniSearch<ToolboxEdit> {
+    private getSearchIndex(): MiniSearch<ToolboxEditEntry> {
         if (this.searchIndex == undefined) {
             this.searchIndex = new MiniSearch({
                 fields: ["name", "group"],
@@ -528,12 +797,36 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler {
         }
         return this.searchIndex;
     }
+
+    /**
+     * Returns the connection search index.
+     * If the connection search index is not yet available, it is created.
+     *
+     * @returns The connection search index
+     */
+    private getConnectionSearchIndex(): MiniSearch<ConnectionEditEntry> {
+        if (this.connectionSearchIndex == undefined) {
+            this.connectionSearchIndex = new MiniSearch({
+                fields: ["edit"],
+                storeFields: ["edit"],
+                searchOptions: {
+                    prefix: true,
+                    fuzzy: 0.2
+                },
+                tokenize: (string) => string.split(" ")
+            });
+            this.connectionSearchIndex.addAll(
+                this.getConnectionEdits(this.currentRoot!).map((edit) => ({ ...edit, id: edit }))
+            );
+        }
+        return this.connectionSearchIndex;
+    }
 }
 
 /**
  * A toolbox edit entry
  */
-interface ToolboxEdit {
+interface ToolboxEditEntry {
     /**
      * The group of the toolbox item
      */
@@ -546,4 +839,18 @@ interface ToolboxEdit {
      * The full key of the edit
      */
     edit: `toolbox/${string}`;
+}
+
+/**
+ * A connection edit entry
+ */
+interface ConnectionEditEntry {
+    /**
+     * The name of the connection operator
+     */
+    name: string;
+    /**
+     * The full key of the edit
+     */
+    edit: `connection/${string}`;
 }

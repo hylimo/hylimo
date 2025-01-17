@@ -1,26 +1,26 @@
 import { Command, CommandExecutionContext, CommandReturn, TYPES as SPROTTY_TYPES } from "sprotty";
-import { CreateAndMoveAction } from "./createAndMoveAction.js";
+import { TransactionalMoveAction } from "./transactionalMoveAction.js";
 import { injectable, inject } from "inversify";
 import { TYPES } from "../types.js";
-import { CreateAndMoveMouseListener } from "./createAndMoveMouseListener.js";
+import { MoveMouseListener } from "./moveMouseListener.js";
 import { SRoot } from "../../model/sRoot.js";
 
 /**
- * Command for CreateMoveAction
+ * Command for TransactionalMoveAction
  */
 @injectable()
-export class CreateAndMoveCommand extends Command {
-    static readonly KIND = CreateAndMoveAction.KIND;
+export class TransactionalMoveCommand extends Command {
+    static readonly KIND = TransactionalMoveAction.KIND;
 
     /**
      * The action to perform
      */
-    @inject(SPROTTY_TYPES.Action) private action!: CreateAndMoveAction;
+    @inject(SPROTTY_TYPES.Action) private action!: TransactionalMoveAction;
 
     /**
      * The listener to activate
      */
-    @inject(TYPES.CreateAndMoveMouseListener) private createMoveMouseListener!: CreateAndMoveMouseListener;
+    @inject(TYPES.CreateAndMoveMouseListener) private createMoveMouseListener!: MoveMouseListener;
 
     override execute(context: CommandExecutionContext): CommandReturn {
         this.createMoveMouseListener.startMove(context.root as SRoot, this.action);

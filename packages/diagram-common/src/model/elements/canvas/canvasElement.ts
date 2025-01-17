@@ -1,11 +1,12 @@
 import { Line } from "../../../line/model/line.js";
 import { Element } from "../base/element.js";
 import { SizedElement } from "../base/sizedElement.js";
+import { EditableCanvasContent } from "./editableCanvasContent.js";
 
 /**
  * Moveable and resizeable element in a canvas
  */
-export interface CanvasElement extends SizedElement {
+export interface CanvasElement extends SizedElement, EditableCanvasContent {
     type: typeof CanvasElement.TYPE;
     /**
      * The id of the CanvasPoint which is used as start

@@ -21,15 +21,15 @@ export const componentDiagramModule = InterpreterModule.create(
     [DiagramModuleNames.DIAGRAM, DiagramModuleNames.DSL],
     [],
     createDiagramModule("componentDiagram", [
-        elementModule,
         defaultStylesModule,
-        componentModule,
-        packageModule,
-        commentModule,
         associationsModule,
         nonNavigableAssociationsModule,
         compositionAndAggregationModule,
         extendsAndImplementsModule,
+        elementModule,
+        componentModule,
+        packageModule,
+        commentModule,
         readingDirectionModule,
         componentDiagramToolboxEditsModule
     ])

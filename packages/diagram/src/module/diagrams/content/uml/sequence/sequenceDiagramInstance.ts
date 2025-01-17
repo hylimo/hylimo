@@ -11,7 +11,7 @@ import { instanceToolboxEdits } from "../instance.js";
  */
 export const sequenceDiagramInstanceModule = InterpreterModule.create(
     "uml/sequence/instance",
-    ["uml/sequence/defaultValues", "uml/instance", "uml/sequence/participant", "uml/associations"],
+    ["uml/sequence/defaultValues", "uml/instance", "uml/sequence/participant"],
     [],
     [
         id(SCOPE).assignField(

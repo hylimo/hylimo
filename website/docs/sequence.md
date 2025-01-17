@@ -590,9 +590,9 @@ To build an instanced actor, pass the second parameter to `actor`, the function 
 ```hylimo
 sequenceDiagram {
     actor("user") {
-        public {
-            age: "30"
-            isGrownUp: "true"
+        values {
+            age = 30
+            isGrownUp = true
         }
     }
 

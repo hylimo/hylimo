@@ -46,6 +46,10 @@ export class SCanvasElement extends SCanvasContent implements CanvasElement, Pos
      * Position of this CanvasElement
      */
     position!: Point;
+    /**
+     * An expression which can be used by edits to obtain this element in an edit
+     */
+    editExpression?: string;
 
     constructor() {
         super();

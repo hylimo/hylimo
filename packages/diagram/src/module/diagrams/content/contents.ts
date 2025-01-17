@@ -32,6 +32,7 @@ import { sequenceDiagramAssociationsModule } from "./uml/sequence/sequenceDiagra
 import { participantModule } from "./uml/sequence/participant.js";
 import { lostFoundMessageModule } from "./uml/sequence/lostFoundMessage.js";
 import { valuesModule } from "./uml/classifier/values.js";
+import { sequenceDiagramCreateConnectionOperatorModule } from "./uml/sequence/sequenceDiagramCreateConnectionOperator.js";
 
 /**
  * All content modules
@@ -68,6 +69,7 @@ export const contents: InterpreterModule[] = [
     sectionsModule,
     sequenceDiagramActorModule,
     sequenceDiagramAssociationsModule,
+    sequenceDiagramCreateConnectionOperatorModule,
     sequenceDiagramInstanceModule,
     valuesModule
 ];

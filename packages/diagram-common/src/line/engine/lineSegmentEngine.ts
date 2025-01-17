@@ -56,4 +56,8 @@ export class LineSegmentEngine extends SegmentEngine<LineSegment> {
     override exists(segment: LineSegment, segmentStartPoint: Point): boolean {
         return !Point.equals(segmentStartPoint, segment.end);
     }
+
+    override toSvgPath(segment: LineSegment): string {
+        return `L ${segment.end.x} ${segment.end.y}`;
+    }
 }

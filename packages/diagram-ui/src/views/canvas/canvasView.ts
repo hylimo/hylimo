@@ -13,6 +13,7 @@ export class CanvasView implements IView {
             "g",
             {
                 attrs: {
+                    "pointer-events": "auto",
                     transform: `translate(${model.dx}, ${model.dy})`
                 }
             },

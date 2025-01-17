@@ -9,14 +9,13 @@ svg.hylimo {
         user-select: none;
     }
 
-    .canvas-element,
-    .marker {
-        pointer-events: visible;
-    }
-
     .selected-rect {
         fill: var(--diagram-layout-color-overlay);
         stroke: var(--diagram-layout-color-selected);
+    }
+
+    .selected-rect,
+    .create-connection-outline {
         stroke-width: calc(5px / var(--diagram-zoom));
         stroke-dasharray: calc(16px / var(--diagram-zoom));
     }
@@ -27,6 +26,7 @@ svg.hylimo {
         transform: scale(calc(1 / var(--diagram-zoom)));
     }
 
+    .create-connection-outline.target,
     .canvas-point.selected {
         stroke: var(--diagram-layout-color-selected);
     }
@@ -50,7 +50,6 @@ svg.hylimo {
         stroke-width: calc(12px / var(--diagram-zoom));
         fill: none;
         stroke: transparent;
-        pointer-events: visibleStroke;
     }
 
     .canvas-rotate-icon > path {
@@ -96,5 +95,43 @@ svg.hylimo {
     }
     .axis-aligned-segment-edit-y {
         cursor: ew-resize;
+    }
+
+    .create-connection-outline {
+        stroke: var(--diagram-layout-color);
+        fill: none;
+        cursor: default;
+        pointer-events: none;
+    }
+
+    .create-connection {
+        transform: scale(calc(1 / var(--diagram-zoom)));
+    }
+
+    .create-connection-point {
+        stroke-linecap: round;
+        stroke: var(--diagram-layout-color-selected);
+    }
+
+    .create-connection-arrow {
+        stroke: var(--diagram-layout-color);
+        opacity: 0.5;
+        fill: none;
+        stroke-width: 3px;
+    }
+
+    .create-connection:hover .create-connection-arrow {
+        stroke: var(--diagram-layout-color-selected);
+        opacity: 1;
+    }
+
+    .create-connection-hover-line {
+        stroke: transparent;
+        stroke-width: 12px;
+        fill: none;
+    }
+
+    .selectable {
+        cursor: pointer;
     }
 }

@@ -49,6 +49,10 @@ export class SCanvasConnection extends SCanvasContent implements CanvasConnectio
      */
     line!: TransformedLine;
     /**
+     * An expression which can be used by edits to obtain this element in an edit
+     */
+    editExpression?: string;
+    /**
      * Required to mark this as moveable
      */
     private readonly position = null;

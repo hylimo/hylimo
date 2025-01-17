@@ -141,6 +141,10 @@
     outline: none;
 }
 
+.sprotty .toolbox * {
+    font-variant-ligatures: no-contextual;
+}
+
 :root {
     --diagram-layout-color: #606770;
     --diagram-layout-color-selected: #00c6f2;

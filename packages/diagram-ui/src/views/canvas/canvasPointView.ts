@@ -54,6 +54,7 @@ export abstract class CanvasPointView<T extends SCanvasPoint> implements IView {
                 },
                 class: {
                     "canvas-point": true,
+                    selectable: true,
                     selected: model.selected
                 }
             })

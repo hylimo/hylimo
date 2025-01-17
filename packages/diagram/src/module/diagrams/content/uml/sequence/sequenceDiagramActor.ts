@@ -10,13 +10,7 @@ import { actorToolboxEdits } from "../actor.js";
  */
 export const sequenceDiagramActorModule = InterpreterModule.create(
     "uml/sequence/actor",
-    [
-        "uml/sequence/defaultValues",
-        "uml/actor",
-        "uml/sequence/participant",
-        "uml/associations",
-        "uml/sequence/instance"
-    ],
+    ["uml/sequence/defaultValues", "uml/actor", "uml/sequence/participant", "uml/sequence/instance"],
     [],
     [
         id(SCOPE).assignField(

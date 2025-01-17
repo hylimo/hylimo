@@ -1,4 +1,4 @@
-import { inject } from "inversify";
+import { inject, injectable } from "inversify";
 import { MouseListener, SModelElementImpl } from "sprotty";
 import { Action } from "sprotty-protocol";
 import { SCanvasConnection } from "../../model/canvas/sCanvasConnection.js";
@@ -30,6 +30,7 @@ import { applyToPoint } from "transformation-matrix";
 /**
  * Listener for splitting canvas connection segments by shift-clicking on them
  */
+@injectable()
 export class SplitCanvasSegmentMouseListener extends MouseListener {
     /**
      * The transaction id provider
@@ -37,7 +38,12 @@ export class SplitCanvasSegmentMouseListener extends MouseListener {
     @inject(TYPES.TransactionIdProvider) transactionIdProvider!: TransactionIdProvider;
 
     override mouseDown(target: SModelElementImpl, event: MouseEvent): Action[] {
-        if (event.shiftKey && target instanceof SCanvasConnection && !(event.ctrlKey || event.altKey)) {
+        if (
+            event.shiftKey &&
+            target instanceof SCanvasConnection &&
+            !(event.ctrlKey || event.altKey) &&
+            target.selected
+        ) {
             const canvas = target.parent;
             const matrix = canvas.getMouseTransformationMatrix();
             const coordinates = applyToPoint(matrix, { x: event.clientX, y: event.clientY });

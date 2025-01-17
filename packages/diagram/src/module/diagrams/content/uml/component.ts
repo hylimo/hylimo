@@ -1,5 +1,5 @@
 import { booleanType, fun, functionType, id, InterpreterModule, listType, optional, stringType } from "@hylimo/core";
-import { createToolboxEdit, SCOPE } from "../../../base/dslModule.js";
+import { createToolboxEdit, PREDICTION_STYLE_CLASS_ASSIGNMENT_EXPRESSION, SCOPE } from "../../../base/dslModule.js";
 
 /**
  * Module providing the component element
@@ -69,7 +69,7 @@ export const componentModule = InterpreterModule.create(
             "Component/Component with provided interface",
             `
                 component("Example") {
-                    provides("API")
+                    provides("API")' & ${PREDICTION_STYLE_CLASS_ASSIGNMENT_EXPRESSION} & '
                 }
             `
         ),
@@ -77,7 +77,7 @@ export const componentModule = InterpreterModule.create(
             "Component/Component with required interface",
             `
                 component("Example") {
-                    requires("API")
+                    requires("API")' & ${PREDICTION_STYLE_CLASS_ASSIGNMENT_EXPRESSION} & '
                 }
             `
         )

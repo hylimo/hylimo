@@ -1,47 +1,69 @@
 import { Edit, TransactionalAction } from "@hylimo/diagram-protocol";
+import { SModelElementImpl } from "sprotty";
+import { Matrix, applyToPoint } from "transformation-matrix";
 
 /**
- * Handler which can handle element moves
+ * Handler which can handle transactional move operations
  */
 export abstract class MoveHandler {
     /**
-     * Creats a new MoveHandler
-     *
-     * @param transactionId the id of the transaction
+     * If true, the mouse has been moved
      */
-    constructor(readonly transactionId: string) {}
+    protected hasMoved = false;
 
     /**
-     * Creates the action handling the move
+     * Creates a new MoveHandler
      *
-     * @param dx the absolute x offset
-     * @param dy the absolute y offset
-     * @param sequenceNumber the sequence number of the action
-     * @param committed if true, this is the final action of the transaction
-     * @param event the mouse event which triggered the move
-     * @returns the generated action
+     * @param transformationMatrix matrix applied to event coordinates
+     * @param requiresMove if true, if the action is committed without being moved before, the move is skipped
      */
-    generateAction(
-        dx: number,
-        dy: number,
-        sequenceNumber: number,
+    constructor(
+        protected readonly transformationMatrix: Matrix,
+        protected readonly requiresMove: boolean = true
+    ) {}
+
+    /**
+     * Generates the action(s) based on the target and the event
+     *
+     * @param target the target element of the event
+     * @param event the mouse event providing the coordinates
+     * @param committed passed through to the action
+     * @param transactionId the transaction id
+     * @param sequenceNumber the sequence number
+     * @returns the edit action
+     */
+    generateActions(
+        target: SModelElementImpl,
+        event: MouseEvent,
         committed: boolean,
-        event: MouseEvent
-    ): TransactionalAction {
-        return {
+        transactionId: string,
+        sequenceNumber: number
+    ): TransactionalAction[] {
+        if (!committed) {
+            this.hasMoved = true;
+        }
+        if (committed && this.requiresMove && !this.hasMoved) {
+            return [];
+        }
+        const { x, y } = applyToPoint(this.transformationMatrix, { x: event.pageX, y: event.pageY });
+        const action: TransactionalAction = {
             kind: TransactionalAction.KIND,
-            transactionId: this.transactionId,
-            sequenceNumber,
+            transactionId: transactionId,
+            sequenceNumber: sequenceNumber,
             committed,
-            edits: this.generateEdits(dx, dy, event)
+            edits: this.generateEdits(x, y, event, target)
         };
+        return [action];
     }
 
     /**
      * Generates the edits for the move
-     * @param dx the absolute x offset
-     * @param dy the absolute y offset
-     * @param event the mouse event which triggered the move
+     *
+     * @param x the x coordinate in the root canvas coordinate system
+     * @param y the y coordinate in the root canvas coordinate system
+     * @param event the causing mouse event
+     * @param target the target of the mouse event
+     * @returns the generated edit
      */
-    protected abstract generateEdits(dx: number, dy: number, event: MouseEvent): Edit[];
+    abstract generateEdits(x: number, y: number, event: MouseEvent, target: SModelElementImpl): Edit[];
 }

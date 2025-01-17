@@ -12,7 +12,8 @@ import {
     SModelRootImpl,
     TYPES as SPROTTY_TYPES,
     UpdateModelCommand as BaseUpdateModelCommand,
-    ViewportRootElementImpl
+    ViewportRootElementImpl,
+    ModelIndexImpl
 } from "sprotty";
 import { SRoot } from "../../model/sRoot.js";
 import {
@@ -21,7 +22,6 @@ import {
 } from "../animation/linearInterpolationAnimation.js";
 import { computeCommonAnimatableFields, isLinearAnimatable } from "../animation/model.js";
 import { createFitToScreenAction } from "../viewport/fitToScreenAction.js";
-import { FluentIterable } from "sprotty/lib/utils/iterable.js";
 import { TYPES } from "../types.js";
 import { TransactionStateProvider } from "../transaction/transactionStateProvider.js";
 
@@ -68,12 +68,13 @@ export class UpdateModelCommand extends BaseUpdateModelCommand {
         if (fadeAnimation instanceof Animation) {
             animations.push(fadeAnimation);
         }
-        if (animations.length > 1) {
-            return new CompoundAnimation(newRoot, context, animations);
-        } else if (animations.length === 1) {
-            return animations[0];
-        } else {
+        const { distance } = calculateLevenshteinDistance(this.oldRoot.index, newRoot.index);
+        if (distance > 0 || animations.length === 0) {
             return newRoot;
+        } else if (animations.length > 1) {
+            return new CompoundAnimation(newRoot, context, animations);
+        } else {
+            return animations[0];
         }
     }
 
@@ -97,6 +98,9 @@ export class UpdateModelCommand extends BaseUpdateModelCommand {
         if (left instanceof ViewportRootElementImpl && right instanceof ViewportRootElementImpl) {
             right.scroll = left.scroll;
             right.zoom = left.zoom;
+        }
+        if (left instanceof SRoot && right instanceof SRoot) {
+            right.createConnectionProvider = left.createConnectionProvider;
         }
         if (isLinearAnimatable(left) && isLinearAnimatable(right)) {
             const commonFields = computeCommonAnimatableFields(left, right);
@@ -126,7 +130,7 @@ export class UpdateModelCommand extends BaseUpdateModelCommand {
         (newRoot as SRoot).changeRevision = (oldRoot as SRoot).changeRevision + 1;
         (newRoot as SRoot).sequenceNumber = (oldRoot as SRoot).sequenceNumber;
         if (!this.transactionStateProvider.isInTransaction) {
-            layoutViewportIfNecessary(oldRoot.index.all(), newRoot.index.all(), this.dispatcher);
+            layoutViewportIfNecessary(oldRoot.index, newRoot.index, this.dispatcher);
         }
         return super.performUpdate(oldRoot, newRoot, context);
     }
@@ -136,57 +140,59 @@ export class UpdateModelCommand extends BaseUpdateModelCommand {
  * Fits the viewport to the new diagram size if too many changes occurred (i.e. the user pasted half a diagram into the editor).
  *
  * @param newElements the index storing all new model elements
- * @param old the index storing all current model elements
+ * @param oldElements the index storing all current model elements
  * @param dispatcher the dispatcher to dispatch the 'fit to screen' action
  */
 function layoutViewportIfNecessary(
-    old: FluentIterable<SModelElementImpl>,
-    newElements: FluentIterable<SModelElementImpl>,
+    oldElements: ModelIndexImpl,
+    newElements: ModelIndexImpl,
     dispatcher: IActionDispatcher
 ) {
-    const updatedElements = new Set(newElements.map((update) => update.id));
-    const oldElements = new Set(old.map((element) => element.id));
-    const difference = calculateDifference(oldElements, updatedElements);
-    if (difference >= 0.5) {
+    const { ratioOfDivergence } = calculateLevenshteinDistance(oldElements, newElements);
+    if (ratioOfDivergence >= 0.5) {
         dispatcher.dispatch(createFitToScreenAction());
     }
 }
 
 /**
- * Calculates the difference ratio in the current diagram.<br>
- * The result is limited to the intervall [0, 1] where 0 means completely equal and 1 means completely different.
+ * Calculates the Levenshtein distance and ratio of divergence on two sets of elements instead of two strings.
  *
- * @param oldElements the elements that were previously in this model
- * @param newElements the elements that were updated
- * @return the ratio of divergence
- */
-function calculateDifference(oldElements: Set<string>, newElements: Set<string>): number {
-    const distance = calculateLevenshteinDistance(oldElements, newElements);
-    const totalElements = new Set([...oldElements, ...newElements]);
-    return distance / totalElements.size;
-}
-
-/**
- * Calculates the Levenshtein distance on two sets of strings instead of two strings.<br>
- * The typical rules apply: each deletion and insertion is counted as one additional distance, and replacement/movement can be ignored in our usecase
+ * The typical rules apply: each deletion and insertion is counted as one additional distance, and replacement/movement can be ignored in our usecase.
+ * Elements are considered equal if their id and type are equal.
+ * The divergence ratio is limited to the interval [0, 1] where 0 means completely equal and 1 means completely different.
  *
- * @param oldElements the set of previously present model element IDs
- * @param newElements the set of updated model element IDs
- * @return the number of deviations for the given inputs
+ *
+ * @param newElements the index storing all new model elements
+ * @param oldElements the index storing all current model elements
+ * @return the number of deviations for the given inputs and ratio of divergence
  */
-function calculateLevenshteinDistance(oldElements: Set<string>, newElements: Set<string>): number {
+function calculateLevenshteinDistance(
+    oldElements: ModelIndexImpl,
+    newElements: ModelIndexImpl
+): {
+    distance: number;
+    ratioOfDivergence: number;
+} {
     let distance = 0;
-    for (const newlyAdded of newElements) {
-        if (!oldElements.has(newlyAdded)) {
+    let distinctCount = 0;
+
+    oldElements.all().forEach((oldElement) => {
+        const newElement = newElements.getById(oldElement.id);
+        if (newElement == undefined || oldElement.type !== newElement.type) {
             distance++;
         }
-    }
-
-    for (const deleted of oldElements) {
-        if (!newElements.has(deleted)) {
+        distinctCount++;
+    });
+    newElements.all().forEach((newElement) => {
+        const oldElement = oldElements.getById(newElement.id);
+        if (oldElement == undefined || newElement.type !== oldElement.type) {
             distance++;
+            distinctCount++;
         }
-    }
+    });
 
-    return distance;
+    return {
+        distance,
+        ratioOfDivergence: distance / distinctCount
+    };
 }

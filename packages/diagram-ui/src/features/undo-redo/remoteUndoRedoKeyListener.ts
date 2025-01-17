@@ -1,3 +1,4 @@
+import { injectable } from "inversify";
 import { RemoteRedoAction, RemoteUndoAction } from "@hylimo/diagram-protocol";
 import { isCtrlOrCmd, KeyListener, SModelElementImpl } from "sprotty";
 import { Action } from "sprotty-protocol";
@@ -5,6 +6,7 @@ import { Action } from "sprotty-protocol";
 /**
  * Key listener for remote undo and redo actions
  */
+@injectable()
 export class RemoteUndoRedoKeyListener extends KeyListener {
     override keyDown(element: SModelElementImpl, event: KeyboardEvent): Action[] {
         if (!isCtrlOrCmd(event)) {

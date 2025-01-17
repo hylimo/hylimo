@@ -27,6 +27,7 @@ export * from "./edit/edit/replaceEditEngine.js";
 export * from "./edit/edit/template.js";
 export * from "./edit/edit/transactionalEdit.js";
 export * from "./edit/handlers/axisAlignedSegmentPosHandler.js";
+export * from "./edit/handlers/connectionHandler.js";
 export * from "./edit/handlers/editHandler.js";
 export * from "./edit/handlers/editHandlerRegistry.js";
 export * from "./edit/handlers/moveLineDistHandler.js";
