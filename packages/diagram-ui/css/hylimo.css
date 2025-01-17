@@ -26,6 +26,7 @@ svg.hylimo {
         transform: scale(calc(1 / var(--diagram-zoom)));
     }
 
+    .create-connection-outline.target,
     .canvas-point.selected {
         stroke: var(--diagram-layout-color-selected);
     }

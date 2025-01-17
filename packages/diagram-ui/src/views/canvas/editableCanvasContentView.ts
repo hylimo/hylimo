@@ -133,7 +133,8 @@ export abstract class EditableCanvasContentView {
                 transform: toSVG(preview.line.transform)
             },
             class: {
-                "create-connection-outline": true
+                "create-connection-outline": true,
+                target: this.transactionStateProvider.isInTransaction
             }
         });
     }
