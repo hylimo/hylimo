@@ -410,18 +410,19 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler, Conn
             "div.selectable-input",
             {
                 on: {
-                    click: () => {
+                    click: (event, vnode) => {
                         this.connectionSearchString = "";
                         this.searchString = undefined;
+                        (vnode.elm as HTMLDivElement).querySelector("input")?.focus();
                         this.update();
                     },
-                    focusout: (event) => {
-                        const relatedTarget = event.relatedTarget;
-                        const relatedTargetIsItem =
-                            relatedTarget instanceof HTMLElement && relatedTarget.closest(".item") != undefined;
-                        if (!relatedTargetIsItem && this.connectionSearchString != undefined) {
-                            this.connectionSearchString = undefined;
-                            this.update();
+                    focusout: () => {
+                        this.connectionSearchString = undefined;
+                        this.update();
+                    },
+                    mousedown: (event) => {
+                        if (!(event.target instanceof HTMLInputElement)) {
+                            event.preventDefault();
                         }
                     }
                 }
@@ -439,7 +440,7 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler, Conn
      */
     private generateConnectionSearchInput(currentConnection: string): VNode {
         return h("input", {
-            props: {
+            attrs: {
                 value: currentConnection
             },
             on: {
@@ -453,6 +454,13 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler, Conn
                         this.update();
                     }
                 }
+            },
+            hook: {
+                update: (oldVnode, vnode) => {
+                    if (this.connectionSearchString == undefined) {
+                        (vnode.elm as HTMLInputElement).value = currentConnection;
+                    }
+                }
             }
         });
     }
@@ -463,8 +471,9 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler, Conn
      * @returns The UI for the connection operator toolbox items
      */
     private generateConnectionToolboxItems(): VNode {
-        const filteredConnections = this.getFilteredConnections(this.getConnectionEdits(this.currentRoot!));
-        const selectedConnection = this.getCurrentConnection(filteredConnections);
+        const connections = this.getConnectionEdits(this.currentRoot!);
+        const filteredConnections = this.getFilteredConnections(connections);
+        const selectedConnection = this.getCurrentConnection(connections);
         return h("div.group", [
             ...filteredConnections.map((connection) =>
                 this.generateConnectionToolboxItem(connection, connection.name === selectedConnection)
@@ -518,6 +527,9 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler, Conn
                     },
                     mouseleave: () => {
                         this.showPreviewFor = undefined;
+                    },
+                    mousedown: (event) => {
+                        event.preventDefault();
                     }
                 },
                 class: {

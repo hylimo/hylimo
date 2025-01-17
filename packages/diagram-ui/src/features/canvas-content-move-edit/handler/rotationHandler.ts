@@ -1,7 +1,7 @@
-import { DefaultEditTypes } from "@hylimo/diagram-common";
+import { DefaultEditTypes, Point } from "@hylimo/diagram-common";
 import { MoveHandler } from "../../move/moveHandler.js";
 import { Edit, RotateEdit } from "@hylimo/diagram-protocol";
-import { Matrix } from "transformation-matrix";
+import { decomposeTSR, fromTwoMovingPoints, Matrix } from "transformation-matrix";
 
 /**
  * Move handler for rotating CanvasElements
@@ -24,7 +24,12 @@ export class RotationHandler extends MoveHandler {
     }
 
     override generateEdits(x: number, y: number): Edit[] {
-        let newRotation = (Math.atan2(y, x) / (2 * Math.PI)) * 360 + this.currentRotation - 270;
+        const rotationIconPosition: Point = { x: 0, y: -1 };
+        const mousePosition: Point = { x, y };
+        const { rotation } = decomposeTSR(
+            fromTwoMovingPoints(Point.ORIGIN, rotationIconPosition, Point.ORIGIN, mousePosition)
+        );
+        let newRotation = this.currentRotation + rotation.angle * (180 / Math.PI);
         while (newRotation < 0) {
             newRotation += 360;
         }
