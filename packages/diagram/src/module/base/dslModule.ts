@@ -1,6 +1,8 @@
 import {
+    assertString,
     assign,
     enumObject,
+    ExecutableExpression,
     fun,
     functionType,
     id,
@@ -14,6 +16,8 @@ import {
     optional,
     or,
     ParseableExpressions,
+    str,
+    stringType,
     validateObject
 } from "@hylimo/core";
 import { canvasContentType, canvasPointType, elementType } from "./types.js";
@@ -28,6 +32,9 @@ import {
 import { LinePointLayoutConfig } from "../../layout/elements/canvas/linePointLayoutConfig.js";
 import { DiagramModuleNames } from "../diagramModuleNames.js";
 import { allStyleAttributes } from "./diagramModule.js";
+import dedent from "dedent";
+import { LayoutEngine } from "../../layout/engine/layoutEngine.js";
+import { jsonataStringLiteral } from "./editModule.js";
 
 /**
  * Identifier for the scope variable
@@ -85,6 +92,50 @@ const canvasConnectionWithScopeProperties = [
 ];
 
 /**
+ * An jsonata expression which assigns the prediction class to an element if the prediction is true
+ */
+export const PREDICTION_STYLE_CLASS_ASSIGNMENT_EXPRESSION = `(prediction ? ' styles { class += "${LayoutEngine.PREDICTION_CLASS}" }' : '')`;
+
+/**
+ * Creates a toolbox edit which is registered in `scope.internal.canvasAddEdits`
+ *
+ * @param edit the name of the edit, implicitly prefixed with `toolbox/`. To be added correctly to the toolbox, follow the format `Group/Name`, so i.e. `Class/Class with nested class`.
+ * @param createElementCode the code which creates the element, expected to return a CanvasElement, i.e. `class("Example")`. Dedented, NOT escaped
+ * @param enableDragging whether the element should be draggable
+ * @returns the executable expression which creates the toolbox edit
+ */
+export function createToolboxEdit(
+    edit: string,
+    createElementCode: string,
+    enableDragging: boolean = true
+): ExecutableExpression {
+    let modifiedEdit = `'\n${dedent(createElementCode)}'`;
+    if (enableDragging) {
+        modifiedEdit += "& ' layout {\n    pos = apos(' & x & ', ' & y & ')\n}'";
+    }
+    modifiedEdit += `& ${PREDICTION_STYLE_CLASS_ASSIGNMENT_EXPRESSION}`;
+    return id(SCOPE).field("internal").field("canvasAddEdits").assignField(`toolbox/${edit}`, str(modifiedEdit));
+}
+
+/**
+ * Generates the fragments used for the create connection edit
+ * - startExpression: jsonata expression used with the connection operator
+ * - posExpression: jsonata expression used within the start / end DSL functions
+ *
+ * @param variable the variable to generate the fragments for
+ * @returns the jsonata fragment expressions
+ */
+export function connectionEditFragments(variable: "start" | "end"): {
+    startExpression: string;
+    posExpression: string;
+} {
+    return {
+        startExpression: `(${variable}.expression ? ${variable}.expression : ('apos(' & ${variable}.x & ', ' & ${variable}.y &')'))`,
+        posExpression: `(${variable}.expression ? ${variable}.pos : '')`
+    };
+}
+
+/**
  * Expressions which create the initial scope which is passed to the callback of all diagram DSL functions
  */
 const scopeExpressions: ParseableExpressions = [
@@ -95,7 +146,8 @@ const scopeExpressions: ParseableExpressions = [
             contents = list(),
             internal = [
                 classCounter = 0,
-                styles = [styles = list()]
+                styles = [styles = list()],
+                canvasAddEdits = []
             ]
         ]
     `,
@@ -587,31 +639,86 @@ const scopeExpressions: ParseableExpressions = [
     id(SCOPE)
         .field("internal")
         .assignField(
+            "createConnectionEdit",
+            jsFun(
+                (args, context) => {
+                    const operator = assertString(args.getFieldValue(0, context));
+                    const createLine = args.getFieldValue("lineType", context).toNative() == "line";
+                    const escapedOperator = jsonataStringLiteral(` ${operator} `);
+                    const start = connectionEditFragments("start");
+                    const end = connectionEditFragments("end");
+                    const segment = createLine ? "line(" : "axisAligned(0.5, ";
+                    const edit = `'\n' & ${start.startExpression} & ${escapedOperator} & ${end.startExpression} & ' with {\n    over = start(' & ${start.posExpression} & ').${segment}end(' & ${end.posExpression} & '))\n}' & ${PREDICTION_STYLE_CLASS_ASSIGNMENT_EXPRESSION}`;
+                    context
+                        .getField(SCOPE)
+                        .getFieldValue("internal", context)
+                        .getFieldValue("canvasAddEdits", context)
+                        .setLocalField(`connection/${operator}`, { value: context.newString(edit) }, context);
+                    return context.null;
+                },
+                {
+                    docs: "Creates a connection edit for the given operator",
+                    params: [
+                        [0, "the operator to create the edit for", stringType],
+                        [
+                            "lineType",
+                            'Determines what sort of segment should be created. Defaults to "axisAligned". Optional, one of "axisAligned" (line that either moves on the x-axis, or the y-axis, but not both simultaneously), "line" (straight line).',
+                            optional(or(literal("axisAligned"), literal("line")))
+                        ]
+                    ],
+                    returns: "null"
+                }
+            )
+        ),
+    id(SCOPE)
+        .field("internal")
+        .assignField(
             "createConnectionOperator",
             fun(
-                `
-                startMarkerFactory = args.startMarkerFactory
-                endMarkerFactory = args.endMarkerFactory
-                class = args.class
-
-                {
-                    (start, end) = args
-                    scope.internal.createConnection(
-                        start,
-                        end,
-                        class,
-                        args,
-                        args.self,
-                        startMarkerFactory = startMarkerFactory,
-                        endMarkerFactory = endMarkerFactory
+                [
+                    `
+                        startMarkerFactory = args.startMarkerFactory
+                        endMarkerFactory = args.endMarkerFactory
+                        class = args.class
+                        (operator) = args
+                        if(operator != null) {
+                            scope.internal.createConnectionEdit(operator)
+                        }
+                    `,
+                    fun(
+                        `
+                            (start, end) = args
+                            scope.internal.createConnection(
+                                start,
+                                end,
+                                class,
+                                args,
+                                args.self,
+                                startMarkerFactory = startMarkerFactory,
+                                endMarkerFactory = endMarkerFactory
+                            )
+                        `,
+                        {
+                            docs: "Creates a new connection between two canvas elements/connections/points",
+                            params: [
+                                [0, "the start element", canvasContentType],
+                                [1, "the end element", canvasContentType]
+                            ],
+                            returns: "The created connection"
+                        }
                     )
-                }
-            `,
+                ],
                 {
                     docs: "Creates new connection operator function which can be used create new connections.",
                     params: [
-                        [0, "optional start marker factory", optional(functionType)],
-                        [1, "optional end marker factory", optional(functionType)]
+                        [
+                            0,
+                            "the operator to use for the create connection edit, if omitted no edit is created",
+                            optional(stringType)
+                        ],
+                        ["startMarkerFactory", "optional start marker factory", optional(functionType)],
+                        ["endMarkerFactory", "optional end marker factory", optional(functionType)],
+                        ["class", "the class of the connection", optional(listType(stringType))]
                     ],
                     returns: "The generated connection operator function"
                 }
@@ -630,6 +737,26 @@ const scopeExpressions: ParseableExpressions = [
                     }
                     isNew // Return true if the name has actually been added
                 `
+            )
+        ),
+    id(SCOPE)
+        .field("internal")
+        .assignField(
+            "registerCanvasContentEditExpressions",
+            fun(
+                `
+                    scope.forEach {
+                        (value, key) = args
+                        if ((value != null) && ((value.type == "${CanvasElement.TYPE}") || (value.type == "${CanvasConnection.TYPE}"))) {
+                            value.editExpression = nameToExpression(key)
+                        }
+                    }
+                `,
+                {
+                    docs: "Iterates over scope and assigns the edit expressions to all found canvas elements",
+                    params: [],
+                    returns: "null"
+                }
             )
         ),
     id(SCOPE).assignField(
@@ -672,7 +799,15 @@ const scopeExpressions: ParseableExpressions = [
     `
         scopeEnhancer(scope)
         callback.callWithScope(scope)
-        diagramCanvas = canvas(contents = scope.contents)
+        canvasEdits = []
+        scope.internal.canvasAddEdits.forEach {
+            (value, key) = args
+            if(key != "proto") {
+                canvasEdits[key] = createAddEdit(callback, value)
+            } 
+        }
+        scope.internal.registerCanvasContentEditExpressions()
+        diagramCanvas = canvas(contents = scope.contents, edits = canvasEdits)
         createDiagram(diagramCanvas, scope.internal.styles, scope.fonts)
     `
 ];

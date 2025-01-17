@@ -41,4 +41,8 @@ export class BezierSegmentEngine extends SegmentEngine<BezierSegment> {
             Point.equals(segmentStartPoint, segment.endControlPoint)
         );
     }
+
+    override toSvgPath(segment: BezierSegment): string {
+        return `C ${segment.startControlPoint.x} ${segment.startControlPoint.y}, ${segment.endControlPoint.x} ${segment.endControlPoint.y}, ${segment.end.x} ${segment.end.y}`;
+    }
 }

@@ -21,6 +21,7 @@ import { ExecutableListEntry } from "./ast/executableListEntry.js";
 import { ExecutableConstExpression } from "./ast/executableConstExpression.js";
 import { StringObject } from "./objects/stringObject.js";
 import { NumberObject } from "./objects/numberObject.js";
+import { BooleanObject } from "./objects/booleanObject.js";
 
 /**
  * Helper function to create an IdentifierExpression without a position
@@ -53,6 +54,16 @@ export function num(value: number): ExecutableConstExpression {
 }
 
 /**
+ * Helper function to create boolean literals
+ *
+ * @param value the value of the literal
+ * @returns the created literal expression
+ */
+export function bool(value: boolean): ExecutableConstExpression {
+    return new ExecutableConstExpression({ value: new BooleanObject(value) });
+}
+
+/**
  * Helper function to create an ExecutableAssignmentExpression without a target
  * (uses scope as target)
  *
@@ -65,7 +76,7 @@ export function assign(field: string, value: ExecutableExpression): ExecutableAs
 }
 
 /**
- * Helpe rfunction to create an ExecutableObjectExpression
+ * Helper function to create an ExecutableObjectExpression
  *
  * @param fields the fields of the object
  * @returns the created ExecutableObjectExpression

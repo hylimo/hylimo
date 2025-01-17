@@ -13,13 +13,13 @@ export const monarchTokenProvider: languages.IMonarchLanguage = {
         expression: [
             //function call
             [
-                /((([!#%&'+\-:;<=>?@\\^`|~]|\*(?!\/)|\/(?![/*])|\.{2,}|[$_]+(?![\p{ID_Continue}$]))+)|([\p{ID_Start}_$][\p{ID_Continue}$]*)(?=[^\S\n]*[{(]))/u,
+                /(((([!#%&'+\-:;<=>?@\\^|~]|\*(?!\/)|\/(?![/*])|\.{2,}|[$_]+(?![\p{ID_Continue}$]))+)|([\p{ID_Start}_$][\p{ID_Continue}$]*)|`[^\n`]+`)(?=[^\S\n]*[{(]))/u,
                 { token: "entity.name.function", switchTo: "@expression.after" }
             ],
 
             //variable
             [
-                /(([!#%&'+\-:;<=>?@\\^`|~]|\*(?!\/)|\/(?![/*])|\.{2,}|[$_]+(?![\p{ID_Continue}$]))+)|([\p{ID_Start}_$][\p{ID_Continue}$]*)/u,
+                /((([!#%&'+\-:;<=>?@\\^|~]|\*(?!\/)|\/(?![/*])|\.{2,}|[$_]+(?![\p{ID_Continue}$]))+)|([\p{ID_Start}_$][\p{ID_Continue}$]*)|`[^\n`]+`)/u,
                 { token: "variable", switchTo: "@expression.after" }
             ],
 
@@ -99,7 +99,7 @@ export const monarchTokenProvider: languages.IMonarchLanguage = {
 
             // variable
             [
-                /((([!#%&'+\-:;<=>?@\\^`|~]|\*(?!\/)|\/(?![/*])|\.{2,}|([_$](?![_$]*[a-zA-Z0-9])))+)|([a-zA-Z_$][a-zA-Z0-9_$]*|\.)+)/u,
+                /(((([!#%&'+\-:;<=>?@\\^|~]|\*(?!\/)|\/(?![/*])|\.{2,}|[$_]+(?![\p{ID_Continue}$]))+)|([\p{ID_Start}_$][\p{ID_Continue}$]*)|`[^\n`]+`)|\.)+/u,
                 {
                     token: "operator",
                     switchTo: "@expression"
@@ -123,7 +123,7 @@ export const monarchTokenProvider: languages.IMonarchLanguage = {
         "expression.after.access": [
             //function call
             [
-                /((([!#%&'+\-:;<=>?@\\^`|~]|\*(?!\/)|\/(?![/*])|\.{2,}|[$_]+(?![\p{ID_Continue}$]))+)|([\p{ID_Start}_$][\p{ID_Continue}$]*)(?=[^\S\n]*[{(]))/u,
+                /(((([!#%&'+\-:;<=>?@\\^|~]|\*(?!\/)|\/(?![/*])|\.{2,}|[$_]+(?![\p{ID_Continue}$]))+)|([\p{ID_Start}_$][\p{ID_Continue}$]*)|`[^\n`]+`)(?=[^\S\n]*[{(]))/u,
                 {
                     token: "entity.name.function",
                     switchTo: "expression.after"
@@ -132,7 +132,7 @@ export const monarchTokenProvider: languages.IMonarchLanguage = {
 
             //variable
             [
-                /(([!#%&'+\-:;<=>?@\\^`|~]|\*(?!\/)|\/(?![/*])|\.{2,}|[$_]+(?![\p{ID_Continue}$]))+)|([\p{ID_Start}_$][\p{ID_Continue}$]*)/u,
+                /((([!#%&'+\-:;<=>?@\\^|~]|\*(?!\/)|\/(?![/*])|\.{2,}|[$_]+(?![\p{ID_Continue}$]))+)|([\p{ID_Start}_$][\p{ID_Continue}$]*)|`[^\n`]+`)/u,
                 {
                     token: "variable.property",
                     switchTo: "@expression.after"
@@ -182,13 +182,15 @@ export const languageConfiguration: languages.LanguageConfiguration = {
         { open: "{", close: "}" },
         { open: "(", close: ")" },
         { open: "[", close: "]" },
-        { open: '"', close: '"' }
+        { open: '"', close: '"' },
+        { open: "`", close: "`" }
     ],
     autoClosingPairs: [
         { open: "{", close: "}" },
         { open: "(", close: ")" },
         { open: "[", close: "]" },
-        { open: '"', close: '"' }
+        { open: '"', close: '"' },
+        { open: "`", close: "`" }
     ],
     brackets: [
         ["{", "}"],

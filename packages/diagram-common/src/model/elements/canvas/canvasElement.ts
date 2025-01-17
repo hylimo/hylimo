@@ -1,11 +1,12 @@
 import { Line } from "../../../line/model/line.js";
 import { Element } from "../base/element.js";
 import { SizedElement } from "../base/sizedElement.js";
+import { EditableCanvasContent } from "./editableCanvasContent.js";
 
 /**
  * Moveable and resizeable element in a canvas
  */
-export interface CanvasElement extends SizedElement {
+export interface CanvasElement extends SizedElement, EditableCanvasContent {
     type: typeof CanvasElement.TYPE;
     /**
      * The id of the CanvasPoint which is used as start
@@ -37,8 +38,9 @@ export namespace CanvasElement {
 
     /**
      * Checks if an element is a CanvasElement
-     * @param value
-     * @returns
+     *
+     * @param value the element to check
+     * @returns true if the element is a CanvasElement
      */
     export function isCanvasElement(value: Element): value is CanvasElement {
         return value.type === TYPE;

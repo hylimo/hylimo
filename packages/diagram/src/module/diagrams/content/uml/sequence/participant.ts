@@ -8,7 +8,7 @@ import { participantType } from "./types.js";
  */
 export const participantModule = InterpreterModule.create(
     "uml/sequence/participant",
-    ["uml/sequence/defaultValues", "uml/sequence/associations"],
+    ["uml/sequence/defaultValues"],
     [],
     [
         `
@@ -25,8 +25,6 @@ export const participantModule = InterpreterModule.create(
                 } { 0 }
                 participantElement.declaringEvent = event
 
-                scope.println("Hello World 7")
-
                 // Calculate x
                 below = args.below
                 previous = scope.internal.lastSequenceDiagramParticipant
@@ -40,8 +38,6 @@ export const participantModule = InterpreterModule.create(
                     }
                 }
 
-                scope.println("Hello World 8")
-
                 participantElement.pos = scope.apos(participantElement.x, participantElement.y) 
 
                 // Create the lifeline of this participantElement now so that it will always be rendered behind everything else
@@ -51,8 +47,6 @@ export const participantModule = InterpreterModule.create(
 
                 scope.internal.sequenceDiagramParticipants += participantElement
                 scope.internal.lastSequenceDiagramParticipant = participantElement
-
-                scope.println("Hello World 9")
 
                 // To calculate an event specific coordinate, we must first know how much space the active activity indicators take up
                 // Calculate the left coordinate of this participant at the current event - especially for when there are currently activity indicators
@@ -86,7 +80,9 @@ export const participantModule = InterpreterModule.create(
                     participantElement.class += "non-top-level-participant"
                 }
 
-                scope.println("Hello World 10")
+                scope.internal.canvasAddEdits["toolbox/Activate instance or actor/\${name}"] = "'activate(' & \${nameToJsonataStringLiteral(name)} & ')'"
+                scope.internal.canvasAddEdits["toolbox/Deactive instance or actor/\${name}"] = "'deactivate(' & \${nameToJsonataStringLiteral(name)} & ')'"
+                scope.internal.canvasAddEdits["toolbox/Destroy instance or actor/\${name}"] = "'destroy(' & \${nameToJsonataStringLiteral(name)} & ')'"
 
                 participantElement
             }
@@ -100,6 +96,7 @@ export const participantModule = InterpreterModule.create(
                 }
             }
         `,
+
         id(SCOPE).assignField(
             "destroy",
             fun(

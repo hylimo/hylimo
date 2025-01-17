@@ -4,13 +4,14 @@ import { VNode } from "snabbdom";
 import { IView, IViewArgs, RenderingContext, svg } from "sprotty";
 import { findViewportZoom } from "../../base/findViewportZoom.js";
 import { SCanvasElement } from "../../model/canvas/sCanvasElement.js";
-import { SCanvas } from "../../model/canvas/sCanvas.js";
+import { CanvasLike } from "../../model/canvas/canvasLike.js";
+import { EditableCanvasContentView } from "./editableCanvasContentView.js";
 
 /**
  * IView that represents a CanvasElement
  */
 @injectable()
-export class CanvasElementView implements IView {
+export class CanvasElementView extends EditableCanvasContentView implements IView {
     /**
      * The path to use for the rotate icon
      */
@@ -62,17 +63,29 @@ export class CanvasElementView implements IView {
             }
             children.push(...this.generateResizeBorder(model));
         }
-        return svg(
+        const createConnection = this.renderCreateConnection(model);
+        const element = svg(
             "g",
             {
                 attrs: {
                     transform: `translate(${position.x}, ${position.y}) rotate(${model.rotation})`
                 },
                 class: {
-                    "canvas-element": true
+                    "canvas-element": true,
+                    selectable: true
                 }
             },
             ...children
+        );
+        return svg(
+            "g",
+            {
+                attrs: {
+                    "pointer-events": "visible"
+                }
+            },
+            element,
+            createConnection
         );
     }
 
@@ -178,7 +191,7 @@ export class CanvasElementView implements IView {
      * @returns the offset for the rotation of the canvas element
      */
     private computeResizeIconOffset(model: Readonly<SCanvasElement>) {
-        const canvasRotation = (model.parent as SCanvas).globalRotation;
+        const canvasRotation = (model.parent as CanvasLike).globalRotation;
         const iconOffset = Math.round(((model.rotation + canvasRotation) / 45) % 8);
         return iconOffset;
     }

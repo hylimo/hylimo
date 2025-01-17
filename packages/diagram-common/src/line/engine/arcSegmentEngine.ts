@@ -137,6 +137,13 @@ export class ArcSegmentEngine extends SegmentEngine<ArcSegment> {
             deltaAngle
         };
     }
+
+    override toSvgPath(segment: ArcSegment, start: Point): string {
+        const { deltaAngle } = this.getArcData(start, segment);
+        const largeArcFlag = Math.abs(deltaAngle) > Math.PI ? 1 : 0;
+        const sweepFlag = deltaAngle > 0 ? 1 : 0;
+        return `A ${segment.radiusX} ${segment.radiusY} 0 ${largeArcFlag} ${sweepFlag} ${segment.end.x} ${segment.end.y}`;
+    }
 }
 
 /**

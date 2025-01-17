@@ -2,12 +2,13 @@ import { Element } from "../base/element.js";
 import { StrokedElement } from "../base/strokedElement.js";
 import { CanvasLineSegment } from "./canvasLineSegment.js";
 import { CanvasBezierSegment } from "./canvasBezierSegment.js";
+import { EditableCanvasContent } from "./editableCanvasContent.js";
 
 /**
  * Connection on a Canvas with an arbitrary amount of segments
  * Must only have CanvasConnectionSegment
  */
-export interface CanvasConnection extends StrokedElement {
+export interface CanvasConnection extends StrokedElement, EditableCanvasContent {
     type: typeof CanvasConnection.TYPE;
     /**
      * The id of the start point
@@ -23,8 +24,9 @@ export namespace CanvasConnection {
 
     /**
      * Checks if an element is a CanvasConnection
-     * @param value
-     * @returns
+     *
+     * @param value the element to check
+     * @returns true if the element is a CanvasConnection
      */
     export function isCanvasConnection(value: Element): value is CanvasConnection {
         return value.type === TYPE;

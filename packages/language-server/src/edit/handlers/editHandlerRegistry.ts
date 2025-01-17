@@ -1,4 +1,5 @@
 import { axisAlignedSegmentPosHandler } from "./axisAlignedSegmentPosHandler.js";
+import { connectionHandler } from "./connectionHandler.js";
 import { EditHandler } from "./editHandler.js";
 import { moveLineDistHandler } from "./moveLineDistHandler.js";
 import { moveLinePosHandler } from "./moveLinePosHandler.js";
@@ -10,15 +11,21 @@ import { rotationHandler } from "./rotationHandler.js";
 import { splitCanvasAxisAlignedSegmentHandler } from "./splitCanvasAxisAlignedSegmentHandler.js";
 import { splitCanvasBezierSegmentHandler } from "./splitCanvasBezierSegmentHandler.js";
 import { splitCanvasLineSegmentHandler } from "./splitCanvasLineSegmentHandler.js";
+import { toolboxHandler } from "./toolboxHandler.js";
 
 /**
  * Registry for all edit handlers
  */
 export class EditHandlerRegistry {
     /**
-     * Map of all edit handlers
+     * Map of all edit handlers which are registered by their exact type
      */
-    private readonly handlers: Map<string, EditHandler<any>> = new Map();
+    private readonly exactMatchingHandlers: Map<string, EditHandler<any>> = new Map();
+
+    /**
+     * List of all edit handlers which are registered by their regex type
+     */
+    private readonly regexMatchingHandlers: EditHandler<any>[] = [];
 
     /**
      * Creates a new TransactionalEditRegistory
@@ -26,7 +33,13 @@ export class EditHandlerRegistry {
      * @param handler the edit handlers to register
      */
     constructor(handler: EditHandler<any>[]) {
-        handler.forEach((edit) => this.handlers.set(edit.type, edit));
+        handler.forEach((edit) => {
+            if (typeof edit.type === "string") {
+                this.exactMatchingHandlers.set(edit.type, edit);
+            } else {
+                this.regexMatchingHandlers.push(edit);
+            }
+        });
     }
 
     /**
@@ -37,7 +50,10 @@ export class EditHandlerRegistry {
      * @returns the edit handler
      */
     getEditHandler(type: string): EditHandler<any> | undefined {
-        return this.handlers.get(type);
+        return (
+            this.exactMatchingHandlers.get(type) ??
+            this.regexMatchingHandlers.find((handler) => handler.type.test(type))
+        );
     }
 }
 
@@ -55,5 +71,7 @@ export const defaultEditRegistry = new EditHandlerRegistry([
     resizeHeight,
     splitCanvasLineSegmentHandler,
     splitCanvasAxisAlignedSegmentHandler,
-    splitCanvasBezierSegmentHandler
+    splitCanvasBezierSegmentHandler,
+    toolboxHandler,
+    connectionHandler
 ]);

@@ -6,8 +6,12 @@ import {
 } from "./generateCompletionItemsMessage.js";
 import { RemoteDiagramImplementationManager } from "./remoteDiagramImplementationManager.js";
 import { RequestUpdateDiagramMessage, ReplyUpdateDiagramMessage } from "./updateDiagramMessage.js";
-import { DiagramConfig } from "@hylimo/diagram-common";
+import { DiagramConfig, Root } from "@hylimo/diagram-common";
 import { ReplyGetSourceRangeMessage, RequestGetSourceRangeMessage } from "./getSourceRangeMessage.js";
+import {
+    ReplyRenderPredictionDiagramMessage,
+    RequestRenderPredictionDiagramMessage
+} from "./renderPredictionDiagramMessage.js";
 
 /**
  * Remote implementation of a diagram.
@@ -80,6 +84,23 @@ export class RemoteDiagramImplementation extends DiagramImplementation {
         } else {
             throw new Error(
                 `Unexpected message type: expected: ${ReplyGetSourceRangeMessage.type}, actual: ${result.type}`
+            );
+        }
+    }
+
+    override async renderPredictionDiagram(source: string, config: DiagramConfig): Promise<Root | undefined> {
+        const request: RequestRenderPredictionDiagramMessage = {
+            type: RequestRenderPredictionDiagramMessage.type,
+            id: this.id,
+            source,
+            config
+        };
+        const result = await this.layoutedDiagramManager.sendRequest(request, this.remoteId);
+        if (ReplyRenderPredictionDiagramMessage.is(result)) {
+            return result.result;
+        } else {
+            throw new Error(
+                `Unexpected message type for the predicted diagram result: expected: ${ReplyRenderPredictionDiagramMessage.type}, actual: ${result.type}`
             );
         }
     }

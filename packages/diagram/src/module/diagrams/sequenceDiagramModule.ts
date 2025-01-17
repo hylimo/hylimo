@@ -14,6 +14,9 @@ import { participantModule } from "./content/uml/sequence/participant.js";
 import { sequenceDiagramFrameModule } from "./content/uml/sequence/frame.js";
 import { lostFoundMessageModule } from "./content/uml/sequence/lostFoundMessage.js";
 import { commentModule } from "./content/uml/comment.js";
+import { sequenceDiagramCreateConnectionOperatorModule } from "./content/uml/sequence/sequenceDiagramCreateConnectionOperator.js";
+import { nonNavigableAssociationsModule } from "./content/uml/nonNavigableAssociations.js";
+import { associationsModule } from "./content/uml/associations.js";
 
 /**
  * Module for UML sequence diagrams.
@@ -23,8 +26,12 @@ export const sequenceDiagramModule = InterpreterModule.create(
     [DiagramModuleNames.DIAGRAM, DiagramModuleNames.DSL],
     [],
     createDiagramModule("sequenceDiagram", [
-        elementModule,
         defaultStylesModule,
+        sequenceDiagramCreateConnectionOperatorModule,
+        associationsModule,
+        sequenceDiagramAssociationsModule,
+        nonNavigableAssociationsModule,
+        elementModule,
         defaultValues,
         commentModule,
         sequenceDiagramInstanceModule,
@@ -33,7 +40,6 @@ export const sequenceDiagramModule = InterpreterModule.create(
         activityIndicatorModule,
         sequenceDiagramFrameModule,
         participantModule,
-        sequenceDiagramAssociationsModule,
         lostFoundMessageModule,
         readingDirectionModule
     ])

@@ -1,4 +1,5 @@
-import { SCanvas } from "./sCanvas.js";
+import { SParentElementImpl } from "sprotty";
+import { CanvasLike } from "./canvasLike.js";
 import { SCanvasConnection } from "./sCanvasConnection.js";
 import { SCanvasContent } from "./sCanvasContent.js";
 import { SMarker } from "./sMarker.js";
@@ -33,7 +34,7 @@ export class PointVisibilityManager {
      *
      * @param canvas the canvas which contains the points
      */
-    constructor(canvas: SCanvas) {
+    constructor(canvas: CanvasLike & SParentElementImpl) {
         for (const child of canvas.children) {
             if (child instanceof SCanvasContent) {
                 this.registerElement(child);

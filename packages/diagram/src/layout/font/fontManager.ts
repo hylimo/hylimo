@@ -5,6 +5,7 @@ import { Buffer } from "buffer";
 import { SubsetConfig } from "./subsetCollector.js";
 import { LayoutCache } from "../engine/layoutCache.js";
 import { SubsetManager } from "./subsetFont.js";
+import { v4 as uuid } from "uuid";
 
 /**
  * Handles retrieving fonts from an url
@@ -14,11 +15,6 @@ export class FontManager {
      * Id counter for fetched buffers
      */
     private fetchIdCounter = 0;
-
-    /**
-     * Id counter for subsetted fonts
-     */
-    private fontIdCounter = 0;
 
     /**
      * Cache used to store download results based on the url
@@ -106,7 +102,7 @@ export class FontManager {
                     config.variationSettings
                 );
                 return {
-                    id: `custom_${this.fontIdCounter++}`,
+                    id: `custom_${uuid().replace(/-/g, "")}`,
                     font: create(subsettedFont) as Font,
                     subsettedFontEncoded: subsettedFont.toString("base64"),
                     originalFont: fetchResult.font

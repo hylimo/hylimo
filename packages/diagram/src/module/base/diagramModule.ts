@@ -30,9 +30,10 @@ import {
 import { openSans, roboto, sourceCodePro } from "@hylimo/fonts";
 import { AttributeConfig, ContentCardinality, LayoutConfig } from "../../layout/layoutElement.js";
 import { layouts } from "../../layout/layouts.js";
-import { simpleElementType } from "./types.js";
+import { elementType } from "./types.js";
 import { DiagramModuleNames } from "../diagramModuleNames.js";
 import { LayoutEngine } from "../../layout/engine/layoutEngine.js";
+import { Canvas } from "@hylimo/diagram-common";
 
 /**
  * Type for unset, default style values
@@ -532,7 +533,7 @@ export class DiagramModule implements InterpreterModule {
                 {
                     docs: "Creates a new diagram, consisting of a ui element, styles and fonts",
                     params: [
-                        [0, "the root ui element", simpleElementType],
+                        [0, "the root ui element", elementType(Canvas.TYPE)],
                         [
                             1,
                             "the styles object created by the styles function",

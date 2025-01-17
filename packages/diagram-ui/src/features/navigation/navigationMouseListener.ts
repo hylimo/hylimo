@@ -1,3 +1,4 @@
+import { injectable } from "inversify";
 import { NavigateToSourceAction } from "@hylimo/diagram-protocol";
 import { MouseListener, SModelElementImpl } from "sprotty";
 import { Action } from "sprotty-protocol";
@@ -5,6 +6,7 @@ import { Action } from "sprotty-protocol";
 /**
  * Listener for navigation features
  */
+@injectable()
 export class NavigationMouseListener extends MouseListener {
     override mouseDown(target: SModelElementImpl, event: MouseEvent): Action[] {
         if (event.altKey) {

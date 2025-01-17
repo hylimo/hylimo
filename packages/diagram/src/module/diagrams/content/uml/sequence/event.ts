@@ -1,5 +1,5 @@
 import { fun, id, InterpreterModule, numberType, optional, stringType } from "@hylimo/core";
-import { SCOPE } from "../../../../base/dslModule.js";
+import { createToolboxEdit, SCOPE } from "../../../../base/dslModule.js";
 
 /**
  * Defines an event.<br>
@@ -103,6 +103,7 @@ export const eventModule = InterpreterModule.create(
                     returns: "The created event"
                 }
             )
-        )
+        ),
+        createToolboxEdit("event/Event", 'event("Example")', false)
     ]
 );

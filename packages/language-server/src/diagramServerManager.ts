@@ -3,7 +3,14 @@ import { ActionMessage, GeneratorArguments, SModelRoot } from "sprotty-protocol"
 import { Connection } from "vscode-languageserver";
 import { Diagram } from "./diagram/diagram.js";
 import { DiagramServer } from "./edit/diagramServer.js";
-import { IncrementalUpdate, IncrementalUpdateAction, DiagramActionNotification } from "@hylimo/diagram-protocol";
+import {
+    IncrementalUpdate,
+    IncrementalUpdateAction,
+    DiagramActionNotification,
+    EditorConfigUpdatedAction,
+    EditorConfig,
+    DynamicLanguageServerConfig
+} from "@hylimo/diagram-protocol";
 
 /**
  * Manages DiagramServer instances and associates them with TextDocuments
@@ -38,8 +45,9 @@ export class DiagramServerManager {
      *
      * @param clientId the unique id of the client, throws an error if already known
      * @param diagram the diagram to serve
+     * @param editorConfig the current editor config
      */
-    addClient(clientId: string, diagram: Diagram): void {
+    addClient(clientId: string, diagram: Diagram, editorConfig: EditorConfig): void {
         if (this.diagramServers.has(clientId)) {
             throw new Error(`ClientId ${clientId} already has a diagram server`);
         }
@@ -70,6 +78,7 @@ export class DiagramServerManager {
         if (diagram.currentDiagram) {
             diagramServer.state.currentRoot = diagram.currentDiagram.rootElement;
         }
+        this.sendConfigToDiagramServer(diagramServer, editorConfig);
     }
 
     /**
@@ -104,6 +113,31 @@ export class DiagramServerManager {
             .forEach((diagramServer) => {
                 diagramServer.dispatch(action);
             });
+    }
+
+    /**
+     * Called to update the editor config of each DiagramServer
+     *
+     * @param config the new config
+     */
+    onDidChangeConfig(config: DynamicLanguageServerConfig): void {
+        for (const diagramServer of this.diagramServers.values()) {
+            this.sendConfigToDiagramServer(diagramServer, config.editorConfig);
+        }
+    }
+
+    /**
+     * Sends the config to the diagram server
+     *
+     * @param diagramServer the diagram server to send the config to
+     * @param config the config to send
+     */
+    private sendConfigToDiagramServer(diagramServer: DiagramServer, config: EditorConfig): void {
+        const action: EditorConfigUpdatedAction = {
+            kind: EditorConfigUpdatedAction.KIND,
+            config
+        };
+        diagramServer.dispatch(action);
     }
 
     /**

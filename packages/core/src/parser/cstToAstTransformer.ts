@@ -227,7 +227,10 @@ export function generateCstToAstTransfromer(parser: Parser): ICstVisitor<never, 
             let baseExpression;
             if (ctx.Identifier) {
                 const token = ctx.Identifier[0];
-                baseExpression = new IdentifierExpression(token.image, generateCompletionMetadata(token, token, token));
+                const name = token.image.startsWith("`")
+                    ? token.image.substring(1, token.image.length - 1)
+                    : token.image;
+                baseExpression = new IdentifierExpression(name, generateCompletionMetadata(token, token, token));
             } else if (ctx.literal) {
                 baseExpression = this.visit(ctx.literal);
             } else if (ctx.function) {

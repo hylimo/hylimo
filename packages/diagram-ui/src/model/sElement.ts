@@ -46,7 +46,7 @@ export abstract class SElement extends SChildElementImpl implements Element {
      * @returns the transformation matrix
      */
     getMouseTransformationMatrix(): Matrix {
-        const rootMatrix = this.root.getZoomScrollTransformationMatrix();
+        const rootMatrix = this.root.getMouseTransformationMatrix();
         const localToParent = this.root.layoutEngine.localToAncestor(this.id, this.root.id);
         const parentToLocal = inverse(localToParent);
         return compose(parentToLocal, rootMatrix);

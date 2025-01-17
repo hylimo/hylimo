@@ -11,6 +11,7 @@ import { extendsAndImplementsModule } from "./content/uml/extendsAndImplements.j
 import { readingDirectionModule } from "./content/uml/readingDirection.js";
 import { componentModule } from "./content/uml/component.js";
 import { DiagramModuleNames } from "../diagramModuleNames.js";
+import { componentDiagramToolboxEditsModule } from "./content/uml/componentDiagramToolboxEdits.js";
 
 /**
  * Module for component diagrams
@@ -20,15 +21,16 @@ export const componentDiagramModule = InterpreterModule.create(
     [DiagramModuleNames.DIAGRAM, DiagramModuleNames.DSL],
     [],
     createDiagramModule("componentDiagram", [
-        elementModule,
         defaultStylesModule,
-        componentModule,
-        packageModule,
-        commentModule,
         associationsModule,
         nonNavigableAssociationsModule,
         compositionAndAggregationModule,
         extendsAndImplementsModule,
-        readingDirectionModule
+        elementModule,
+        componentModule,
+        packageModule,
+        commentModule,
+        readingDirectionModule,
+        componentDiagramToolboxEditsModule
     ])
 );

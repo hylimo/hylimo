@@ -3,8 +3,8 @@ import { VNode } from "snabbdom";
 import { IViewArgs, RenderingContext, svg } from "sprotty";
 import { SRelativePoint } from "../../model/canvas/sRelativePoint.js";
 import { CanvasPointView } from "./canvasPointView.js";
-import { SRoot } from "../../model/sRoot.js";
 import { Point } from "@hylimo/diagram-common";
+import { SCanvasPoint } from "../../model/canvas/sCanvasPoint.js";
 
 /**
  * IView that represents an RelativePoint
@@ -18,7 +18,7 @@ export class RelativePointView extends CanvasPointView<SRelativePoint> {
     ): VNode | undefined {
         const position = model.position;
         const target = model.targetPosition;
-        const pointRadius = SRoot.POINT_SIZE / model.root.zoom / 2;
+        const pointRadius = SCanvasPoint.POINT_SIZE / model.root.zoom / 2;
         const startY = target.y + Math.sign(position.y - target.y) * pointRadius;
         const endX = position.x - Math.sign(position.x - target.x) * pointRadius;
         let endY: number;

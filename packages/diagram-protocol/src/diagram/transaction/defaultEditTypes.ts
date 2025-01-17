@@ -1,4 +1,4 @@
-import { DefaultEditTypes } from "@hylimo/diagram-common";
+import { DefaultEditTypes, Point } from "@hylimo/diagram-common";
 import { Edit } from "./edit.js";
 
 /**
@@ -51,4 +51,37 @@ export type SplitCanvasAxisAlignedSegmentEdit = Edit<
 export type SplitCanvasBezierSegmentEdit = Edit<
     { x: number; y: number; cx1: number; cy1: number; cx2: number; cy2: number },
     DefaultEditTypes.SPLIT_CANVAS_BEZIER_SEGMENT
+>;
+
+/**
+ * Toolbox edit
+ */
+export type ToolboxEdit = Edit<{ x: number; y: number; prediction?: boolean }, `toolbox/${string}`>;
+
+/**
+ * Start/end for a connection created by a connection edit.
+ * - x/y coordinates are in the root coordinate system
+ * - optional: expression and pos for a target to snap to
+ */
+export type ConnectionEnd = Point &
+    (
+        | {
+              /**
+               * Expression evaluating to a CanvasConnection or CanvasElement
+               */
+              expression: string;
+              /**
+               * Position on the line the element provides
+               */
+              pos: number;
+          }
+        | object
+    );
+
+/**
+ * Connection edit
+ */
+export type ConnectionEdit = Edit<
+    { start: ConnectionEnd; end: ConnectionEnd; prediction?: boolean },
+    `connection/${string}`
 >;

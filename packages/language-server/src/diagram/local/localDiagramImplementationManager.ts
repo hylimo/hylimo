@@ -10,6 +10,10 @@ import {
     RequestGenerateCompletionItemMessage
 } from "../remote/generateCompletionItemsMessage.js";
 import { ReplyGetSourceRangeMessage, RequestGetSourceRangeMessage } from "../remote/getSourceRangeMessage.js";
+import {
+    ReplyRenderPredictionDiagramMessage,
+    RequestRenderPredictionDiagramMessage
+} from "../remote/renderPredictionDiagramMessage.js";
 
 /**
  * Manages the layouted diagrams. This is the local implementation.
@@ -52,6 +56,8 @@ export class LocalDiagramImplementationManager extends DiagramImplementationMana
             return this.handleGenerateCompletionItemsRequest(message);
         } else if (RequestGetSourceRangeMessage.is(message)) {
             return this.handleGetSourceRangeRequest(message);
+        } else if (RequestRenderPredictionDiagramMessage.is(message)) {
+            return this.handleRenderPredictionDiagramRequest(message);
         } else {
             throw new Error("Unexpected message type: " + message.type);
         }
@@ -107,6 +113,23 @@ export class LocalDiagramImplementationManager extends DiagramImplementationMana
         const result: ReplyGetSourceRangeMessage = {
             type: ReplyGetSourceRangeMessage.type,
             range: await implementation.getSourceRange(message.element)
+        };
+        return result;
+    }
+
+    /**
+     * Handles a request to render a prediction diagram.
+     *
+     * @param message the message requesting the prediction diagram
+     * @returns the response message payload
+     */
+    private async handleRenderPredictionDiagramRequest(
+        message: RequestRenderPredictionDiagramMessage
+    ): Promise<ReplyRenderPredictionDiagramMessage> {
+        const implementation = this.getNewDiagramImplementation(message.id);
+        const result: ReplyRenderPredictionDiagramMessage = {
+            type: ReplyRenderPredictionDiagramMessage.type,
+            result: await implementation.renderPredictionDiagram(message.source, message.config)
         };
         return result;
     }

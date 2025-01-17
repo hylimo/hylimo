@@ -73,7 +73,8 @@ export class CanvasConnectionLayoutConfig extends EditableCanvasContentLayoutCon
                 .filter((content) => content.layoutConfig.type != Marker.TYPE)
                 .flatMap((content) => layout.layout(content, position, content.measuredSize!)),
             ...(element.isHidden ? {} : extractStrokeStyleAttributes(element.styles)),
-            edits: element.edits
+            edits: element.edits,
+            editExpression: element.element.getLocalFieldOrUndefined("editExpression")?.value?.toNative()
         };
         const contentLookup = new Map(contents.map((content) => [content.element, content]));
         if (element.startMarker != undefined) {

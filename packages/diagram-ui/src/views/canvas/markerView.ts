@@ -12,6 +12,9 @@ export class MarkerView implements IView {
         return svg(
             "g",
             {
+                attrs: {
+                    "pointer-events": "visible"
+                },
                 class: {
                     marker: true
                 }

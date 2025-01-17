@@ -32,7 +32,6 @@ import {
     exportModule
 } from "sprotty";
 import { CommandStack } from "./base/commandStack.js";
-import { moveModule } from "./features/move/di.config.js";
 import { transactionModule } from "./features/transaction/di.config.js";
 import { updateModule } from "./features/update/di.config.js";
 import { zorderModule } from "./features/zorder/di.config.js";
@@ -64,10 +63,15 @@ import { SCanvasAxisAlignedSegment } from "./model/canvas/sCanvasAxisAlignedSegm
 import { SEllipse } from "./model/sEllipse.js";
 import { EllipseView } from "./views/ellipseView.js";
 import { navigationModule } from "./features/navigation/di.config.js";
-import { splitCanvasSegmentModule } from "./features/split-canvas-segment/di.config.js";
+import { canvasContentMoveEditModule } from "./features/canvas-content-move-edit/di.config.js";
 import { resetCanvasBoundsModule } from "./features/canvas-bounds/di.config.js";
 import { viewportModule } from "./features/viewport/di.config.js";
 import { undoRedoModule } from "./features/undo-redo/di.config.js";
+import { toolboxModule } from "./features/toolbox/ci.config.js";
+import { moveModule } from "./features/move/di.config.js";
+import { configModule } from "./features/config/di.config.js";
+import { splitCanvasSegmentModule } from "./features/split-canvas-segment/di.config.js";
+import { createConnectionModule } from "./features/create-connection/di.config.js";
 
 /**
  * The module used
@@ -131,9 +135,13 @@ export function createContainer(widgetId: string): Container {
         moveModule,
         resetCanvasBoundsModule,
         navigationModule,
+        canvasContentMoveEditModule,
         splitCanvasSegmentModule,
         viewportModule,
-        undoRedoModule
+        undoRedoModule,
+        toolboxModule,
+        configModule,
+        createConnectionModule
     );
     container.load(diagramModule);
 

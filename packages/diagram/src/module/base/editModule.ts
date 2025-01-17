@@ -15,7 +15,11 @@ import {
     FunctionExpression,
     RuntimeError,
     MissingArgumentSource,
-    OperatorExpression
+    OperatorExpression,
+    or,
+    stringType,
+    numberType,
+    nameToExpression
 } from "@hylimo/core";
 import { DiagramModuleNames } from "../diagramModuleNames.js";
 
@@ -112,6 +116,16 @@ function generateAddArgEdit(
     const edit = generateEdit(target, template, "add-arg", context);
     edit.setLocalField("key", key, context);
     return edit;
+}
+
+/**
+ * Creates a jsonata string literal based on the given value
+ *
+ * @param value the value to create the jsonata string literal for
+ * @returns the jsonata string literal
+ */
+export function jsonataStringLiteral(value: string): string {
+    return `"${value.replaceAll(/\\/g, "\\\\").replaceAll(/"/g, '\\"')}"`;
 }
 
 /**
@@ -272,6 +286,37 @@ export const editModule = InterpreterModule.create(
                         [2, "the expression to append"]
                     ],
                     returns: "the created edit or null if the target is not editable"
+                }
+            )
+        ),
+        assign(
+            "nameToExpression",
+            jsFun(
+                (args, context) => {
+                    const name = args.getFieldValue(0, context).toNative();
+                    const expression = nameToExpression(name);
+                    return context.newString(expression);
+                },
+                {
+                    docs: "Converts a name to an expression",
+                    params: [[0, "the name of the identifier to convert", or(stringType, numberType)]],
+                    returns: "the expression"
+                }
+            )
+        ),
+        assign(
+            "nameToJsonataStringLiteral",
+            jsFun(
+                (args, context) => {
+                    const name = args.getFieldValue(0, context).toNative();
+                    const expression = nameToExpression(name);
+                    const escapedExpression = jsonataStringLiteral(expression);
+                    return context.newString(escapedExpression);
+                },
+                {
+                    docs: "Converts a name to a jsonata expression",
+                    params: [[0, "the name of the identifier to convert", or(stringType, numberType)]],
+                    returns: "the jsonata expression"
                 }
             )
         )

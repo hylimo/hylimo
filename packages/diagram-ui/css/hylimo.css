@@ -1,0 +1,137 @@
+svg.hylimo {
+    background: conic-gradient(from 90deg at 1px 1px, var(--diagram-background) 90deg, var(--diagram-grid) 0)
+        calc(var(--diagram-scroll-x) * -1 * var(--diagram-zoom))
+        calc(var(--diagram-scroll-y) * -1 * var(--diagram-zoom)) / calc(100px * var(--diagram-zoom-normalized))
+        calc(100px * var(--diagram-zoom-normalized));
+
+    text {
+        white-space: pre;
+        user-select: none;
+    }
+
+    .selected-rect {
+        fill: var(--diagram-layout-color-overlay);
+        stroke: var(--diagram-layout-color-selected);
+    }
+
+    .selected-rect,
+    .create-connection-outline {
+        stroke-width: calc(5px / var(--diagram-zoom));
+        stroke-dasharray: calc(16px / var(--diagram-zoom));
+    }
+
+    .canvas-point {
+        stroke-linecap: round;
+        stroke: var(--diagram-layout-color);
+        transform: scale(calc(1 / var(--diagram-zoom)));
+    }
+
+    .create-connection-outline.target,
+    .canvas-point.selected {
+        stroke: var(--diagram-layout-color-selected);
+    }
+
+    .canvas-dependency-line {
+        stroke: var(--diagram-layout-color);
+        stroke-width: calc(2px / var(--diagram-zoom));
+        stroke-dasharray: calc(16px / var(--diagram-zoom));
+        fill: none;
+        pointer-events: none;
+    }
+
+    .bezier-handle-line {
+        stroke: var(--diagram-layout-color);
+        stroke-width: calc(4px / var(--diagram-zoom));
+        fill: none;
+        pointer-events: none;
+    }
+
+    .select-canvas-connection {
+        stroke-width: calc(12px / var(--diagram-zoom));
+        fill: none;
+        stroke: transparent;
+    }
+
+    .canvas-rotate-icon > path {
+        fill: var(--diagram-layout-color);
+    }
+
+    .canvas-rotate-icon > rect {
+        fill: transparent;
+        cursor: pointer;
+    }
+
+    .resize {
+        stroke-width: calc(12px / var(--diagram-zoom));
+        stroke: transparent;
+    }
+
+    .resize-corner {
+        stroke-linecap: square;
+    }
+
+    .resize-cursor-0,
+    .resize-cursor-4 {
+        cursor: nwse-resize;
+    }
+
+    .resize-cursor-1,
+    .resize-cursor-5 {
+        cursor: ns-resize;
+    }
+
+    .resize-cursor-2,
+    .resize-cursor-6 {
+        cursor: nesw-resize;
+    }
+
+    .resize-cursor-3,
+    .resize-cursor-7 {
+        cursor: ew-resize;
+    }
+
+    .axis-aligned-segment-edit-x {
+        cursor: ns-resize;
+    }
+    .axis-aligned-segment-edit-y {
+        cursor: ew-resize;
+    }
+
+    .create-connection-outline {
+        stroke: var(--diagram-layout-color);
+        fill: none;
+        cursor: default;
+        pointer-events: none;
+    }
+
+    .create-connection {
+        transform: scale(calc(1 / var(--diagram-zoom)));
+    }
+
+    .create-connection-point {
+        stroke-linecap: round;
+        stroke: var(--diagram-layout-color-selected);
+    }
+
+    .create-connection-arrow {
+        stroke: var(--diagram-layout-color);
+        opacity: 0.5;
+        fill: none;
+        stroke-width: 3px;
+    }
+
+    .create-connection:hover .create-connection-arrow {
+        stroke: var(--diagram-layout-color-selected);
+        opacity: 1;
+    }
+
+    .create-connection-hover-line {
+        stroke: transparent;
+        stroke-width: 12px;
+        fill: none;
+    }
+
+    .selectable {
+        cursor: pointer;
+    }
+}

@@ -65,7 +65,6 @@ export class PDFDiagramVisitor extends SimplifiedDiagramVisitor<PDFKit.PDFDocume
      *
      * @param margin the margin to apply to the bounding box
      * @param background the background color
-     * @param fontCollection the font collection to use
      */
     constructor(
         private readonly margin: number,

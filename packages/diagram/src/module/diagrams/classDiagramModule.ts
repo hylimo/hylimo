@@ -13,6 +13,7 @@ import { compositionAndAggregationModule } from "./content/uml/compositionAndAgg
 import { extendsAndImplementsModule } from "./content/uml/extendsAndImplements.js";
 import { readingDirectionModule } from "./content/uml/readingDirection.js";
 import { DiagramModuleNames } from "../diagramModuleNames.js";
+import { classDiagramToolboxEditsModule } from "./content/uml/classDiagramToolboxEdits.js";
 
 /**
  * Module for class diagrams
@@ -22,17 +23,18 @@ export const classDiagramModule = InterpreterModule.create(
     [DiagramModuleNames.DIAGRAM, DiagramModuleNames.DSL],
     [],
     createDiagramModule("classDiagram", [
-        elementModule,
         defaultStylesModule,
+        associationsModule,
+        nonNavigableAssociationsModule,
+        compositionAndAggregationModule,
+        extendsAndImplementsModule,
+        elementModule,
         classModule,
         interfaceModule,
         enumModule,
         packageModule,
         commentModule,
-        associationsModule,
-        nonNavigableAssociationsModule,
-        compositionAndAggregationModule,
-        extendsAndImplementsModule,
-        readingDirectionModule
+        readingDirectionModule,
+        classDiagramToolboxEditsModule
     ])
 );

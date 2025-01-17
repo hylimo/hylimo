@@ -47,6 +47,16 @@ export abstract class SegmentEngine<T extends Segment> {
      * @returns true if the segment exists
      */
     abstract exists(segment: T, segmentStartPoint: Point): boolean;
+
+    /**
+     * Converts the segment to an SVG path which can be appended to a path string
+     * Does not handle the initial M command
+     *
+     * @param segment the segment to convert
+     * @param start the start point of the segment
+     * @returns the SVG path
+     */
+    abstract toSvgPath(segment: T, start: Point): string;
 }
 
 /**
