@@ -28,6 +28,7 @@ program
     .option("--max-execution-steps", "Maximum number of execution steps", parseInt, 1000000)
     .option("--disable-font-subsetting", "Disable font subsetting", false)
     .option("--enable-external-fonts", "Enable external fonts", false)
+    .option("--text-as-path", "Render text as path, only relevant for svg output format", false)
     .parse(process.argv);
 
 const options = program.opts();
@@ -80,7 +81,7 @@ const config: DiagramConfig = {
         fs.writeFileSync(outputFile, Buffer.from(renderedPdf.flatMap((part) => [...part])));
     } else if (outputExtension === ".svg") {
         const renderer = new SVGRenderer();
-        const svg = renderer.render(rootElement);
+        const svg = renderer.render(rootElement, options.textAsPath);
         fs.writeFileSync(outputFile, svg);
     }
 })();
