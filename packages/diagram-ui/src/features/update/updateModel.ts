@@ -159,7 +159,7 @@ function layoutViewportIfNecessary(
  *
  * The typical rules apply: each deletion and insertion is counted as one additional distance, and replacement/movement can be ignored in our usecase.
  * Elements are considered equal if their id and type are equal.
- * The ratio of divergence is limited to the intervall [0, 1] where 0 means completely equal and 1 means completely different.
+ * The divergence ratio is limited to the interval [0, 1] where 0 means completely equal and 1 means completely different.
  *
  *
  * @param newElements the index storing all new model elements
