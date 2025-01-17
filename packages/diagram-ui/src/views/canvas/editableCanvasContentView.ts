@@ -28,9 +28,10 @@ export abstract class EditableCanvasContentView {
      */
     protected renderCreateConnection(model: Readonly<SCanvasElement | SCanvasConnection>): VNode | undefined {
         if (
-            model.createConnectionProvider?.isVisible !== true ||
+            model.createConnectionProvider == undefined ||
             model.selected ||
-            this.transactionStateProvider.isInTransaction
+            this.transactionStateProvider.types?.some((type) => !type.startsWith("connection/")) ||
+            (!model.createConnectionProvider.isVisible && !this.transactionStateProvider.isInTransaction)
         ) {
             return undefined;
         }
@@ -50,7 +51,10 @@ export abstract class EditableCanvasContentView {
      * @param preview the connection creation preview
      * @returns the rendered start symbol
      */
-    private renderCreateConnectionStartSymbol(preview: CreateConnectionData): VNode {
+    private renderCreateConnectionStartSymbol(preview: CreateConnectionData): VNode | undefined {
+        if (this.transactionStateProvider.isInTransaction) {
+            return undefined;
+        }
         const position = LineEngine.DEFAULT.getPoint(preview.position, undefined, 0, preview.line);
         return svg(
             "g",

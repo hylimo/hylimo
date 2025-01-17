@@ -29,7 +29,7 @@ export class CreateConnectionMouseListener extends MouseListener {
         }
         const action: UpdateCreateConnectionDataAction = {
             kind: UpdateCreateConnectionDataAction.KIND,
-            isVisible: event.shiftKey && event.buttons === 0,
+            isVisible: event.shiftKey,
             providerWithTarget: {
                 target: canvasElement.id,
                 provider: () => this.createConnection(event, canvasElement)

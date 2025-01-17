@@ -9,7 +9,7 @@ import { UpdateCreateConnectionDataAction } from "./updateCreateConnectionData.j
 @injectable()
 export class CreateConnectionKeyListener extends KeyListener {
     override keyDown(element: SModelElementImpl, event: KeyboardEvent): Action[] {
-        if (event.key !== "Shift") {
+        if (event.key !== "Shift" || event.repeat) {
             return [];
         }
         const action: UpdateCreateConnectionDataAction = {
