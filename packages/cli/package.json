@@ -16,7 +16,7 @@
         "@hylimo/diagram": "^1.1.2",
         "@hylimo/diagram-render-pdf": "^1.1.2",
         "@hylimo/diagram-render-svg": "^1.1.2",
-        "commander": "^12.1.0"
+        "commander": "^13.0.0"
     },
     "bin": "lib/index.js"
 }

@@ -19,8 +19,7 @@ import {
     RemoteRequest,
     SetLanguageServerIdNotification
 } from "@hylimo/diagram-protocol";
-import { initServices } from "monaco-languageclient/vscode/services";
-import { checkServiceConsistency, configureServices } from "monaco-editor-wrapper/vscode/services";
+import { checkServiceConsistency } from "monaco-editor-wrapper/vscode/services";
 import * as monaco from "monaco-editor";
 import { customDarkTheme, customLightTheme, languageConfiguration, monarchTokenProvider } from "../util/language";
 import { useData } from "vitepress";
@@ -28,6 +27,8 @@ import { useLocalStorage, throttledWatch } from "@vueuse/core";
 import { useWorkerFactory } from "monaco-editor-wrapper/workerFactory";
 import monacoEditorWorker from "monaco-editor/esm/vs/editor/editor.worker?worker";
 import { languageServerConfigKey, languageClientKey } from "./injectionKeys";
+import { configureAndInitVscodeApi } from "monaco-editor-wrapper";
+import { LogLevel } from "vscode/services";
 
 /**
  * Config for the diagram
@@ -174,17 +175,28 @@ async function setupLanguageClient(isDark: boolean) {
     const writer = new BrowserMessageWriter(worker);
 
     useWorkerFactory({
-        ignoreMapping: true,
-        workerLoaders: {
-            editorWorkerService: () => new monacoEditorWorker()
+        workerOverrides: {
+            ignoreMapping: true,
+            workerLoaders: {
+                TextEditorWorker: () => new monacoEditorWorker()
+            }
         }
     });
-    const serviceConfig = await configureServices({});
-    await initServices({
-        serviceConfig,
-        caller: "website",
-        performChecks: checkServiceConsistency
-    });
+    await configureAndInitVscodeApi(
+        "classic",
+        {
+            vscodeApiConfig: {
+                viewsConfig: {
+                    viewServiceType: "ViewsService"
+                }
+            },
+            logLevel: LogLevel.Warning
+        },
+        {
+            caller: "website",
+            performServiceConsistencyChecks: checkServiceConsistency
+        }
+    );
 
     monaco.languages.register({ id: language });
     monaco.languages.setLanguageConfiguration(language, languageConfiguration);
@@ -202,11 +214,7 @@ async function setupLanguageClient(isDark: boolean) {
                 closed: () => ({ action: CloseAction.DoNotRestart })
             }
         },
-        connectionProvider: {
-            get: () => {
-                return Promise.resolve({ reader, writer });
-            }
-        }
+        messageTransports: { reader, writer }
     });
 
     await client.start();

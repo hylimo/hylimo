@@ -118,7 +118,8 @@ const diagramModule = new ContainerModule((bind, unbind, isBound, rebind) => {
  */
 export function createContainer(widgetId: string): Container {
     const container = new Container();
-    loadDefaultModules(container, {
+    loadDefaultModules(container as any, {
+        // TODO remove this cast after upgrade to inversify 7.x
         exclude: [
             sprottyUpdateModule,
             sprottyMoveModule,
@@ -145,7 +146,8 @@ export function createContainer(widgetId: string): Container {
     );
     container.load(diagramModule);
 
-    overrideViewerOptions(container, {
+    overrideViewerOptions(container as any, {
+        // TODO remove this cast after upgrade to inversify 7.x
         needsClientLayout: false,
         needsServerLayout: false,
         baseDiv: widgetId
