@@ -121,7 +121,10 @@
 /* Sprotty */
 
 .sprotty-wrapper {
+    width: 100%;
     height: 100%;
+    container-type: size;
+    container-name: sprotty;
 }
 
 .sprotty {
@@ -143,6 +146,12 @@
 
 .sprotty .toolbox * {
     font-variant-ligatures: no-contextual;
+}
+
+@container sprotty (width < 350px) or (height < 350px) {
+    .hylimo.toolbox-wrapper {
+        visibility: collapse;
+    }
 }
 
 :root {

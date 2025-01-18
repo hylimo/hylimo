@@ -163,7 +163,6 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler, Conn
         if (!this.containerElement) {
             this.initialize();
         }
-        this.setContainerVisible(true);
         this.update();
     }
 
