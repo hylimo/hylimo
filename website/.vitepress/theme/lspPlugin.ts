@@ -19,7 +19,7 @@ import {
     RemoteRequest,
     SetLanguageServerIdNotification
 } from "@hylimo/diagram-protocol";
-import { checkServiceConsistency } from "monaco-editor-wrapper/vscode/services";
+//import { checkServiceConsistency } from "monaco-editor-wrapper/vscode/services";
 import * as monaco from "monaco-editor";
 import { customDarkTheme, customLightTheme, languageConfiguration, monarchTokenProvider } from "../util/language";
 import { useData } from "vitepress";
@@ -29,6 +29,7 @@ import monacoEditorWorker from "monaco-editor/esm/vs/editor/editor.worker?worker
 import { languageServerConfigKey, languageClientKey } from "./injectionKeys";
 import { configureAndInitVscodeApi } from "monaco-editor-wrapper";
 import { LogLevel } from "vscode/services";
+import { ConsoleLogger } from "monaco-languageclient/tools";
 
 /**
  * Config for the diagram
@@ -182,19 +183,18 @@ async function setupLanguageClient(isDark: boolean) {
             }
         }
     });
+    // DO NOT perform consistency checks currently!
+    // importing anything from monaco-editor-wrapper/vscode will load a view service, which causes errors on startup
+    // TODO potentially readd if fixed upstream
     await configureAndInitVscodeApi(
         "classic",
         {
-            vscodeApiConfig: {
-                viewsConfig: {
-                    viewServiceType: "ViewsService"
-                }
-            },
+            vscodeApiConfig: {},
             logLevel: LogLevel.Warning
         },
         {
             caller: "website",
-            performServiceConsistencyChecks: checkServiceConsistency
+            logger: new ConsoleLogger(LogLevel.Warning)
         }
     );
 
@@ -216,7 +216,6 @@ async function setupLanguageClient(isDark: boolean) {
         },
         messageTransports: { reader, writer }
     });
-
     await client.start();
 
     client.onNotification(RemoteNotification.type, (message) => {

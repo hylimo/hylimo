@@ -81,35 +81,4 @@ export class CreateConnectionMouseListener extends MouseListener {
                 )
         };
     }
-
-    /**
-     * Provides the connection creation data based on the current mouse position and the target element.
-     *
-     * @param event provider for the mouse position
-     * @param target the target element
-     * @returns the connection creation data
-     */
-    private createConnection(event: MouseEvent, target: SCanvasElement | SCanvasConnection): LineProviderHoverData {
-        const context = target.parent;
-        const line = target.root.layoutEngine.layoutLine(target, context.id);
-        const point = applyToPoint(context.getMouseTransformationMatrix(), { x: event.pageX, y: event.pageY });
-        const nearest = LineEngine.DEFAULT.projectPoint(point, line);
-        return {
-            line,
-            position: nearest.pos
-        };
-    }
-}
-
-/**
- * Checks if the element is a canvas element or connection with an edit expression
- *
- * @param target the target element
- * @returns true if the element is a canvas element or connection with an edit expression
- */
-export function isCreateConnectionTarget(element: SModelElementImpl): element is SCanvasElement | SCanvasConnection {
-    return (
-        (element instanceof SCanvasElement || element instanceof SCanvasConnection) &&
-        element.editExpression != undefined
-    );
 }
