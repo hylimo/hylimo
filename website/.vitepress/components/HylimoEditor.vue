@@ -196,10 +196,12 @@ onMounted(async () => {
         }
 
         protected override handleUndo(): void {
+            editor.focus();
             editor.trigger("diagram", "undo", {});
         }
 
         protected override handleRedo(): void {
+            editor.focus();
             editor.trigger("diagram", "redo", {});
         }
 

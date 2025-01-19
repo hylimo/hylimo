@@ -19,7 +19,6 @@ import {
     RemoteRequest,
     SetLanguageServerIdNotification
 } from "@hylimo/diagram-protocol";
-//import { checkServiceConsistency } from "monaco-editor-wrapper/vscode/services";
 import * as monaco from "monaco-editor";
 import { customDarkTheme, customLightTheme, languageConfiguration, monarchTokenProvider } from "../util/language";
 import { useData } from "vitepress";
@@ -184,7 +183,7 @@ async function setupLanguageClient(isDark: boolean) {
         }
     });
     // DO NOT perform consistency checks currently!
-    // importing anything from monaco-editor-wrapper/vscode will load a view service, which causes errors on startup
+    // importing anything from monaco-editor-wrapper/vscode/services will load a view service, which causes errors on startup
     // TODO potentially readd if fixed upstream
     await configureAndInitVscodeApi(
         "classic",
