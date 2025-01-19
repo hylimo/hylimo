@@ -1,16 +1,16 @@
 import { inject, injectable } from "inversify";
-import { findParentByFeature, MouseListener, SModelElementImpl } from "sprotty";
+import { MouseListener, SModelElementImpl } from "sprotty";
 import { Action, SelectAction } from "sprotty-protocol";
 import { SCanvasElement } from "../../model/canvas/sCanvasElement.js";
 import { SCanvasConnection } from "../../model/canvas/sCanvasConnection.js";
-import { UpdateCreateConnectionDataAction } from "./updateCreateConnectionData.js";
-import { CreateConnectionData } from "./createConnectionData.js";
 import { LineEngine } from "@hylimo/diagram-common";
 import { applyToPoint } from "transformation-matrix";
 import { TransactionalMoveAction } from "../move/transactionalMoveAction.js";
 import { CreateConnectionMoveHandler } from "./createConnectionMoveHandler.js";
 import { TYPES } from "../types.js";
 import { ConnectionEditProvider } from "../toolbox/connectionEditProvider.js";
+import { EditableCanvasContentView } from "../../views/canvas/editableCanvasContentView.js";
+import { LineProviderHoverData } from "../line-provider-hover/lineProviderHoverData.js";
 
 /**
  * Mouse listener for updating the connection creation UI based on mouse movements
@@ -22,48 +22,16 @@ export class CreateConnectionMouseListener extends MouseListener {
      */
     @inject(TYPES.ConnectionEditProvider) protected readonly connectionEditProvider!: ConnectionEditProvider;
 
-    override mouseMove(target: SModelElementImpl, event: MouseEvent): Action[] {
-        const canvasElement = findParentByFeature(target, isCreateConnectionTarget);
-        if (canvasElement == undefined) {
-            return [];
-        }
-        const action: UpdateCreateConnectionDataAction = {
-            kind: UpdateCreateConnectionDataAction.KIND,
-            isVisible: event.shiftKey,
-            providerWithTarget: {
-                target: canvasElement.id,
-                provider: () => this.createConnection(event, canvasElement)
-            }
-        };
-        return [action];
-    }
-
-    override mouseOver(target: SModelElementImpl, event: MouseEvent): Action[] {
-        const canvasElement = findParentByFeature(target, isCreateConnectionTarget);
-        if (
-            canvasElement != undefined ||
-            (event.target as HTMLElement).classList.contains(CreateConnectionData.CLASS)
-        ) {
-            return [];
-        }
-        const action: UpdateCreateConnectionDataAction = {
-            kind: UpdateCreateConnectionDataAction.KIND,
-            isVisible: false,
-            providerWithTarget: null
-        };
-        return [action];
-    }
-
     override mouseDown(target: SModelElementImpl, event: MouseEvent): Action[] {
         const element = event.target as HTMLElement;
         if (
-            !element.classList.contains(CreateConnectionData.CLASS) ||
+            !element.classList.contains(EditableCanvasContentView.CREATE_CONNECTION_CLASS) ||
             !(target instanceof SCanvasElement || target instanceof SCanvasConnection) ||
             target.editExpression == undefined
         ) {
             return [];
         }
-        const startData = target.createConnectionProvider?.provider();
+        const startData = target.hoverDataProvider?.provider();
         if (startData == undefined) {
             return [];
         }
@@ -90,7 +58,7 @@ export class CreateConnectionMouseListener extends MouseListener {
      */
     private generateStartCreateConnectionAction(
         target: SCanvasElement | SCanvasConnection,
-        startData: CreateConnectionData,
+        startData: LineProviderHoverData,
         edit: `connection/${string}`
     ): TransactionalMoveAction {
         const { x, y } = applyToPoint(
@@ -121,7 +89,7 @@ export class CreateConnectionMouseListener extends MouseListener {
      * @param target the target element
      * @returns the connection creation data
      */
-    private createConnection(event: MouseEvent, target: SCanvasElement | SCanvasConnection): CreateConnectionData {
+    private createConnection(event: MouseEvent, target: SCanvasElement | SCanvasConnection): LineProviderHoverData {
         const context = target.parent;
         const line = target.root.layoutEngine.layoutLine(target, context.id);
         const point = applyToPoint(context.getMouseTransformationMatrix(), { x: event.pageX, y: event.pageY });

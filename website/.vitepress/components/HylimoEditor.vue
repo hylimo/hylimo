@@ -114,7 +114,7 @@ onMounted(async () => {
                 alwaysConsumeMouseWheel: false
             },
             glyphMargin: false
-        },
+        }
     };
     await wrapper.initAndStart({
         $type: "classic",

@@ -72,6 +72,7 @@ import { moveModule } from "./features/move/di.config.js";
 import { configModule } from "./features/config/di.config.js";
 import { splitCanvasSegmentModule } from "./features/split-canvas-segment/di.config.js";
 import { createConnectionModule } from "./features/create-connection/di.config.js";
+import { lineProviderHoverModule } from "./features/line-provider-hover/di.config.js";
 
 /**
  * The module used
@@ -118,8 +119,8 @@ const diagramModule = new ContainerModule((bind, unbind, isBound, rebind) => {
  */
 export function createContainer(widgetId: string): Container {
     const container = new Container();
+    // TODO remove this cast after upgrade to inversify 7.x
     loadDefaultModules(container as any, {
-        // TODO remove this cast after upgrade to inversify 7.x
         exclude: [
             sprottyUpdateModule,
             sprottyMoveModule,
@@ -142,12 +143,13 @@ export function createContainer(widgetId: string): Container {
         undoRedoModule,
         toolboxModule,
         configModule,
-        createConnectionModule
+        createConnectionModule,
+        lineProviderHoverModule
     );
     container.load(diagramModule);
 
+    // TODO remove this cast after upgrade to inversify 7.x
     overrideViewerOptions(container as any, {
-        // TODO remove this cast after upgrade to inversify 7.x
         needsClientLayout: false,
         needsServerLayout: false,
         baseDiv: widgetId
