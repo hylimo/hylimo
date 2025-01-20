@@ -1,4 +1,10 @@
-import { CanvasBezierSegment, Point, SegmentLayoutInformation } from "@hylimo/diagram-common";
+import {
+    CanvasBezierSegment,
+    DefaultEditTypes,
+    EditSpecification,
+    Point,
+    SegmentLayoutInformation
+} from "@hylimo/diagram-common";
 import { VNode } from "snabbdom";
 import { svg } from "sprotty";
 import { SCanvasConnectionSegment } from "./sCanvasConnectionSegment.js";
@@ -75,5 +81,9 @@ export class SCanvasBezierSegment extends SCanvasConnectionSegment implements Ca
                 }
             })
         ];
+    }
+
+    override canSplitSegment(): boolean {
+        return EditSpecification.isConsistent([[this.edits[DefaultEditTypes.SPLIT_CANVAS_BEZIER_SEGMENT]]]);
     }
 }

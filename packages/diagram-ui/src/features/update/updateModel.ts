@@ -100,7 +100,7 @@ export class UpdateModelCommand extends BaseUpdateModelCommand {
             right.zoom = left.zoom;
         }
         if (left instanceof SRoot && right instanceof SRoot) {
-            right.createConnectionProvider = left.createConnectionProvider;
+            right.lineProviderHoverDataProvider = left.lineProviderHoverDataProvider;
         }
         if (isLinearAnimatable(left) && isLinearAnimatable(right)) {
             const commonFields = computeCommonAnimatableFields(left, right);

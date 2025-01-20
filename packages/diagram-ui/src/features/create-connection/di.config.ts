@@ -1,19 +1,14 @@
 import { ContainerModule } from "inversify";
-import { configureCommand, TYPES } from "sprotty";
-import { CreateConnectionMouseListener } from "./createConnectionMouseListener.js";
-import { CreateConnectionKeyListener } from "./createConnectionKeyListener.js";
-import { UpdateCreateConnectionDataCommand } from "./updateCreateConnectionData.js";
+import { TYPES } from "sprotty";
 import { CreateConnectionVNodePostprocessor } from "./createConnectionVNodePostprocessor.js";
+import { CreateConnectionMouseListener } from "./createConnectionMouseListener.js";
 
 /**
  * Module for creating connections graphically
  */
-export const createConnectionModule = new ContainerModule((bind, _unbind, isBound) => {
+export const createConnectionModule = new ContainerModule((bind) => {
     bind(CreateConnectionMouseListener).toSelf().inSingletonScope();
     bind(TYPES.MouseListener).toService(CreateConnectionMouseListener);
-    bind(CreateConnectionKeyListener).toSelf().inSingletonScope();
-    bind(TYPES.KeyListener).toService(CreateConnectionKeyListener);
     bind(CreateConnectionVNodePostprocessor).toSelf().inSingletonScope();
     bind(TYPES.IVNodePostprocessor).toService(CreateConnectionVNodePostprocessor);
-    configureCommand({ bind, isBound }, UpdateCreateConnectionDataCommand);
 });
