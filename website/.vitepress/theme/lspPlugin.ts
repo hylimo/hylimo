@@ -29,6 +29,7 @@ import { languageServerConfigKey, languageClientKey } from "./injectionKeys";
 import { configureAndInitVscodeApi } from "monaco-editor-wrapper";
 import { LogLevel } from "vscode/services";
 import { ConsoleLogger } from "monaco-languageclient/tools";
+import { checkServiceConsistency } from "monaco-editor-wrapper/vscode/services";
 
 /**
  * Config for the diagram
@@ -189,9 +190,7 @@ async function setupLanguageClient(isDark: boolean) {
             }
         }
     });
-    // DO NOT perform consistency checks currently!
-    // importing anything from monaco-editor-wrapper/vscode/services will load a view service, which causes errors on startup
-    // TODO potentially readd if fixed upstream
+
     await configureAndInitVscodeApi(
         "classic",
         {
@@ -200,6 +199,7 @@ async function setupLanguageClient(isDark: boolean) {
         },
         {
             caller: "website",
+            performServiceConsistencyChecks: checkServiceConsistency,
             logger: new ConsoleLogger(LogLevel.Warning)
         }
     );
