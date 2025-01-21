@@ -125,11 +125,6 @@ export class SCanvasAxisAlignedSegment
     }
 
     override canSplitSegment(): boolean {
-        const splitEdit = this.edits[DefaultEditTypes.SPLIT_CANVAS_AXIS_ALIGNED_SEGMENT];
-        if (!EditSpecification.isConsistent([[splitEdit]])) {
-            return false;
-        }
-        const nextPosEdit = this.edits[DefaultEditTypes.AXIS_ALIGNED_SEGMENT_POS];
-        return nextPosEdit == undefined || EditSpecification.isConsistent([[nextPosEdit], [splitEdit]]);
+        return EditSpecification.isConsistent([[this.edits[DefaultEditTypes.SPLIT_CANVAS_AXIS_ALIGNED_SEGMENT]]]);
     }
 }

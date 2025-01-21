@@ -2,7 +2,14 @@ import { inject, injectable } from "inversify";
 import { MouseListener, SModelElementImpl } from "sprotty";
 import { Action } from "sprotty-protocol";
 import { SCanvasConnection } from "../../model/canvas/sCanvasConnection.js";
-import { DefaultEditTypes, LineEngine, Math2D, Point, ProjectionResult } from "@hylimo/diagram-common";
+import {
+    DefaultEditTypes,
+    EditSpecification,
+    LineEngine,
+    Math2D,
+    Point,
+    ProjectionResult
+} from "@hylimo/diagram-common";
 import { SCanvasConnectionSegment } from "../../model/canvas/sCanvasConnectionSegment.js";
 import {
     AxisAlignedSegmentEdit,
@@ -163,7 +170,8 @@ export class SplitCanvasSegmentMouseListener extends MouseListener {
             elements: [originSegment.id]
         } satisfies SplitCanvasAxisAlignedSegmentEdit);
         const editNextPos = originSegment.edits[DefaultEditTypes.AXIS_ALIGNED_SEGMENT_POS];
-        if (editNextPos != undefined) {
+        const splitSegment = originSegment.edits[DefaultEditTypes.SPLIT_CANVAS_AXIS_ALIGNED_SEGMENT];
+        if (editNextPos != undefined && EditSpecification.isConsistent([[editNextPos], [splitSegment]])) {
             edits.push({
                 types: [DefaultEditTypes.AXIS_ALIGNED_SEGMENT_POS],
                 values: {
