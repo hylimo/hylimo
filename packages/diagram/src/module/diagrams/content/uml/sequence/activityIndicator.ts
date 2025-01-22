@@ -74,8 +74,7 @@ export const activityIndicatorModule = InterpreterModule.create(
                     // - start: the (x,y) coordinate of the given event-actor combi
                     // - x=-0.5*activity indicatorwidth + xShift: In Hylimo coordinates, x is the upper left corner but we want it to be the center of the x-axis instead (unless there are multiple activity indicators simultaneously, then we want to offset them)
                     // - y=-margin: The line should not start at the event, but [margin] ahead  
-                    activityIndicatorElement.pos = scope.rpos(scope.apos(participant.x, event.y), -0.5 * scope.activityWidth + xShift, yStart)
-                    
+                    activityIndicatorElement.pos = scope.apos(participant.x - (0.5 * scope.activityWidth) + xShift, event.y + yStart)
 
                     scope.internal.registerCanvasElement(activityIndicatorElement, args, args.self)
                     participant.activeActivityIndicators += activityIndicatorElement
@@ -84,11 +83,11 @@ export const activityIndicatorModule = InterpreterModule.create(
                     // Also works with multiple indicators as then the right point will simply be hidden behind the new indicator
                     if(scope.enableDebugging) {
                         _left = canvasElement(content = ellipse(fill = "orange", stroke = "unset"), width=7, height=7, hAlign = "center", vAlign = "center")
-                        _left.pos = scope.rpos(startPosition, activityIndicatorElement.leftX, 0)
+                        _left.pos = scope.rpos(activityIndicatorElement.pos, activityIndicatorElement.leftX + (0.5 * scope.activityWidth), yStart * -1)
                         scope.internal.registerCanvasElement(_left, originalArgs, originalArgs.self)
                         // No 'center' as this doesn't make sense when we have multiple indicators
                         _right = canvasElement(content = ellipse(fill = "orange", stroke = "unset"), width=7, height=7, hAlign = "center", vAlign = "center")
-                        _right.pos = scope.rpos(startPosition, activityIndicatorElement.rightX, 0)
+                        _right.pos = scope.rpos(activityIndicatorElement.pos, activityIndicatorElement.rightX + (0.5 * scope.activityWidth), yStart * -1)
                         scope.internal.registerCanvasElement(_right, originalArgs, originalArgs.self)
                     }
 
