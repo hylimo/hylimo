@@ -32,7 +32,6 @@ export const activityIndicatorModule = InterpreterModule.create(
                     }
 
                     activityIndicators = participant.activeActivityIndicators
-                    scope.println("activity indicators: " + activityIndicators)
                     defaultLineshift = scope.activityShift
                     xShift = args.xShift
 
@@ -84,11 +83,11 @@ export const activityIndicatorModule = InterpreterModule.create(
                     if(scope.enableDebugging) {
                         // We must offset the points by half their width as the indicator has been centered
                         _left = canvasElement(content = ellipse(fill = "orange", stroke = "unset"), width=7, height=7, hAlign = "center", vAlign = "center")
-                        _left.pos = scope.rpos(activityIndicatorElement.pos, activityIndicatorElement.leftX + (0.5 * scope.activityWidth), yStart * -1)
+                        _left.pos = participant.left()
                         scope.internal.registerCanvasElement(_left, originalArgs, originalArgs.self)
                         // No 'center' as this doesn't make sense when we have multiple indicators
                         _right = canvasElement(content = ellipse(fill = "orange", stroke = "unset"), width=7, height=7, hAlign = "center", vAlign = "center")
-                        _right.pos = scope.rpos(activityIndicatorElement.pos, activityIndicatorElement.rightX + (0.5 * scope.activityWidth), yStart * -1)
+                        _right.pos = participant.right()
                         scope.internal.registerCanvasElement(_right, originalArgs, originalArgs.self)
                     }
 
