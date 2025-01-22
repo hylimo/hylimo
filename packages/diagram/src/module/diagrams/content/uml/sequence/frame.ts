@@ -178,17 +178,13 @@ export const sequenceDiagramFrameModule = InterpreterModule.create(
                         bottom = args.bottom
                         left = args.left
 
-                        // We must swap around the coordinates if necessary - this case can happen when the user moves a participant or event and is otherwise only fixable by manually adjusting the bounds
-                        if(top.y > bottom.y) {
-                            temp = top
-                            top = bottom
-                            bottom = temp
-                        }
+                        // We must swap around the coordinates if necessary - this case can happen when the user moves a participant and is otherwise only fixable by manually adjusting the bounds
                         if(left.x > right.x) {
                             temp = left
                             left = right
                             right = temp
                         }
+                        // We do NOT switch around 'top' and 'bottom': The case "user moves participants around" is common, the case "top and bottom events are switched" is really uncommon. In that case, the user will already have to fix everything
 
                         // Calculate the rectangle position
                         x = left.x - marginLeft
