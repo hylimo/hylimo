@@ -82,6 +82,7 @@ export const activityIndicatorModule = InterpreterModule.create(
                     // When in debugging mode, visualize the coordinates of the new activity indicator here - they cannot be captured by 'event(...)' as this indicator didn't exist back then: 'event(...);activate(...)'
                     // Also works with multiple indicators as then the right point will simply be hidden behind the new indicator
                     if(scope.enableDebugging) {
+                        // We must offset the points by half their width as the indicator has been centered
                         _left = canvasElement(content = ellipse(fill = "orange", stroke = "unset"), width=7, height=7, hAlign = "center", vAlign = "center")
                         _left.pos = scope.rpos(activityIndicatorElement.pos, activityIndicatorElement.leftX + (0.5 * scope.activityWidth), yStart * -1)
                         scope.internal.registerCanvasElement(_left, originalArgs, originalArgs.self)

@@ -15,8 +15,6 @@ export const eventModule = InterpreterModule.create(
             fun(
                 `
                     (name, yDistance) = args
-                    
-                    scope.println("Hello World 1")
 
                     eventObject = [name = name]
                     if(!(scope.internal.registerInDiagramScope(name, eventObject))) {
@@ -29,8 +27,6 @@ export const eventModule = InterpreterModule.create(
                     previousEvent = scope.internal.lastSequenceDiagramEvent
                     eventObject.deltaY = if(yDistance != null) { yDistance } { scope.eventDistance }
                     eventObject.y = if(previousEvent != null) { previousEvent.y } { 0 } + eventObject.deltaY 
-
-                    scope.println("Hello World 2")
 
                     // When in debugging mode, print the event name on the left to give an overview where we are
                     if(scope.enableDebugging) {
@@ -50,7 +46,6 @@ export const eventModule = InterpreterModule.create(
                             stroke = "red"
                         }
                     }
-                    scope.println("Hello World 3")
 
                     // Position the event for each instance relative to the latest previous event
                     // and add all events as per the user facing definition of events, i.e. 'start.User', 'start.Shop', …
@@ -71,21 +66,15 @@ export const eventModule = InterpreterModule.create(
                             scope.internal.registerCanvasElement(_right, originalArgs, originalArgs.self)
                         }
 
-                        scope.println("Hello World 4")
-
                         // change the length of the instance line (its end position) to the new last position + 3*margin
                         // (+3 margin so that a activity indicator that is still present there can end, and there's still a bit of the line left over)
                         endpos = scope.apos(it.x, eventObject.y + (3*scope.margin))
                         it.lifeline.contents.get(it.lifeline.contents.length - 1).end = endpos
 
-                        scope.println("Hello World 5")
-
                         // Also enlarge all active activity indicators
                         it.activeActivityIndicators.forEach {
                             it.height = it.height + eventObject.deltaY
                         }
-
-                        scope.println("Hello World 6")
                     }
                     scope.internal.lastSequenceDiagramEvent = eventObject
                 `,
