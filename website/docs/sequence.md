@@ -103,20 +103,35 @@ If their name is already used by something else, you can assign the result of th
 
 ```hylimo
 sequenceDiagram {
-    enableDebugging = true
     Bob = true
     user = instance("Bob")
+    instance("Charlie")
+    event("buy")
+    user --> Charlie
+}
+```
+
+:::
+
+Sometimes, you want to send messages where some time delta happens in between.\
+However, the normal Hylimo behavior for `A --> B` is to use the most recent event as y coordinate, not any y coordinate.\
+To achieve the time delta in spite of these inherent limitations, use the notation `participant.on(event)` which forces Hylimo to use the participant at the specified point in time:
+
+:::info
+
+```hylimo
+sequenceDiagram {
+    enableDebugging = true
+    instance("Bob")
     event("buy")
     event("stop")
-    buy.on(Bob) --> stop.on(Bob) with {
+    Bob.on(buy) --> Bob.on(stop) with {
         over = start(0).axisAligned(1, apos(0, 25), 1, apos(25, 25), 0, end(0.5))
     }
 }
 ```
 
 :::
-
-In this example, we also see that to refer to a specific xy-coordinate, we can always use `eventname.participant`.
 
 Now, we have the basic knowledge to go on with the remaining features that are all relative to the latest event.
 

@@ -121,7 +121,7 @@ export const participantModule = InterpreterModule.create(
                                         scope.apos(rightX, event.y)
                                     }
                                 }
-                                scope.virtualParticipant(left = left, right = right)
+                                scope.virtualParticipant(left = left, right = right, x = participant.x)
                             `,
                                 {
                                     docs: "Creates a virtual participant positioned at the given event. Can be used to create messages to arbitrary points in time (i.e. events that have a delay until they arrive)",
@@ -172,13 +172,19 @@ export const participantModule = InterpreterModule.create(
                 lifeline = canvasElement()
                 left = args.left
                 right = args.right
-                [name = "artificially created participant", lifeline = lifeline, activeActivityIndicators = list(), declaringEvent = null, alive = false, x = 0, y = 0, left = left, right = right]
+                x = args.x ?? 0
+                [name = "artificially created participant", lifeline = lifeline, activeActivityIndicators = list(), declaringEvent = null, alive = false, x = x, y = 0, left = left, right = right]
           `,
                 {
                     docs: "Creates a virtual participant that is not visible in the diagram but can be used for things that need to differentiate between a 'left' and a 'right' position",
                     params: [
                         ["left", "a function producing the left point of this participant", functionType],
-                        ["right", "a function producing the right point of this participant", functionType]
+                        ["right", "a function producing the right point of this participant", functionType],
+                        [
+                            "x",
+                            "the center x coordinate of this participant, if present. Should be set if you want the detection if a message has been sent by the same participant to work correctly",
+                            optional(numberType)
+                        ]
                     ],
                     returns: "The created virtual participant",
                     snippet: "(left = $1, right = $2)"
