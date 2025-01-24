@@ -66,6 +66,18 @@ export const eventModule = InterpreterModule.create(
                             scope.internal.registerCanvasElement(_right, originalArgs, originalArgs.self)
                         }
 
+                        // Precreate the data necessary to store what activity indicators are active for the participant at this event
+                        participant.events[eventObject.name] = if(scope.internal.lastSequenceDiagramEvent == null) {
+                            [ activityIndicators = list()]
+                        }{
+                            previousData = participant.events[scope.internal.lastSequenceDiagramEvent.name]
+                            if(previousData != null) {
+                                [ activityIndicators = previousData.activityIndicators.map({ it }) /* we need to copy the list, not the contents, as the list may be updated later on */ ]
+                            } {
+                                [ activityIndicators = list()]
+                            }
+                        }
+
                         // change the length of the instance line (its end position) to the new last position + 3*margin
                         // (+3 margin so that a activity indicator that is still present there can end, and there's still a bit of the line left over)
                         endpos = scope.apos(it.x, eventObject.y + (3*scope.margin))

@@ -18,6 +18,7 @@ export const participantModule = InterpreterModule.create(
                 participantElement.alive = true
                 participantElement.name = name
                 participantElement.below = args.below
+                participantElement.events = []
 
                 // Calculate y
                 event = scope.internal.lastSequenceDiagramEvent
@@ -37,6 +38,11 @@ export const participantModule = InterpreterModule.create(
                     } {
                         0
                     }
+                }
+
+                // Assign the current event to the list of data when this participant was active, when it exists
+                if(event != null) {
+                    participantElement.events[event.name] = [ activityIndicators = list()]
                 }
 
                 participantElement.pos = scope.apos(participantElement.x, participantElement.y) 

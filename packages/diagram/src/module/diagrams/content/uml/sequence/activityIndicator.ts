@@ -77,6 +77,10 @@ export const activityIndicatorModule = InterpreterModule.create(
 
                     scope.internal.registerCanvasElement(activityIndicatorElement, args, args.self)
                     participant.activeActivityIndicators += activityIndicatorElement
+                    if(participant.events[event.name] == null) {
+                        scope.error("participant '\${participant.name}' does not seem to have data for event '\${event.name}' which shouldn't happen")
+                    }
+                    participant.events[event.name].activityIndicators += activityIndicatorElement
 
                     // When in debugging mode, visualize the coordinates of the new activity indicator here - they cannot be captured by 'event(...)' as this indicator didn't exist back then: 'event(...);activate(...)'
                     // Also works with multiple indicators as then the right point will simply be hidden behind the new indicator
@@ -131,6 +135,12 @@ export const activityIndicatorModule = InterpreterModule.create(
                     if(participant.activeActivityIndicators.length == 0) {
                         error("Cannot deactivate participant '\${participant.name}' as it has not been activated")
                     }
+
+                    eventName = scope.internal.lastSequenceDiagramEvent.name
+                    if(participant.events[eventName] == null) {
+                        scope.error("participant '\${participant.name}' does not seem to have data for event '\${eventName}' which shouldn't happen")
+                    }
+                    participant.events[eventName].activityIndicators.remove()
                     activityIndicator = participant.activeActivityIndicators.remove()
                 `,
                 {

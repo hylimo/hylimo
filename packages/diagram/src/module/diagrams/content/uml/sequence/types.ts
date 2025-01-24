@@ -3,6 +3,7 @@ import {
     functionType,
     listType,
     literal,
+    mapType,
     namedType,
     numberType,
     objectType,
@@ -51,6 +52,11 @@ export const activityIndicatorType = namedType(
     "UML sequence diagram activity indicator"
 );
 
+const participantEventDetails = namedType(
+    objectType(new Map([["activityIndicators", listType(activityIndicatorType)]])),
+    "activity indicators at one event for one participant"
+);
+
 /**
  * Stores the data of a single participant.
  *
@@ -60,12 +66,14 @@ export const activityIndicatorType = namedType(
  * - `y`: absolute to the root of the diagram
  * - `left`: function taking no parameter and producing the left position of the participant at the current event (differs from `x` if there are activity indicators)
  * - `right`: function taking no parameter and producing the right position of the participant at the current event (differs from `x` if there are activity indicators)
+ * - `events`: Each event name where the participant was active mapped to the data of this participant at this event (i.e. which activity indicators were active)
  */
 export const participantType = namedType(
     objectType(
         new Map([
             ["name", stringType],
             ["lifeline", canvasContentType],
+            ["events", mapType(participantEventDetails)],
             ["activeActivityIndicators", listType(activityIndicatorType)],
             ["declaringEvent", optional(eventType)],
             ["x", numberType],
