@@ -1,6 +1,7 @@
 import { fun, id, InterpreterModule, numberType, optional } from "@hylimo/core";
 import { SCOPE } from "../../../../base/dslModule.js";
 import { participantType } from "./types.js";
+import { canvasPointType } from "../../../../base/types.js";
 
 /**
  * Module providing the shared logic for all sorts of sequence diagram participants - instances, actors, …<br>
@@ -51,11 +52,11 @@ export const participantModule = InterpreterModule.create(
                 // To calculate an event specific coordinate, we must first know how much space the active activity indicators take up
                 // Calculate the left coordinate of this participant at the current event - especially for when there are currently activity indicators
                 participantElement.left = {
-                    event = it ?? scope.internal.lastSequenceDiagramEvent
+                    event = scope.internal.lastSequenceDiagramEvent
                     if((event == null) || (event == participantElement.declaringEvent)) {
                         scope.lpos(participantElement, 0.5) // On the left of the participant
                     } {
-                        leftX = if(participantElement.activeActivityIndicators.length > 0) { participantElement.activeActivityIndicators.get(participantElement.activeActivityIndicators.length - 1).leftX } { participantElement.x }
+                        leftX = participantElement.x + (if(participantElement.activeActivityIndicators.length > 0) { participantElement.activeActivityIndicators.get(participantElement.activeActivityIndicators.length - 1).leftX } { 0 })
                         scope.apos(leftX, event.y)
                     }
                 }
@@ -65,7 +66,7 @@ export const participantModule = InterpreterModule.create(
                     if((event == null) || (event == participantElement.declaringEvent)) {
                         scope.lpos(participantElement, 0.0) // On the right of the participant
                     } {
-                        rightX = if(participantElement.activeActivityIndicators.length > 0) { participantElement.activeActivityIndicators.get(participantElement.activeActivityIndicators.length - 1).rightX } { participantElement.x }
+                        rightX =  participantElement.x + (if(participantElement.activeActivityIndicators.length > 0) { participantElement.activeActivityIndicators.get(participantElement.activeActivityIndicators.length - 1).rightX } { 0 })
                         scope.apos(rightX, event.y)
                     }}
 
@@ -79,7 +80,7 @@ export const participantModule = InterpreterModule.create(
                 } {
                     participantElement.class += "non-top-level-participant"
                 }
-
+                
                 scope.internal.canvasAddEdits["toolbox/Activate instance or actor/\${name}"] = "'activate(' & \${nameToJsonataStringLiteral(name)} & ')'"
                 scope.internal.canvasAddEdits["toolbox/Deactive instance or actor/\${name}"] = "'deactivate(' & \${nameToJsonataStringLiteral(name)} & ')'"
                 scope.internal.canvasAddEdits["toolbox/Destroy instance or actor/\${name}"] = "'destroy(' & \${nameToJsonataStringLiteral(name)} & ')'"
@@ -96,6 +97,26 @@ export const participantModule = InterpreterModule.create(
                 }
             }
         `,
+        id(SCOPE).assignField(
+            "virtualParticipant",
+            fun(
+                `
+                lifeline = canvasElement()
+                left = it
+                right = args[1]
+                [name = "artificially created participant", lifeline = lifeline, activeActivityIndicators = list(), declaringEvent = null, alive = false, x = 0, y = 0, left = { left }, right = { right }]
+          `,
+                {
+                    docs: "Creates a virtual participant that is not visible in the diagram but can be used for things that need to differentiate between a 'left' and a 'right' position",
+                    params: [
+                        [0, "the left point of this participant", canvasPointType],
+                        [1, "the right point of this participant", canvasPointType]
+                    ],
+                    returns: "The created virtual participant",
+                    snippet: "($1, $2)"
+                }
+            )
+        ),
 
         id(SCOPE).assignField(
             "destroy",
