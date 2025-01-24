@@ -1,7 +1,7 @@
-import { fun, id, InterpreterModule, numberType, optional } from "@hylimo/core";
+import { fun, functionType, id, InterpreterModule, numberType, optional, stringType } from "@hylimo/core";
 import { SCOPE } from "../../../../base/dslModule.js";
-import { participantType } from "./types.js";
-import { canvasPointType } from "../../../../base/types.js";
+import { eventType, participantType } from "./types.js";
+import { canvasContentType } from "../../../../base/types.js";
 
 /**
  * Module providing the shared logic for all sorts of sequence diagram participants - instances, actors, …<br>
@@ -12,8 +12,13 @@ export const participantModule = InterpreterModule.create(
     ["uml/sequence/defaultValues"],
     [],
     [
-        `
-            scope.internal.createSequenceDiagramParticipant = {
+        id(SCOPE)
+            .field("internal")
+            .assignField(
+                "createSequenceDiagramParticipant",
+                fun(
+                    [
+                        `
                 (name, participantElement) = args
                 participantElement.alive = true
                 participantElement.name = name
@@ -85,15 +90,72 @@ export const participantModule = InterpreterModule.create(
                     participantElement.class += "top-level-participant"
                 } {
                     participantElement.class += "non-top-level-participant"
-                }
+                }`,
+                        id("participantElement").assignField(
+                            "on",
+                            fun(
+                                `
+                                event = it
+                                participant = participantElement
+                                left =  {
+                                    if(event == participant.declaringEvent) {
+                                        scope.lpos(participant, 0.5) // On the left of the participant
+                                    } {
+                                        if(participant.events[event.name] == null) {
+                                            scope.error("Participant '\${participant.name}' does not have data for event '\${event.name}'")
+                                        }
+                                        activityIndicators = participant.events[event.name].activityIndicators
+                                        leftX = participant.x + (if(activityIndicators.length > 0) { activityIndicators.get(activityIndicators.length - 1).leftX } { 0 })
+                                        scope.apos(leftX, event.y)
+                                    }
+                                }
+                                right = {
+                                    if(event == participant.declaringEvent) {
+                                        scope.lpos(participant, 0) // On the right of the participant
+                                    } {
+                                        if(participant.events[event.name] == null) {
+                                            scope.error("Participant '\${participant.name}' does not have data for event '\${event.name}'")
+                                        }
+                                        activityIndicators = participant.events[event.name].activityIndicators
+                                        rightX = participant.x + (if(activityIndicators.length > 0) { activityIndicators.get(activityIndicators.length - 1).rightX } { 0 })
+                                        scope.apos(rightX, event.y)
+                                    }
+                                }
+                                scope.virtualParticipant(left = left, right = right)
+                            `,
+                                {
+                                    docs: "Creates a virtual participant positioned at the given event. Can be used to create messages to arbitrary points in time (i.e. events that have a delay until they arrive)",
+                                    params: [[0, "the event where to pinpoint the participant", eventType]],
+                                    returns: "the new virtual participant to use for i.e. messages",
+                                    snippet: "($1)"
+                                }
+                            )
+                        ),
+                        `
                 
                 scope.internal.canvasAddEdits["toolbox/Activate instance or actor/\${name}"] = "'activate(' & \${nameToJsonataStringLiteral(name)} & ')'"
                 scope.internal.canvasAddEdits["toolbox/Deactive instance or actor/\${name}"] = "'deactivate(' & \${nameToJsonataStringLiteral(name)} & ')'"
                 scope.internal.canvasAddEdits["toolbox/Destroy instance or actor/\${name}"] = "'destroy(' & \${nameToJsonataStringLiteral(name)} & ')'"
 
                 participantElement
-            }
-
+                `
+                    ],
+                    {
+                        docs: "Enriches the given already created participant with all sequence diagram specific data",
+                        params: [
+                            [0, "the name of this participant", stringType],
+                            [1, "the already created participant element", canvasContentType],
+                            [
+                                "below",
+                                "another participant below which to position this participant",
+                                optional(participantType)
+                            ]
+                        ],
+                        returns: "the participant"
+                    }
+                )
+            ),
+        `
             scope.styles {
                 cls("top-level-participant") {
                     vAlign = "bottom"
@@ -108,18 +170,18 @@ export const participantModule = InterpreterModule.create(
             fun(
                 `
                 lifeline = canvasElement()
-                left = it
-                right = args[1]
-                [name = "artificially created participant", lifeline = lifeline, activeActivityIndicators = list(), declaringEvent = null, alive = false, x = 0, y = 0, left = { left }, right = { right }]
+                left = args.left
+                right = args.right
+                [name = "artificially created participant", lifeline = lifeline, activeActivityIndicators = list(), declaringEvent = null, alive = false, x = 0, y = 0, left = left, right = right]
           `,
                 {
                     docs: "Creates a virtual participant that is not visible in the diagram but can be used for things that need to differentiate between a 'left' and a 'right' position",
                     params: [
-                        [0, "the left point of this participant", canvasPointType],
-                        [1, "the right point of this participant", canvasPointType]
+                        ["left", "a function producing the left point of this participant", functionType],
+                        ["right", "a function producing the right point of this participant", functionType]
                     ],
                     returns: "The created virtual participant",
-                    snippet: "($1, $2)"
+                    snippet: "(left = $1, right = $2)"
                 }
             )
         ),
