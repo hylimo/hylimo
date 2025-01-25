@@ -29,33 +29,37 @@ export const sequenceDiagramCreateConnectionOperatorModule = InterpreterModule.c
                 {
                     (a, b) = args
                     
-                    // When we have 'instance(b); instance(a); a --> b', swap the connection to 'b --> a' internally as otherwise the line will start on the wrong side of the activity indicator (left for b, right for a), which looks unpleasant
+                    // When we have 'instance(b); instance(a); a --> b', swap the connection to 'b <-- a' internally as otherwise the line will start on the wrong side of the activity indicator (left for b, right for a), which looks unpleasant
                     // This case occurs the moment the user moves 'instruction(a);' from the original code 'instruction(a); instruction(b); a --> b' one line down, so can happen frequently
-                    if((a.x != null) && (b.x != null) && (b.x < a.x)) { // <- must be '<', '<=' would be incorrect
-                        c = b
-                        b = a
-                        a = c
-                    }
+                    invertMessageDirection = (a.x != null) && (b.x != null) && (b.x < a.x) // <- must be '<', '<=' would be incorrect
 
                     // If necessary, unwrap to the left/ right side of the most recent activity indicator - calculated through the given left/right functions
-                    start = if(a.right != null && (a.right.proto == {}.proto)) {
+                    start = if(!(invertMessageDirection) && (a.right != null) && (a.right.proto == {}.proto)) {
                         a.right()
                     } {
-                        a
+                        if(invertMessageDirection && (a.left != null) && (a.left.proto == {}.proto)) {
+                            a.left()
+                        } {
+                            a
+                        }
                     } 
 
                     // For the end point, there's a specialty: If both events point at the same participant (self message, so same x coordinate), don't use the left point but the right one instead so that x is indeed the same
                     // Additionally, in this case, we don't want to draw a straight line but an axis aligned one by default
                     lineType = "line"
-                    end = if(b.left != null && (b.left.proto == {}.proto)) {
-                        if((b.x == a.x) && (b.right != null) && (b.right.proto == {}.proto)) {
-                            lineType = "axisAligned"
-                            b.right()
-                        } {
-                            b.left()
-                        }
+                    end = if((b.x == a.x) && (b.right != null) && (b.right.proto == {}.proto)) {
+                        lineType = "axisAligned"
+                        b.right()
                     } {
-                        b
+                        if(!(invertMessageDirection) && (b.left != null) && (b.left.proto == {}.proto)) {
+                            b.left()
+                        } {
+                            if(invertMessageDirection && (b.right != null) && (b.right.proto == {}.proto)) {
+                                b.right()
+                            } {
+                                b
+                            }
+                        }
                     } 
 
                     // For lostMessage()/foundMessage(), we only calculate their position now, relative to the opposite side
