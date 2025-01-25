@@ -69,7 +69,7 @@ export const eventModule = InterpreterModule.create(
                         // Precreate the data necessary to store what activity indicators are active for the participant at this event
                         participant.events[eventObject.name] = if(scope.internal.lastSequenceDiagramEvent == null) {
                             [ activityIndicators = list()]
-                        }{
+                        } {
                             previousData = participant.events[scope.internal.lastSequenceDiagramEvent.name]
                             if(previousData != null) {
                                 [ activityIndicators = previousData.activityIndicators.map({ it }) /* we need to copy the list, not the contents, as the list may be updated later on */ ]
