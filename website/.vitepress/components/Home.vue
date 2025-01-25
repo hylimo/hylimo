@@ -9,6 +9,9 @@
             class="main-content"
         />
         <ClientOnly>
+            <Teleport to="#diagram-filename">
+                <FilenameInput></FilenameInput>
+            </Teleport>
             <Teleport to="#copy-diagram-link">
                 <IconButton label="Copy diagram link" icon="vpi-link" @click="copyLink" />
                 <span class="tooltip" :class="{ active: copiedSuccess }">Copied!</span>
@@ -48,6 +51,8 @@ import { onBeforeMount } from "vue";
 import RegisterSW from "./RegisterSW.vue";
 import { CodeWithFileHandle, openDiagram } from "../util/diagramOpener";
 import { languageServerConfigKey } from "../theme/injectionKeys";
+import BaseInput from "./settings/BaseInput.vue";
+import FilenameInput from "./settings/FilenameInput.vue";
 
 const HylimoEditor = defineClientComponent(() => import("./HylimoEditor.vue"));
 
