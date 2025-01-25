@@ -17,9 +17,9 @@ export const activityIndicatorModule = InterpreterModule.create(
             fun(
                 `
                     originalArgs = args
-                    (instance) = args
-                    if(instance == null) {
-                        error("Cannot activate a non-existing instance")
+                    (participant) = args
+                    if(participant == null) {
+                        error("Cannot activate a non-existing participant")
                     }
 
                     event = scope.internal.lastSequenceDiagramEvent
@@ -27,24 +27,11 @@ export const activityIndicatorModule = InterpreterModule.create(
                         error("activate() can only be called once there is an 'event()'")
                     }
 
-                    if(instance.name == null) {
-                        error("Argument of 'activate()' is not an instance or an actor")
+                    if(participant.alive != true) {
+                        error("'\${participant.name}' has already been destroyed and thus cannot be activated anymore")
                     }
 
-                    startPositionRaw = event[instance.name]
-                    if(startPositionRaw == null) {
-                        if(scope.internal.previouslyExistingSequenceDiagramParticipants[instance.name] != null) {
-                            error("'\${instance.name}' has already been destroyed and thus cannot be activated anymore")
-                        } {
-                            error("'\${event.name}.\${instance.name}' does not exist which should not happen")
-                        }
-                    }
-                    startPosition = startPositionRaw.center
-                    if(startPosition == null) {
-                        error("'\${event.name}.\${instance.name}' has no 'center' property which should not happen")
-                    }
-
-                    activityIndicators = instance.activeActivityIndicators
+                    activityIndicators = participant.activeActivityIndicators
                     defaultLineshift = scope.activityShift
                     xShift = args.xShift
 
@@ -86,21 +73,25 @@ export const activityIndicatorModule = InterpreterModule.create(
                     // - start: the (x,y) coordinate of the given event-actor combi
                     // - x=-0.5*activity indicatorwidth + xShift: In Hylimo coordinates, x is the upper left corner but we want it to be the center of the x-axis instead (unless there are multiple activity indicators simultaneously, then we want to offset them)
                     // - y=-margin: The line should not start at the event, but [margin] ahead  
-                    activityIndicatorElement.pos = scope.rpos(startPosition, -0.5 * scope.activityWidth + xShift, yStart)
-                    
+                    activityIndicatorElement.pos = scope.apos(participant.x - (0.5 * scope.activityWidth) + xShift, event.y + yStart)
 
                     scope.internal.registerCanvasElement(activityIndicatorElement, args, args.self)
-                    instance.activeActivityIndicators += activityIndicatorElement
+                    participant.activeActivityIndicators += activityIndicatorElement
+                    if(participant.events[event.name] == null) {
+                        scope.error("participant '\${participant.name}' does not seem to have data for event '\${event.name}' which shouldn't happen")
+                    }
+                    participant.events[event.name].activityIndicators += activityIndicatorElement
 
                     // When in debugging mode, visualize the coordinates of the new activity indicator here - they cannot be captured by 'event(...)' as this indicator didn't exist back then: 'event(...);activate(...)'
                     // Also works with multiple indicators as then the right point will simply be hidden behind the new indicator
                     if(scope.enableDebugging) {
+                        // We must offset the points by half their width as the indicator has been centered
                         _left = canvasElement(content = ellipse(fill = "orange", stroke = "unset"), width=7, height=7, hAlign = "center", vAlign = "center")
-                        _left.pos = scope.rpos(startPosition, activityIndicatorElement.leftX, 0)
+                        _left.pos = participant.left()
                         scope.internal.registerCanvasElement(_left, originalArgs, originalArgs.self)
                         // No 'center' as this doesn't make sense when we have multiple indicators
                         _right = canvasElement(content = ellipse(fill = "orange", stroke = "unset"), width=7, height=7, hAlign = "center", vAlign = "center")
-                        _right.pos = scope.rpos(startPosition, activityIndicatorElement.rightX, 0)
+                        _right.pos = participant.right()
                         scope.internal.registerCanvasElement(_right, originalArgs, originalArgs.self)
                     }
 
@@ -113,12 +104,12 @@ export const activityIndicatorModule = InterpreterModule.create(
                     activityIndicatorElement
                 `,
                 {
-                    docs: "Activates an activity indicator at the most recent event you declared. activity indicators are ranges of time during which an instance is active. You can activate an activity indicator multiple times simultaneously for the same participant",
+                    docs: "Activates an activity indicator at the most recent event you declared. activity indicators are ranges of time during which a participant is active. You can activate an activity indicator multiple times simultaneously for the same participant",
                     params: [
                         [0, "the participant (instance or actor) to activate", participantType],
                         [
                             "xShift",
-                            "an optional shift on the x-axis when using multiple activity indicators simultaneously on the same instance. Defaults to 'activityShift'",
+                            "an optional shift on the x-axis when using multiple activity indicators simultaneously on the same participant. Defaults to 'activityShift'",
                             optional(numberType)
                         ],
                         [
@@ -136,15 +127,21 @@ export const activityIndicatorModule = InterpreterModule.create(
             "deactivate",
             fun(
                 `
-                    (instance) = args
-                    if(instance == null) {
-                        error("Cannot deactivate a non-existing instance")
+                    (participant) = args
+                    if(participant == null) {
+                        error("Cannot deactivate a non-existing participant")
                     }
 
-                    if(instance.activeActivityIndicators.length == 0) {
-                        error("Cannot deactivate instance '\${instance.name}' as it has not been activated")
+                    if(participant.activeActivityIndicators.length == 0) {
+                        error("Cannot deactivate participant '\${participant.name}' as it has not been activated")
                     }
-                    activityIndicator = instance.activeActivityIndicators.remove()
+
+                    eventName = scope.internal.lastSequenceDiagramEvent.name
+                    if(participant.events[eventName] == null) {
+                        scope.error("participant '\${participant.name}' does not seem to have data for event '\${eventName}' which shouldn't happen")
+                    }
+                    participant.events[eventName].activityIndicators.remove()
+                    activityIndicator = participant.activeActivityIndicators.remove()
                 `,
                 {
                     docs: "Deactivates the most recent activity indicator",

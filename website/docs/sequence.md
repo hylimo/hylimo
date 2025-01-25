@@ -103,20 +103,35 @@ If their name is already used by something else, you can assign the result of th
 
 ```hylimo
 sequenceDiagram {
-    enableDebugging = true
     Bob = true
     user = instance("Bob")
+    instance("Charlie")
+    event("buy")
+    user --> Charlie
+}
+```
+
+:::
+
+Sometimes, you want to send messages where some time delta happens in between.\
+However, the normal Hylimo behavior for `A --> B` is to use the most recent event as y coordinate, not any y coordinate.\
+To achieve the time delta in spite of these inherent limitations, use the notation `participant.on(event)` which forces Hylimo to use the participant at the specified point in time:
+
+:::info
+
+```hylimo
+sequenceDiagram {
+    enableDebugging = true
+    instance("Bob")
     event("buy")
     event("stop")
-    buy.Bob --> stop.Bob with {
+    Bob.on(buy) --> Bob.on(stop) with {
         over = start(0).axisAligned(1, apos(0, 25), 1, apos(25, 25), 0, end(0.5))
     }
 }
 ```
 
 :::
-
-In this example, we also see that to refer to a specific xy-coordinate, we can always use `eventname.participant`.
 
 Now, we have the basic knowledge to go on with the remaining features that are all relative to the latest event.
 
@@ -234,19 +249,19 @@ sequenceDiagram {
     instance("A")
     instance("B")
     event("E1")
-    E1.A -- E1.B // asynchronous undirected message
+    A -- B // asynchronous undirected message
     event("E2")
-    E2.A --> E2.B // asynchronous directed message, object creation message
+    A --> B // asynchronous directed message, object creation message
     event("E3")
-    E3.A -->> E3.B // synchronous directed message
+    A -->> B // synchronous directed message
     event("E4")
-    E4.A <.. E4.B // asynchronous return message
+    A <.. B // asynchronous return message
     event("E5")
-    E5.A <<.. E5.B // synchronous return message
+    A <<.. B // synchronous return message
     event("E6")
-    E6.A --! E6.B // destroy message
+    A --! B // destroy message
     event("E7")
-    E7.A ..! E7.B // destroy return message
+    A ..! B // destroy return message
 }
 ```
 
@@ -341,7 +356,7 @@ Should always be used inline as a message from something else:
 sequenceDiagram {
     instance("Bob")
     event("E")
-    foundMessage() -->> E.Bob
+    foundMessage() -->> Bob
 }
 ```
 
@@ -419,7 +434,7 @@ Should always be used inline as a message to something else:
 sequenceDiagram {
     instance("Bob")
     event("E")
-    E.Bob -->> lostMessage()
+    Bob -->> lostMessage()
 }
 ```
 
@@ -485,12 +500,12 @@ sequenceDiagram {
 
     event("start")
     event("communicate")
-    communicate.Alice --> communicate.Bob with {
+    Alice --> Bob with {
         label("Ping", 0.25, -5)
     }
     event("end")
 
-    frame(topLeft = start.Alice, bottomRight = end.Charlie, text = "while", subtext = "[condition]")
+    frame(top = start, left = Alice, bottom = end, right = Charlie, text = "while", subtext = "[condition]")
 }
 ```
 
@@ -521,17 +536,17 @@ sequenceDiagram {
     event("hi3", 120)
     activate(last)
     z = instance("Cat", below = bob)
-    hi3.alice --> z
+    alice --> z
     event("hi4")
     event("hi5")
-    hi5.Dave <<-- hi5.last with {
+    Dave <<-- last with {
         label("notify", 0.5)
     }
     event("hi6")
     event("hi7")
 
-    frame(topLeft = hi2.alice, bottomRight = hi7.last, text = "outer", marginRight = 40, marginTop = 25)
-    frame(topLeft = hi4.Dave, bottomRight = hi6.last, marginRight = 10, marginY = 12.4, text = "if", subtext = "[finished]")
+    frame(top = hi2, left = alice, bottom = hi7, right = last, text = "outer", marginRight = 40, marginTop = 25)
+    frame(top = hi4, left = Dave, bottom = hi6, right = last, marginRight = 10, marginY = 12.4, text = "if", subtext = "[finished]")
 }
 ```
 
@@ -560,16 +575,16 @@ sequenceDiagram {
     event("hi3", 120)
     activate(last)
     z = instance("Cat", below = bob)
-    hi3.alice --> z
+    alice --> z
     event("hi4")
     event("hi5")
-    hi5.Dave <<-- hi5.last with {
+    Dave <<-- last with {
         label("notify", 0.5)
     }
     event("hi6")
     event("hi7")
 
-    frame(topLeft = hi2.alice, bottomRight = hi7.last, text = "if", subtext = "[work to do]", marginRight = 40, marginTop = 25) {
+    frame(top = hi2, left = alice, bottom = hi7, right = last, text = "if", subtext = "[work to do]", marginRight = 40, marginTop = 25) {
         fragment(hi3, text = "else if", subtext = "[environment variable set]")
         fragment(hi5, text = "else")
     }
@@ -600,7 +615,7 @@ sequenceDiagram {
     event("start")
     activate(user)
     activate(other)
-    start.user -->> start.other
+    user -->> other
     deactivate(user)
     deactivate(other)
     event("end")
@@ -635,16 +650,16 @@ sequenceDiagram {
     event("hi3", 120)
     activate(last)
     z = instance("Cat", below = bob)
-    hi3.alice --> z
+    alice --> z
     event("hi4")
     event("hi5")
-    hi5.Dave <<-- hi5.last with {
+    Dave <<-- last with {
         label("notify", 0.5)
     }
     event("hi6")
     event("hi7")
 
-    frame(topLeft = hi2.alice, bottomRight = hi7.last, text = "alt", subtext = "[work to do]", marginRight = 40, marginTop = 25) {
+    frame(top = hi2, left = alice, bottom = hi7, right = last, text = "alt", subtext = "[work to do]", marginRight = 40, marginTop = 25) {
         fragment(hi3, subtext = "[environment variable set]")
         fragment(hi5, subtext = "[else]")
     }
@@ -675,16 +690,16 @@ sequenceDiagram {
     event("hi3", 120)
     activate(last)
     z = instance("Cat", below = bob)
-    hi3.alice --> z
+    alice --> z
     event("hi4")
     event("hi5")
-    hi5.Dave <<-- hi5.last with {
+    Dave <<-- last with {
         label("notify", 0.5)
     }
     event("hi6")
     event("hi7")
 
-    frame(topLeft = hi2.alice, bottomRight = hi7.last, text = "opt", subtext = "[status == pending]", marginRight = 40, marginTop = 25) {
+    frame(top = hi2, left = alice, bottom = hi7, right = last, text = "opt", subtext = "[status == pending]", marginRight = 40, marginTop = 25) {
         fragment(hi3, subtext = "[status == executing]")
         fragment(hi5, subtext = "[status == terminated]")
     }
@@ -712,19 +727,19 @@ sequenceDiagram {
 
     event("start")
     event("communicate")
-    communicate.Alice --> communicate.Bob with {
+    Alice --> Bob with {
         label("Ping", 0.25, -5)
     }
     event("breakStart", 40)
     event("breakEnd")
     event("sendMessage")
-    sendMessage.Alice -->> sendMessage.Charlie with {
+    Alice -->> Charlie with {
         label("sendMessage", 0.25)
     }
     event("end")
 
-    frame(topLeft = start.Alice, bottomRight = end.Charlie, text = "loop", subtext = "[message in messages]")
-    frame(topLeft = breakStart.Alice, bottomRight = breakEnd.Charlie, text = "break", subtext = "[all messages have been sent]", marginX = 5)
+    frame(top = start, left = Alice, bottom = end, right = Charlie, text = "loop", subtext = "[message in messages]")
+    frame(top = breakStart, left = Alice, bottom = breakEnd, right = Charlie, text = "break", subtext = "[all messages have been sent]", marginX = 5)
 }
 ```
 
@@ -746,18 +761,18 @@ sequenceDiagram {
 
     event("start")
     event("communicateA")
-    communicateA.Alice --> communicateA.Bob with {
+    Alice --> Bob with {
         label("Ping", 0.25, -5)
     }
     event("communicateB", 50)
-    communicateB.Alice <-- communicateB.Bob with {
+    Alice <-- Bob with {
         label("Ping", 0.25, -5)
     }
     event("communicateC", 50)
-    communicateC.Bob --> communicateC.Charlie
+    Bob --> Charlie
     event("end")
 
-    frame(topLeft = start.Alice, bottomRight = end.Charlie, text = "par") {
+    frame(top = start, left = Alice, bottom = end, right = Charlie, text = "par") {
         fragment(communicateB)
         fragment(communicateC)
     }
@@ -782,14 +797,14 @@ sequenceDiagram {
 
     event("start")
     event("communicate")
-    communicate.Alice --> communicate.Bob with {
+    Alice --> Bob with {
         label("Ping", 0.25, -5)
     }
     event("handleErrorsStart", 50)
     event("handleErrorsEnd")
     event("end")
 
-    frame(topLeft = handleErrorsStart.Alice, bottomRight = handleErrorsEnd.Bob, text = "ref", subtext = "handle errors")
+    frame(top = handleErrorsStart, left = Alice, bottom = handleErrorsEnd, right = Bob, text = "ref", subtext = "handle errors")
 }
 ```
 
@@ -812,27 +827,27 @@ sequenceDiagram {
     event("initialRequest")
     activate(bob)
     activate(ourShop)
-    initialRequest.user --> initialRequest.ourShop
+    user --> ourShop
     deactivate(bob)
 
     activate(Cart)
     event("cartRequest")
-    cartRequest.ourShop --> cartRequest.Cart
+    ourShop --> Cart
 
     event("cartResponse")
-    cartResponse.ourShop <.. cartResponse.Cart
+    ourShop <.. Cart
     deactivate(Cart)
 
     activate(Payment)
     event("startPayment", 140)
-    startPayment.ourShop ..> startPayment.Payment
+    ourShop ..> Payment
     deactivate(Payment)
 
     event("notifyUser", 70)
-    notifyUser.user <.. notifyUser.ourShop
+    user <.. ourShop
     deactivate(ourShop)
 
-    frame(topLeft = cartResponse.user, bottomRight = notifyUser.ourShop, text = "if", subtext = "[response successful]", margin=30) {
+    frame(top = cartResponse, left = user, bottom = notifyUser, right = ourShop, text = "if", subtext = "[response successful]", margin=30) {
         fragment(startPayment, text = "else", subtext = "[nothing was done]")
     }
 }

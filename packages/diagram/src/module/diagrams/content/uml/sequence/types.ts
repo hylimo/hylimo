@@ -3,6 +3,7 @@ import {
     functionType,
     listType,
     literal,
+    mapType,
     namedType,
     numberType,
     objectType,
@@ -27,37 +28,9 @@ export const eventType = namedType(
             ["name", stringType],
             ["deltaY", numberType],
             ["y", numberType]
-            // And a bunch of dynamic 'eventCoordinateType's, always under the names of the currently available participants, i.e. 'event.Bob'
         ])
     ),
     "UML sequence diagram event"
-);
-
-/**
- * Stores an event coordinate, i.e. `instance("Bob") \n event("shopping").Bob`
- *
- * param explanations:
- * - `left`: function that produces a connectable point resembling the left x position of the underlying participant (at the given y coordinate) (differs from center when there is an active activity indicator)
- * - `center`: precise xy position of the event
- * - `right`: function that produces a connectable point resembling the right x position of the underlying participant (at the given y coordinate) (differs from center when there is an active activity indicator)
- * - `x`: Absolute `x` coordinate relative to the diagram root, equal to `center.x` (which we don't know due to the design of Hylimo)
- * - `y`: Absolute `y` coordinate relative to the diagram root, equal to `center.y` (which we don't know due to the design of Hylimo)
- * - `parentEvent`: Can only be `null` when a top level participant is used as event coordinate (object creation messages)
- * - `participantName`: i.e. 'Bob' when this object is called as 'event.Bob'
- */
-export const eventCoordinateType = namedType(
-    objectType(
-        new Map([
-            ["left", functionType],
-            ["center", canvasPointType],
-            ["right", functionType],
-            ["x", numberType],
-            ["y", numberType],
-            ["parentEvent", optional(eventType)],
-            ["participantName", stringType]
-        ])
-    ),
-    "UML sequence diagram event for a specific x coordinate"
 );
 
 /**
@@ -79,22 +52,35 @@ export const activityIndicatorType = namedType(
     "UML sequence diagram activity indicator"
 );
 
+const participantEventDetails = namedType(
+    objectType(new Map([["activityIndicators", listType(activityIndicatorType)]])),
+    "activity indicators at one event for one participant"
+);
+
 /**
  * Stores the data of a single participant.
  *
  * param explanations:
+ * - `declaringEvent`: The event below which this participant was declared, if present
  * - `x`: absolute to the root of the diagram
  * - `y`: absolute to the root of the diagram
+ * - `left`: function taking no parameter and producing the left position of the participant at the current event (differs from `x` if there are activity indicators)
+ * - `right`: function taking no parameter and producing the right position of the participant at the current event (differs from `x` if there are activity indicators)
+ * - `events`: Each event name where the participant was active mapped to the data of this participant at this event (i.e. which activity indicators were active)
  */
 export const participantType = namedType(
     objectType(
         new Map([
             ["name", stringType],
             ["lifeline", canvasContentType],
-            ["events", listType(canvasPointType)],
+            ["events", mapType(participantEventDetails)],
             ["activeActivityIndicators", listType(activityIndicatorType)],
+            ["declaringEvent", optional(eventType)],
             ["x", numberType],
-            ["y", numberType]
+            ["y", numberType],
+            ["left", functionType],
+            ["right", functionType],
+            ["alive", booleanType]
         ])
     ),
     "UML sequence diagram participant (instance or actor)"
@@ -149,8 +135,10 @@ export const fragmentType = namedType(
 export const frameType = namedType(
     objectType(
         new Map([
-            ["topLeft", eventCoordinateType],
-            ["bottomRight", eventCoordinateType],
+            ["top", eventType],
+            ["right", participantType],
+            ["bottom", eventType],
+            ["left", participantType],
             ["x", numberType],
             ["width", numberType],
             ["fragments", listType(fragmentType)]

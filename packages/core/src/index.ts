@@ -88,6 +88,7 @@ export * from "./types/enum.js";
 export * from "./types/function.js";
 export * from "./types/list.js";
 export * from "./types/literal.js";
+export * from "./types/map.js";
 export * from "./types/named.js";
 export * from "./types/null.js";
 export * from "./types/number.js";

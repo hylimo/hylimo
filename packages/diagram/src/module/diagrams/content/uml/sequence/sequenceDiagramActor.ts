@@ -49,6 +49,8 @@ export const sequenceDiagramActorModule = InterpreterModule.create(
                         actor.activeActivityIndicators = instance.activeActivityIndicators
                         actor.x = instance.x
                         actor.y = instance.y
+                        actor.alive = instance.alive
+                        // TODO: Desync possible between actor and its instance when deactivating it
                     }
 
                     this.actor
