@@ -2,8 +2,8 @@ import { ConnectionEdit, ConnectionEnd, Edit } from "@hylimo/diagram-protocol";
 import { findParentByFeature, SModelElementImpl } from "sprotty";
 import { MoveHandler } from "../move/moveHandler.js";
 import { Matrix } from "transformation-matrix";
-import { isCreateConnectionTarget } from "./createConnectionMouseListener.js";
 import { LineEngine } from "@hylimo/diagram-common";
+import { isLineProvider } from "../line-provider-hover/lineProvider.js";
 
 /**
  * Move handler for creating connections
@@ -26,7 +26,7 @@ export class CreateConnectionMoveHandler extends MoveHandler {
     }
 
     override generateEdits(x: number, y: number, event: MouseEvent, target: SModelElementImpl): Edit[] {
-        const lineProvider = findParentByFeature(target, isCreateConnectionTarget);
+        const lineProvider = findParentByFeature(target, isLineProvider);
         let end: ConnectionEnd = { x, y };
         if (lineProvider != undefined) {
             const root = lineProvider.root;

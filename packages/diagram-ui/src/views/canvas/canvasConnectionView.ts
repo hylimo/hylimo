@@ -1,4 +1,4 @@
-import { MarkerLayoutInformation } from "@hylimo/diagram-common";
+import { LineEngine, MarkerLayoutInformation, Point } from "@hylimo/diagram-common";
 import { injectable } from "inversify";
 import { VNode } from "snabbdom";
 import { IView, IViewArgs, RenderingContext, svg } from "sprotty";
@@ -7,6 +7,7 @@ import { SCanvasConnectionSegment } from "../../model/canvas/sCanvasConnectionSe
 import { SMarker } from "../../model/canvas/sMarker.js";
 import { extractStrokeAttriabutes } from "@hylimo/diagram-render-svg";
 import { EditableCanvasContentView } from "./editableCanvasContentView.js";
+import { SCanvasPoint } from "../../model/canvas/sCanvasPoint.js";
 
 /**
  * IView that represents a CanvasConnection
@@ -28,7 +29,8 @@ export class CanvasConnectionView extends EditableCanvasContentView implements I
             childPaths.push(...this.renderConnectionPath(model, path));
         }
         const createConnectionPreview = this.renderCreateConnection(model);
-        const connection = svg(
+        const splitSegmentPreview = this.renderSplitSegmentPreview(model);
+        return svg(
             "g",
             {
                 class: {
@@ -37,13 +39,10 @@ export class CanvasConnectionView extends EditableCanvasContentView implements I
             },
             ...childPaths,
             ...childMarkers,
-            ...childControlElements
+            ...childControlElements,
+            createConnectionPreview,
+            splitSegmentPreview
         );
-        if (createConnectionPreview != undefined) {
-            return svg("g", null, connection, createConnectionPreview);
-        } else {
-            return connection;
-        }
     }
 
     /**
@@ -137,6 +136,53 @@ export class CanvasConnectionView extends EditableCanvasContentView implements I
                 }
             },
             context.renderElement(marker)
+        );
+    }
+
+    /**
+     * Renders a preview point for splitting a segment of the connection
+     *
+     * @param model the model of the connection
+     * @returns the rendered preview point if available
+     */
+    private renderSplitSegmentPreview(model: Readonly<SCanvasConnection>): VNode | undefined {
+        const hoverDataProvider = model.hoverDataProvider;
+        if (!model.selected || hoverDataProvider == undefined || !hoverDataProvider.isVisible) {
+            return undefined;
+        }
+        const { position, line, projectionResult } = hoverDataProvider.provider();
+        const segment = model.index.getById(
+            line.line.segments[projectionResult.segment].origin
+        ) as SCanvasConnectionSegment;
+        if (!segment.canSplitSegment()) {
+            return undefined;
+        }
+        return this.renderPreviewPoint(LineEngine.DEFAULT.getPoint(position, undefined, 0, line));
+    }
+
+    /**
+     * Renders a preview point
+     *
+     * @param point the position of the preview point
+     * @returns the rendered preview point
+     */
+    private renderPreviewPoint({ x, y }: Point): VNode | undefined {
+        return svg(
+            "g",
+            {
+                attrs: {
+                    transform: `translate(${x}, ${y})`
+                }
+            },
+            svg("line", {
+                attrs: {
+                    "stroke-width": SCanvasPoint.POINT_SIZE
+                },
+                class: {
+                    "canvas-point": true,
+                    selectable: true
+                }
+            })
         );
     }
 }

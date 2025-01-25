@@ -51,15 +51,15 @@ export class SplitCanvasSegmentMouseListener extends MouseListener {
             const projectedCoordinates = LineEngine.DEFAULT.getPoint(projectedPoint.pos, undefined, 0, target.line);
             const segment = target.line.line.segments[projectedPoint.segment];
             const originSegment = target.index.getById(segment.origin) as SCanvasConnectionSegment;
+            if (!originSegment.canSplitSegment()) {
+                return [];
+            }
             const edits = this.computeSegmentEdits(originSegment, {
                 projectedCoordinates,
                 segmentIndex: segment.originSegment,
                 projectedPoint,
                 target
             });
-            if (edits.length == 0) {
-                return [];
-            }
             const action: TransactionalAction = {
                 kind: TransactionalAction.KIND,
                 transactionId: this.transactionIdProvider.generateId(),
@@ -81,16 +81,7 @@ export class SplitCanvasSegmentMouseListener extends MouseListener {
      */
     private computeSegmentEdits(originSegment: SCanvasConnectionSegment, context: SplitSegmentEditContext): Edit[] {
         if (originSegment instanceof SCanvasLineSegment) {
-            const edit = originSegment.edits[DefaultEditTypes.SPLIT_CANVAS_LINE_SEGMENT];
-            if (edit != undefined && EditSpecification.isConsistent([[edit]])) {
-                return [
-                    {
-                        types: [DefaultEditTypes.SPLIT_CANVAS_LINE_SEGMENT],
-                        values: context.projectedCoordinates,
-                        elements: [originSegment.id]
-                    } satisfies SplitCanvasLineSegmentEdit
-                ];
-            }
+            return this.computeLineEdits(originSegment, context);
         } else if (originSegment instanceof SCanvasAxisAlignedSegment) {
             return this.computeAxisAlignedEdits(originSegment, context);
         } else if (originSegment instanceof SCanvasBezierSegment) {
@@ -98,7 +89,26 @@ export class SplitCanvasSegmentMouseListener extends MouseListener {
         } else {
             throw new Error("Unknown segment type");
         }
-        return [];
+    }
+
+    /**
+     * Computes the edits for a line segment
+     *
+     * @param originSegment the origin line segment
+     * @param context the context for the edit computation
+     * @returns the edits for the line segment
+     */
+    private computeLineEdits(
+        originSegment: SCanvasLineSegment,
+        { projectedCoordinates }: SplitSegmentEditContext
+    ): Edit[] {
+        return [
+            {
+                types: [DefaultEditTypes.SPLIT_CANVAS_LINE_SEGMENT],
+                values: projectedCoordinates,
+                elements: [originSegment.id]
+            } satisfies SplitCanvasLineSegmentEdit
+        ];
     }
 
     /**
@@ -112,33 +122,29 @@ export class SplitCanvasSegmentMouseListener extends MouseListener {
         originSegment: SCanvasBezierSegment,
         { target, projectedPoint, projectedCoordinates }: SplitSegmentEditContext
     ): Edit[] {
-        const edit = originSegment.edits[DefaultEditTypes.SPLIT_CANVAS_BEZIER_SEGMENT];
-        if (edit != undefined && EditSpecification.isConsistent([[edit]])) {
-            const index = target.segments.indexOf(originSegment);
-            const layout = target.layout.segments[index];
-            const curve = new Bezier(
-                layout.start,
-                originSegment.startControlPointPosition,
-                originSegment.endControlPointPosition,
-                layout.end
-            );
-            const derivative = curve.derivative(projectedPoint.relativePos);
-            const scaledDerivative = Math2D.scaleTo(derivative, 100);
-            return [
-                {
-                    types: [DefaultEditTypes.SPLIT_CANVAS_BEZIER_SEGMENT],
-                    values: {
-                        ...projectedCoordinates,
-                        cx1: scaledDerivative.x,
-                        cy1: scaledDerivative.y,
-                        cx2: -scaledDerivative.x,
-                        cy2: -scaledDerivative.y
-                    },
-                    elements: [originSegment.id]
-                } satisfies SplitCanvasBezierSegmentEdit
-            ];
-        }
-        return [];
+        const index = target.segments.indexOf(originSegment);
+        const layout = target.layout.segments[index];
+        const curve = new Bezier(
+            layout.start,
+            originSegment.startControlPointPosition,
+            originSegment.endControlPointPosition,
+            layout.end
+        );
+        const derivative = curve.derivative(projectedPoint.relativePos);
+        const scaledDerivative = Math2D.scaleTo(derivative, 100);
+        return [
+            {
+                types: [DefaultEditTypes.SPLIT_CANVAS_BEZIER_SEGMENT],
+                values: {
+                    ...projectedCoordinates,
+                    cx1: scaledDerivative.x,
+                    cy1: scaledDerivative.y,
+                    cx2: -scaledDerivative.x,
+                    cy2: -scaledDerivative.y
+                },
+                elements: [originSegment.id]
+            } satisfies SplitCanvasBezierSegmentEdit
+        ];
     }
 
     /**
@@ -152,29 +158,27 @@ export class SplitCanvasSegmentMouseListener extends MouseListener {
         originSegment: SCanvasAxisAlignedSegment,
         { projectedPoint, projectedCoordinates, segmentIndex }: SplitSegmentEditContext
     ): Edit[] {
-        const edit = originSegment.edits[DefaultEditTypes.SPLIT_CANVAS_AXIS_ALIGNED_SEGMENT];
         const edits: Edit[] = [];
-        if (edit != undefined && EditSpecification.isConsistent([[edit]])) {
-            const { pos, nextPos } = this.calculatePosAndNextPos(segmentIndex, originSegment, projectedPoint);
+        const { pos, nextPos } = this.calculatePosAndNextPos(segmentIndex, originSegment, projectedPoint);
+        edits.push({
+            types: [DefaultEditTypes.SPLIT_CANVAS_AXIS_ALIGNED_SEGMENT],
+            values: {
+                ...projectedCoordinates,
+                pos,
+                nextPos
+            },
+            elements: [originSegment.id]
+        } satisfies SplitCanvasAxisAlignedSegmentEdit);
+        const editNextPos = originSegment.edits[DefaultEditTypes.AXIS_ALIGNED_SEGMENT_POS];
+        const splitSegment = originSegment.edits[DefaultEditTypes.SPLIT_CANVAS_AXIS_ALIGNED_SEGMENT];
+        if (editNextPos != undefined && EditSpecification.isConsistent([[editNextPos], [splitSegment]])) {
             edits.push({
-                types: [DefaultEditTypes.SPLIT_CANVAS_AXIS_ALIGNED_SEGMENT],
+                types: [DefaultEditTypes.AXIS_ALIGNED_SEGMENT_POS],
                 values: {
-                    ...projectedCoordinates,
-                    pos,
-                    nextPos
+                    pos: nextPos
                 },
                 elements: [originSegment.id]
-            } satisfies SplitCanvasAxisAlignedSegmentEdit);
-            const editNextPos = originSegment.edits[DefaultEditTypes.AXIS_ALIGNED_SEGMENT_POS];
-            if (editNextPos != undefined && EditSpecification.isConsistent([[editNextPos], [edit]])) {
-                edits.push({
-                    types: [DefaultEditTypes.AXIS_ALIGNED_SEGMENT_POS],
-                    values: {
-                        pos: nextPos
-                    },
-                    elements: [originSegment.id]
-                } satisfies AxisAlignedSegmentEdit);
-            }
+            } satisfies AxisAlignedSegmentEdit);
         }
         return edits;
     }

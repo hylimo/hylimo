@@ -1,4 +1,9 @@
-import { CanvasLineSegment, SegmentLayoutInformation } from "@hylimo/diagram-common";
+import {
+    CanvasLineSegment,
+    DefaultEditTypes,
+    EditSpecification,
+    SegmentLayoutInformation
+} from "@hylimo/diagram-common";
 import { SCanvasConnectionSegment } from "./sCanvasConnectionSegment.js";
 import { VNode } from "snabbdom";
 
@@ -13,5 +18,9 @@ export class SCanvasLineSegment extends SCanvasConnectionSegment implements Canv
 
     override generateControlViewElements(_layout: SegmentLayoutInformation): VNode[] {
         return [];
+    }
+
+    override canSplitSegment(): boolean {
+        return EditSpecification.isConsistent([[this.edits[DefaultEditTypes.SPLIT_CANVAS_LINE_SEGMENT]]]);
     }
 }

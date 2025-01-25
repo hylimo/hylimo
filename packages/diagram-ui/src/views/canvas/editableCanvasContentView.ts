@@ -2,19 +2,24 @@ import { inject, injectable } from "inversify";
 import { VNode } from "snabbdom";
 import { svg } from "sprotty";
 import { SCanvasElement } from "../../model/canvas/sCanvasElement.js";
-import { CreateConnectionData } from "../../features/create-connection/createConnectionData.js";
 import { LineEngine } from "@hylimo/diagram-common";
 import { SCanvasPoint } from "../../model/canvas/sCanvasPoint.js";
 import { toSVG } from "transformation-matrix";
 import { SCanvasConnection } from "../../model/canvas/sCanvasConnection.js";
 import { TYPES } from "../../features/types.js";
 import { TransactionStateProvider } from "../../features/transaction/transactionStateProvider.js";
+import { LineProviderHoverData } from "../../features/line-provider-hover/lineProviderHoverData.js";
 
 /**
  * Base class for CanvasElementView and CanvasConnectionView
  */
 @injectable()
 export abstract class EditableCanvasContentView {
+    /**
+     * The class name for the create connection UI elements
+     */
+    static readonly CREATE_CONNECTION_CLASS = "create-connection-target";
+
     /**
      * The transaction state provider
      */
@@ -28,14 +33,15 @@ export abstract class EditableCanvasContentView {
      */
     protected renderCreateConnection(model: Readonly<SCanvasElement | SCanvasConnection>): VNode | undefined {
         if (
-            model.createConnectionProvider == undefined ||
+            model.hoverDataProvider == undefined ||
             model.selected ||
+            model.editExpression == undefined ||
             this.transactionStateProvider.types?.some((type) => !type.startsWith("connection/")) ||
-            (!model.createConnectionProvider.isVisible && !this.transactionStateProvider.isInTransaction)
+            (!model.hoverDataProvider.isVisible && !this.transactionStateProvider.isInTransaction)
         ) {
             return undefined;
         }
-        const preview = model.createConnectionProvider.provider();
+        const preview = model.hoverDataProvider.provider();
         return svg(
             "g",
             null,
@@ -51,7 +57,7 @@ export abstract class EditableCanvasContentView {
      * @param preview the connection creation preview
      * @returns the rendered start symbol
      */
-    private renderCreateConnectionStartSymbol(preview: CreateConnectionData): VNode | undefined {
+    private renderCreateConnectionStartSymbol(preview: LineProviderHoverData): VNode | undefined {
         if (this.transactionStateProvider.isInTransaction) {
             return undefined;
         }
@@ -76,7 +82,7 @@ export abstract class EditableCanvasContentView {
                         "stroke-width": SCanvasPoint.POINT_SIZE
                     },
                     class: {
-                        [CreateConnectionData.CLASS]: true,
+                        [EditableCanvasContentView.CREATE_CONNECTION_CLASS]: true,
                         "create-connection-point": true
                     }
                 }),
@@ -92,7 +98,7 @@ export abstract class EditableCanvasContentView {
      * @param preview the connection creation preview
      * @returns the rendered arrow symbol and hover line
      */
-    private renderCreateConnectionSymbolArrow(preview: CreateConnectionData): VNode[] {
+    private renderCreateConnectionSymbolArrow(preview: LineProviderHoverData): VNode[] {
         const normal = LineEngine.DEFAULT.getNormalVector(preview.position, undefined, preview.line);
         const rotation = Math.atan2(normal.y, normal.x) * (180 / Math.PI);
         return [
@@ -102,7 +108,7 @@ export abstract class EditableCanvasContentView {
                     transform: `rotate(${rotation})`
                 },
                 class: {
-                    [CreateConnectionData.CLASS]: true,
+                    [EditableCanvasContentView.CREATE_CONNECTION_CLASS]: true,
                     "create-connection-arrow": true
                 }
             }),
@@ -112,7 +118,7 @@ export abstract class EditableCanvasContentView {
                     transform: `rotate(${rotation})`
                 },
                 class: {
-                    [CreateConnectionData.CLASS]: true,
+                    [EditableCanvasContentView.CREATE_CONNECTION_CLASS]: true,
                     "create-connection-hover-line": true
                 }
             })
@@ -125,7 +131,7 @@ export abstract class EditableCanvasContentView {
      * @param preview the connection creation preview
      * @returns the rendered create connection outline
      */
-    private renderCreateConnectionOutline(preview: CreateConnectionData): VNode {
+    private renderCreateConnectionOutline(preview: LineProviderHoverData): VNode {
         const path = LineEngine.DEFAULT.getSvgPath(preview.line.line);
         return svg("path", {
             attrs: {

@@ -19,8 +19,6 @@ import {
     RemoteRequest,
     SetLanguageServerIdNotification
 } from "@hylimo/diagram-protocol";
-import { initServices } from "monaco-languageclient/vscode/services";
-import { checkServiceConsistency, configureServices } from "monaco-editor-wrapper/vscode/services";
 import * as monaco from "monaco-editor";
 import { customDarkTheme, customLightTheme, languageConfiguration, monarchTokenProvider } from "../util/language";
 import { useData } from "vitepress";
@@ -28,6 +26,10 @@ import { useLocalStorage, throttledWatch } from "@vueuse/core";
 import { useWorkerFactory } from "monaco-editor-wrapper/workerFactory";
 import monacoEditorWorker from "monaco-editor/esm/vs/editor/editor.worker?worker";
 import { languageServerConfigKey, languageClientKey } from "./injectionKeys";
+import { configureAndInitVscodeApi } from "monaco-editor-wrapper";
+import { LogLevel } from "vscode/services";
+import { ConsoleLogger } from "monaco-languageclient/tools";
+import { checkServiceConsistency } from "monaco-editor-wrapper/vscode/services";
 
 /**
  * Config for the diagram
@@ -89,7 +91,14 @@ export const language = "syncscript";
  */
 export const lspPlugin: Plugin = {
     install(app) {
-        const languageServerSettings = useLocalStorage<LanguageServerSettings>("languageServerSettings", {});
+        const languageServerSettings = useLocalStorage<LanguageServerSettings>("languageServerSettings", {
+            translationPrecision: 1,
+            resizePrecision: 1,
+            linePointPosPrecision: 0.001,
+            linePointDistancePrecision: 0.1,
+            axisAlignedPosPrecision: 0.001,
+            rotationPrecision: 1
+        });
         const diagramConfig = useLocalStorage<DiagramConfig>("diagramConfig", {
             lightPrimaryColor: "#000000",
             lightBackgroundColor: "#ffffff",
@@ -174,17 +183,26 @@ async function setupLanguageClient(isDark: boolean) {
     const writer = new BrowserMessageWriter(worker);
 
     useWorkerFactory({
-        ignoreMapping: true,
-        workerLoaders: {
-            editorWorkerService: () => new monacoEditorWorker()
+        workerOverrides: {
+            ignoreMapping: true,
+            workerLoaders: {
+                TextEditorWorker: () => new monacoEditorWorker()
+            }
         }
     });
-    const serviceConfig = await configureServices({});
-    await initServices({
-        serviceConfig,
-        caller: "website",
-        performChecks: checkServiceConsistency
-    });
+
+    await configureAndInitVscodeApi(
+        "classic",
+        {
+            vscodeApiConfig: {},
+            logLevel: LogLevel.Warning
+        },
+        {
+            caller: "website",
+            performServiceConsistencyChecks: checkServiceConsistency,
+            logger: new ConsoleLogger(LogLevel.Warning)
+        }
+    );
 
     monaco.languages.register({ id: language });
     monaco.languages.setLanguageConfiguration(language, languageConfiguration);
@@ -202,13 +220,8 @@ async function setupLanguageClient(isDark: boolean) {
                 closed: () => ({ action: CloseAction.DoNotRestart })
             }
         },
-        connectionProvider: {
-            get: () => {
-                return Promise.resolve({ reader, writer });
-            }
-        }
+        messageTransports: { reader, writer }
     });
-
     await client.start();
 
     client.onNotification(RemoteNotification.type, (message) => {

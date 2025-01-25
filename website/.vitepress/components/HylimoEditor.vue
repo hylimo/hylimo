@@ -28,7 +28,7 @@ import {
 import { createContainer, DiagramServerProxy, ResetCanvasBoundsAction } from "@hylimo/diagram-ui";
 import { Root } from "@hylimo/diagram-common";
 import { onMounted } from "vue";
-import { MonacoEditorLanguageClientWrapper, UserConfig } from "monaco-editor-wrapper";
+import { EditorAppConfig, MonacoEditorLanguageClientWrapper } from "monaco-editor-wrapper";
 import { shallowRef } from "vue";
 import { inject } from "vue";
 import { language } from "../theme/lspPlugin";
@@ -98,31 +98,32 @@ onMounted(async () => {
     const currentLanguageClient = await languageClient.value;
     const wrapper = new MonacoEditorLanguageClientWrapper();
     disposables.value.push(wrapper);
-    const userConfig: UserConfig = {
-        wrapperConfig: {
-            editorAppConfig: {
-                $type: "classic",
-                editorOptions: {
-                    language,
-                    model: null,
-                    automaticLayout: true,
-                    fixedOverflowWidgets: true,
-                    hover: {
-                        above: false
-                    },
-                    suggest: {
-                        snippetsPreventQuickSuggestions: false
-                    },
-                    scrollbar: {
-                        alwaysConsumeMouseWheel: false
-                    },
-                    glyphMargin: false
-                }
-            }
+    const editorAppConfig: EditorAppConfig = {
+        editorOptions: {
+            language,
+            model: null,
+            automaticLayout: true,
+            fixedOverflowWidgets: true,
+            hover: {
+                above: false
+            },
+            suggest: {
+                snippetsPreventQuickSuggestions: false
+            },
+            scrollbar: {
+                alwaysConsumeMouseWheel: false
+            },
+            glyphMargin: false
         }
     };
-
-    await wrapper.initAndStart(userConfig, editorElement.value!);
+    await wrapper.initAndStart({
+        $type: "classic",
+        htmlContainer: editorElement.value!,
+        editorAppConfig,
+        vscodeApiConfig: {
+            vscodeApiInitPerformExternally: true
+        }
+    });
 
     const editor = wrapper.getEditor()!;
     hideMainContent.value = false;
@@ -195,10 +196,12 @@ onMounted(async () => {
         }
 
         protected override handleUndo(): void {
+            editor.focus();
             editor.trigger("diagram", "undo", {});
         }
 
         protected override handleRedo(): void {
+            editor.focus();
             editor.trigger("diagram", "redo", {});
         }
 

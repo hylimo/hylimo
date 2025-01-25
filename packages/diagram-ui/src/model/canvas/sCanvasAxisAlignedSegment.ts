@@ -1,4 +1,9 @@
-import { CanvasAxisAlignedSegment, DefaultEditTypes, SegmentLayoutInformation } from "@hylimo/diagram-common";
+import {
+    CanvasAxisAlignedSegment,
+    DefaultEditTypes,
+    EditSpecification,
+    SegmentLayoutInformation
+} from "@hylimo/diagram-common";
 import { VNode } from "snabbdom";
 import { svg } from "sprotty";
 import { SCanvasConnectionSegment } from "./sCanvasConnectionSegment.js";
@@ -117,5 +122,9 @@ export class SCanvasAxisAlignedSegment
                 [SCanvasAxisAlignedSegment.SEGMENT_EDIT_CLASS_X]: true
             }
         });
+    }
+
+    override canSplitSegment(): boolean {
+        return EditSpecification.isConsistent([[this.edits[DefaultEditTypes.SPLIT_CANVAS_AXIS_ALIGNED_SEGMENT]]]);
     }
 }

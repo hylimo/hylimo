@@ -39,4 +39,11 @@ export abstract class SCanvasConnectionSegment extends SElement {
      * @returns the generated nodes
      */
     abstract generateControlViewElements(layout: SegmentLayoutInformation): VNode[];
+
+    /**
+     * Checks if this segment can be split using an edit
+     *
+     * @returns true if the segment can be split
+     */
+    abstract canSplitSegment(): boolean;
 }

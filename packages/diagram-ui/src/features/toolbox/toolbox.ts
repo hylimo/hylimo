@@ -12,7 +12,7 @@ import {
 } from "sprotty";
 import { Action, generateRequestId, SetModelAction, UpdateModelAction } from "sprotty-protocol";
 import { VNode, h } from "snabbdom";
-import { Root } from "@hylimo/diagram-common";
+import { EditSpecification, Root } from "@hylimo/diagram-common";
 import { TransactionalMoveAction } from "../move/transactionalMoveAction.js";
 import {
     ConnectionEdit,
@@ -163,7 +163,6 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler, Conn
         if (!this.containerElement) {
             this.initialize();
         }
-        this.setContainerVisible(true);
         this.update();
     }
 
@@ -680,9 +679,9 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler, Conn
      * @returns The toolbox edits
      */
     private getToolboxEdits(root: Root): ToolboxEditEntry[] {
-        return Object.keys(root.edits)
-            .filter((key) => key.startsWith("toolbox/"))
-            .map((key) => {
+        return Object.entries(root.edits)
+            .filter(([key, edit]) => key.startsWith("toolbox/") && EditSpecification.isConsistent([[edit]]))
+            .map(([key]) => {
                 const [group, name] = key.substring("toolbox/".length).split("/");
                 return { group, name, edit: key as `toolbox/${string}` };
             });
@@ -695,9 +694,9 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler, Conn
      * @returns The connection edits
      */
     private getConnectionEdits(root: Root): ConnectionEditEntry[] {
-        return Object.keys(root.edits)
-            .filter((key) => key.startsWith("connection/"))
-            .map((key) => ({ name: key.substring("connection/".length), edit: key as `connection/${string}` }));
+        return Object.entries(root.edits)
+            .filter(([key, edit]) => key.startsWith("connection/") && EditSpecification.isConsistent([[edit]]))
+            .map(([key]) => ({ name: key.substring("connection/".length), edit: key as `connection/${string}` }));
     }
 
     /**
