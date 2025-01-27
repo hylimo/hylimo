@@ -235,7 +235,7 @@ class SVGDiagramVisitor extends SimplifiedDiagramVisitor<SVGRendererContext, SVG
         let offset = 0;
         const paths: string[] = [];
         for (const glyph of glyphRun.glyphs) {
-            if (!/^\s*$/.test(String.fromCodePoint(...glyph.codePoints)) && element.fill != undefined) {
+            if (element.fill != undefined) {
                 paths.push(glyph.path.translate(offset, 0).toSVG());
             }
             offset += glyph.advanceWidth;
