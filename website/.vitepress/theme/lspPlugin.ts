@@ -23,13 +23,13 @@ import * as monaco from "monaco-editor";
 import { customDarkTheme, customLightTheme, languageConfiguration, monarchTokenProvider } from "../util/language";
 import { useData } from "vitepress";
 import { useLocalStorage, throttledWatch } from "@vueuse/core";
-import { useWorkerFactory } from "monaco-editor-wrapper/workerFactory";
 import monacoEditorWorker from "monaco-editor/esm/vs/editor/editor.worker?worker";
 import { languageServerConfigKey, languageClientKey } from "./injectionKeys";
 import { configureAndInitVscodeApi } from "monaco-editor-wrapper";
-import { LogLevel } from "vscode/services";
 import { ConsoleLogger } from "monaco-languageclient/tools";
 import { checkServiceConsistency } from "monaco-editor-wrapper/vscode/services";
+import { useWorkerFactory } from "monaco-languageclient/workerFactory";
+import { LogLevel } from "@codingame/monaco-vscode-api";
 
 /**
  * Config for the diagram
@@ -183,11 +183,8 @@ async function setupLanguageClient(isDark: boolean) {
     const writer = new BrowserMessageWriter(worker);
 
     useWorkerFactory({
-        workerOverrides: {
-            ignoreMapping: true,
-            workerLoaders: {
-                TextEditorWorker: () => new monacoEditorWorker()
-            }
+        workerLoaders: {
+            TextEditorWorker: () => new monacoEditorWorker()
         }
     });
 
