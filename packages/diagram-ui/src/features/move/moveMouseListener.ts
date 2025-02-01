@@ -67,7 +67,7 @@ export class MoveMouseListener extends MouseListener {
         if (this.context == undefined || outstandingUpdates > this.context.maxUpdatesPerRevision) {
             return [];
         }
-        return this.generateActions(target, event, false);
+        return this.generateActions(target, event, event.buttons === 0);
     }
 
     override mouseUp(target: SModelElementImpl, event: MouseEvent): (Action | Promise<Action>)[] {

@@ -29,7 +29,7 @@ import { configureAndInitVscodeApi } from "monaco-editor-wrapper";
 import { ConsoleLogger } from "monaco-languageclient/tools";
 import { checkServiceConsistency } from "monaco-editor-wrapper/vscode/services";
 import { useWorkerFactory } from "monaco-languageclient/workerFactory";
-import { LogLevel } from "vscode";
+import { LogLevel } from "@codingame/monaco-vscode-api";
 
 /**
  * Config for the diagram
