@@ -37,21 +37,19 @@
 </template>
 <script setup lang="ts">
 import VPNav from "vitepress/dist/client/theme-default/components/VPNav.vue";
-import { useLocalStorage, onKeyStroke, useWindowSize, useEventListener } from "@vueuse/core";
+import { onKeyStroke, useEventListener, useLocalStorage, useWindowSize } from "@vueuse/core";
 import { defineClientComponent, useData } from "vitepress";
 import IconButton from "./IconButton.vue";
 import VPFlyout from "vitepress/dist/client/theme-default/components/VPFlyout.vue";
 import { Root } from "@hylimo/diagram-common";
-import { computed, inject, ref } from "vue";
+import { computed, inject, onBeforeMount, ref, UnwrapRef } from "vue";
 import { SVGRenderer } from "@hylimo/diagram-render-svg";
 import { PDFRenderer } from "@hylimo/diagram-render-pdf";
 import fileSaver from "file-saver";
-import { serialize, deserialize } from "../util/serialization.js";
-import { onBeforeMount } from "vue";
+import { deserialize, serialize } from "../util/serialization.js";
 import RegisterSW from "./RegisterSW.vue";
 import { CodeWithFileHandle, openDiagram } from "../util/diagramOpener";
 import { languageServerConfigKey } from "../theme/injectionKeys";
-import BaseInput from "./settings/BaseInput.vue";
 import FilenameInput from "./settings/FilenameInput.vue";
 
 const HylimoEditor = defineClientComponent(() => import("./HylimoEditor.vue"));
@@ -60,26 +58,136 @@ const { isDark, site } = useData();
 const { width, height } = useWindowSize();
 const languageServerConfig = inject(languageServerConfigKey)!;
 
-const localStorageCode = useLocalStorage(
-    "code",
-    'classDiagram {\n    class("HelloWorld") {\n        public {\n            hello : string\n        }\n    }\n}'
-);
+/**
+ * The current version of the diagram serialization algorithm.
+ */
+const serializationVersion = 1;
+/**
+ * @param filename the filename without extension (i.e. `diagram` for the resulting file `diagram.hyl`)
+ * @param version the serialization mechanism of the diagram, currently always `1`
+ */
+type SavedJSONDiagrams = [{ filename: string; version: number; lastChangeString: string }];
+
+/**
+ * @param filename the filename without extension (i.e. `diagram` for the resulting file `diagram.hyl`)
+ * @param version the serialization mechanism of the diagram, currently always `1`
+ */
+type DiagramMetadata = { filename: string; version: number; lastChange: Date };
+type DiagramsMetadata = DiagramMetadata[];
+
+const localStorageAvailableDiagrams = useLocalStorage("available-diagrams", "[]");
+
+const defaultDiagram =
+    'classDiagram {\n    class("HelloWorld") {\n        public {\n            hello : string\n        }\n    }\n}';
+
+const filename = ref<string>("diagram");
+
 const fileCode = ref<string>();
 const codeWithFileHandle = ref<CodeWithFileHandle>();
 const hasFileCodeChanges = computed(
     () => fileCode.value != undefined && fileCode.value != codeWithFileHandle.value?.code
 );
+
 const code = computed({
-    get: () => fileCode.value ?? localStorageCode.value,
+    get: () => fileCode.value ?? queryLocalStorageDiagram(),
     set: (value: string) => {
         if (codeWithFileHandle.value != undefined) {
             fileCode.value = value;
         } else {
-            localStorageCode.value = value;
+            saveToLocalStorage(value);
         }
     }
 });
-const baseName = computed(() => codeWithFileHandle.value?.fileHandle?.name?.match(/^(.*?)(\.hyl)?$/)?.[1] ?? "diagram");
+
+/**
+ * Queries the given diagram from the possible diagram stored by the user.
+ *
+ * @param diagram the diagram name to load, or `null` to load the most recent diagram
+ */
+function queryLocalStorageDiagram(diagram: string | null = filename.value): string {
+    const diagrams = loadAllDiagramMetadata();
+    if (diagrams.length == 0) return defaultDiagram;
+
+    if (diagram == null) return loadLocalStorageDiagram(diagrams[0].filename, diagrams[0].version);
+
+    var expectedDiagrams = diagrams.filter((d) => d.filename === diagram);
+    if (expectedDiagrams.length == 0) {
+        console.error(`diagram ${diagram} was not found. Possible options: ${diagrams}`);
+        return defaultDiagram;
+    }
+    return loadLocalStorageDiagram(expectedDiagrams[0].filename, expectedDiagrams[0].version);
+}
+
+/**
+ * Saves the current diagram to local storage.
+ *
+ * @param value the text of the current diagram
+ */
+function saveToLocalStorage(value: string) {
+    const diagrams = loadAllDiagramMetadata();
+
+    let diagramMetadata = diagrams.find((d) => d.filename === filename.value);
+    if (diagramMetadata == undefined) {
+        diagramMetadata = { filename: filename.value, version: serializationVersion, lastChange: new Date() };
+        diagrams.push(diagramMetadata);
+    } else {
+        diagramMetadata.lastChange = new Date();
+    }
+
+    saveMetadata(diagrams);
+    saveCurrentDiagram(filename.value, diagramMetadata.version, value);
+}
+
+function saveMetadata(diagrams: DiagramsMetadata) {
+    localStorageAvailableDiagrams.value = JSON.stringify(diagrams);
+}
+
+/**
+ * Serializes the given diagram with the given serialization algorithm into localstorage.<br>
+ * Inverse of {@link loadLocalStorageDiagram}.
+ *
+ * @param filename the diagram name
+ * @param serializationVersion the serialization algorithm to use. Currently always {@link serializationVersion}
+ * @param diagramText the diagram source code to serialize
+ */
+function saveCurrentDiagram(filename: UnwrapRef<string>, serializationVersion: number, diagramText: string) {
+    if (serializationVersion != 1) {
+        throw new Error(`Unsupported diagram version: ${serializationVersion}. Cannot serialize diagram '${filename}'`);
+    }
+    useLocalStorage(`diagram-v1-${filename}`, diagramText).value = diagramText;
+}
+
+/**
+ * Loads the metadata of all diagrams Hylimo knows about from localstorage.
+ */
+function loadAllDiagramMetadata(): DiagramsMetadata {
+    const rawList = JSON.parse(localStorageAvailableDiagrams.value) as SavedJSONDiagrams;
+    return rawList
+        .map((diagram) => {
+            return {
+                filename: diagram.filename,
+                version: diagram.version,
+                lastChange: new Date(diagram.lastChangeString)
+            };
+        })
+        .sort((a, b) => b.lastChange.getTime() - a.lastChange.getTime());
+}
+
+/**
+ * Loads the given diagram from the local storage using the given serialization algorithm.<br>
+ * Inverse of {@link saveCurrentDiagram}.
+ *
+ * @param filename the diagram to load
+ * @param version the Hylimo serialization algorithm version that was used to serialize the diagram. Currently always set to {@link serializationVersion}.
+ */
+function loadLocalStorageDiagram(filename: string, version: number): string {
+    if (version != 1) {
+        throw new Error(`Unsupported diagram version: ${version}. Cannot deserialize diagram '${filename}'`);
+    }
+    return useLocalStorage(`diagram-v1-${filename}`, defaultDiagram).value;
+}
+
+const baseName = computed(() => codeWithFileHandle.value?.fileHandle?.name?.match(/^(.*?)(\.hyl)?$/)?.[1] ?? filename);
 const diagram = ref<Root>();
 const successMessageTimeout = 1000;
 const copiedSuccess = ref(false);
@@ -105,7 +213,7 @@ onKeyStroke("E", (event) => {
         return;
     }
     event.preventDefault();
-    downloadSVG();
+    downloadSVG(false);
 });
 
 function downloadSVG(textAsPath: boolean) {
@@ -186,9 +294,11 @@ onBeforeMount(() => {
     display: flex;
     flex-direction: column;
 }
+
 .navbar {
     position: relative;
 }
+
 .main-content {
     width: 100%;
     flex-grow: 1;

@@ -18,7 +18,6 @@ const filename = defineModel({
     width: auto;
     flex-shrink: 1; /* Allow shrinking in flex containers */
     box-sizing: border-box; /* Ensure padding is included in width */
-    /* flex: 1 1 0;*/
     min-width: 5ch;
 }
 
