@@ -10,7 +10,7 @@
         />
         <ClientOnly>
             <Teleport to="#diagram-filename">
-                <FilenameInput></FilenameInput>
+                <FilenameInput v-model="filename"></FilenameInput>
             </Teleport>
             <Teleport to="#copy-diagram-link">
                 <IconButton label="Copy diagram link" icon="vpi-link" @click="copyLink" />
