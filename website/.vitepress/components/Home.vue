@@ -154,7 +154,7 @@ function saveCurrentDiagram(filename: UnwrapRef<string>, serializationVersion: n
     if (serializationVersion != 1) {
         throw new Error(`Unsupported diagram version: ${serializationVersion}. Cannot serialize diagram '${filename}'`);
     }
-    useLocalStorage(`diagram-v1-${filename}`, diagramText).value = diagramText;
+    window.localStorage.setItem(`diagram-v1-${filename}`, diagramText);
 }
 
 /**
@@ -184,7 +184,7 @@ function loadLocalStorageDiagram(filename: string, version: number): string {
     if (version != 1) {
         throw new Error(`Unsupported diagram version: ${version}. Cannot deserialize diagram '${filename}'`);
     }
-    return useLocalStorage(`diagram-v1-${filename}`, defaultDiagram).value;
+    return window.localStorage.getItem(`diagram-v1-${filename}`) ?? defaultDiagram;
 }
 
 const baseName = computed(() => codeWithFileHandle.value?.fileHandle?.name?.match(/^(.*?)(\.hyl)?$/)?.[1] ?? filename);
