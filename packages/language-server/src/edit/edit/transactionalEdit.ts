@@ -133,12 +133,11 @@ export class TransactionalEdit {
         lastApplied: TransactionalAction | undefined,
         newest: TransactionalAction
     ): IncrementalUpdate[] {
-        if (!this.checkIfPredictionsAreValid(layoutedDiagram)) {
-            return [];
-        }
         const res: IncrementalUpdate[] = [];
         this.action.edits.forEach((edit, index) => {
-            const elements = edit.elements!.map((id) => layoutedDiagram.elementLookup[id]);
+            const elements = edit
+                .elements!.map((id) => layoutedDiagram.elementLookup[id])
+                .filter((element) => element != undefined);
             for (const type of edit.types!) {
                 const handler = this.registry.getEditHandler(type);
                 if (handler != undefined) {
@@ -146,32 +145,14 @@ export class TransactionalEdit {
                         ...handler.predictActionDiff(
                             lastApplied?.edits?.[index]?.values,
                             newest.edits[index].values,
-                            elements
+                            elements,
+                            layoutedDiagram.elementLookup
                         )
                     );
                 }
             }
         });
         return res;
-    }
-
-    /**
-     * Checks if predictions are still valid
-     * Predictions are not valid if the topology of the diagram has changed compared to the initial diagram
-     *
-     * @param layoutedDiagram the layouted diagram to check
-     * @returns true if predictions are still valid
-     */
-    private checkIfPredictionsAreValid(layoutedDiagram: BaseLayoutedDiagram) {
-        let predictionsValid: boolean = true;
-        const elements = [...Object.values(layoutedDiagram.elementLookup)];
-        if (
-            elements.length !== this.initialDiagramElementLookup.size ||
-            elements.some((element) => this.initialDiagramElementLookup.get(element.id) !== element.type)
-        ) {
-            predictionsValid = false;
-        }
-        return predictionsValid;
     }
 
     /**

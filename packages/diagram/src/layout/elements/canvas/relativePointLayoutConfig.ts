@@ -10,6 +10,7 @@ import { CanvasPointLayoutConfig } from "./canvasPointLayoutConfig.js";
  */
 export class RelativePointLayoutConfig extends CanvasPointLayoutConfig {
     override type = RelativePoint.TYPE;
+    override idGroup = "pr";
 
     constructor() {
         super(

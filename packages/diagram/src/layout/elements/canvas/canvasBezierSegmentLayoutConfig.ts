@@ -9,6 +9,7 @@ import { CanvasConnectionSegmentLayoutConfig } from "./canvasConnectionSegmentLa
  */
 export class CanvasBezierSegmentLayoutConfig extends CanvasConnectionSegmentLayoutConfig {
     override type = CanvasBezierSegment.TYPE;
+    override idGroup = "cb";
 
     constructor() {
         super(

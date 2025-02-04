@@ -9,6 +9,7 @@ import { CanvasConnectionSegmentLayoutConfig } from "./canvasConnectionSegmentLa
  */
 export class CanvasAxisAlignedSegmentLayoutConfig extends CanvasConnectionSegmentLayoutConfig {
     override type = CanvasAxisAlignedSegment.TYPE;
+    override idGroup = "ca";
 
     constructor() {
         super(

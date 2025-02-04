@@ -43,6 +43,12 @@ export abstract class ElementLayoutConfig implements LayoutConfig {
     abstract readonly type: string;
 
     /**
+     * A string prefix which uses a specific group of ids for the element
+     * To keep short ids, should be short / a single character
+     */
+    readonly idGroup: string = "";
+
+    /**
      * Assigns type and styleAttributes
      *
      * @param additionalAttributes additional non-style attributes

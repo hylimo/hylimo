@@ -18,6 +18,7 @@ import { EditableCanvasContentLayoutConfig } from "./editableCanvasContentLayout
 export class CanvasElementLayoutConfig extends EditableCanvasContentLayoutConfig {
     override isLayoutContent = false;
     override type = CanvasElement.TYPE;
+    override idGroup = "e";
 
     constructor() {
         super(

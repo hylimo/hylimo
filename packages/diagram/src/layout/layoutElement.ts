@@ -237,6 +237,11 @@ export interface LayoutConfig {
      */
     type: string;
     /**
+     * A string prefix which uses a specific group of ids for the element
+     * To keep short ids, should be short / a single character
+     */
+    idGroup: string;
+    /**
      * List of style attributes it supports
      */
     styleAttributes: AttributeConfig[];

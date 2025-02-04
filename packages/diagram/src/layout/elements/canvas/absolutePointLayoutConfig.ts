@@ -9,6 +9,7 @@ import { CanvasPointLayoutConfig } from "./canvasPointLayoutConfig.js";
  */
 export class AbsolutePointLayoutConfig extends CanvasPointLayoutConfig {
     override type = AbsolutePoint.TYPE;
+    override idGroup = "pa";
 
     constructor() {
         super(
