@@ -252,9 +252,9 @@ export class Layout {
      * @returns the generated id
      */
     private generateId(layoutConfig: LayoutConfig, parent: LayoutElement | undefined): string {
-        const parentIdWithGroup = (parent?.id ?? "") + layoutConfig.idGroup;
+        const parentIdWithGroup = parent == undefined ? layoutConfig.idGroup : `${parent.id}_${layoutConfig.idGroup}`;
         const counter = this.elementIdCounter.get(parentIdWithGroup) ?? 0;
-        const id = `${parentIdWithGroup}_${counter}`;
+        const id = parentIdWithGroup + counter;
         this.elementIdCounter.set(parentIdWithGroup, counter + 1);
         return id;
     }
