@@ -8,6 +8,7 @@ import { CanvasConnectionSegmentLayoutConfig } from "./canvasConnectionSegmentLa
  */
 export class CanvasLineSegmentLayoutConfig extends CanvasConnectionSegmentLayoutConfig {
     override type = CanvasLineSegment.TYPE;
+    override idGroup = "cl";
 
     constructor() {
         super([], []);

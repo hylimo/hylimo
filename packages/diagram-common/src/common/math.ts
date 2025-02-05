@@ -112,7 +112,7 @@ export namespace Math2D {
      * @returns the length of the vector
      */
     export function length(a: Vector): number {
-        return Math.sqrt(a.x * a.x + a.y * a.y);
+        return Math.hypot(a.x, a.y);
     }
 
     /**

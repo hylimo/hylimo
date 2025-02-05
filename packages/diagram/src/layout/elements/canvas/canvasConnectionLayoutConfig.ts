@@ -26,6 +26,7 @@ const markerType = optional(elementType(Marker.TYPE));
 export class CanvasConnectionLayoutConfig extends EditableCanvasContentLayoutConfig {
     override isLayoutContent = false;
     override type = CanvasConnection.TYPE;
+    override idGroup = "c";
 
     constructor() {
         super(

@@ -41,6 +41,7 @@ export class LinePointLayoutConfig extends CanvasPointLayoutConfig {
     );
 
     override type = LinePoint.TYPE;
+    override idGroup = "pl";
 
     constructor() {
         super(
