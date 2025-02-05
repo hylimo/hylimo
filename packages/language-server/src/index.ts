@@ -41,6 +41,7 @@ export * from "./edit/handlers/splitCanvasAxisAlignedSegmentHandler.js";
 export * from "./edit/handlers/splitCanvasBezierSegmentHandler.js";
 export * from "./edit/handlers/splitCanvasLineSegmentHandler.js";
 export * from "./edit/handlers/toolboxHandler.js";
+export * from "./edit/handlers/translationHandlerUtils.js";
 export * from "./edit/diagramServer.js";
 export * from "./edit/transactionManager.js";
 export * from "./format/comments.js";

@@ -9,7 +9,8 @@ import { Segment } from "../model/segment.js";
 import { ArcSegmentEngine } from "./arcSegmentEngine.js";
 import { BezierSegmentEngine } from "./bezierSegmentEngine.js";
 import { LineSegmentEngine } from "./lineSegmentEngine.js";
-import { SegmentEngine } from "./segmentEngine.js";
+import { NearestPointResult, SegmentEngine } from "./segmentEngine.js";
+import { Math2D } from "../../common/math.js";
 
 /**
  * Helper to get closest points to a line, and calculate the position of a point on the line
@@ -47,33 +48,71 @@ export class LineEngine {
             };
         }
         const localPoint = applyToPoint(inverse(transform), point);
-        const lengthPerSegment = 1 / line.segments.length;
-        let minDistance = Number.POSITIVE_INFINITY;
+        let minDistToExpected = Number.POSITIVE_INFINITY;
+        let minDistanceToLine = Number.POSITIVE_INFINITY;
         let relativePosition = 0;
         let segmentIndex = 0;
         let distance = 0;
         let startPosition = line.start;
         for (let i = 0; i < line.segments.length; i++) {
             const segment = line.segments[i];
-            const engine = this.getEngine(segment);
-            const candidate = engine.projectPoint(localPoint, segment, startPosition);
-            if (candidate.distance < minDistance) {
-                minDistance = candidate.distance;
+            const { distToExpected, distToLine, candidate } = this.projectOnSegment(segment, localPoint, startPosition);
+            if (
+                (distToExpected < minDistToExpected && minDistToExpected > 1) ||
+                (distToExpected <= 1 && candidate.distance < minDistanceToLine)
+            ) {
                 relativePosition = candidate.position;
                 segmentIndex = i;
-                const normal = engine.getNormalVector(candidate.position, segment, startPosition);
-                const d2 = normal.x ** 2 + normal.y ** 2;
-                distance =
-                    ((localPoint.x - candidate.point.x) * normal.x + (localPoint.y - candidate.point.y) * normal.y) /
-                    d2;
+                distance = distToLine;
+                minDistToExpected = distToExpected;
+                minDistanceToLine = candidate.distance;
             }
             startPosition = segment.end;
         }
         return {
-            pos: lengthPerSegment * (segmentIndex + relativePosition),
+            pos: (segmentIndex + relativePosition) / line.segments.length,
             relativePos: relativePosition,
             segment: segmentIndex,
             distance
+        };
+    }
+
+    /**
+     * Gets data for a potential nearest point candidate.
+     * First does a projection of localPoint to the segment.
+     * Then draws a normal from the projected point on the line, and finds the point on that line which is closest to localPoint.
+     * This is called the expected point, as this will be returned by the projection.
+     *
+     * - candidate: the nearest point result for the segment
+     * - distToLine: the (signed) distance from expected point to the line
+     * - distToExpected: the distance from localPoint to the expected point
+     *
+     * @param segment the segment on which the point should be projected
+     * @param localPoint the point to project
+     * @param startPosition the start position of the segment
+     * @returns the projection candidate data
+     */
+    private projectOnSegment(
+        segment: Segment,
+        localPoint: Point,
+        startPosition: Point
+    ): {
+        distToExpected: number;
+        distToLine: number;
+        candidate: NearestPointResult;
+    } {
+        const engine = this.getEngine(segment);
+        const candidate = engine.projectPoint(localPoint, segment, startPosition);
+        const normal = engine.getNormalVector(candidate.position, segment, startPosition);
+        const d2 = normal.x ** 2 + normal.y ** 2;
+        const distToLine =
+            ((localPoint.x - candidate.point.x) * normal.x + (localPoint.y - candidate.point.y) * normal.y) / d2;
+        const expectedPoint = engine.getPoint(candidate.position, distToLine, segment, startPosition);
+        const distToExpected = Math2D.distance(expectedPoint, localPoint);
+        return {
+            distToExpected,
+            distToLine,
+            candidate
         };
     }
 
