@@ -15,7 +15,7 @@
                         <div class="content" v-for="diagram in allDiagrams" :key="diagram.filename">
                             <button @click="changeDiagramTo(diagram.filename)">
                                 <span>{{ diagram.filename }}</span>
-                                <span>last edited on {{ diagram.lastChange.toString() }}</span>
+                                <span class="last-edited-paragraph">last edited on {{ diagram.lastChange.toString() }}</span>
                             </button>
                             <IconButton
                                 icon="vpi-trashcan"
@@ -35,7 +35,7 @@ import type { DiagramsMetadata } from "../Home.vue";
 import { ref } from "vue";
 import { onClickOutside } from "@vueuse/core";
 
-defineProps<{ allDiagrams: DiagramsMetadata }>();
+const props = defineProps<{ allDiagrams: DiagramsMetadata }>();
 
 const emit = defineEmits<{ (e: "changeDiagramContent", value: string): void, (e: "deleteDiagram", value: string): void }>();
 
@@ -48,6 +48,7 @@ let showDialog = ref(false);
 const dialog = ref<HTMLElement | null>(null);
 
 function openDialogue(): void {
+    console.log(`Choosing diagram to use among ${props.allDiagrams}`)
     showDialog.value = true;
 }
 
@@ -132,5 +133,9 @@ onClickOutside(dialog, () => {
 
 .content {
   display: flex;
+}
+
+.last-edited-paragraph {
+    margin-left: auto;
 }
 </style>

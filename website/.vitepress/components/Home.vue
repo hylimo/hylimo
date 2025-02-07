@@ -67,11 +67,6 @@ const languageServerConfig = inject(languageServerConfigKey)!;
  * The current version of the diagram serialization algorithm.
  */
 const serializationVersion = 1;
-/**
- * @param filename the filename without extension (i.e. `diagram` for the resulting file `diagram.hyl`)
- * @param version the serialization mechanism of the diagram, currently always `1`
- */
-type SavedJSONDiagrams = [{ filename: string; version: number; lastChangeString: string }];
 
 /**
  * @param filename the filename without extension (i.e. `diagram` for the resulting file `diagram.hyl`)
@@ -95,7 +90,7 @@ class DiagramMetadata {
 
 export type DiagramsMetadata = DiagramMetadata[];
 
-const localStorageAvailableDiagrams = useLocalStorage("available-diagrams", "[]");
+const localStorageAvailableDiagrams = useLocalStorage<DiagramsMetadata>("available-diagrams", [], {listenToStorageChanges: true});
 
 const defaultDiagram =
     'classDiagram {\n    class("HelloWorld") {\n        public {\n            hello : string\n        }\n    }\n}';
@@ -123,7 +118,6 @@ const code = computed({
 });
 
 function openMostRecentLocalstorageDiagram() {
-    localStorageDiagrams.value = loadAllDiagramMetadata();
     if (localStorageDiagrams.value.length == 0) {
         localStorageCode.value = defaultDiagram;
         return;
@@ -140,7 +134,6 @@ function openMostRecentLocalstorageDiagram() {
  * @param diagram the diagram name to load
  */
 function openLocalStorageDiagram(diagram: string) {
-    localStorageDiagrams.value = loadAllDiagramMetadata();
     const diagrams = localStorageDiagrams.value;
 
     const expectedDiagrams = diagrams.filter((d) => d.filename === diagram);
@@ -165,7 +158,7 @@ function saveToLocalStorage(value: string) {
     let diagramMetadata = diagrams.find((d) => d.filename === filename.value);
     if (diagramMetadata == undefined) {
         diagramMetadata = { filename: filename.value, version: serializationVersion, lastChange: new Date() };
-        diagrams.push(diagramMetadata);
+        diagrams.unshift(diagramMetadata);
     } else {
         diagramMetadata.lastChange = new Date();
     }
@@ -175,7 +168,7 @@ function saveToLocalStorage(value: string) {
 }
 
 function saveMetadata(diagrams: DiagramsMetadata) {
-    localStorageAvailableDiagrams.value = JSON.stringify(diagrams);
+    localStorageAvailableDiagrams.value = diagrams;
 }
 
 /**
@@ -191,22 +184,6 @@ function saveCurrentDiagram(filename: UnwrapRef<string>, serializationVersion: n
         throw new Error(`Unsupported diagram version: ${serializationVersion}. Cannot serialize diagram '${filename}'`);
     }
     window.localStorage.setItem(`diagram-v1-${filename}`, diagramText);
-}
-
-/**
- * Loads the metadata of all diagrams Hylimo knows about from localstorage.
- */
-function loadAllDiagramMetadata(): DiagramsMetadata {
-    const rawList = JSON.parse(localStorageAvailableDiagrams.value) as SavedJSONDiagrams;
-    return rawList
-        .map((diagram) => {
-            return {
-                filename: diagram.filename,
-                version: diagram.version,
-                lastChange: new Date(diagram.lastChangeString)
-            };
-        })
-        .sort((a, b) => b.lastChange.getTime() - a.lastChange.getTime());
 }
 
 /**
@@ -228,7 +205,19 @@ function loadLocalStorageDiagram(filename: string, version: number) {
 }
 
 function deleteDiagram(filename: string) {
-  localStorageDiagrams.value = localStorageDiagrams.value.filter(diagram => diagram.filename !== filename);
+    const deletedDiagram = localStorageDiagrams.value.find((d) => d.filename === filename);
+    localStorageDiagrams.value = localStorageDiagrams.value.filter((diagram) => diagram.filename !== filename);
+    saveMetadata(localStorageDiagrams.value);
+    if (deletedDiagram) {
+        deleteDiagramText(deletedDiagram.filename, deletedDiagram.version);
+    }
+}
+
+function deleteDiagramText(filename: string, version: number) {
+    if(version != 1) {
+        throw new Error(`Unsupported diagram version: ${version}. Cannot delete diagram '${filename}'`);
+    }
+    window.localStorage.removeItem(`diagram-v1-${filename}`);
 }
 
 const baseName = computed(
@@ -409,6 +398,7 @@ body {
     height: 100svh;
     min-height: unset;
 }
+
 .VPNavBarSearch {
     display: none;
 }

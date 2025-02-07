@@ -137,7 +137,7 @@ onMounted(async () => {
 
     editorModel.value = monaco.editor.createModel(model.value, language);
     editor.setModel(editorModel.value);
-    const pushStackElement = editorModel.value.pushStackElement.bind(editorModel);
+    const pushStackElement = editorModel.value.pushStackElement.bind(editorModel.value);
 
     // override pushStackElement to ignore undo stops during transactions
     editorModel.value.pushStackElement = () => {
