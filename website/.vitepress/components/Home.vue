@@ -14,6 +14,7 @@
                     v-model="filename"
                     :all-diagrams="localStorageDiagrams"
                     @change-diagram-content="openLocalStorageDiagram"
+                    @delete-diagram="deleteDiagram"
                 ></DiagramChooser>
             </Teleport>
             <Teleport to="#copy-diagram-link">
@@ -159,7 +160,7 @@ function openLocalStorageDiagram(diagram: string) {
  * @param value the text of the current diagram
  */
 function saveToLocalStorage(value: string) {
-    const diagrams = loadAllDiagramMetadata();
+    const diagrams = localStorageDiagrams.value;
 
     let diagramMetadata = diagrams.find((d) => d.filename === filename.value);
     if (diagramMetadata == undefined) {
@@ -224,6 +225,10 @@ function loadLocalStorageDiagram(filename: string, version: number) {
         localStorageCode.value = diagram;
         console.log(`successfully loaded diagram ${filename}`);
     }
+}
+
+function deleteDiagram(filename: string) {
+  localStorageDiagrams.value = localStorageDiagrams.value.filter(diagram => diagram.filename !== filename);
 }
 
 const baseName = computed(

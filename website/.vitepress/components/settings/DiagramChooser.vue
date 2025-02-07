@@ -17,6 +17,11 @@
                                 <span>{{ diagram.filename }}</span>
                                 <span>last edited on {{ diagram.lastChange.toString() }}</span>
                             </button>
+                            <IconButton
+                                icon="vpi-trashcan"
+                                :label="`Delete diagram '${diagram.filename}'`"
+                                @click="deleteDiagram(diagram.filename)"
+                            />
                         </div>
                     </div>
                 </div>
@@ -32,7 +37,7 @@ import { onClickOutside } from "@vueuse/core";
 
 defineProps<{ allDiagrams: DiagramsMetadata }>();
 
-const emit = defineEmits<{ (e: "changeDiagramContent", value: string): void }>();
+const emit = defineEmits<{ (e: "changeDiagramContent", value: string): void, (e: "deleteDiagram", value: string): void }>();
 
 const filename = defineModel({
     type: String,
@@ -49,6 +54,13 @@ function openDialogue(): void {
 function changeDiagramTo(newFilename: string): void {
     filename.value = newFilename;
     emit("changeDiagramContent", newFilename);
+}
+
+function deleteDiagram(diagram: string): void {
+  const confirmed = window.confirm(`Are you sure you want to delete diagram '${diagram}'?`);
+  if (confirmed) {
+    emit("deleteDiagram", diagram);
+  }
 }
 
 onClickOutside(dialog, () => {
@@ -116,5 +128,9 @@ onClickOutside(dialog, () => {
 .modal-enter-from .modal-container,
 .modal-leave-to .modal-container {
     transform: scale(1.1);
+}
+
+.content {
+  display: flex;
 }
 </style>
