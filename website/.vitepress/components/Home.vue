@@ -9,8 +9,12 @@
             class="main-content"
         />
         <ClientOnly>
-            <Teleport to="#diagram-filename">
-                <FilenameInput v-model="filename"></FilenameInput>
+            <Teleport v-if="codeWithFileHandle == undefined" to="#diagram-filename">
+                <DiagramChooser
+                    v-model="filename"
+                    :all-diagrams="localStorageDiagrams"
+                    @change-diagram-content="openLocalStorageDiagram"
+                ></DiagramChooser>
             </Teleport>
             <Teleport to="#copy-diagram-link">
                 <IconButton label="Copy diagram link" icon="vpi-link" @click="copyLink" />
@@ -50,7 +54,7 @@ import { deserialize, serialize } from "../util/serialization.js";
 import RegisterSW from "./RegisterSW.vue";
 import { CodeWithFileHandle, openDiagram } from "../util/diagramOpener";
 import { languageServerConfigKey } from "../theme/injectionKeys";
-import FilenameInput from "./settings/FilenameInput.vue";
+import DiagramChooser from "./settings/DiagramChooser.vue";
 
 const HylimoEditor = defineClientComponent(() => import("./HylimoEditor.vue"));
 
@@ -72,8 +76,23 @@ type SavedJSONDiagrams = [{ filename: string; version: number; lastChangeString:
  * @param filename the filename without extension (i.e. `diagram` for the resulting file `diagram.hyl`)
  * @param version the serialization mechanism of the diagram, currently always `1`
  */
-type DiagramMetadata = { filename: string; version: number; lastChange: Date };
-type DiagramsMetadata = DiagramMetadata[];
+class DiagramMetadata {
+    filename: string;
+    version: number;
+    lastChange: Date;
+
+    constructor(filename: string, version: number, lastChange: string) {
+        this.filename = filename;
+        this.version = version;
+        this.lastChange = new Date(lastChange);
+    }
+
+    toString(): string {
+        return `diagram ${this.filename} (last edited ${this.lastChange})`;
+    }
+}
+
+export type DiagramsMetadata = DiagramMetadata[];
 
 const localStorageAvailableDiagrams = useLocalStorage("available-diagrams", "[]");
 
@@ -88,8 +107,11 @@ const hasFileCodeChanges = computed(
     () => fileCode.value != undefined && fileCode.value != codeWithFileHandle.value?.code
 );
 
+const localStorageCode = ref<string>("");
+const localStorageDiagrams = ref<DiagramsMetadata>([]);
+
 const code = computed({
-    get: () => fileCode.value ?? queryLocalStorageDiagram(),
+    get: () => fileCode.value ?? localStorageCode.value,
     set: (value: string) => {
         if (codeWithFileHandle.value != undefined) {
             fileCode.value = value;
@@ -99,23 +121,36 @@ const code = computed({
     }
 });
 
+function openMostRecentLocalstorageDiagram() {
+    localStorageDiagrams.value = loadAllDiagramMetadata();
+    if (localStorageDiagrams.value.length == 0) {
+        localStorageCode.value = defaultDiagram;
+        return;
+    }
+
+    const diagram = localStorageDiagrams.value[0];
+    loadLocalStorageDiagram(diagram.filename, diagram.version);
+    filename.value = diagram.filename;
+}
+
 /**
- * Queries the given diagram from the possible diagram stored by the user.
+ * Opens the given diagram from local storage.
  *
- * @param diagram the diagram name to load, or `null` to load the most recent diagram
+ * @param diagram the diagram name to load
  */
-function queryLocalStorageDiagram(diagram: string | null = filename.value): string {
-    const diagrams = loadAllDiagramMetadata();
-    if (diagrams.length == 0) return defaultDiagram;
+function openLocalStorageDiagram(diagram: string) {
+    localStorageDiagrams.value = loadAllDiagramMetadata();
+    const diagrams = localStorageDiagrams.value;
 
-    if (diagram == null) return loadLocalStorageDiagram(diagrams[0].filename, diagrams[0].version);
-
-    var expectedDiagrams = diagrams.filter((d) => d.filename === diagram);
+    const expectedDiagrams = diagrams.filter((d) => d.filename === diagram);
     if (expectedDiagrams.length == 0) {
         console.error(`diagram ${diagram} was not found. Possible options: ${diagrams}`);
-        return defaultDiagram;
+        return;
     }
-    return loadLocalStorageDiagram(expectedDiagrams[0].filename, expectedDiagrams[0].version);
+    const newDiagram = expectedDiagrams[0];
+
+    loadLocalStorageDiagram(newDiagram.filename, newDiagram.version);
+    filename.value = newDiagram.filename;
 }
 
 /**
@@ -180,14 +215,20 @@ function loadAllDiagramMetadata(): DiagramsMetadata {
  * @param filename the diagram to load
  * @param version the Hylimo serialization algorithm version that was used to serialize the diagram. Currently always set to {@link serializationVersion}.
  */
-function loadLocalStorageDiagram(filename: string, version: number): string {
+function loadLocalStorageDiagram(filename: string, version: number) {
     if (version != 1) {
         throw new Error(`Unsupported diagram version: ${version}. Cannot deserialize diagram '${filename}'`);
     }
-    return window.localStorage.getItem(`diagram-v1-${filename}`) ?? defaultDiagram;
+    const diagram = window.localStorage.getItem(`diagram-v1-${filename}`);
+    if (diagram) {
+        localStorageCode.value = diagram;
+        console.log(`successfully loaded diagram ${filename}`);
+    }
 }
 
-const baseName = computed(() => codeWithFileHandle.value?.fileHandle?.name?.match(/^(.*?)(\.hyl)?$/)?.[1] ?? filename);
+const baseName = computed(
+    () => codeWithFileHandle.value?.fileHandle?.name?.match(/^(.*?)(\.hyl)?$/)?.[1] ?? filename.value
+);
 const diagram = ref<Root>();
 const successMessageTimeout = 1000;
 const copiedSuccess = ref(false);
@@ -269,9 +310,11 @@ onBeforeMount(() => {
             console.warn("Failed to deserialize diagram from URL", e);
         }
     } else {
+        let useLocalStorage = true;
         openDiagram()
             .then((diagram) => {
                 if (diagram != undefined) {
+                    useLocalStorage = false;
                     codeWithFileHandle.value = diagram;
                     fileCode.value = diagram.code;
                 }
@@ -280,6 +323,9 @@ onBeforeMount(() => {
                 // eslint-disable-next-line no-console
                 console.error("Failed to open diagram", e);
             });
+        if (useLocalStorage) {
+            openMostRecentLocalstorageDiagram();
+        }
     }
     useEventListener(window, "beforeunload", (event) => {
         if (hasFileCodeChanges.value) {
@@ -357,5 +403,8 @@ onBeforeMount(() => {
 body {
     height: 100svh;
     min-height: unset;
+}
+.VPNavBarSearch {
+    display: none;
 }
 </style>
