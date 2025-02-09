@@ -5,6 +5,7 @@ import { generateToolboxAddElementDetails } from "./item.js";
 import { generateIcon } from "./icon.js";
 import { ToolboxTool, toolboxTools, ToolboxToolType } from "../tools.js";
 import { generateToolboxConnectDetails } from "./connection.js";
+import { PencilRuler, X } from "lucide";
 
 /**
  * Generates the toolbox UI.
@@ -92,7 +93,7 @@ function generateToolboxToolButton(context: Toolbox, tool: ToolboxTool): VNode {
                 active: context.currentTool.type === tool.id
             }
         },
-        generateIcon(tool.id)
+        generateIcon(tool.icon)
     );
 }
 
@@ -113,6 +114,6 @@ function generateToggleToolboxButton(context: Toolbox): VNode {
                 title: context.isOpen ? "Close Toolbox" : "Open Toolbox"
             }
         },
-        generateIcon(context.isOpen ? "close" : "toolbox")
+        generateIcon(context.isOpen ? X : PencilRuler)
     );
 }

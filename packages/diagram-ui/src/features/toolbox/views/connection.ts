@@ -2,7 +2,8 @@ import { ConnectionEditEntry, Toolbox } from "../toolbox.js";
 import { VNode, h } from "snabbdom";
 import { generatePreviewIfAvailable } from "./preview.js";
 import { Root } from "@hylimo/diagram-common";
-import { generateSearchBox } from "./search.js";
+import { generateIcon } from "./icon.js";
+import { ArrowUpRight } from "lucide";
 
 /**
  * Generates the toolbox UI for the connection operator.
@@ -12,7 +13,11 @@ import { generateSearchBox } from "./search.js";
  * @returns The toolbox UI for the connection operator
  */
 export function generateToolboxConnectDetails(context: Toolbox, root: Root): VNode[] {
-    return [generateSearchBox(context), h("div.items", generateConnectionToolboxItems(context, root))];
+    const res = [generateSearchBox(context)];
+    if (context.connectionSearchString != undefined) {
+        res.push(h("div.items", generateConnectionToolboxItems(context, root)));
+    }
+    return res;
 }
 
 /**
@@ -75,7 +80,7 @@ export function generateConnectionToolboxItem(
             on: {
                 click: (event) => {
                     context.selectedConnection = connectionEdit.name;
-                    context.searchString = "";
+                    context.connectionSearchString = undefined;
                     event.stopPropagation();
                     context.update();
                 },
@@ -98,21 +103,69 @@ export function generateConnectionToolboxItem(
 }
 
 /**
- * Generates the connection icon.
+ * Generates the UI for the connection operator search box.
  *
- * @returns The connection icon
+ * @param context The toolbox context
+ * @returns The UI for the connection operator search box
  */
-export function generateConnectionIcon(): VNode {
-    return h(
-        "svg",
+function generateSearchBox(context: Toolbox): VNode {
+    const connections = context.getConnectionEdits(context.currentRoot!);
+    const currentConnection = context.getCurrentConnection(connections);
+    const input = h(
+        "div.selectable-input",
         {
-            attrs: {
-                viewBox: "0 0 16 16"
-            },
-            class: {
-                "connection-icon": true
+            on: {
+                click: (event, vnode) => {
+                    context.connectionSearchString = "";
+                    (vnode.elm as HTMLDivElement).querySelector("input")?.focus();
+                    context.update();
+                },
+                focusout: () => {
+                    context.connectionSearchString = undefined;
+                    context.update();
+                },
+                mousedown: (event) => {
+                    if (!(event.target instanceof HTMLInputElement)) {
+                        event.preventDefault();
+                    }
+                }
             }
         },
-        [h("path", { attrs: { d: "M 2 13 H 7 V 5 H 14 m -3 -3 l 3 3 l -3 3" } })]
+        [generateIcon(ArrowUpRight), generateSearchInput(context, currentConnection)]
     );
+    return h("div.toolbox-details-header", [input]);
+}
+
+/**
+ * Generates the connection search input element
+ *
+ * @param context The toolbox context
+ * @param currentConnection the currently selected connection operator
+ * @returns The search input element
+ */
+function generateSearchInput(context: Toolbox, currentConnection: string): VNode {
+    return h("input", {
+        attrs: {
+            value: currentConnection
+        },
+        on: {
+            input: (event) => {
+                context.connectionSearchString = (event.target as HTMLInputElement).value;
+                context.update();
+            },
+            keydown: (event) => {
+                if (event.key === "Escape") {
+                    context.connectionSearchString = undefined;
+                    context.update();
+                }
+            }
+        },
+        hook: {
+            update: (oldVnode, vnode) => {
+                if (context.connectionSearchString == undefined) {
+                    (vnode.elm as HTMLInputElement).value = currentConnection;
+                }
+            }
+        }
+    });
 }

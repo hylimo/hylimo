@@ -86,6 +86,11 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler, Conn
     searchString: string = "";
 
     /**
+     * The search string for the connection select.
+     */
+    connectionSearchString?: string;
+
+    /**
      * The selected connection.
      */
     selectedConnection?: string;
