@@ -5,7 +5,7 @@ import { generateToolboxAddElementDetails } from "./item.js";
 import { generateIcon } from "./icon.js";
 import { ToolboxTool, toolboxTools, ToolboxToolType } from "../tools.js";
 import { generateToolboxConnectDetails } from "./connection.js";
-import { PencilRuler, X } from "lucide";
+import { Lock, PencilRuler, X } from "lucide";
 
 /**
  * Generates the toolbox UI.
@@ -80,6 +80,7 @@ function generateToolboxDetails(context: Toolbox, root: Root): VNode {
  * @returns The toolbox tool button
  */
 function generateToolboxToolButton(context: Toolbox, tool: ToolboxTool): VNode {
+    const active = context.currentTool.type === tool.id;
     return h(
         "button.toolbox-tool-button",
         {
@@ -90,10 +91,10 @@ function generateToolboxToolButton(context: Toolbox, tool: ToolboxTool): VNode {
                 title: tool.title
             },
             class: {
-                active: context.currentTool.type === tool.id
+                active
             }
         },
-        generateIcon(tool.icon)
+        [generateIcon(tool.icon), active && context.currentTool.locked ? generateIcon(Lock, ["locked"]) : undefined]
     );
 }
 

@@ -53,11 +53,19 @@
             align-items: center;
             justify-content: center;
             outline: none;
+            position: relative;
 
             .icon {
-                --size: calc(min(15px, 100% - 5px));
+                --size: calc(min(18px, 100% - 8px));
                 width: var(--size);
                 height: var(--size);
+            }
+
+            .icon.locked {
+                --size: calc(min(18px, 100% - 8px) * 0.7);
+                bottom: calc(-0.25 * var(--size));
+                right: calc(-0.25 * var(--size));
+                position: absolute;
             }
         }
 
