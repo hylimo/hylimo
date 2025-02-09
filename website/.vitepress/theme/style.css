@@ -123,8 +123,6 @@
 .sprotty-wrapper {
     width: 100%;
     height: 100%;
-    container-type: size;
-    container-name: sprotty;
 }
 
 .sprotty {
@@ -162,9 +160,9 @@
     --toolbox-background: var(--vp-c-bg);
     --toolbox-primary: var(--vp-c-brand);
     --toolbox-box-shadow: var(--vp-shadow-4);
-    --toolbox-header-background: var(--vp-c-gray-1);
-    --toolbox-group-header-background: var(--vp-c-gray-2);
-    --toolbox-item-hover-background: var(--vp-c-gray-3);
+    --toolbox-background-1: var(--vp-c-gray-1);
+    --toolbox-background-2: var(--vp-c-gray-2);
+    --toolbox-background-3: var(--vp-c-gray-3);
     --toolbox-scrollbar-thumb-background: var(--vp-c-text-3);
 }
 

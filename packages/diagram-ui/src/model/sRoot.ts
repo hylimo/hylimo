@@ -122,6 +122,10 @@ export class SRoot extends ViewportRootElementImpl implements CanvasLike {
      */
     generateStyle(baseDiv: string): string {
         const staticStyles = `
+            #${baseDiv}.sprotty {
+                container-type: size;
+                container-name: sprotty;
+            }
             #${baseDiv}.sprotty svg {
                 --diagram-zoom: ${this.zoom};
                 --diagram-zoom-normalized: ${this.zoom / Math.pow(2, Math.round(Math.log2(this.zoom) / 2) * 2)};
