@@ -80,23 +80,24 @@ type DiagramMetadata = {
 
 export type DiagramsMetadata = DiagramMetadata[];
 
-const localStorageAvailableDiagrams = useLocalStorage<DiagramsMetadata>("available-diagrams", [], {
-    listenToStorageChanges: true
+
+const localStorageCode = ref<string>("");
+
+const localStorageDiagrams = ref<DiagramsMetadata>([]);
+const localStorageAvailableDiagrams = useLocalStorage<DiagramsMetadata>("available-diagrams", localStorageDiagrams, {
+    listenToStorageChanges: true,
+    onError: (err) => { console.log(err); }
 });
 
 const defaultDiagram =
     'classDiagram {\n    class("HelloWorld") {\n        public {\n            hello : string\n        }\n    }\n}';
 
 const filename = ref<string>("diagram");
-
 const fileCode = ref<string>();
 const codeWithFileHandle = ref<CodeWithFileHandle>();
 const hasFileCodeChanges = computed(
     () => fileCode.value != undefined && fileCode.value != codeWithFileHandle.value?.code
 );
-
-const localStorageCode = ref<string>("");
-const localStorageDiagrams = ref<DiagramsMetadata>([]);
 
 const code = computed({
     get: () => fileCode.value ?? localStorageCode.value,
@@ -116,10 +117,10 @@ function openMostRecentLocalstorageDiagram() {
         return;
     }
 
-    const diagrams = localStorageDiagrams.value
+    localStorageDiagrams.value = localStorageDiagrams.value
         .slice()
-        .sort((a, b) => new Date(a.lastChange).getTime() - new Date(b.lastChange).getTime());
-    const diagram = diagrams[0];
+        .sort((a, b) => new Date(b.lastChange).getTime() - new Date(a.lastChange).getTime());
+    const diagram = localStorageDiagrams.value[0];
     loadLocalStorageDiagram(diagram.filename, diagram.version);
     filename.value = diagram.filename;
 }
@@ -201,6 +202,8 @@ function loadLocalStorageDiagram(filename: string, version: number) {
     if (diagram) {
         localStorageCode.value = diagram;
         console.log(`successfully loaded diagram ${filename}`);
+    } else {
+        console.error(`Could not load diagram ${filename} as it does not exist.`);
     }
 }
 
