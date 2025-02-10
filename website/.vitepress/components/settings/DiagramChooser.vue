@@ -14,7 +14,7 @@
                         <p class="title">Available diagrams</p>
                         <div class="content" v-for="diagram in allDiagrams" :key="diagram.filename">
                             <button @click="changeDiagramTo(diagram.filename)">
-                                <span>{{ diagram.filename }}</span>
+                                <span class="available-digram-filename">{{ diagram.filename }}</span>
                                 <span class="last-edited-paragraph"
                                     >last edited on {{ diagram.lastChange.toString() }}</span
                                 >
@@ -140,7 +140,11 @@ onClickOutside(dialog, () => {
     display: flex;
 }
 
+.available-digram-filename {
+    font-style: italic;
+}
+
 .last-edited-paragraph {
-    margin-left: auto;
+    font-size: 0.75em;
 }
 </style>
