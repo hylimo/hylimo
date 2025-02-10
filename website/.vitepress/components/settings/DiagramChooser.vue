@@ -15,7 +15,9 @@
                         <div class="content" v-for="diagram in allDiagrams" :key="diagram.filename">
                             <button @click="changeDiagramTo(diagram.filename)">
                                 <span>{{ diagram.filename }}</span>
-                                <span class="last-edited-paragraph">last edited on {{ diagram.lastChange.toString() }}</span>
+                                <span class="last-edited-paragraph"
+                                    >last edited on {{ diagram.lastChange.toString() }}</span
+                                >
                             </button>
                             <IconButton
                                 icon="vpi-trashcan"
@@ -37,7 +39,10 @@ import { onClickOutside } from "@vueuse/core";
 
 const props = defineProps<{ allDiagrams: DiagramsMetadata }>();
 
-const emit = defineEmits<{ (e: "changeDiagramContent", value: string): void, (e: "deleteDiagram", value: string): void }>();
+const emit = defineEmits<{
+    (e: "changeDiagramContent", value: string): void;
+    (e: "deleteDiagram", value: string): void;
+}>();
 
 const filename = defineModel({
     type: String,
@@ -48,7 +53,7 @@ let showDialog = ref(false);
 const dialog = ref<HTMLElement | null>(null);
 
 function openDialogue(): void {
-    console.log(`Choosing diagram to use among ${props.allDiagrams}`)
+    console.log(`Choosing diagram to use among ${props.allDiagrams}`);
     showDialog.value = true;
 }
 
@@ -58,10 +63,10 @@ function changeDiagramTo(newFilename: string): void {
 }
 
 function deleteDiagram(diagram: string): void {
-  const confirmed = window.confirm(`Are you sure you want to delete diagram '${diagram}'?`);
-  if (confirmed) {
-    emit("deleteDiagram", diagram);
-  }
+    const confirmed = window.confirm(`Are you sure you want to delete diagram '${diagram}'?`);
+    if (confirmed) {
+        emit("deleteDiagram", diagram);
+    }
 }
 
 onClickOutside(dialog, () => {
@@ -132,7 +137,7 @@ onClickOutside(dialog, () => {
 }
 
 .content {
-  display: flex;
+    display: flex;
 }
 
 .last-edited-paragraph {

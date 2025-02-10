@@ -80,13 +80,11 @@ type DiagramMetadata = {
 
 export type DiagramsMetadata = DiagramMetadata[];
 
-
 const localStorageCode = ref<string>("");
 
 const localStorageDiagrams = ref<DiagramsMetadata>([]);
 const localStorageAvailableDiagrams = useLocalStorage<DiagramsMetadata>("available-diagrams", localStorageDiagrams, {
-    listenToStorageChanges: true,
-    onError: (err) => { console.log(err); }
+    listenToStorageChanges: true
 });
 
 const defaultDiagram =
