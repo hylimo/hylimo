@@ -12,8 +12,8 @@
                 <div v-show="showDialog" class="modal-mask">
                     <div ref="dialog" class="modal-container">
                         <p class="title">Available diagrams</p>
-                        <div class="content" v-for="diagram in allDiagrams" :key="diagram.filename">
-                            <button @click="changeDiagramTo(diagram.filename)">
+                        <div class="content" v-for="diagram in allDiagrams" :key="diagram.filename" :class="{ 'current-file' : filename === diagram.filename }">
+                            <button @click="changeDiagramTo(diagram.filename)" >
                                 <span class="available-digram-filename">{{ diagram.filename }}</span>
                                 <span class="last-edited-paragraph"
                                     >last edited on {{ diagram.lastChange.toString() }}</span
@@ -146,5 +146,9 @@ onClickOutside(dialog, () => {
 
 .last-edited-paragraph {
     font-size: 0.75em;
+}
+
+.current-file {
+    background: rgb(from var(--vp-c-brand) r g b / 0.5);
 }
 </style>
