@@ -14,6 +14,7 @@ export default withPwa(
             },
             nav: [
                 { text: "Docs", link: "/docs/docs" },
+                { component: "NavTeleportTarget", props: { "target-id": "diagram-filename" } },
                 { component: "NavTeleportTarget", props: { "target-id": "copy-diagram-link" } },
                 { component: "NavTeleportTarget", props: { "target-id": "save-diagram" } },
                 { component: "NavTeleportTarget", props: { "target-id": "export-diagram" } },
