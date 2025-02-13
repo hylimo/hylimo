@@ -39,7 +39,7 @@ const WHEEL_DELAY = 40;
 /**
  * Animation duration for zooming with the mouse wheel.
  */
-const WHEEL_ANIMATION_DURATION = 250;
+const WHEEL_ANIMATION_DURATION = 225;
 
 /**
  * Given given (x, y), (x1, y1) control points for a bezier curve,
