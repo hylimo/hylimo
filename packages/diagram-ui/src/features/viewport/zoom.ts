@@ -17,7 +17,7 @@ import { SetViewportAction } from "./viewport.js";
 /**
  * Zoom rate for mouse wheel events.
  */
-const WHEEL_ZOOM_RATE = 1 / 250;
+const WHEEL_ZOOM_RATE = 1 / 300;
 
 /**
  * Default zoom rate when using the trackpad.
@@ -27,7 +27,7 @@ const DEFAULT_ZOOM_RATE = 1 / 200;
 /**
  * Limits how often wheel events are processed when in wheel mode, due to each update taking at least one frame
  */
-const MIN_WHEEL_EVENT_TIME_DIFF = 25;
+const MIN_WHEEL_EVENT_TIME_DIFF = 15;
 
 /**
  * A delay which is waited to determine if a WheelEvent is caused by a mouse wheel.
@@ -39,7 +39,7 @@ const WHEEL_DELAY = 40;
 /**
  * Animation duration for zooming with the mouse wheel.
  */
-const WHEEL_ANIMATION_DURATION = 225;
+const WHEEL_ANIMATION_DURATION = 250;
 
 /**
  * Given given (x, y), (x1, y1) control points for a bezier curve,
@@ -93,8 +93,9 @@ export class ZoomMouseListener extends SprottyZoomMouseListener {
      * The previous easing function used for the zoom animation.
      * Used to create a new easing function that is continuous with the last one.
      */
-    previousEasing?: {
+    private previousEasing?: {
         start: number;
+        targetZoom: number;
         easing: (_: number) => number;
     };
 
@@ -110,15 +111,35 @@ export class ZoomMouseListener extends SprottyZoomMouseListener {
         } else if (event.deltaMode === WheelEvent.DOM_DELTA_PAGE) {
             value *= 100;
         }
+        this.delta += value;
+
+        this.detectWheelType(value, viewport, viewportOffset);
+
+        event.preventDefault();
+        if (this.type != undefined) {
+            return this.updateViewport(viewport, viewportOffset);
+        }
+        return [];
+    }
+
+    /**
+     * Detects the wheel type (wheel or trackpad) based on the value, and time since the last event.
+     * If the type cannot be detected now, sets a timeout when the type can surely be determined.
+     * 
+     * @param value the scaled delta value
+     * @param viewport the viewport
+     * @param viewportOffset the cursor position which should remain stable
+     */
+    private detectWheelType(value: number, viewport: SModelRootImpl & Viewport, viewportOffset: Point) {
         const now = Date.now();
         const timeDelta = now - this.lastWheelEventTime;
         this.lastWheelEventTime = now;
-        this.delta += value;
-
         if (value !== 0 && Math.abs(value) < 1) {
             this.type = "trackpad";
-        } else if (timeDelta > 400) {
+            this.previousEasing = undefined;
+        } else if (timeDelta > 1.5 * WHEEL_ANIMATION_DURATION) {
             this.type = undefined;
+            this.previousEasing = undefined;
             this.timeout = setTimeout(() => {
                 this.type = "wheel";
                 this.actionDispatcher.dispatchAll(this.updateViewport(viewport, viewportOffset));
@@ -130,19 +151,13 @@ export class ZoomMouseListener extends SprottyZoomMouseListener {
                 this.timeout = undefined;
             }
         }
-
-        event.preventDefault();
-        if (this.type != undefined) {
-            return this.updateViewport(viewport, viewportOffset);
-        }
-        return [];
     }
 
     /**
      * Updates the viewport
      *
      * @param viewport the viewport to update
-     * @param viewportOffset the offset of the viewport
+     * @param viewportOffset the cursor position which should remain stable
      * @returns the actions to dispatch
      */
     private updateViewport(viewport: SModelRootImpl & Viewport, viewportOffset: Point): Action[] {
@@ -156,10 +171,33 @@ export class ZoomMouseListener extends SprottyZoomMouseListener {
         }
         const zoomRate = isWheel ? WHEEL_ZOOM_RATE : DEFAULT_ZOOM_RATE;
         const zoomFactor = Math.exp(-this.delta * zoomRate);
-        const limitedZoom = limit(viewport.zoom * zoomFactor, this.viewerOptions.zoomLimits);
+        const limitedZoom = limit(
+            (this.previousEasing?.targetZoom ?? viewport.zoom) * zoomFactor,
+            this.viewerOptions.zoomLimits
+        );
         if (limitedZoom === viewport.zoom) {
             return [];
         }
+        const action = this.generateUpdateViewportAction(limitedZoom, viewport, viewportOffset, isWheel);
+        this.delta = 0;
+        return [action];
+    }
+
+    /**
+     * Generates the action to update the viewport.
+     *
+     * @param limitedZoom the limited zoom level
+     * @param viewport the viewport to update
+     * @param viewportOffset the cursor position which should remain stable
+     * @param isWheel whether the action is caused by a wheel instead of a trackpad
+     * @returns the action to update the viewport
+     */
+    private generateUpdateViewportAction(
+        limitedZoom: number,
+        viewport: SModelRootImpl & Viewport,
+        viewportOffset: Point,
+        isWheel: boolean
+    ): SetViewportAction {
         const offsetFactor = 1.0 / limitedZoom - 1.0 / viewport.zoom;
         const action: SetViewportAction = {
             kind: "viewport",
@@ -175,21 +213,21 @@ export class ZoomMouseListener extends SprottyZoomMouseListener {
             zoomAnimation: isWheel
                 ? {
                       animationDuration: WHEEL_ANIMATION_DURATION,
-                      ease: this.computeWheelEasing()
+                      ease: this.computeWheelEasing(limitedZoom)
                   }
                 : undefined
         };
-        this.delta = 0;
-        return [action];
+        return action;
     }
 
     /**
      * Computes the easing function for the zoom animation.
      * Ensures that the easing function is continuous with the last one.
      *
+     * @param targetZoom the target zoom level
      * @returns the easing function
      */
-    private computeWheelEasing() {
+    private computeWheelEasing(targetZoom: number) {
         let easing = bezier(0.25, 0.1, 0.25, 1);
 
         if (this.previousEasing) {
@@ -206,6 +244,7 @@ export class ZoomMouseListener extends SprottyZoomMouseListener {
 
         this.previousEasing = {
             start: Date.now(),
+            targetZoom,
             easing
         };
         return easing;
