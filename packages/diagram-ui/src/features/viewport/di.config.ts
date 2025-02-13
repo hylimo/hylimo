@@ -1,22 +1,38 @@
 import { ContainerModule } from "inversify";
-import { configureActionHandler, TYPES } from "sprotty";
+import {
+    CenterCommand,
+    configureActionHandler,
+    configureCommand,
+    FitToScreenCommand,
+    GetViewportCommand,
+    TYPES
+} from "sprotty";
 import { ViewportTouchListener } from "./touch.js";
 import { SetModelAction } from "sprotty-protocol";
 import { SetModelActionHandler } from "./setModelActionHandler.js";
 import { CenterKeyboardListener } from "./fitToScreenKeyboardListener.js";
-import { CenterKeyboardListener as SprottyCenterKeyboardListener } from "sprotty";
+import { SetViewportCommand } from "./viewport.js";
+import { ScrollMouseListener } from "./scroll.js";
+import { ZoomMouseListener } from "./zoom.js";
 
 /**
  * Module which configures touch support for the viewport and other additional event handlers
  */
-export const viewportModule = new ContainerModule((bind, unbind, isBound, rebind) => {
+export const viewportModule = new ContainerModule((bind, unbind, isBound) => {
+    // unmodified
+    configureCommand({ bind, isBound }, CenterCommand);
+    configureCommand({ bind, isBound }, FitToScreenCommand);
+    configureCommand({ bind, isBound }, GetViewportCommand);
+
+    // modified
+    configureCommand({ bind, isBound }, SetViewportCommand);
+    bind(CenterKeyboardListener).toSelf().inSingletonScope();
+    bind(TYPES.KeyListener).toService(CenterKeyboardListener);
+    bind(ScrollMouseListener).toSelf().inSingletonScope();
+    bind(ZoomMouseListener).toSelf().inSingletonScope();
+    bind(TYPES.MouseListener).toService(ScrollMouseListener);
+    bind(TYPES.MouseListener).toService(ZoomMouseListener);
     bind(ViewportTouchListener).toSelf().inSingletonScope();
     bind(TYPES.IVNodePostprocessor).toService(ViewportTouchListener);
-
-    // Sprotty has a default behavior for ctrl+shift+f/c that we want to customize
-    bind(CenterKeyboardListener).toSelf().inSingletonScope();
-    rebind(SprottyCenterKeyboardListener).toService(CenterKeyboardListener);
-
-    // Layout viewport on initial load
     configureActionHandler({ bind, isBound }, SetModelAction.KIND, SetModelActionHandler);
 });

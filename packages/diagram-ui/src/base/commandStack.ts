@@ -57,6 +57,9 @@ export class CommandStack extends SprottyCommandStack {
             get duration(): number {
                 return CancelableCommandExecutionContext.isCanceled(this) ? 0 : originalContext.duration;
             },
+            set duration(value: number) {
+                originalContext.duration = value;
+            },
             cancelState: this.lastContext?.cancelState ?? {
                 cancelUntil: -1,
                 skipUntil: -1

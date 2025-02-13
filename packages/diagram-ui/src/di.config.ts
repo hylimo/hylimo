@@ -29,7 +29,8 @@ import {
     decorationModule,
     registerModelElement,
     undoRedoModule as sprottyUndoRedoModule,
-    exportModule
+    exportModule,
+    viewportModule as sprottyViewportModule
 } from "sprotty";
 import { CommandStack } from "./base/commandStack.js";
 import { transactionModule } from "./features/transaction/di.config.js";
@@ -127,7 +128,8 @@ export function createContainer(widgetId: string): Container {
             sprottyZOrderModule,
             decorationModule,
             sprottyUndoRedoModule,
-            exportModule
+            exportModule,
+            sprottyViewportModule
         ]
     });
     container.load(
