@@ -128,7 +128,7 @@ export class SRoot extends ViewportRootElementImpl implements CanvasLike {
             }
             #${baseDiv}.sprotty svg {
                 --diagram-zoom: ${this.zoom};
-                --diagram-zoom-normalized: ${this.zoom / Math.pow(2, Math.round(Math.log2(this.zoom) / 2) * 2)};
+                --diagram-zoom-normalized: ${this.zoom / Math.pow(3, Math.floor(Math.log(this.zoom) / Math.log(3)))};
                 --diagram-scroll-x: ${this.scroll.x}px;
                 --diagram-scroll-y: ${this.scroll.y}px;
             }

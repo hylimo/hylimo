@@ -125,7 +125,7 @@ export class ZoomMouseListener extends SprottyZoomMouseListener {
     /**
      * Detects the wheel type (wheel or trackpad) based on the value, and time since the last event.
      * If the type cannot be detected now, sets a timeout when the type can surely be determined.
-     * 
+     *
      * @param value the scaled delta value
      * @param viewport the viewport
      * @param viewportOffset the cursor position which should remain stable
@@ -175,11 +175,11 @@ export class ZoomMouseListener extends SprottyZoomMouseListener {
             (this.previousEasing?.targetZoom ?? viewport.zoom) * zoomFactor,
             this.viewerOptions.zoomLimits
         );
+        this.delta = 0;
         if (limitedZoom === viewport.zoom) {
             return [];
         }
         const action = this.generateUpdateViewportAction(limitedZoom, viewport, viewportOffset, isWheel);
-        this.delta = 0;
         return [action];
     }
 
