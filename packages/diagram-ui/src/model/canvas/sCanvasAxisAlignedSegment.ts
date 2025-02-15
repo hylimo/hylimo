@@ -78,7 +78,7 @@ export class SCanvasAxisAlignedSegment
      * @returns the generated line
      */
     private generateVerticalControlLine(x: number, y1: number, y2: number, startX: number, endX: number): VNode {
-        return svg("line", {
+        return svg("line.resize", {
             attrs: {
                 x1: x,
                 y1,
@@ -90,7 +90,6 @@ export class SCanvasAxisAlignedSegment
                 "data-id": this.id
             },
             class: {
-                resize: true,
                 [SCanvasAxisAlignedSegment.SEGMENT_EDIT_CLASS_Y]: true
             }
         });
@@ -106,7 +105,7 @@ export class SCanvasAxisAlignedSegment
      * @returns the generated line
      */
     private generateHorizontalControlLine(y: number, x1: number, x2: number, startY: number, endY: number): VNode {
-        return svg("line", {
+        return svg("line.resize", {
             attrs: {
                 x1,
                 y1: y,
@@ -118,7 +117,6 @@ export class SCanvasAxisAlignedSegment
                 "data-id": this.id
             },
             class: {
-                resize: true,
                 [SCanvasAxisAlignedSegment.SEGMENT_EDIT_CLASS_X]: true
             }
         });

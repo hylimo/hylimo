@@ -12,6 +12,11 @@ export abstract class SCanvasPoint extends SCanvasContent implements CanvasPoint
     static readonly POINT_SIZE = 16;
 
     /**
+     * The size of the inner point
+     */
+    static readonly INNER_POINT_SIZE = 8;
+
+    /**
      * The provided position
      */
     position!: Point;

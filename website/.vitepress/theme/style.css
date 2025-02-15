@@ -154,8 +154,7 @@
 
 :root {
     --diagram-layout-color: #606770;
-    --diagram-layout-color-selected: #00c6f2;
-    --diagram-layout-color-overlay: #88888855;
+    --diagram-layout-color-selected: var(--vp-c-brand);
     --diagram-grid: #bbb;
     --toolbox-background: var(--vp-c-bg);
     --toolbox-primary: var(--vp-c-brand);

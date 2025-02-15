@@ -70,20 +70,13 @@ export abstract class EditableCanvasContentView {
                 }
             },
             svg(
-                "g",
-                {
-                    class: {
-                        "create-connection": true,
-                        selectable: true
-                    }
-                },
-                svg("line", {
+                "g.create-connection.selectable",
+                svg("line.create-connection-point", {
                     attrs: {
                         "stroke-width": SCanvasPoint.POINT_SIZE
                     },
                     class: {
-                        [EditableCanvasContentView.CREATE_CONNECTION_CLASS]: true,
-                        "create-connection-point": true
+                        [EditableCanvasContentView.CREATE_CONNECTION_CLASS]: true
                     }
                 }),
                 ...this.renderCreateConnectionSymbolArrow(preview)
@@ -102,24 +95,22 @@ export abstract class EditableCanvasContentView {
         const normal = LineEngine.DEFAULT.getNormalVector(preview.position, undefined, preview.line);
         const rotation = Math.atan2(normal.y, normal.x) * (180 / Math.PI);
         return [
-            svg("path", {
+            svg("path.create-connection-arrow", {
                 attrs: {
                     d: "M 12 0 L 32 0 m -8 -8 l 8 8 l -8 8",
                     transform: `rotate(${rotation})`
                 },
                 class: {
-                    [EditableCanvasContentView.CREATE_CONNECTION_CLASS]: true,
-                    "create-connection-arrow": true
+                    [EditableCanvasContentView.CREATE_CONNECTION_CLASS]: true
                 }
             }),
-            svg("path", {
+            svg("path.create-connection-hover-line", {
                 attrs: {
                     d: "M 0 0 L 32 0",
                     transform: `rotate(${rotation})`
                 },
                 class: {
-                    [EditableCanvasContentView.CREATE_CONNECTION_CLASS]: true,
-                    "create-connection-hover-line": true
+                    [EditableCanvasContentView.CREATE_CONNECTION_CLASS]: true
                 }
             })
         ];
@@ -133,13 +124,12 @@ export abstract class EditableCanvasContentView {
      */
     private renderCreateConnectionOutline(preview: LineProviderHoverData): VNode {
         const path = LineEngine.DEFAULT.getSvgPath(preview.line.line);
-        return svg("path", {
+        return svg("path.create-connection-outline", {
             attrs: {
                 d: path,
                 transform: toSVG(preview.line.transform)
             },
             class: {
-                "create-connection-outline": true,
                 target: this.transactionStateProvider.isInTransaction
             }
         });

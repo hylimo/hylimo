@@ -10,13 +10,10 @@ import { SMarker } from "../../model/canvas/sMarker.js";
 export class MarkerView implements IView {
     render(model: Readonly<SMarker>, context: RenderingContext, _args?: IViewArgs | undefined): VNode | undefined {
         return svg(
-            "g",
+            "g.marker",
             {
                 attrs: {
                     "pointer-events": "visible"
-                },
-                class: {
-                    marker: true
                 }
             },
             ...context.renderChildren(model)

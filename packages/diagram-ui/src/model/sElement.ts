@@ -19,7 +19,7 @@ export abstract class SElement extends SChildElementImpl implements Element {
     }
 
     /**
-     * Creats a cached property on this element
+     * Creates a cached property on this element
      *
      * @param name the name of the property
      * @param initializer initializer for the property

@@ -15,27 +15,21 @@ export class SRootView implements IView {
 
     render(model: Readonly<SRoot>, context: RenderingContext, _args?: IViewArgs | undefined): VNode {
         if (context.targetKind == "hidden") {
-            return svg("svg", { class: { hylimo: true } });
+            return svg("svg.hylimo", null);
         }
         const transform = `scale(${model.zoom}) translate(${-model.scroll.x},${-model.scroll.y})`;
         return svg(
-            "svg",
+            "svg.hylimo",
             {
-                class: {
-                    hylimo: true
-                },
                 attrs: this.generateAttributes(model, context)
             },
             svg("style", null, model.generateStyle(this.options.baseDiv)),
             this.renderDefs(),
             svg(
-                "g",
+                "g.sprotty-root",
                 {
                     attrs: {
                         transform
-                    },
-                    class: {
-                        "sprotty-root": true
                     }
                 },
                 ...context.renderChildren(model, undefined)

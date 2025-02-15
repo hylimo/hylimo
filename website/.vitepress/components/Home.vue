@@ -100,7 +100,7 @@ onKeyStroke("E", (event) => {
         return;
     }
     event.preventDefault();
-    downloadSVG();
+    downloadSVG(false);
 });
 
 function downloadSVG(textAsPath: boolean) {

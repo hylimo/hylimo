@@ -7,7 +7,8 @@ import { SCanvasConnectionSegment } from "../../model/canvas/sCanvasConnectionSe
 import { SMarker } from "../../model/canvas/sMarker.js";
 import { extractStrokeAttriabutes } from "@hylimo/diagram-render-svg";
 import { EditableCanvasContentView } from "./editableCanvasContentView.js";
-import { SCanvasPoint } from "../../model/canvas/sCanvasPoint.js";
+import { renderPoint } from "./canvasPointView.js";
+import { findViewportZoom } from "../../base/findViewportZoom.js";
 
 /**
  * IView that represents a CanvasConnection
@@ -31,12 +32,8 @@ export class CanvasConnectionView extends EditableCanvasContentView implements I
         const createConnectionPreview = this.renderCreateConnection(model);
         const splitSegmentPreview = this.renderSplitSegmentPreview(model);
         return svg(
-            "g",
-            {
-                class: {
-                    selectable: true
-                }
-            },
+            "g.selectable",
+            null,
             ...childPaths,
             ...childMarkers,
             ...childControlElements,
@@ -62,12 +59,9 @@ export class CanvasConnectionView extends EditableCanvasContentView implements I
                     fill: "none"
                 }
             }),
-            svg("path", {
+            svg("path.select-canvas-connection", {
                 attrs: {
                     d: path
-                },
-                class: {
-                    "select-canvas-connection": true
                 }
             })
         ];
@@ -157,32 +151,17 @@ export class CanvasConnectionView extends EditableCanvasContentView implements I
         if (!segment.canSplitSegment()) {
             return undefined;
         }
-        return this.renderPreviewPoint(LineEngine.DEFAULT.getPoint(position, undefined, 0, line));
+        return this.renderPreviewPoint(LineEngine.DEFAULT.getPoint(position, undefined, 0, line), model);
     }
 
     /**
      * Renders a preview point
      *
      * @param point the position of the preview point
+     * @param model the model of the connection
      * @returns the rendered preview point
      */
-    private renderPreviewPoint({ x, y }: Point): VNode | undefined {
-        return svg(
-            "g",
-            {
-                attrs: {
-                    transform: `translate(${x}, ${y})`
-                }
-            },
-            svg("line", {
-                attrs: {
-                    "stroke-width": SCanvasPoint.POINT_SIZE
-                },
-                class: {
-                    "canvas-point": true,
-                    selectable: true
-                }
-            })
-        );
+    private renderPreviewPoint({ x, y }: Point, model: Readonly<SCanvasConnection>): VNode | undefined {
+        return svg("g", null, ...renderPoint({ x, y }, findViewportZoom(model), true));
     }
 }

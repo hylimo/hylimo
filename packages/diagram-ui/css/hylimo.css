@@ -11,38 +11,68 @@ svg.hylimo {
     }
 
     .selected-rect {
-        fill: var(--diagram-layout-color-overlay);
+        fill: none;
+        stroke: var(--diagram-layout-color-selected);
+        stroke-width: calc(2px / var(--diagram-zoom));
+    }
+
+    .selected-outline {
+        fill: none;
+        stroke: var(--diagram-layout-color-selected);
+        stroke-width: calc(1.5px / var(--diagram-zoom));
+    }
+
+    .selected-outline-corner,
+    .canvas-rotate-icon,
+    .canvas-point-inner,
+    .canvas-dependency-line,
+    .bezier-handle-line {
+        stroke-width: calc(1.5px / var(--diagram-zoom));
+    }
+
+    .selected-outline-corner,
+    .canvas-rotate-icon,
+    .canvas-point-inner {
+        fill: var(--diagram-background);
         stroke: var(--diagram-layout-color-selected);
     }
 
-    .selected-rect,
+    .canvas-rotate-icon {
+        rx: 100%;
+        cursor: grab;
+    }
+
     .create-connection-outline {
         stroke-width: calc(5px / var(--diagram-zoom));
         stroke-dasharray: calc(16px / var(--diagram-zoom));
     }
 
     .canvas-point {
-        stroke-linecap: round;
-        stroke: var(--diagram-layout-color);
-        transform: scale(calc(1 / var(--diagram-zoom)));
+        fill: transparent;
     }
 
-    .create-connection-outline.target,
-    .canvas-point.selected {
+    .canvas-point.selected,
+    .canvas-point:hover {
+        fill: rgb(from var(--diagram-layout-color-selected) r g b / 0.5);
+    }
+
+    .canvas-point-inner {
+        pointer-events: none;
+    }
+
+    .create-connection-outline.target{
         stroke: var(--diagram-layout-color-selected);
     }
 
     .canvas-dependency-line {
         stroke: var(--diagram-layout-color);
-        stroke-width: calc(2px / var(--diagram-zoom));
-        stroke-dasharray: calc(16px / var(--diagram-zoom));
+        stroke-dasharray: calc(8px / var(--diagram-zoom));
         fill: none;
         pointer-events: none;
     }
 
     .bezier-handle-line {
         stroke: var(--diagram-layout-color);
-        stroke-width: calc(4px / var(--diagram-zoom));
         fill: none;
         pointer-events: none;
     }
