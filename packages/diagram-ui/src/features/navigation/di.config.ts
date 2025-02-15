@@ -1,5 +1,5 @@
 import { ContainerModule } from "inversify";
-import { TYPES } from "sprotty";
+import { TYPES } from "../types.js";
 import { NavigationMouseListener } from "./navigationMouseListener.js";
 
 /**

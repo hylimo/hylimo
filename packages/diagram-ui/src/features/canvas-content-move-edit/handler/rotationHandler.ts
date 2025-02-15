@@ -20,7 +20,7 @@ export class RotationHandler extends MoveHandler {
         readonly currentRotation: number,
         transformMatrix: Matrix
     ) {
-        super(transformMatrix);
+        super(transformMatrix, "cursor-grab");
     }
 
     override generateEdits(x: number, y: number): Edit[] {

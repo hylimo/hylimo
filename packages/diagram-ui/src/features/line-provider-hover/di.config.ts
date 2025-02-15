@@ -1,8 +1,9 @@
 import { ContainerModule } from "inversify";
 import { LineProviderHoverKeyListener } from "./lineProviderHoverKeyListener.js";
 import { LineProviderHoverMouseListener } from "./lineProviderHoverMouseListener.js";
-import { configureCommand, TYPES } from "sprotty";
+import { configureCommand } from "sprotty";
 import { UpdateLineProviderHoverDataCommand } from "./updateLineProviderHoverData.js";
+import { TYPES } from "../types.js";
 
 /**
  * Module for updating the UI based on hovering over a line provider and holding shift

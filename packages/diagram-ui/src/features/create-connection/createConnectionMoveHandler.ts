@@ -22,7 +22,7 @@ export class CreateConnectionMoveHandler extends MoveHandler {
         private readonly start: ConnectionEnd,
         transformationMatrix: Matrix
     ) {
-        super(transformationMatrix, false);
+        super(transformationMatrix, undefined, false);
     }
 
     override generateEdits(x: number, y: number, event: MouseEvent, target: SModelElementImpl): Edit[] {

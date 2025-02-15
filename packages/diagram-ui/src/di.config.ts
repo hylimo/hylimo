@@ -25,7 +25,6 @@ import {
     moveModule as sprottyMoveModule,
     zorderModule as sprottyZOrderModule,
     moveFeature,
-    TYPES,
     decorationModule,
     registerModelElement,
     undoRedoModule as sprottyUndoRedoModule,
@@ -74,6 +73,7 @@ import { configModule } from "./features/config/di.config.js";
 import { splitCanvasSegmentModule } from "./features/split-canvas-segment/di.config.js";
 import { createConnectionModule } from "./features/create-connection/di.config.js";
 import { lineProviderHoverModule } from "./features/line-provider-hover/di.config.js";
+import { TYPES } from "./features/types.js";
 
 /**
  * The module used

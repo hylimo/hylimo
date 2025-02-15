@@ -7,6 +7,7 @@ import { SCanvasElement } from "../../model/canvas/sCanvasElement.js";
 import { CanvasLike } from "../../model/canvas/canvasLike.js";
 import { EditableCanvasContentView } from "./editableCanvasContentView.js";
 import { SCanvasPoint } from "../../model/canvas/sCanvasPoint.js";
+import { computeResizeIconOffset } from "../../features/move/cursor.js";
 
 /**
  * IView that represents a CanvasElement
@@ -185,9 +186,7 @@ export class CanvasElementView extends EditableCanvasContentView implements IVie
      * @returns the offset for the rotation of the canvas element
      */
     private computeResizeIconOffset(model: Readonly<SCanvasElement>) {
-        const canvasRotation = (model.parent as CanvasLike).globalRotation;
-        const iconOffset = Math.round(((model.rotation + canvasRotation) / 45) % 8);
-        return iconOffset;
+        return computeResizeIconOffset(model.parent as CanvasLike, model.rotation);
     }
 
     /**
@@ -225,7 +224,7 @@ export class CanvasElementView extends EditableCanvasContentView implements IVie
                 [CanvasElementView.RESIZE_BORDER_CLASS]: startPos !== endPos,
                 [CanvasElementView.RESIZE_CORNER_CLASS]: startPos === endPos,
                 [CanvasElementView.RESIZE_CLASS]: true,
-                [`resize-cursor-${(startPos + endPos + cursorIconOffset) % 8}`]: true
+                [`cursor-resize-${(startPos + endPos + cursorIconOffset) % 8}`]: true
             }
         });
     }

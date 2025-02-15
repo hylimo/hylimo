@@ -7,11 +7,11 @@ import {
     isViewport,
     SModelElementImpl,
     SModelRootImpl,
-    SetViewportCommand as SprottySetViewportCommand,
-    TYPES
+    SetViewportCommand as SprottySetViewportCommand
 } from "sprotty";
 import { inject, injectable } from "inversify";
 import { Math2D, Point } from "@hylimo/diagram-common";
+import { TYPES } from "../types.js";
 
 /**
  * Extended SetViewportAction with additional properties to control the animation

@@ -32,7 +32,7 @@ export class TranslationMoveHandler extends MoveHandler {
         readonly elements: ElementsGroupedByTransformation[],
         transformationMatrix: Matrix
     ) {
-        super(transformationMatrix);
+        super(transformationMatrix, "cursor-move");
     }
 
     override generateEdits(x: number, y: number, event: MouseEvent): Edit[] {

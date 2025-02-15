@@ -1,7 +1,9 @@
-import { IView, IViewArgs, RenderingContext, svg, TYPES, ViewerOptions } from "sprotty";
+import { IView, IViewArgs, RenderingContext, svg, ViewerOptions } from "sprotty";
 import { injectable, inject } from "inversify";
 import { Attrs, VNode } from "snabbdom";
 import { SRoot } from "../model/sRoot.js";
+import { TYPES } from "../features/types.js";
+import { MoveCursorProvider } from "../features/move/cursor.js";
 
 /**
  * IView that is the parent which handles
@@ -13,6 +15,11 @@ export class SRootView implements IView {
      */
     @inject(TYPES.ViewerOptions) protected options!: ViewerOptions;
 
+    /**
+     * MoveCursorProvider used to get the cursor to use while moving
+     */
+    @inject(TYPES.MoveCursorProvider) protected moveCursorProvider!: MoveCursorProvider;
+
     render(model: Readonly<SRoot>, context: RenderingContext, _args?: IViewArgs | undefined): VNode {
         if (context.targetKind == "hidden") {
             return svg("svg.hylimo", null);
@@ -21,7 +28,8 @@ export class SRootView implements IView {
         return svg(
             "svg.hylimo",
             {
-                attrs: this.generateAttributes(model, context)
+                attrs: this.generateAttributes(model, context),
+                class: this.computeRootClass()
             },
             svg("style", null, model.generateStyle(this.options.baseDiv)),
             this.renderDefs(),
@@ -35,6 +43,22 @@ export class SRootView implements IView {
                 ...context.renderChildren(model, undefined)
             )
         );
+    }
+
+    /**
+     * Computes the root classes
+     *
+     * @returns the root classes
+     */
+    private computeRootClass(): Record<string, boolean> {
+        const moveCursor = this.moveCursorProvider.moveCursor;
+        if (moveCursor != undefined) {
+            return {
+                [moveCursor]: true
+            };
+        } else {
+            return {};
+        }
     }
 
     /**

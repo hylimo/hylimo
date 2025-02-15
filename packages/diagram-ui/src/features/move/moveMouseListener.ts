@@ -1,4 +1,4 @@
-import { IActionDispatcher, MouseListener, SModelElementImpl, TYPES as SPROTTY_TYPES } from "sprotty";
+import { IActionDispatcher, MouseListener, SModelElementImpl } from "sprotty";
 import { inject, injectable } from "inversify";
 import { TYPES } from "../types.js";
 import { TransactionIdProvider } from "../transaction/transactionIdProvider.js";
@@ -20,7 +20,7 @@ export class MoveMouseListener extends MouseListener {
     /**
      * The action dispatcher
      */
-    @inject(SPROTTY_TYPES.IActionDispatcher) actionDispatcher!: IActionDispatcher;
+    @inject(TYPES.IActionDispatcher) actionDispatcher!: IActionDispatcher;
 
     /**
      * The context of the current move

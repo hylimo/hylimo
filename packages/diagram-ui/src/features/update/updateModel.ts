@@ -10,7 +10,6 @@ import {
     MatchResult,
     SModelElementImpl,
     SModelRootImpl,
-    TYPES as SPROTTY_TYPES,
     UpdateModelCommand as BaseUpdateModelCommand,
     ViewportRootElementImpl,
     ModelIndexImpl
@@ -33,7 +32,7 @@ export class UpdateModelCommand extends BaseUpdateModelCommand {
     /**
      * The action dispatcher to dispatch
      */
-    @inject(SPROTTY_TYPES.IActionDispatcher) private readonly dispatcher!: IActionDispatcher;
+    @inject(TYPES.IActionDispatcher) private readonly dispatcher!: IActionDispatcher;
 
     /**
      * The transaction state provider

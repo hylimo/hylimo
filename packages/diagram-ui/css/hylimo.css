@@ -60,7 +60,7 @@ svg.hylimo {
         pointer-events: none;
     }
 
-    .create-connection-outline.target{
+    .create-connection-outline.target {
         stroke: var(--diagram-layout-color-selected);
     }
 
@@ -101,30 +101,23 @@ svg.hylimo {
         stroke-linecap: square;
     }
 
-    .resize-cursor-0,
-    .resize-cursor-4 {
+    .cursor-resize-0,
+    .cursor-resize-4 {
         cursor: nwse-resize;
     }
 
-    .resize-cursor-1,
-    .resize-cursor-5 {
+    .cursor-resize-1,
+    .cursor-resize-5 {
         cursor: ns-resize;
     }
 
-    .resize-cursor-2,
-    .resize-cursor-6 {
+    .cursor-resize-2,
+    .cursor-resize-6 {
         cursor: nesw-resize;
     }
 
-    .resize-cursor-3,
-    .resize-cursor-7 {
-        cursor: ew-resize;
-    }
-
-    .axis-aligned-segment-edit-x {
-        cursor: ns-resize;
-    }
-    .axis-aligned-segment-edit-y {
+    .cursor-resize-3,
+    .cursor-resize-7 {
         cursor: ew-resize;
     }
 
@@ -164,5 +157,56 @@ svg.hylimo {
 
     .selectable {
         cursor: pointer;
+    }
+
+    .selected-outline,
+    .canvas-point.selected {
+        cursor: move;
+    }
+
+    &.cursor-resize-0,
+    &.cursor-resize-4 {
+        &,
+        & * {
+            cursor: nwse-resize !important;
+        }
+    }
+
+    &.cursor-resize-1,
+    &.cursor-resize-5 {
+        &,
+        & * {
+            cursor: ns-resize !important;
+        }
+    }
+
+    &.cursor-resize-2,
+    &.cursor-resize-6 {
+        &,
+        & * {
+            cursor: nesw-resize !important;
+        }
+    }
+
+    &.cursor-resize-3,
+    &.cursor-resize-7 {
+        &,
+        & * {
+            cursor: ew-resize !important;
+        }
+    }
+
+    &.cursor-move {
+        &,
+        & * {
+            cursor: move !important;
+        }
+    }
+
+    &.cursor-grab {
+        &,
+        & * {
+            cursor: grab !important;
+        }
     }
 }

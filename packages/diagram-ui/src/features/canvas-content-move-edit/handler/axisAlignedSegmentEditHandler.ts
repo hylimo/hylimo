@@ -2,6 +2,7 @@ import { AxisAlignedSegmentEdit, Edit } from "@hylimo/diagram-protocol";
 import { DefaultEditTypes } from "@hylimo/diagram-common";
 import { Matrix } from "transformation-matrix";
 import { MoveHandler } from "../../move/moveHandler.js";
+import { ResizeMoveCursor } from "../../move/cursor.js";
 
 /**
  * Move handler for moving the vertical segment of an axis aligned connection segment.
@@ -17,6 +18,7 @@ export class AxisAligedSegmentEditHandler extends MoveHandler {
      * @param end the x/y cooridnate of the end of the whole axis aligned segment
      * @param vertical true if the vertical segment is moved, otherwise false
      * @param transformationMatrix transformation matrix to apply to obtain the relative position
+     * @param moveCursor the cursor to use while moving
      */
     constructor(
         readonly element: string,
@@ -24,9 +26,10 @@ export class AxisAligedSegmentEditHandler extends MoveHandler {
         readonly start: number,
         readonly end: number,
         readonly vertical: boolean,
-        transformationMatrix: Matrix
+        transformationMatrix: Matrix,
+        moveCursor: ResizeMoveCursor | undefined
     ) {
-        super(transformationMatrix);
+        super(transformationMatrix, moveCursor);
     }
 
     override generateEdits(x: number, y: number): Edit[] {

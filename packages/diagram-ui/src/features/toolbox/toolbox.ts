@@ -7,8 +7,7 @@ import {
     IModelFactory,
     ModelRenderer,
     ModelRendererFactory,
-    PatcherProvider,
-    TYPES as SPROTTY_TYPES
+    PatcherProvider
 } from "sprotty";
 import { Action, generateRequestId, SetModelAction, UpdateModelAction } from "sprotty-protocol";
 import { VNode, h } from "snabbdom";
@@ -118,17 +117,17 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler, Conn
     /**
      * The patcher provider.
      */
-    @inject(SPROTTY_TYPES.PatcherProvider) private readonly patcherProvider!: PatcherProvider;
+    @inject(TYPES.PatcherProvider) private readonly patcherProvider!: PatcherProvider;
 
     /**
      * The action dispatcher.
      */
-    @inject(SPROTTY_TYPES.IActionDispatcher) readonly actionDispatcher!: IActionDispatcher;
+    @inject(TYPES.IActionDispatcher) readonly actionDispatcher!: IActionDispatcher;
 
     /**
      * The model factory, used to render previews.
      */
-    @inject(SPROTTY_TYPES.IModelFactory) private readonly modelFactory!: IModelFactory;
+    @inject(TYPES.IModelFactory) private readonly modelFactory!: IModelFactory;
 
     /**
      * Creates a new toolbox.
@@ -138,7 +137,7 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler, Conn
      */
     constructor(
         @inject(TYPES.ConfigManager) private readonly configManager: ConfigManager,
-        @inject(SPROTTY_TYPES.ModelRendererFactory) modelRendererFactory: ModelRendererFactory
+        @inject(TYPES.ModelRendererFactory) modelRendererFactory: ModelRendererFactory
     ) {
         super();
         this.isOpen = configManager.config?.toolboxEnabled ?? true;

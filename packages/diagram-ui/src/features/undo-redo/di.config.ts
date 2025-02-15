@@ -1,6 +1,6 @@
 import { ContainerModule } from "inversify";
 import { RemoteUndoRedoKeyListener } from "./remoteUndoRedoKeyListener.js";
-import { TYPES } from "sprotty";
+import { TYPES } from "../types.js";
 
 /**
  * Module for remote undo and redo actions

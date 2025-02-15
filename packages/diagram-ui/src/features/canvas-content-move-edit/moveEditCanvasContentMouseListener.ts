@@ -34,6 +34,7 @@ import { isCanvasLike } from "../../model/canvas/canvasLike.js";
 import { TransactionalMoveAction } from "../move/transactionalMoveAction.js";
 import { NoopMoveHandler } from "./handler/noopMoveHandler.js";
 import { SElement } from "../../model/sElement.js";
+import { findResizeIconClass } from "../move/cursor.js";
 
 /**
  * The maximum number of updates that can be performed on the same revision.
@@ -65,7 +66,8 @@ export class MoveEditCanvasContentMouseListener extends MouseListener {
                 }
                 const action: TransactionalMoveAction = {
                     kind: TransactionalMoveAction.KIND,
-                    handlerProvider: () => this.createHandler(moveableTarget, event) ?? new NoopMoveHandler(identity()),
+                    handlerProvider: () =>
+                        this.createHandler(moveableTarget, event) ?? new NoopMoveHandler(identity(), undefined),
                     maxUpdatesPerRevision
                 };
                 return [action];
@@ -127,7 +129,8 @@ export class MoveEditCanvasContentMouseListener extends MouseListener {
             start,
             end,
             vertical,
-            this.makeRelative(target.getMouseTransformationMatrix(), event)
+            this.makeRelative(target.getMouseTransformationMatrix(), event),
+            findResizeIconClass(targetElement.classList)
         );
     }
 
@@ -173,7 +176,8 @@ export class MoveEditCanvasContentMouseListener extends MouseListener {
             target.width,
             target.height,
             elements,
-            this.makeRelative(target.getMouseTransformationMatrix(), event)
+            this.makeRelative(target.getMouseTransformationMatrix(), event),
+            findResizeIconClass(classList)
         );
     }
 

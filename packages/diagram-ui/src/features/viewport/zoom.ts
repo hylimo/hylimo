@@ -5,14 +5,14 @@ import {
     limit,
     SModelElementImpl,
     SModelRootImpl,
-    ZoomMouseListener as SprottyZoomMouseListener,
-    TYPES
+    ZoomMouseListener as SprottyZoomMouseListener
 } from "sprotty";
 import { inject, injectable } from "inversify";
 import { Action, Viewport } from "sprotty-protocol";
 import UnitBezier from "@mapbox/unitbezier";
 import { Point } from "@hylimo/diagram-common";
 import { SetViewportAction } from "./viewport.js";
+import { TYPES } from "../types.js";
 
 /**
  * Zoom rate for mouse wheel events.

@@ -1,7 +1,7 @@
 import { ContainerModule } from "inversify";
-import { TYPES } from "sprotty";
 import { CreateConnectionVNodePostprocessor } from "./createConnectionVNodePostprocessor.js";
 import { CreateConnectionMouseListener } from "./createConnectionMouseListener.js";
+import { TYPES } from "../types.js";
 
 /**
  * Module for creating connections graphically

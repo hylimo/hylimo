@@ -10,10 +10,10 @@ import {
     on,
     SModelElementImpl,
     SModelRootImpl,
-    TYPES,
     ViewerOptions
 } from "sprotty";
 import { Action, Bounds, SetViewportAction, Viewport, Point } from "sprotty-protocol";
+import { TYPES } from "../types.js";
 
 /**
  * A touch listener that handles panning and zooming of the viewport

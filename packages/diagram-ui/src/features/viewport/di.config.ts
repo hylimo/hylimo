@@ -4,8 +4,7 @@ import {
     configureActionHandler,
     configureCommand,
     FitToScreenCommand,
-    GetViewportCommand,
-    TYPES
+    GetViewportCommand
 } from "sprotty";
 import { ViewportTouchListener } from "./touch.js";
 import { SetModelAction } from "sprotty-protocol";
@@ -14,6 +13,7 @@ import { CenterKeyboardListener } from "./fitToScreenKeyboardListener.js";
 import { SetViewportCommand } from "./viewport.js";
 import { ScrollMouseListener } from "./scroll.js";
 import { ZoomMouseListener } from "./zoom.js";
+import { TYPES } from "../types.js";
 
 /**
  * Module which configures touch support for the viewport and other additional event handlers

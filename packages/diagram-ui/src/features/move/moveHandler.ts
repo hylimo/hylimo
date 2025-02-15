@@ -1,6 +1,8 @@
 import { Edit, TransactionalAction } from "@hylimo/diagram-protocol";
 import { SModelElementImpl } from "sprotty";
 import { Matrix, applyToPoint } from "transformation-matrix";
+import { MoveCursor, SetMoveCursorAction } from "./cursor.js";
+import { Action } from "sprotty-protocol";
 
 /**
  * Handler which can handle transactional move operations
@@ -15,10 +17,12 @@ export abstract class MoveHandler {
      * Creates a new MoveHandler
      *
      * @param transformationMatrix matrix applied to event coordinates
+     * @param moveCursor the cursor to use while moving
      * @param requiresMove if true, if the action is committed without being moved before, the move is skipped
      */
     constructor(
         protected readonly transformationMatrix: Matrix,
+        readonly moveCursor: MoveCursor | undefined,
         protected readonly requiresMove: boolean = true
     ) {}
 
@@ -38,22 +42,29 @@ export abstract class MoveHandler {
         committed: boolean,
         transactionId: string,
         sequenceNumber: number
-    ): TransactionalAction[] {
-        if (!committed) {
-            this.hasMoved = true;
-        }
+    ): Action[] {
         if (committed && this.requiresMove && !this.hasMoved) {
             return [];
         }
+        const actions: Action[] = [];
+        if (this.moveCursor != undefined && (!this.hasMoved || committed)) {
+            const moveCursorAction: SetMoveCursorAction = {
+                kind: SetMoveCursorAction.KIND,
+                cursor: committed ? undefined : this.moveCursor
+            };
+            actions.push(moveCursorAction);
+        }
+        this.hasMoved = true;
         const { x, y } = applyToPoint(this.transformationMatrix, { x: event.pageX, y: event.pageY });
-        const action: TransactionalAction = {
+        const transactionalAction: TransactionalAction = {
             kind: TransactionalAction.KIND,
             transactionId: transactionId,
             sequenceNumber: sequenceNumber,
             committed,
             edits: this.generateEdits(x, y, event, target)
         };
-        return [action];
+        actions.push(transactionalAction);
+        return actions;
     }
 
     /**

@@ -24,7 +24,7 @@ export class LineMoveHandler extends MoveHandler {
         readonly line: TransformedLine,
         transformMatrix: Matrix
     ) {
-        super(transformMatrix);
+        super(transformMatrix, "cursor-move");
     }
 
     override generateEdits(x: number, y: number): Edit[] {

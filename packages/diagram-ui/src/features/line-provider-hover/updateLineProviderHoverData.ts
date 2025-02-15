@@ -1,8 +1,9 @@
 import { Action } from "sprotty-protocol";
 import { LineProviderHoverData } from "./lineProviderHoverData.js";
-import { Command, CommandExecutionContext, CommandReturn, TYPES } from "sprotty";
+import { Command, CommandExecutionContext, CommandReturn } from "sprotty";
 import { inject } from "inversify";
 import { SRoot } from "../../model/sRoot.js";
+import { TYPES } from "../types.js";
 
 /**
  * Action to update the connection preview based on the current mouse position and/or shift status
