@@ -50,7 +50,7 @@ defineProps({
 
 const emit = defineEmits<{
     "update:diagram": [diagram: Root];
-    "save": [];
+    save: [];
 }>();
 
 const model = defineModel({
@@ -95,14 +95,18 @@ useResizeObserver(sprottyWrapper, () => {
     actionDispatcher.value?.dispatch({ kind: ResetCanvasBoundsAction.KIND } satisfies ResetCanvasBoundsAction);
 });
 
-onKeyDown("s", (event) => {
-    if (!(event.ctrlKey || event.metaKey)) {
-        return;
+onKeyDown(
+    "s",
+    (event) => {
+        if (!(event.ctrlKey || event.metaKey)) {
+            return;
+        }
+        emit("save");
+    },
+    {
+        target: editorElement
     }
-    emit("save");
-}, {
-    target: editorElement
-});
+);
 
 onMounted(async () => {
     const currentLanguageClient = await languageClient.value;
