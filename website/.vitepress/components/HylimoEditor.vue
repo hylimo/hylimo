@@ -34,7 +34,7 @@ import { inject } from "vue";
 import { language } from "../theme/lspPlugin";
 import { languageClientKey, languageServerConfigKey } from "../theme/injectionKeys";
 import { Disposable } from "vscode-languageserver-protocol";
-import { useResizeObserver } from "@vueuse/core";
+import { onKeyDown, useResizeObserver } from "@vueuse/core";
 import { v4 as uuid } from "uuid";
 import * as monaco from "monaco-editor";
 import { useData } from "vitepress";
@@ -50,6 +50,7 @@ defineProps({
 
 const emit = defineEmits<{
     "update:diagram": [diagram: Root];
+    save: [];
 }>();
 
 const model = defineModel({
@@ -94,6 +95,19 @@ useResizeObserver(sprottyWrapper, () => {
     actionDispatcher.value?.dispatch({ kind: ResetCanvasBoundsAction.KIND } satisfies ResetCanvasBoundsAction);
 });
 
+onKeyDown(
+    "s",
+    (event) => {
+        if (!(event.ctrlKey || event.metaKey)) {
+            return;
+        }
+        emit("save");
+    },
+    {
+        target: editorElement
+    }
+);
+
 onMounted(async () => {
     const currentLanguageClient = await languageClient.value;
     const wrapper = new MonacoEditorLanguageClientWrapper();
@@ -101,7 +115,6 @@ onMounted(async () => {
     const editorAppConfig: EditorAppConfig = {
         editorOptions: {
             language,
-            model: null,
             automaticLayout: true,
             fixedOverflowWidgets: true,
             hover: {
@@ -114,6 +127,13 @@ onMounted(async () => {
                 alwaysConsumeMouseWheel: false
             },
             glyphMargin: false
+        },
+        codeResources: {
+            modified: {
+                text: model.value,
+                fileExt: "hyl",
+                enforceLanguageId: language
+            }
         }
     };
     await wrapper.initAndStart({
@@ -128,8 +148,7 @@ onMounted(async () => {
     const editor = wrapper.getEditor()!;
     hideMainContent.value = false;
 
-    const editorModel = monaco.editor.createModel(model.value, language);
-    editor.setModel(editorModel);
+    const editorModel = editor.getModel()!;
     const pushStackElement = editorModel.pushStackElement.bind(editorModel);
 
     // override pushStackElement to ignore undo stops during transactions
