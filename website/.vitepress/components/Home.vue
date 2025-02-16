@@ -6,6 +6,7 @@
             v-model="code"
             :horizontal="height > width && width < 800"
             @update:diagram="diagram = $event"
+            @save="save"
             class="main-content"
         />
         <ClientOnly>
@@ -34,7 +35,7 @@
 </template>
 <script setup lang="ts">
 import VPNav from "vitepress/dist/client/theme-default/components/VPNav.vue";
-import { useLocalStorage, onKeyStroke, useWindowSize, useEventListener } from "@vueuse/core";
+import { useLocalStorage, onKeyStroke, useWindowSize, useEventListener, onKeyDown } from "@vueuse/core";
 import { defineClientComponent, useData } from "vitepress";
 import IconButton from "./IconButton.vue";
 import VPFlyout from "vitepress/dist/client/theme-default/components/VPFlyout.vue";
@@ -88,11 +89,7 @@ onKeyStroke("s", (event) => {
         return;
     }
     event.preventDefault();
-    if (codeWithFileHandle.value != undefined) {
-        saveFile();
-    } else {
-        downloadSource();
-    }
+    save();
 });
 
 onKeyStroke("E", (event) => {
@@ -100,8 +97,16 @@ onKeyStroke("E", (event) => {
         return;
     }
     event.preventDefault();
-    downloadSVG();
+    downloadSVG(false);
 });
+
+function save() {
+    if (codeWithFileHandle.value != undefined) {
+        saveFile();
+    } else {
+        downloadSource();
+    }
+}
 
 function downloadSVG(textAsPath: boolean) {
     const svgBlob = new Blob([svgRenderer.render(diagram.value!, textAsPath)], { type: "image/svg+xml;charset=utf-8" });
