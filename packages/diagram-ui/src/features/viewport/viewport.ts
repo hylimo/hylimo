@@ -19,6 +19,7 @@ import { TYPES } from "../types.js";
 export interface SetViewportAction extends SprottySetViewportAction {
     /**
      * Additional properties to control the animation
+     * If null, no animation should be performed, but previous ones should be cancelled
      */
     zoomAnimation?: {
         /**
@@ -29,7 +30,7 @@ export interface SetViewportAction extends SprottySetViewportAction {
          * Overwrites the default easing function
          */
         ease: (x: number) => number;
-    };
+    } | null;
 }
 
 /**
@@ -53,7 +54,7 @@ export class SetViewportCommand extends SprottySetViewportCommand implements ISt
      */
     constructor(@inject(TYPES.Action) protected override readonly action: SetViewportAction) {
         super(action);
-        this.stoppableCommandKey = action.zoomAnimation != undefined ? SprottySetViewportAction.KIND : "";
+        this.stoppableCommandKey = action.zoomAnimation !== undefined ? SprottySetViewportAction.KIND : "";
     }
 
     override execute(context: CommandExecutionContext): CommandReturn {

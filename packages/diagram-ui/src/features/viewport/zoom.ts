@@ -134,8 +134,9 @@ export class ZoomMouseListener extends SprottyZoomMouseListener {
         const now = Date.now();
         const timeDelta = now - this.lastWheelEventTime;
         this.lastWheelEventTime = now;
-        if (value !== 0 && Math.abs(value) < 1) {
+        if (value !== 0 && Math.abs(value) < 4) {
             this.type = "trackpad";
+            this.clearTimeoutIfSet();
             this.previousEasing = undefined;
         } else if (timeDelta > 1.5 * WHEEL_ANIMATION_DURATION) {
             this.type = undefined;
@@ -145,11 +146,18 @@ export class ZoomMouseListener extends SprottyZoomMouseListener {
                 this.actionDispatcher.dispatchAll(this.updateViewport(viewport, viewportOffset));
             }, WHEEL_DELAY);
         } else if (!this.type) {
-            this.type = Math.abs(timeDelta * value) < 50 ? "trackpad" : "wheel";
-            if (this.timeout != undefined) {
-                clearTimeout(this.timeout);
-                this.timeout = undefined;
-            }
+            this.type = Math.abs(timeDelta * value) < 200 ? "trackpad" : "wheel";
+            this.clearTimeoutIfSet();
+        }
+    }
+
+    /**
+     * Cancels the timeout if set.
+     */
+    private clearTimeoutIfSet() {
+        if (this.timeout != undefined) {
+            clearTimeout(this.timeout);
+            this.timeout = undefined;
         }
     }
 
@@ -215,7 +223,7 @@ export class ZoomMouseListener extends SprottyZoomMouseListener {
                       animationDuration: WHEEL_ANIMATION_DURATION,
                       ease: this.computeWheelEasing(limitedZoom)
                   }
-                : undefined
+                : null
         };
         return action;
     }
