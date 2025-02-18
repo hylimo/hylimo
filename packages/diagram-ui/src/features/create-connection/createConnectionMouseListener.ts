@@ -16,6 +16,7 @@ import { ToolTypeProvider } from "../toolbox/toolState.js";
 import { UpdateCreateConnectionHoverDataAction } from "./updateCreateConnectionHoverData.js";
 import { ToolboxToolType } from "../toolbox/toolType.js";
 import { isLineProvider } from "./lineProvider.js";
+import { TransactionStateProvider } from "../transaction/transactionStateProvider.js";
 
 /**
  * Mouse listener for updating the connection creation UI based on mouse movements
@@ -31,6 +32,11 @@ export class CreateConnectionMouseListener extends MouseListener {
      * The tool type provider to determine the current tool type
      */
     @inject(TYPES.ToolTypeProvider) protected readonly toolTypeProvider!: ToolTypeProvider;
+
+    /**
+     * The transaction state provider that keeps track of the current transaction state.
+     */
+    @inject(TYPES.TransactionStateProvider) protected transactionStateProvider!: TransactionStateProvider;
 
     override mouseDown(target: SModelElementImpl): Action[] {
         if (this.toolTypeProvider.toolType !== ToolboxToolType.CONNECT) {
@@ -81,7 +87,10 @@ export class CreateConnectionMouseListener extends MouseListener {
     }
 
     override mouseMove(target: SModelElementImpl, event: MouseEvent): Action[] {
-        if (this.toolTypeProvider.toolType !== ToolboxToolType.CONNECT) {
+        if (
+            this.toolTypeProvider.toolType !== ToolboxToolType.CONNECT &&
+            !this.transactionStateProvider.isInCreateConnectionTransaction
+        ) {
             return [];
         }
         let data: CreateConnectionHoverData;

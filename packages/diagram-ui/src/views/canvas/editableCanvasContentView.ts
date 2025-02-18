@@ -40,15 +40,14 @@ export abstract class EditableCanvasContentView {
      * @returns the rendered create connection preview
      */
     protected renderCreateConnection(model: Readonly<SCanvasElement | SCanvasConnection>): VNode | undefined {
-        if (this.toolTypeProvider.toolType !== ToolboxToolType.CONNECT) {
+        if (
+            this.toolTypeProvider.toolType !== ToolboxToolType.CONNECT &&
+            !this.transactionStateProvider.isInCreateConnectionTransaction
+        ) {
             return undefined;
         }
         const hoverData = model.hoverData;
-        if (
-            hoverData == undefined ||
-            model.editExpression == undefined ||
-            this.transactionStateProvider.types?.some((type) => !type.startsWith("connection/"))
-        ) {
+        if (hoverData == undefined || model.editExpression == undefined) {
             return undefined;
         }
         return svg(

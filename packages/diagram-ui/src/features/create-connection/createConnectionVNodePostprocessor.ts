@@ -19,10 +19,7 @@ export class CreateConnectionVNodePostprocessor implements IVNodePostprocessor {
 
     decorate(vnode: VNode, element: SModelElementImpl): VNode {
         if (element instanceof SCanvasElement || element instanceof SCanvasConnection) {
-            if (
-                this.transactionStateProvider.types?.some((type) => type.startsWith("connection/")) &&
-                element.editExpression == undefined
-            ) {
+            if (this.transactionStateProvider.isInCreateConnectionTransaction && element.editExpression == undefined) {
                 setAttr(vnode, "pointer-events", "none");
             }
         }
