@@ -61,7 +61,7 @@ function generateToolboxTools(context: Toolbox): VNode {
  * @returns The toolbox details UI
  */
 function generateToolboxDetails(context: Toolbox, root: Root): VNode {
-    const tool = context.toolType;
+    const tool = context.toolState.toolType;
     let details: VNode[] | undefined = undefined;
     if (tool === ToolboxToolType.ADD_ELEMENT) {
         details = generateToolboxAddElementDetails(context, root);
@@ -81,7 +81,7 @@ function generateToolboxDetails(context: Toolbox, root: Root): VNode {
  * @returns The toolbox tool button
  */
 function generateToolboxToolButton(context: Toolbox, tool: ToolboxTool): VNode {
-    const active = context.toolType === tool.id;
+    const active = context.toolState.toolType === tool.id;
     return h(
         "button.toolbox-tool-button",
         {
@@ -95,7 +95,7 @@ function generateToolboxToolButton(context: Toolbox, tool: ToolboxTool): VNode {
                 active
             }
         },
-        [generateIcon(tool.icon), active && context.isToolLocked ? generateIcon(Lock, ["locked"]) : undefined]
+        [generateIcon(tool.icon), active && context.toolState.isLocked ? generateIcon(Lock, ["locked"]) : undefined]
     );
 }
 

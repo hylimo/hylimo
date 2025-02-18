@@ -140,11 +140,11 @@ export class CanvasConnectionView extends EditableCanvasContentView implements I
      * @returns the rendered preview point if available
      */
     private renderSplitSegmentPreview(model: Readonly<SCanvasConnection>): VNode | undefined {
-        const hoverDataProvider = model.hoverDataProvider;
-        if (!model.selected || hoverDataProvider == undefined || !hoverDataProvider.isVisible) {
+        const hoverData = model.hoverData;
+        if (!model.selected || hoverData == undefined) {
             return undefined;
         }
-        const { position, line, projectionResult } = hoverDataProvider.provider();
+        const { position, line, projectionResult } = hoverData;
         const segment = model.index.getById(
             line.line.segments[projectionResult.segment].origin
         ) as SCanvasConnectionSegment;

@@ -6,7 +6,7 @@ import { Bounds } from "sprotty-protocol";
 import { Bounds as HylimoBounds } from "@hylimo/diagram-common";
 import { CanvasLike } from "./canvas/canvasLike.js";
 import { PointVisibilityManager } from "./canvas/pointVisibilityManager.js";
-import { LineProviderHoverDataProvider } from "../features/line-provider-hover/lineProviderHoverData.js";
+import { CreateConnectionHoverData } from "../features/create-connection/createConnectionHoverData.js";
 
 /**
  * Root element.
@@ -68,9 +68,9 @@ export class SRoot extends ViewportRootElementImpl implements CanvasLike {
     globalRotation = 0;
 
     /**
-     * If defined, can provide information on how the user hovers over a line provider
+     * If defined, can provide information where a potential connection would be created
      */
-    lineProviderHoverDataProvider?: LineProviderHoverDataProvider;
+    createConnectionHoverData?: CreateConnectionHoverData;
 
     constructor(index = new ModelIndexImpl()) {
         super(index);

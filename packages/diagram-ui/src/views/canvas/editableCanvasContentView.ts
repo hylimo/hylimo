@@ -7,9 +7,11 @@ import { toSVG } from "transformation-matrix";
 import { SCanvasConnection } from "../../model/canvas/sCanvasConnection.js";
 import { TYPES } from "../../features/types.js";
 import { TransactionStateProvider } from "../../features/transaction/transactionStateProvider.js";
-import { LineProviderHoverData } from "../../features/line-provider-hover/lineProviderHoverData.js";
+import { LineProviderHoverData } from "../../features/create-connection/createConnectionHoverData.js";
 import { renderPoint } from "./canvasPointView.js";
 import { SElement } from "../../model/sElement.js";
+import { ToolTypeProvider } from "../../features/toolbox/toolState.js";
+import { ToolboxToolType } from "../../features/toolbox/toolType.js";
 
 /**
  * Base class for CanvasElementView and CanvasConnectionView
@@ -27,27 +29,33 @@ export abstract class EditableCanvasContentView {
     @inject(TYPES.TransactionStateProvider) protected transactionStateProvider!: TransactionStateProvider;
 
     /**
+     * The tool type provider to determine the current tool type
+     */
+    @inject(TYPES.ToolTypeProvider) protected readonly toolTypeProvider!: ToolTypeProvider;
+
+    /**
      * Renders the create connection preview
      *
      * @param model the SRoot model
      * @returns the rendered create connection preview
      */
     protected renderCreateConnection(model: Readonly<SCanvasElement | SCanvasConnection>): VNode | undefined {
+        if (this.toolTypeProvider.toolType !== ToolboxToolType.CONNECT) {
+            return undefined;
+        }
+        const hoverData = model.hoverData;
         if (
-            model.hoverDataProvider == undefined ||
-            model.selected ||
+            hoverData == undefined ||
             model.editExpression == undefined ||
-            this.transactionStateProvider.types?.some((type) => !type.startsWith("connection/")) ||
-            (!model.hoverDataProvider.isVisible && !this.transactionStateProvider.isInTransaction)
+            this.transactionStateProvider.types?.some((type) => !type.startsWith("connection/"))
         ) {
             return undefined;
         }
-        const preview = model.hoverDataProvider.provider();
         return svg(
             "g",
             null,
-            this.renderCreateConnectionOutline(preview),
-            ...this.renderCreateConnectionStartSymbol(model, preview)
+            this.renderCreateConnectionOutline(hoverData),
+            ...this.renderCreateConnectionStartSymbol(model, hoverData)
         );
     }
 

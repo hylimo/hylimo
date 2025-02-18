@@ -26,7 +26,7 @@ import { ConnectionEditProvider } from "./connectionEditProvider.js";
 import { generateToolbox } from "./views/toolbox.js";
 import { ToolboxToolType } from "./toolType.js";
 import { Cursor, UpdateCursorAction } from "../cursor/cursor.js";
-import { ToolTypeProvider } from "./toolTypeProvider.js";
+import { ToolState } from "./toolState.js";
 
 /**
  * UI Extension which displays the graphical toolbox.
@@ -37,7 +37,7 @@ import { ToolTypeProvider } from "./toolTypeProvider.js";
  * - selecting the connection operator used for creating connections
  */
 @injectable()
-export class Toolbox extends AbstractUIExtension implements IActionHandler, ConnectionEditProvider, ToolTypeProvider {
+export class Toolbox extends AbstractUIExtension implements IActionHandler, ConnectionEditProvider {
     /**
      * The unique identifier of the toolbox.
      */
@@ -52,31 +52,6 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler, Conn
      * The current root element.
      */
     currentRoot?: Root;
-
-    /**
-     * The current toolbox tool state.
-     */
-    private toolState: {
-        type: ToolboxToolType;
-        locked: boolean;
-    } = {
-        type: ToolboxToolType.CURSOR,
-        locked: false
-    };
-
-    /**
-     * The currently selected toolbox tool.
-     */
-    get toolType(): ToolboxToolType {
-        return this.toolState.type;
-    }
-
-    /**
-     * TIf the currently selected tool is locked
-     */
-    get isToolLocked(): boolean {
-        return this.toolState.locked;
-    }
 
     /**
      * If true, pointer events are disabled
@@ -146,6 +121,11 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler, Conn
     @inject(TYPES.IModelFactory) private readonly modelFactory!: IModelFactory;
 
     /**
+     * The tool state.
+     */
+    @inject(ToolState) toolState!: ToolState;
+
+    /**
      * Creates a new toolbox.
      *
      * @param configManager The config manager
@@ -171,12 +151,34 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler, Conn
                 this.connectionSearchIndex = undefined;
             }
         } else if (TransactionalAction.isTransactionalAction(action)) {
-            if (action.committed) {
-                this.pointerEventsDisabled = false;
-                this.update();
-            }
+            this.handleTransactionalAction(action);
         } else if (EditorConfigUpdatedAction.is(action)) {
             this.isOpen = action.config.toolboxEnabled;
+            this.update();
+        }
+    }
+
+    /**
+     * Handles a transactional action
+     * Activates pointer events again if action is committed, and resets the tool if necessary.
+     *
+     * @param action the transactional action
+     */
+    private handleTransactionalAction(action: TransactionalAction) {
+        let shouldUpdate = false;
+        if (action.committed) {
+            this.pointerEventsDisabled = false;
+            shouldUpdate = true;
+        }
+        const toolType = this.toolState.toolType;
+        if (
+            !this.toolState.isLocked &&
+            (toolType == ToolboxToolType.CONNECT || toolType == ToolboxToolType.ADD_ELEMENT)
+        ) {
+            this.updateTool(ToolboxToolType.CURSOR, false);
+            shouldUpdate = true;
+        }
+        if (shouldUpdate) {
             this.update();
         }
     }
@@ -234,10 +236,11 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler, Conn
      * @param locked if the tool should be locked
      */
     updateTool(tool: ToolboxToolType, locked: boolean): void {
-        if (this.toolType == tool && this.isToolLocked == locked) {
+        const toolType = this.toolState.toolType;
+        if (toolType == tool && this.toolState.isLocked == locked) {
             return;
         }
-        if (this.toolType != tool) {
+        if (toolType != tool) {
             let cusor: Cursor | null = null;
             if (tool == ToolboxToolType.HAND) {
                 cusor = "cursor-grab";
@@ -250,7 +253,8 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler, Conn
             };
             this.actionDispatcher.dispatch(updateCursorAction);
         }
-        this.toolState = { type: tool, locked };
+        this.toolState.toolType = tool;
+        this.toolState.isLocked = locked;
         this.update();
     }
 

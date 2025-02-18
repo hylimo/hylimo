@@ -2,7 +2,7 @@ import { SModelElementImpl, ScrollMouseListener as SprottyScrollMouseListener } 
 import { injectable, inject } from "inversify";
 import { Action } from "sprotty-protocol";
 import { TYPES } from "../types.js";
-import { ToolTypeProvider } from "../toolbox/toolTypeProvider.js";
+import { ToolTypeProvider } from "../toolbox/toolState.js";
 import { ToolboxToolType } from "../toolbox/toolType.js";
 import { UpdateCursorAction } from "../cursor/cursor.js";
 

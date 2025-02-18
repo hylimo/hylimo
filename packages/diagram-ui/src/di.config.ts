@@ -67,14 +67,14 @@ import { canvasContentMoveEditModule } from "./features/canvas-content-move-edit
 import { resetCanvasBoundsModule } from "./features/canvas-bounds/di.config.js";
 import { viewportModule } from "./features/viewport/di.config.js";
 import { undoRedoModule } from "./features/undo-redo/di.config.js";
-import { toolboxModule } from "./features/toolbox/ci.config.js";
+import { toolboxModule } from "./features/toolbox/di.config.js";
 import { moveModule } from "./features/move/di.config.js";
 import { configModule } from "./features/config/di.config.js";
 import { splitCanvasSegmentModule } from "./features/split-canvas-segment/di.config.js";
 import { createConnectionModule } from "./features/create-connection/di.config.js";
-import { lineProviderHoverModule } from "./features/line-provider-hover/di.config.js";
 import { TYPES } from "./features/types.js";
 import { cursorModule } from "./features/cursor/di.config.js";
+import { selectModule } from "./features/select/di.config.js";
 
 /**
  * The module used
@@ -147,8 +147,8 @@ export function createContainer(widgetId: string): Container {
         toolboxModule,
         configModule,
         createConnectionModule,
-        lineProviderHoverModule,
-        cursorModule
+        cursorModule,
+        selectModule
     );
     container.load(diagramModule);
 

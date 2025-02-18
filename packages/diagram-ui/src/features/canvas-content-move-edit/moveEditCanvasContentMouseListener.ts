@@ -36,7 +36,7 @@ import { NoopMoveHandler } from "./handler/noopMoveHandler.js";
 import { SElement } from "../../model/sElement.js";
 import { findResizeIconClass } from "../cursor/resizeIcon.js";
 import { TYPES } from "../types.js";
-import { ToolTypeProvider } from "../toolbox/toolTypeProvider.js";
+import { ToolTypeProvider } from "../toolbox/toolState.js";
 import { isRegularInteractionTool } from "../toolbox/toolType.js";
 
 /**

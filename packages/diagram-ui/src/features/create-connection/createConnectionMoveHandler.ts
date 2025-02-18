@@ -3,7 +3,7 @@ import { findParentByFeature, SModelElementImpl } from "sprotty";
 import { MoveHandler } from "../move/moveHandler.js";
 import { Matrix } from "transformation-matrix";
 import { LineEngine } from "@hylimo/diagram-common";
-import { isLineProvider } from "../line-provider-hover/lineProvider.js";
+import { isLineProvider } from "./lineProvider.js";
 
 /**
  * Move handler for creating connections
@@ -22,7 +22,7 @@ export class CreateConnectionMoveHandler extends MoveHandler {
         private readonly start: ConnectionEnd,
         transformationMatrix: Matrix
     ) {
-        super(transformationMatrix, undefined, false);
+        super(transformationMatrix, "cursor-crosshair", false);
     }
 
     override generateEdits(x: number, y: number, event: MouseEvent, target: SModelElementImpl): Edit[] {

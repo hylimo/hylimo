@@ -1,16 +1,21 @@
 import { inject, injectable } from "inversify";
-import { MouseListener, SModelElementImpl } from "sprotty";
-import { Action, SelectAction } from "sprotty-protocol";
+import { findParentByFeature, MouseListener, SModelElementImpl } from "sprotty";
+import { Action } from "sprotty-protocol";
 import { SCanvasElement } from "../../model/canvas/sCanvasElement.js";
 import { SCanvasConnection } from "../../model/canvas/sCanvasConnection.js";
-import { LineEngine } from "@hylimo/diagram-common";
+import { LineEngine, Point } from "@hylimo/diagram-common";
 import { applyToPoint } from "transformation-matrix";
 import { TransactionalMoveAction } from "../move/transactionalMoveAction.js";
 import { CreateConnectionMoveHandler } from "./createConnectionMoveHandler.js";
 import { TYPES } from "../types.js";
 import { ConnectionEditProvider } from "../toolbox/connectionEditProvider.js";
-import { EditableCanvasContentView } from "../../views/canvas/editableCanvasContentView.js";
-import { LineProviderHoverData } from "../line-provider-hover/lineProviderHoverData.js";
+import { CreateConnectionHoverData, LineProviderHoverData } from "./createConnectionHoverData.js";
+import { SRoot } from "../../model/sRoot.js";
+import { ConnectionEnd } from "@hylimo/diagram-protocol";
+import { ToolTypeProvider } from "../toolbox/toolState.js";
+import { UpdateCreateConnectionHoverDataAction } from "./updateCreateConnectionHoverData.js";
+import { ToolboxToolType } from "../toolbox/toolType.js";
+import { isLineProvider } from "./lineProvider.js";
 
 /**
  * Mouse listener for updating the connection creation UI based on mouse movements
@@ -22,29 +27,25 @@ export class CreateConnectionMouseListener extends MouseListener {
      */
     @inject(TYPES.ConnectionEditProvider) protected readonly connectionEditProvider!: ConnectionEditProvider;
 
-    override mouseDown(target: SModelElementImpl, event: MouseEvent): Action[] {
-        const element = event.target as HTMLElement;
-        if (
-            !element.classList.contains(EditableCanvasContentView.CREATE_CONNECTION_CLASS) ||
-            !(target instanceof SCanvasElement || target instanceof SCanvasConnection) ||
-            target.editExpression == undefined
-        ) {
+    /**
+     * The tool type provider to determine the current tool type
+     */
+    @inject(TYPES.ToolTypeProvider) protected readonly toolTypeProvider!: ToolTypeProvider;
+
+    override mouseDown(target: SModelElementImpl): Action[] {
+        if (this.toolTypeProvider.toolType !== ToolboxToolType.CONNECT) {
             return [];
         }
-        const startData = target.hoverDataProvider?.provider();
-        if (startData == undefined) {
+        const root = target.root as SRoot;
+        const data = root.createConnectionHoverData;
+        if (data == undefined) {
             return [];
         }
         const edit = this.connectionEditProvider.connectionEdit;
         if (edit == undefined) {
             return [];
         }
-        const deselectAction: SelectAction = {
-            kind: SelectAction.KIND,
-            selectedElementsIDs: [],
-            deselectedElementsIDs: [target.id]
-        };
-        return [deselectAction, this.generateStartCreateConnectionAction(target, startData, edit)];
+        return [this.generateStartCreateConnectionAction(root, data, edit)];
     }
 
     /**
@@ -57,28 +58,75 @@ export class CreateConnectionMouseListener extends MouseListener {
      * @returns the action to start the creation of a connection
      */
     private generateStartCreateConnectionAction(
-        target: SCanvasElement | SCanvasConnection,
-        startData: LineProviderHoverData,
+        root: SRoot,
+        startData: CreateConnectionHoverData,
         edit: `connection/${string}`
     ): TransactionalMoveAction {
-        const { x, y } = applyToPoint(
-            target.root.layoutEngine.localToAncestor(target.parent.id, target.root.id),
-            LineEngine.DEFAULT.getPoint(startData.position, undefined, 0, startData.line)
-        );
+        let start: ConnectionEnd;
+        if ("target" in startData) {
+            start = {
+                x: startData.x,
+                y: startData.y,
+                expression: startData.editExpression,
+                pos: startData.position
+            };
+        } else {
+            start = startData;
+        }
         return {
             kind: TransactionalMoveAction.KIND,
             maxUpdatesPerRevision: 1,
-            handlerProvider: () =>
-                new CreateConnectionMoveHandler(
-                    edit,
-                    {
-                        x,
-                        y,
-                        expression: target.editExpression!,
-                        pos: startData.position
-                    },
-                    target.root.getMouseTransformationMatrix()
-                )
+            handlerProvider: () => new CreateConnectionMoveHandler(edit, start, root.getMouseTransformationMatrix())
+        };
+    }
+
+    override mouseMove(target: SModelElementImpl, event: MouseEvent): Action[] {
+        if (this.toolTypeProvider.toolType !== ToolboxToolType.CONNECT) {
+            return [];
+        }
+        let data: CreateConnectionHoverData;
+        const lineProvider = findParentByFeature(target, isLineProvider);
+        const root = target.root as SRoot;
+        const rootPos = applyToPoint(root.getMouseTransformationMatrix(), {
+            x: event.pageX,
+            y: event.pageY
+        });
+        if (lineProvider == undefined || lineProvider.editExpression == undefined) {
+            data = rootPos;
+        } else {
+            data = this.generateLineProviderData(event, lineProvider, rootPos);
+        }
+        const action: UpdateCreateConnectionHoverDataAction = {
+            kind: UpdateCreateConnectionHoverDataAction.KIND,
+            data
+        };
+        return [action];
+    }
+
+    /**
+     * Provides the line provider hover data based on the current mouse position and the target element.
+     *
+     * @param event provider for the mouse position
+     * @param target the target element
+     * @param rootPos the position of the event in the root coordinate system
+     * @returns the line provider hover data
+     */
+    private generateLineProviderData(
+        event: MouseEvent,
+        target: SCanvasElement | SCanvasConnection,
+        rootPos: Point
+    ): LineProviderHoverData {
+        const context = target.parent;
+        const line = target.root.layoutEngine.layoutLine(target, context.id);
+        const point = applyToPoint(context.getMouseTransformationMatrix(), { x: event.pageX, y: event.pageY });
+        const projectionResult = LineEngine.DEFAULT.projectPoint(point, line);
+        return {
+            line,
+            projectionResult,
+            position: projectionResult.pos,
+            target: target.id,
+            ...rootPos,
+            editExpression: target.editExpression!
         };
     }
 }

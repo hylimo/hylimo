@@ -73,7 +73,7 @@ export const toolboxTools: ToolboxTool[] = [
  * @param tool the tool to enable
  */
 function enableTool(context: Toolbox, tool: ToolboxToolType): void {
-    if (context.toolType != tool) {
+    if (context.toolState.toolType != tool) {
         context.updateTool(tool, false);
     }
 }
@@ -85,10 +85,10 @@ function enableTool(context: Toolbox, tool: ToolboxToolType): void {
  * @param tool the tool to enable/lock
  */
 function enableOrLockTool(context: Toolbox, tool: ToolboxToolType): void {
-    if (context.toolType != tool) {
+    if (context.toolState.toolType != tool) {
         context.updateTool(tool, false);
     } else {
-        context.updateTool(tool, !context.isToolLocked);
+        context.updateTool(tool, !context.toolState.isLocked);
     }
     context.update();
 }
