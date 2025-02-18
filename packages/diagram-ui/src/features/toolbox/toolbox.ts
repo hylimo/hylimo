@@ -9,7 +9,7 @@ import {
     ModelRendererFactory,
     PatcherProvider
 } from "sprotty";
-import { Action, generateRequestId, SetModelAction, UpdateModelAction } from "sprotty-protocol";
+import { Action, generateRequestId, SelectAllAction, SetModelAction, UpdateModelAction } from "sprotty-protocol";
 import { VNode, h } from "snabbdom";
 import { EditSpecification, Root } from "@hylimo/diagram-common";
 import {
@@ -171,10 +171,7 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler, Conn
             shouldUpdate = true;
         }
         const toolType = this.toolState.toolType;
-        if (
-            !this.toolState.isLocked &&
-            (toolType == ToolboxToolType.CONNECT || toolType == ToolboxToolType.ADD_ELEMENT)
-        ) {
+        if (!this.toolState.isLocked && toolType == ToolboxToolType.CONNECT) {
             this.updateTool(ToolboxToolType.CURSOR, false);
             shouldUpdate = true;
         }
@@ -241,6 +238,7 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler, Conn
             return;
         }
         if (toolType != tool) {
+            const actions: Action[] = [];
             let cusor: Cursor | null = null;
             if (tool == ToolboxToolType.HAND) {
                 cusor = "cursor-grab";
@@ -251,7 +249,11 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler, Conn
                 kind: UpdateCursorAction.KIND,
                 toolCursor: cusor
             };
-            this.actionDispatcher.dispatch(updateCursorAction);
+            actions.push(updateCursorAction);
+            if (tool == ToolboxToolType.CONNECT) {
+                actions.push(SelectAllAction.create({ select: false }));
+            }
+            this.actionDispatcher.dispatchAll(actions);
         }
         this.toolState.toolType = tool;
         this.toolState.isLocked = locked;

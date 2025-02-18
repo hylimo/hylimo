@@ -7,6 +7,7 @@ import { CreateElementMoveHandler } from "../createElementMoveHandler.js";
 import { generatePreviewIfAvailable } from "./preview.js";
 import { generateIcon } from "./icon.js";
 import { Search } from "lucide";
+import { ToolboxToolType } from "../toolType.js";
 
 /**
  * Generates the UI for the toolbox items.
@@ -97,6 +98,9 @@ function generateToolboxItem(context: Toolbox, toolboxEdit: ToolboxEditEntry): V
                         handlerProvider: (root) => new CreateElementMoveHandler(toolboxEdit.edit, root),
                         maxUpdatesPerRevision: 1
                     };
+                    if (!context.toolState.isLocked) {
+                        context.updateTool(ToolboxToolType.CURSOR, false);
+                    }
                     context.pointerEventsDisabled = true;
                     event.preventDefault();
                     context.update();
