@@ -24,7 +24,9 @@ import { ConfigManager } from "../config/configManager.js";
 import MiniSearch from "minisearch";
 import { ConnectionEditProvider } from "./connectionEditProvider.js";
 import { generateToolbox } from "./views/toolbox.js";
-import { ToolboxToolType } from "./tools.js";
+import { ToolboxToolType } from "./toolType.js";
+import { Cursor, UpdateCursorAction } from "../cursor/cursor.js";
+import { ToolTypeProvider } from "./toolTypeProvider.js";
 
 /**
  * UI Extension which displays the graphical toolbox.
@@ -35,7 +37,7 @@ import { ToolboxToolType } from "./tools.js";
  * - selecting the connection operator used for creating connections
  */
 @injectable()
-export class Toolbox extends AbstractUIExtension implements IActionHandler, ConnectionEditProvider {
+export class Toolbox extends AbstractUIExtension implements IActionHandler, ConnectionEditProvider, ToolTypeProvider {
     /**
      * The unique identifier of the toolbox.
      */
@@ -52,15 +54,29 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler, Conn
     currentRoot?: Root;
 
     /**
-     * The currently selected toolbox tool.
+     * The current toolbox tool state.
      */
-    currentTool: {
+    private toolState: {
         type: ToolboxToolType;
         locked: boolean;
     } = {
         type: ToolboxToolType.CURSOR,
         locked: false
     };
+
+    /**
+     * The currently selected toolbox tool.
+     */
+    get toolType(): ToolboxToolType {
+        return this.toolState.type;
+    }
+
+    /**
+     * TIf the currently selected tool is locked
+     */
+    get isToolLocked(): boolean {
+        return this.toolState.locked;
+    }
 
     /**
      * If true, pointer events are disabled
@@ -212,11 +228,36 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler, Conn
     }
 
     /**
-     * Gets the current connection edit
+     * Sets the currently used tool
      *
-     * @returns the current connection edit or undefined if no connection edit is available
+     * @param tool the new tool
+     * @param locked if the tool should be locked
      */
-    getConnectionEdit(): `connection/${string}` | undefined {
+    updateTool(tool: ToolboxToolType, locked: boolean): void {
+        if (this.toolType == tool && this.isToolLocked == locked) {
+            return;
+        }
+        if (this.toolType != tool) {
+            let cusor: Cursor | null = null;
+            if (tool == ToolboxToolType.HAND) {
+                cusor = "cursor-grab";
+            } else if (tool == ToolboxToolType.CONNECT) {
+                cusor = "cursor-crosshair";
+            }
+            const updateCursorAction: UpdateCursorAction = {
+                kind: UpdateCursorAction.KIND,
+                toolCursor: cusor
+            };
+            this.actionDispatcher.dispatch(updateCursorAction);
+        }
+        this.toolState = { type: tool, locked };
+        this.update();
+    }
+
+    /**
+     * The current connection edit or undefined if no connection edit is available
+     */
+    get connectionEdit(): `connection/${string}` | undefined {
         if (this.currentRoot == undefined) {
             return undefined;
         }

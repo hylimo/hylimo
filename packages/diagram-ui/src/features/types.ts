@@ -10,5 +10,6 @@ export const TYPES = {
     CreateAndMoveMouseListener: Symbol("CreateAndMoveMouseListener"),
     ConfigManager: Symbol("ConfigManager"),
     ConnectionEditProvider: Symbol("ConnectionEditProvider"),
+    ToolTypeProvider: Symbol("ToolTypeProvider"),
     MoveCursorProvider: Symbol("MoveCursorProvider")
 };

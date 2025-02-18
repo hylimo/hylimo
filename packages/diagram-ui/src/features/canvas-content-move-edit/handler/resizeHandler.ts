@@ -2,7 +2,7 @@ import { DefaultEditTypes } from "@hylimo/diagram-common";
 import { Edit, ResizeEdit } from "@hylimo/diagram-protocol";
 import { Matrix } from "transformation-matrix";
 import { MoveHandler } from "../../move/moveHandler.js";
-import { ResizeMoveCursor } from "../../move/cursor.js";
+import { ResizeMoveCursor } from "../../cursor/cursor.js";
 
 /**
  * Elements with an optional original width and height.

@@ -3,7 +3,8 @@ import { Toolbox } from "../toolbox.js";
 import { VNode, h } from "snabbdom";
 import { generateToolboxAddElementDetails } from "./item.js";
 import { generateIcon } from "./icon.js";
-import { ToolboxTool, toolboxTools, ToolboxToolType } from "../tools.js";
+import { ToolboxTool, toolboxTools } from "../tools.js";
+import { ToolboxToolType } from "../toolType.js";
 import { generateToolboxConnectDetails } from "./connection.js";
 import { Lock, PencilRuler, X } from "lucide";
 
@@ -60,7 +61,7 @@ function generateToolboxTools(context: Toolbox): VNode {
  * @returns The toolbox details UI
  */
 function generateToolboxDetails(context: Toolbox, root: Root): VNode {
-    const tool = context.currentTool.type;
+    const tool = context.toolType;
     let details: VNode[] | undefined = undefined;
     if (tool === ToolboxToolType.ADD_ELEMENT) {
         details = generateToolboxAddElementDetails(context, root);
@@ -80,7 +81,7 @@ function generateToolboxDetails(context: Toolbox, root: Root): VNode {
  * @returns The toolbox tool button
  */
 function generateToolboxToolButton(context: Toolbox, tool: ToolboxTool): VNode {
-    const active = context.currentTool.type === tool.id;
+    const active = context.toolType === tool.id;
     return h(
         "button.toolbox-tool-button",
         {
@@ -94,7 +95,7 @@ function generateToolboxToolButton(context: Toolbox, tool: ToolboxTool): VNode {
                 active
             }
         },
-        [generateIcon(tool.icon), active && context.currentTool.locked ? generateIcon(Lock, ["locked"]) : undefined]
+        [generateIcon(tool.icon), active && context.isToolLocked ? generateIcon(Lock, ["locked"]) : undefined]
     );
 }
 

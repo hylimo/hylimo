@@ -3,7 +3,7 @@ import { injectable, inject } from "inversify";
 import { Attrs, VNode } from "snabbdom";
 import { SRoot } from "../model/sRoot.js";
 import { TYPES } from "../features/types.js";
-import { MoveCursorProvider } from "../features/move/cursor.js";
+import { CursorProvider } from "../features/cursor/cursor.js";
 
 /**
  * IView that is the parent which handles
@@ -18,7 +18,7 @@ export class SRootView implements IView {
     /**
      * MoveCursorProvider used to get the cursor to use while moving
      */
-    @inject(TYPES.MoveCursorProvider) protected moveCursorProvider!: MoveCursorProvider;
+    @inject(TYPES.MoveCursorProvider) protected moveCursorProvider!: CursorProvider;
 
     render(model: Readonly<SRoot>, context: RenderingContext, _args?: IViewArgs | undefined): VNode {
         if (context.targetKind == "hidden") {
@@ -51,10 +51,10 @@ export class SRootView implements IView {
      * @returns the root classes
      */
     private computeRootClass(): Record<string, boolean> {
-        const moveCursor = this.moveCursorProvider.moveCursor;
-        if (moveCursor != undefined) {
+        const cursor = this.moveCursorProvider.moveCursor ?? this.moveCursorProvider.toolCursor;
+        if (cursor != undefined) {
             return {
-                [moveCursor]: true
+                [cursor]: true
             };
         } else {
             return {};

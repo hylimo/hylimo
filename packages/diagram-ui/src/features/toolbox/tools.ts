@@ -1,22 +1,32 @@
 import { Toolbox } from "./toolbox.js";
 import { ArrowUpRight, FolderPlus, Hand, IconNode, MousePointer, SquareDashedMousePointer, WandSparkles } from "lucide";
+import { ToolboxToolType } from "./toolType.js";
 
-export enum ToolboxToolType {
-    HAND = "hand",
-    CURSOR = "cursor",
-    CONNECT = "connect",
-    ADD_ELEMENT = "add-element",
-    BOX_SELECT = "box-select",
-    AUTOLAYOUT = "autolayout"
-}
-
+/**
+ * A tool in the toolbox.
+ */
 export interface ToolboxTool {
+    /**
+     * The tool to use
+     */
     id: ToolboxToolType;
+    /**
+     * The icon to show
+     */
     icon: IconNode;
+    /**
+     * An alternative text for the icon
+     */
     title: string;
+    /**
+     * What to do when the tool is selected
+     */
     action: (context: Toolbox) => void;
 }
 
+/**
+ * The tools available in the toolbox.
+ */
 export const toolboxTools: ToolboxTool[] = [
     {
         id: ToolboxToolType.HAND,
@@ -56,20 +66,29 @@ export const toolboxTools: ToolboxTool[] = [
     }
 ];
 
+/**
+ * Enables the given tool.
+ *
+ * @param context the toolbox context
+ * @param tool the tool to enable
+ */
 function enableTool(context: Toolbox, tool: ToolboxToolType): void {
-    const current = context.currentTool.type;
-    if (current != tool) {
-        context.currentTool = { type: tool, locked: false };
-        context.update();
+    if (context.toolType != tool) {
+        context.updateTool(tool, false);
     }
 }
 
+/**
+ * Enables a given tool. If it is already enabled, toggles the locked state.
+ *
+ * @param context the toolbox context
+ * @param tool the tool to enable/lock
+ */
 function enableOrLockTool(context: Toolbox, tool: ToolboxToolType): void {
-    const current = context.currentTool.type;
-    if (current != tool) {
-        context.currentTool = { type: tool, locked: false };
+    if (context.toolType != tool) {
+        context.updateTool(tool, false);
     } else {
-        context.currentTool.locked = !context.currentTool.locked;
+        context.updateTool(tool, !context.isToolLocked);
     }
     context.update();
 }

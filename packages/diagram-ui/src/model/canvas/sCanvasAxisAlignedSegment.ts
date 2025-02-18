@@ -9,7 +9,7 @@ import { svg } from "sprotty";
 import { SCanvasConnectionSegment } from "./sCanvasConnectionSegment.js";
 import { LinearAnimatable } from "../../features/animation/model.js";
 import { SCanvasConnection } from "./sCanvasConnection.js";
-import { computeResizeIconOffset } from "../../features/move/cursor.js";
+import { computeResizeIconOffset } from "../../features/cursor/resizeIcon.js";
 
 /**
  * Animated fields for CanvasAxisAlignedSegment

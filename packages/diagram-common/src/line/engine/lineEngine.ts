@@ -212,6 +212,9 @@ export class LineEngine {
             path += ` ${engine.toSvgPath(segment, startPosition)}`;
             startPosition = segment.end;
         }
+        if (line.isClosed) {
+            path += " Z";
+        }
         return path;
     }
 

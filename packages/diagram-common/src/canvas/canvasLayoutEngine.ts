@@ -252,7 +252,8 @@ export abstract class CanvasLayoutEngine {
         return [
             {
                 start,
-                segments: segments.flatMap((segment, i) => this.generateSegments(segment, layouts[i], context))
+                segments: segments.flatMap((segment, i) => this.generateSegments(segment, layouts[i], context)),
+                isClosed: false
             },
             layouts
         ];

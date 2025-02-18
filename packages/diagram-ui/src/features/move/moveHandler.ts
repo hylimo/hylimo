@@ -1,7 +1,7 @@
 import { Edit, TransactionalAction } from "@hylimo/diagram-protocol";
 import { SModelElementImpl } from "sprotty";
 import { Matrix, applyToPoint } from "transformation-matrix";
-import { MoveCursor, SetMoveCursorAction } from "./cursor.js";
+import { Cursor, UpdateCursorAction } from "../cursor/cursor.js";
 import { Action } from "sprotty-protocol";
 
 /**
@@ -22,7 +22,7 @@ export abstract class MoveHandler {
      */
     constructor(
         protected readonly transformationMatrix: Matrix,
-        readonly moveCursor: MoveCursor | undefined,
+        readonly moveCursor: Cursor | undefined,
         protected readonly requiresMove: boolean = true
     ) {}
 
@@ -48,9 +48,9 @@ export abstract class MoveHandler {
         }
         const actions: Action[] = [];
         if (this.moveCursor != undefined && (!this.hasMoved || committed)) {
-            const moveCursorAction: SetMoveCursorAction = {
-                kind: SetMoveCursorAction.KIND,
-                cursor: committed ? undefined : this.moveCursor
+            const moveCursorAction: UpdateCursorAction = {
+                kind: UpdateCursorAction.KIND,
+                moveCursor: committed ? null : this.moveCursor
             };
             actions.push(moveCursorAction);
         }

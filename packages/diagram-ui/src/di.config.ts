@@ -74,6 +74,7 @@ import { splitCanvasSegmentModule } from "./features/split-canvas-segment/di.con
 import { createConnectionModule } from "./features/create-connection/di.config.js";
 import { lineProviderHoverModule } from "./features/line-provider-hover/di.config.js";
 import { TYPES } from "./features/types.js";
+import { cursorModule } from "./features/cursor/di.config.js";
 
 /**
  * The module used
@@ -146,7 +147,8 @@ export function createContainer(widgetId: string): Container {
         toolboxModule,
         configModule,
         createConnectionModule,
-        lineProviderHoverModule
+        lineProviderHoverModule,
+        cursorModule
     );
     container.load(diagramModule);
 

@@ -35,7 +35,7 @@ export class CreateConnectionMouseListener extends MouseListener {
         if (startData == undefined) {
             return [];
         }
-        const edit = this.connectionEditProvider.getConnectionEdit();
+        const edit = this.connectionEditProvider.connectionEdit;
         if (edit == undefined) {
             return [];
         }

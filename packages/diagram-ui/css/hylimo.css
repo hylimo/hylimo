@@ -42,11 +42,6 @@ svg.hylimo {
         cursor: grab;
     }
 
-    .create-connection-outline {
-        stroke-width: calc(5px / var(--diagram-zoom));
-        stroke-dasharray: calc(16px / var(--diagram-zoom));
-    }
-
     .canvas-point {
         fill: transparent;
     }
@@ -58,10 +53,6 @@ svg.hylimo {
 
     .canvas-point-inner {
         pointer-events: none;
-    }
-
-    .create-connection-outline.target {
-        stroke: var(--diagram-layout-color-selected);
     }
 
     .canvas-dependency-line {
@@ -122,7 +113,10 @@ svg.hylimo {
     }
 
     .create-connection-outline {
-        stroke: var(--diagram-layout-color);
+        stroke: rgb(from var(--diagram-layout-color-selected) r g b / 0.15);
+        stroke-width: calc(15px / var(--diagram-zoom));
+        stroke-linejoin: round;
+        stroke-linecap: round;
         fill: none;
         cursor: default;
         pointer-events: none;
@@ -207,6 +201,20 @@ svg.hylimo {
         &,
         & * {
             cursor: grab !important;
+        }
+    }
+
+    &.cursor-grabbing {
+        &,
+        & * {
+            cursor: grabbing !important;
+        }
+    }
+
+    &.cursor-crosshair {
+        &,
+        & * {
+            cursor: crosshair !important;
         }
     }
 }

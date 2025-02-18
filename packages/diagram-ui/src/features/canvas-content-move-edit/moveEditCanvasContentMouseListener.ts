@@ -1,4 +1,4 @@
-import { injectable } from "inversify";
+import { injectable, inject } from "inversify";
 import { EditSpecification, DefaultEditTypes, EditSpecificationEntry, groupBy } from "@hylimo/diagram-common";
 import { findParentByFeature, isMoveable, MouseListener, SModelElementImpl } from "sprotty";
 import { Action } from "sprotty-protocol";
@@ -34,7 +34,10 @@ import { isCanvasLike } from "../../model/canvas/canvasLike.js";
 import { TransactionalMoveAction } from "../move/transactionalMoveAction.js";
 import { NoopMoveHandler } from "./handler/noopMoveHandler.js";
 import { SElement } from "../../model/sElement.js";
-import { findResizeIconClass } from "../move/cursor.js";
+import { findResizeIconClass } from "../cursor/resizeIcon.js";
+import { TYPES } from "../types.js";
+import { ToolTypeProvider } from "../toolbox/toolTypeProvider.js";
+import { isRegularInteractionTool } from "../toolbox/toolType.js";
 
 /**
  * The maximum number of updates that can be performed on the same revision.
@@ -56,8 +59,17 @@ const maxResizeScale = 10;
  */
 @injectable()
 export class MoveEditCanvasContentMouseListener extends MouseListener {
+    /**
+     * The tool type provider to determine the current tool type
+     */
+    @inject(TYPES.ToolTypeProvider) protected readonly toolTypeProvider!: ToolTypeProvider;
+
     override mouseDown(target: SModelElementImpl, event: MouseEvent): Action[] {
-        if (event.button === 0 && !(event.ctrlKey || event.altKey)) {
+        if (
+            event.button === 0 &&
+            !(event.ctrlKey || event.altKey) &&
+            isRegularInteractionTool(this.toolTypeProvider.toolType)
+        ) {
             const moveableTarget = findParentByFeature(target, isMoveable);
             if (moveableTarget != undefined && moveableTarget instanceof SElement) {
                 const parentCanvas = findParentByFeature(target, isCanvasLike);

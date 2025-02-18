@@ -13,6 +13,7 @@ export const toolboxModule = new ContainerModule((bind, _unbind, isBound) => {
     bind(Toolbox).toSelf().inSingletonScope();
     bind(TYPES.IUIExtension).toService(Toolbox);
     bind(TYPES.ConnectionEditProvider).toService(Toolbox);
+    bind(TYPES.ToolTypeProvider).toService(Toolbox);
     configureActionHandler(context, UpdateModelAction.KIND, Toolbox);
     configureActionHandler(context, SetModelAction.KIND, Toolbox);
     configureActionHandler(context, TransactionalAction.KIND, Toolbox);

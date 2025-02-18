@@ -7,7 +7,7 @@ import { SCanvasElement } from "../../model/canvas/sCanvasElement.js";
 import { CanvasLike } from "../../model/canvas/canvasLike.js";
 import { EditableCanvasContentView } from "./editableCanvasContentView.js";
 import { SCanvasPoint } from "../../model/canvas/sCanvasPoint.js";
-import { computeResizeIconOffset } from "../../features/move/cursor.js";
+import { computeResizeIconOffset } from "../../features/cursor/resizeIcon.js";
 
 /**
  * IView that represents a CanvasElement
