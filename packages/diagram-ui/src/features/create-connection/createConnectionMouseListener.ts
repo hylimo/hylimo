@@ -38,8 +38,8 @@ export class CreateConnectionMouseListener extends MouseListener {
      */
     @inject(TYPES.TransactionStateProvider) protected transactionStateProvider!: TransactionStateProvider;
 
-    override mouseDown(target: SModelElementImpl): Action[] {
-        if (this.toolTypeProvider.toolType !== ToolboxToolType.CONNECT) {
+    override mouseDown(target: SModelElementImpl, event: MouseEvent): Action[] {
+        if (this.toolTypeProvider.toolType !== ToolboxToolType.CONNECT || event.button !== 0) {
             return [];
         }
         const root = target.root as SRoot;
