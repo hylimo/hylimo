@@ -9,7 +9,6 @@ import { TYPES } from "../../features/types.js";
 import { TransactionStateProvider } from "../../features/transaction/transactionStateProvider.js";
 import { LineProviderHoverData } from "../../features/create-connection/createConnectionHoverData.js";
 import { renderPoint } from "./canvasPointView.js";
-import { SElement } from "../../model/sElement.js";
 import { ToolTypeProvider } from "../../features/toolbox/toolState.js";
 import { ToolboxToolType } from "../../features/toolbox/toolType.js";
 
@@ -54,7 +53,7 @@ export abstract class EditableCanvasContentView {
             "g",
             null,
             this.renderCreateConnectionOutline(hoverData),
-            ...this.renderCreateConnectionStartSymbol(model, hoverData)
+            ...this.renderCreateConnectionStartSymbol(hoverData)
         );
     }
 
@@ -65,7 +64,7 @@ export abstract class EditableCanvasContentView {
      * @param preview the connection creation preview
      * @returns the rendered start symbol
      */
-    private renderCreateConnectionStartSymbol(model: Readonly<SElement>, preview: LineProviderHoverData): VNode[] {
+    private renderCreateConnectionStartSymbol(preview: LineProviderHoverData): VNode[] {
         if (this.transactionStateProvider.isInTransaction) {
             return [];
         }

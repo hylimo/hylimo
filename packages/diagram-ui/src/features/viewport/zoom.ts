@@ -27,7 +27,7 @@ const DEFAULT_ZOOM_RATE = 1 / 200;
 /**
  * Limits how often wheel events are processed when in wheel mode, due to each update taking at least one frame
  */
-const MIN_WHEEL_EVENT_TIME_DIFF = 15;
+const MIN_WHEEL_EVENT_TIME_DIFF = 30;
 
 /**
  * A delay which is waited to determine if a WheelEvent is caused by a mouse wheel.
@@ -90,14 +90,23 @@ export class ZoomMouseListener extends SprottyZoomMouseListener {
     private delta = 0;
 
     /**
+     * Rolling time delta and value, used to detect if the wheel event is caused by a trackpad.
+     */
+    private rollingValues: { timeDelta: number; value: number }[] = [];
+
+    /**
      * The previous easing function used for the zoom animation.
      * Used to create a new easing function that is continuous with the last one.
      */
     private previousEasing?: {
         start: number;
-        targetZoom: number;
         easing: (_: number) => number;
     };
+
+    /**
+     * The current target zoom level
+     */
+    targetZoom?: number;
 
     override wheel(target: SModelElementImpl, event: WheelEvent): Action[] {
         const viewport = findParentByFeature(target, isViewport);
@@ -133,10 +142,21 @@ export class ZoomMouseListener extends SprottyZoomMouseListener {
     private detectWheelType(value: number, viewport: SModelRootImpl & Viewport, viewportOffset: Point) {
         const now = Date.now();
         const timeDelta = now - this.lastWheelEventTime;
+        if (this.rollingValues.length > 4) {
+            this.rollingValues.shift();
+        }
+        this.rollingValues.push({ timeDelta, value });
+        const averageTimeDelta =
+            this.rollingValues.reduce((avg, entry) => avg + entry.timeDelta, 0) / this.rollingValues.length;
         this.lastWheelEventTime = now;
-        if ((value !== 0 && Math.abs(value) < 4) || timeDelta < 40) {
+        if (
+            this.rollingValues.length >= 3 &&
+            new Set(this.rollingValues.map((entry) => Math.abs(entry.value))).size === 1 &&
+            Math.abs(value) > 10
+        ) {
+            this.type = "wheel";
+        } else if ((value !== 0 && Math.abs(value) < 4) || averageTimeDelta < 25) {
             this.type = "trackpad";
-            this.clearTimeoutIfSet();
             this.previousEasing = undefined;
         } else if (timeDelta > 1.5 * WHEEL_ANIMATION_DURATION) {
             this.type = undefined;
@@ -147,6 +167,8 @@ export class ZoomMouseListener extends SprottyZoomMouseListener {
             }, WHEEL_DELAY);
         } else if (!this.type || timeDelta > 200) {
             this.type = Math.abs(timeDelta * value) < 200 ? "trackpad" : "wheel";
+        }
+        if (this.type != undefined) {
             this.clearTimeoutIfSet();
         }
     }
@@ -179,10 +201,7 @@ export class ZoomMouseListener extends SprottyZoomMouseListener {
         }
         const zoomRate = isWheel ? WHEEL_ZOOM_RATE : DEFAULT_ZOOM_RATE;
         const zoomFactor = Math.exp(-this.delta * zoomRate);
-        const limitedZoom = limit(
-            (this.previousEasing?.targetZoom ?? viewport.zoom) * zoomFactor,
-            this.viewerOptions.zoomLimits
-        );
+        const limitedZoom = limit((this.targetZoom ?? viewport.zoom) * zoomFactor, this.viewerOptions.zoomLimits);
         this.delta = 0;
         if (limitedZoom === viewport.zoom) {
             return [];
@@ -217,14 +236,15 @@ export class ZoomMouseListener extends SprottyZoomMouseListener {
                 },
                 zoom: limitedZoom
             },
-            animate: isWheel,
+            animate: false,
             zoomAnimation: isWheel
                 ? {
                       animationDuration: WHEEL_ANIMATION_DURATION,
-                      ease: this.computeWheelEasing(limitedZoom)
+                      ease: this.computeWheelEasing()
                   }
                 : null
         };
+        this.targetZoom = limitedZoom;
         return action;
     }
 
@@ -232,10 +252,9 @@ export class ZoomMouseListener extends SprottyZoomMouseListener {
      * Computes the easing function for the zoom animation.
      * Ensures that the easing function is continuous with the last one.
      *
-     * @param targetZoom the target zoom level
      * @returns the easing function
      */
-    private computeWheelEasing(targetZoom: number) {
+    private computeWheelEasing() {
         let easing = bezier(0.25, 0.1, 0.25, 1);
 
         if (this.previousEasing) {
@@ -252,7 +271,6 @@ export class ZoomMouseListener extends SprottyZoomMouseListener {
 
         this.previousEasing = {
             start: Date.now(),
-            targetZoom,
             easing
         };
         return easing;

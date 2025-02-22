@@ -1,16 +1,27 @@
 import { IView, IViewArgs, RenderingContext, svg, ViewerOptions } from "sprotty";
 import { injectable, inject } from "inversify";
-import { Attrs, VNode } from "snabbdom";
+import { Attrs, thunk, VNode } from "snabbdom";
 import { SRoot } from "../model/sRoot.js";
 import { TYPES } from "../features/types.js";
 import { CursorProvider } from "../features/cursor/cursor.js";
 import { BoxSelectProvider } from "../features/select/boxSelectProvider.js";
+import { convertFontsToCssStyle } from "@hylimo/diagram-common";
 
 /**
  * IView that is the parent which handles
  */
 @injectable()
 export class SRootView implements IView {
+    /**
+     * ID of the arrow marker
+     */
+    static readonly ARROW_MARKER_ID = "arrow";
+
+    /**
+     * ID of the background pattern
+     */
+    static readonly BACKGROUND_PATTERN_ID = "background-pattern";
+
     /**
      * Viewer options, used to get id of viewer element
      */
@@ -37,8 +48,9 @@ export class SRootView implements IView {
                 attrs: this.generateAttributes(model, context),
                 class: this.computeRootClass()
             },
-            svg("style", null, model.generateStyle(this.options.baseDiv)),
-            this.renderDefs(),
+            this.renderStyles(model),
+            this.renderDefs(model),
+            this.renderBackground(),
             svg(
                 "g.sprotty-root",
                 {
@@ -50,6 +62,37 @@ export class SRootView implements IView {
                 this.renderSelectBox()
             )
         );
+    }
+
+    /**
+     * Renders the style element for the fonts
+     *
+     * @param model the SRoot model
+     * @returns the VNode for the style element
+     */
+    private renderStyles(model: Readonly<SRoot>): VNode {
+        return thunk(
+            "style",
+            () => svg("style", null, convertFontsToCssStyle(model.fonts)),
+            model.fonts.map((font) => font.fontFamily).sort()
+        );
+    }
+
+    /**
+     * Renders the background of the diagram
+     *
+     * @returns the VNode for the background
+     */
+    private renderBackground(): VNode {
+        return svg("rect", {
+            attrs: {
+                x: 0,
+                y: 0,
+                width: "100%",
+                height: "100%",
+                fill: `url(#${SRootView.BACKGROUND_PATTERN_ID})`
+            }
+        });
     }
 
     /**
@@ -108,33 +151,70 @@ export class SRootView implements IView {
     /**
      * Renders the defs section of the SVG
      *
+     * @param model the SRoot model
      * @returns the VNode for the defs section
      */
-    private renderDefs(): VNode {
+    private renderDefs(model: Readonly<SRoot>): VNode {
+        return svg("defs", null, this.renderArrowMarker(), this.renderBackgroundPattern(model));
+    }
+
+    /**
+     * Renders the background pattern
+     *
+     * @param model the SRoot model
+     * @returns the VNode for the background pattern
+     */
+    private renderBackgroundPattern(model: Readonly<SRoot>): VNode {
+        const zoomNormalized = model.zoom / Math.pow(3, Math.floor(Math.log(model.zoom) / Math.log(3)));
+        const gridSize = 25 * zoomNormalized;
         return svg(
-            "defs",
-            null,
-            svg(
-                "marker",
-                {
-                    attrs: {
-                        id: "arrow",
-                        viewBox: "0 0 10 10",
-                        refX: 9,
-                        refY: 5,
-                        markerWidth: 6,
-                        markerHeight: 6,
-                        markerUnits: "strokeWidth",
-                        orient: "auto-start-reverse"
-                    }
-                },
-                svg("path", {
-                    attrs: {
-                        d: "M 0 0 L 10 5 L 0 10 z",
-                        fill: "var(--diagram-layout-color)"
-                    }
-                })
-            )
+            "pattern",
+            {
+                attrs: {
+                    id: SRootView.BACKGROUND_PATTERN_ID,
+                    width: gridSize,
+                    height: gridSize,
+                    x: (-model.scroll.x * model.zoom) % gridSize,
+                    y: (-model.scroll.y * model.zoom) % gridSize,
+                    patternUnits: "userSpaceOnUse"
+                }
+            },
+            svg("circle.background-pattern", {
+                attrs: {
+                    cx: gridSize / 2,
+                    cy: gridSize / 2,
+                    r: 1
+                }
+            })
+        );
+    }
+
+    /**
+     * Renders the arrow marker
+     *
+     * @returns the VNode for the arrow marker
+     */
+    private renderArrowMarker(): VNode {
+        return svg(
+            "marker",
+            {
+                attrs: {
+                    id: SRootView.ARROW_MARKER_ID,
+                    viewBox: "0 0 10 10",
+                    refX: 9,
+                    refY: 5,
+                    markerWidth: 6,
+                    markerHeight: 6,
+                    markerUnits: "strokeWidth",
+                    orient: "auto-start-reverse"
+                }
+            },
+            svg("path", {
+                attrs: {
+                    d: "M 0 0 L 10 5 L 0 10 z",
+                    fill: "var(--diagram-layout-color)"
+                }
+            })
         );
     }
 }

@@ -46,6 +46,10 @@ export class SetViewportCommand extends SprottySetViewportCommand implements ISt
      * The animation which can be stopped
      */
     private animation?: Animation;
+    /**
+     * Whether the command has been stopped
+     */
+    private isStopped = false;
 
     /**
      * Creates a new SetViewportCommand
@@ -70,7 +74,12 @@ export class SetViewportCommand extends SprottySetViewportCommand implements ISt
         newViewport: Viewport,
         context: CommandExecutionContext
     ): CommandReturn {
-        if (this.action.zoomAnimation != undefined && isViewport(element) && newViewport.zoom != oldViewport.zoom) {
+        if (
+            this.action.zoomAnimation != undefined &&
+            isViewport(element) &&
+            newViewport.zoom != oldViewport.zoom &&
+            !this.isStopped
+        ) {
             this.animation = new ZoomViewportAnimation(
                 element,
                 oldViewport,
@@ -86,6 +95,8 @@ export class SetViewportCommand extends SprottySetViewportCommand implements ISt
 
     stopExecution(): void {
         this.animation?.stop();
+        this.action.animate = false;
+        this.isStopped = true;
     }
 }
 

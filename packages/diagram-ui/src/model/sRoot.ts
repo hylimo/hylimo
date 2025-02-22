@@ -1,4 +1,4 @@
-import { EditSpecification, FontData, convertFontsToCssStyle } from "@hylimo/diagram-common";
+import { EditSpecification, FontData } from "@hylimo/diagram-common";
 import { isSelectable, ModelIndexImpl, SModelElementImpl, ViewportRootElementImpl } from "sprotty";
 import { SCanvasLayoutEngine } from "./canvas/sCanvasLayoutEngine.js";
 import { Matrix, compose, translate, scale, applyToPoint } from "transformation-matrix";
@@ -123,27 +123,5 @@ export class SRoot extends ViewportRootElementImpl implements CanvasLike {
     getPosition(event: MouseEvent): { x: number; y: number } {
         const matrix = this.getMouseTransformationMatrix();
         return applyToPoint(matrix, { x: event.pageX, y: event.pageY });
-    }
-
-    /**
-     * Genrates the style string based on the fonts
-     *
-     * @param baseDiv the id of the base div
-     * @returns the generated style string
-     */
-    generateStyle(baseDiv: string): string {
-        const staticStyles = `
-            #${baseDiv}.sprotty {
-                container-type: size;
-                container-name: sprotty;
-            }
-            #${baseDiv}.sprotty svg {
-                --diagram-zoom: ${this.zoom};
-                --diagram-zoom-normalized: ${this.zoom / Math.pow(3, Math.floor(Math.log(this.zoom) / Math.log(3)))};
-                --diagram-scroll-x: ${this.scroll.x}px;
-                --diagram-scroll-y: ${this.scroll.y}px;
-            }
-        `;
-        return convertFontsToCssStyle(this.fonts) + staticStyles;
     }
 }

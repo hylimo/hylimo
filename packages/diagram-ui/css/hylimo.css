@@ -1,33 +1,38 @@
 svg.hylimo {
-    --grid-size: calc(25px * var(--diagram-zoom-normalized));
-    background: radial-gradient(circle, var(--diagram-grid) 1px, transparent 1px)
-        calc(var(--diagram-scroll-x) * -1 * var(--diagram-zoom) + var(--grid-size) / 2)
-        calc(var(--diagram-scroll-y) * -1 * var(--diagram-zoom) + var(--grid-size) / 2) / var(--grid-size)
-        var(--grid-size);
-
     text {
         white-space: pre;
         user-select: none;
     }
 
-    .selected-rect {
-        fill: none;
-        stroke: var(--diagram-layout-color-selected);
-        stroke-width: calc(2px / var(--diagram-zoom));
+    .background-pattern {
+        fill: var(--diagram-grid);
     }
 
     .selected-outline {
         fill: none;
         stroke: var(--diagram-layout-color-selected);
-        stroke-width: calc(1.5px / var(--diagram-zoom));
     }
 
+    .selected-outline,
     .selected-outline-corner,
     .canvas-rotate-icon,
     .canvas-point-inner,
+    .bezier-handle-line,
+    .canvas-dependency-line {
+        stroke-width: 1.5px;
+    }
+
+    .selected-outline,
+    .selected-outline-corner,
+    .canvas-rotate-icon,
+    .resize,
+    .canvas-point-inner,
+    .bezier-handle-line,
     .canvas-dependency-line,
-    .bezier-handle-line {
-        stroke-width: calc(1.5px / var(--diagram-zoom));
+    .select-box,
+    .select-canvas-connection,
+    .create-connection-outline {
+        vector-effect: non-scaling-stroke;
     }
 
     .selected-outline-corner,
@@ -57,7 +62,6 @@ svg.hylimo {
 
     .canvas-dependency-line {
         stroke: var(--diagram-layout-color);
-        stroke-dasharray: calc(8px / var(--diagram-zoom));
         fill: none;
         pointer-events: none;
     }
@@ -69,9 +73,9 @@ svg.hylimo {
     }
 
     .select-canvas-connection {
-        stroke-width: calc(12px / var(--diagram-zoom));
         fill: none;
         stroke: transparent;
+        stroke-width: 12px;
     }
 
     .canvas-rotate-icon > path {
@@ -84,8 +88,8 @@ svg.hylimo {
     }
 
     .resize {
-        stroke-width: calc(12px / var(--diagram-zoom));
         stroke: transparent;
+        stroke-width: 12px;
     }
 
     .resize-corner {
@@ -114,39 +118,12 @@ svg.hylimo {
 
     .create-connection-outline {
         stroke: rgb(from var(--diagram-layout-color-selected) r g b / 0.15);
-        stroke-width: calc(15px / var(--diagram-zoom));
         stroke-linejoin: round;
         stroke-linecap: round;
         fill: none;
         cursor: default;
         pointer-events: none;
-    }
-
-    .create-connection {
-        transform: scale(calc(1 / var(--diagram-zoom)));
-    }
-
-    .create-connection-point {
-        stroke-linecap: round;
-        stroke: var(--diagram-layout-color-selected);
-    }
-
-    .create-connection-arrow {
-        stroke: var(--diagram-layout-color);
-        opacity: 0.5;
-        fill: none;
-        stroke-width: 3px;
-    }
-
-    .create-connection:hover .create-connection-arrow {
-        stroke: var(--diagram-layout-color-selected);
-        opacity: 1;
-    }
-
-    .create-connection-hover-line {
-        stroke: transparent;
-        stroke-width: 12px;
-        fill: none;
+        stroke-width: 15px;
     }
 
     .selectable {
@@ -161,7 +138,7 @@ svg.hylimo {
     .select-box {
         fill: rgb(from var(--diagram-layout-color-selected) r g b / 0.1);
         stroke: var(--diagram-layout-color-selected);
-        stroke-width: calc(1px / var(--diagram-zoom));
+        stroke-width: 1px;
     }
 
     &.cursor-resize-0,

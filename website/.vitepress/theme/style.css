@@ -123,10 +123,12 @@
 .sprotty-wrapper {
     width: 100%;
     height: 100%;
+    container-type: size;
+    container-name: sprotty;
 }
 
 .sprotty {
-    display: flex;
+    width: 100%;
     height: 100%;
 }
 
@@ -136,7 +138,7 @@
 
 .sprotty svg {
     width: 100%;
-    flex: 1;
+    height: 100%;
     border-style: none;
     border-width: 0px;
     outline: none;
