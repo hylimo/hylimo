@@ -134,7 +134,7 @@ export class ZoomMouseListener extends SprottyZoomMouseListener {
         const now = Date.now();
         const timeDelta = now - this.lastWheelEventTime;
         this.lastWheelEventTime = now;
-        if (value !== 0 && Math.abs(value) < 4) {
+        if (value !== 0 && Math.abs(value) < 4 || timeDelta < 40) {
             this.type = "trackpad";
             this.clearTimeoutIfSet();
             this.previousEasing = undefined;
@@ -145,7 +145,7 @@ export class ZoomMouseListener extends SprottyZoomMouseListener {
                 this.type = "wheel";
                 this.actionDispatcher.dispatchAll(this.updateViewport(viewport, viewportOffset));
             }, WHEEL_DELAY);
-        } else if (!this.type) {
+        } else if (!this.type || timeDelta > 200) {
             this.type = Math.abs(timeDelta * value) < 200 ? "trackpad" : "wheel";
             this.clearTimeoutIfSet();
         }
