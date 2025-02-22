@@ -5,6 +5,9 @@ import { TYPES } from "../types.js";
 import { Action } from "sprotty-protocol";
 import { isRegularInteractionTool } from "../toolbox/toolType.js";
 
+/**
+ * SelectMouseListener that disables both mouseDown and mouseUp when the current tool is not a regular interaction tool
+ */
 @injectable()
 export class SelectMouseListener extends SprottySelectMouseListener {
     /**
@@ -17,5 +20,12 @@ export class SelectMouseListener extends SprottySelectMouseListener {
             return [];
         }
         return super.mouseDown(target, event);
+    }
+
+    override mouseUp(target: SModelElementImpl, event: MouseEvent): (Action | Promise<Action>)[] {
+        if (!isRegularInteractionTool(this.toolTypeProvider.toolType)) {
+            return [];
+        }
+        return super.mouseUp(target, event);
     }
 }

@@ -27,6 +27,7 @@ import { generateToolbox } from "./views/toolbox.js";
 import { ToolboxToolType } from "./toolType.js";
 import { Cursor, UpdateCursorAction } from "../cursor/cursor.js";
 import { ToolState } from "./toolState.js";
+import { SetToolAction } from "./setToolAction.js";
 
 /**
  * UI Extension which displays the graphical toolbox.
@@ -155,6 +156,8 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler, Conn
         } else if (EditorConfigUpdatedAction.is(action)) {
             this.isOpen = action.config.toolboxEnabled;
             this.update();
+        } else if (SetToolAction.is(action)) {
+            this.updateTool(action.tool, false);
         }
     }
 
@@ -242,7 +245,7 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler, Conn
             let cusor: Cursor | null = null;
             if (tool == ToolboxToolType.HAND) {
                 cusor = "cursor-grab";
-            } else if (tool == ToolboxToolType.CONNECT) {
+            } else if (tool == ToolboxToolType.CONNECT || tool == ToolboxToolType.BOX_SELECT) {
                 cusor = "cursor-crosshair";
             }
             const updateCursorAction: UpdateCursorAction = {
@@ -250,7 +253,7 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler, Conn
                 toolCursor: cusor
             };
             actions.push(updateCursorAction);
-            if (tool == ToolboxToolType.CONNECT) {
+            if (tool == ToolboxToolType.CONNECT || tool == ToolboxToolType.HAND) {
                 actions.push(SelectAllAction.create({ select: false }));
             }
             this.actionDispatcher.dispatchAll(actions);

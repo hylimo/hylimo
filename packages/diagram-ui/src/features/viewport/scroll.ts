@@ -18,7 +18,8 @@ export class ScrollMouseListener extends SprottyScrollMouseListener {
 
     override mouseDown(target: SModelElementImpl, event: MouseEvent): (Action | Promise<Action>)[] {
         let targetOrRoot = target;
-        if (this.toolTypeProvider.toolType === ToolboxToolType.CONNECT && event.button !== 1) {
+        const toolType = this.toolTypeProvider.toolType;
+        if (toolType === ToolboxToolType.BOX_SELECT || (toolType === ToolboxToolType.CONNECT && event.button !== 1)) {
             return [];
         }
         if (event.button === 1 || this.toolTypeProvider.toolType === ToolboxToolType.HAND) {

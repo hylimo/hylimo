@@ -75,6 +75,7 @@ import { createConnectionModule } from "./features/create-connection/di.config.j
 import { TYPES } from "./features/types.js";
 import { cursorModule } from "./features/cursor/di.config.js";
 import { selectModule } from "./features/select/di.config.js";
+import { boxSelectFeature } from "./features/select/boxSelectFeature.js";
 
 /**
  * The module used
@@ -91,16 +92,16 @@ const diagramModule = new ContainerModule((bind, unbind, isBound, rebind) => {
     configureModelElement(context, Text.TYPE, SText, TextView);
     configureModelElement(context, Canvas.TYPE, SCanvas, CanvasView);
     configureModelElement(context, CanvasElement.TYPE, SCanvasElement, CanvasElementView, {
-        enable: [selectFeature, moveFeature]
+        enable: [selectFeature, moveFeature, boxSelectFeature]
     });
     configureModelElement(context, AbsolutePoint.TYPE, SAbsolutePoint, AbsolutePointView, {
-        enable: [selectFeature, moveFeature]
+        enable: [selectFeature, moveFeature, boxSelectFeature]
     });
     configureModelElement(context, RelativePoint.TYPE, SRelativePoint, RelativePointView, {
-        enable: [selectFeature, moveFeature]
+        enable: [selectFeature, moveFeature, boxSelectFeature]
     });
     configureModelElement(context, LinePoint.TYPE, SLinePoint, LinePointView, {
-        enable: [selectFeature, moveFeature]
+        enable: [selectFeature, moveFeature, boxSelectFeature]
     });
     configureModelElement(context, CanvasConnection.TYPE, SCanvasConnection, CanvasConnectionView, {
         enable: [selectFeature, moveFeature]

@@ -1,11 +1,12 @@
-import { CanvasPoint, Point } from "@hylimo/diagram-common";
+import { Bounds, CanvasPoint, Point } from "@hylimo/diagram-common";
 import { PositionProvider } from "../../features/layout/positionProvider.js";
 import { SCanvasContent } from "./sCanvasContent.js";
+import { BoxSelectable } from "../../features/select/boxSelectFeature.js";
 
 /**
  * Base model for all canvas points
  */
-export abstract class SCanvasPoint extends SCanvasContent implements CanvasPoint, PositionProvider {
+export abstract class SCanvasPoint extends SCanvasContent implements CanvasPoint, PositionProvider, BoxSelectable {
     /**
      * The default point size
      */
@@ -33,5 +34,10 @@ export abstract class SCanvasPoint extends SCanvasContent implements CanvasPoint
         this.cachedProperty<Point>("position", () => {
             return this.root.layoutEngine.getPoint(this.id, this.parent.id);
         });
+    }
+
+    isIncluded(bounds: Bounds): boolean {
+        const point = this.root.layoutEngine.getPoint(this.id, this.root.id);
+        return Bounds.contains(bounds, point);
     }
 }

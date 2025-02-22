@@ -158,6 +158,12 @@ svg.hylimo {
         cursor: move;
     }
 
+    .select-box {
+        fill: rgb(from var(--diagram-layout-color-selected) r g b / 0.1);
+        stroke: var(--diagram-layout-color-selected);
+        stroke-width: calc(1px / var(--diagram-zoom));
+    }
+
     &.cursor-resize-0,
     &.cursor-resize-4 {
         &,

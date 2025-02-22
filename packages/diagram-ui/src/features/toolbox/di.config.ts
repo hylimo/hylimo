@@ -5,6 +5,7 @@ import { SetModelAction, UpdateModelAction } from "sprotty-protocol";
 import { EditorConfigUpdatedAction, TransactionalAction } from "@hylimo/diagram-protocol";
 import { TYPES } from "../types.js";
 import { ToolState } from "./toolState.js";
+import { SetToolAction } from "./setToolAction.js";
 
 /**
  * Toolbox module
@@ -20,4 +21,5 @@ export const toolboxModule = new ContainerModule((bind, _unbind, isBound) => {
     configureActionHandler(context, SetModelAction.KIND, Toolbox);
     configureActionHandler(context, TransactionalAction.KIND, Toolbox);
     configureActionHandler(context, EditorConfigUpdatedAction.KIND, Toolbox);
+    configureActionHandler(context, SetToolAction.KIND, Toolbox);
 });

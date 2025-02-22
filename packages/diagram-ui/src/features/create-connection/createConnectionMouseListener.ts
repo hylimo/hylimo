@@ -96,10 +96,7 @@ export class CreateConnectionMouseListener extends MouseListener {
         let data: CreateConnectionHoverData;
         const lineProvider = findParentByFeature(target, isLineProvider);
         const root = target.root as SRoot;
-        const rootPos = applyToPoint(root.getMouseTransformationMatrix(), {
-            x: event.pageX,
-            y: event.pageY
-        });
+        const rootPos = root.getPosition(event);
         if (lineProvider == undefined || lineProvider.editExpression == undefined) {
             data = rootPos;
         } else {

@@ -1,7 +1,7 @@
 import { EditSpecification, FontData, convertFontsToCssStyle } from "@hylimo/diagram-common";
 import { isSelectable, ModelIndexImpl, SModelElementImpl, ViewportRootElementImpl } from "sprotty";
 import { SCanvasLayoutEngine } from "./canvas/sCanvasLayoutEngine.js";
-import { Matrix, compose, translate, scale } from "transformation-matrix";
+import { Matrix, compose, translate, scale, applyToPoint } from "transformation-matrix";
 import { Bounds } from "sprotty-protocol";
 import { Bounds as HylimoBounds } from "@hylimo/diagram-common";
 import { CanvasLike } from "./canvas/canvasLike.js";
@@ -112,6 +112,17 @@ export class SRoot extends ViewportRootElementImpl implements CanvasLike {
     getMouseTransformationMatrix(): Matrix {
         const rect = this.canvasBounds;
         return compose(translate(this.scroll.x, this.scroll.y), scale(1 / this.zoom), translate(-rect.x, -rect.y));
+    }
+
+    /**
+     * Gets the position of the mouse event in the coordinate system of the canvas.
+     *
+     * @param event the mouse event
+     * @returns the position in the canvas coordinate system
+     */
+    getPosition(event: MouseEvent): { x: number; y: number } {
+        const matrix = this.getMouseTransformationMatrix();
+        return applyToPoint(matrix, { x: event.pageX, y: event.pageY });
     }
 
     /**
