@@ -35,7 +35,7 @@
         "reflect-metadata": "^0.2.2",
         "splitpanes": "^3.1.8",
         "sprotty": "^1.4.0",
-        "uuid": "^11.0.5",
+        "uuid": "^11.1.0",
         "vscode-languageserver": "^9.0.1",
         "vscode-languageserver-protocol": "^3.17.5"
     }
