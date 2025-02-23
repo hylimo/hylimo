@@ -11,7 +11,7 @@ import { convertFontsToCssStyle } from "@hylimo/diagram-common";
  * IView that is the parent which handles
  */
 @injectable()
-export class SRootView implements IView {
+export class RootView implements IView {
     /**
      * ID of the arrow marker
      */
@@ -90,7 +90,7 @@ export class SRootView implements IView {
                 y: 0,
                 width: "100%",
                 height: "100%",
-                fill: `url(#${SRootView.BACKGROUND_PATTERN_ID})`
+                fill: `url(#${RootView.BACKGROUND_PATTERN_ID})`
             }
         });
     }
@@ -171,7 +171,7 @@ export class SRootView implements IView {
             "pattern",
             {
                 attrs: {
-                    id: SRootView.BACKGROUND_PATTERN_ID,
+                    id: RootView.BACKGROUND_PATTERN_ID,
                     width: gridSize,
                     height: gridSize,
                     x: (-model.scroll.x * model.zoom) % gridSize,
@@ -199,7 +199,7 @@ export class SRootView implements IView {
             "marker",
             {
                 attrs: {
-                    id: SRootView.ARROW_MARKER_ID,
+                    id: RootView.ARROW_MARKER_ID,
                     viewBox: "0 0 10 10",
                     refX: 9,
                     refY: 5,

@@ -11,6 +11,8 @@ import { LineProviderHoverData } from "../../features/create-connection/createCo
 import { renderPoint } from "./canvasPointView.js";
 import { ToolTypeProvider } from "../../features/toolbox/toolState.js";
 import { ToolboxToolType } from "../../features/toolbox/toolType.js";
+import { SElement } from "../../model/sElement.js";
+import { findViewportZoom } from "../../base/findViewportZoom.js";
 
 /**
  * Base class for CanvasElementView and CanvasConnectionView
@@ -53,7 +55,7 @@ export abstract class EditableCanvasContentView {
             "g",
             null,
             this.renderCreateConnectionOutline(hoverData),
-            ...this.renderCreateConnectionStartSymbol(hoverData)
+            ...this.renderCreateConnectionStartSymbol(model, hoverData)
         );
     }
 
@@ -61,15 +63,16 @@ export abstract class EditableCanvasContentView {
      * Renders the start symbol for the create connection preview
      * Consists of a point on the outline and an arrow pointing in the direction of the connection
      *
+     * @param model the canvas content model
      * @param preview the connection creation preview
      * @returns the rendered start symbol
      */
-    private renderCreateConnectionStartSymbol(preview: LineProviderHoverData): VNode[] {
+    private renderCreateConnectionStartSymbol(model: Readonly<SElement>, preview: LineProviderHoverData): VNode[] {
         if (this.transactionStateProvider.isInTransaction) {
             return [];
         }
         const position = LineEngine.DEFAULT.getPoint(preview.position, undefined, 0, preview.line);
-        return renderPoint(position, 1, true);
+        return renderPoint(position, findViewportZoom(model), true);
     }
 
     /**

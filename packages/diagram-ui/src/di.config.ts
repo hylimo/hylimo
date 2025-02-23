@@ -53,7 +53,7 @@ import { CanvasElementView } from "./views/canvas/canvasElementView.js";
 import { MarkerView } from "./views/canvas/markerView.js";
 import { RelativePointView } from "./views/canvas/relativePointView.js";
 import { RectView } from "./views/rectView.js";
-import { SRootView } from "./views/rootView.js";
+import { RootView } from "./views/rootView.js";
 import { TextView } from "./views/textView.js";
 import { SLinePoint } from "./model/canvas/sLinePoint.js";
 import { LinePointView } from "./views/canvas/linePointView.js";
@@ -85,7 +85,7 @@ const diagramModule = new ContainerModule((bind, unbind, isBound, rebind) => {
 
     rebind(TYPES.ICommandStack).to(CommandStack).inSingletonScope();
 
-    configureModelElement(context, Root.TYPE, SRoot, SRootView);
+    configureModelElement(context, Root.TYPE, SRoot, RootView);
     configureModelElement(context, Rect.TYPE, SRect, RectView);
     configureModelElement(context, Ellipse.TYPE, SEllipse, EllipseView);
     configureModelElement(context, Path.TYPE, SPath, PathView);

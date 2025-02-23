@@ -6,7 +6,7 @@ import { CanvasPointView } from "./canvasPointView.js";
 import { Point } from "@hylimo/diagram-common";
 import { SCanvasPoint } from "../../model/canvas/sCanvasPoint.js";
 import { findViewportZoom } from "../../base/findViewportZoom.js";
-import { SRootView } from "../rootView.js";
+import { RootView } from "../rootView.js";
 
 /**
  * IView that represents an RelativePoint
@@ -38,7 +38,7 @@ export class RelativePointView extends CanvasPointView<SRelativePoint> {
                 svg("polyline.canvas-dependency-line", {
                     attrs: {
                         points: `${startX},${startY} ${startX},${endY} ${endX},${endY}`,
-                        "marker-start": `url(#${SRootView.ARROW_MARKER_ID})`,
+                        "marker-start": `url(#${RootView.ARROW_MARKER_ID})`,
                         "stroke-dasharray": 8 / zoom
                     }
                 })
