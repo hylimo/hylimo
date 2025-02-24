@@ -140,18 +140,18 @@ export class CanvasConnectionView extends EditableCanvasContentView implements I
      * @returns the rendered preview point if available
      */
     private renderSplitSegmentPreview(model: Readonly<SCanvasConnection>): VNode | undefined {
-        const hoverData = model.hoverData;
-        if (!model.selected || hoverData == undefined) {
+        const projectionResult = model.splitPreviewData;
+        if (!model.selected || projectionResult == undefined) {
             return undefined;
         }
-        const { position, line, projectionResult } = hoverData;
+        const line = model.line;
         const segment = model.index.getById(
             line.line.segments[projectionResult.segment].origin
         ) as SCanvasConnectionSegment;
         if (!segment.canSplitSegment()) {
             return undefined;
         }
-        return this.renderPreviewPoint(LineEngine.DEFAULT.getPoint(position, undefined, 0, line), model);
+        return this.renderPreviewPoint(LineEngine.DEFAULT.getPoint(projectionResult.pos, undefined, 0, line), model);
     }
 
     /**
@@ -162,6 +162,6 @@ export class CanvasConnectionView extends EditableCanvasContentView implements I
      * @returns the rendered preview point
      */
     private renderPreviewPoint({ x, y }: Point, model: Readonly<SCanvasConnection>): VNode | undefined {
-        return svg("g", null, ...renderPoint({ x, y }, findViewportZoom(model), true));
+        return svg("g.split-canvas-connetion-preview", null, ...renderPoint({ x, y }, findViewportZoom(model), true));
     }
 }

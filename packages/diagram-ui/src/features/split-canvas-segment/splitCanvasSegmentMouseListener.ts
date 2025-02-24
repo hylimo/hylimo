@@ -26,6 +26,7 @@ import { SCanvasAxisAlignedSegment } from "../../model/canvas/sCanvasAxisAligned
 import { SCanvasBezierSegment } from "../../model/canvas/sCanvasBezierSegment.js";
 import { Bezier } from "bezier-js";
 import { applyToPoint } from "transformation-matrix";
+import { UpdateSplitConnectionPreviewDataAction } from "./updateSplitConnectionPreviewData.js";
 
 /**
  * Listener for splitting canvas connection segments by shift-clicking on them
@@ -38,38 +39,95 @@ export class SplitCanvasSegmentMouseListener extends MouseListener {
     @inject(TYPES.TransactionIdProvider) transactionIdProvider!: TransactionIdProvider;
 
     override mouseDown(target: SModelElementImpl, event: MouseEvent): Action[] {
-        if (
-            event.shiftKey &&
-            target instanceof SCanvasConnection &&
-            !(event.ctrlKey || event.altKey) &&
-            target.selected
-        ) {
-            const canvas = target.parent;
-            const matrix = canvas.getMouseTransformationMatrix();
-            const coordinates = applyToPoint(matrix, { x: event.clientX, y: event.clientY });
-            const projectedPoint = LineEngine.DEFAULT.projectPoint(coordinates, target.line);
-            const projectedCoordinates = LineEngine.DEFAULT.getPoint(projectedPoint.pos, undefined, 0, target.line);
-            const segment = target.line.line.segments[projectedPoint.segment];
-            const originSegment = target.index.getById(segment.origin) as SCanvasConnectionSegment;
-            if (!originSegment.canSplitSegment()) {
-                return [];
-            }
-            const edits = this.computeSegmentEdits(originSegment, {
-                projectedCoordinates,
-                segmentIndex: segment.originSegment,
-                projectedPoint,
-                target
-            });
-            const action: TransactionalAction = {
-                kind: TransactionalAction.KIND,
-                transactionId: this.transactionIdProvider.generateId(),
-                sequenceNumber: 0,
-                committed: true,
-                edits
-            };
-            return [action];
+        if (!this.canSplit(target, event)) {
+            return [];
+        }
+        const projectedPoint = this.projectOnConnection(target, event);
+        const projectedCoordinates = LineEngine.DEFAULT.getPoint(projectedPoint.pos, undefined, 0, target.line);
+        const segment = target.line.line.segments[projectedPoint.segment];
+        const originSegment = target.index.getById(segment.origin) as SCanvasConnectionSegment;
+        if (!originSegment.canSplitSegment()) {
+            return [];
+        }
+        const edits = this.computeSegmentEdits(originSegment, {
+            projectedCoordinates,
+            segmentIndex: segment.originSegment,
+            projectedPoint,
+            target
+        });
+        const action: TransactionalAction = {
+            kind: TransactionalAction.KIND,
+            transactionId: this.transactionIdProvider.generateId(),
+            sequenceNumber: 0,
+            committed: true,
+            edits
+        };
+        return [action];
+    }
+
+    override mouseMove(target: SModelElementImpl, event: MouseEvent): Action[] {
+        if (!(target instanceof SCanvasConnection && target.selected)) {
+            return [];
+        }
+        if (!this.canSplit(target, event)) {
+            return [this.generateUnsetSplitPreviewDataAction(target)];
+        }
+        const projectedPoint = this.projectOnConnection(target, event);
+        const updateAction: UpdateSplitConnectionPreviewDataAction = {
+            kind: UpdateSplitConnectionPreviewDataAction.KIND,
+            connectionId: target.id,
+            previewData: projectedPoint
+        };
+        return [updateAction];
+    }
+
+    override mouseOut(target: SModelElementImpl): Action[] {
+        if (target instanceof SCanvasConnection && target.selected) {
+            return [this.generateUnsetSplitPreviewDataAction(target)];
         }
         return [];
+    }
+
+    /**
+     * Checks if a target could be split by the event
+     *
+     * @param target the target to check
+     * @param event the event to check
+     * @returns true if the target could be split by the event
+     */
+    private canSplit(target: SModelElementImpl, event: MouseEvent): target is SCanvasConnection {
+        return (
+            event.shiftKey && target instanceof SCanvasConnection && !(event.ctrlKey || event.altKey) && target.selected
+        );
+    }
+
+    /**
+     * Projects the event on the connection
+     *
+     * @param target the target connection
+     * @param event the event to project
+     * @returns the projected point
+     */
+    private projectOnConnection(target: SCanvasConnection, event: MouseEvent) {
+        const canvas = target.parent;
+        const matrix = canvas.getMouseTransformationMatrix();
+        const coordinates = applyToPoint(matrix, { x: event.clientX, y: event.clientY });
+        const projectedPoint = LineEngine.DEFAULT.projectPoint(coordinates, target.line);
+        return projectedPoint;
+    }
+
+    /**
+     * Generates an action to unset the split preview data
+     *
+     * @param target the target connection
+     * @returns the action to unset the split preview data
+     */
+    private generateUnsetSplitPreviewDataAction(target: SCanvasConnection): UpdateSplitConnectionPreviewDataAction {
+        return {
+            kind: UpdateSplitConnectionPreviewDataAction.KIND,
+            connectionId: target.id,
+            previewData: undefined
+        };
     }
 
     /**
