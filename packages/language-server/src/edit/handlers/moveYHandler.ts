@@ -12,7 +12,11 @@ export const moveYHandler: EditHandler<MoveEdit> = {
     predictActionDiff(lastApplied, newest, elements, elementLookup) {
         const deltaY = newest.dy - (lastApplied?.dy ?? 0);
         const updates: IncrementalUpdate[] = [];
-        for (const element of computeElementsToUpdate(elements, elementLookup)) {
+        const elementsToUpdate = computeElementsToUpdate(elements, elementLookup);
+        if (elementsToUpdate == undefined) {
+            return undefined;
+        }
+        for (const element of elementsToUpdate) {
             if (AbsolutePoint.isAbsolutePoint(element)) {
                 updates.push({
                     target: element.id,

@@ -68,7 +68,11 @@ export class UpdateModelCommand extends BaseUpdateModelCommand {
             animations.push(fadeAnimation);
         }
         const { distance } = calculateLevenshteinDistance(this.oldRoot.index, newRoot.index);
-        if (distance > 0 || animations.length === 0) {
+        if (
+            distance > 0 ||
+            animations.length === 0 ||
+            (this.transactionStateProvider.isInTransaction && (this.oldRoot as SRoot).incrementalUpdateCount < 3)
+        ) {
             return newRoot;
         } else if (animations.length > 1) {
             return new CompoundAnimation(newRoot, context, animations);

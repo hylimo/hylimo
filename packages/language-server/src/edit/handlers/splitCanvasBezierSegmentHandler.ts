@@ -9,7 +9,7 @@ export const splitCanvasBezierSegmentHandler: EditHandler<SplitCanvasBezierSegme
     type: DefaultEditTypes.SPLIT_CANVAS_BEZIER_SEGMENT,
 
     predictActionDiff() {
-        return [];
+        return undefined;
     },
 
     transformEdit(edit, config) {

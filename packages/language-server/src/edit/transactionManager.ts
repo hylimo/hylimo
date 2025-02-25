@@ -119,7 +119,7 @@ export class TransactionManager {
      */
     private createHandleActionResult(action: TransactionalAction): IncrementalUpdate[] {
         const currentDiagram = this.diagram.currentDiagram;
-        if (currentDiagram != undefined && this.edit != undefined && (action.sequenceNumber > 0 || !action.committed)) {
+        if (currentDiagram != undefined && this.edit != undefined) {
             return this.edit.predictActionDiff(this.diagram.currentDiagram!, this.lastAppliedAction, action);
         } else {
             return [];

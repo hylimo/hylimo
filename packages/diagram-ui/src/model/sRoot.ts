@@ -72,6 +72,12 @@ export class SRoot extends ViewportRootElementImpl implements CanvasLike {
      */
     createConnectionHoverData?: CreateConnectionHoverData;
 
+    /**
+     * The amount of time this model has been updated incrementally
+     * Used to disable animation during transactions with many full updates
+     */
+    incrementalUpdateCount = 0;
+
     constructor(index = new ModelIndexImpl()) {
         super(index);
     }

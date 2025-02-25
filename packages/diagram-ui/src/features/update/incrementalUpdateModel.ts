@@ -14,6 +14,7 @@ export class IncrementalUpdateModelCommand extends Command {
         const root = context.root as SRoot;
         root.changeRevision++;
         root.sequenceNumber = this.action.sequenceNumber;
+        root.incrementalUpdateCount++;
         for (const update of this.action.updates) {
             const element = context.root.index.getById(update.target);
             if (element !== undefined) {
