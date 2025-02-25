@@ -1,7 +1,7 @@
 import { nodeResolve } from "@rollup/plugin-node-resolve";
 import { wasm } from "@rollup/plugin-wasm";
 import typescript from "@rollup/plugin-typescript";
-import glob from "glob";
+import { glob } from "glob";
 import path from "node:path";
 import { fileURLToPath, URL } from "node:url";
 
