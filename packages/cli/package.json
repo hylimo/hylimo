@@ -14,6 +14,7 @@
     },
     "dependencies": {
         "@hylimo/diagram": "^1.1.2",
+        "@hylimo/diagram-common": "^1.1.2",
         "@hylimo/diagram-render-pdf": "^1.1.2",
         "@hylimo/diagram-render-svg": "^1.1.2",
         "commander": "^13.1.0"

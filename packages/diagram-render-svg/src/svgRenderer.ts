@@ -19,8 +19,8 @@ import {
 import { SimplifiedCanvasElement } from "@hylimo/diagram-common";
 import { create } from "xmlbuilder2";
 import { XMLBuilder } from "xmlbuilder2/lib/interfaces.js";
-import { create as createFont, Font } from "fontkit";
-import { Buffer } from "buffer";
+import { Font } from "fontkit";
+import { createFont } from "@hylimo/diagram";
 
 /**
  * Renderer which renders a diagram to svg
@@ -129,8 +129,7 @@ class SVGRendererContext {
             if (!fontData) {
                 throw new Error(`Font with family ${fontFamily} not found`);
             }
-            const buffer = Buffer.from(fontData.data, "base64");
-            this.fonts.set(fontFamily, createFont(buffer) as Font);
+            this.fonts.set(fontFamily, createFont(fontData.data));
         }
         return this.fonts.get(fontFamily)!;
     }

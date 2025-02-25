@@ -45,6 +45,7 @@ export * from "./features/select/di.config.js";
 export * from "./features/select/selectMouseListener.js";
 export * from "./features/split-canvas-segment/di.config.js";
 export * from "./features/split-canvas-segment/splitCanvasSegmentMouseListener.js";
+export * from "./features/split-canvas-segment/updateSplitConnectionPreviewData.js";
 export * from "./features/toolbox/views/connection.js";
 export * from "./features/toolbox/views/icon.js";
 export * from "./features/toolbox/views/item.js";
