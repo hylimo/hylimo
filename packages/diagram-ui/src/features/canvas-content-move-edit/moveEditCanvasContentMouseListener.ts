@@ -40,11 +40,6 @@ import { ToolTypeProvider } from "../toolbox/toolState.js";
 import { isRegularInteractionTool } from "../toolbox/toolType.js";
 
 /**
- * The maximum number of updates that can be performed on the same revision.
- */
-const maxUpdatesPerRevision = 5;
-
-/**
  * If a resize scale exceeds this value, instead resize with scale 1 in the opposite direction is performed.
  */
 const maxResizeScale = 10;
@@ -59,6 +54,11 @@ const maxResizeScale = 10;
  */
 @injectable()
 export class MoveEditCanvasContentMouseListener extends MouseListener {
+    /**
+     * The maximum number of updates that can be performed on the same revision.
+     */
+    static readonly MAX_UPDATES_PER_REVISION = 5;
+
     /**
      * The tool type provider to determine the current tool type
      */
@@ -80,7 +80,7 @@ export class MoveEditCanvasContentMouseListener extends MouseListener {
                     kind: TransactionalMoveAction.KIND,
                     handlerProvider: () =>
                         this.createHandler(moveableTarget, event) ?? new NoopMoveHandler(identity(), undefined),
-                    maxUpdatesPerRevision
+                    maxUpdatesPerRevision: MoveEditCanvasContentMouseListener.MAX_UPDATES_PER_REVISION
                 };
                 return [action];
             }

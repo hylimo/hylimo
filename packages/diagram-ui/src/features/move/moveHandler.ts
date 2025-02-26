@@ -54,7 +54,9 @@ export abstract class MoveHandler {
             };
             actions.push(moveCursorAction);
         }
-        this.hasMoved = true;
+        if (!committed) {
+            this.hasMoved = true;
+        }
         const { x, y } = applyToPoint(this.transformationMatrix, { x: event.pageX, y: event.pageY });
         const transactionalAction: TransactionalAction = {
             kind: TransactionalAction.KIND,
