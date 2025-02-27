@@ -7,6 +7,9 @@
     "references": [
         {
             "path": "../diagram-common"
+        },
+        {
+            "path": "../diagram"
         }
     ],
     "include": ["src/**/*.ts"],

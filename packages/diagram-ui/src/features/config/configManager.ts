@@ -1,6 +1,7 @@
 import { EditorConfig, UpdateEditorConfigAction } from "@hylimo/diagram-protocol";
 import { inject, injectable } from "inversify";
-import { IActionDispatcher, TYPES } from "sprotty";
+import { IActionDispatcher } from "sprotty";
+import { TYPES } from "../types.js";
 
 /**
  * Manager which manges the editor config

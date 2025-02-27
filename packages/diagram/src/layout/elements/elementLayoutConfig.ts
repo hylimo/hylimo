@@ -163,7 +163,8 @@ export abstract class ElementLayoutConfig implements LayoutConfig {
         ];
         return {
             start: startPos,
-            segments
+            segments,
+            isClosed: true
         };
     }
 

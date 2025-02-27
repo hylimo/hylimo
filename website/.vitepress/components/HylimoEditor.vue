@@ -18,14 +18,14 @@ import "reflect-metadata";
 import { Splitpanes, Pane } from "splitpanes";
 import "splitpanes/dist/splitpanes.css";
 import { ref, onBeforeUnmount, computed } from "vue";
-import { ActionHandlerRegistry, IActionDispatcher, TYPES } from "sprotty";
+import { ActionHandlerRegistry, IActionDispatcher } from "sprotty";
 import { RequestModelAction, ActionMessage } from "sprotty-protocol";
 import {
     DiagramActionNotification,
     DiagramOpenNotification,
     PublishDocumentRevealNotification
 } from "@hylimo/diagram-protocol";
-import { createContainer, DiagramServerProxy, ResetCanvasBoundsAction } from "@hylimo/diagram-ui";
+import { createContainer, DiagramServerProxy, ResetCanvasBoundsAction, TYPES } from "@hylimo/diagram-ui";
 import { Root } from "@hylimo/diagram-common";
 import { onMounted } from "vue";
 import { EditorAppConfig, MonacoEditorLanguageClientWrapper } from "monaco-editor-wrapper";
@@ -126,7 +126,9 @@ onMounted(async () => {
             scrollbar: {
                 alwaysConsumeMouseWheel: false
             },
-            glyphMargin: false
+            glyphMargin: false,
+            // @ts-expect-error (outdated types due to @codingame/monaco-vscode-api) disable to prevent / to open the search bar
+            experimentalEditContextEnabled: false
         },
         codeResources: {
             modified: {

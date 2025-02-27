@@ -8,12 +8,12 @@ import { AbsolutePoint, CanvasElement, Element, RelativePoint } from "@hylimo/di
  *
  * @param elements the elements to compute the updates for
  * @param elementLookup a lookup table for all current elements
- * @returns the elements to update
+ * @returns the elements to update, or undefined if the prediction is unreliable
  */
 export function computeElementsToUpdate(
     elements: Element[],
     elementLookup: Record<string, Element>
-): (AbsolutePoint | RelativePoint)[] {
+): (AbsolutePoint | RelativePoint)[] | undefined {
     const points: (AbsolutePoint | RelativePoint)[] = [];
     const canvasElements: CanvasElement[] = [];
     for (const element of elements) {
@@ -25,7 +25,7 @@ export function computeElementsToUpdate(
     }
     if (points.length > 0) {
         if (canvasElements.length > 0) {
-            return [];
+            return undefined;
         } else {
             return points;
         }

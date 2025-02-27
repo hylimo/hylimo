@@ -16,7 +16,7 @@ export class CreateElementMoveHandler extends MoveHandler {
         private readonly edit: `toolbox/${string}`,
         private readonly root: SRoot
     ) {
-        super(root.getMouseTransformationMatrix(), false);
+        super(root.getMouseTransformationMatrix(), undefined, false);
     }
 
     override generateEdits(x: number, y: number): Edit[] {

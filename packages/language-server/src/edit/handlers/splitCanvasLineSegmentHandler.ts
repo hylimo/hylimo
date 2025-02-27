@@ -9,7 +9,7 @@ export const splitCanvasLineSegmentHandler: EditHandler<SplitCanvasLineSegmentEd
     type: DefaultEditTypes.SPLIT_CANVAS_LINE_SEGMENT,
 
     predictActionDiff() {
-        return [];
+        return undefined;
     },
 
     transformEdit(edit, config) {

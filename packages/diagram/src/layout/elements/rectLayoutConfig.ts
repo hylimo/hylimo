@@ -98,7 +98,8 @@ export class RectLayoutConfig extends ContentShapeLayoutConfig {
             ];
             return {
                 start: startPos,
-                segments
+                segments,
+                isClosed: true
             };
         } else {
             return super.outline(layout, element, position, size, id);

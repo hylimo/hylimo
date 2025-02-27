@@ -15,7 +15,7 @@
     },
     "dependencies": {
         "bezier-js": "^6.1.4",
-        "transformation-matrix": "^2.16.1",
+        "transformation-matrix": "^3.0.0",
         "svgpath": "^2.6.0"
     },
     "devDependencies": {

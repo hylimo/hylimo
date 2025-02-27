@@ -3,9 +3,7 @@
  */
 export interface ConnectionEditProvider {
     /**
-     * Gets the current connection edit
-     *
-     * @returns the current connection edit or undefined if no connection edit is available
+     * The current connection edit or undefined if no connection edit is available
      */
-    getConnectionEdit(): `connection/${string}` | undefined;
+    readonly connectionEdit: `connection/${string}` | undefined;
 }

@@ -134,24 +134,28 @@ export class TransactionalEdit {
         newest: TransactionalAction
     ): IncrementalUpdate[] {
         const res: IncrementalUpdate[] = [];
-        this.action.edits.forEach((edit, index) => {
+        for (let i = 0; i < this.action.edits.length; i++) {
+            const edit = this.action.edits[i];
             const elements = edit
                 .elements!.map((id) => layoutedDiagram.elementLookup[id])
                 .filter((element) => element != undefined);
             for (const type of edit.types!) {
                 const handler = this.registry.getEditHandler(type);
                 if (handler != undefined) {
-                    res.push(
-                        ...handler.predictActionDiff(
-                            lastApplied?.edits?.[index]?.values,
-                            newest.edits[index].values,
-                            elements,
-                            layoutedDiagram.elementLookup
-                        )
+                    const prediction = handler.predictActionDiff(
+                        lastApplied?.edits?.[i]?.values,
+                        newest.edits[i].values,
+                        elements,
+                        layoutedDiagram.elementLookup
                     );
+                    if (prediction != undefined) {
+                        res.push(...prediction);
+                    } else {
+                        return [];
+                    }
                 }
             }
-        });
+        }
         return res;
     }
 

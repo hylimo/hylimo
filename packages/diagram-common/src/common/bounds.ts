@@ -14,3 +14,21 @@ export interface Bounds {
      */
     position: Point;
 }
+
+export namespace Bounds {
+    /**
+     * Checks if the given bounds contain the given point
+     *
+     * @param bounds the bounds to check
+     * @param point the point to check
+     * @returns true if the bounds contain the point
+     */
+    export function contains(bounds: Bounds, point: Point): boolean {
+        return (
+            point.x >= bounds.position.x &&
+            point.x <= bounds.position.x + bounds.size.width &&
+            point.y >= bounds.position.y &&
+            point.y <= bounds.position.y + bounds.size.height
+        );
+    }
+}

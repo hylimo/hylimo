@@ -1,4 +1,4 @@
-import { Command, CommandExecutionContext, CommandReturn, TYPES as SPROTTY_TYPES } from "sprotty";
+import { Command, CommandExecutionContext, CommandReturn } from "sprotty";
 import { TransactionalMoveAction } from "./transactionalMoveAction.js";
 import { injectable, inject } from "inversify";
 import { TYPES } from "../types.js";
@@ -15,7 +15,7 @@ export class TransactionalMoveCommand extends Command {
     /**
      * The action to perform
      */
-    @inject(SPROTTY_TYPES.Action) private action!: TransactionalMoveAction;
+    @inject(TYPES.Action) private action!: TransactionalMoveAction;
 
     /**
      * The listener to activate

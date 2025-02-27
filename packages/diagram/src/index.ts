@@ -32,6 +32,7 @@ export * from "./layout/engine/edits.js";
 export * from "./layout/engine/layout.js";
 export * from "./layout/engine/layoutCache.js";
 export * from "./layout/engine/layoutEngine.js";
+export * from "./layout/font/createFont.js";
 export * from "./layout/font/fontCollection.js";
 export * from "./layout/font/fontFamily.js";
 export * from "./layout/font/fontManager.js";

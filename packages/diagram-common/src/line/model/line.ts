@@ -16,6 +16,10 @@ export interface Line {
      * The segments of the line
      */
     segments: Segment[];
+    /**
+     * Whether the line is closed or not
+     */
+    isClosed: boolean;
 }
 
 /**

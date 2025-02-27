@@ -18,6 +18,14 @@ export class TransactionStateProvider implements IActionHandler {
      */
     types: string[] | undefined = undefined;
 
+    /**
+     * Whether the current transaction is a create connection transaction
+     */
+    get isInCreateConnectionTransaction(): boolean {
+        const types = this.types;
+        return types != undefined && types.length === 1 && types[0].startsWith("connection/");
+    }
+
     handle(action: Action): ICommand | Action | void {
         if (TransactionalAction.isTransactionalAction(action)) {
             this.isInTransaction = !action.committed;

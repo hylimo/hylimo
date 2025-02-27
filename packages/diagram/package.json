@@ -22,7 +22,9 @@
         "fontkit": "^2.0.4",
         "linebreak": "^1.1.0",
         "p-limit": "^6.2.0",
-        "uuid": "^11.0.5"
+        "svgpath": "^2.6.0",
+        "transformation-matrix": "^3.0.0",
+        "uuid": "^11.1.0"
     },
     "devDependencies": {
         "@types/fontkit": "^2.0.7"

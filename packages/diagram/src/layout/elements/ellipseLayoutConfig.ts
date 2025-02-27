@@ -74,7 +74,8 @@ export class EllipseLayoutConfig extends ContentShapeLayoutConfig {
         }));
         return {
             start: startPos,
-            segments: segments
+            segments: segments,
+            isClosed: true
         };
     }
 

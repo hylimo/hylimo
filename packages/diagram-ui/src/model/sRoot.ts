@@ -1,12 +1,12 @@
-import { EditSpecification, FontData, convertFontsToCssStyle } from "@hylimo/diagram-common";
+import { EditSpecification, FontData } from "@hylimo/diagram-common";
 import { isSelectable, ModelIndexImpl, SModelElementImpl, ViewportRootElementImpl } from "sprotty";
 import { SCanvasLayoutEngine } from "./canvas/sCanvasLayoutEngine.js";
-import { Matrix, compose, translate, scale } from "transformation-matrix";
+import { Matrix, compose, translate, scale, applyToPoint } from "transformation-matrix";
 import { Bounds } from "sprotty-protocol";
 import { Bounds as HylimoBounds } from "@hylimo/diagram-common";
 import { CanvasLike } from "./canvas/canvasLike.js";
 import { PointVisibilityManager } from "./canvas/pointVisibilityManager.js";
-import { LineProviderHoverDataProvider } from "../features/line-provider-hover/lineProviderHoverData.js";
+import { CreateConnectionHoverData } from "../features/create-connection/createConnectionHoverData.js";
 
 /**
  * Root element.
@@ -63,14 +63,25 @@ export class SRoot extends ViewportRootElementImpl implements CanvasLike {
     edits!: EditSpecification;
 
     /**
+     * Is this a preview element?
+     */
+    preview!: boolean;
+
+    /**
      * The global rotation of the canvas, always 0 for the root element
      */
     globalRotation = 0;
 
     /**
-     * If defined, can provide information on how the user hovers over a line provider
+     * If defined, can provide information where a potential connection would be created
      */
-    lineProviderHoverDataProvider?: LineProviderHoverDataProvider;
+    createConnectionHoverData?: CreateConnectionHoverData;
+
+    /**
+     * The amount of time this model has been updated incrementally
+     * Used to disable animation during transactions with many full updates
+     */
+    incrementalUpdateCount = 0;
 
     constructor(index = new ModelIndexImpl()) {
         super(index);
@@ -115,20 +126,13 @@ export class SRoot extends ViewportRootElementImpl implements CanvasLike {
     }
 
     /**
-     * Genrates the style string based on the fonts
+     * Gets the position of the mouse event in the coordinate system of the canvas.
      *
-     * @param baseDiv the id of the base div
-     * @returns the generated style string
+     * @param event the mouse event
+     * @returns the position in the canvas coordinate system
      */
-    generateStyle(baseDiv: string): string {
-        const staticStyles = `
-            #${baseDiv}.sprotty svg {
-                --diagram-zoom: ${this.zoom};
-                --diagram-zoom-normalized: ${this.zoom / Math.pow(2, Math.round(Math.log2(this.zoom) / 2) * 2)};
-                --diagram-scroll-x: ${this.scroll.x}px;
-                --diagram-scroll-y: ${this.scroll.y}px;
-            }
-        `;
-        return convertFontsToCssStyle(this.fonts) + staticStyles;
+    getPosition(event: MouseEvent): { x: number; y: number } {
+        const matrix = this.getMouseTransformationMatrix();
+        return applyToPoint(matrix, { x: event.pageX, y: event.pageY });
     }
 }

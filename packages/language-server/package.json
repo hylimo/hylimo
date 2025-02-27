@@ -15,9 +15,11 @@
     "dependencies": {
         "@hylimo/core": "^1.1.2",
         "@hylimo/diagram": "^1.1.2",
+        "@hylimo/diagram-common": "^1.1.2",
         "@hylimo/diagram-protocol": "^1.1.2",
+        "chevrotain": "^11.0.3",
         "jsonata": "^2.0.6",
-        "prettier": "^3.4.2",
+        "prettier": "^3.5.2",
         "sprotty-protocol": "^1.4.0",
         "vscode-languageserver": "9.0.1",
         "vscode-languageserver-textdocument": "^1.0.12"

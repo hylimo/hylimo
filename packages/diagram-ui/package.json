@@ -16,9 +16,15 @@
         "@hylimo/diagram-common": "^1.1.2",
         "@hylimo/diagram-protocol": "^1.1.2",
         "@hylimo/diagram-render-svg": "^1.1.2",
+        "@mapbox/unitbezier": "^0.0.1",
         "@vscode/codicons": "^0.0.36",
-        "minisearch": "^7.1.1",
+        "bezier-js": "^6.1.4",
+        "inversify": "^6.2.2",
+        "lucide": "^0.476.0",
+        "minisearch": "^7.1.2",
+        "snabbdom": "^3.6.2",
         "sprotty": "^1.4.0",
-        "sprotty-protocol": "^1.4.0"
+        "sprotty-protocol": "^1.4.0",
+        "transformation-matrix": "^3.0.0"
     }
 }

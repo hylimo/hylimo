@@ -1,5 +1,5 @@
 import { harfbuzzjsSubset } from "@hylimo/wasm-libs";
-import { Buffer } from "buffer";
+import { Buffer } from "buffer/index.js";
 import pLimit from "p-limit";
 
 /**

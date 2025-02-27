@@ -11,14 +11,7 @@ import {
     ProjectionResult
 } from "@hylimo/diagram-common";
 import { SCanvasConnectionSegment } from "../../model/canvas/sCanvasConnectionSegment.js";
-import {
-    AxisAlignedSegmentEdit,
-    Edit,
-    SplitCanvasAxisAlignedSegmentEdit,
-    SplitCanvasBezierSegmentEdit,
-    SplitCanvasLineSegmentEdit,
-    TransactionalAction
-} from "@hylimo/diagram-protocol";
+import { AxisAlignedSegmentEdit } from "@hylimo/diagram-protocol";
 import { TYPES } from "../types.js";
 import { TransactionIdProvider } from "../transaction/transactionIdProvider.js";
 import { SCanvasLineSegment } from "../../model/canvas/sCanvasLineSegment.js";
@@ -26,6 +19,14 @@ import { SCanvasAxisAlignedSegment } from "../../model/canvas/sCanvasAxisAligned
 import { SCanvasBezierSegment } from "../../model/canvas/sCanvasBezierSegment.js";
 import { Bezier } from "bezier-js";
 import { applyToPoint } from "transformation-matrix";
+import { UpdateSplitConnectionPreviewDataAction } from "./updateSplitConnectionPreviewData.js";
+import { SplitSegmentMoveHandler } from "./handler/splitSegmentMoveHandler.js";
+import { SplitLineSegmentMoveHandler } from "./handler/splitLineSegmentMoveHandler.js";
+import { Matrix } from "transformation-matrix";
+import { SplitBezierSegmentMoveHandler } from "./handler/splitBezierSegmentMoveHandler.js";
+import { SplitAxisAlignedSegmentMoveHandler } from "./handler/splitAxisAlignedSegmentMoveHandler.js";
+import { TransactionalMoveAction } from "../move/transactionalMoveAction.js";
+import { MoveEditCanvasContentMouseListener } from "../canvas-content-move-edit/moveEditCanvasContentMouseListener.js";
 
 /**
  * Listener for splitting canvas connection segments by shift-clicking on them
@@ -38,90 +39,142 @@ export class SplitCanvasSegmentMouseListener extends MouseListener {
     @inject(TYPES.TransactionIdProvider) transactionIdProvider!: TransactionIdProvider;
 
     override mouseDown(target: SModelElementImpl, event: MouseEvent): Action[] {
-        if (
-            event.shiftKey &&
-            target instanceof SCanvasConnection &&
-            !(event.ctrlKey || event.altKey) &&
-            target.selected
-        ) {
-            const canvas = target.parent;
-            const matrix = canvas.getMouseTransformationMatrix();
-            const coordinates = applyToPoint(matrix, { x: event.clientX, y: event.clientY });
-            const projectedPoint = LineEngine.DEFAULT.projectPoint(coordinates, target.line);
-            const projectedCoordinates = LineEngine.DEFAULT.getPoint(projectedPoint.pos, undefined, 0, target.line);
-            const segment = target.line.line.segments[projectedPoint.segment];
-            const originSegment = target.index.getById(segment.origin) as SCanvasConnectionSegment;
-            if (!originSegment.canSplitSegment()) {
-                return [];
-            }
-            const edits = this.computeSegmentEdits(originSegment, {
-                projectedCoordinates,
-                segmentIndex: segment.originSegment,
-                projectedPoint,
-                target
-            });
-            const action: TransactionalAction = {
-                kind: TransactionalAction.KIND,
-                transactionId: this.transactionIdProvider.generateId(),
-                sequenceNumber: 0,
-                committed: true,
-                edits
-            };
-            return [action];
+        if (!this.canSplit(target, event)) {
+            return [];
+        }
+        const { projectedPoint, transformationMatrix } = this.projectOnConnection(target, event);
+        const projectedCoordinates = LineEngine.DEFAULT.getPoint(projectedPoint.pos, undefined, 0, target.line);
+        const segment = target.line.line.segments[projectedPoint.segment];
+        const originSegment = target.index.getById(segment.origin) as SCanvasConnectionSegment;
+        if (!originSegment.canSplitSegment()) {
+            return [];
+        }
+        const context: SplitSegmentEditContext = {
+            projectedCoordinates,
+            segmentIndex: segment.originSegment,
+            projectedPoint,
+            transformationMatrix,
+            target
+        };
+        const action: TransactionalMoveAction = {
+            kind: TransactionalMoveAction.KIND,
+            handlerProvider: () => this.createSegmentHandler(originSegment, context),
+            maxUpdatesPerRevision: MoveEditCanvasContentMouseListener.MAX_UPDATES_PER_REVISION
+        };
+        return [action];
+    }
+
+    override mouseMove(target: SModelElementImpl, event: MouseEvent): Action[] {
+        if (!(target instanceof SCanvasConnection && target.selected)) {
+            return [];
+        }
+        const updateAction: UpdateSplitConnectionPreviewDataAction = {
+            kind: UpdateSplitConnectionPreviewDataAction.KIND,
+            connectionId: target.id,
+            previewDataProvider: () => this.projectOnConnection(target, event).projectedPoint
+        };
+        return [updateAction];
+    }
+
+    override mouseOut(target: SModelElementImpl): Action[] {
+        if (target instanceof SCanvasConnection && target.selected) {
+            return [this.generateUnsetSplitPreviewDataAction(target)];
         }
         return [];
     }
 
     /**
-     * Computes the edits for splitting a segment
+     * Checks if a target could be split by the event
+     *
+     * @param target the target to check
+     * @param event the event to check
+     * @returns true if the target could be split by the event
+     */
+    private canSplit(target: SModelElementImpl, event: MouseEvent): target is SCanvasConnection {
+        return (
+            event.shiftKey && target instanceof SCanvasConnection && !(event.ctrlKey || event.altKey) && target.selected
+        );
+    }
+
+    /**
+     * Projects the event on the connection
+     *
+     * @param target the target connection
+     * @param event the event to project
+     * @returns the projected point and the mouse transformation matrix
+     */
+    private projectOnConnection(
+        target: SCanvasConnection,
+        event: MouseEvent
+    ): { projectedPoint: ProjectionResult; transformationMatrix: Matrix } {
+        const canvas = target.parent;
+        const transformationMatrix = canvas.getMouseTransformationMatrix();
+        const coordinates = applyToPoint(transformationMatrix, { x: event.clientX, y: event.clientY });
+        const projectedPoint = LineEngine.DEFAULT.projectPoint(coordinates, target.line);
+        return { projectedPoint, transformationMatrix };
+    }
+
+    /**
+     * Generates an action to unset the split preview data
+     *
+     * @param target the target connection
+     * @returns the action to unset the split preview data
+     */
+    private generateUnsetSplitPreviewDataAction(target: SCanvasConnection): UpdateSplitConnectionPreviewDataAction {
+        return {
+            kind: UpdateSplitConnectionPreviewDataAction.KIND,
+            connectionId: target.id,
+            previewDataProvider: undefined
+        };
+    }
+
+    /**
+     * Creates the edits for splitting a segment
      *
      * @param originSegment the segment to split
      * @param context the context for the edit computation
      * @returns the edits for splitting the segment
      */
-    private computeSegmentEdits(originSegment: SCanvasConnectionSegment, context: SplitSegmentEditContext): Edit[] {
+    private createSegmentHandler(
+        originSegment: SCanvasConnectionSegment,
+        context: SplitSegmentEditContext
+    ): SplitSegmentMoveHandler {
         if (originSegment instanceof SCanvasLineSegment) {
-            return this.computeLineEdits(originSegment, context);
+            return this.createLineHandler(originSegment, context);
         } else if (originSegment instanceof SCanvasAxisAlignedSegment) {
-            return this.computeAxisAlignedEdits(originSegment, context);
+            return this.createAxisAlignedHandler(originSegment, context);
         } else if (originSegment instanceof SCanvasBezierSegment) {
-            return this.computeBezierEdits(originSegment, context);
+            return this.createBezierHandler(originSegment, context);
         } else {
             throw new Error("Unknown segment type");
         }
     }
 
     /**
-     * Computes the edits for a line segment
+     * Creates the move handler for splitting a line segment
      *
      * @param originSegment the origin line segment
      * @param context the context for the edit computation
-     * @returns the edits for the line segment
+     * @returns the move handler for splitting the line segment
      */
-    private computeLineEdits(
+    private createLineHandler(
         originSegment: SCanvasLineSegment,
-        { projectedCoordinates }: SplitSegmentEditContext
-    ): Edit[] {
-        return [
-            {
-                types: [DefaultEditTypes.SPLIT_CANVAS_LINE_SEGMENT],
-                values: projectedCoordinates,
-                elements: [originSegment.id]
-            } satisfies SplitCanvasLineSegmentEdit
-        ];
+        { transformationMatrix, projectedCoordinates }: SplitSegmentEditContext
+    ): SplitLineSegmentMoveHandler {
+        return new SplitLineSegmentMoveHandler(originSegment.id, transformationMatrix, projectedCoordinates);
     }
 
     /**
-     * Computes the edits for a bezier segment
+     * Creates the move handler for splitting a bezier segment
      *
      * @param originSegment the origin bezier segment
      * @param context the context for the edit computation
-     * @returns the edits for the bezier segment
+     * @returns the move handler for splitting the bezier segment
      */
-    private computeBezierEdits(
+    private createBezierHandler(
         originSegment: SCanvasBezierSegment,
-        { target, projectedPoint, projectedCoordinates }: SplitSegmentEditContext
-    ): Edit[] {
+        { target, projectedPoint, transformationMatrix, projectedCoordinates }: SplitSegmentEditContext
+    ): SplitBezierSegmentMoveHandler {
         const index = target.segments.indexOf(originSegment);
         const layout = target.layout.segments[index];
         const curve = new Bezier(
@@ -132,55 +185,49 @@ export class SplitCanvasSegmentMouseListener extends MouseListener {
         );
         const derivative = curve.derivative(projectedPoint.relativePos);
         const scaledDerivative = Math2D.scaleTo(derivative, 100);
-        return [
-            {
-                types: [DefaultEditTypes.SPLIT_CANVAS_BEZIER_SEGMENT],
-                values: {
-                    ...projectedCoordinates,
-                    cx1: scaledDerivative.x,
-                    cy1: scaledDerivative.y,
-                    cx2: -scaledDerivative.x,
-                    cy2: -scaledDerivative.y
-                },
-                elements: [originSegment.id]
-            } satisfies SplitCanvasBezierSegmentEdit
-        ];
+        return new SplitBezierSegmentMoveHandler(
+            originSegment.id,
+            scaledDerivative.x,
+            scaledDerivative.y,
+            -scaledDerivative.x,
+            -scaledDerivative.y,
+            transformationMatrix,
+            projectedCoordinates
+        );
     }
 
     /**
-     * Computes the edit for an axis-aligned segment
+     * Creates the move handler for splitting an axis-aligned segment
      *
      * @param originSegment the origin axis-aligned segment
      * @param context the context for the edit computation
-     * @returns the edits for the axis-aligned segment
+     * @returns the move handler for splitting the axis-aligned segment
      */
-    private computeAxisAlignedEdits(
+    private createAxisAlignedHandler(
         originSegment: SCanvasAxisAlignedSegment,
-        { projectedPoint, projectedCoordinates, segmentIndex }: SplitSegmentEditContext
-    ): Edit[] {
-        const edits: Edit[] = [];
+        { projectedPoint, segmentIndex, transformationMatrix, projectedCoordinates }: SplitSegmentEditContext
+    ): SplitAxisAlignedSegmentMoveHandler {
         const { pos, nextPos } = this.calculatePosAndNextPos(segmentIndex, originSegment, projectedPoint);
-        edits.push({
-            types: [DefaultEditTypes.SPLIT_CANVAS_AXIS_ALIGNED_SEGMENT],
-            values: {
-                ...projectedCoordinates,
-                pos,
-                nextPos
-            },
-            elements: [originSegment.id]
-        } satisfies SplitCanvasAxisAlignedSegmentEdit);
         const editNextPos = originSegment.edits[DefaultEditTypes.AXIS_ALIGNED_SEGMENT_POS];
         const splitSegment = originSegment.edits[DefaultEditTypes.SPLIT_CANVAS_AXIS_ALIGNED_SEGMENT];
+        let nextSegmentEdit: AxisAlignedSegmentEdit | undefined;
         if (editNextPos != undefined && EditSpecification.isConsistent([[editNextPos], [splitSegment]])) {
-            edits.push({
+            nextSegmentEdit = {
                 types: [DefaultEditTypes.AXIS_ALIGNED_SEGMENT_POS],
                 values: {
                     pos: nextPos
                 },
                 elements: [originSegment.id]
-            } satisfies AxisAlignedSegmentEdit);
+            };
         }
-        return edits;
+        return new SplitAxisAlignedSegmentMoveHandler(
+            originSegment.id,
+            pos,
+            nextPos,
+            nextSegmentEdit,
+            transformationMatrix,
+            projectedCoordinates
+        );
     }
 
     /**
@@ -255,6 +302,10 @@ interface SplitSegmentEditContext {
      * The projected point on the segment
      */
     projectedPoint: ProjectionResult;
+    /**
+     * The mouse transformation matrix for the parent canvas
+     */
+    transformationMatrix: Matrix;
     /**
      * The target canvas connection
      */

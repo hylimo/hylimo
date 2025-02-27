@@ -11,8 +11,6 @@ import {
     SimplifiedText
 } from "@hylimo/diagram-common";
 import PDFDocument from "pdfkit/js/pdfkit.standalone.js";
-import { create } from "fontkit";
-import { Buffer } from "buffer";
 import {
     ShapeStyleAttributes,
     extractFillAttributes,
@@ -20,6 +18,7 @@ import {
     extractShapeStyleAttributes
 } from "@hylimo/diagram-render-svg";
 import EmbeddedFont from "./embeddedFont.js";
+import { createFont } from "@hylimo/diagram";
 
 /**
  * Renderer which renders a diagram to pdf
@@ -75,9 +74,8 @@ export class PDFDiagramVisitor extends SimplifiedDiagramVisitor<PDFKit.PDFDocume
 
     override visitRoot(element: Root, context: PDFKit.PDFDocument): void {
         for (const font of element.fonts) {
-            const buffer = Buffer.from(font.data, "base64");
             const id = `F${++(context as any)._fontCount}`;
-            const embeddedFont = new EmbeddedFont(context, create(buffer), id);
+            const embeddedFont = new EmbeddedFont(context, createFont(font.data), id);
             (context as any)._fontFamilies[font.fontFamily] = embeddedFont;
         }
         const [width, height] = [

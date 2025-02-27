@@ -9,7 +9,7 @@ export const splitCanvasAxisAlignedSegmentHandler: EditHandler<SplitCanvasAxisAl
     type: DefaultEditTypes.SPLIT_CANVAS_AXIS_ALIGNED_SEGMENT,
 
     predictActionDiff() {
-        return [];
+        return undefined;
     },
 
     transformEdit(edit, config) {

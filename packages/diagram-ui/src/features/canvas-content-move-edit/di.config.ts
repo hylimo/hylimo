@@ -1,6 +1,6 @@
 import { ContainerModule } from "inversify";
-import { TYPES } from "sprotty";
 import { MoveEditCanvasContentMouseListener } from "./moveEditCanvasContentMouseListener.js";
+import { TYPES } from "../types.js";
 
 /**
  * Module for all kinds of canvas content edit operations, including

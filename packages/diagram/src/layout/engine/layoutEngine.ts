@@ -189,7 +189,8 @@ export class LayoutEngine {
                     position: { x: -canvas.dx, y: -canvas.dy },
                     size: { width: canvas.width, height: canvas.height }
                 },
-                fonts: this.generateSubsettedFontData(layout)
+                fonts: this.generateSubsettedFontData(layout),
+                preview: predictionMode
             },
             elementLookup: layout.elementLookup,
             layoutElementLookup: layout.layoutElementLookup
