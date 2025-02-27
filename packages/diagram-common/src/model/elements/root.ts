@@ -22,6 +22,10 @@ export interface Root extends Element {
      * The bounds of the whole diagram, as defined by hylimo's internal definition, not the definition of any external tool
      */
     rootBounds: Bounds;
+    /**
+     * Is this a preview element?
+     */
+    preview: boolean;
 }
 
 export namespace Root {

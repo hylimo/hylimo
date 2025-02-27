@@ -20,7 +20,9 @@ export class RootView implements IView {
     /**
      * ID of the background pattern
      */
-    static readonly BACKGROUND_PATTERN_ID = "background-pattern";
+    get backgroundPatternId(): string {
+        return this.options.baseDiv + "-background-pattern";
+    }
 
     /**
      * Viewer options, used to get id of viewer element
@@ -50,7 +52,7 @@ export class RootView implements IView {
             },
             this.renderStyles(model),
             this.renderDefs(model),
-            this.renderBackground(),
+            this.renderBackground(model),
             svg(
                 "g.sprotty-root",
                 {
@@ -81,16 +83,20 @@ export class RootView implements IView {
     /**
      * Renders the background of the diagram
      *
-     * @returns the VNode for the background
+     * @param model the SRoot model
+     * @returns the VNode for the background or undefined if in preview mode
      */
-    private renderBackground(): VNode {
+    private renderBackground(model: Readonly<SRoot>): VNode | undefined {
+        if (model.preview) {
+            return undefined;
+        }
         return svg("rect", {
             attrs: {
                 x: 0,
                 y: 0,
                 width: "100%",
                 height: "100%",
-                fill: `url(#${RootView.BACKGROUND_PATTERN_ID})`
+                fill: `url(#${this.backgroundPatternId})`
             }
         });
     }
@@ -162,16 +168,19 @@ export class RootView implements IView {
      * Renders the background pattern
      *
      * @param model the SRoot model
-     * @returns the VNode for the background pattern
+     * @returns the VNode for the background pattern or undefined if in preview mode
      */
-    private renderBackgroundPattern(model: Readonly<SRoot>): VNode {
+    private renderBackgroundPattern(model: Readonly<SRoot>): VNode | undefined {
+        if (model.preview) {
+            return undefined;
+        }
         const zoomNormalized = model.zoom / Math.pow(3, Math.floor(Math.log(model.zoom) / Math.log(3)));
         const gridSize = 25 * zoomNormalized;
         return svg(
             "pattern",
             {
                 attrs: {
-                    id: RootView.BACKGROUND_PATTERN_ID,
+                    id: this.backgroundPatternId,
                     width: gridSize,
                     height: gridSize,
                     x: (-model.scroll.x * model.zoom) % gridSize,
@@ -209,10 +218,9 @@ export class RootView implements IView {
                     orient: "auto-start-reverse"
                 }
             },
-            svg("path", {
+            svg("path.arrow-marker", {
                 attrs: {
-                    d: "M 0 0 L 10 5 L 0 10 z",
-                    fill: "var(--diagram-layout-color)"
+                    d: "M 0 0 L 10 5 L 0 10 z"
                 }
             })
         );

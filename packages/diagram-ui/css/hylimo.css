@@ -1,4 +1,6 @@
 svg.hylimo {
+    background: var(--diagram-background);
+
     text {
         white-space: pre;
         user-select: none;
@@ -64,6 +66,10 @@ svg.hylimo {
         stroke: var(--diagram-layout-color);
         fill: none;
         pointer-events: none;
+    }
+
+    .arrow-marker {
+        fill: var(--diagram-layout-color);
     }
 
     .bezier-handle-line {

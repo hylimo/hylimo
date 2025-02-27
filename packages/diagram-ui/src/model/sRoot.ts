@@ -63,6 +63,11 @@ export class SRoot extends ViewportRootElementImpl implements CanvasLike {
     edits!: EditSpecification;
 
     /**
+     * Is this a preview element?
+     */
+    preview!: boolean;
+
+    /**
      * The global rotation of the canvas, always 0 for the root element
      */
     globalRotation = 0;
