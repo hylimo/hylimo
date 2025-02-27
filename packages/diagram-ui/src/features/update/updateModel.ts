@@ -23,6 +23,7 @@ import { computeCommonAnimatableFields, isLinearAnimatable } from "../animation/
 import { createFitToScreenAction } from "../viewport/fitToScreenAction.js";
 import { TYPES } from "../types.js";
 import { TransactionStateProvider } from "../transaction/transactionStateProvider.js";
+import { SCanvasConnection } from "../../model/canvas/sCanvasConnection.js";
 
 /**
  * Custom UpdateModelCommand which handles linear interpolation animations
@@ -104,6 +105,9 @@ export class UpdateModelCommand extends BaseUpdateModelCommand {
         }
         if (left instanceof SRoot && right instanceof SRoot) {
             right.createConnectionHoverData = left.createConnectionHoverData;
+        }
+        if (left instanceof SCanvasConnection && right instanceof SCanvasConnection) {
+            left.splitPreviewDataProvider = right.splitPreviewDataProvider;
         }
         if (isLinearAnimatable(left) && isLinearAnimatable(right)) {
             const commonFields = computeCommonAnimatableFields(left, right);

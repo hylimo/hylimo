@@ -1,7 +1,7 @@
 import { Action } from "sprotty-protocol";
 import { CreateConnectionHoverData } from "./createConnectionHoverData.js";
 import { Command, CommandExecutionContext, CommandReturn } from "sprotty";
-import { inject } from "inversify";
+import { inject, injectable } from "inversify";
 import { SRoot } from "../../model/sRoot.js";
 import { TYPES } from "../types.js";
 
@@ -27,6 +27,7 @@ export namespace UpdateCreateConnectionHoverDataAction {
  * Command for UpdateCreateConnectionHoverDataAction
  * Updates the connection preview provider of the root element
  */
+@injectable()
 export class UpdateCreateConnectionHoverDataCommand extends Command {
     static readonly KIND = UpdateCreateConnectionHoverDataAction.KIND;
 

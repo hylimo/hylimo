@@ -68,14 +68,10 @@ export class SplitCanvasSegmentMouseListener extends MouseListener {
         if (!(target instanceof SCanvasConnection && target.selected)) {
             return [];
         }
-        if (!this.canSplit(target, event)) {
-            return [this.generateUnsetSplitPreviewDataAction(target)];
-        }
-        const { projectedPoint } = this.projectOnConnection(target, event);
         const updateAction: UpdateSplitConnectionPreviewDataAction = {
             kind: UpdateSplitConnectionPreviewDataAction.KIND,
             connectionId: target.id,
-            previewData: projectedPoint
+            previewDataProvider: () => this.projectOnConnection(target, event).projectedPoint
         };
         return [updateAction];
     }
@@ -128,7 +124,7 @@ export class SplitCanvasSegmentMouseListener extends MouseListener {
         return {
             kind: UpdateSplitConnectionPreviewDataAction.KIND,
             connectionId: target.id,
-            previewData: undefined
+            previewDataProvider: undefined
         };
     }
 

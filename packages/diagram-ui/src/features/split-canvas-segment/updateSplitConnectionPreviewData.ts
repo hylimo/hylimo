@@ -1,7 +1,7 @@
 import { ProjectionResult } from "@hylimo/diagram-common";
 import { Command, CommandExecutionContext, CommandReturn } from "sprotty";
 import { Action } from "sprotty-protocol";
-import { inject } from "inversify";
+import { inject, injectable } from "inversify";
 import { TYPES } from "../types.js";
 import { SCanvasConnection } from "../../model/canvas/sCanvasConnection.js";
 
@@ -17,7 +17,7 @@ export interface UpdateSplitConnectionPreviewDataAction extends Action {
     /**
      * The preview data for the split
      */
-    previewData: ProjectionResult | undefined;
+    previewDataProvider: (() => ProjectionResult) | undefined;
 }
 
 export namespace UpdateSplitConnectionPreviewDataAction {
@@ -28,6 +28,7 @@ export namespace UpdateSplitConnectionPreviewDataAction {
  * Command for UpdateSplitConnectionPreviewDataAction
  * Updates the split preview data of a connection
  */
+@injectable()
 export class UpdateSplitConnectionPreviewDataCommand extends Command {
     static readonly KIND = UpdateSplitConnectionPreviewDataAction.KIND;
 
@@ -39,7 +40,7 @@ export class UpdateSplitConnectionPreviewDataCommand extends Command {
     override execute(context: CommandExecutionContext): CommandReturn {
         const connection = context.root.index.getById(this.action.connectionId);
         if (connection != undefined && connection instanceof SCanvasConnection) {
-            connection.splitPreviewData = this.action.previewData;
+            connection.splitPreviewDataProvider = this.action.previewDataProvider;
         }
         return context.root;
     }

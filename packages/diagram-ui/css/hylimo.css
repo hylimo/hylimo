@@ -132,6 +132,14 @@ svg.hylimo {
         stroke-width: 15px;
     }
 
+    .split-canvas-connetion-preview {
+        pointer-events: none;
+    }
+
+    .canvas-connection:has(.split-canvas-connetion-preview) * {
+        cursor: move;
+    }
+
     .selectable {
         cursor: pointer;
     }

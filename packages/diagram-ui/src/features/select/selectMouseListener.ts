@@ -4,6 +4,7 @@ import { ToolTypeProvider } from "../toolbox/toolState.js";
 import { TYPES } from "../types.js";
 import { Action } from "sprotty-protocol";
 import { isRegularInteractionTool } from "../toolbox/toolType.js";
+import { KeyState } from "../key-state/keyState.js";
 
 /**
  * SelectMouseListener that disables both mouseDown and mouseUp when the current tool is not a regular interaction tool
@@ -15,15 +16,20 @@ export class SelectMouseListener extends SprottySelectMouseListener {
      */
     @inject(TYPES.ToolTypeProvider) protected readonly toolTypeProvider!: ToolTypeProvider;
 
+    /**
+     * The key state to check if the space key is pressed
+     */
+    @inject(TYPES.KeyState) protected keyState!: KeyState;
+
     override mouseDown(target: SModelElementImpl, event: MouseEvent): (Action | Promise<Action>)[] {
-        if (!isRegularInteractionTool(this.toolTypeProvider.toolType)) {
+        if (!isRegularInteractionTool(this.toolTypeProvider.toolType) || this.keyState.isSpacePressed) {
             return [];
         }
         return super.mouseDown(target, event);
     }
 
     override mouseUp(target: SModelElementImpl, event: MouseEvent): (Action | Promise<Action>)[] {
-        if (!isRegularInteractionTool(this.toolTypeProvider.toolType)) {
+        if (!isRegularInteractionTool(this.toolTypeProvider.toolType) || this.keyState.isSpacePressed) {
             return [];
         }
         return super.mouseUp(target, event);

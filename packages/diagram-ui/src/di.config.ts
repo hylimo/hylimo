@@ -76,6 +76,7 @@ import { TYPES } from "./features/types.js";
 import { cursorModule } from "./features/cursor/di.config.js";
 import { selectModule } from "./features/select/di.config.js";
 import { boxSelectFeature } from "./features/select/boxSelectFeature.js";
+import { keyStateModule } from "./features/key-state/di.config.js";
 
 /**
  * The module used
@@ -149,7 +150,8 @@ export function createContainer(widgetId: string): Container {
         configModule,
         createConnectionModule,
         cursorModule,
-        selectModule
+        selectModule,
+        keyStateModule
     );
     container.load(diagramModule);
 

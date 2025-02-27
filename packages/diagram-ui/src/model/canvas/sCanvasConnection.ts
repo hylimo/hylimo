@@ -62,7 +62,7 @@ export class SCanvasConnection extends SCanvasContent implements CanvasConnectio
     /**
      * The projection result for the preview data
      */
-    splitPreviewData?: ProjectionResult;
+    splitPreviewDataProvider?: () => ProjectionResult;
     /**
      * Required to mark this as moveable
      */

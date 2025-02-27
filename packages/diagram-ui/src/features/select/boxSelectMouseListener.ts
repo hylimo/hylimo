@@ -1,7 +1,5 @@
-import { injectable, inject } from "inversify";
-import { isSelected, MouseListener, SModelElementImpl } from "sprotty";
-import { ToolTypeProvider } from "../toolbox/toolState.js";
-import { TYPES } from "../types.js";
+import { injectable } from "inversify";
+import { isSelected, SModelElementImpl } from "sprotty";
 import { Action, SelectAction } from "sprotty-protocol";
 import { ToolboxToolType } from "../toolbox/toolType.js";
 import { BoxSelectProvider } from "./boxSelectProvider.js";
@@ -9,17 +7,13 @@ import { Bounds, Point } from "@hylimo/diagram-common";
 import { SetToolAction } from "../toolbox/setToolAction.js";
 import { SRoot } from "../../model/sRoot.js";
 import { isBoxSelectable } from "./boxSelectFeature.js";
+import { MouseListener } from "../../base/mouseListener.js";
 
 /**
  * MouseListener handling box selection
  */
 @injectable()
 export class BoxSelectMouseListener extends MouseListener implements BoxSelectProvider {
-    /**
-     * The tool type provider to determine the current tool type
-     */
-    @inject(TYPES.ToolTypeProvider) protected readonly toolTypeProvider!: ToolTypeProvider;
-
     /**
      * The start position of the box selection
      */
@@ -59,7 +53,7 @@ export class BoxSelectMouseListener extends MouseListener implements BoxSelectPr
     }
 
     override mouseDown(target: SModelElementImpl, event: MouseEvent): Action[] {
-        if (this.toolTypeProvider.toolType !== ToolboxToolType.BOX_SELECT || event.button !== 0) {
+        if (this.toolTypeProvider.toolType !== ToolboxToolType.BOX_SELECT || this.isForcedScroll(event)) {
             return [];
         }
         this.start = (target.root as SRoot).getPosition(event);
@@ -74,7 +68,7 @@ export class BoxSelectMouseListener extends MouseListener implements BoxSelectPr
     }
 
     override mouseMove(target: SModelElementImpl, event: MouseEvent): Action[] {
-        if (this.toolTypeProvider.toolType !== ToolboxToolType.BOX_SELECT) {
+        if (this.toolTypeProvider.toolType !== ToolboxToolType.BOX_SELECT || this.start == undefined) {
             return [];
         }
         if (event.buttons === 0) {

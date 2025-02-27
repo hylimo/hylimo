@@ -7,6 +7,7 @@ import { ToolboxTool, toolboxTools } from "../tools.js";
 import { ToolboxToolType } from "../toolType.js";
 import { generateToolboxConnectDetails } from "./connection.js";
 import { Lock, PencilRuler, X } from "lucide";
+import { generateUpdateKeyStateActions } from "../../key-state/keyStateKeyListener.js";
 
 /**
  * Generates the toolbox UI.
@@ -22,6 +23,14 @@ export function generateToolbox(context: Toolbox, root: Root): VNode {
             class: {
                 "pointer-events-disabled": context.pointerEventsDisabled,
                 closed: !context.isOpen
+            },
+            on: {
+                keydown: (event: KeyboardEvent) => {
+                    context.actionDispatcher.dispatchAll(generateUpdateKeyStateActions(event, true));
+                },
+                keyup: (event: KeyboardEvent) => {
+                    context.actionDispatcher.dispatchAll(generateUpdateKeyStateActions(event, false));
+                }
             }
         },
         [generateToolboxTools(context), generateToolboxDetails(context, root)]

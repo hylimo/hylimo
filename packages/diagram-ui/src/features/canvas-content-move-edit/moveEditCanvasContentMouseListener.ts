@@ -1,6 +1,6 @@
-import { injectable, inject } from "inversify";
+import { injectable } from "inversify";
 import { EditSpecification, DefaultEditTypes, EditSpecificationEntry, groupBy } from "@hylimo/diagram-common";
-import { findParentByFeature, isMoveable, MouseListener, SModelElementImpl } from "sprotty";
+import { findParentByFeature, isMoveable, SModelElementImpl } from "sprotty";
 import { Action } from "sprotty-protocol";
 import { SAbsolutePoint } from "../../model/canvas/sAbsolutePoint.js";
 import { SCanvasElement } from "../../model/canvas/sCanvasElement.js";
@@ -35,9 +35,7 @@ import { TransactionalMoveAction } from "../move/transactionalMoveAction.js";
 import { NoopMoveHandler } from "./handler/noopMoveHandler.js";
 import { SElement } from "../../model/sElement.js";
 import { findResizeIconClass } from "../cursor/resizeIcon.js";
-import { TYPES } from "../types.js";
-import { ToolTypeProvider } from "../toolbox/toolState.js";
-import { isRegularInteractionTool } from "../toolbox/toolType.js";
+import { MouseListener } from "../../base/mouseListener.js";
 
 /**
  * If a resize scale exceeds this value, instead resize with scale 1 in the opposite direction is performed.
@@ -59,16 +57,12 @@ export class MoveEditCanvasContentMouseListener extends MouseListener {
      */
     static readonly MAX_UPDATES_PER_REVISION = 5;
 
-    /**
-     * The tool type provider to determine the current tool type
-     */
-    @inject(TYPES.ToolTypeProvider) protected readonly toolTypeProvider!: ToolTypeProvider;
-
     override mouseDown(target: SModelElementImpl, event: MouseEvent): Action[] {
         if (
             event.button === 0 &&
             !(event.ctrlKey || event.altKey) &&
-            isRegularInteractionTool(this.toolTypeProvider.toolType)
+            this.isRegularInteractionTool() &&
+            !this.isForcedScroll(event)
         ) {
             const moveableTarget = findParentByFeature(target, isMoveable);
             if (moveableTarget != undefined && moveableTarget instanceof SElement) {

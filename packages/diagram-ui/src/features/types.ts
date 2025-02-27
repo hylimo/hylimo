@@ -12,5 +12,6 @@ export const TYPES = {
     ConnectionEditProvider: Symbol("ConnectionEditProvider"),
     ToolTypeProvider: Symbol("ToolTypeProvider"),
     MoveCursorProvider: Symbol("MoveCursorProvider"),
-    BoxSelectProvider: Symbol("BoxSelectProvider")
+    BoxSelectProvider: Symbol("BoxSelectProvider"),
+    KeyState: Symbol("KeyState")
 };

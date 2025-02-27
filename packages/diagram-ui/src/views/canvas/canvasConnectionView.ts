@@ -1,5 +1,5 @@
 import { LineEngine, MarkerLayoutInformation, Point } from "@hylimo/diagram-common";
-import { injectable } from "inversify";
+import { inject, injectable } from "inversify";
 import { VNode } from "snabbdom";
 import { IView, IViewArgs, RenderingContext, svg } from "sprotty";
 import { SCanvasConnection } from "../../model/canvas/sCanvasConnection.js";
@@ -9,12 +9,19 @@ import { extractStrokeAttriabutes } from "@hylimo/diagram-render-svg";
 import { EditableCanvasContentView } from "./editableCanvasContentView.js";
 import { renderPoint } from "./canvasPointView.js";
 import { findViewportZoom } from "../../base/findViewportZoom.js";
+import { TYPES } from "../../features/types.js";
+import { KeyState } from "../../features/key-state/keyState.js";
 
 /**
  * IView that represents a CanvasConnection
  */
 @injectable()
 export class CanvasConnectionView extends EditableCanvasContentView implements IView {
+    /**
+     * The key state used to determine if the shift key is pressed
+     */
+    @inject(TYPES.KeyState) protected readonly keyState!: KeyState;
+
     render(
         model: Readonly<SCanvasConnection>,
         context: RenderingContext,
@@ -32,7 +39,7 @@ export class CanvasConnectionView extends EditableCanvasContentView implements I
         const createConnectionPreview = this.renderCreateConnection(model);
         const splitSegmentPreview = this.renderSplitSegmentPreview(model);
         return svg(
-            "g.selectable",
+            "g.selectable.canvas-connection",
             null,
             ...childPaths,
             ...childMarkers,
@@ -140,10 +147,11 @@ export class CanvasConnectionView extends EditableCanvasContentView implements I
      * @returns the rendered preview point if available
      */
     private renderSplitSegmentPreview(model: Readonly<SCanvasConnection>): VNode | undefined {
-        const projectionResult = model.splitPreviewData;
-        if (!model.selected || projectionResult == undefined) {
+        const provider = model.splitPreviewDataProvider;
+        if (provider == undefined || !model.selected || !this.keyState.isShiftPressed) {
             return undefined;
         }
+        const projectionResult = provider();
         const line = model.line;
         const segment = model.index.getById(
             line.line.segments[projectionResult.segment].origin

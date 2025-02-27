@@ -6,6 +6,7 @@ import { TYPES } from "../features/types.js";
 import { CursorProvider } from "../features/cursor/cursor.js";
 import { BoxSelectProvider } from "../features/select/boxSelectProvider.js";
 import { convertFontsToCssStyle } from "@hylimo/diagram-common";
+import { KeyState } from "../features/key-state/keyState.js";
 
 /**
  * IView that is the parent which handles
@@ -38,6 +39,11 @@ export class RootView implements IView {
      * BoxSelectProvider used to get the box selection box
      */
     @inject(TYPES.BoxSelectProvider) protected boxSelectProvider!: BoxSelectProvider;
+
+    /**
+     * KeyState used to check if space is pressed
+     */
+    @inject(TYPES.KeyState) protected keyState!: KeyState;
 
     render(model: Readonly<SRoot>, context: RenderingContext, _args?: IViewArgs | undefined): VNode {
         if (context.targetKind == "hidden") {
@@ -107,7 +113,9 @@ export class RootView implements IView {
      * @returns the root classes
      */
     private computeRootClass(): Record<string, boolean> {
-        const cursor = this.moveCursorProvider.moveCursor ?? this.moveCursorProvider.toolCursor;
+        const spacePressedMoveCursor = this.keyState.isSpacePressed ? "cursor-grab" : undefined;
+        const cursor =
+            this.moveCursorProvider.moveCursor ?? spacePressedMoveCursor ?? this.moveCursorProvider.toolCursor;
         if (cursor != undefined) {
             return {
                 [cursor]: true

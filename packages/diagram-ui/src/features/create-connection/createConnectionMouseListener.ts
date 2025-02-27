@@ -1,5 +1,5 @@
 import { inject, injectable } from "inversify";
-import { findParentByFeature, MouseListener, SModelElementImpl } from "sprotty";
+import { findParentByFeature, SModelElementImpl } from "sprotty";
 import { Action } from "sprotty-protocol";
 import { SCanvasElement } from "../../model/canvas/sCanvasElement.js";
 import { SCanvasConnection } from "../../model/canvas/sCanvasConnection.js";
@@ -12,11 +12,11 @@ import { ConnectionEditProvider } from "../toolbox/connectionEditProvider.js";
 import { CreateConnectionHoverData, LineProviderHoverData } from "./createConnectionHoverData.js";
 import { SRoot } from "../../model/sRoot.js";
 import { ConnectionEnd } from "@hylimo/diagram-protocol";
-import { ToolTypeProvider } from "../toolbox/toolState.js";
 import { UpdateCreateConnectionHoverDataAction } from "./updateCreateConnectionHoverData.js";
 import { ToolboxToolType } from "../toolbox/toolType.js";
 import { isLineProvider } from "./lineProvider.js";
 import { TransactionStateProvider } from "../transaction/transactionStateProvider.js";
+import { MouseListener } from "../../base/mouseListener.js";
 
 /**
  * Mouse listener for updating the connection creation UI based on mouse movements
@@ -29,17 +29,12 @@ export class CreateConnectionMouseListener extends MouseListener {
     @inject(TYPES.ConnectionEditProvider) protected readonly connectionEditProvider!: ConnectionEditProvider;
 
     /**
-     * The tool type provider to determine the current tool type
-     */
-    @inject(TYPES.ToolTypeProvider) protected readonly toolTypeProvider!: ToolTypeProvider;
-
-    /**
      * The transaction state provider that keeps track of the current transaction state.
      */
     @inject(TYPES.TransactionStateProvider) protected transactionStateProvider!: TransactionStateProvider;
 
     override mouseDown(target: SModelElementImpl, event: MouseEvent): Action[] {
-        if (this.toolTypeProvider.toolType !== ToolboxToolType.CONNECT || event.button !== 0) {
+        if (this.toolTypeProvider.toolType !== ToolboxToolType.CONNECT || this.isForcedScroll(event)) {
             return [];
         }
         const root = target.root as SRoot;

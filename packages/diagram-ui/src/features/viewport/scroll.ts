@@ -5,6 +5,7 @@ import { TYPES } from "../types.js";
 import { ToolTypeProvider } from "../toolbox/toolState.js";
 import { ToolboxToolType } from "../toolbox/toolType.js";
 import { UpdateCursorAction } from "../cursor/cursor.js";
+import { KeyState } from "../key-state/keyState.js";
 
 /**
  * Extends the Sprotty ScrollMouseListener to handle drag move correctly when in drag mode
@@ -16,13 +17,19 @@ export class ScrollMouseListener extends SprottyScrollMouseListener {
      */
     @inject(TYPES.ToolTypeProvider) protected readonly toolTypeProvider!: ToolTypeProvider;
 
+    /**
+     * The key state to check if the space key is pressed
+     */
+    @inject(TYPES.KeyState) protected keyState!: KeyState;
+
     override mouseDown(target: SModelElementImpl, event: MouseEvent): (Action | Promise<Action>)[] {
         let targetOrRoot = target;
         const toolType = this.toolTypeProvider.toolType;
-        if (toolType === ToolboxToolType.BOX_SELECT || (toolType === ToolboxToolType.CONNECT && event.button !== 1)) {
+        const forceScroll = this.keyState.isSpacePressed || event.button === 1;
+        if ((toolType === ToolboxToolType.BOX_SELECT || toolType === ToolboxToolType.CONNECT) && !forceScroll) {
             return [];
         }
-        if (event.button === 1 || this.toolTypeProvider.toolType === ToolboxToolType.HAND) {
+        if (forceScroll || this.toolTypeProvider.toolType === ToolboxToolType.HAND) {
             targetOrRoot = target.root;
         }
         const result = super.mouseDown(targetOrRoot, event);
