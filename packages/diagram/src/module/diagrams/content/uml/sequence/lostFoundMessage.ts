@@ -11,8 +11,8 @@ import { ContentModule } from "../../contentModule.js";
  */
 function message(type: string): string {
     return `
-            distance = args.distance ?? scope.externalMessageDistance
-            diameter = args.diameter ?? scope.externalMessageDiameter
+            distance = args.distance ?? scope.internal.config.externalMessageDistance
+            diameter = args.diameter ?? scope.internal.config.externalMessageDiameter
             dot = canvasElement(
                 content = ellipse(class = list("${type}-message")),
                 width = diameter,

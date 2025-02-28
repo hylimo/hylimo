@@ -26,11 +26,11 @@ export const eventModule = ContentModule.create(
 
                     // The event itself must store its y-coordinate so that the calculation of the activity indicators and co works correctly
                     previousEvent = scope.internal.lastSequenceDiagramEvent
-                    eventObject.deltaY = if(yDistance != null) { yDistance } { scope.eventDistance }
+                    eventObject.deltaY = if(yDistance != null) { yDistance } { scope.internal.config.eventDistance }
                     eventObject.y = if(previousEvent != null) { previousEvent.y } { 0 } + eventObject.deltaY 
 
                     // When in debugging mode, print the event name on the left to give an overview where we are
-                    if(scope.enableDebugging) {
+                    if(scope.internal.config.enableDebugging) {
                         start = scope.apos(-100, eventObject.y) // a little bit to the left of the diagram to leave space for the participants
 
                         name = canvasElement(content = text(contents = list(span(text = name, fill = "red", stroke = "unset"))), hAlign = "right", vAlign = "center")
@@ -41,7 +41,7 @@ export const eventModule = ContentModule.create(
                         scope.internal.sequenceDiagramParticipants.forEach {
                             maximum = Math.max(maximum, it.x)
                         }
-                        maximum = maximum - start.x + (scope.participantDistance * 0.25)
+                        maximum = maximum - start.x + (scope.internal.config.participantDistance * 0.25)
 
                         scope["--"](name, scope.rpos(name, maximum, 0)) scope.styles {
                             stroke = "red"
@@ -55,7 +55,7 @@ export const eventModule = ContentModule.create(
                         participant = it
 
                         // When in debugging mode, visualize the coordinates of all events
-                        if(scope.enableDebugging) {
+                        if(scope.internal.config.enableDebugging) {
                             _left = canvasElement(content = ellipse(fill = "orange", stroke = "unset"), width=7, height=7, hAlign = "center", vAlign = "center")
                             _left.pos = participant.left(eventObject)
                             scope.internal.registerCanvasElement(_left, originalArgs, originalArgs.self)
@@ -81,7 +81,7 @@ export const eventModule = ContentModule.create(
 
                         // change the length of the instance line (its end position) to the new last position + 3*margin
                         // (+3 margin so that a activity indicator that is still present there can end, and there's still a bit of the line left over)
-                        endpos = scope.apos(it.x, eventObject.y + (3*scope.margin))
+                        endpos = scope.apos(it.x, eventObject.y + (3*scope.internal.config.margin))
                         it.lifeline.contents.get(it.lifeline.contents.length - 1).end = endpos
 
                         // Also enlarge all active activity indicators

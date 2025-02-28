@@ -40,7 +40,7 @@ export const participantModule = ContentModule.create(
                                 below.x
                             } {
                                 if(previous != null) {
-                                    previous.x + scope.participantDistance
+                                    previous.x + scope.internal.config.participantDistance
                                 } {
                                     0
                                 }
@@ -55,7 +55,7 @@ export const participantModule = ContentModule.create(
 
                             // Create the lifeline of this participantElement now so that it will always be rendered behind everything else
                             this.bottomcenter = scope.lpos(participantElement, 0.25)
-                            participantElement.lifeline = scope[".."](bottomcenter, scope.rpos(bottomcenter, 0, scope.margin))
+                            participantElement.lifeline = scope[".."](bottomcenter, scope.rpos(bottomcenter, 0, scope.internal.config.margin))
                             participantElement.activeActivityIndicators = list() // Needed for the activity indicator autolayouting
 
                             scope.internal.sequenceDiagramParticipants += participantElement
@@ -198,7 +198,7 @@ export const participantModule = ContentModule.create(
             fun(
                 `
                     (participant) = args
-                    crossSize = args.crossSize ?? scope.destroyingCrossSize
+                    crossSize = args.crossSize ?? scope.internal.config.destroyingCrossSize
 
                     if(participant.alive != true) {
                         scope.error("\${participant.name} has already been destroyed")

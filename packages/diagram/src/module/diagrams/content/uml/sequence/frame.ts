@@ -148,15 +148,15 @@ export const sequenceDiagramFrameModule = ContentModule.create(
                         subtext = args.subtext
 
                         // We must differentiate the following approaches to set margin:
-                        // 1. No margin set -> use scope.frameMarginX/Y
+                        // 1. No margin set -> use scope.internal.config.frameMarginX/Y
                         // 2. Everything has an individual margin
                         defaultMarginX = args.marginX
                         if(defaultMarginX == null) {
-                            defaultMarginX = scope.frameMarginX
+                            defaultMarginX = scope.internal.config.frameMarginX
                         }
                         defaultMarginY = args.marginY
                         if(defaultMarginY == null) {
-                            defaultMarginY = scope.frameMarginY
+                            defaultMarginY = scope.internal.config.frameMarginY
                         }
 
                         marginRight = args.marginRight ?? defaultMarginX
