@@ -26,7 +26,7 @@ export const umlDiagramModule = InterpreterModule.create(
     DiagramModuleNames.UML_DIAGRAM,
     [DiagramModuleNames.DIAGRAM, DiagramModuleNames.DSL],
     [],
-    createDiagramModule("umlDiagram", [
+    createDiagramModule("umlDiagram", "Creates a general UML diagram", [
         defaultStylesModule,
         associationsModule,
         nonNavigableAssociationsModule,

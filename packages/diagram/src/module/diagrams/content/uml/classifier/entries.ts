@@ -5,17 +5,17 @@ import {
     fun,
     FunctionObject,
     functionType,
-    InterpreterModule,
     jsFun,
     num
 } from "@hylimo/core";
 import { convertStringOrIdentifier } from "./propertiesAndMethods.js";
+import { ContentModule } from "../../contentModule.js";
 
 /**
  * Module providing the entries content handler
  * Requires the sections content handler
  */
-export const entriesModule = InterpreterModule.create(
+export const entriesModule = ContentModule.create(
     "uml/classifier/entries",
     [],
     [],

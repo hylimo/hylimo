@@ -1,16 +1,7 @@
-import {
-    booleanType,
-    fun,
-    functionType,
-    id,
-    InterpreterModule,
-    numberType,
-    optional,
-    or,
-    stringType
-} from "@hylimo/core";
+import { booleanType, fun, functionType, id, numberType, optional, or, stringType } from "@hylimo/core";
 import { SCOPE } from "../../../../base/dslModule.js";
 import { eventType, participantType } from "./types.js";
+import { ContentModule } from "../../contentModule.js";
 
 const fragmentNameBorderSVG = "M 0 0 H 20 V 5 L 16 9 H 0 V 0";
 
@@ -21,7 +12,7 @@ const fragmentNameBorderSVG = "M 0 0 H 20 V 5 L 16 9 H 0 V 0";
  * - optional text (i.e. `if`) (optionally inside a small icon) in the top-left corner
  * - optional subtext next to the text (i.e. the condition for the `if`)
  */
-export const sequenceDiagramFrameModule = InterpreterModule.create(
+export const sequenceDiagramFrameModule = ContentModule.create(
     "uml/sequence/frame",
     ["uml/sequence/defaultValues"],
     [],

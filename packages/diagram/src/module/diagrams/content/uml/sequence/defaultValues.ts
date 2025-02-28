@@ -1,9 +1,9 @@
-import { InterpreterModule } from "@hylimo/core";
+import { ContentModule } from "../../contentModule.js";
 
 /**
  * Provides a default margin - the additional (vertical) length that is added to each line on top of its normally calculated borders
  */
-export const defaultValues = InterpreterModule.create(
+export const defaultValues = ContentModule.create(
     "uml/sequence/defaultValues",
     [],
     [],

@@ -1,14 +1,15 @@
-import { fun, functionType, id, InterpreterModule, optional, stringType } from "@hylimo/core";
+import { fun, functionType, id, optional, stringType } from "@hylimo/core";
 import { SCOPE } from "../../../../base/dslModule.js";
 import { participantType } from "./types.js";
 import { actorToolboxEdits } from "../actor.js";
+import { ContentModule } from "../../contentModule.js";
 
 /**
  * Module providing the UML 'actor' function for sequence diagrams - they differ from normal actors in that
  * - they store the line pointing down
  * - they receive a default position based on the previous elements
  */
-export const sequenceDiagramActorModule = InterpreterModule.create(
+export const sequenceDiagramActorModule = ContentModule.create(
     "uml/sequence/actor",
     ["uml/sequence/defaultValues", "uml/actor", "uml/sequence/participant", "uml/sequence/instance"],
     [],

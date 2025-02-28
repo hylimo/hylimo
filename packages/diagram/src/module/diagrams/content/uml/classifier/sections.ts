@@ -1,9 +1,9 @@
-import { InterpreterModule } from "@hylimo/core";
+import { ContentModule } from "../../contentModule.js";
 
 /**
  * Module providing the sections content handler
  */
-export const sectionsModule = InterpreterModule.create(
+export const sectionsModule = ContentModule.create(
     "uml/classifier/sections",
     [],
     [],

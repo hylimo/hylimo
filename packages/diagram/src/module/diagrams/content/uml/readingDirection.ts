@@ -1,10 +1,11 @@
-import { fun, id, InterpreterModule, stringType } from "@hylimo/core";
+import { fun, id, stringType } from "@hylimo/core";
 import { SCOPE } from "../../../base/dslModule.js";
+import { ContentModule } from "../contentModule.js";
 
 /**
  * Module providing the reading direction helper functions
  */
-export const readingDirectionModule = InterpreterModule.create(
+export const readingDirectionModule = ContentModule.create(
     "uml/readingDirection",
     [],
     [],

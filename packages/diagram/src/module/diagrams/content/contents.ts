@@ -1,4 +1,3 @@
-import { InterpreterModule } from "@hylimo/core";
 import { defaultMarkersModule } from "./common/defaultMarkers.js";
 import { defaultStylesModule } from "./common/defaultStyles.js";
 import { elementModule } from "./common/element.js";
@@ -33,11 +32,12 @@ import { participantModule } from "./uml/sequence/participant.js";
 import { lostFoundMessageModule } from "./uml/sequence/lostFoundMessage.js";
 import { valuesModule } from "./uml/classifier/values.js";
 import { sequenceDiagramCreateConnectionOperatorModule } from "./uml/sequence/sequenceDiagramCreateConnectionOperator.js";
+import { ContentModule } from "./contentModule.js";
 
 /**
  * All content modules
  */
-export const contents: InterpreterModule[] = [
+export const contents: ContentModule[] = [
     activityIndicatorModule,
     actorModule,
     associationsModule,

@@ -1,9 +1,9 @@
-import { InterpreterModule } from "@hylimo/core";
+import { ContentModule } from "../contentModule.js";
 
 /**
  * Module providing composition and aggregation connections operators
  */
-export const compositionAndAggregationModule = InterpreterModule.create(
+export const compositionAndAggregationModule = ContentModule.create(
     "uml/compositionAndAggregation",
     ["common/defaultMarkers"],
     [],

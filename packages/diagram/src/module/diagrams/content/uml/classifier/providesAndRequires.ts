@@ -1,7 +1,8 @@
-import { fun, id, InterpreterModule, numberType, object, objectType, optional, stringType } from "@hylimo/core";
+import { fun, id, numberType, object, objectType, optional, stringType } from "@hylimo/core";
 import { LinePointLayoutConfig } from "../../../../../layout/elements/canvas/linePointLayoutConfig.js";
 import { SCOPE } from "../../../../base/dslModule.js";
 import { canvasContentType } from "../../../../base/types.js";
+import { ContentModule } from "../../contentModule.js";
 
 /**
  * Type for the optional name label position
@@ -20,7 +21,7 @@ const nameLabelPosType = optional(
 /**
  * Module providing helper function to create provided and required interfaces for a classifier
  */
-export const providesAndRequiresModule = InterpreterModule.create(
+export const providesAndRequiresModule = ContentModule.create(
     "uml/classifier/providesAndRequires",
     ["common/defaultMarkers"],
     [],

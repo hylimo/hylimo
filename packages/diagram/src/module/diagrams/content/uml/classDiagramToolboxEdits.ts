@@ -1,10 +1,10 @@
-import { InterpreterModule } from "@hylimo/core";
 import { createToolboxEdit } from "../../../base/dslModule.js";
+import { ContentModule } from "../contentModule.js";
 
 /**
  * Module providing toolbox edits specific for UML class diagrams
  */
-export const classDiagramToolboxEditsModule = InterpreterModule.create(
+export const classDiagramToolboxEditsModule = ContentModule.create(
     "uml/classDiagramToolboxEdits",
     [],
     [],

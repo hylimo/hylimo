@@ -1,15 +1,16 @@
-import { assign, fun, id, InterpreterModule, str, stringType } from "@hylimo/core";
+import { assign, fun, id, str, stringType } from "@hylimo/core";
 import {
     connectionEditFragments,
     createToolboxEdit,
     PREDICTION_STYLE_CLASS_ASSIGNMENT_EXPRESSION,
     SCOPE
 } from "../../../base/dslModule.js";
+import { ContentModule } from "../contentModule.js";
 
 /**
  * Module providing the comment element
  */
-export const commentModule = InterpreterModule.create(
+export const commentModule = ContentModule.create(
     "uml/comment",
     ["uml/associations"],
     [],

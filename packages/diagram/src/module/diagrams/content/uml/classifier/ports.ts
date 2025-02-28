@@ -1,11 +1,12 @@
-import { fun, functionType, id, InterpreterModule, object, optional } from "@hylimo/core";
+import { fun, functionType, id, object, optional } from "@hylimo/core";
 import { SCOPE } from "../../../../base/dslModule.js";
 import { LinePointLayoutConfig } from "../../../../../layout/elements/canvas/linePointLayoutConfig.js";
+import { ContentModule } from "../../contentModule.js";
 
 /**
  * Module providing helper function to create ports for a classifier
  */
-export const portsModule = InterpreterModule.create(
+export const portsModule = ContentModule.create(
     "uml/classifier/ports",
     ["uml/classifier/providesAndRequires"],
     [],

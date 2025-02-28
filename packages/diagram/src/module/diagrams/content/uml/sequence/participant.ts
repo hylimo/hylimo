@@ -1,13 +1,14 @@
-import { fun, functionType, id, InterpreterModule, numberType, optional, stringType } from "@hylimo/core";
+import { fun, functionType, id, numberType, optional, stringType } from "@hylimo/core";
 import { SCOPE } from "../../../../base/dslModule.js";
 import { eventType, participantType } from "./types.js";
 import { canvasContentType } from "../../../../base/types.js";
+import { ContentModule } from "../../contentModule.js";
 
 /**
  * Module providing the shared logic for all sorts of sequence diagram participants - instances, actors, …<br>
  * Note that the caller is responsible for creating the element and registering the element under the given name beforehand.
  */
-export const participantModule = InterpreterModule.create(
+export const participantModule = ContentModule.create(
     "uml/sequence/participant",
     ["uml/sequence/defaultValues"],
     [],

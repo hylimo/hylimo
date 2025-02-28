@@ -8,7 +8,6 @@ import {
     functionType,
     IdentifierExpression,
     IndexExpression,
-    InterpreterModule,
     InvocationExpression,
     jsFun,
     num,
@@ -17,12 +16,13 @@ import {
     RuntimeError,
     StringLiteralExpression
 } from "@hylimo/core";
+import { ContentModule } from "../../contentModule.js";
 
 /**
  * Module providing the properties and methods content handler
  * Requires the sections content handler
  */
-export const propertiesAndMethodsModule = InterpreterModule.create(
+export const propertiesAndMethodsModule = ContentModule.create(
     "uml/classifier/propertiesAndMethods",
     [],
     [],

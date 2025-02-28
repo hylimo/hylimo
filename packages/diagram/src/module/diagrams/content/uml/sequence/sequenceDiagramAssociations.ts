@@ -1,4 +1,4 @@
-import { InterpreterModule } from "@hylimo/core";
+import { ContentModule } from "../../contentModule.js";
 
 /**
  * Module providing additional associations for sequence diagrams.<br>
@@ -6,7 +6,7 @@ import { InterpreterModule } from "@hylimo/core";
  * - sync return: ..>>, <<..
  * - destruction: !.., ..!, !..!
  */
-export const sequenceDiagramAssociationsModule = InterpreterModule.create(
+export const sequenceDiagramAssociationsModule = ContentModule.create(
     "uml/sequence/associations",
     ["common/defaultMarkers", "uml/sequence/createConnectionOperator"],
     [],

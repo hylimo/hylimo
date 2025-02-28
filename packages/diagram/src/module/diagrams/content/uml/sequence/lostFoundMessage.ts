@@ -1,5 +1,6 @@
-import { fun, id, InterpreterModule, numberType, optional } from "@hylimo/core";
+import { fun, id, numberType, optional } from "@hylimo/core";
 import { SCOPE } from "../../../../base/dslModule.js";
+import { ContentModule } from "../../contentModule.js";
 
 /**
  * Lost and found message are synonyms, so should use the same function.<br>
@@ -34,7 +35,7 @@ function message(type: string): string {
  * - they store the line pointing down
  * - they receive a default position based on the previous elements
  */
-export const lostFoundMessageModule = InterpreterModule.create(
+export const lostFoundMessageModule = ContentModule.create(
     "uml/sequence/lostFound",
     ["uml/sequence/defaultValues"],
     [],

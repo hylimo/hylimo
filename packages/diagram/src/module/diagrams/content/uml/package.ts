@@ -1,10 +1,11 @@
-import { assign, fun, functionType, id, InterpreterModule, listType, optional, stringType } from "@hylimo/core";
+import { assign, fun, functionType, id, listType, optional, stringType } from "@hylimo/core";
 import { createToolboxEdit, SCOPE } from "../../../base/dslModule.js";
+import { ContentModule } from "../contentModule.js";
 
 /**
  * Module providing the package element
  */
-export const packageModule = InterpreterModule.create(
+export const packageModule = ContentModule.create(
     "uml/package",
     ["uml/classifier/defaultTitle"],
     [],

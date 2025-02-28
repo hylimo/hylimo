@@ -1,10 +1,11 @@
-import { fun, id, InterpreterModule } from "@hylimo/core";
+import { fun, id } from "@hylimo/core";
 import { SCOPE } from "../../../../base/dslModule.js";
+import { ContentModule } from "../../contentModule.js";
 
 /**
  * Module providing a helper function to create a DSL construct used for e.g. classes and components
  */
-export const classifierModule = InterpreterModule.create(
+export const classifierModule = ContentModule.create(
     "uml/classifier/classifier",
     [],
     [],
@@ -108,14 +109,14 @@ export const classifierModule = InterpreterModule.create(
                     }
                     cls("abstract") {
                         cls("title") {
-                            type("span") {
+                            cls("title") {
                                 fontStyle = "italic"
                             }
                         }
                     }
                     cls("title") {
                         hAlign = "center"
-                        type("span") {
+                        cls("title") {
                             fontWeight = "bold"
                         }
                     }

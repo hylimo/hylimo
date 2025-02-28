@@ -1,13 +1,14 @@
-import { fun, id, InterpreterModule, numberType, optional } from "@hylimo/core";
+import { fun, id, numberType, optional } from "@hylimo/core";
 import { SCOPE } from "../../../../base/dslModule.js";
 import { participantType } from "./types.js";
+import { ContentModule } from "../../contentModule.js";
 
 /**
  * Defines an activity indicator.<br>
  * An activity indicator is the "white" rectangle on top of a activityIndicator.
  * Multiple indicators can be active simultaneously, in which case they are offset from each other by 'activityShift' on the x-axis (or whatever you passed yourself).
  */
-export const activityIndicatorModule = InterpreterModule.create(
+export const activityIndicatorModule = ContentModule.create(
     "uml/sequence/activityIndicator",
     ["uml/sequence/defaultValues"],
     [],

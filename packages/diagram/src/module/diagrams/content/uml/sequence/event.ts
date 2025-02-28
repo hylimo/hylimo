@@ -1,11 +1,12 @@
-import { fun, id, InterpreterModule, numberType, optional, stringType } from "@hylimo/core";
+import { fun, id, numberType, optional, stringType } from "@hylimo/core";
 import { createToolboxEdit, SCOPE } from "../../../../base/dslModule.js";
+import { ContentModule } from "../../contentModule.js";
 
 /**
  * Defines an event.<br>
  * An event is an abstract representation of a point on the timeline.
  */
-export const eventModule = InterpreterModule.create(
+export const eventModule = ContentModule.create(
     "uml/sequence/event",
     ["uml/sequence/defaultValues"],
     [],

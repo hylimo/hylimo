@@ -1,9 +1,9 @@
-import { InterpreterModule } from "@hylimo/core";
+import { ContentModule } from "../contentModule.js";
 
 /**
  * Module providing default styles
  */
-export const defaultStylesModule = InterpreterModule.create(
+export const defaultStylesModule = ContentModule.create(
     "common/defaultStyles",
     [],
     [],
