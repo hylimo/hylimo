@@ -7,7 +7,8 @@ import {
     InterpreterModule,
     object,
     optional,
-    SemanticFieldNames
+    SemanticFieldNames,
+    Type
 } from "@hylimo/core";
 import { contents } from "./content/contents.js";
 import { SCOPE } from "../base/dslModule.js";
@@ -30,6 +31,9 @@ export function createDiagramModule(
 ): ExecutableExpression[] {
     const modules = InterpreterModule.computeModules(requiredContents, allContents);
     const configProperties = modules.flatMap((module) => module.config);
+    const configParams = configProperties.map(
+        ([name, description, type]) => [name, description, optional(type)] as const
+    );
     return [
         assign(
             diagramName,
@@ -38,7 +42,8 @@ export function createDiagramModule(
                     id("generateDiagram").call(
                         fun([
                             assign(SCOPE, id(SemanticFieldNames.IT)),
-                            ...modules.flatMap((module) => module.expressions)
+                            ...modules.flatMap((module) => module.expressions),
+                            createWithConfigFunction(configParams)
                         ]),
                         id(SemanticFieldNames.ARGS),
                         object(configProperties.map(([name, , , defaultValue]) => ({ name, value: defaultValue })))
@@ -46,15 +51,39 @@ export function createDiagramModule(
                 ],
                 {
                     docs: docs,
-                    params: [
-                        [0, "the callback to execute", functionType],
-                        ...configProperties.map(
-                            ([name, description, type]) => [name, description, optional(type)] as const
-                        )
-                    ],
+                    params: [[0, "the callback to execute", functionType], ...configParams],
                     returns: "The created diagram"
                 }
             )
         )
     ];
+}
+/**
+ * Creates and registers a withConfig function which allows to temporarily change the configuration
+ *
+ * @param configParams the parameters for the configuration
+ * @returns the expression registering the withConfig function in the scope
+ */
+function createWithConfigFunction(configParams: (readonly [string, string, Type])[]): ExecutableExpression {
+    return id(SCOPE).assignField(
+        "withConfig",
+        fun(
+            `
+                this.oldConfig = scope.internal.config
+                this.newConfig = args
+                args.proto = this.oldConfig
+                scope.internal.config = newConfig
+                it()
+                scope.internal.config = oldConfig
+            `,
+            {
+                docs: "Executes a callback with a temporarily changed configuration.",
+                params: [
+                    [0, "the callback to execute with the temporarily changed configuration", functionType],
+                    ...configParams
+                ],
+                returns: "null"
+            }
+        )
+    );
 }
