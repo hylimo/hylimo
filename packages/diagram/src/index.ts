@@ -85,6 +85,7 @@ export * from "./module/diagrams/content/uml/interface.js";
 export * from "./module/diagrams/content/uml/nonNavigableAssociations.js";
 export * from "./module/diagrams/content/uml/package.js";
 export * from "./module/diagrams/content/uml/readingDirection.js";
+export * from "./module/diagrams/content/contentModule.js";
 export * from "./module/diagrams/content/contents.js";
 export * from "./module/diagrams/baseDiagramModule.js";
 export * from "./module/diagrams/classDiagramModule.js";

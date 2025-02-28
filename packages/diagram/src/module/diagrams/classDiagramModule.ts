@@ -22,7 +22,7 @@ export const classDiagramModule = InterpreterModule.create(
     DiagramModuleNames.CLASS_DIAGRAM,
     [DiagramModuleNames.DIAGRAM, DiagramModuleNames.DSL],
     [],
-    createDiagramModule("classDiagram", [
+    createDiagramModule("classDiagram", "Creates a UML class diagram", [
         defaultStylesModule,
         associationsModule,
         nonNavigableAssociationsModule,

@@ -78,14 +78,11 @@ export namespace InterpreterModule {
      * @param optionalModules the modules which are only loaded if required by any required module
      * @returns the ordered list of modules
      */
-    export function computeModules(
-        requiredModules: InterpreterModule[],
-        optionalModules: InterpreterModule[]
-    ): InterpreterModule[] {
+    export function computeModules<T extends InterpreterModule>(requiredModules: T[], optionalModules: T[]): T[] {
         const markedModules = requiredModules.map((module) => ({ module, mark: false, temporaryMark: false }));
         const markedOptionalModules = optionalModules.map((module) => ({ module, mark: false, temporaryMark: false }));
         const moduleLookup = new Map<string, (typeof markedModules)[0]>();
-        const modules: InterpreterModule[] = [];
+        const modules: T[] = [];
         for (const module of markedModules) {
             if (moduleLookup.has(module.module.name)) {
                 throw new Error(`Duplicate module ${module.module.name}`);

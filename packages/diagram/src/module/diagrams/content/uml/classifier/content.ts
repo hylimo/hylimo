@@ -1,9 +1,9 @@
-import { InterpreterModule } from "@hylimo/core";
+import { ContentModule } from "../../contentModule.js";
 
 /**
  * Module providing the content content handler (creates a subcanvas if required)
  */
-export const contentModule = InterpreterModule.create(
+export const contentModule = ContentModule.create(
     "uml/classifier/content",
     [],
     [],

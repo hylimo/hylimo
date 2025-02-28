@@ -1,9 +1,9 @@
-import { InterpreterModule } from "@hylimo/core";
+import { ContentModule } from "../contentModule.js";
 
 /**
  * Module providing the element function to create arbitrary canvas elements
  */
-export const elementModule = InterpreterModule.create(
+export const elementModule = ContentModule.create(
     "common/element",
     [],
     [],

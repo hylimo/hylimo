@@ -11,5 +11,5 @@ export const baseDiagramModule = InterpreterModule.create(
     DiagramModuleNames.BASE_DIAGRAM,
     [DiagramModuleNames.DIAGRAM, DiagramModuleNames.DSL],
     [],
-    createDiagramModule("diagram", [defaultStylesModule, elementModule])
+    createDiagramModule("diagram", "Creates a diagram", [defaultStylesModule, elementModule])
 );

@@ -25,7 +25,7 @@ export const sequenceDiagramModule = InterpreterModule.create(
     DiagramModuleNames.SEQUENCE_DIAGRAM,
     [DiagramModuleNames.DIAGRAM, DiagramModuleNames.DSL],
     [],
-    createDiagramModule("sequenceDiagram", [
+    createDiagramModule("sequenceDiagram", "Creates a UML sequence diagram", [
         defaultStylesModule,
         sequenceDiagramCreateConnectionOperatorModule,
         associationsModule,

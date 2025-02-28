@@ -1,7 +1,8 @@
-import { fun, functionType, id, InterpreterModule, optional, or, stringType } from "@hylimo/core";
+import { fun, functionType, id, optional, or, stringType } from "@hylimo/core";
 import { SCOPE } from "../../../../base/dslModule.js";
 import { participantType } from "./types.js";
 import { instanceToolboxEdits } from "../instance.js";
+import { ContentModule } from "../../contentModule.js";
 
 /**
  * Module providing the UML 'instance' function for sequence diagrams - they differ from normal instances in that
@@ -9,7 +10,7 @@ import { instanceToolboxEdits } from "../instance.js";
  * - they store the line pointing down
  * - they receive a default position based on the previous elements
  */
-export const sequenceDiagramInstanceModule = InterpreterModule.create(
+export const sequenceDiagramInstanceModule = ContentModule.create(
     "uml/sequence/instance",
     ["uml/sequence/defaultValues", "uml/instance", "uml/sequence/participant"],
     [],

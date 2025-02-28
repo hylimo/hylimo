@@ -1,4 +1,4 @@
-import { InterpreterModule } from "@hylimo/core";
+import { ContentModule } from "../../contentModule.js";
 
 /**
  * Path to the component icon
@@ -9,7 +9,7 @@ const componentIconPath =
 /**
  * Module providing the component title content handler
  */
-export const componentTitleModule = InterpreterModule.create(
+export const componentTitleModule = ContentModule.create(
     "uml/classifier/componentTitle",
     ["uml/classifier/defaultTitle"],
     [],
@@ -19,7 +19,7 @@ export const componentTitleModule = InterpreterModule.create(
             {
                 args.contents += stack(
                     contents = list(
-                        scope.internal.defaultTitle(args.args.title, args.args.keywords),
+                        scope.internal.defaultTitle(args.args.title, args.args.keywords, args.args.abstract),
                         path(path = "${componentIconPath}", class = list("component-icon"))
                     ),
                     class = list("component-title-container")

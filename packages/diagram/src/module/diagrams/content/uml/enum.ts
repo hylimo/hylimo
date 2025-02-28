@@ -1,10 +1,11 @@
-import { booleanType, fun, functionType, id, InterpreterModule, listType, optional, stringType } from "@hylimo/core";
+import { booleanType, fun, functionType, id, listType, optional, stringType } from "@hylimo/core";
 import { createToolboxEdit, SCOPE } from "../../../base/dslModule.js";
+import { ContentModule } from "../contentModule.js";
 
 /**
  * Module providing the enum element
  */
-export const enumModule = InterpreterModule.create(
+export const enumModule = ContentModule.create(
     "uml/enum",
     [
         "uml/classifier/classifier",

@@ -1,9 +1,9 @@
-import { InterpreterModule } from "@hylimo/core";
+import { ContentModule } from "../contentModule.js";
 
 /**
  * Module providing extends and implements connection operators
  */
-export const extendsAndImplementsModule = InterpreterModule.create(
+export const extendsAndImplementsModule = ContentModule.create(
     "uml/extendsAndImplements",
     ["common/defaultMarkers"],
     [],
