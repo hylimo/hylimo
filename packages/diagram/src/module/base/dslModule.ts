@@ -377,7 +377,9 @@ const scopeExpressions: ParseableExpressions = [
                     scope.internal.registerCanvasElement(labelCanvasElement, args, self.canvasScope)
                     labelCanvasElement.rotation = rotation
                     labelCanvasElement
-                }
+                },
+                originalStart = self.originalStart,
+                originalEnd = self.originalEnd
             ]
             callback.callWithScope(result)
             _validateCanvasConnectionWithScope(result, args)
@@ -570,6 +572,8 @@ const scopeExpressions: ParseableExpressions = [
                 )
                 connection.startProvider = startProvider
                 connection.endProvider = endProvider
+                connection.originalStart = start
+                connection.originalEnd = end
                 scope.internal.registerCanvasElement(connection, target, canvasScope)
 
                 connection
