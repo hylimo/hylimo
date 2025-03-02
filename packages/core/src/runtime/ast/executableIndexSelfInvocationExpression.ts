@@ -1,11 +1,11 @@
-import { IndexSelfInvocationExpression } from "../../ast/indexSelfInvocationExpression.js";
-import { InterpreterContext } from "../interpreter/interpreterContext.js";
-import { LabeledValue } from "../objects/labeledValue.js";
+import type { IndexSelfInvocationExpression } from "../../ast/indexSelfInvocationExpression.js";
+import type { InterpreterContext } from "../interpreter/interpreterContext.js";
+import type { LabeledValue } from "../objects/labeledValue.js";
 import { SemanticFieldNames } from "../semanticFieldNames.js";
 import { ExecutableAbstractInvocationExpression } from "./executableAbstractInvocationExpression.js";
-import { ExecutableListEntry } from "./executableListEntry.js";
+import type { ExecutableListEntry } from "./executableListEntry.js";
 import { ExecutableConstExpression } from "./executableConstExpression.js";
-import { ExecutableExpression } from "./executableExpression.js";
+import type { ExecutableExpression } from "./executableExpression.js";
 import { assertIndex } from "../../stdlib/typeHelpers.js";
 
 /**

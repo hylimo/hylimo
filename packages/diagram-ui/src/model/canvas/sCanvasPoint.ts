@@ -1,7 +1,8 @@
-import { Bounds, CanvasPoint, Point } from "@hylimo/diagram-common";
-import { PositionProvider } from "../../features/layout/positionProvider.js";
+import type { CanvasPoint, Point } from "@hylimo/diagram-common";
+import { Bounds } from "@hylimo/diagram-common";
+import type { PositionProvider } from "../../features/layout/positionProvider.js";
 import { SCanvasContent } from "./sCanvasContent.js";
-import { BoxSelectable } from "../../features/select/boxSelectFeature.js";
+import type { BoxSelectable } from "../../features/select/boxSelectFeature.js";
 
 /**
  * Base model for all canvas points

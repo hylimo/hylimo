@@ -1,8 +1,8 @@
-import { FontFamilyConfig, FontConfig, DiagramConfig } from "@hylimo/diagram-common";
-import { FontFamily, SubsettedFont } from "./fontFamily.js";
+import type { FontFamilyConfig, FontConfig, DiagramConfig } from "@hylimo/diagram-common";
+import type { FontFamily, SubsettedFont } from "./fontFamily.js";
 import { Buffer } from "buffer/index.js";
-import { SubsetConfig } from "./subsetCollector.js";
-import { LayoutCache } from "../engine/layoutCache.js";
+import type { SubsetConfig } from "./subsetCollector.js";
+import type { LayoutCache } from "../engine/layoutCache.js";
 import { SubsetManager } from "./subsetFont.js";
 import { v4 as uuid } from "uuid";
 import { createFont } from "./createFont.js";

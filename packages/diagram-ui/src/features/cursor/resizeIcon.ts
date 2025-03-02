@@ -1,5 +1,5 @@
-import { CanvasLike } from "../../model/canvas/canvasLike.js";
-import { ResizeMoveCursor } from "./cursor.js";
+import type { CanvasLike } from "../../model/canvas/canvasLike.js";
+import type { ResizeMoveCursor } from "./cursor.js";
 
 /**
  * Computes the offset to the index of a resize icon based on the elements rotation relative to the diagram root.

@@ -1,7 +1,8 @@
-import { Point } from "@hylimo/diagram-common";
+import type { Point } from "@hylimo/diagram-common";
 import { injectable } from "inversify";
-import { VNode } from "snabbdom";
-import { IView, svg } from "sprotty";
+import type { VNode } from "snabbdom";
+import type { IView } from "sprotty";
+import { svg } from "sprotty";
 import { SCanvasPoint } from "../../model/canvas/sCanvasPoint.js";
 import { findViewportZoom } from "../../base/findViewportZoom.js";
 

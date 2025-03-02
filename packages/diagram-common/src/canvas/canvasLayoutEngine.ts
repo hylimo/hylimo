@@ -1,22 +1,24 @@
-import { compose, identity, Matrix, rotateDEG, translate, applyToPoint } from "transformation-matrix";
+import type { Matrix } from "transformation-matrix";
+import { compose, identity, rotateDEG, translate, applyToPoint } from "transformation-matrix";
 import { Point } from "../common/point.js";
-import { Line, TransformedLine } from "../line/model/line.js";
-import { Segment } from "../line/model/segment.js";
+import type { Line, TransformedLine } from "../line/model/line.js";
+import type { Segment } from "../line/model/segment.js";
 import { CanvasAxisAlignedSegment } from "../model/elements/canvas/canvasAxisAlignedSegment.js";
 import { CanvasBezierSegment } from "../model/elements/canvas/canvasBezierSegment.js";
 import { CanvasConnection } from "../model/elements/canvas/canvasConnection.js";
-import { CanvasConnectionSegment } from "../model/elements/canvas/canvasConnectionSegment.js";
+import type { CanvasConnectionSegment } from "../model/elements/canvas/canvasConnectionSegment.js";
 import { CanvasElement } from "../model/elements/canvas/canvasElement.js";
 import { CanvasLineSegment } from "../model/elements/canvas/canvasLineSegment.js";
-import { Marker, MarkerLayoutInformation } from "../model/elements/canvas/marker.js";
+import type { MarkerLayoutInformation } from "../model/elements/canvas/marker.js";
+import { Marker } from "../model/elements/canvas/marker.js";
 import { AxisAlignedSegmentLayoutEngine } from "./axisAlignedSegmentLayoutEngine.js";
 import { BezierSegmentLayoutEngine } from "./bezierSegmentLayoutEngine.js";
-import { CanvasConnectionLayout, SegmentLayoutInformation } from "./canvasConnectionLayout.js";
+import type { CanvasConnectionLayout, SegmentLayoutInformation } from "./canvasConnectionLayout.js";
 import { LineSegmentLayoutEngine } from "./lineSegmentLayoutEngine.js";
-import { SegmentLayoutEngine } from "./segmentLayoutEngine.js";
+import type { SegmentLayoutEngine } from "./segmentLayoutEngine.js";
 import { AbsolutePoint, LinePoint, RelativePoint } from "../model/elements/canvas/canvasPoint.js";
 import { LineEngine } from "../line/engine/lineEngine.js";
-import { Element } from "../model/elements/base/element.js";
+import type { Element } from "../model/elements/base/element.js";
 import { Canvas } from "../model/elements/canvas/canvas.js";
 
 /**

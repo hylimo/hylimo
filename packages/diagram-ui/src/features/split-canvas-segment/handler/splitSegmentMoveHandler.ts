@@ -1,7 +1,7 @@
-import { Point } from "@hylimo/diagram-common";
+import type { Point } from "@hylimo/diagram-common";
 import { MoveHandler } from "../../move/moveHandler.js";
-import { Matrix } from "transformation-matrix";
-import { Edit } from "@hylimo/diagram-protocol";
+import type { Matrix } from "transformation-matrix";
+import type { Edit } from "@hylimo/diagram-protocol";
 
 /**
  * Base class for all split segment move handlers

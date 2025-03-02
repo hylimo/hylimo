@@ -1,19 +1,15 @@
+import type { BaseObject, CompletionExpressionMetadata, Expression, InterpreterContext, Range } from "@hylimo/core";
 import {
     AbstractFunctionObject,
-    BaseObject,
-    CompletionExpressionMetadata,
     ExecutableExpression,
-    Expression,
     FullObject,
-    InterpreterContext,
     nameToAccessExpression,
     nameToExpression,
-    Range,
     SemanticFieldNames
 } from "@hylimo/core";
 import { CompletionError } from "./completionError.js";
 import { CompletionItemKind, InsertTextFormat, InsertTextMode, MarkupKind } from "vscode-languageserver";
-import { CompletionItem } from "./completionItem.js";
+import type { CompletionItem } from "./completionItem.js";
 
 /**
  * An expression which throws an CompletionError on evaluation

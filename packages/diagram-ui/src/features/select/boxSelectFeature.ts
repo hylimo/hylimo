@@ -1,6 +1,6 @@
-import { Bounds } from "@hylimo/diagram-common";
-import { SModelElementImpl } from "sprotty";
-import { Selectable } from "sprotty-protocol";
+import type { Bounds } from "@hylimo/diagram-common";
+import type { SModelElementImpl } from "sprotty";
+import type { Selectable } from "sprotty-protocol";
 
 /**
  * Marks elements which can be selected by box selection.

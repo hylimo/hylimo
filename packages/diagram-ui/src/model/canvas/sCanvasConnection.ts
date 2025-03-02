@@ -1,4 +1,4 @@
-import {
+import type {
     CanvasConnection,
     CanvasConnectionLayout,
     Point,
@@ -6,10 +6,10 @@ import {
     Stroke,
     TransformedLine
 } from "@hylimo/diagram-common";
-import { LinearAnimatable } from "../../features/animation/model.js";
+import type { LinearAnimatable } from "../../features/animation/model.js";
 import { SCanvasConnectionSegment } from "./sCanvasConnectionSegment.js";
 import { SCanvasContent } from "./sCanvasContent.js";
-import { SCanvasPoint } from "./sCanvasPoint.js";
+import type { SCanvasPoint } from "./sCanvasPoint.js";
 import { SMarker } from "./sMarker.js";
 
 /**

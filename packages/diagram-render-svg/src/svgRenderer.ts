@@ -1,14 +1,5 @@
-import {
-    Root,
-    Rect,
-    Path,
-    Canvas,
-    Element,
-    convertFontsToCssStyle,
-    Ellipse,
-    SimplifiedText,
-    FontData
-} from "@hylimo/diagram-common";
+import type { Root, Rect, Path, Canvas, Element, Ellipse, SimplifiedText, FontData } from "@hylimo/diagram-common";
+import { convertFontsToCssStyle } from "@hylimo/diagram-common";
 import { SimplifiedDiagramVisitor } from "@hylimo/diagram-common";
 import {
     extractFillAttributes,
@@ -16,10 +7,10 @@ import {
     extractOutlinedShapeAttributes,
     extractShapeStyleAttributes
 } from "./attributeHelpers.js";
-import { SimplifiedCanvasElement } from "@hylimo/diagram-common";
+import type { SimplifiedCanvasElement } from "@hylimo/diagram-common";
 import { create } from "xmlbuilder2";
-import { XMLBuilder } from "xmlbuilder2/lib/interfaces.js";
-import { Font } from "fontkit";
+import type { XMLBuilder } from "xmlbuilder2/lib/interfaces.js";
+import type { Font } from "fontkit";
 import { createFont } from "@hylimo/diagram";
 
 /**

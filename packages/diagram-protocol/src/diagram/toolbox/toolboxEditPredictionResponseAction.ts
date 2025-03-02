@@ -1,5 +1,5 @@
-import { Root } from "@hylimo/diagram-common";
-import { ResponseAction } from "sprotty-protocol";
+import type { Root } from "@hylimo/diagram-common";
+import type { ResponseAction } from "sprotty-protocol";
 
 /**
  * Response for the ToolboxEditPredictionRequestAction

@@ -1,12 +1,14 @@
-import { IView, IViewArgs, RenderingContext, svg, ViewerOptions } from "sprotty";
+import type { IView, IViewArgs, RenderingContext, ViewerOptions } from "sprotty";
+import { svg } from "sprotty";
 import { injectable, inject } from "inversify";
-import { Attrs, thunk, VNode } from "snabbdom";
-import { SRoot } from "../model/sRoot.js";
+import type { Attrs, VNode } from "snabbdom";
+import { thunk } from "snabbdom";
+import type { SRoot } from "../model/sRoot.js";
 import { TYPES } from "../features/types.js";
-import { CursorProvider } from "../features/cursor/cursor.js";
-import { BoxSelectProvider } from "../features/select/boxSelectProvider.js";
+import type { CursorProvider } from "../features/cursor/cursor.js";
+import type { BoxSelectProvider } from "../features/select/boxSelectProvider.js";
 import { convertFontsToCssStyle } from "@hylimo/diagram-common";
-import { KeyState } from "../features/key-state/keyState.js";
+import type { KeyState } from "../features/key-state/keyState.js";
 
 /**
  * IView that is the parent which handles

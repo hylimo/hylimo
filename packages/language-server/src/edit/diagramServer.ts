@@ -4,8 +4,9 @@ import {
     TransactionalAction,
     UpdateEditorConfigAction
 } from "@hylimo/diagram-protocol";
-import { Action, DiagramServer as SprottyDiagramServer, DiagramServices } from "sprotty-protocol";
-import { Diagram } from "../diagram/diagram.js";
+import type { Action, DiagramServices } from "sprotty-protocol";
+import { DiagramServer as SprottyDiagramServer } from "sprotty-protocol";
+import type { Diagram } from "../diagram/diagram.js";
 
 /**
  * Custom DiagramServer which redirects TransactionalActions to the diagram

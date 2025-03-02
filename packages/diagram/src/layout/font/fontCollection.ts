@@ -1,5 +1,5 @@
 import { FontStyle, FontWeight } from "@hylimo/diagram-common";
-import { FontFamily, SubsettedFont } from "./fontFamily.js";
+import type { FontFamily, SubsettedFont } from "./fontFamily.js";
 
 /**
  * Collection of fonts

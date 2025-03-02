@@ -1,16 +1,17 @@
 import {
-    CstNode,
+    type CstNode,
     CstParser,
-    ICstVisitor,
-    ILexingError,
-    ILexingResult,
-    IRecognitionException,
-    IToken,
+    type ICstVisitor,
+    type ILexingError,
+    type ILexingResult,
+    type IRecognitionException,
+    type IToken,
     Lexer
 } from "chevrotain";
-import { Expression } from "../ast/expression.js";
-import { Range } from "../ast/range.js";
+import type { Expression } from "../ast/expression.js";
+import type { Range } from "../ast/range.js";
 import { generateCstToAstTransfromer } from "./cstToAstTransformer.js";
+import type { TokenType } from "./lexer.js";
 import {
     CloseCurlyBracket,
     CloseRoundBracket,
@@ -29,8 +30,7 @@ import {
     StringContent,
     StringEnd,
     StringStart,
-    StringTemplateStart,
-    TokenType
+    StringTemplateStart
 } from "./lexer.js";
 
 /**

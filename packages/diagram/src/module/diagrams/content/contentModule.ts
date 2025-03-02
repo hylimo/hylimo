@@ -1,4 +1,5 @@
-import { ExecutableExpression, InterpreterModule, parse, ParseableExpressions, Type } from "@hylimo/core";
+import type { ExecutableExpression, InterpreterModule, ParseableExpressions, Type } from "@hylimo/core";
+import { parse } from "@hylimo/core";
 
 /**
  * Config property

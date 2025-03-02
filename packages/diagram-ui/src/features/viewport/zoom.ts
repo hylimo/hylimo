@@ -1,17 +1,10 @@
-import {
-    findParentByFeature,
-    IActionDispatcher,
-    isViewport,
-    limit,
-    SModelElementImpl,
-    SModelRootImpl,
-    ZoomMouseListener as SprottyZoomMouseListener
-} from "sprotty";
+import type { IActionDispatcher, SModelElementImpl, SModelRootImpl } from "sprotty";
+import { findParentByFeature, isViewport, limit, ZoomMouseListener as SprottyZoomMouseListener } from "sprotty";
 import { inject, injectable } from "inversify";
-import { Action, Viewport } from "sprotty-protocol";
+import type { Action, Viewport } from "sprotty-protocol";
 import UnitBezier from "@mapbox/unitbezier";
-import { Point } from "@hylimo/diagram-common";
-import { SetViewportAction } from "./viewport.js";
+import type { Point } from "@hylimo/diagram-common";
+import type { SetViewportAction } from "./viewport.js";
 import { TYPES } from "../types.js";
 
 /**

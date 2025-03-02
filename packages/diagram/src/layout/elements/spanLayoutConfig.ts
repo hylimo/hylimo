@@ -1,7 +1,10 @@
-import { booleanType, enumType, FullObject, nullType, numberType, or, stringType } from "@hylimo/core";
-import { Element, FontStyle, FontWeight, Point, Size } from "@hylimo/diagram-common";
-import { ContentCardinality, LayoutElement, SizeConstraints } from "../layoutElement.js";
-import { Layout } from "../engine/layout.js";
+import type { FullObject } from "@hylimo/core";
+import { booleanType, enumType, nullType, numberType, or, stringType } from "@hylimo/core";
+import type { Element, Point, Size } from "@hylimo/diagram-common";
+import { FontStyle, FontWeight } from "@hylimo/diagram-common";
+import type { LayoutElement, SizeConstraints } from "../layoutElement.js";
+import { ContentCardinality } from "../layoutElement.js";
+import type { Layout } from "../engine/layout.js";
 import { ElementLayoutConfig } from "./elementLayoutConfig.js";
 import { fillStyleAttributes } from "./attributes.js";
 

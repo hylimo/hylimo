@@ -1,12 +1,14 @@
-import { EditSpecification, FontData } from "@hylimo/diagram-common";
-import { isSelectable, ModelIndexImpl, SModelElementImpl, ViewportRootElementImpl } from "sprotty";
+import type { EditSpecification, FontData } from "@hylimo/diagram-common";
+import type { SModelElementImpl } from "sprotty";
+import { isSelectable, ModelIndexImpl, ViewportRootElementImpl } from "sprotty";
 import { SCanvasLayoutEngine } from "./canvas/sCanvasLayoutEngine.js";
-import { Matrix, compose, translate, scale, applyToPoint } from "transformation-matrix";
-import { Bounds } from "sprotty-protocol";
-import { Bounds as HylimoBounds } from "@hylimo/diagram-common";
-import { CanvasLike } from "./canvas/canvasLike.js";
+import type { Matrix } from "transformation-matrix";
+import { compose, translate, scale, applyToPoint } from "transformation-matrix";
+import type { Bounds } from "sprotty-protocol";
+import type { Bounds as HylimoBounds } from "@hylimo/diagram-common";
+import type { CanvasLike } from "./canvas/canvasLike.js";
 import { PointVisibilityManager } from "./canvas/pointVisibilityManager.js";
-import { CreateConnectionHoverData } from "../features/create-connection/createConnectionHoverData.js";
+import type { CreateConnectionHoverData } from "../features/create-connection/createConnectionHoverData.js";
 
 /**
  * Root element.

@@ -1,12 +1,13 @@
 import { AbstractInvocationExpression } from "../../ast/abstractInvocationExpression.js";
-import { OperatorExpression } from "../../ast/operatorExpression.js";
+import type { OperatorExpression } from "../../ast/operatorExpression.js";
 import { validate } from "../../types/validate.js";
-import { FunctionDocumentation } from "../ast/executableAbstractFunctionExpression.js";
-import { ExecutableListEntry } from "../ast/executableListEntry.js";
-import { InterpreterContext } from "../interpreter/interpreterContext.js";
+import type { FunctionDocumentation } from "../ast/executableAbstractFunctionExpression.js";
+import type { ExecutableListEntry } from "../ast/executableListEntry.js";
+import type { InterpreterContext } from "../interpreter/interpreterContext.js";
 import { SemanticFieldNames } from "../semanticFieldNames.js";
 import { FullObject } from "./fullObject.js";
-import { LabeledValue, MissingArgumentSource } from "./labeledValue.js";
+import type { LabeledValue } from "./labeledValue.js";
+import { MissingArgumentSource } from "./labeledValue.js";
 
 /**
  * Generates the arguments map based on argumentExpressions

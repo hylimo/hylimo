@@ -1,5 +1,5 @@
 import { enumType, numberType, stringType } from "@hylimo/core";
-import { FilledElement, StrokedElement } from "@hylimo/diagram-common";
+import type { FilledElement, StrokedElement } from "@hylimo/diagram-common";
 import { HorizontalAlignment, VerticalAlignment, Visibility } from "../layoutElement.js";
 import { LineCap, LineJoin } from "@hylimo/diagram-common";
 

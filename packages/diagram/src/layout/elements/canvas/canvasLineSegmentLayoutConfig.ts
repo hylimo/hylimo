@@ -1,6 +1,7 @@
-import { Size, Point, Element, CanvasLineSegment } from "@hylimo/diagram-common";
-import { LayoutElement } from "../../layoutElement.js";
-import { Layout } from "../../engine/layout.js";
+import type { Size, Point, Element } from "@hylimo/diagram-common";
+import { CanvasLineSegment } from "@hylimo/diagram-common";
+import type { LayoutElement } from "../../layoutElement.js";
+import type { Layout } from "../../engine/layout.js";
 import { CanvasConnectionSegmentLayoutConfig } from "./canvasConnectionSegmentLayoutConfig.js";
 
 /**

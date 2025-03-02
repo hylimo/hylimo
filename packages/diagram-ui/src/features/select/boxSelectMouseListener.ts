@@ -1,11 +1,13 @@
 import { injectable } from "inversify";
-import { isSelected, SModelElementImpl } from "sprotty";
-import { Action, SelectAction } from "sprotty-protocol";
+import type { SModelElementImpl } from "sprotty";
+import { isSelected } from "sprotty";
+import type { Action } from "sprotty-protocol";
+import { SelectAction } from "sprotty-protocol";
 import { ToolboxToolType } from "../toolbox/toolType.js";
-import { BoxSelectProvider } from "./boxSelectProvider.js";
-import { Bounds, Point } from "@hylimo/diagram-common";
+import type { BoxSelectProvider } from "./boxSelectProvider.js";
+import type { Bounds, Point } from "@hylimo/diagram-common";
 import { SetToolAction } from "../toolbox/setToolAction.js";
-import { SRoot } from "../../model/sRoot.js";
+import type { SRoot } from "../../model/sRoot.js";
 import { isBoxSelectable } from "./boxSelectFeature.js";
 import { MouseListener } from "../../base/mouseListener.js";
 

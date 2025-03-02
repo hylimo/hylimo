@@ -1,6 +1,6 @@
-import { DestructuringExpression } from "../../ast/destructuringExpression.js";
-import { InterpreterContext } from "../interpreter/interpreterContext.js";
-import { LabeledValue } from "../objects/labeledValue.js";
+import type { DestructuringExpression } from "../../ast/destructuringExpression.js";
+import type { InterpreterContext } from "../interpreter/interpreterContext.js";
+import type { LabeledValue } from "../objects/labeledValue.js";
 import { ExecutableExpression } from "./executableExpression.js";
 
 /**

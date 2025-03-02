@@ -1,8 +1,10 @@
-import { FullObject, nullType } from "@hylimo/core";
-import { Size } from "@hylimo/diagram-common";
+import type { FullObject } from "@hylimo/core";
+import { nullType } from "@hylimo/core";
+import type { Size } from "@hylimo/diagram-common";
 import { canvasPointType } from "../../../module/base/types.js";
-import { AttributeConfig, ContentCardinality, LayoutElement, SizeConstraints } from "../../layoutElement.js";
-import { Layout } from "../../engine/layout.js";
+import type { AttributeConfig, LayoutElement, SizeConstraints } from "../../layoutElement.js";
+import { ContentCardinality } from "../../layoutElement.js";
+import type { Layout } from "../../engine/layout.js";
 import { ElementLayoutConfig } from "../elementLayoutConfig.js";
 
 /**

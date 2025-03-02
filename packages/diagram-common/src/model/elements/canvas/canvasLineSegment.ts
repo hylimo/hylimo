@@ -1,7 +1,8 @@
-import { Point } from "../../../common/point.js";
-import { Element } from "../base/element.js";
-import { Marker, MarkerLayoutInformation } from "./marker.js";
-import { CanvasConnectionSegment, calculateMarkerRenderInformationInternal } from "./canvasConnectionSegment.js";
+import type { Point } from "../../../common/point.js";
+import type { Element } from "../base/element.js";
+import type { Marker, MarkerLayoutInformation } from "./marker.js";
+import type { CanvasConnectionSegment } from "./canvasConnectionSegment.js";
+import { calculateMarkerRenderInformationInternal } from "./canvasConnectionSegment.js";
 
 /**
  * Direct line connection segment

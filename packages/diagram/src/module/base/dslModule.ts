@@ -1,8 +1,8 @@
+import type { ExecutableExpression, ParseableExpressions } from "@hylimo/core";
 import {
     assertString,
     assign,
     enumObject,
-    ExecutableExpression,
     fun,
     functionType,
     id,
@@ -15,7 +15,6 @@ import {
     objectType,
     optional,
     or,
-    ParseableExpressions,
     str,
     stringType,
     validateObject

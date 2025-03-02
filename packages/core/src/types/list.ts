@@ -1,6 +1,6 @@
 import { FullObject } from "../runtime/objects/fullObject.js";
 import { assertNumber } from "../stdlib/typeHelpers.js";
-import { Type } from "./base.js";
+import type { Type } from "./base.js";
 import { numberType } from "./number.js";
 
 /**

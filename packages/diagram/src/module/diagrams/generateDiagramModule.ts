@@ -1,18 +1,8 @@
-import {
-    assign,
-    ExecutableExpression,
-    fun,
-    functionType,
-    id,
-    InterpreterModule,
-    object,
-    optional,
-    SemanticFieldNames,
-    Type
-} from "@hylimo/core";
+import type { ExecutableExpression, Type } from "@hylimo/core";
+import { assign, fun, functionType, id, InterpreterModule, object, optional, SemanticFieldNames } from "@hylimo/core";
 import { contents } from "./content/contents.js";
 import { SCOPE } from "../base/dslModule.js";
-import { ContentModule } from "./content/contentModule.js";
+import type { ContentModule } from "./content/contentModule.js";
 
 /**
  * Creates the executable expressions for a diagram module

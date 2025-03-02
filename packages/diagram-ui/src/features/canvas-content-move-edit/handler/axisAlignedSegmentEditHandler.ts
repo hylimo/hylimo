@@ -1,8 +1,8 @@
-import { AxisAlignedSegmentEdit, Edit } from "@hylimo/diagram-protocol";
+import type { AxisAlignedSegmentEdit, Edit } from "@hylimo/diagram-protocol";
 import { DefaultEditTypes } from "@hylimo/diagram-common";
-import { Matrix } from "transformation-matrix";
+import type { Matrix } from "transformation-matrix";
 import { MoveHandler } from "../../move/moveHandler.js";
-import { ResizeMoveCursor } from "../../cursor/cursor.js";
+import type { ResizeMoveCursor } from "../../cursor/cursor.js";
 
 /**
  * Move handler for moving the vertical segment of an axis aligned connection segment.

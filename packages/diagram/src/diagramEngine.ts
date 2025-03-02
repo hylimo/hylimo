@@ -1,9 +1,6 @@
+import type { CstResult, ExecutableExpression, InterpretationResult, InterpreterModule } from "@hylimo/core";
 import {
-    CstResult,
-    ExecutableExpression,
-    InterpretationResult,
     Interpreter,
-    InterpreterModule,
     Parser,
     RuntimeError,
     SemanticFieldNames,
@@ -15,8 +12,8 @@ import {
     toExecutable
 } from "@hylimo/core";
 import { LayoutEngine, LayoutWithRoot } from "./layout/engine/layoutEngine.js";
-import { DiagramConfig } from "@hylimo/diagram-common";
-import { LayoutedDiagram } from "./layout/diagramLayoutResult.js";
+import type { DiagramConfig } from "@hylimo/diagram-common";
+import type { LayoutedDiagram } from "./layout/diagramLayoutResult.js";
 import { createBaseDiagramModules, defaultDiagramModules } from "./module/diagramModules.js";
 
 /**

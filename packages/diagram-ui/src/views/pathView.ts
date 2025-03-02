@@ -1,7 +1,8 @@
 import { injectable } from "inversify";
-import { VNode, Attrs } from "snabbdom";
-import { IViewArgs, RenderingContext, IView, svg } from "sprotty";
-import { SPath } from "../model/sPath.js";
+import type { VNode, Attrs } from "snabbdom";
+import type { IViewArgs, RenderingContext, IView } from "sprotty";
+import { svg } from "sprotty";
+import type { SPath } from "../model/sPath.js";
 import { extractShapeStyleAttributes } from "@hylimo/diagram-render-svg";
 
 /**

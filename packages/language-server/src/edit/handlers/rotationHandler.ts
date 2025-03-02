@@ -1,6 +1,6 @@
 import { CanvasElement, DefaultEditTypes } from "@hylimo/diagram-common";
-import { IncrementalUpdate, RotateEdit } from "@hylimo/diagram-protocol";
-import { EditHandler } from "./editHandler.js";
+import type { IncrementalUpdate, RotateEdit } from "@hylimo/diagram-protocol";
+import type { EditHandler } from "./editHandler.js";
 
 /**
  * Handler for axis aligned segment pos edits

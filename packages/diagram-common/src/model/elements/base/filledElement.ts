@@ -1,5 +1,5 @@
-import { Fill } from "./colored.js";
-import { Element } from "./element.js";
+import type { Fill } from "./colored.js";
+import type { Element } from "./element.js";
 
 /**
  * Element with fill related properties

@@ -1,8 +1,8 @@
-import { Selectable } from "sprotty-protocol";
+import type { Selectable } from "sprotty-protocol";
 import { SElement } from "../sElement.js";
-import { SParentElementImpl } from "sprotty";
-import { CanvasLike } from "./canvasLike.js";
-import { LineProviderHoverData } from "../../features/create-connection/createConnectionHoverData.js";
+import type { SParentElementImpl } from "sprotty";
+import type { CanvasLike } from "./canvasLike.js";
+import type { LineProviderHoverData } from "../../features/create-connection/createConnectionHoverData.js";
 
 /**
  * Base class for all canvas contents

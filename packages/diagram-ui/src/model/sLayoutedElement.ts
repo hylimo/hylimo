@@ -1,4 +1,4 @@
-import { LayoutedElement } from "@hylimo/diagram-common";
+import type { LayoutedElement } from "@hylimo/diagram-common";
 import { SElement } from "./sElement.js";
 
 /**

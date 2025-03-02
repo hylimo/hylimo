@@ -1,16 +1,17 @@
 import { DefaultEditTypes, LinePoint } from "@hylimo/diagram-common";
-import { findParentByFeature, IModelIndex } from "sprotty";
+import type { IModelIndex } from "sprotty";
+import { findParentByFeature } from "sprotty";
 import { SAbsolutePoint } from "../../model/canvas/sAbsolutePoint.js";
 import { SCanvasConnection } from "../../model/canvas/sCanvasConnection.js";
-import { SCanvasContent } from "../../model/canvas/sCanvasContent.js";
+import type { SCanvasContent } from "../../model/canvas/sCanvasContent.js";
 import { SCanvasElement } from "../../model/canvas/sCanvasElement.js";
 import { SCanvasPoint } from "../../model/canvas/sCanvasPoint.js";
 import { SLinePoint } from "../../model/canvas/sLinePoint.js";
 import { SRelativePoint } from "../../model/canvas/sRelativePoint.js";
 import { SMarker } from "../../model/canvas/sMarker.js";
 import { SCanvasBezierSegment } from "../../model/canvas/sCanvasBezierSegment.js";
-import { CanvasLike } from "../../model/canvas/canvasLike.js";
-import { SElement } from "../../model/sElement.js";
+import type { CanvasLike } from "../../model/canvas/canvasLike.js";
+import type { SElement } from "../../model/sElement.js";
 
 /**
  * Helper to select the points and elements which have to be modified during a move edit.

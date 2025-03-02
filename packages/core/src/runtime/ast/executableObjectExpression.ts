@@ -1,7 +1,7 @@
-import { ObjectExpression } from "../../ast/objectExpression.js";
-import { InterpreterContext } from "../interpreter/interpreterContext.js";
-import { LabeledValue } from "../objects/labeledValue.js";
-import { ExecutableListEntry } from "./executableListEntry.js";
+import type { ObjectExpression } from "../../ast/objectExpression.js";
+import type { InterpreterContext } from "../interpreter/interpreterContext.js";
+import type { LabeledValue } from "../objects/labeledValue.js";
+import type { ExecutableListEntry } from "./executableListEntry.js";
 import { ExecutableExpression } from "./executableExpression.js";
 
 /**

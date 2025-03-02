@@ -1,5 +1,5 @@
 import { StringObject } from "../runtime/objects/stringObject.js";
-import { Type } from "./base.js";
+import type { Type } from "./base.js";
 
 /**
  * String type matching only strings

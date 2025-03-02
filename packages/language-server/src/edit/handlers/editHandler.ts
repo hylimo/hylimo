@@ -1,6 +1,6 @@
-import { Element } from "@hylimo/diagram-common";
-import { Edit, IncrementalUpdate } from "@hylimo/diagram-protocol";
-import { Config } from "../../config.js";
+import type { Element } from "@hylimo/diagram-common";
+import type { Edit, IncrementalUpdate } from "@hylimo/diagram-protocol";
+import type { Config } from "../../config.js";
 
 /**
  * Handles transactional edits to a TextDocument

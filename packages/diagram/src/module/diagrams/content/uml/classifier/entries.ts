@@ -1,13 +1,5 @@
-import {
-    assign,
-    ExecutableConstExpression,
-    Expression,
-    fun,
-    FunctionObject,
-    functionType,
-    jsFun,
-    num
-} from "@hylimo/core";
+import type { Expression } from "@hylimo/core";
+import { assign, ExecutableConstExpression, fun, FunctionObject, functionType, jsFun, num } from "@hylimo/core";
 import { convertStringOrIdentifier } from "./propertiesAndMethods.js";
 import { ContentModule } from "../../contentModule.js";
 

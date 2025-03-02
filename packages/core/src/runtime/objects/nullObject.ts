@@ -1,11 +1,11 @@
-import { AbstractInvocationExpression } from "../../ast/abstractInvocationExpression.js";
-import { OperatorExpression } from "../../ast/operatorExpression.js";
-import { ExecutableListEntry } from "../ast/executableListEntry.js";
-import { InterpreterContext } from "../interpreter/interpreterContext.js";
+import type { AbstractInvocationExpression } from "../../ast/abstractInvocationExpression.js";
+import type { OperatorExpression } from "../../ast/operatorExpression.js";
+import type { ExecutableListEntry } from "../ast/executableListEntry.js";
+import type { InterpreterContext } from "../interpreter/interpreterContext.js";
 import { RuntimeError } from "../runtimeError.js";
 import { BaseObject } from "./baseObject.js";
-import { LabeledValue } from "./labeledValue.js";
-import { FullObject } from "./fullObject.js";
+import type { LabeledValue } from "./labeledValue.js";
+import type { FullObject } from "./fullObject.js";
 
 /**
  * BaseObject supporting neither get or set field, or call.

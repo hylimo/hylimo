@@ -32,7 +32,7 @@ import { participantModule } from "./uml/sequence/participant.js";
 import { lostFoundMessageModule } from "./uml/sequence/lostFoundMessage.js";
 import { valuesModule } from "./uml/classifier/values.js";
 import { sequenceDiagramCreateConnectionOperatorModule } from "./uml/sequence/sequenceDiagramCreateConnectionOperator.js";
-import { ContentModule } from "./contentModule.js";
+import type { ContentModule } from "./contentModule.js";
 
 /**
  * All content modules

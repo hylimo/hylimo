@@ -1,5 +1,5 @@
 import { FullObject } from "../runtime/objects/fullObject.js";
-import { Type } from "./base.js";
+import type { Type } from "./base.js";
 
 /**
  * Generates an object type

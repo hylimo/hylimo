@@ -1,8 +1,11 @@
-import { Edit, TransactionalAction } from "@hylimo/diagram-protocol";
-import { SModelElementImpl } from "sprotty";
-import { Matrix, applyToPoint } from "transformation-matrix";
-import { Cursor, UpdateCursorAction } from "../cursor/cursor.js";
-import { Action } from "sprotty-protocol";
+import type { Edit } from "@hylimo/diagram-protocol";
+import { TransactionalAction } from "@hylimo/diagram-protocol";
+import type { SModelElementImpl } from "sprotty";
+import type { Matrix } from "transformation-matrix";
+import { applyToPoint } from "transformation-matrix";
+import type { Cursor } from "../cursor/cursor.js";
+import { UpdateCursorAction } from "../cursor/cursor.js";
+import type { Action } from "sprotty-protocol";
 
 /**
  * Handler which can handle transactional move operations

@@ -1,7 +1,8 @@
-import { TemplateEntry } from "@hylimo/diagram-common";
-import { TextDocument } from "vscode-languageserver-textdocument";
+import type { TemplateEntry } from "@hylimo/diagram-common";
+import type { TextDocument } from "vscode-languageserver-textdocument";
 import { Range } from "vscode-languageserver";
-import jsonata, { Expression } from "jsonata";
+import type { Expression } from "jsonata";
+import jsonata from "jsonata";
 
 /**
  * Parsed template entry

@@ -1,17 +1,17 @@
 import { inject, injectable } from "inversify";
-import { VNode } from "snabbdom";
+import type { VNode } from "snabbdom";
 import { svg } from "sprotty";
-import { SCanvasElement } from "../../model/canvas/sCanvasElement.js";
+import type { SCanvasElement } from "../../model/canvas/sCanvasElement.js";
 import { LineEngine } from "@hylimo/diagram-common";
 import { toSVG } from "transformation-matrix";
-import { SCanvasConnection } from "../../model/canvas/sCanvasConnection.js";
+import type { SCanvasConnection } from "../../model/canvas/sCanvasConnection.js";
 import { TYPES } from "../../features/types.js";
-import { TransactionStateProvider } from "../../features/transaction/transactionStateProvider.js";
-import { LineProviderHoverData } from "../../features/create-connection/createConnectionHoverData.js";
+import type { TransactionStateProvider } from "../../features/transaction/transactionStateProvider.js";
+import type { LineProviderHoverData } from "../../features/create-connection/createConnectionHoverData.js";
 import { renderPoint } from "./canvasPointView.js";
-import { ToolTypeProvider } from "../../features/toolbox/toolState.js";
+import type { ToolTypeProvider } from "../../features/toolbox/toolState.js";
 import { ToolboxToolType } from "../../features/toolbox/toolType.js";
-import { SElement } from "../../model/sElement.js";
+import type { SElement } from "../../model/sElement.js";
 import { findViewportZoom } from "../../base/findViewportZoom.js";
 
 /**

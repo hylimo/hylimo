@@ -1,7 +1,7 @@
-import { ParenthesisExpressionMetadata } from "./expressionMetadata.js";
+import type { ParenthesisExpressionMetadata } from "./expressionMetadata.js";
 import { Expression } from "./expression.js";
 import { ListEntry } from "./listEntry.js";
-import { WrapperObjectFieldRetriever } from "../runtime/objects/wrapperObject.js";
+import type { WrapperObjectFieldRetriever } from "../runtime/objects/wrapperObject.js";
 
 /**
  * Base class for all invocation expressions, provides helper to generate args

@@ -1,9 +1,9 @@
-import { Expression } from "../ast/expression.js";
-import { InterpreterContext } from "../runtime/interpreter/interpreterContext.js";
-import { BaseObject } from "../runtime/objects/baseObject.js";
+import type { Expression } from "../ast/expression.js";
+import type { InterpreterContext } from "../runtime/interpreter/interpreterContext.js";
+import type { BaseObject } from "../runtime/objects/baseObject.js";
 import { RuntimeError } from "../runtime/runtimeError.js";
 import { assertObject } from "../stdlib/typeHelpers.js";
-import { Type } from "./base.js";
+import type { Type } from "./base.js";
 
 /**
  * Checks that a value matches a type and throws an error if not

@@ -1,9 +1,9 @@
-import { AbstractInvocationExpression } from "../../ast/abstractInvocationExpression.js";
-import { Expression } from "../../ast/expression.js";
-import { ExpressionMetadata } from "../../ast/expressionMetadata.js";
-import { InterpreterContext } from "../interpreter/interpreterContext.js";
-import { BaseObject } from "./baseObject.js";
-import { WrapperObject, WrapperObjectFieldRetriever } from "./wrapperObject.js";
+import type { AbstractInvocationExpression } from "../../ast/abstractInvocationExpression.js";
+import type { Expression } from "../../ast/expression.js";
+import type { ExpressionMetadata } from "../../ast/expressionMetadata.js";
+import type { InterpreterContext } from "../interpreter/interpreterContext.js";
+import type { BaseObject } from "./baseObject.js";
+import type { WrapperObject, WrapperObjectFieldRetriever } from "./wrapperObject.js";
 
 /**
  * Entry of a field

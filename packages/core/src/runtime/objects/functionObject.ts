@@ -1,14 +1,15 @@
-import { AbstractInvocationExpression } from "../../ast/abstractInvocationExpression.js";
-import { ExecutableAbstractFunctionExpression } from "../ast/executableAbstractFunctionExpression.js";
-import { ExecutableListEntry } from "../ast/executableListEntry.js";
-import { ExecutableFunctionExpression } from "../ast/executableFunctionExpression.js";
-import { ExecutableNativeFunctionExpression } from "../ast/executableNativeFunctionExpression.js";
-import { InterpreterContext } from "../interpreter/interpreterContext.js";
+import type { AbstractInvocationExpression } from "../../ast/abstractInvocationExpression.js";
+import type { ExecutableAbstractFunctionExpression } from "../ast/executableAbstractFunctionExpression.js";
+import type { ExecutableListEntry } from "../ast/executableListEntry.js";
+import type { ExecutableFunctionExpression } from "../ast/executableFunctionExpression.js";
+import type { ExecutableNativeFunctionExpression } from "../ast/executableNativeFunctionExpression.js";
+import type { InterpreterContext } from "../interpreter/interpreterContext.js";
 import { SemanticFieldNames } from "../semanticFieldNames.js";
-import { BaseObject, SimpleObject } from "./baseObject.js";
-import { LabeledValue } from "./labeledValue.js";
+import type { BaseObject } from "./baseObject.js";
+import { SimpleObject } from "./baseObject.js";
+import type { LabeledValue } from "./labeledValue.js";
 import { FullObject } from "./fullObject.js";
-import { OperatorExpression } from "../../ast/operatorExpression.js";
+import type { OperatorExpression } from "../../ast/operatorExpression.js";
 import { generateArgs } from "./generateArgs.js";
 
 /**

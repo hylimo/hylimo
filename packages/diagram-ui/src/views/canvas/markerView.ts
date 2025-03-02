@@ -1,7 +1,8 @@
 import { injectable } from "inversify";
-import { VNode } from "snabbdom";
-import { IView, IViewArgs, RenderingContext, svg } from "sprotty";
-import { SMarker } from "../../model/canvas/sMarker.js";
+import type { VNode } from "snabbdom";
+import type { IView, IViewArgs, RenderingContext } from "sprotty";
+import { svg } from "sprotty";
+import type { SMarker } from "../../model/canvas/sMarker.js";
 
 /**
  * IView that represents a Marker

@@ -1,11 +1,6 @@
 import { injectable } from "inversify";
-import {
-    CommandExecutionContext,
-    CommandReturn,
-    CommandStack as SprottyCommandStack,
-    ICommand,
-    SModelRootImpl
-} from "sprotty";
+import type { CommandExecutionContext, CommandReturn, ICommand, SModelRootImpl } from "sprotty";
+import { CommandStack as SprottyCommandStack } from "sprotty";
 import { CancelableCommandExecutionContext } from "../features/animation/cancelableCommandExecutionContext.js";
 import { UpdateModelCommand } from "../features/update/updateModel.js";
 import { IncrementalUpdateModelCommand } from "../features/update/incrementalUpdateModel.js";

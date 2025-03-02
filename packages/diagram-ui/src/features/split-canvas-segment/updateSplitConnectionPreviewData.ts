@@ -1,6 +1,7 @@
-import { ProjectionResult } from "@hylimo/diagram-common";
-import { Command, CommandExecutionContext, CommandReturn } from "sprotty";
-import { Action } from "sprotty-protocol";
+import type { ProjectionResult } from "@hylimo/diagram-common";
+import type { CommandExecutionContext, CommandReturn } from "sprotty";
+import { Command } from "sprotty";
+import type { Action } from "sprotty-protocol";
 import { inject, injectable } from "inversify";
 import { TYPES } from "../types.js";
 import { SCanvasConnection } from "../../model/canvas/sCanvasConnection.js";

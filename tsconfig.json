@@ -20,8 +20,9 @@
         "esModuleInterop": true,
         "jsx": "react",
         "strict": true,
-        "downlevelIteration": true,
+        "downlevelIteration": false,
         "composite": true,
-        "skipLibCheck": true
+        "skipLibCheck": true,
+        "verbatimModuleSyntax": true
     }
 }

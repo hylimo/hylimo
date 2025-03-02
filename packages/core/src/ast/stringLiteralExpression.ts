@@ -1,7 +1,7 @@
-import { InterpreterContext } from "../runtime/interpreter/interpreterContext.js";
-import { WrapperObject } from "../runtime/objects/wrapperObject.js";
+import type { InterpreterContext } from "../runtime/interpreter/interpreterContext.js";
+import type { WrapperObject } from "../runtime/objects/wrapperObject.js";
 import { Expression } from "./expression.js";
-import { ExpressionMetadata } from "./expressionMetadata.js";
+import type { ExpressionMetadata } from "./expressionMetadata.js";
 
 /**
  * String expression

@@ -1,7 +1,8 @@
 import { injectable } from "inversify";
 import { RemoteRedoAction, RemoteUndoAction } from "@hylimo/diagram-protocol";
-import { isCtrlOrCmd, KeyListener, SModelElementImpl } from "sprotty";
-import { Action } from "sprotty-protocol";
+import type { SModelElementImpl } from "sprotty";
+import { isCtrlOrCmd, KeyListener } from "sprotty";
+import type { Action } from "sprotty-protocol";
 
 /**
  * Key listener for remote undo and redo actions

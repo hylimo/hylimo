@@ -1,6 +1,6 @@
-import { CompletionItem, Position } from "vscode-languageserver";
-import { RemoteMessagePayload } from "@hylimo/diagram-protocol";
-import { RequestUpdateDiagramMessage } from "./updateDiagramMessage.js";
+import type { CompletionItem, Position } from "vscode-languageserver";
+import type { RemoteMessagePayload } from "@hylimo/diagram-protocol";
+import type { RequestUpdateDiagramMessage } from "./updateDiagramMessage.js";
 
 /**
  * Message to perform generateCompletionItem on a remote language server

@@ -1,9 +1,9 @@
 import { assertFunction } from "../../stdlib/typeHelpers.js";
 import { ExecutableConstExpression } from "../ast/executableConstExpression.js";
-import { InterpreterContext } from "../interpreter/interpreterContext.js";
-import { BaseObject } from "./baseObject.js";
-import { LabeledValue } from "./labeledValue.js";
-import { AbstractFunctionObject } from "./functionObject.js";
+import type { InterpreterContext } from "../interpreter/interpreterContext.js";
+import type { BaseObject } from "./baseObject.js";
+import type { LabeledValue } from "./labeledValue.js";
+import type { AbstractFunctionObject } from "./functionObject.js";
 
 /**
  * Property consisting of a getter and a setter

@@ -8,7 +8,7 @@ import { FieldAccessExpression } from "./fieldAccessExpression.js";
 import { DestructuringExpression } from "./destructuringExpression.js";
 import { BracketExpression } from "./bracketExpression.js";
 import { AssignmentExpression } from "./assignmentExpression.js";
-import { Expression } from "./expression.js";
+import type { Expression } from "./expression.js";
 import { ObjectExpression } from "./objectExpression.js";
 import { OperatorExpression } from "./operatorExpression.js";
 import { NoopExpression } from "./noopExpression.js";

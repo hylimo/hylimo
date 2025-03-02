@@ -1,7 +1,7 @@
 import { injectable } from "inversify";
-import { VNode } from "snabbdom";
+import type { VNode } from "snabbdom";
 import { svg } from "sprotty";
-import { SRelativePoint } from "../../model/canvas/sRelativePoint.js";
+import type { SRelativePoint } from "../../model/canvas/sRelativePoint.js";
 import { CanvasPointView } from "./canvasPointView.js";
 import { Point } from "@hylimo/diagram-common";
 import { SCanvasPoint } from "../../model/canvas/sCanvasPoint.js";

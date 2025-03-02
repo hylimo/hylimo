@@ -1,4 +1,5 @@
-import { FullObject, objectToList } from "@hylimo/core";
+import type { FullObject } from "@hylimo/core";
+import { objectToList } from "@hylimo/core";
 import { assertString } from "@hylimo/core";
 
 /**

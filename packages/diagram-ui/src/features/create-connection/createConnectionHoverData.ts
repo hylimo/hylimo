@@ -1,4 +1,4 @@
-import { Point, ProjectionResult, TransformedLine } from "@hylimo/diagram-common";
+import type { Point, ProjectionResult, TransformedLine } from "@hylimo/diagram-common";
 
 /**
  * Hover data for creating a connection

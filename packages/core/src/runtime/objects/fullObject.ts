@@ -1,12 +1,12 @@
-import { AbstractInvocationExpression } from "../../ast/abstractInvocationExpression.js";
-import { OperatorExpression } from "../../ast/operatorExpression.js";
-import { ExecutableListEntry } from "../ast/executableListEntry.js";
-import { InterpreterContext } from "../interpreter/interpreterContext.js";
+import type { AbstractInvocationExpression } from "../../ast/abstractInvocationExpression.js";
+import type { OperatorExpression } from "../../ast/operatorExpression.js";
+import type { ExecutableListEntry } from "../ast/executableListEntry.js";
+import type { InterpreterContext } from "../interpreter/interpreterContext.js";
 import { RuntimeError } from "../runtimeError.js";
 import { SemanticFieldNames } from "../semanticFieldNames.js";
 import { BaseObject } from "./baseObject.js";
-import { LabeledValue } from "./labeledValue.js";
-import { AbstractFunctionObject } from "./functionObject.js";
+import type { LabeledValue } from "./labeledValue.js";
+import type { AbstractFunctionObject } from "./functionObject.js";
 import { Property } from "./property.js";
 
 /**

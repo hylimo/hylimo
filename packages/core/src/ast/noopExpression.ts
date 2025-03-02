@@ -1,4 +1,4 @@
-import { WrapperObject } from "../runtime/objects/wrapperObject.js";
+import type { WrapperObject } from "../runtime/objects/wrapperObject.js";
 import { Expression } from "./expression.js";
 
 export class NoopExpression extends Expression {

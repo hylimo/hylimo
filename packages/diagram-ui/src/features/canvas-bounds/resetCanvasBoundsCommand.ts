@@ -1,5 +1,6 @@
 import { injectable, inject } from "inversify";
-import { Command, CommandExecutionContext, CommandReturn } from "sprotty";
+import type { CommandExecutionContext, CommandReturn } from "sprotty";
+import { Command } from "sprotty";
 import { Bounds } from "sprotty-protocol";
 import { ResetCanvasBoundsAction } from "./resetCanvasBoundsAction.js";
 import { TYPES } from "../types.js";

@@ -1,4 +1,4 @@
-import { Bounds } from "@hylimo/diagram-common";
+import type { Bounds } from "@hylimo/diagram-common";
 
 /**
  * Provider for the current selection box

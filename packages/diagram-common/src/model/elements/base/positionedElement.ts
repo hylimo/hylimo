@@ -1,5 +1,5 @@
-import { Point } from "../../../common/point.js";
-import { Element } from "./element.js";
+import type { Point } from "../../../common/point.js";
+import type { Element } from "./element.js";
 
 /**
  * Element with a position

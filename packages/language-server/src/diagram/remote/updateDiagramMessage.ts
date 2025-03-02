@@ -1,7 +1,7 @@
-import { DiagramUpdateResult } from "../diagramImplementation.js";
-import { RemoteDiagramMessage } from "./remoteDiagramMessage.js";
-import { RemoteMessagePayload } from "@hylimo/diagram-protocol";
-import { DiagramConfig } from "@hylimo/diagram-common";
+import type { DiagramUpdateResult } from "../diagramImplementation.js";
+import type { RemoteDiagramMessage } from "./remoteDiagramMessage.js";
+import type { RemoteMessagePayload } from "@hylimo/diagram-protocol";
+import type { DiagramConfig } from "@hylimo/diagram-common";
 
 /**
  * Message to request an update of a diagram

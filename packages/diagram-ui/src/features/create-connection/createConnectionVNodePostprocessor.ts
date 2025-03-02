@@ -1,8 +1,9 @@
 import { injectable, inject } from "inversify";
-import { VNode } from "snabbdom";
-import { IVNodePostprocessor, setAttr, SModelElementImpl } from "sprotty";
+import type { VNode } from "snabbdom";
+import type { IVNodePostprocessor, SModelElementImpl } from "sprotty";
+import { setAttr } from "sprotty";
 import { TYPES } from "../types.js";
-import { TransactionStateProvider } from "../transaction/transactionStateProvider.js";
+import type { TransactionStateProvider } from "../transaction/transactionStateProvider.js";
 import { SCanvasElement } from "../../model/canvas/sCanvasElement.js";
 import { SCanvasConnection } from "../../model/canvas/sCanvasConnection.js";
 

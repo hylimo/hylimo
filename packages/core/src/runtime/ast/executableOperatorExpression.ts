@@ -1,6 +1,6 @@
-import { OperatorExpression } from "../../ast/operatorExpression.js";
-import { InterpreterContext } from "../interpreter/interpreterContext.js";
-import { LabeledValue } from "../objects/labeledValue.js";
+import type { OperatorExpression } from "../../ast/operatorExpression.js";
+import type { InterpreterContext } from "../interpreter/interpreterContext.js";
+import type { LabeledValue } from "../objects/labeledValue.js";
 import { SemanticFieldNames } from "../semanticFieldNames.js";
 import { ExecutableConstExpression } from "./executableConstExpression.js";
 import { ExecutableExpression } from "./executableExpression.js";

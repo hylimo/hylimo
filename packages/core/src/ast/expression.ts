@@ -1,7 +1,8 @@
-import { ExpressionMetadata } from "./expressionMetadata.js";
-import { Range } from "./range.js";
-import { WrapperObject, WrapperObjectFieldRetriever } from "../runtime/objects/wrapperObject.js";
-import { InterpreterContext } from "../runtime/interpreter/interpreterContext.js";
+import type { ExpressionMetadata } from "./expressionMetadata.js";
+import type { Range } from "./range.js";
+import type { WrapperObject } from "../runtime/objects/wrapperObject.js";
+import { type WrapperObjectFieldRetriever } from "../runtime/objects/wrapperObject.js";
+import type { InterpreterContext } from "../runtime/interpreter/interpreterContext.js";
 
 /**
  * Base interface for all expressions

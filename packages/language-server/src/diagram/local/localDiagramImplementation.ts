@@ -1,18 +1,13 @@
-import { LayoutedDiagram, RenderErrors } from "@hylimo/diagram";
-import {
-    Diagnostic,
-    DiagnosticSeverity,
-    uinteger,
-    Range,
-    CompletionItem,
-    Position,
-    TextEdit
-} from "vscode-languageserver";
+import type { LayoutedDiagram, RenderErrors } from "@hylimo/diagram";
+import type { CompletionItem, Position } from "vscode-languageserver";
+import { Diagnostic, DiagnosticSeverity, uinteger, Range, TextEdit } from "vscode-languageserver";
 import { TextDocument } from "vscode-languageserver-textdocument";
-import { DiagramImplementation, DiagramUpdateResult } from "../diagramImplementation.js";
-import { SharedDiagramUtils } from "../../sharedDiagramUtils.js";
-import { DiagramConfig, Root } from "@hylimo/diagram-common";
-import { Expression, isWrapperObject } from "@hylimo/core";
+import type { DiagramUpdateResult } from "../diagramImplementation.js";
+import { DiagramImplementation } from "../diagramImplementation.js";
+import type { SharedDiagramUtils } from "../../sharedDiagramUtils.js";
+import type { DiagramConfig, Root } from "@hylimo/diagram-common";
+import type { Expression } from "@hylimo/core";
+import { isWrapperObject } from "@hylimo/core";
 
 /**
  * Local implementation of a diagram.

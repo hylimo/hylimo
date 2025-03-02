@@ -1,9 +1,11 @@
-import { Root } from "@hylimo/diagram-common";
-import { Toolbox } from "../toolbox.js";
-import { VNode, h } from "snabbdom";
+import type { Root } from "@hylimo/diagram-common";
+import type { Toolbox } from "../toolbox.js";
+import type { VNode } from "snabbdom";
+import { h } from "snabbdom";
 import { generateToolboxAddElementDetails } from "./item.js";
 import { generateIcon } from "./icon.js";
-import { ToolboxTool, toolboxTools } from "../tools.js";
+import type { ToolboxTool } from "../tools.js";
+import { toolboxTools } from "../tools.js";
 import { ToolboxToolType } from "../toolType.js";
 import { generateToolboxConnectDetails } from "./connection.js";
 import { Lock, PencilRuler, X } from "lucide";

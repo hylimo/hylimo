@@ -1,24 +1,27 @@
 import { injectable } from "inversify";
-import { EditSpecification, DefaultEditTypes, EditSpecificationEntry, groupBy } from "@hylimo/diagram-common";
-import { findParentByFeature, isMoveable, SModelElementImpl } from "sprotty";
-import { Action } from "sprotty-protocol";
-import { SAbsolutePoint } from "../../model/canvas/sAbsolutePoint.js";
+import type { EditSpecificationEntry } from "@hylimo/diagram-common";
+import { EditSpecification, DefaultEditTypes, groupBy } from "@hylimo/diagram-common";
+import type { SModelElementImpl } from "sprotty";
+import { findParentByFeature, isMoveable } from "sprotty";
+import type { Action } from "sprotty-protocol";
+import type { SAbsolutePoint } from "../../model/canvas/sAbsolutePoint.js";
 import { SCanvasElement } from "../../model/canvas/sCanvasElement.js";
 import { SCanvasPoint } from "../../model/canvas/sCanvasPoint.js";
 import { SLinePoint } from "../../model/canvas/sLinePoint.js";
-import { SRelativePoint } from "../../model/canvas/sRelativePoint.js";
-import { MoveHandler } from "../move/moveHandler.js";
+import type { SRelativePoint } from "../../model/canvas/sRelativePoint.js";
+import type { MoveHandler } from "../move/moveHandler.js";
 import { TranslationMoveHandler } from "./handler/translationMoveHandler.js";
 import { LineMoveHandler } from "./handler/lineMoveHandler.js";
 import { CanvasElementView, ResizePosition } from "../../views/canvas/canvasElementView.js";
 import { RotationHandler } from "./handler/rotationHandler.js";
 import { SCanvasConnection } from "../../model/canvas/sCanvasConnection.js";
-import { SRoot } from "../../model/sRoot.js";
-import { ElementsGroupedBySize, ResizeHandler } from "./handler/resizeHandler.js";
+import type { SRoot } from "../../model/sRoot.js";
+import type { ElementsGroupedBySize } from "./handler/resizeHandler.js";
+import { ResizeHandler } from "./handler/resizeHandler.js";
 import { SCanvasAxisAlignedSegment } from "../../model/canvas/sCanvasAxisAlignedSegment.js";
 import { AxisAligedSegmentEditHandler } from "./handler/axisAlignedSegmentEditHandler.js";
+import type { Matrix } from "transformation-matrix";
 import {
-    Matrix,
     compose,
     translate,
     applyToPoint,

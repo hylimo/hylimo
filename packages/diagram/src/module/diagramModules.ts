@@ -1,4 +1,4 @@
-import { InterpreterModule } from "@hylimo/core";
+import type { InterpreterModule } from "@hylimo/core";
 import { DiagramModule } from "./base/diagramModule.js";
 import { dslModule } from "./base/dslModule.js";
 import { editModule } from "./base/editModule.js";
@@ -7,7 +7,7 @@ import { classDiagramModule } from "./diagrams/classDiagramModule.js";
 import { componentDiagramModule } from "./diagrams/componentDiagramModule.js";
 import { sequenceDiagramModule } from "./diagrams/sequenceDiagramModule.js";
 import { umlDiagramModule } from "./diagrams/umlDiagramModule.js";
-import { LayoutEngine } from "../layout/engine/layoutEngine.js";
+import type { LayoutEngine } from "../layout/engine/layoutEngine.js";
 
 /**
  * Provides / creates the base diagram modules, including

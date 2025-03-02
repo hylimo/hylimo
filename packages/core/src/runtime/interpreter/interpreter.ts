@@ -1,7 +1,7 @@
-import { ExecutableExpression } from "../ast/executableExpression.js";
-import { BaseObject } from "../objects/baseObject.js";
-import { FullObject } from "../objects/fullObject.js";
-import { RuntimeError } from "../runtimeError.js";
+import type { ExecutableExpression } from "../ast/executableExpression.js";
+import type { BaseObject } from "../objects/baseObject.js";
+import type { FullObject } from "../objects/fullObject.js";
+import type { RuntimeError } from "../runtimeError.js";
 import { InterpreterContext } from "./interpreterContext.js";
 import { InterpreterModule } from "./interpreterModule.js";
 

@@ -1,5 +1,5 @@
-import { Expression } from "../ast/expression.js";
-import { Range } from "../ast/range.js";
+import type { Expression } from "../ast/expression.js";
+import type { Range } from "../ast/range.js";
 
 /**
  * Error thrown during interpretation of a program

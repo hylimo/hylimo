@@ -1,18 +1,9 @@
 import { inject, injectable } from "inversify";
-import { VNode } from "snabbdom";
-import {
-    findParentByFeature,
-    getWindowScroll,
-    IActionDispatcher,
-    isViewport,
-    IVNodePostprocessor,
-    limit,
-    on,
-    SModelElementImpl,
-    SModelRootImpl,
-    ViewerOptions
-} from "sprotty";
-import { Action, Bounds, SetViewportAction, Viewport, Point } from "sprotty-protocol";
+import type { VNode } from "snabbdom";
+import type { IActionDispatcher, IVNodePostprocessor, SModelElementImpl, ViewerOptions } from "sprotty";
+import { findParentByFeature, getWindowScroll, isViewport, limit, on, SModelRootImpl } from "sprotty";
+import type { Action, Bounds, Viewport, Point } from "sprotty-protocol";
+import { SetViewportAction } from "sprotty-protocol";
 import { TYPES } from "../types.js";
 
 /**

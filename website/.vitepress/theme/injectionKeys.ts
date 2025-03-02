@@ -1,4 +1,4 @@
-import { InjectionKey, ShallowRef } from "vue";
+import type { InjectionKey, ShallowRef } from "vue";
 import type { LanguageClientProxy, LanguageServerConfig } from "./lspPlugin";
 
 /**

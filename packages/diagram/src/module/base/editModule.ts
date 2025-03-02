@@ -1,17 +1,13 @@
+import type { BaseObject, Expression, LabeledValue, InterpreterContext, StringObject } from "@hylimo/core";
 import {
     AbstractInvocationExpression,
     assertString,
     assign,
-    BaseObject,
     DefaultModuleNames,
-    Expression,
-    LabeledValue,
     IdentifierExpression,
-    InterpreterContext,
     InterpreterModule,
     jsFun,
     NumberLiteralExpression,
-    StringObject,
     FunctionExpression,
     RuntimeError,
     MissingArgumentSource,

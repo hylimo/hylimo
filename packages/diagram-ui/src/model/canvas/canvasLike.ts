@@ -1,6 +1,6 @@
-import { SModelElementImpl } from "sprotty";
-import { PointVisibilityManager } from "./pointVisibilityManager.js";
-import { Matrix } from "transformation-matrix";
+import type { SModelElementImpl } from "sprotty";
+import type { PointVisibilityManager } from "./pointVisibilityManager.js";
+import type { Matrix } from "transformation-matrix";
 
 /**
  * Interface for elements that are like a canvas (e.g. SCanvas, SRoot)
