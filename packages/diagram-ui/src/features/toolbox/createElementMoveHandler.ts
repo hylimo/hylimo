@@ -1,6 +1,6 @@
-import { Edit, ToolboxEdit } from "@hylimo/diagram-protocol";
+import type { Edit, ToolboxEdit } from "@hylimo/diagram-protocol";
 import { MoveHandler } from "../move/moveHandler.js";
-import { SRoot } from "../../model/sRoot.js";
+import type { SRoot } from "../../model/sRoot.js";
 
 /**
  * Create move handler to create canvas elements, typically used for toolbox edits

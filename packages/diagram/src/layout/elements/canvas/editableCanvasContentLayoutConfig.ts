@@ -1,5 +1,6 @@
-import { Expression, optional, stringType, Type, wrapperObjectType } from "@hylimo/core";
-import { AttributeConfig, ContentCardinality } from "../../layoutElement.js";
+import type { Type } from "@hylimo/core";
+import { Expression, optional, stringType, wrapperObjectType } from "@hylimo/core";
+import type { AttributeConfig, ContentCardinality } from "../../layoutElement.js";
 import { CanvasContentLayoutConfig } from "./canvasContentLayoutConfig.js";
 
 /**

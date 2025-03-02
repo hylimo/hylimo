@@ -1,7 +1,7 @@
-import { Point, SegmentLayoutInformation } from "@hylimo/diagram-common";
-import { SCanvasConnection } from "./sCanvasConnection.js";
-import { SCanvasPoint } from "./sCanvasPoint.js";
-import { VNode } from "snabbdom";
+import type { Point, SegmentLayoutInformation } from "@hylimo/diagram-common";
+import type { SCanvasConnection } from "./sCanvasConnection.js";
+import type { SCanvasPoint } from "./sCanvasPoint.js";
+import type { VNode } from "snabbdom";
 import { SElement } from "../sElement.js";
 
 /**

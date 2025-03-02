@@ -1,7 +1,8 @@
-import { ConnectionEdit, ConnectionEnd, Edit } from "@hylimo/diagram-protocol";
-import { findParentByFeature, SModelElementImpl } from "sprotty";
+import type { ConnectionEdit, ConnectionEnd, Edit } from "@hylimo/diagram-protocol";
+import type { SModelElementImpl } from "sprotty";
+import { findParentByFeature } from "sprotty";
 import { MoveHandler } from "../move/moveHandler.js";
-import { Matrix } from "transformation-matrix";
+import type { Matrix } from "transformation-matrix";
 import { LineEngine } from "@hylimo/diagram-common";
 import { isLineProvider } from "./lineProvider.js";
 

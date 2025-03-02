@@ -1,8 +1,9 @@
 import { EditorConfigUpdatedAction } from "@hylimo/diagram-protocol";
 import { inject, injectable } from "inversify";
-import { Command, CommandExecutionContext, CommandReturn } from "sprotty";
+import type { CommandExecutionContext, CommandReturn } from "sprotty";
+import { Command } from "sprotty";
 import { TYPES } from "../types.js";
-import { ConfigManager } from "./configManager.js";
+import type { ConfigManager } from "./configManager.js";
 
 /**
  * Command for EditorConfigUpdatedAction

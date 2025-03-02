@@ -1,5 +1,5 @@
-import { SplitCanvasAxisAlignedSegmentEdit } from "@hylimo/diagram-protocol";
-import { EditHandler } from "./editHandler.js";
+import type { SplitCanvasAxisAlignedSegmentEdit } from "@hylimo/diagram-protocol";
+import type { EditHandler } from "./editHandler.js";
 import { DefaultEditTypes } from "@hylimo/diagram-common";
 
 /**

@@ -1,9 +1,9 @@
-import { Point } from "../common/point.js";
-import { Segment } from "../line/model/segment.js";
-import { CanvasConnectionSegment } from "../model/elements/canvas/canvasConnectionSegment.js";
-import { Marker, MarkerLayoutInformation } from "../model/elements/canvas/marker.js";
-import { SegmentLayoutInformation } from "./canvasConnectionLayout.js";
-import { CanvasLayoutEngine } from "./canvasLayoutEngine.js";
+import type { Point } from "../common/point.js";
+import type { Segment } from "../line/model/segment.js";
+import type { CanvasConnectionSegment } from "../model/elements/canvas/canvasConnectionSegment.js";
+import type { Marker, MarkerLayoutInformation } from "../model/elements/canvas/marker.js";
+import type { SegmentLayoutInformation } from "./canvasConnectionLayout.js";
+import type { CanvasLayoutEngine } from "./canvasLayoutEngine.js";
 
 /**
  * Base class for line, bezier and axisAligned canvas connection segment engines

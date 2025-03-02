@@ -1,5 +1,5 @@
-import { Action } from "sprotty-protocol";
-import { ToolboxToolType } from "./toolType.js";
+import type { Action } from "sprotty-protocol";
+import type { ToolboxToolType } from "./toolType.js";
 
 /**
  * Action to set the toolbox tool.

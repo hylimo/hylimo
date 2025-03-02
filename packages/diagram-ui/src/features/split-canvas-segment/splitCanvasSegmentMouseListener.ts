@@ -1,28 +1,23 @@
 import { inject, injectable } from "inversify";
-import { MouseListener, SModelElementImpl } from "sprotty";
-import { Action } from "sprotty-protocol";
+import type { SModelElementImpl } from "sprotty";
+import { MouseListener } from "sprotty";
+import type { Action } from "sprotty-protocol";
 import { SCanvasConnection } from "../../model/canvas/sCanvasConnection.js";
-import {
-    DefaultEditTypes,
-    EditSpecification,
-    LineEngine,
-    Math2D,
-    Point,
-    ProjectionResult
-} from "@hylimo/diagram-common";
-import { SCanvasConnectionSegment } from "../../model/canvas/sCanvasConnectionSegment.js";
-import { AxisAlignedSegmentEdit } from "@hylimo/diagram-protocol";
+import type { Point, ProjectionResult } from "@hylimo/diagram-common";
+import { DefaultEditTypes, EditSpecification, LineEngine, Math2D } from "@hylimo/diagram-common";
+import type { SCanvasConnectionSegment } from "../../model/canvas/sCanvasConnectionSegment.js";
+import type { AxisAlignedSegmentEdit } from "@hylimo/diagram-protocol";
 import { TYPES } from "../types.js";
-import { TransactionIdProvider } from "../transaction/transactionIdProvider.js";
+import type { TransactionIdProvider } from "../transaction/transactionIdProvider.js";
 import { SCanvasLineSegment } from "../../model/canvas/sCanvasLineSegment.js";
 import { SCanvasAxisAlignedSegment } from "../../model/canvas/sCanvasAxisAlignedSegment.js";
 import { SCanvasBezierSegment } from "../../model/canvas/sCanvasBezierSegment.js";
 import { Bezier } from "bezier-js";
 import { applyToPoint } from "transformation-matrix";
 import { UpdateSplitConnectionPreviewDataAction } from "./updateSplitConnectionPreviewData.js";
-import { SplitSegmentMoveHandler } from "./handler/splitSegmentMoveHandler.js";
+import type { SplitSegmentMoveHandler } from "./handler/splitSegmentMoveHandler.js";
 import { SplitLineSegmentMoveHandler } from "./handler/splitLineSegmentMoveHandler.js";
-import { Matrix } from "transformation-matrix";
+import type { Matrix } from "transformation-matrix";
 import { SplitBezierSegmentMoveHandler } from "./handler/splitBezierSegmentMoveHandler.js";
 import { SplitAxisAlignedSegmentMoveHandler } from "./handler/splitAxisAlignedSegmentMoveHandler.js";
 import { TransactionalMoveAction } from "../move/transactionalMoveAction.js";

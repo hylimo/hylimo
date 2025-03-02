@@ -1,15 +1,15 @@
 import { applyToPoint, compose, decomposeTSR, inverse, rotate, scale } from "transformation-matrix";
-import { Point } from "../../common/point.js";
+import type { Point } from "../../common/point.js";
 import { LinePoint } from "../../model/elements/canvas/canvasPoint.js";
 import { ArcSegment } from "../model/arcSegment.js";
 import { BezierSegment } from "../model/bezierSegment.js";
-import { Line, TransformedLine } from "../model/line.js";
+import type { Line, TransformedLine } from "../model/line.js";
 import { LineSegment } from "../model/lineSegment.js";
-import { Segment } from "../model/segment.js";
+import type { Segment } from "../model/segment.js";
 import { ArcSegmentEngine } from "./arcSegmentEngine.js";
 import { BezierSegmentEngine } from "./bezierSegmentEngine.js";
 import { LineSegmentEngine } from "./lineSegmentEngine.js";
-import { NearestPointResult, SegmentEngine } from "./segmentEngine.js";
+import type { NearestPointResult, SegmentEngine } from "./segmentEngine.js";
 import { Math2D } from "../../common/math.js";
 
 /**

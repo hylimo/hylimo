@@ -1,8 +1,9 @@
 import { identifierNeedsQuotes, Rules } from "@hylimo/core";
-import { IToken } from "chevrotain";
-import { doc, Doc } from "prettier";
+import type { IToken } from "chevrotain";
+import type { Doc } from "prettier";
+import { doc } from "prettier";
 import { uinteger } from "vscode-languageserver";
-import { PrintContext, Path, Print } from "./types.js";
+import type { PrintContext, Path, Print } from "./types.js";
 import { printDanglingComments } from "./comments.js";
 
 const { group, indent, join, line, hardline, softline } = doc.builders;

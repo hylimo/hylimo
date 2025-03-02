@@ -1,10 +1,10 @@
-import { DiagramImplementation } from "../diagramImplementation.js";
-import { SharedDiagramUtils } from "../../sharedDiagramUtils.js";
+import type { DiagramImplementation } from "../diagramImplementation.js";
+import type { SharedDiagramUtils } from "../../sharedDiagramUtils.js";
 import { DiagramImplementationManager } from "../diagramImplementationManager.js";
 import { LocalDiagramImplementation } from "../local/localDiagramImplementation.js";
 import { RegisterRemoteLanguageServerMessage } from "./registerRemoteLanguageServerMessage.js";
 import { RemoteDiagramImplementation } from "./remoteDiagramImplementation.js";
-import { RemoteMessagePayload } from "@hylimo/diagram-protocol";
+import type { RemoteMessagePayload } from "@hylimo/diagram-protocol";
 
 /**
  * Manages the layouted diagrams. This is the remote implementation.

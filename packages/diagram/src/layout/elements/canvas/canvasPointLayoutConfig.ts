@@ -1,8 +1,10 @@
-import { Size } from "@hylimo/diagram-common";
-import { AttributeConfig, ContentCardinality, LayoutElement, SizeConstraints } from "../../layoutElement.js";
-import { Layout } from "../../engine/layout.js";
+import type { Size } from "@hylimo/diagram-common";
+import type { AttributeConfig, LayoutElement, SizeConstraints } from "../../layoutElement.js";
+import { ContentCardinality } from "../../layoutElement.js";
+import type { Layout } from "../../engine/layout.js";
 import { CanvasContentLayoutConfig } from "./canvasContentLayoutConfig.js";
-import { FullObject, nullType } from "@hylimo/core";
+import type { FullObject } from "@hylimo/core";
+import { nullType } from "@hylimo/core";
 
 /**
  * Base class for all point layout configs

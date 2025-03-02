@@ -1,7 +1,8 @@
-import { AttributeConfig, ContentCardinality, LayoutElement } from "../layoutElement.js";
+import type { AttributeConfig, LayoutElement } from "../layoutElement.js";
+import { ContentCardinality } from "../layoutElement.js";
 import { ShapeLayoutConfig } from "./shapeLayoutConfig.js";
 import { simpleElementType } from "../../module/base/types.js";
-import { FullObject } from "@hylimo/core";
+import type { FullObject } from "@hylimo/core";
 
 /**
  * Base class for all shape layout configs with a content

@@ -1,5 +1,5 @@
-import { Action } from "sprotty-protocol";
-import { EditorConfig } from "./editorConfig.js";
+import type { Action } from "sprotty-protocol";
+import type { EditorConfig } from "./editorConfig.js";
 
 /**
  * Action to update the editor configuration from the server

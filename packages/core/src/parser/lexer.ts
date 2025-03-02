@@ -1,4 +1,4 @@
-import { createToken, IMultiModeLexerDefinition, Lexer } from "chevrotain";
+import { createToken, type IMultiModeLexerDefinition, Lexer } from "chevrotain";
 
 /**
  * Supported lexer modes

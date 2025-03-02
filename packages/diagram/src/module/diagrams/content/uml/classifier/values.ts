@@ -1,8 +1,8 @@
+import type { Expression } from "@hylimo/core";
 import {
     assign,
     AssignmentExpression,
     ExecutableConstExpression,
-    Expression,
     fun,
     FunctionObject,
     functionType,

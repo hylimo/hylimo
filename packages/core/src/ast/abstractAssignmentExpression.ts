@@ -1,6 +1,6 @@
-import { ExpressionMetadata } from "./expressionMetadata.js";
+import type { ExpressionMetadata } from "./expressionMetadata.js";
 import { Expression } from "./expression.js";
-import { WrapperObjectFieldRetriever } from "../runtime/objects/wrapperObject.js";
+import type { WrapperObjectFieldRetriever } from "../runtime/objects/wrapperObject.js";
 
 /**
  * Base class for all assignment expressions, provides helper to generate args

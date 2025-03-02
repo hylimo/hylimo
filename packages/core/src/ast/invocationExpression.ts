@@ -1,9 +1,9 @@
-import { ParenthesisExpressionMetadata } from "./expressionMetadata.js";
-import { Expression } from "./expression.js";
+import type { ParenthesisExpressionMetadata } from "./expressionMetadata.js";
+import type { Expression } from "./expression.js";
 import { AbstractInvocationExpression } from "./abstractInvocationExpression.js";
 import { ListEntry } from "./listEntry.js";
-import { InterpreterContext } from "../runtime/interpreter/interpreterContext.js";
-import { WrapperObject } from "../runtime/objects/wrapperObject.js";
+import type { InterpreterContext } from "../runtime/interpreter/interpreterContext.js";
+import type { WrapperObject } from "../runtime/objects/wrapperObject.js";
 
 /*
  * Function invocation expression

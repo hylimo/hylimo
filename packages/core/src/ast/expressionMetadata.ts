@@ -1,4 +1,4 @@
-import { Range } from "./range.js";
+import type { Range } from "./range.js";
 
 /**
  * Metadata for Expressions

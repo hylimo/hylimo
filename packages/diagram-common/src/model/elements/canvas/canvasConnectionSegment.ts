@@ -1,6 +1,6 @@
 import { Point } from "../../../common/point.js";
-import { Element } from "../base/element.js";
-import { Marker, MarkerLayoutInformation } from "./marker.js";
+import type { Element } from "../base/element.js";
+import type { Marker, MarkerLayoutInformation } from "./marker.js";
 import { Math2D } from "../../../common/math.js";
 
 /**

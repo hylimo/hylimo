@@ -1,5 +1,6 @@
 import { useData } from "vitepress";
-import { nextTick, Plugin, watch } from "vue";
+import type { Plugin } from "vue";
+import { nextTick, watch } from "vue";
 
 /**
  * Plugin which automatically sets the theme color of the website based on the current theme.

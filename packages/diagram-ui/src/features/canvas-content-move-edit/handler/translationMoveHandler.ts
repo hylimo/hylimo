@@ -1,7 +1,8 @@
-import { Edit, MoveEdit } from "@hylimo/diagram-protocol";
+import type { Edit, MoveEdit } from "@hylimo/diagram-protocol";
 import { MoveHandler } from "../../move/moveHandler.js";
 import { DefaultEditTypes } from "@hylimo/diagram-common";
-import { Matrix, applyToPoint } from "transformation-matrix";
+import type { Matrix } from "transformation-matrix";
+import { applyToPoint } from "transformation-matrix";
 
 /**
  * Entry for a translation move operation

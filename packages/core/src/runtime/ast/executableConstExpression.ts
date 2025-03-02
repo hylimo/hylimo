@@ -1,5 +1,5 @@
-import { Expression } from "../../ast/expression.js";
-import { LabeledValue } from "../objects/labeledValue.js";
+import type { Expression } from "../../ast/expression.js";
+import type { LabeledValue } from "../objects/labeledValue.js";
 import { ExecutableExpression } from "./executableExpression.js";
 
 /**

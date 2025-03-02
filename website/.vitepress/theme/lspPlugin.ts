@@ -1,20 +1,17 @@
-import { computed, Plugin, Ref, shallowRef, toRaw, watch } from "vue";
+import type { Plugin, Ref } from "vue";
+import { computed, shallowRef, toRaw, watch } from "vue";
+import type { NotificationHandler, NotificationType, Disposable } from "vscode-languageserver-protocol/browser.js";
 import {
     BrowserMessageReader,
     BrowserMessageWriter,
-    createProtocolConnection,
-    NotificationHandler,
-    NotificationType,
-    Disposable
+    createProtocolConnection
 } from "vscode-languageserver-protocol/browser.js";
 import { MonacoLanguageClient } from "monaco-languageclient";
 import { CloseAction, ErrorAction } from "vscode-languageclient";
+import type { DynamicLanguageServerConfig, EditorConfig, LanguageServerSettings } from "@hylimo/diagram-protocol";
 import {
     ConfigNotification,
-    DynamicLanguageServerConfig,
-    EditorConfig,
     UpdateEditorConfigNotification,
-    LanguageServerSettings,
     RemoteNotification,
     RemoteRequest,
     SetLanguageServerIdNotification

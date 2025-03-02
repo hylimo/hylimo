@@ -1,16 +1,16 @@
-import { SetViewportAction as SprottySetViewportAction, Viewport } from "sprotty-protocol";
-import {
-    Animation,
+import type { Viewport } from "sprotty-protocol";
+import { SetViewportAction as SprottySetViewportAction } from "sprotty-protocol";
+import type {
     CommandExecutionContext,
     CommandReturn,
     IStoppableCommand,
-    isViewport,
     SModelElementImpl,
-    SModelRootImpl,
-    SetViewportCommand as SprottySetViewportCommand
+    SModelRootImpl
 } from "sprotty";
+import { Animation, isViewport, SetViewportCommand as SprottySetViewportCommand } from "sprotty";
 import { inject, injectable } from "inversify";
-import { Math2D, Point } from "@hylimo/diagram-common";
+import type { Point } from "@hylimo/diagram-common";
+import { Math2D } from "@hylimo/diagram-common";
 import { TYPES } from "../types.js";
 
 /**

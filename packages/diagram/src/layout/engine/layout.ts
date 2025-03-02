@@ -1,31 +1,22 @@
+import type { InterpreterContext, LabeledValue } from "@hylimo/core";
 import {
     FullObject,
     assertString,
     nativeToList,
     RuntimeError,
-    InterpreterContext,
     isObject,
-    LabeledValue,
     isNull,
     ExecutableConstExpression,
     validateObject
 } from "@hylimo/core";
-import { Line, Point, Size } from "@hylimo/diagram-common";
-import { FontCollection } from "../font/fontCollection.js";
-import { StyleList, Selector, SelectorType, Style } from "../../styles.js";
-import {
-    LayoutElement,
-    LayoutInformation,
-    SizeConstraints,
-    addToSize,
-    matchToConstraints,
-    HorizontalAlignment,
-    VerticalAlignment,
-    Visibility,
-    LayoutConfig
-} from "../layoutElement.js";
-import { LayoutEngine } from "./layoutEngine.js";
-import { Element } from "@hylimo/diagram-common";
+import type { Line, Point, Size } from "@hylimo/diagram-common";
+import type { FontCollection } from "../font/fontCollection.js";
+import type { StyleList, Selector, Style } from "../../styles.js";
+import { SelectorType } from "../../styles.js";
+import type { LayoutElement, LayoutInformation, SizeConstraints, LayoutConfig } from "../layoutElement.js";
+import { addToSize, matchToConstraints, HorizontalAlignment, VerticalAlignment, Visibility } from "../layoutElement.js";
+import type { LayoutEngine } from "./layoutEngine.js";
+import type { Element } from "@hylimo/diagram-common";
 import { applyEdits } from "./edits.js";
 import { CanvasLayoutEngine } from "./canvasLayoutEngine.js";
 

@@ -1,6 +1,5 @@
 import { inject, injectable } from "inversify";
-import {
-    AbstractUIExtension,
+import type {
     IActionDispatcher,
     IActionHandler,
     ICommand,
@@ -9,23 +8,26 @@ import {
     ModelRendererFactory,
     PatcherProvider
 } from "sprotty";
-import { Action, generateRequestId, SelectAllAction, SetModelAction, UpdateModelAction } from "sprotty-protocol";
-import { VNode, h } from "snabbdom";
+import { AbstractUIExtension } from "sprotty";
+import type { Action } from "sprotty-protocol";
+import { generateRequestId, SelectAllAction, SetModelAction, UpdateModelAction } from "sprotty-protocol";
+import type { VNode } from "snabbdom";
+import { h } from "snabbdom";
 import { EditSpecification, Root } from "@hylimo/diagram-common";
+import type { ConnectionEdit, ToolboxEdit } from "@hylimo/diagram-protocol";
 import {
-    ConnectionEdit,
     EditorConfigUpdatedAction,
-    ToolboxEdit,
     ToolboxEditPredictionRequestAction,
     TransactionalAction
 } from "@hylimo/diagram-protocol";
 import { TYPES } from "../types.js";
-import { ConfigManager } from "../config/configManager.js";
+import type { ConfigManager } from "../config/configManager.js";
 import MiniSearch from "minisearch";
-import { ConnectionEditProvider } from "./connectionEditProvider.js";
+import type { ConnectionEditProvider } from "./connectionEditProvider.js";
 import { generateToolbox } from "./views/toolbox.js";
 import { ToolboxToolType } from "./toolType.js";
-import { Cursor, UpdateCursorAction } from "../cursor/cursor.js";
+import type { Cursor } from "../cursor/cursor.js";
+import { UpdateCursorAction } from "../cursor/cursor.js";
 import { ToolState } from "./toolState.js";
 import { SetToolAction } from "./setToolAction.js";
 

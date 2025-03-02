@@ -1,4 +1,5 @@
-import { EditEngine, ParsedTemplate } from "./editEngine.js";
+import type { ParsedTemplate } from "./editEngine.js";
+import { EditEngine } from "./editEngine.js";
 import { evaluateTemplate } from "./template.js";
 
 /**

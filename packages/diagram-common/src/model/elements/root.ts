@@ -1,6 +1,6 @@
-import { Bounds } from "../../common/bounds.js";
-import { FontData } from "../../font/fontData.js";
-import { Element } from "./base/element.js";
+import type { Bounds } from "../../common/bounds.js";
+import type { FontData } from "../../font/fontData.js";
+import type { Element } from "./base/element.js";
 
 /**
  * Root diagram element, defining child elements and fonts

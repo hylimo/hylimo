@@ -1,4 +1,5 @@
-import { isViewport, SModelElementImpl } from "sprotty";
+import type { SModelElementImpl } from "sprotty";
+import { isViewport } from "sprotty";
 
 /**
  * Finds the zoom of the current viewport by searching for a viewport in the parents of element

@@ -1,6 +1,6 @@
-import { CstChildrenDictionary, Rules } from "@hylimo/core";
-import { IToken, CstNode } from "chevrotain";
-import { AstPath, Doc, ParserOptions } from "prettier";
+import type { CstChildrenDictionary, Rules } from "@hylimo/core";
+import type { IToken, CstNode } from "chevrotain";
+import type { AstPath, Doc, ParserOptions } from "prettier";
 
 /**
  * CST node type used by prettier

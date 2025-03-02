@@ -1,4 +1,4 @@
-import { ExecutableExpression } from "./executableExpression.js";
+import type { ExecutableExpression } from "./executableExpression.js";
 
 /**
  * Executable version of InvocationArgument

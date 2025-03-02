@@ -1,4 +1,4 @@
-import {
+import type {
     Canvas,
     Element,
     Ellipse,
@@ -7,12 +7,12 @@ import {
     Root,
     Shape,
     SimplifiedCanvasElement,
-    SimplifiedDiagramVisitor,
     SimplifiedText
 } from "@hylimo/diagram-common";
+import { SimplifiedDiagramVisitor } from "@hylimo/diagram-common";
 import PDFDocument from "pdfkit/js/pdfkit.standalone.js";
+import type { ShapeStyleAttributes } from "@hylimo/diagram-render-svg";
 import {
-    ShapeStyleAttributes,
     extractFillAttributes,
     extractOutlinedShapeAttributes,
     extractShapeStyleAttributes

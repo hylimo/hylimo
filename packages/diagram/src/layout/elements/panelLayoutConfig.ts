@@ -1,9 +1,11 @@
-import { FullObject, objectToList } from "@hylimo/core";
-import { AttributeConfig, ContentCardinality, LayoutElement } from "../layoutElement.js";
+import type { FullObject } from "@hylimo/core";
+import { objectToList } from "@hylimo/core";
+import type { AttributeConfig, LayoutElement } from "../layoutElement.js";
+import { ContentCardinality } from "../layoutElement.js";
 import { StyledElementLayoutConfig } from "./styledElementLayoutConfig.js";
 import { simpleElementType } from "../../module/base/types.js";
-import { Point, Size, Line } from "@hylimo/diagram-common";
-import { Layout } from "../engine/layout.js";
+import type { Point, Size, Line } from "@hylimo/diagram-common";
+import type { Layout } from "../engine/layout.js";
 
 /**
  * Base class for all layout configs which contain contents

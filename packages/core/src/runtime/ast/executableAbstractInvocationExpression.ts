@@ -1,5 +1,5 @@
-import { AbstractInvocationExpression } from "../../ast/abstractInvocationExpression.js";
-import { ExecutableListEntry } from "./executableListEntry.js";
+import type { AbstractInvocationExpression } from "../../ast/abstractInvocationExpression.js";
+import type { ExecutableListEntry } from "./executableListEntry.js";
 import { ExecutableExpression } from "./executableExpression.js";
 
 /**

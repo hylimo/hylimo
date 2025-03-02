@@ -1,4 +1,5 @@
-import { fun, functionType, id, listType, optional, or, ParseableExpressions, stringType } from "@hylimo/core";
+import type { ParseableExpressions } from "@hylimo/core";
+import { fun, functionType, id, listType, optional, or, stringType } from "@hylimo/core";
 import { createToolboxEdit, SCOPE } from "../../../base/dslModule.js";
 import { ContentModule } from "../contentModule.js";
 

@@ -1,5 +1,6 @@
-import { IconNode } from "lucide";
-import { h, thunk, VNode } from "snabbdom";
+import type { IconNode } from "lucide";
+import type { VNode } from "snabbdom";
+import { h, thunk } from "snabbdom";
 
 /**
  * Generates an icon.

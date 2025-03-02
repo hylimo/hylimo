@@ -1,4 +1,4 @@
-import { SModelElementImpl } from "sprotty";
+import type { SModelElementImpl } from "sprotty";
 
 /**
  * Used to mark fields as animatable by linear interpolation

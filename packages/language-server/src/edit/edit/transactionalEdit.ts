@@ -1,8 +1,8 @@
-import { IncrementalUpdate, TransactionalAction } from "@hylimo/diagram-protocol";
-import { EditEngine } from "./editEngine.js";
+import type { IncrementalUpdate, TransactionalAction } from "@hylimo/diagram-protocol";
+import type { EditEngine } from "./editEngine.js";
 import { ReplaceEditEngine } from "./replaceEditEngine.js";
-import { Diagram } from "../../diagram/diagram.js";
-import { TextDocument, TextEdit } from "vscode-languageserver-textdocument";
+import type { Diagram } from "../../diagram/diagram.js";
+import type { TextDocument, TextEdit } from "vscode-languageserver-textdocument";
 import {
     Position,
     Range,
@@ -14,10 +14,11 @@ import {
 import { parseTemplate } from "./template.js";
 import { groupBy, IndexedModificationSpecificationEntry } from "@hylimo/diagram-common";
 import { AddEditEngine } from "./addEditEngine.js";
-import { AddEditSpecificationEntry, BaseLayoutedDiagram, EditSpecification } from "@hylimo/diagram-common";
-import { EditHandlerRegistry } from "../handlers/editHandlerRegistry.js";
+import type { AddEditSpecificationEntry, BaseLayoutedDiagram } from "@hylimo/diagram-common";
+import { EditSpecification } from "@hylimo/diagram-common";
+import type { EditHandlerRegistry } from "../handlers/editHandlerRegistry.js";
 import { AddArgEditEngine } from "./addArgEditEngine.js";
-import { Config } from "../../config.js";
+import type { Config } from "../../config.js";
 
 /**
  * Transaction edit handling transaction actions

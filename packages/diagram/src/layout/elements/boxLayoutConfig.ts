@@ -1,4 +1,4 @@
-import { Point, Line } from "@hylimo/diagram-common";
+import type { Point, Line } from "@hylimo/diagram-common";
 import { PanelLayoutConfig } from "./panelLayoutConfig.js";
 import { booleanType } from "@hylimo/core";
 

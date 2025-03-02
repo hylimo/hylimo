@@ -1,7 +1,8 @@
-import { AxisAlignedSegmentEdit, Edit, SplitCanvasAxisAlignedSegmentEdit } from "@hylimo/diagram-protocol";
+import type { AxisAlignedSegmentEdit, Edit, SplitCanvasAxisAlignedSegmentEdit } from "@hylimo/diagram-protocol";
 import { SplitSegmentMoveHandler } from "./splitSegmentMoveHandler.js";
-import { Matrix } from "transformation-matrix";
-import { DefaultEditTypes, Point } from "@hylimo/diagram-common";
+import type { Matrix } from "transformation-matrix";
+import type { Point } from "@hylimo/diagram-common";
+import { DefaultEditTypes } from "@hylimo/diagram-common";
 
 /**
  * Move handler for splitting a bezier segment

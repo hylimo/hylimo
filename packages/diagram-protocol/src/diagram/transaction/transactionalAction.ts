@@ -1,4 +1,4 @@
-import { Edit } from "./edit.js";
+import type { Edit } from "./edit.js";
 
 /**
  * Transactional action with a transaction id

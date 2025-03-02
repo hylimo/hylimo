@@ -1,19 +1,16 @@
-import {
+import type {
     AssignmentExpression,
     CompletionExpressionMetadata,
     Expression,
     FieldAccessExpression,
-    IdentifierExpression,
-    NumberLiteralExpression,
     FieldSelfInvocationExpression,
     IndexSelfInvocationExpression,
     InvocationExpression,
     AbstractInvocationExpression,
     ExecutableExpression,
-    FieldAssignmentExpression,
-    RuntimeAstTransformer,
-    num
+    FieldAssignmentExpression
 } from "@hylimo/core";
+import { IdentifierExpression, NumberLiteralExpression, RuntimeAstTransformer, num } from "@hylimo/core";
 import { CompletableFieldSelfInvocationExpression } from "./completableFieldSelfInvocationExpression.js";
 import { CompletableIndexSelfInvocationExpression } from "./completableIndexSelfInvocationExpression.js";
 import { CompletableInvocationExpression } from "./completableInvocationExpression.js";

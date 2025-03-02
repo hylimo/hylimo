@@ -1,4 +1,4 @@
-import { Fill, Shape, Stroke } from "@hylimo/diagram-common";
+import type { Fill, Shape, Stroke } from "@hylimo/diagram-common";
 import { SLayoutedElement } from "./sLayoutedElement.js";
 
 /**

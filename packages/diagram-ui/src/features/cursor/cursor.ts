@@ -1,7 +1,8 @@
-import { Action } from "sprotty-protocol";
+import type { Action } from "sprotty-protocol";
 import { injectable, inject } from "inversify";
 import { TYPES } from "../types.js";
-import { Command, CommandExecutionContext, CommandReturn } from "sprotty";
+import type { CommandExecutionContext, CommandReturn } from "sprotty";
+import { Command } from "sprotty";
 
 /**
  * Different types of resize cursers which can be fixed during a move transaction

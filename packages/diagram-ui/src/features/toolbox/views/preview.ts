@@ -1,5 +1,6 @@
-import { ConnectionEditEntry, Toolbox, ToolboxEditEntry } from "../toolbox.js";
-import { VNode, h } from "snabbdom";
+import type { ConnectionEditEntry, Toolbox, ToolboxEditEntry } from "../toolbox.js";
+import type { VNode } from "snabbdom";
+import { h } from "snabbdom";
 
 /**
  * Generates the preview for a toolbox/connection edit if available.

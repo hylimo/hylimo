@@ -1,7 +1,7 @@
 import { injectable } from "inversify";
-import { VNode } from "snabbdom";
+import type { VNode } from "snabbdom";
 import { svg } from "sprotty";
-import { SAbsolutePoint } from "../../model/canvas/sAbsolutePoint.js";
+import type { SAbsolutePoint } from "../../model/canvas/sAbsolutePoint.js";
 import { CanvasPointView } from "./canvasPointView.js";
 
 /**

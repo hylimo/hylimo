@@ -1,8 +1,9 @@
-import { Action } from "sprotty-protocol";
-import { CreateConnectionHoverData } from "./createConnectionHoverData.js";
-import { Command, CommandExecutionContext, CommandReturn } from "sprotty";
+import type { Action } from "sprotty-protocol";
+import type { CreateConnectionHoverData } from "./createConnectionHoverData.js";
+import type { CommandExecutionContext, CommandReturn } from "sprotty";
+import { Command } from "sprotty";
 import { inject, injectable } from "inversify";
-import { SRoot } from "../../model/sRoot.js";
+import type { SRoot } from "../../model/sRoot.js";
 import { TYPES } from "../types.js";
 
 /**

@@ -1,10 +1,10 @@
-import { Parser } from "@hylimo/core";
-import { DiagramEngine } from "@hylimo/diagram";
-import { Connection } from "vscode-languageserver";
-import { DiagramServerManager } from "./diagramServerManager.js";
-import { CompletionEngine } from "./completion/completionEngine.js";
-import { Config } from "./config.js";
-import { EditHandlerRegistry } from "./edit/handlers/editHandlerRegistry.js";
+import type { Parser } from "@hylimo/core";
+import type { DiagramEngine } from "@hylimo/diagram";
+import type { Connection } from "vscode-languageserver";
+import type { DiagramServerManager } from "./diagramServerManager.js";
+import type { CompletionEngine } from "./completion/completionEngine.js";
+import type { Config } from "./config.js";
+import type { EditHandlerRegistry } from "./edit/handlers/editHandlerRegistry.js";
 
 /**
  * Shared utils for each diagram

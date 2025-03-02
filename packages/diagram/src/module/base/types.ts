@@ -1,4 +1,5 @@
-import { literal, namedType, objectType, or, Type } from "@hylimo/core";
+import type { Type } from "@hylimo/core";
+import { literal, namedType, objectType, or } from "@hylimo/core";
 import {
     AbsolutePoint,
     Canvas,

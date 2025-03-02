@@ -1,5 +1,5 @@
 import { NumberObject } from "../runtime/objects/numberObject.js";
-import { Type } from "./base.js";
+import type { Type } from "./base.js";
 
 /**
  * Number type matching only numbers

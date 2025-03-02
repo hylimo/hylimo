@@ -1,5 +1,5 @@
-import { Ellipse } from "@hylimo/diagram-common";
-import { LinearAnimatable } from "../features/animation/model.js";
+import type { Ellipse } from "@hylimo/diagram-common";
+import type { LinearAnimatable } from "../features/animation/model.js";
 import { SShape } from "./sShape.js";
 
 /**

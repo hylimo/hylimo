@@ -1,5 +1,6 @@
 import { Buffer } from "buffer/index.js";
-import { Font, create } from "fontkit";
+import type { Font } from "fontkit";
+import { create } from "fontkit";
 
 /**
  * Creates a font from the provided source

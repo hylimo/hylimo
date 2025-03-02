@@ -1,5 +1,5 @@
-import { DiagramConfig } from "@hylimo/diagram-common";
-import { DynamicLanguageServerConfig, EditorConfig, LanguageServerSettings } from "@hylimo/diagram-protocol";
+import type { DiagramConfig } from "@hylimo/diagram-common";
+import type { DynamicLanguageServerConfig, EditorConfig, LanguageServerSettings } from "@hylimo/diagram-protocol";
 
 /**
  * Dynamic configuration for a diagram language server

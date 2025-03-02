@@ -1,6 +1,6 @@
-import { Point } from "../../common/point.js";
-import { CanvasElement } from "../elements/canvas/canvasElement.js";
-import { Text } from "../elements/text.js";
+import type { Point } from "../../common/point.js";
+import type { CanvasElement } from "../elements/canvas/canvasElement.js";
+import type { Text } from "../elements/text.js";
 
 /**
  * Simplified version of CanvasElement where pos is replaced with the actual point

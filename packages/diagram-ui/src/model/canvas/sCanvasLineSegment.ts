@@ -1,6 +1,7 @@
-import { CanvasLineSegment, DefaultEditTypes, EditSpecification } from "@hylimo/diagram-common";
+import type { CanvasLineSegment } from "@hylimo/diagram-common";
+import { DefaultEditTypes, EditSpecification } from "@hylimo/diagram-common";
 import { SCanvasConnectionSegment } from "./sCanvasConnectionSegment.js";
-import { VNode } from "snabbdom";
+import type { VNode } from "snabbdom";
 
 /**
  * Model for CanvasLineSegment

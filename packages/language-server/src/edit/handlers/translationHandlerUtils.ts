@@ -1,4 +1,5 @@
-import { AbsolutePoint, CanvasElement, Element, RelativePoint } from "@hylimo/diagram-common";
+import type { Element } from "@hylimo/diagram-common";
+import { AbsolutePoint, CanvasElement, RelativePoint } from "@hylimo/diagram-common";
 
 /**
  * When doing a translation move, computes the elements to which a prediction should be applied

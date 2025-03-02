@@ -1,5 +1,5 @@
-import { CompletionItem } from "./completionItem.js";
-import { Range } from "@hylimo/core";
+import type { CompletionItem } from "./completionItem.js";
+import type { Range } from "@hylimo/core";
 
 /**
  * An error which aborts the execution of the program and provides the context for completion

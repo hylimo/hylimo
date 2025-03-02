@@ -1,8 +1,9 @@
-import { Bounds, CanvasElement, Line, Point } from "@hylimo/diagram-common";
-import { LinearAnimatable } from "../../features/animation/model.js";
-import { PositionProvider } from "../../features/layout/positionProvider.js";
+import type { CanvasElement, Line } from "@hylimo/diagram-common";
+import { Bounds, Point } from "@hylimo/diagram-common";
+import type { LinearAnimatable } from "../../features/animation/model.js";
+import type { PositionProvider } from "../../features/layout/positionProvider.js";
 import { SCanvasContent } from "./sCanvasContent.js";
-import { BoxSelectable } from "../../features/select/boxSelectFeature.js";
+import type { BoxSelectable } from "../../features/select/boxSelectFeature.js";
 import { applyToPoint } from "transformation-matrix";
 
 /**

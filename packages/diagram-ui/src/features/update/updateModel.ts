@@ -1,28 +1,28 @@
 import { inject, injectable } from "inversify";
-import {
-    Animation,
+import type {
     CommandExecutionContext,
     CommandReturn,
-    CompoundAnimation,
-    forEachMatch,
     IActionDispatcher,
-    isSelectable,
     MatchResult,
     SModelElementImpl,
-    SModelRootImpl,
-    UpdateModelCommand as BaseUpdateModelCommand,
-    ViewportRootElementImpl,
     ModelIndexImpl
 } from "sprotty";
-import { SRoot } from "../../model/sRoot.js";
 import {
-    ElmentLinearInterpolationAnimation,
-    LinearInterpolationAnimation
-} from "../animation/linearInterpolationAnimation.js";
+    Animation,
+    CompoundAnimation,
+    forEachMatch,
+    isSelectable,
+    SModelRootImpl,
+    UpdateModelCommand as BaseUpdateModelCommand,
+    ViewportRootElementImpl
+} from "sprotty";
+import { SRoot } from "../../model/sRoot.js";
+import type { ElmentLinearInterpolationAnimation } from "../animation/linearInterpolationAnimation.js";
+import { LinearInterpolationAnimation } from "../animation/linearInterpolationAnimation.js";
 import { computeCommonAnimatableFields, isLinearAnimatable } from "../animation/model.js";
 import { createFitToScreenAction } from "../viewport/fitToScreenAction.js";
 import { TYPES } from "../types.js";
-import { TransactionStateProvider } from "../transaction/transactionStateProvider.js";
+import type { TransactionStateProvider } from "../transaction/transactionStateProvider.js";
 import { SCanvasConnection } from "../../model/canvas/sCanvasConnection.js";
 
 /**

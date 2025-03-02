@@ -1,6 +1,6 @@
-import { RemoteDiagramMessage } from "./remoteDiagramMessage.js";
-import { RemoteMessagePayload } from "@hylimo/diagram-protocol";
-import { DiagramConfig, Root } from "@hylimo/diagram-common";
+import type { RemoteDiagramMessage } from "./remoteDiagramMessage.js";
+import type { RemoteMessagePayload } from "@hylimo/diagram-protocol";
+import type { DiagramConfig, Root } from "@hylimo/diagram-common";
 
 /**
  * Message to request the rendering of a prediction diagram

@@ -1,14 +1,10 @@
-import {
-    CanvasAxisAlignedSegment,
-    DefaultEditTypes,
-    EditSpecification,
-    SegmentLayoutInformation
-} from "@hylimo/diagram-common";
-import { VNode } from "snabbdom";
+import type { CanvasAxisAlignedSegment, SegmentLayoutInformation } from "@hylimo/diagram-common";
+import { DefaultEditTypes, EditSpecification } from "@hylimo/diagram-common";
+import type { VNode } from "snabbdom";
 import { svg } from "sprotty";
 import { SCanvasConnectionSegment } from "./sCanvasConnectionSegment.js";
-import { LinearAnimatable } from "../../features/animation/model.js";
-import { SCanvasConnection } from "./sCanvasConnection.js";
+import type { LinearAnimatable } from "../../features/animation/model.js";
+import type { SCanvasConnection } from "./sCanvasConnection.js";
 import { computeResizeIconOffset } from "../../features/cursor/resizeIcon.js";
 
 /**

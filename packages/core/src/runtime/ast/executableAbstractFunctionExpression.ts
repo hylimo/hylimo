@@ -1,8 +1,8 @@
 import dedent from "dedent";
-import { Expression } from "../../ast/expression.js";
-import { Type } from "../../types/base.js";
-import { InterpreterContext } from "../interpreter/interpreterContext.js";
-import { BaseObject } from "../objects/baseObject.js";
+import type { Expression } from "../../ast/expression.js";
+import type { Type } from "../../types/base.js";
+import type { InterpreterContext } from "../interpreter/interpreterContext.js";
+import type { BaseObject } from "../objects/baseObject.js";
 import { ExecutableExpression } from "./executableExpression.js";
 
 /**

@@ -1,9 +1,10 @@
-import { Command, CommandExecutionContext, CommandReturn } from "sprotty";
+import type { CommandExecutionContext, CommandReturn } from "sprotty";
+import { Command } from "sprotty";
 import { TransactionalMoveAction } from "./transactionalMoveAction.js";
 import { injectable, inject } from "inversify";
 import { TYPES } from "../types.js";
-import { MoveMouseListener } from "./moveMouseListener.js";
-import { SRoot } from "../../model/sRoot.js";
+import type { MoveMouseListener } from "./moveMouseListener.js";
+import type { SRoot } from "../../model/sRoot.js";
 
 /**
  * Command for TransactionalMoveAction

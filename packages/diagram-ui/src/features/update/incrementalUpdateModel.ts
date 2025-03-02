@@ -1,7 +1,8 @@
 import { IncrementalUpdateAction } from "@hylimo/diagram-protocol";
 import { injectable, inject } from "inversify";
-import { Command, CommandExecutionContext, CommandReturn } from "sprotty";
-import { SRoot } from "../../model/sRoot.js";
+import type { CommandExecutionContext, CommandReturn } from "sprotty";
+import { Command } from "sprotty";
+import type { SRoot } from "../../model/sRoot.js";
 import { TYPES } from "../types.js";
 
 @injectable()

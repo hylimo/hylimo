@@ -1,6 +1,7 @@
-import { KeyListener, SModelElementImpl } from "sprotty";
+import type { SModelElementImpl } from "sprotty";
+import { KeyListener } from "sprotty";
 import { injectable } from "inversify";
-import { Action } from "sprotty-protocol";
+import type { Action } from "sprotty-protocol";
 import { UpdateKeyStateAction } from "./updateKeyState.js";
 
 /**

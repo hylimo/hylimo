@@ -1,5 +1,5 @@
-import { AbsolutePoint, Point } from "@hylimo/diagram-common";
-import { LinearAnimatable } from "../../features/animation/model.js";
+import type { AbsolutePoint, Point } from "@hylimo/diagram-common";
+import type { LinearAnimatable } from "../../features/animation/model.js";
 import { SCanvasPoint } from "./sCanvasPoint.js";
 
 /**

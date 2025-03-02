@@ -1,21 +1,23 @@
 import { inject, injectable } from "inversify";
-import { findParentByFeature, SModelElementImpl } from "sprotty";
-import { Action } from "sprotty-protocol";
-import { SCanvasElement } from "../../model/canvas/sCanvasElement.js";
-import { SCanvasConnection } from "../../model/canvas/sCanvasConnection.js";
-import { LineEngine, Point } from "@hylimo/diagram-common";
+import type { SModelElementImpl } from "sprotty";
+import { findParentByFeature } from "sprotty";
+import type { Action } from "sprotty-protocol";
+import type { SCanvasElement } from "../../model/canvas/sCanvasElement.js";
+import type { SCanvasConnection } from "../../model/canvas/sCanvasConnection.js";
+import type { Point } from "@hylimo/diagram-common";
+import { LineEngine } from "@hylimo/diagram-common";
 import { applyToPoint } from "transformation-matrix";
 import { TransactionalMoveAction } from "../move/transactionalMoveAction.js";
 import { CreateConnectionMoveHandler } from "./createConnectionMoveHandler.js";
 import { TYPES } from "../types.js";
-import { ConnectionEditProvider } from "../toolbox/connectionEditProvider.js";
-import { CreateConnectionHoverData, LineProviderHoverData } from "./createConnectionHoverData.js";
-import { SRoot } from "../../model/sRoot.js";
-import { ConnectionEnd } from "@hylimo/diagram-protocol";
+import type { ConnectionEditProvider } from "../toolbox/connectionEditProvider.js";
+import type { CreateConnectionHoverData, LineProviderHoverData } from "./createConnectionHoverData.js";
+import type { SRoot } from "../../model/sRoot.js";
+import type { ConnectionEnd } from "@hylimo/diagram-protocol";
 import { UpdateCreateConnectionHoverDataAction } from "./updateCreateConnectionHoverData.js";
 import { ToolboxToolType } from "../toolbox/toolType.js";
 import { isLineProvider } from "./lineProvider.js";
-import { TransactionStateProvider } from "../transaction/transactionStateProvider.js";
+import type { TransactionStateProvider } from "../transaction/transactionStateProvider.js";
 import { MouseListener } from "../../base/mouseListener.js";
 
 /**

@@ -1,16 +1,18 @@
-import { LineEngine, MarkerLayoutInformation, Point } from "@hylimo/diagram-common";
+import type { MarkerLayoutInformation, Point } from "@hylimo/diagram-common";
+import { LineEngine } from "@hylimo/diagram-common";
 import { inject, injectable } from "inversify";
-import { VNode } from "snabbdom";
-import { IView, IViewArgs, RenderingContext, svg } from "sprotty";
-import { SCanvasConnection } from "../../model/canvas/sCanvasConnection.js";
+import type { VNode } from "snabbdom";
+import type { IView, IViewArgs, RenderingContext } from "sprotty";
+import { svg } from "sprotty";
+import type { SCanvasConnection } from "../../model/canvas/sCanvasConnection.js";
 import { SCanvasConnectionSegment } from "../../model/canvas/sCanvasConnectionSegment.js";
-import { SMarker } from "../../model/canvas/sMarker.js";
+import type { SMarker } from "../../model/canvas/sMarker.js";
 import { extractStrokeAttriabutes } from "@hylimo/diagram-render-svg";
 import { EditableCanvasContentView } from "./editableCanvasContentView.js";
 import { renderPoint } from "./canvasPointView.js";
 import { findViewportZoom } from "../../base/findViewportZoom.js";
 import { TYPES } from "../../features/types.js";
-import { KeyState } from "../../features/key-state/keyState.js";
+import type { KeyState } from "../../features/key-state/keyState.js";
 
 /**
  * IView that represents a CanvasConnection

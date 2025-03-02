@@ -1,7 +1,8 @@
-import { ConnectionEditEntry, Toolbox } from "../toolbox.js";
-import { VNode, h } from "snabbdom";
+import type { ConnectionEditEntry, Toolbox } from "../toolbox.js";
+import type { VNode } from "snabbdom";
+import { h } from "snabbdom";
 import { generatePreviewIfAvailable } from "./preview.js";
-import { Root } from "@hylimo/diagram-common";
+import type { Root } from "@hylimo/diagram-common";
 import { generateIcon } from "./icon.js";
 import { ArrowUpRight } from "lucide";
 

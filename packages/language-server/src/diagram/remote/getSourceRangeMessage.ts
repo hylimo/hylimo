@@ -1,6 +1,6 @@
-import { Range } from "vscode-languageserver";
-import { RemoteDiagramMessage } from "./remoteDiagramMessage.js";
-import { RemoteMessagePayload } from "@hylimo/diagram-protocol";
+import type { Range } from "vscode-languageserver";
+import type { RemoteDiagramMessage } from "./remoteDiagramMessage.js";
+import type { RemoteMessagePayload } from "@hylimo/diagram-protocol";
 
 /**
  * Message to request the source range of an element

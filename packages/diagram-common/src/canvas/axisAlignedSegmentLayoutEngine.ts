@@ -1,9 +1,9 @@
-import { Point } from "../common/point.js";
+import type { Point } from "../common/point.js";
 import { LineSegment } from "../line/model/lineSegment.js";
-import { Segment } from "../line/model/segment.js";
+import type { Segment } from "../line/model/segment.js";
 import { CanvasAxisAlignedSegment } from "../model/elements/canvas/canvasAxisAlignedSegment.js";
-import { Marker, MarkerLayoutInformation } from "../model/elements/canvas/marker.js";
-import { SegmentLayoutInformation } from "./canvasConnectionLayout.js";
+import type { Marker, MarkerLayoutInformation } from "../model/elements/canvas/marker.js";
+import type { SegmentLayoutInformation } from "./canvasConnectionLayout.js";
 import { SegmentLayoutEngine } from "./segmentLayoutEngine.js";
 
 /**

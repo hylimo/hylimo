@@ -1,7 +1,7 @@
 import { injectable } from "inversify";
-import { VNode } from "snabbdom";
+import type { VNode } from "snabbdom";
 import { svg } from "sprotty";
-import { SLinePoint } from "../../model/canvas/sLinePoint.js";
+import type { SLinePoint } from "../../model/canvas/sLinePoint.js";
 import { CanvasPointView } from "./canvasPointView.js";
 
 /**

@@ -1,11 +1,12 @@
-import { IActionDispatcher, MouseListener, SModelElementImpl } from "sprotty";
+import type { IActionDispatcher, SModelElementImpl } from "sprotty";
+import { MouseListener } from "sprotty";
 import { inject, injectable } from "inversify";
 import { TYPES } from "../types.js";
-import { TransactionIdProvider } from "../transaction/transactionIdProvider.js";
-import { Action } from "sprotty-protocol";
-import { SRoot } from "../../model/sRoot.js";
-import { TransactionalMoveAction } from "./transactionalMoveAction.js";
-import { MoveHandler } from "./moveHandler.js";
+import type { TransactionIdProvider } from "../transaction/transactionIdProvider.js";
+import type { Action } from "sprotty-protocol";
+import type { SRoot } from "../../model/sRoot.js";
+import type { TransactionalMoveAction } from "./transactionalMoveAction.js";
+import type { MoveHandler } from "./moveHandler.js";
 
 /**
  * Listener for mouse events to create transactional move operations

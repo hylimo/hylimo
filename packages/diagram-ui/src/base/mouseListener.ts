@@ -1,8 +1,8 @@
 import { inject } from "inversify";
 import { MouseListener as SprottyMouseListener } from "sprotty";
 import { TYPES } from "../features/types.js";
-import { ToolTypeProvider } from "../features/toolbox/toolState.js";
-import { KeyState } from "../features/key-state/keyState.js";
+import type { ToolTypeProvider } from "../features/toolbox/toolState.js";
+import type { KeyState } from "../features/key-state/keyState.js";
 import { isRegularInteractionTool } from "../features/toolbox/toolType.js";
 
 /**

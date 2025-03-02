@@ -1,5 +1,6 @@
-import { ExecutableExpression } from "../ast/executableExpression.js";
-import { parse, ParseableExpressions } from "../executableAstHelper.js";
+import type { ExecutableExpression } from "../ast/executableExpression.js";
+import type { ParseableExpressions } from "../executableAstHelper.js";
+import { parse } from "../executableAstHelper.js";
 
 /**
  * Module which can be loaded into the interpreter.

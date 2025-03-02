@@ -5,8 +5,8 @@
  */
 
 import svgPath from "svgpath";
-import { Point } from "../common/point.js";
-import { Size } from "../common/size.js";
+import type { Point } from "../common/point.js";
+import type { Size } from "../common/size.js";
 import { Math2D } from "../common/math.js";
 import { LineCap, LineJoin } from "../model/elements/base/colored.js";
 

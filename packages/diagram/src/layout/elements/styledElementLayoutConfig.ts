@@ -1,5 +1,5 @@
-import { Type } from "@hylimo/core";
-import { AttributeConfig, ContentCardinality } from "../layoutElement.js";
+import type { Type } from "@hylimo/core";
+import type { AttributeConfig, ContentCardinality } from "../layoutElement.js";
 import { defaultStyleAttributes } from "./attributes.js";
 import { ElementLayoutConfig } from "./elementLayoutConfig.js";
 

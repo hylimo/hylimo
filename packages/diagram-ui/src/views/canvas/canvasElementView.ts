@@ -1,10 +1,12 @@
-import { DefaultEditTypes, EditSpecification, Point } from "@hylimo/diagram-common";
+import type { Point } from "@hylimo/diagram-common";
+import { DefaultEditTypes, EditSpecification } from "@hylimo/diagram-common";
 import { injectable } from "inversify";
-import { VNode } from "snabbdom";
-import { IView, IViewArgs, RenderingContext, svg } from "sprotty";
+import type { VNode } from "snabbdom";
+import type { IView, IViewArgs, RenderingContext } from "sprotty";
+import { svg } from "sprotty";
 import { findViewportZoom } from "../../base/findViewportZoom.js";
-import { SCanvasElement } from "../../model/canvas/sCanvasElement.js";
-import { CanvasLike } from "../../model/canvas/canvasLike.js";
+import type { SCanvasElement } from "../../model/canvas/sCanvasElement.js";
+import type { CanvasLike } from "../../model/canvas/canvasLike.js";
 import { EditableCanvasContentView } from "./editableCanvasContentView.js";
 import { SCanvasPoint } from "../../model/canvas/sCanvasPoint.js";
 import { computeResizeIconOffset } from "../../features/cursor/resizeIcon.js";

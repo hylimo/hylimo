@@ -1,7 +1,8 @@
 import { Math2D } from "../../common/math.js";
 import { Point } from "../../common/point.js";
-import { LineSegment } from "../model/lineSegment.js";
-import { NearestPointResult, SegmentEngine } from "./segmentEngine.js";
+import type { LineSegment } from "../model/lineSegment.js";
+import type { NearestPointResult } from "./segmentEngine.js";
+import { SegmentEngine } from "./segmentEngine.js";
 
 /**
  * Segment engine for LineSegment

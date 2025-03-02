@@ -1,5 +1,5 @@
-import { SplitCanvasBezierSegmentEdit } from "@hylimo/diagram-protocol";
-import { EditHandler } from "./editHandler.js";
+import type { SplitCanvasBezierSegmentEdit } from "@hylimo/diagram-protocol";
+import type { EditHandler } from "./editHandler.js";
 import { DefaultEditTypes } from "@hylimo/diagram-common";
 
 /**

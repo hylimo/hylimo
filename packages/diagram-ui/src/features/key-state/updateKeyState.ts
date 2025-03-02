@@ -1,8 +1,9 @@
-import { Command, CommandExecutionContext, CommandReturn } from "sprotty";
-import { Action } from "sprotty-protocol";
+import type { CommandExecutionContext, CommandReturn } from "sprotty";
+import { Command } from "sprotty";
+import type { Action } from "sprotty-protocol";
 import { inject, injectable } from "inversify";
 import { TYPES } from "../types.js";
-import { KeyState } from "./keyState.js";
+import type { KeyState } from "./keyState.js";
 
 /**
  * Action to update the key state

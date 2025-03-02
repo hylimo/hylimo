@@ -1,11 +1,12 @@
-import { SModelElementImpl, ScrollMouseListener as SprottyScrollMouseListener } from "sprotty";
+import type { SModelElementImpl } from "sprotty";
+import { ScrollMouseListener as SprottyScrollMouseListener } from "sprotty";
 import { injectable, inject } from "inversify";
-import { Action } from "sprotty-protocol";
+import type { Action } from "sprotty-protocol";
 import { TYPES } from "../types.js";
-import { ToolTypeProvider } from "../toolbox/toolState.js";
+import type { ToolTypeProvider } from "../toolbox/toolState.js";
 import { ToolboxToolType } from "../toolbox/toolType.js";
 import { UpdateCursorAction } from "../cursor/cursor.js";
-import { KeyState } from "../key-state/keyState.js";
+import type { KeyState } from "../key-state/keyState.js";
 
 /**
  * Extends the Sprotty ScrollMouseListener to handle drag move correctly when in drag mode

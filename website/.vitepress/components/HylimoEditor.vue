@@ -18,8 +18,8 @@ import "reflect-metadata";
 import { Splitpanes, Pane } from "splitpanes";
 import "splitpanes/dist/splitpanes.css";
 import { ref, onBeforeUnmount, computed } from "vue";
-import { ActionHandlerRegistry, IActionDispatcher } from "sprotty";
-import { RequestModelAction, ActionMessage } from "sprotty-protocol";
+import { ActionHandlerRegistry, type IActionDispatcher } from "sprotty";
+import { RequestModelAction, type ActionMessage } from "sprotty-protocol";
 import {
     DiagramActionNotification,
     DiagramOpenNotification,
@@ -28,7 +28,7 @@ import {
 import { createContainer, DiagramServerProxy, ResetCanvasBoundsAction, TYPES } from "@hylimo/diagram-ui";
 import { Root } from "@hylimo/diagram-common";
 import { onMounted } from "vue";
-import { EditorAppConfig, MonacoEditorLanguageClientWrapper } from "monaco-editor-wrapper";
+import { type EditorAppConfig, MonacoEditorLanguageClientWrapper } from "monaco-editor-wrapper";
 import { shallowRef } from "vue";
 import { inject } from "vue";
 import { language } from "../theme/lspPlugin";

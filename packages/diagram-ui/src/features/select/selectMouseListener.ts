@@ -1,10 +1,11 @@
 import { injectable, inject } from "inversify";
-import { SModelElementImpl, SelectMouseListener as SprottySelectMouseListener } from "sprotty";
-import { ToolTypeProvider } from "../toolbox/toolState.js";
+import type { SModelElementImpl } from "sprotty";
+import { SelectMouseListener as SprottySelectMouseListener } from "sprotty";
+import type { ToolTypeProvider } from "../toolbox/toolState.js";
 import { TYPES } from "../types.js";
-import { Action } from "sprotty-protocol";
+import type { Action } from "sprotty-protocol";
 import { isRegularInteractionTool } from "../toolbox/toolType.js";
-import { KeyState } from "../key-state/keyState.js";
+import type { KeyState } from "../key-state/keyState.js";
 
 /**
  * SelectMouseListener that disables both mouseDown and mouseUp when the current tool is not a regular interaction tool

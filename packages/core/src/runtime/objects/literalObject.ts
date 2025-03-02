@@ -1,4 +1,5 @@
-import { BaseObject, SimpleObject } from "./baseObject.js";
+import type { BaseObject } from "./baseObject.js";
+import { SimpleObject } from "./baseObject.js";
 
 /**
  * Represents a js literal.

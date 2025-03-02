@@ -1,4 +1,4 @@
-import { FontData } from "./fontData.js";
+import type { FontData } from "./fontData.js";
 
 /**
  * Converts a list of fonts to a css style string

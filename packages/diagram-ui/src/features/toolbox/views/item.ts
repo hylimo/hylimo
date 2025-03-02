@@ -1,7 +1,8 @@
-import { Root } from "@hylimo/diagram-common";
-import { VNode, h } from "snabbdom";
-import { Toolbox, ToolboxEditEntry } from "../toolbox.js";
-import { SearchResult } from "minisearch";
+import type { Root } from "@hylimo/diagram-common";
+import type { VNode } from "snabbdom";
+import { h } from "snabbdom";
+import type { Toolbox, ToolboxEditEntry } from "../toolbox.js";
+import type { SearchResult } from "minisearch";
 import { TransactionalMoveAction } from "../../move/transactionalMoveAction.js";
 import { CreateElementMoveHandler } from "../createElementMoveHandler.js";
 import { generatePreviewIfAvailable } from "./preview.js";

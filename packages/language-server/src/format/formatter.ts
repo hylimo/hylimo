@@ -1,8 +1,10 @@
-import { Parser, Rules, TokenType } from "@hylimo/core";
-import { Plugin, format } from "prettier";
-import { TextDocument } from "vscode-languageserver-textdocument";
-import { CstNode, IToken } from "chevrotain";
-import { Comment, Path, Node } from "./types.js";
+import type { Parser } from "@hylimo/core";
+import { Rules, TokenType } from "@hylimo/core";
+import type { Plugin } from "prettier";
+import { format } from "prettier";
+import type { TextDocument } from "vscode-languageserver-textdocument";
+import type { CstNode, IToken } from "chevrotain";
+import type { Comment, Path, Node } from "./types.js";
 import { printers } from "./printers.js";
 import { printComment } from "./comments.js";
 

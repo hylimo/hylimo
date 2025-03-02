@@ -1,8 +1,8 @@
-import { Element } from "../base/element.js";
-import { StrokedElement } from "../base/strokedElement.js";
+import type { Element } from "../base/element.js";
+import type { StrokedElement } from "../base/strokedElement.js";
 import { CanvasLineSegment } from "./canvasLineSegment.js";
 import { CanvasBezierSegment } from "./canvasBezierSegment.js";
-import { EditableCanvasContent } from "./editableCanvasContent.js";
+import type { EditableCanvasContent } from "./editableCanvasContent.js";
 
 /**
  * Connection on a Canvas with an arbitrary amount of segments

@@ -1,9 +1,10 @@
-import { FunctionExpression } from "../../ast/functionExpression.js";
-import { InterpreterContext } from "../interpreter/interpreterContext.js";
-import { LabeledValue } from "../objects/labeledValue.js";
+import type { FunctionExpression } from "../../ast/functionExpression.js";
+import type { InterpreterContext } from "../interpreter/interpreterContext.js";
+import type { LabeledValue } from "../objects/labeledValue.js";
 import { FunctionObject } from "../objects/functionObject.js";
-import { ExecutableAbstractFunctionExpression, FunctionDocumentation } from "./executableAbstractFunctionExpression.js";
-import { ExecutableExpression } from "./executableExpression.js";
+import type { FunctionDocumentation } from "./executableAbstractFunctionExpression.js";
+import { ExecutableAbstractFunctionExpression } from "./executableAbstractFunctionExpression.js";
+import type { ExecutableExpression } from "./executableExpression.js";
 
 /**
  * Executable FunctionExpression

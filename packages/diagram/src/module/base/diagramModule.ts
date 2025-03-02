@@ -1,16 +1,18 @@
-import {
-    assign,
+import type {
     BaseObject,
-    booleanType,
-    DefaultModuleNames,
-    ExecutableConstExpression,
     ExecutableExpression,
     ExecutableListEntry,
     FullObject,
+    InterpreterModule
+} from "@hylimo/core";
+import {
+    assign,
+    booleanType,
+    DefaultModuleNames,
+    ExecutableConstExpression,
     fun,
     functionType,
     id,
-    InterpreterModule,
     isObject,
     isString,
     jsFun,
@@ -28,11 +30,12 @@ import {
     validateObject
 } from "@hylimo/core";
 import { openSans, roboto, sourceCodePro } from "@hylimo/fonts";
-import { AttributeConfig, ContentCardinality, LayoutConfig } from "../../layout/layoutElement.js";
+import type { AttributeConfig, LayoutConfig } from "../../layout/layoutElement.js";
+import { ContentCardinality } from "../../layout/layoutElement.js";
 import { layouts } from "../../layout/layouts.js";
 import { elementType } from "./types.js";
 import { DiagramModuleNames } from "../diagramModuleNames.js";
-import { LayoutEngine } from "../../layout/engine/layoutEngine.js";
+import type { LayoutEngine } from "../../layout/engine/layoutEngine.js";
 import { Canvas } from "@hylimo/diagram-common";
 
 /**

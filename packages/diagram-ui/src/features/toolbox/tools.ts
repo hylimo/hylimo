@@ -1,5 +1,6 @@
-import { Toolbox } from "./toolbox.js";
-import { ArrowUpRight, FolderPlus, Hand, IconNode, MousePointer, SquareDashedMousePointer, WandSparkles } from "lucide";
+import type { Toolbox } from "./toolbox.js";
+import type { IconNode } from "lucide";
+import { ArrowUpRight, FolderPlus, Hand, MousePointer, SquareDashedMousePointer, WandSparkles } from "lucide";
 import { ToolboxToolType } from "./toolType.js";
 
 /**

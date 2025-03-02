@@ -1,9 +1,11 @@
 import { injectable } from "inversify";
-import { VNode } from "snabbdom";
-import { IViewArgs, RenderingContext, IView, svg } from "sprotty";
-import { SText } from "../model/sText.js";
-import { extractFillAttributes, extractLayoutAttributes, StrokeAttributes } from "@hylimo/diagram-render-svg";
-import { TextLine } from "@hylimo/diagram-common";
+import type { VNode } from "snabbdom";
+import type { IViewArgs, RenderingContext, IView } from "sprotty";
+import { svg } from "sprotty";
+import type { SText } from "../model/sText.js";
+import type { StrokeAttributes } from "@hylimo/diagram-render-svg";
+import { extractFillAttributes, extractLayoutAttributes } from "@hylimo/diagram-render-svg";
+import type { TextLine } from "@hylimo/diagram-common";
 
 /**
  * IView that represents an svg text
