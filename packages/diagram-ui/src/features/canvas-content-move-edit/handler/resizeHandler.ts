@@ -44,7 +44,7 @@ export class ResizeHandler extends MoveHandler {
         super(transformationMatrix, moveCursor);
     }
 
-    override generateEdits(x: number, y: number): Edit[] {
+    override generateEdits(x: number, y: number, event: MouseEvent): Edit[] {
         let factorX: number | undefined = undefined;
         let factorY: number | undefined = undefined;
 
@@ -53,6 +53,11 @@ export class ResizeHandler extends MoveHandler {
         }
         if (this.scaleY !== undefined) {
             factorY = Math.abs((y * this.scaleY + this.originalHeight) / this.originalHeight);
+        }
+        if (event.shiftKey && factorX != undefined && factorY != undefined) {
+            const uniformFactor = Math.max(factorX, factorY);
+            factorX = uniformFactor;
+            factorY = uniformFactor;
         }
         const edits: Edit[] = [];
         for (const group of this.groupedElements) {
