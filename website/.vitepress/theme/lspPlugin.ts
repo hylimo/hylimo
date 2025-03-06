@@ -22,11 +22,11 @@ import { useData } from "vitepress";
 import { useLocalStorage, throttledWatch } from "@vueuse/core";
 import monacoEditorWorker from "monaco-editor/esm/vs/editor/editor.worker?worker";
 import { languageServerConfigKey, languageClientKey } from "./injectionKeys";
-import { configureAndInitVscodeApi } from "monaco-editor-wrapper";
 import { ConsoleLogger } from "monaco-languageclient/tools";
-import { checkServiceConsistency } from "monaco-editor-wrapper/vscode/services";
+import { augmentVscodeApiConfig, checkServiceConsistency } from "monaco-editor-wrapper/vscode/services";
 import { useWorkerFactory } from "monaco-languageclient/workerFactory";
 import { LogLevel } from "@codingame/monaco-vscode-api";
+import { initServices } from "monaco-languageclient/vscode/services";
 
 /**
  * Config for the diagram
@@ -185,18 +185,15 @@ async function setupLanguageClient(isDark: boolean) {
         }
     });
 
-    await configureAndInitVscodeApi(
-        "classic",
-        {
-            vscodeApiConfig: {},
-            logLevel: LogLevel.Warning
-        },
-        {
-            caller: "website",
-            performServiceConsistencyChecks: checkServiceConsistency,
-            logger: new ConsoleLogger(LogLevel.Warning)
-        }
-    );
+    const vscodeApiConfig = await augmentVscodeApiConfig("classic", {
+        vscodeApiConfig: {},
+        logLevel: LogLevel.Warning
+    });
+    await initServices(vscodeApiConfig, {
+        caller: "website",
+        performServiceConsistencyChecks: checkServiceConsistency,
+        logger: new ConsoleLogger(LogLevel.Warning)
+    });
 
     monaco.languages.register({ id: language });
     monaco.languages.setLanguageConfiguration(language, languageConfiguration);
