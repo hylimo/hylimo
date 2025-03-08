@@ -1,5 +1,5 @@
 <template>
-    <div :class="{ hidden: hideMainContent }">
+    <div class="editor" :class="{ hidden: hideMainContent }">
         <Splitpanes :horizontal="horizontal">
             <Pane>
                 <div ref="editorElement" class="editor-element"></div>
@@ -36,7 +36,6 @@ import { languageClientKey, languageServerConfigKey } from "../theme/injectionKe
 import { Disposable } from "vscode-languageserver-protocol";
 import { onKeyDown, useResizeObserver } from "@vueuse/core";
 import { v4 as uuid } from "uuid";
-import * as monaco from "monaco-editor";
 import { useData } from "vitepress";
 
 const id = uuid();
@@ -276,6 +275,7 @@ onBeforeUnmount(() => {
     z-index: 5;
     background: transparent;
     transition: background-color 0s 0s;
+    position: relative;
 }
 
 .splitpanes--vertical .splitpanes__splitter {
@@ -290,10 +290,37 @@ onBeforeUnmount(() => {
     height: 4px;
 }
 
+@media (pointer: coarse) {
+    .splitpanes__splitter:before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 0;
+        opacity: 0;
+        z-index: 1;
+    }
+    .splitpanes__splitter:hover:before {
+        opacity: 1;
+    }
+    .splitpanes--vertical > .splitpanes__splitter:before {
+        left: -20px;
+        right: -20px;
+        height: 100%;
+    }
+    .splitpanes--horizontal > .splitpanes__splitter:before {
+        top: -20px;
+        bottom: -20px;
+        width: 100%;
+    }
+}
+
 .splitpanes.splitpanes--dragging .splitpanes__splitter,
 .splitpanes__splitter:hover {
-    transition: background-color 0s 0.25s;
     background: #007fd4;
+}
+
+.splitpanes__splitter:hover:not(.splitpanes--dragging) {
+    transition: background-color 0s 0.25s;
 }
 
 .splitpanes__pane {
@@ -315,5 +342,13 @@ onBeforeUnmount(() => {
 .splitpanes--horizontal .splitpanes__pane:not(:first-of-type)::before {
     height: 1px;
     width: 100%;
+}
+
+body:has(.splitpanes.splitpanes--vertical.splitpanes--dragging) * {
+    cursor: col-resize !important;
+}
+
+body:has(.splitpanes.splitpanes--horizontal.splitpanes--dragging) * {
+    cursor: row-resize !important;
 }
 </style>
