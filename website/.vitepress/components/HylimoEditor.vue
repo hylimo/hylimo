@@ -32,13 +32,10 @@ import { type EditorAppConfig, MonacoEditorLanguageClientWrapper } from "monaco-
 import { shallowRef } from "vue";
 import { inject } from "vue";
 import { language } from "../theme/lspPlugin";
-import { languageClientKey, languageServerConfigKey } from "../theme/injectionKeys";
+import { diagramIdProviderKey, languageClientKey, languageServerConfigKey } from "../theme/injectionKeys";
 import { Disposable } from "vscode-languageserver-protocol";
 import { onKeyDown, useResizeObserver } from "@vueuse/core";
-import { v4 as uuid } from "uuid";
 import { useData } from "vitepress";
-
-const id = uuid();
 
 defineProps({
     horizontal: {
@@ -81,6 +78,8 @@ const sprottyWrapper = ref<HTMLElement | null>(null);
 const disposables = shallowRef<Disposable[]>([]);
 const languageClient = inject(languageClientKey)!;
 const languageServerConfig = inject(languageServerConfigKey)!;
+const diagramIdProvider = inject(diagramIdProviderKey)!;
+const id = ref(diagramIdProvider());
 const { isDark } = useData();
 const diagramBackground = computed(() => {
     const config = languageServerConfig.diagramConfig.value;
@@ -132,7 +131,7 @@ onMounted(async () => {
         codeResources: {
             modified: {
                 text: model.value,
-                fileExt: "hyl",
+                uri: `diagram-${id.value}.hyl`,
                 enforceLanguageId: language
             }
         }
@@ -235,7 +234,7 @@ onMounted(async () => {
         }
     }
 
-    const container = createContainer(`sprotty-container-${id}`);
+    const container = createContainer(`sprotty-container-${id.value}`);
     container.bind(LspDiagramServerProxy).toSelf().inSingletonScope();
     container.bind(TYPES.ModelSource).toService(LspDiagramServerProxy);
     const currentActionDispatcher = container.get<IActionDispatcher>(TYPES.IActionDispatcher);

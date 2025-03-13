@@ -1,5 +1,5 @@
 import type { Plugin, Ref } from "vue";
-import { computed, shallowRef, toRaw, watch } from "vue";
+import { computed, ref, shallowRef, toRaw, watch } from "vue";
 import type { NotificationHandler, NotificationType, Disposable } from "vscode-languageserver-protocol/browser.js";
 import {
     BrowserMessageReader,
@@ -21,7 +21,7 @@ import { customDarkTheme, customLightTheme, languageConfiguration, monarchTokenP
 import { useData } from "vitepress";
 import { useLocalStorage, throttledWatch } from "@vueuse/core";
 import monacoEditorWorker from "monaco-editor/esm/vs/editor/editor.worker?worker";
-import { languageServerConfigKey, languageClientKey } from "./injectionKeys";
+import { languageServerConfigKey, languageClientKey, diagramIdProviderKey } from "./injectionKeys";
 import { ConsoleLogger } from "monaco-languageclient/tools";
 import { augmentVscodeApiConfig, checkServiceConsistency } from "monaco-editor-wrapper/vscode/services";
 import { useWorkerFactory } from "monaco-languageclient/workerFactory";
@@ -133,7 +133,9 @@ export const lspPlugin: Plugin = {
         });
 
         const client = setupLanguageClient(isDark.value);
+        const idCounter = ref(1);
         app.provide(languageClientKey, shallowRef(client));
+        app.provide(diagramIdProviderKey, () => idCounter.value++);
 
         client.then((value) => {
             value.onNotification(UpdateEditorConfigNotification.type, (config) => {
