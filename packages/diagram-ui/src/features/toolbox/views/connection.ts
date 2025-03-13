@@ -111,7 +111,7 @@ export function generateConnectionToolboxItem(
  */
 function generateSearchBox(context: Toolbox): VNode {
     const connections = context.getConnectionEdits(context.currentRoot!);
-    const currentConnection = context.getCurrentConnection(connections);
+    const currentConnection = context.getCurrentConnection(connections) ?? "";
     const input = h(
         "div.selectable-input",
         {

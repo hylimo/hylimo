@@ -69,7 +69,7 @@
             }
         }
 
-        .toolbox-tool-button:hover {
+        .toolbox-tool-button:hover:not(:disabled) {
             background: var(--toolbox-background-3);
         }
 
@@ -85,6 +85,10 @@
             .icon {
                 color: var(--toolbox-primary);
             }
+        }
+
+        .toolbox-tool-button:disabled {
+            opacity: 0.5;
         }
 
         .divider {

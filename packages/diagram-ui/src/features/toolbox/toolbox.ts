@@ -284,16 +284,16 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler, Conn
      * Uses {@link selectedConnection} if it is set and in the list of available connections
      *
      * @param connections the list of available connection operators
-     * @returns the current connection operator
+     * @returns the current connection operator or unefined if no connection operator is available
      */
-    getCurrentConnection(connections: ConnectionEditEntry[]): string {
+    getCurrentConnection(connections: ConnectionEditEntry[]): string | undefined {
         if (
             this.selectedConnection != undefined &&
             connections.some((entry) => entry.name === this.selectedConnection)
         ) {
             return this.selectedConnection;
         }
-        return connections[0].name;
+        return connections[0]?.name;
     }
 
     /**
@@ -443,6 +443,23 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler, Conn
             );
         }
         return this.connectionSearchIndex;
+    }
+
+    /**
+     * Checks if a toolbox tool is currently enabled.
+     *
+     * @param tool The toolbox tool
+     * @returns True if the tool is enabled, false otherwise
+     */
+    isToolEnabled(tool: ToolboxToolType): boolean {
+        if (tool === ToolboxToolType.ADD_ELEMENT) {
+            return this.getToolboxEdits(this.currentRoot!).length > 0;
+        } else if (tool === ToolboxToolType.CONNECT) {
+            return this.getCurrentConnection(this.getConnectionEdits(this.currentRoot!)) != undefined;
+        } else if (tool === ToolboxToolType.AUTOLAYOUT) {
+            return false;
+        }
+        return true;
     }
 }
 

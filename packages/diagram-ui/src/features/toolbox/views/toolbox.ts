@@ -100,7 +100,8 @@ function generateToolboxToolButton(context: Toolbox, tool: ToolboxTool): VNode {
                 click: () => tool.action(context)
             },
             attrs: {
-                title: tool.title
+                title: tool.title,
+                disabled: !context.isToolEnabled(tool.id)
             },
             class: {
                 active
