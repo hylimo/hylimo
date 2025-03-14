@@ -102,7 +102,7 @@ export namespace Math2D {
         if (denominator === 0) {
             return 0;
         }
-        return Math.acos(dot(a, b) / denominator);
+        return Math.acos(Math.min(Math.max(dot(a, b) / denominator, -1), 1));
     }
 
     /**
