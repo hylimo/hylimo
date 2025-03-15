@@ -1,7 +1,9 @@
-import { ExecutableAbstractFunctionExpression, fun, numberType } from "@hylimo/core";
-import { Size, AbsolutePoint, Element, Point, DefaultEditTypes } from "@hylimo/diagram-common";
-import { LayoutElement } from "../../layoutElement.js";
-import { Layout } from "../../engine/layout.js";
+import type { ExecutableAbstractFunctionExpression } from "@hylimo/core";
+import { fun, numberType } from "@hylimo/core";
+import type { Size, Element, Point } from "@hylimo/diagram-common";
+import { AbsolutePoint, DefaultEditTypes } from "@hylimo/diagram-common";
+import type { LayoutElement } from "../../layoutElement.js";
+import type { Layout } from "../../engine/layout.js";
 import { CanvasPointLayoutConfig } from "./canvasPointLayoutConfig.js";
 
 /**
@@ -9,6 +11,7 @@ import { CanvasPointLayoutConfig } from "./canvasPointLayoutConfig.js";
  */
 export class AbsolutePointLayoutConfig extends CanvasPointLayoutConfig {
     override type = AbsolutePoint.TYPE;
+    override idGroup = "pa";
 
     constructor() {
         super(

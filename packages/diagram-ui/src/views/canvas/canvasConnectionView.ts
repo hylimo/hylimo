@@ -1,19 +1,29 @@
-import { LineEngine, MarkerLayoutInformation, Point } from "@hylimo/diagram-common";
-import { injectable } from "inversify";
-import { VNode } from "snabbdom";
-import { IView, IViewArgs, RenderingContext, svg } from "sprotty";
-import { SCanvasConnection } from "../../model/canvas/sCanvasConnection.js";
+import type { MarkerLayoutInformation, Point } from "@hylimo/diagram-common";
+import { LineEngine } from "@hylimo/diagram-common";
+import { inject, injectable } from "inversify";
+import type { VNode } from "snabbdom";
+import type { IView, IViewArgs, RenderingContext } from "sprotty";
+import { svg } from "sprotty";
+import type { SCanvasConnection } from "../../model/canvas/sCanvasConnection.js";
 import { SCanvasConnectionSegment } from "../../model/canvas/sCanvasConnectionSegment.js";
-import { SMarker } from "../../model/canvas/sMarker.js";
+import type { SMarker } from "../../model/canvas/sMarker.js";
 import { extractStrokeAttriabutes } from "@hylimo/diagram-render-svg";
 import { EditableCanvasContentView } from "./editableCanvasContentView.js";
-import { SCanvasPoint } from "../../model/canvas/sCanvasPoint.js";
+import { renderPoint } from "./canvasPointView.js";
+import { findViewportZoom } from "../../base/findViewportZoom.js";
+import { TYPES } from "../../features/types.js";
+import type { KeyState } from "../../features/key-state/keyState.js";
 
 /**
  * IView that represents a CanvasConnection
  */
 @injectable()
 export class CanvasConnectionView extends EditableCanvasContentView implements IView {
+    /**
+     * The key state used to determine if the shift key is pressed
+     */
+    @inject(TYPES.KeyState) protected readonly keyState!: KeyState;
+
     render(
         model: Readonly<SCanvasConnection>,
         context: RenderingContext,
@@ -31,12 +41,8 @@ export class CanvasConnectionView extends EditableCanvasContentView implements I
         const createConnectionPreview = this.renderCreateConnection(model);
         const splitSegmentPreview = this.renderSplitSegmentPreview(model);
         return svg(
-            "g",
-            {
-                class: {
-                    selectable: true
-                }
-            },
+            "g.selectable.canvas-connection",
+            null,
             ...childPaths,
             ...childMarkers,
             ...childControlElements,
@@ -62,12 +68,9 @@ export class CanvasConnectionView extends EditableCanvasContentView implements I
                     fill: "none"
                 }
             }),
-            svg("path", {
+            svg("path.select-canvas-connection", {
                 attrs: {
                     d: path
-                },
-                class: {
-                    "select-canvas-connection": true
                 }
             })
         ];
@@ -87,7 +90,7 @@ export class CanvasConnectionView extends EditableCanvasContentView implements I
         for (let i = 0; i < segments.length; i++) {
             const segment = segments[i];
             if (showControlElements) {
-                childControlElements.push(...segment.generateControlViewElements(layout.segments[i]));
+                childControlElements.push(...segment.generateControlViewElements(model, layout.segments[i]));
             }
         }
         return { path: layout.path, childControlElements };
@@ -146,43 +149,29 @@ export class CanvasConnectionView extends EditableCanvasContentView implements I
      * @returns the rendered preview point if available
      */
     private renderSplitSegmentPreview(model: Readonly<SCanvasConnection>): VNode | undefined {
-        const hoverDataProvider = model.hoverDataProvider;
-        if (!model.selected || hoverDataProvider == undefined || !hoverDataProvider.isVisible) {
+        const provider = model.splitPreviewDataProvider;
+        if (provider == undefined || !model.selected || !this.keyState.isShiftPressed) {
             return undefined;
         }
-        const { position, line, projectionResult } = hoverDataProvider.provider();
+        const projectionResult = provider();
+        const line = model.line;
         const segment = model.index.getById(
             line.line.segments[projectionResult.segment].origin
         ) as SCanvasConnectionSegment;
         if (!segment.canSplitSegment()) {
             return undefined;
         }
-        return this.renderPreviewPoint(LineEngine.DEFAULT.getPoint(position, undefined, 0, line));
+        return this.renderPreviewPoint(LineEngine.DEFAULT.getPoint(projectionResult.pos, undefined, 0, line), model);
     }
 
     /**
      * Renders a preview point
      *
      * @param point the position of the preview point
+     * @param model the model of the connection
      * @returns the rendered preview point
      */
-    private renderPreviewPoint({ x, y }: Point): VNode | undefined {
-        return svg(
-            "g",
-            {
-                attrs: {
-                    transform: `translate(${x}, ${y})`
-                }
-            },
-            svg("line", {
-                attrs: {
-                    "stroke-width": SCanvasPoint.POINT_SIZE
-                },
-                class: {
-                    "canvas-point": true,
-                    selectable: true
-                }
-            })
-        );
+    private renderPreviewPoint({ x, y }: Point, model: Readonly<SCanvasConnection>): VNode | undefined {
+        return svg("g.split-canvas-connetion-preview", null, ...renderPoint({ x, y }, findViewportZoom(model), true));
     }
 }

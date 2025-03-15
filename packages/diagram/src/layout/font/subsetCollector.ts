@@ -1,5 +1,5 @@
 import { FontStyle, FontWeight } from "@hylimo/diagram-common";
-import { LayoutElement } from "../layoutElement.js";
+import type { LayoutElement } from "../layoutElement.js";
 
 /**
  * Contains the subsets of fonts

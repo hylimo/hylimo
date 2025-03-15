@@ -1,4 +1,4 @@
-import { Action } from "sprotty-protocol";
+import type { Action } from "sprotty-protocol";
 
 /**
  * Action to reset the bounds of the root

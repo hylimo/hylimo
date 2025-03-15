@@ -1,8 +1,15 @@
-import { CanvasConnection, CanvasConnectionLayout, Point, Stroke, TransformedLine } from "@hylimo/diagram-common";
-import { LinearAnimatable } from "../../features/animation/model.js";
+import type {
+    CanvasConnection,
+    CanvasConnectionLayout,
+    Point,
+    ProjectionResult,
+    Stroke,
+    TransformedLine
+} from "@hylimo/diagram-common";
+import type { LinearAnimatable } from "../../features/animation/model.js";
 import { SCanvasConnectionSegment } from "./sCanvasConnectionSegment.js";
 import { SCanvasContent } from "./sCanvasContent.js";
-import { SCanvasPoint } from "./sCanvasPoint.js";
+import type { SCanvasPoint } from "./sCanvasPoint.js";
 import { SMarker } from "./sMarker.js";
 
 /**
@@ -52,6 +59,10 @@ export class SCanvasConnection extends SCanvasContent implements CanvasConnectio
      * An expression which can be used by edits to obtain this element in an edit
      */
     editExpression?: string;
+    /**
+     * The projection result for the preview data
+     */
+    splitPreviewDataProvider?: () => ProjectionResult;
     /**
      * Required to mark this as moveable
      */

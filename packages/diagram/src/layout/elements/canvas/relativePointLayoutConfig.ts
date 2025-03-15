@@ -1,8 +1,10 @@
-import { ExecutableAbstractFunctionExpression, FullObject, fun, numberType } from "@hylimo/core";
-import { Size, Element, RelativePoint, Point, DefaultEditTypes } from "@hylimo/diagram-common";
+import type { ExecutableAbstractFunctionExpression, FullObject } from "@hylimo/core";
+import { fun, numberType } from "@hylimo/core";
+import type { Size, Element, Point } from "@hylimo/diagram-common";
+import { RelativePoint, DefaultEditTypes } from "@hylimo/diagram-common";
 import { canvasContentType } from "../../../module/base/types.js";
-import { LayoutElement } from "../../layoutElement.js";
-import { Layout } from "../../engine/layout.js";
+import type { LayoutElement } from "../../layoutElement.js";
+import type { Layout } from "../../engine/layout.js";
 import { CanvasPointLayoutConfig } from "./canvasPointLayoutConfig.js";
 
 /**
@@ -10,6 +12,7 @@ import { CanvasPointLayoutConfig } from "./canvasPointLayoutConfig.js";
  */
 export class RelativePointLayoutConfig extends CanvasPointLayoutConfig {
     override type = RelativePoint.TYPE;
+    override idGroup = "pr";
 
     constructor() {
         super(

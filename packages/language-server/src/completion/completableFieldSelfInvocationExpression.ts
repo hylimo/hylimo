@@ -1,11 +1,11 @@
-import {
-    ExecutableAbstractInvocationExpression,
+import type {
     FieldSelfInvocationExpression,
     ExecutableListEntry,
     ExecutableExpression,
     InterpreterContext,
     LabeledValue
 } from "@hylimo/core";
+import { ExecutableAbstractInvocationExpression } from "@hylimo/core";
 import { supplyNamedArguments } from "./completionGenerator.js";
 
 /**

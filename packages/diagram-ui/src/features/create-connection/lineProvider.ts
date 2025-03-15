@@ -1,4 +1,4 @@
-import { SModelElementImpl } from "sprotty";
+import type { SModelElementImpl } from "sprotty";
 import { SCanvasConnection } from "../../model/canvas/sCanvasConnection.js";
 import { SCanvasElement } from "../../model/canvas/sCanvasElement.js";
 

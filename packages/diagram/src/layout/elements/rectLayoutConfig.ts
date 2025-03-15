@@ -1,7 +1,9 @@
 import { numberType } from "@hylimo/core";
-import { Element, Size, Rect, Point, Line, ArcSegment, LineSegment } from "@hylimo/diagram-common";
-import { LayoutElement, SizeConstraints, addToConstraints, addToSize } from "../layoutElement.js";
-import { Layout } from "../engine/layout.js";
+import type { Element, Size, Point, Line, ArcSegment, LineSegment } from "@hylimo/diagram-common";
+import { Rect } from "@hylimo/diagram-common";
+import type { LayoutElement, SizeConstraints } from "../layoutElement.js";
+import { addToConstraints, addToSize } from "../layoutElement.js";
+import type { Layout } from "../engine/layout.js";
 import { ContentShapeLayoutConfig } from "./contentShapeLayoutConfig.js";
 
 /**
@@ -98,7 +100,8 @@ export class RectLayoutConfig extends ContentShapeLayoutConfig {
             ];
             return {
                 start: startPos,
-                segments
+                segments,
+                isClosed: true
             };
         } else {
             return super.outline(layout, element, position, size, id);

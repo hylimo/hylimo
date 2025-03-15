@@ -1,5 +1,5 @@
-import { SplitCanvasLineSegmentEdit } from "@hylimo/diagram-protocol";
-import { EditHandler } from "./editHandler.js";
+import type { SplitCanvasLineSegmentEdit } from "@hylimo/diagram-protocol";
+import type { EditHandler } from "./editHandler.js";
 import { DefaultEditTypes } from "@hylimo/diagram-common";
 
 /**
@@ -9,7 +9,7 @@ export const splitCanvasLineSegmentHandler: EditHandler<SplitCanvasLineSegmentEd
     type: DefaultEditTypes.SPLIT_CANVAS_LINE_SEGMENT,
 
     predictActionDiff() {
-        return [];
+        return undefined;
     },
 
     transformEdit(edit, config) {

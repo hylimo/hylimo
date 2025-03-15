@@ -2,51 +2,125 @@
     position: absolute;
     top: 15px;
     right: 15px;
-    width: calc(min(40%, 300px));
+    width: var(--toolbox-width);
     max-height: 50%;
     display: flex;
     flex-direction: column;
-    border-radius: var(--toolbox-border-radius);
-    box-shadow: var(--toolbox-box-shadow);
-    background: var(--toolbox-background);
-    transition:
-        width 0.15s ease,
-        max-height 0.3s ease;
 
-    * {
+    *:not(.preview *) {
         font-size: inherit;
+        font-family: inherit;
     }
 
     --toolbox-margin: 10px;
     --toolbox-border-radius: 12px;
-    --codicon-button-size: 26px;
+    --tool-button-margin: 5px;
+    --tool-button-size: calc((var(--toolbox-width) - 9 * var(--tool-button-margin) - 1px) / 7);
 
     .toolbox {
         display: flex;
         flex-direction: column;
         min-height: 0;
+    }
+
+    .toolbox-tools {
+        border-radius: var(--toolbox-border-radius);
+        box-shadow: var(--toolbox-box-shadow);
+        background: var(--toolbox-background);
         position: relative;
+        height: calc(var(--tool-button-size) + 2 * var(--tool-button-margin));
+        overflow: hidden;
+        flex: 0 0 auto;
 
-        .toolbox-header {
+        .wrapper {
+            width: var(--toolbox-width);
+            position: absolute;
+            right: 0;
             display: flex;
-            padding: var(--toolbox-margin) var(--toolbox-margin) 5px var(--toolbox-margin);
-            background: var(--toolbox-header-background);
-            font-weight: 600;
+            gap: var(--tool-button-margin);
+            padding: var(--tool-button-margin);
             align-items: center;
-            transition: background-color 0.3s ease;
-            border-radius: var(--toolbox-border-radius) var(--toolbox-border-radius) 0 0;
+        }
 
-            .title {
-                flex: 1 1 0;
-                min-width: 0;
-                overflow: hidden;
+        .toolbox-tool-button {
+            width: var(--tool-button-size);
+            height: var(--tool-button-size);
+            border-radius: 6px;
+            border: 1px solid transparent;
+            min-width: 0;
+            min-height: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            outline: none;
+            position: relative;
+
+            .icon {
+                --size: calc(min(18px, 100% - 8px));
+                width: var(--size);
+                height: var(--size);
+            }
+
+            .icon.locked {
+                --size: calc(min(18px, 100% - 8px) * 0.7);
+                bottom: calc(-0.25 * var(--size));
+                right: calc(-0.25 * var(--size));
+                position: absolute;
             }
         }
 
-        .toolbox-header-content {
-            flex: 0 1 auto;
-            min-height: 0;
-            overflow: hidden;
+        .toolbox-tool-button:hover:not(:disabled) {
+            background: var(--toolbox-background-3);
+        }
+
+        .toolbox-tool-button.active {
+            background: var(--toolbox-background-2);
+        }
+
+        .toolbox-tool-button:active {
+            border-color: var(--toolbox-primary);
+        }
+
+        .toolbox-tool-button.active {
+            .icon {
+                color: var(--toolbox-primary);
+            }
+        }
+
+        .toolbox-tool-button:disabled {
+            opacity: 0.5;
+        }
+
+        .divider {
+            width: 1px;
+            height: calc(var(--tool-button-size) * 0.8);
+            background: var(--toolbox-background-1);
+        }
+    }
+
+    .toolbox-details {
+        border-radius: var(--toolbox-border-radius);
+        box-shadow: var(--toolbox-box-shadow);
+        background: var(--toolbox-background);
+        display: flex;
+        flex-direction: column;
+        margin-top: var(--toolbox-margin);
+        opacity: 1;
+        transition:
+            opacity 0.3s ease,
+            transform 0.3s ease;
+        overflow: hidden;
+
+        .toolbox-details-header {
+            padding: var(--toolbox-margin);
+        }
+
+        .toolbox-details-header:not(:only-child):after {
+            content: "";
+            display: block;
+            height: 1px;
+            background: var(--toolbox-background-1);
+            margin-top: var(--toolbox-margin);
         }
 
         @supports selector(::-webkit-scrollbar) {
@@ -69,7 +143,7 @@
 
         .group {
             .group-header {
-                background: var(--toolbox-group-header-background);
+                background: var(--toolbox-background-2);
                 font-weight: 500;
                 padding: 0 var(--toolbox-margin);
             }
@@ -95,7 +169,6 @@
 
                 svg {
                     padding: 10px;
-                    background: var(--diagram-background);
                 }
             }
         }
@@ -103,7 +176,7 @@
         .item.selected,
         .item:hover,
         .item:focus-within {
-            background: var(--toolbox-item-hover-background);
+            background: var(--toolbox-background-3);
         }
 
         .item:hover {
@@ -112,17 +185,11 @@
             }
         }
 
-        .input-container {
-            background: var(--toolbox-header-background);
-            padding: var(--toolbox-margin);
-            padding-top: 0;
-        }
-
         .selectable-input {
             display: flex;
             border-radius: 8px;
             align-items: center;
-            background: var(--toolbox-item-hover-background);
+            background: var(--toolbox-background-3);
             padding: 4px 0px 4px 8px;
 
             input {
@@ -134,6 +201,12 @@
             span {
                 flex: 1 1 0;
                 text-align: left;
+            }
+
+            .icon {
+                width: 18px;
+                height: 18px;
+                flex: 0 0 auto;
             }
         }
 
@@ -154,27 +227,9 @@
         }
     }
 
-    i.codicon {
-        font-size: 18px;
-    }
-
-    .codicon-button {
-        width: var(--codicon-button-size);
-        height: var(--codicon-button-size);
-        border-radius: 6px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin-left: 3px;
-    }
-
-    .codicon-button.active,
-    .codicon-button:hover {
-        background: var(--toolbox-item-hover-background);
-
-        i.codicon {
-            color: var(--toolbox-primary);
-        }
+    .toolbox-details:empty {
+        opacity: 0;
+        transform: translateY(-10px);
     }
 }
 
@@ -182,23 +237,32 @@
     pointer-events: none;
 }
 
-.hylimo.toolbox-wrapper:has(.closed) {
-    --closed-toolbox-size: calc(var(--codicon-button-size) + var(--toolbox-margin) * 2);
-    width: var(--closed-toolbox-size);
-    max-height: var(--closed-toolbox-size);
+.hylimo.toolbox-wrapper:focus-within {
+    transition:
+        width 0.15s ease,
+        max-height 0.3s ease;
+}
+
+.hylimo.toolbox-wrapper:has(.closed):focus-within {
     transition:
         width 0.15s 0.15s ease,
         max-height 0.3s ease;
+}
 
-    .toolbox {
-        .toolbox-header {
-            background: transparent;
+.hylimo.toolbox-wrapper:has(.closed) {
+    --closed-toolbox-size: calc(var(--tool-button-size) + 2 * var(--tool-button-margin));
+    width: var(--closed-toolbox-size);
+    max-height: var(--closed-toolbox-size);
 
-            button:last-child {
-                margin: calc(var(--toolbox-margin) * -1);
-                width: var(--closed-toolbox-size);
-                height: var(--closed-toolbox-size);
-            }
+    .toolbox-tools {
+        .divider {
+            visibility: hidden;
         }
+    }
+}
+
+@container sprotty (min-width: 0) {
+    .hylimo.toolbox-wrapper {
+        --toolbox-width: calc(min(60cqw, 300px));
     }
 }

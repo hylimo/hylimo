@@ -1,5 +1,5 @@
-import { Point } from "../../common/point.js";
-import { Segment } from "./segment.js";
+import type { Point } from "../../common/point.js";
+import type { Segment } from "./segment.js";
 
 /**
  * Defines an circular arc line

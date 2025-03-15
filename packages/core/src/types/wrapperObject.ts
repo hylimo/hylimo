@@ -1,6 +1,6 @@
-import { InterpreterContext } from "../runtime/interpreter/interpreterContext.js";
+import type { InterpreterContext } from "../runtime/interpreter/interpreterContext.js";
 import { WrapperObject } from "../runtime/objects/wrapperObject.js";
-import { Type } from "./base.js";
+import type { Type } from "./base.js";
 
 /**
  * Generates a wrapper object type

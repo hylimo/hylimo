@@ -1,5 +1,5 @@
-import { SplitCanvasAxisAlignedSegmentEdit } from "@hylimo/diagram-protocol";
-import { EditHandler } from "./editHandler.js";
+import type { SplitCanvasAxisAlignedSegmentEdit } from "@hylimo/diagram-protocol";
+import type { EditHandler } from "./editHandler.js";
 import { DefaultEditTypes } from "@hylimo/diagram-common";
 
 /**
@@ -9,7 +9,7 @@ export const splitCanvasAxisAlignedSegmentHandler: EditHandler<SplitCanvasAxisAl
     type: DefaultEditTypes.SPLIT_CANVAS_AXIS_ALIGNED_SEGMENT,
 
     predictActionDiff() {
-        return [];
+        return undefined;
     },
 
     transformEdit(edit, config) {

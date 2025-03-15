@@ -1,9 +1,14 @@
-import { ProjectionResult, TransformedLine } from "@hylimo/diagram-common";
+import type { Point, ProjectionResult, TransformedLine } from "@hylimo/diagram-common";
+
+/**
+ * Hover data for creating a connection
+ */
+export type CreateConnectionHoverData = LineProviderHoverData | RootHoverData;
 
 /**
  * Line provider hover data
  */
-export interface LineProviderHoverData {
+export interface LineProviderHoverData extends Point {
     /**
      * The position on the outline of the start element where the connection would start.
      */
@@ -16,22 +21,17 @@ export interface LineProviderHoverData {
      * The line on which the connection would be created in the context of the parent canvas.
      */
     line: TransformedLine;
-}
-
-/**
- * Provider for line provider hover data.
- */
-export interface LineProviderHoverDataProvider {
-    /**
-     * Whether the line provider hover UI is currently visible.
-     */
-    isVisible: boolean;
-    /**
-     * The line provider hover data itself.
-     */
-    provider: () => LineProviderHoverData;
     /**
      * The id of the target element.
      */
     target: string;
+    /**
+     * The provider to get the connection edit expression
+     */
+    editExpression: string;
 }
+
+/**
+ * Root hover data
+ */
+export type RootHoverData = Point;

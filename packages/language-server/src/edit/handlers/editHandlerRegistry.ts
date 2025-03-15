@@ -1,6 +1,6 @@
 import { axisAlignedSegmentPosHandler } from "./axisAlignedSegmentPosHandler.js";
 import { connectionHandler } from "./connectionHandler.js";
-import { EditHandler } from "./editHandler.js";
+import type { EditHandler } from "./editHandler.js";
 import { moveLineDistHandler } from "./moveLineDistHandler.js";
 import { moveLinePosHandler } from "./moveLinePosHandler.js";
 import { moveXHandler } from "./moveXHandler.js";

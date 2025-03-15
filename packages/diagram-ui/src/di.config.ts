@@ -25,11 +25,11 @@ import {
     moveModule as sprottyMoveModule,
     zorderModule as sprottyZOrderModule,
     moveFeature,
-    TYPES,
     decorationModule,
     registerModelElement,
     undoRedoModule as sprottyUndoRedoModule,
-    exportModule
+    exportModule,
+    viewportModule as sprottyViewportModule
 } from "sprotty";
 import { CommandStack } from "./base/commandStack.js";
 import { transactionModule } from "./features/transaction/di.config.js";
@@ -53,7 +53,7 @@ import { CanvasElementView } from "./views/canvas/canvasElementView.js";
 import { MarkerView } from "./views/canvas/markerView.js";
 import { RelativePointView } from "./views/canvas/relativePointView.js";
 import { RectView } from "./views/rectView.js";
-import { SRootView } from "./views/rootView.js";
+import { RootView } from "./views/rootView.js";
 import { TextView } from "./views/textView.js";
 import { SLinePoint } from "./model/canvas/sLinePoint.js";
 import { LinePointView } from "./views/canvas/linePointView.js";
@@ -67,12 +67,16 @@ import { canvasContentMoveEditModule } from "./features/canvas-content-move-edit
 import { resetCanvasBoundsModule } from "./features/canvas-bounds/di.config.js";
 import { viewportModule } from "./features/viewport/di.config.js";
 import { undoRedoModule } from "./features/undo-redo/di.config.js";
-import { toolboxModule } from "./features/toolbox/ci.config.js";
+import { toolboxModule } from "./features/toolbox/di.config.js";
 import { moveModule } from "./features/move/di.config.js";
 import { configModule } from "./features/config/di.config.js";
 import { splitCanvasSegmentModule } from "./features/split-canvas-segment/di.config.js";
 import { createConnectionModule } from "./features/create-connection/di.config.js";
-import { lineProviderHoverModule } from "./features/line-provider-hover/di.config.js";
+import { TYPES } from "./features/types.js";
+import { cursorModule } from "./features/cursor/di.config.js";
+import { selectModule } from "./features/select/di.config.js";
+import { boxSelectFeature } from "./features/select/boxSelectFeature.js";
+import { keyStateModule } from "./features/key-state/di.config.js";
 
 /**
  * The module used
@@ -82,23 +86,23 @@ const diagramModule = new ContainerModule((bind, unbind, isBound, rebind) => {
 
     rebind(TYPES.ICommandStack).to(CommandStack).inSingletonScope();
 
-    configureModelElement(context, Root.TYPE, SRoot, SRootView);
+    configureModelElement(context, Root.TYPE, SRoot, RootView);
     configureModelElement(context, Rect.TYPE, SRect, RectView);
     configureModelElement(context, Ellipse.TYPE, SEllipse, EllipseView);
     configureModelElement(context, Path.TYPE, SPath, PathView);
     configureModelElement(context, Text.TYPE, SText, TextView);
     configureModelElement(context, Canvas.TYPE, SCanvas, CanvasView);
     configureModelElement(context, CanvasElement.TYPE, SCanvasElement, CanvasElementView, {
-        enable: [selectFeature, moveFeature]
+        enable: [selectFeature, moveFeature, boxSelectFeature]
     });
     configureModelElement(context, AbsolutePoint.TYPE, SAbsolutePoint, AbsolutePointView, {
-        enable: [selectFeature, moveFeature]
+        enable: [selectFeature, moveFeature, boxSelectFeature]
     });
     configureModelElement(context, RelativePoint.TYPE, SRelativePoint, RelativePointView, {
-        enable: [selectFeature, moveFeature]
+        enable: [selectFeature, moveFeature, boxSelectFeature]
     });
     configureModelElement(context, LinePoint.TYPE, SLinePoint, LinePointView, {
-        enable: [selectFeature, moveFeature]
+        enable: [selectFeature, moveFeature, boxSelectFeature]
     });
     configureModelElement(context, CanvasConnection.TYPE, SCanvasConnection, CanvasConnectionView, {
         enable: [selectFeature, moveFeature]
@@ -127,7 +131,8 @@ export function createContainer(widgetId: string): Container {
             sprottyZOrderModule,
             decorationModule,
             sprottyUndoRedoModule,
-            exportModule
+            exportModule,
+            sprottyViewportModule
         ]
     });
     container.load(
@@ -144,7 +149,9 @@ export function createContainer(widgetId: string): Container {
         toolboxModule,
         configModule,
         createConnectionModule,
-        lineProviderHoverModule
+        cursorModule,
+        selectModule,
+        keyStateModule
     );
     container.load(diagramModule);
 

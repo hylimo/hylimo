@@ -1,7 +1,7 @@
-import { Point, SegmentLayoutInformation } from "@hylimo/diagram-common";
-import { SCanvasConnection } from "./sCanvasConnection.js";
-import { SCanvasPoint } from "./sCanvasPoint.js";
-import { VNode } from "snabbdom";
+import type { Point, SegmentLayoutInformation } from "@hylimo/diagram-common";
+import type { SCanvasConnection } from "./sCanvasConnection.js";
+import type { SCanvasPoint } from "./sCanvasPoint.js";
+import type { VNode } from "snabbdom";
 import { SElement } from "../sElement.js";
 
 /**
@@ -35,10 +35,11 @@ export abstract class SCanvasConnectionSegment extends SElement {
     /**
      * Generates the control elements rendered when the connection is selected
      *
+     * @param model the parent connection
      * @param layout defines the segment start and end points
      * @returns the generated nodes
      */
-    abstract generateControlViewElements(layout: SegmentLayoutInformation): VNode[];
+    abstract generateControlViewElements(model: Readonly<SCanvasConnection>, layout: SegmentLayoutInformation): VNode[];
 
     /**
      * Checks if this segment can be split using an edit

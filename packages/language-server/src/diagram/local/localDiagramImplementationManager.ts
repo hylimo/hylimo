@@ -1,8 +1,8 @@
-import { DiagramImplementation } from "../diagramImplementation.js";
-import { SharedDiagramUtils } from "../../sharedDiagramUtils.js";
+import type { DiagramImplementation } from "../diagramImplementation.js";
+import type { SharedDiagramUtils } from "../../sharedDiagramUtils.js";
 import { DiagramImplementationManager } from "../diagramImplementationManager.js";
 import { RegisterRemoteLanguageServerMessage } from "../remote/registerRemoteLanguageServerMessage.js";
-import { RemoteMessagePayload } from "@hylimo/diagram-protocol";
+import type { RemoteMessagePayload } from "@hylimo/diagram-protocol";
 import { RequestUpdateDiagramMessage, ReplyUpdateDiagramMessage } from "../remote/updateDiagramMessage.js";
 import { LocalDiagramImplementation } from "./localDiagramImplementation.js";
 import {

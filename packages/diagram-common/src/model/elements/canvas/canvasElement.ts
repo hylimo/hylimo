@@ -1,7 +1,7 @@
-import { Line } from "../../../line/model/line.js";
-import { Element } from "../base/element.js";
-import { SizedElement } from "../base/sizedElement.js";
-import { EditableCanvasContent } from "./editableCanvasContent.js";
+import type { Line } from "../../../line/model/line.js";
+import type { Element } from "../base/element.js";
+import type { SizedElement } from "../base/sizedElement.js";
+import type { EditableCanvasContent } from "./editableCanvasContent.js";
 
 /**
  * Moveable and resizeable element in a canvas

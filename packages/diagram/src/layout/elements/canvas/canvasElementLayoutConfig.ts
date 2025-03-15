@@ -1,14 +1,11 @@
-import { FullObject, numberType, optional, ExecutableAbstractFunctionExpression, fun } from "@hylimo/core";
-import { Size, Point, Element, CanvasElement, DefaultEditTypes } from "@hylimo/diagram-common";
+import type { FullObject, ExecutableAbstractFunctionExpression } from "@hylimo/core";
+import { numberType, optional, fun } from "@hylimo/core";
+import type { Size, Point, Element } from "@hylimo/diagram-common";
+import { CanvasElement, DefaultEditTypes } from "@hylimo/diagram-common";
 import { canvasPointType, simpleElementType } from "../../../module/base/types.js";
-import {
-    ContentCardinality,
-    HorizontalAlignment,
-    LayoutElement,
-    SizeConstraints,
-    VerticalAlignment
-} from "../../layoutElement.js";
-import { Layout } from "../../engine/layout.js";
+import type { LayoutElement, SizeConstraints } from "../../layoutElement.js";
+import { ContentCardinality, HorizontalAlignment, VerticalAlignment } from "../../layoutElement.js";
+import type { Layout } from "../../engine/layout.js";
 import { alignStyleAttributes, sizeStyleAttributes, visibilityStyleAttributes } from "../attributes.js";
 import { EditableCanvasContentLayoutConfig } from "./editableCanvasContentLayoutConfig.js";
 
@@ -18,6 +15,7 @@ import { EditableCanvasContentLayoutConfig } from "./editableCanvasContentLayout
 export class CanvasElementLayoutConfig extends EditableCanvasContentLayoutConfig {
     override isLayoutContent = false;
     override type = CanvasElement.TYPE;
+    override idGroup = "e";
 
     constructor() {
         super(

@@ -20,7 +20,7 @@ export const componentDiagramModule = InterpreterModule.create(
     DiagramModuleNames.COMPONENT_DIAGRAM,
     [DiagramModuleNames.DIAGRAM, DiagramModuleNames.DSL],
     [],
-    createDiagramModule("componentDiagram", [
+    createDiagramModule("componentDiagram", "Creates a UML component diagram", [
         defaultStylesModule,
         associationsModule,
         nonNavigableAssociationsModule,

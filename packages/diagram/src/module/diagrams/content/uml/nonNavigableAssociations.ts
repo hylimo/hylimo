@@ -1,9 +1,9 @@
-import { InterpreterModule } from "@hylimo/core";
+import { ContentModule } from "../contentModule.js";
 
 /**
  * Module providing associations without navigation operators
  */
-export const nonNavigableAssociationsModule = InterpreterModule.create(
+export const nonNavigableAssociationsModule = ContentModule.create(
     "uml/nonNavigableConnections",
     ["common/defaultMarkers"],
     [],

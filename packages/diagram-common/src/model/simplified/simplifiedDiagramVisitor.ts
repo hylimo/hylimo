@@ -1,16 +1,17 @@
 import { CanvasLayoutEngine } from "../../canvas/canvasLayoutEngine.js";
 import { Canvas } from "../elements/canvas/canvas.js";
 import { CanvasElement } from "../elements/canvas/canvasElement.js";
-import { MarkerLayoutInformation } from "../elements/canvas/marker.js";
+import type { MarkerLayoutInformation } from "../elements/canvas/marker.js";
 import { Path } from "../elements/path.js";
 import { Rect } from "../elements/rect.js";
 import { Root } from "../elements/root.js";
-import { SimplifiedCanvasElement, SimplifiedText } from "./simplifiedTypes.js";
-import { Element } from "../elements/base/element.js";
-import { TextLine, Text } from "../elements/text.js";
+import type { SimplifiedCanvasElement, SimplifiedText } from "./simplifiedTypes.js";
+import type { Element } from "../elements/base/element.js";
+import type { TextLine } from "../elements/text.js";
+import { Text } from "../elements/text.js";
 import { CanvasConnection } from "../elements/canvas/canvasConnection.js";
 import { Point } from "../../common/point.js";
-import { LayoutedElement } from "../elements/base/layoutedElement.js";
+import type { LayoutedElement } from "../elements/base/layoutedElement.js";
 import { Ellipse } from "../elements/ellipse.js";
 import { LineCap, LineJoin } from "../elements/base/colored.js";
 

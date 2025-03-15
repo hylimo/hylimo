@@ -1,5 +1,7 @@
-import { fun, id, InterpreterModule, optional, ParseableExpressions, stringType } from "@hylimo/core";
+import type { ParseableExpressions } from "@hylimo/core";
+import { fun, id, optional, stringType } from "@hylimo/core";
 import { createToolboxEdit, SCOPE } from "../../../base/dslModule.js";
+import { ContentModule } from "../contentModule.js";
 
 /**
  * SVG path to draw a stickman with a head, two arms, and two legs.<br>
@@ -11,7 +13,7 @@ const stickmanIconPath =
 /**
  * Module providing the UML 'actor' function for use-case/sequence diagrams
  */
-export const actorModule = InterpreterModule.create(
+export const actorModule = ContentModule.create(
     "uml/actor",
     [],
     [],

@@ -1,7 +1,7 @@
-import { IndexAssignmentExpression } from "../../ast/indexAssignmentExpression.js";
+import type { IndexAssignmentExpression } from "../../ast/indexAssignmentExpression.js";
 import { assertIndex } from "../../stdlib/typeHelpers.js";
-import { InterpreterContext } from "../interpreter/interpreterContext.js";
-import { LabeledValue } from "../objects/labeledValue.js";
+import type { InterpreterContext } from "../interpreter/interpreterContext.js";
+import type { LabeledValue } from "../objects/labeledValue.js";
 import { ExecutableExpression } from "./executableExpression.js";
 
 /**

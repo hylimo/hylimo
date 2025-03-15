@@ -2,7 +2,7 @@ import { FunctionExpression } from "../../ast/functionExpression.js";
 import { ExecutableConstExpression } from "../../runtime/ast/executableConstExpression.js";
 import { assign, jsFun, native } from "../../runtime/executableAstHelper.js";
 import { InterpreterModule } from "../../runtime/interpreter/interpreterModule.js";
-import { LabeledValue } from "../../runtime/objects/labeledValue.js";
+import type { LabeledValue } from "../../runtime/objects/labeledValue.js";
 import { RuntimeError } from "../../runtime/runtimeError.js";
 import { SemanticFieldNames } from "../../runtime/semanticFieldNames.js";
 import { booleanType } from "../../types/boolean.js";

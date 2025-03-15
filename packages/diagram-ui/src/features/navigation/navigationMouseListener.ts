@@ -1,7 +1,8 @@
 import { injectable } from "inversify";
 import { NavigateToSourceAction } from "@hylimo/diagram-protocol";
-import { MouseListener, SModelElementImpl } from "sprotty";
-import { Action } from "sprotty-protocol";
+import type { SModelElementImpl } from "sprotty";
+import { MouseListener } from "sprotty";
+import type { Action } from "sprotty-protocol";
 
 /**
  * Listener for navigation features

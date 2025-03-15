@@ -1,7 +1,9 @@
-import { ExecutableAbstractFunctionExpression, fun, numberType } from "@hylimo/core";
-import { CanvasAxisAlignedSegment, Point, Size, Element, DefaultEditTypes } from "@hylimo/diagram-common";
-import { LayoutElement } from "../../layoutElement.js";
-import { Layout } from "../../engine/layout.js";
+import type { ExecutableAbstractFunctionExpression } from "@hylimo/core";
+import { fun, numberType } from "@hylimo/core";
+import type { Point, Size, Element } from "@hylimo/diagram-common";
+import { CanvasAxisAlignedSegment, DefaultEditTypes } from "@hylimo/diagram-common";
+import type { LayoutElement } from "../../layoutElement.js";
+import type { Layout } from "../../engine/layout.js";
 import { CanvasConnectionSegmentLayoutConfig } from "./canvasConnectionSegmentLayoutConfig.js";
 
 /**
@@ -9,6 +11,7 @@ import { CanvasConnectionSegmentLayoutConfig } from "./canvasConnectionSegmentLa
  */
 export class CanvasAxisAlignedSegmentLayoutConfig extends CanvasConnectionSegmentLayoutConfig {
     override type = CanvasAxisAlignedSegment.TYPE;
+    override idGroup = "ca";
 
     constructor() {
         super(

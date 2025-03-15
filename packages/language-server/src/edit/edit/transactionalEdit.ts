@@ -1,8 +1,8 @@
-import { IncrementalUpdate, TransactionalAction } from "@hylimo/diagram-protocol";
-import { EditEngine } from "./editEngine.js";
+import type { IncrementalUpdate, TransactionalAction } from "@hylimo/diagram-protocol";
+import type { EditEngine } from "./editEngine.js";
 import { ReplaceEditEngine } from "./replaceEditEngine.js";
-import { Diagram } from "../../diagram/diagram.js";
-import { TextDocument, TextEdit } from "vscode-languageserver-textdocument";
+import type { Diagram } from "../../diagram/diagram.js";
+import type { TextDocument, TextEdit } from "vscode-languageserver-textdocument";
 import {
     Position,
     Range,
@@ -14,10 +14,11 @@ import {
 import { parseTemplate } from "./template.js";
 import { groupBy, IndexedModificationSpecificationEntry } from "@hylimo/diagram-common";
 import { AddEditEngine } from "./addEditEngine.js";
-import { AddEditSpecificationEntry, BaseLayoutedDiagram, EditSpecification } from "@hylimo/diagram-common";
-import { EditHandlerRegistry } from "../handlers/editHandlerRegistry.js";
+import type { AddEditSpecificationEntry, BaseLayoutedDiagram } from "@hylimo/diagram-common";
+import { EditSpecification } from "@hylimo/diagram-common";
+import type { EditHandlerRegistry } from "../handlers/editHandlerRegistry.js";
 import { AddArgEditEngine } from "./addArgEditEngine.js";
-import { Config } from "../../config.js";
+import type { Config } from "../../config.js";
 
 /**
  * Transaction edit handling transaction actions
@@ -133,45 +134,30 @@ export class TransactionalEdit {
         lastApplied: TransactionalAction | undefined,
         newest: TransactionalAction
     ): IncrementalUpdate[] {
-        if (!this.checkIfPredictionsAreValid(layoutedDiagram)) {
-            return [];
-        }
         const res: IncrementalUpdate[] = [];
-        this.action.edits.forEach((edit, index) => {
-            const elements = edit.elements!.map((id) => layoutedDiagram.elementLookup[id]);
+        for (let i = 0; i < this.action.edits.length; i++) {
+            const edit = this.action.edits[i];
+            const elements = edit
+                .elements!.map((id) => layoutedDiagram.elementLookup[id])
+                .filter((element) => element != undefined);
             for (const type of edit.types!) {
                 const handler = this.registry.getEditHandler(type);
                 if (handler != undefined) {
-                    res.push(
-                        ...handler.predictActionDiff(
-                            lastApplied?.edits?.[index]?.values,
-                            newest.edits[index].values,
-                            elements
-                        )
+                    const prediction = handler.predictActionDiff(
+                        lastApplied?.edits?.[i]?.values,
+                        newest.edits[i].values,
+                        elements,
+                        layoutedDiagram.elementLookup
                     );
+                    if (prediction != undefined) {
+                        res.push(...prediction);
+                    } else {
+                        return [];
+                    }
                 }
             }
-        });
-        return res;
-    }
-
-    /**
-     * Checks if predictions are still valid
-     * Predictions are not valid if the topology of the diagram has changed compared to the initial diagram
-     *
-     * @param layoutedDiagram the layouted diagram to check
-     * @returns true if predictions are still valid
-     */
-    private checkIfPredictionsAreValid(layoutedDiagram: BaseLayoutedDiagram) {
-        let predictionsValid: boolean = true;
-        const elements = [...Object.values(layoutedDiagram.elementLookup)];
-        if (
-            elements.length !== this.initialDiagramElementLookup.size ||
-            elements.some((element) => this.initialDiagramElementLookup.get(element.id) !== element.type)
-        ) {
-            predictionsValid = false;
         }
-        return predictionsValid;
+        return res;
     }
 
     /**

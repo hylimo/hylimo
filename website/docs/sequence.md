@@ -62,8 +62,7 @@ Of course, once you want to finish your diagram, we recommend to turn it off aga
 :::info
 
 ```hylimo
-sequenceDiagram {
-    enableDebugging = true
+sequenceDiagram(enableDebugging = true) {
     instance("Bob")
     event("startPayment")
     event("stopPayment")
@@ -81,8 +80,7 @@ Nevertheless, in cases where you want an explicit distance to the predecessor, y
 :::info
 
 ```hylimo
-sequenceDiagram {
-    enableDebugging = true
+sequenceDiagram(enableDebugging = true) {
     instance("Bob")
     event("startPayment")
     event("stopPayment", 100)
@@ -120,8 +118,7 @@ To achieve the time delta in spite of these inherent limitations, use the notati
 :::info
 
 ```hylimo
-sequenceDiagram {
-    enableDebugging = true
+sequenceDiagram(enableDebugging = true) {
     instance("Bob")
     event("buy")
     event("stop")
@@ -144,8 +141,7 @@ There is a bunch of things you can do with participants, depending on if there i
 :::info
 
 ```hylimo
-sequenceDiagram {
-    enableDebugging = true
+sequenceDiagram(enableDebugging = true) {
     instance("A")
     event("smth")
     instance("B")
@@ -159,8 +155,7 @@ sequenceDiagram {
 :::info
 
 ```hylimo
-sequenceDiagram {
-    enableDebugging = true
+sequenceDiagram(enableDebugging = true) {
     instance("A")
     instance("B")
     event("E1")
@@ -194,8 +189,7 @@ sequenceDiagram {
 :::info
 
 ```hylimo
-sequenceDiagram {
-    enableDebugging = true
+sequenceDiagram(enableDebugging = true) {
     instance("A")
     instance("B")
     event("E1")
@@ -267,9 +261,9 @@ sequenceDiagram {
 
 :::
 
-## Global variables within sequence diagrams
+## Config properties
 
-The following global variables are available and modifiable within sequence diagrams:
+The following config properties are available for sequence diagrams:
 |Variable|Meaning|Default value (in pixels)|Comment|
 |--------|-------|-------------------------|-------|
 |`activityShift`| How far on the x axis subsequent simultaneously active activity indicators on the same participant are shifted | 3 |-|
@@ -817,8 +811,7 @@ Here is an example for a webshop order:
 :::info
 
 ```hylimo
-sequenceDiagram {
-    enableDebugging = true
+sequenceDiagram(enableDebugging = true) {
     bob = instance("user")
     instance("ourShop", "Shop")
     instance("Cart")

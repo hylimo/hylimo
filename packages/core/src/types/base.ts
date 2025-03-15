@@ -1,5 +1,5 @@
-import { InterpreterContext } from "../runtime/interpreter/interpreterContext.js";
-import { BaseObject } from "../runtime/objects/baseObject.js";
+import type { InterpreterContext } from "../runtime/interpreter/interpreterContext.js";
+import type { BaseObject } from "../runtime/objects/baseObject.js";
 
 /**
  * The result of the match function, either true or an object with the current path and reson why it did not match

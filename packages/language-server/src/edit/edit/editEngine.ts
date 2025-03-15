@@ -1,4 +1,4 @@
-import { ParsedTemplateEntry } from "./template.js";
+import type { ParsedTemplateEntry } from "./template.js";
 
 /**
  * Base class for add and replace edit engines

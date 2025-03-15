@@ -1,6 +1,6 @@
 import { CanvasElement, DefaultEditTypes } from "@hylimo/diagram-common";
-import { IncrementalUpdate, ResizeEdit } from "@hylimo/diagram-protocol";
-import { EditHandler } from "./editHandler.js";
+import type { IncrementalUpdate, ResizeEdit } from "@hylimo/diagram-protocol";
+import type { EditHandler } from "./editHandler.js";
 
 /**
  * Handler for resize width edits
@@ -17,7 +17,7 @@ export const resizeWidth: EditHandler<ResizeEdit> = {
                     changes: {
                         width: newest.width,
                         // scale the relative x position according to the new width
-                        x: (newest.width! / element.width) * element.dx
+                        dx: (newest.width! / element.width) * element.dx
                     }
                 });
             }

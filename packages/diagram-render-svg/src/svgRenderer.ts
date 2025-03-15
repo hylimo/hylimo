@@ -1,14 +1,5 @@
-import {
-    Root,
-    Rect,
-    Path,
-    Canvas,
-    Element,
-    convertFontsToCssStyle,
-    Ellipse,
-    SimplifiedText,
-    FontData
-} from "@hylimo/diagram-common";
+import type { Root, Rect, Path, Canvas, Element, Ellipse, SimplifiedText, FontData } from "@hylimo/diagram-common";
+import { convertFontsToCssStyle } from "@hylimo/diagram-common";
 import { SimplifiedDiagramVisitor } from "@hylimo/diagram-common";
 import {
     extractFillAttributes,
@@ -16,11 +7,11 @@ import {
     extractOutlinedShapeAttributes,
     extractShapeStyleAttributes
 } from "./attributeHelpers.js";
-import { SimplifiedCanvasElement } from "@hylimo/diagram-common";
+import type { SimplifiedCanvasElement } from "@hylimo/diagram-common";
 import { create } from "xmlbuilder2";
-import { XMLBuilder } from "xmlbuilder2/lib/interfaces.js";
-import { create as createFont, Font } from "fontkit";
-import { Buffer } from "buffer";
+import type { XMLBuilder } from "xmlbuilder2/lib/interfaces.js";
+import type { Font } from "fontkit";
+import { createFont } from "@hylimo/diagram";
 
 /**
  * Renderer which renders a diagram to svg
@@ -129,8 +120,7 @@ class SVGRendererContext {
             if (!fontData) {
                 throw new Error(`Font with family ${fontFamily} not found`);
             }
-            const buffer = Buffer.from(fontData.data, "base64");
-            this.fonts.set(fontFamily, createFont(buffer) as Font);
+            this.fonts.set(fontFamily, createFont(fontData.data));
         }
         return this.fonts.get(fontFamily)!;
     }
@@ -235,7 +225,7 @@ class SVGDiagramVisitor extends SimplifiedDiagramVisitor<SVGRendererContext, SVG
         let offset = 0;
         const paths: string[] = [];
         for (const glyph of glyphRun.glyphs) {
-            if (!/^\s*$/.test(String.fromCodePoint(...glyph.codePoints)) && element.fill != undefined) {
+            if (element.fill != undefined) {
                 paths.push(glyph.path.translate(offset, 0).toSVG());
             }
             offset += glyph.advanceWidth;

@@ -1,7 +1,8 @@
 import { SChildElementImpl } from "sprotty";
-import { EditSpecification, Element } from "@hylimo/diagram-common";
-import { SRoot } from "./sRoot.js";
-import { inverse, compose, Matrix } from "transformation-matrix";
+import type { EditSpecification, Element } from "@hylimo/diagram-common";
+import type { SRoot } from "./sRoot.js";
+import type { Matrix } from "transformation-matrix";
+import { inverse, compose } from "transformation-matrix";
 
 /**
  * Base class for all elements
@@ -19,7 +20,7 @@ export abstract class SElement extends SChildElementImpl implements Element {
     }
 
     /**
-     * Creats a cached property on this element
+     * Creates a cached property on this element
      *
      * @param name the name of the property
      * @param initializer initializer for the property

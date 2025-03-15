@@ -1,6 +1,6 @@
-import { Action } from "sprotty-protocol";
-import { MoveHandler } from "./moveHandler.js";
-import { SRoot } from "../../model/sRoot.js";
+import type { Action } from "sprotty-protocol";
+import type { MoveHandler } from "./moveHandler.js";
+import type { SRoot } from "../../model/sRoot.js";
 
 /**
  * Action to start a transactional move operation

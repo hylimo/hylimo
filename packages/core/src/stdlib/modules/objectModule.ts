@@ -3,7 +3,7 @@ import { InterpreterModule } from "../../runtime/interpreter/interpreterModule.j
 import { assign, fun, id, jsFun, native, num, str } from "../../runtime/executableAstHelper.js";
 import { SemanticFieldNames } from "../../runtime/semanticFieldNames.js";
 import { assertFunction, assertIndex, assertNumber, assertObject } from "../typeHelpers.js";
-import { LabeledValue } from "../../runtime/objects/labeledValue.js";
+import type { LabeledValue } from "../../runtime/objects/labeledValue.js";
 import { generateArgs } from "../../runtime/objects/generateArgs.js";
 import { or } from "../../types/or.js";
 import { stringType } from "../../types/string.js";

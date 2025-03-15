@@ -1,13 +1,11 @@
-import {
-    CanvasAxisAlignedSegment,
-    DefaultEditTypes,
-    EditSpecification,
-    SegmentLayoutInformation
-} from "@hylimo/diagram-common";
-import { VNode } from "snabbdom";
+import type { CanvasAxisAlignedSegment, SegmentLayoutInformation } from "@hylimo/diagram-common";
+import { DefaultEditTypes, EditSpecification } from "@hylimo/diagram-common";
+import type { VNode } from "snabbdom";
 import { svg } from "sprotty";
 import { SCanvasConnectionSegment } from "./sCanvasConnectionSegment.js";
-import { LinearAnimatable } from "../../features/animation/model.js";
+import type { LinearAnimatable } from "../../features/animation/model.js";
+import type { SCanvasConnection } from "./sCanvasConnection.js";
+import { computeResizeIconOffset } from "../../features/cursor/resizeIcon.js";
 
 /**
  * Animated fields for CanvasAxisAlignedSegment
@@ -45,21 +43,26 @@ export class SCanvasAxisAlignedSegment
         return [this.end];
     }
 
-    override generateControlViewElements(layout: SegmentLayoutInformation): VNode[] {
+    override generateControlViewElements(
+        model: Readonly<SCanvasConnection>,
+        layout: SegmentLayoutInformation
+    ): VNode[] {
         if (DefaultEditTypes.AXIS_ALIGNED_SEGMENT_POS in this.edits) {
+            const start = layout.start;
+            const end = layout.end;
             if (this.pos >= 0) {
-                const x = layout.start.x + this.pos * (layout.end.x - layout.start.x);
+                const x = start.x + this.pos * (end.x - start.x);
                 return [
-                    this.generateVerticalControlLine(x, layout.start.y, layout.end.y, layout.start.x, layout.end.x),
-                    this.generateHorizontalControlLine(layout.start.y, layout.start.x, x, layout.start.y, layout.end.y),
-                    this.generateHorizontalControlLine(layout.end.y, x, layout.end.x, layout.start.y, layout.end.y)
+                    this.generateVerticalControlLine(model, x, start.y, end.y, start.x, end.x),
+                    this.generateHorizontalControlLine(model, start.y, start.x, x, start.y, end.y),
+                    this.generateHorizontalControlLine(model, end.y, x, end.x, start.y, end.y)
                 ];
             } else {
-                const y = layout.end.y + this.pos * (layout.end.y - layout.start.y);
+                const y = end.y + this.pos * (end.y - start.y);
                 return [
-                    this.generateHorizontalControlLine(y, layout.start.x, layout.end.x, layout.start.y, layout.end.y),
-                    this.generateVerticalControlLine(layout.start.x, layout.start.y, y, layout.start.x, layout.end.x),
-                    this.generateVerticalControlLine(layout.end.x, y, layout.end.y, layout.start.x, layout.end.x)
+                    this.generateHorizontalControlLine(model, y, start.x, end.x, start.y, end.y),
+                    this.generateVerticalControlLine(model, start.x, start.y, y, start.x, end.x),
+                    this.generateVerticalControlLine(model, end.x, y, end.y, start.x, end.x)
                 ];
             }
         } else {
@@ -70,6 +73,7 @@ export class SCanvasAxisAlignedSegment
     /**
      * Generates a vertical control line
      *
+     * @param model the parent canvas connection
      * @param x the x position of the line
      * @param y1 the y start position of the line
      * @param y2 the y end position of the line
@@ -77,8 +81,15 @@ export class SCanvasAxisAlignedSegment
      * @param endX the x end position of the segment
      * @returns the generated line
      */
-    private generateVerticalControlLine(x: number, y1: number, y2: number, startX: number, endX: number): VNode {
-        return svg("line", {
+    private generateVerticalControlLine(
+        model: Readonly<SCanvasConnection>,
+        x: number,
+        y1: number,
+        y2: number,
+        startX: number,
+        endX: number
+    ): VNode {
+        return svg("line.resize", {
             attrs: {
                 x1: x,
                 y1,
@@ -90,14 +101,16 @@ export class SCanvasAxisAlignedSegment
                 "data-id": this.id
             },
             class: {
-                resize: true,
-                [SCanvasAxisAlignedSegment.SEGMENT_EDIT_CLASS_Y]: true
+                [SCanvasAxisAlignedSegment.SEGMENT_EDIT_CLASS_Y]: true,
+                [`cursor-resize-${computeResizeIconOffset(model.parent, 3 * 45)}`]: true
             }
         });
     }
 
     /**
      * Generates a horizontal control line
+     *
+     * @param model the parent canvas connection
      * @param y the y position of the line
      * @param x1 the x start position of the line
      * @param x2 the x end position of the line
@@ -105,8 +118,15 @@ export class SCanvasAxisAlignedSegment
      * @param endY the y end position of the segment
      * @returns the generated line
      */
-    private generateHorizontalControlLine(y: number, x1: number, x2: number, startY: number, endY: number): VNode {
-        return svg("line", {
+    private generateHorizontalControlLine(
+        model: Readonly<SCanvasConnection>,
+        y: number,
+        x1: number,
+        x2: number,
+        startY: number,
+        endY: number
+    ): VNode {
+        return svg("line.resize", {
             attrs: {
                 x1,
                 y1: y,
@@ -118,8 +138,8 @@ export class SCanvasAxisAlignedSegment
                 "data-id": this.id
             },
             class: {
-                resize: true,
-                [SCanvasAxisAlignedSegment.SEGMENT_EDIT_CLASS_X]: true
+                [SCanvasAxisAlignedSegment.SEGMENT_EDIT_CLASS_X]: true,
+                [`cursor-resize-${computeResizeIconOffset(model.parent, 45)}`]: true
             }
         });
     }

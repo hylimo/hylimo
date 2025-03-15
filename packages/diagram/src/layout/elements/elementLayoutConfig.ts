@@ -1,16 +1,11 @@
-import {
-    ExecutableAbstractFunctionExpression,
-    FullObject,
-    Type,
-    fun,
-    listType,
-    optional,
-    stringType
-} from "@hylimo/core";
-import { ArcSegment, Element, Line, LineSegment, Point, Size } from "@hylimo/diagram-common";
-import { LayoutElement, LayoutConfig, SizeConstraints, AttributeConfig, ContentCardinality } from "../layoutElement.js";
-import { Layout } from "../engine/layout.js";
-import { Matrix } from "transformation-matrix";
+import type { ExecutableAbstractFunctionExpression, FullObject, Type } from "@hylimo/core";
+import { fun, listType, optional, stringType } from "@hylimo/core";
+import type { Element, Line, Point, Size } from "@hylimo/diagram-common";
+import { ArcSegment, LineSegment } from "@hylimo/diagram-common";
+import type { LayoutElement, LayoutConfig, SizeConstraints, AttributeConfig } from "../layoutElement.js";
+import { ContentCardinality } from "../layoutElement.js";
+import type { Layout } from "../engine/layout.js";
+import type { Matrix } from "transformation-matrix";
 
 /**
  * Base class for all layout element configs
@@ -41,6 +36,12 @@ export abstract class ElementLayoutConfig implements LayoutConfig {
      * What type of element is supported
      */
     abstract readonly type: string;
+
+    /**
+     * A string prefix which uses a specific group of ids for the element
+     * To keep short ids, should be short / a single character
+     */
+    readonly idGroup: string = "";
 
     /**
      * Assigns type and styleAttributes
@@ -157,7 +158,8 @@ export abstract class ElementLayoutConfig implements LayoutConfig {
         ];
         return {
             start: startPos,
-            segments
+            segments,
+            isClosed: true
         };
     }
 

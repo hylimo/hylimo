@@ -13,11 +13,12 @@
         "build": "rollup -c"
     },
     "dependencies": {
-        "harfbuzzjs": "^0.4.4"
+        "harfbuzzjs": "^0.4.5"
     },
     "devDependencies": {
-        "@rollup/plugin-node-resolve": "^16.0.0",
+        "@rollup/plugin-node-resolve": "^16.0.1",
         "@rollup/plugin-typescript": "^12.1.2",
-        "@rollup/plugin-wasm": "^6.2.2"
+        "@rollup/plugin-wasm": "^6.2.2",
+        "glob": "^11.0.1"
     }
 }

@@ -1,5 +1,5 @@
-import { SplitCanvasBezierSegmentEdit } from "@hylimo/diagram-protocol";
-import { EditHandler } from "./editHandler.js";
+import type { SplitCanvasBezierSegmentEdit } from "@hylimo/diagram-protocol";
+import type { EditHandler } from "./editHandler.js";
 import { DefaultEditTypes } from "@hylimo/diagram-common";
 
 /**
@@ -9,7 +9,7 @@ export const splitCanvasBezierSegmentHandler: EditHandler<SplitCanvasBezierSegme
     type: DefaultEditTypes.SPLIT_CANVAS_BEZIER_SEGMENT,
 
     predictActionDiff() {
-        return [];
+        return undefined;
     },
 
     transformEdit(edit, config) {

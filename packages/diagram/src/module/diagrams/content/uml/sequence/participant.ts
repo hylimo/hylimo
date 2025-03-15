@@ -1,13 +1,14 @@
-import { fun, functionType, id, InterpreterModule, numberType, optional, stringType } from "@hylimo/core";
+import { fun, functionType, id, numberType, optional, stringType } from "@hylimo/core";
 import { SCOPE } from "../../../../base/dslModule.js";
 import { eventType, participantType } from "./types.js";
 import { canvasContentType } from "../../../../base/types.js";
+import { ContentModule } from "../../contentModule.js";
 
 /**
  * Module providing the shared logic for all sorts of sequence diagram participants - instances, actors, …<br>
  * Note that the caller is responsible for creating the element and registering the element under the given name beforehand.
  */
-export const participantModule = InterpreterModule.create(
+export const participantModule = ContentModule.create(
     "uml/sequence/participant",
     ["uml/sequence/defaultValues"],
     [],
@@ -39,7 +40,7 @@ export const participantModule = InterpreterModule.create(
                                 below.x
                             } {
                                 if(previous != null) {
-                                    previous.x + scope.participantDistance
+                                    previous.x + scope.internal.config.participantDistance
                                 } {
                                     0
                                 }
@@ -54,7 +55,7 @@ export const participantModule = InterpreterModule.create(
 
                             // Create the lifeline of this participantElement now so that it will always be rendered behind everything else
                             this.bottomcenter = scope.lpos(participantElement, 0.25)
-                            participantElement.lifeline = scope[".."](bottomcenter, scope.rpos(bottomcenter, 0, scope.margin))
+                            participantElement.lifeline = scope[".."](bottomcenter, scope.rpos(bottomcenter, 0, scope.internal.config.margin))
                             participantElement.activeActivityIndicators = list() // Needed for the activity indicator autolayouting
 
                             scope.internal.sequenceDiagramParticipants += participantElement
@@ -197,7 +198,7 @@ export const participantModule = InterpreterModule.create(
             fun(
                 `
                     (participant) = args
-                    crossSize = args.crossSize ?? scope.destroyingCrossSize
+                    crossSize = args.crossSize ?? scope.internal.config.destroyingCrossSize
 
                     if(participant.alive != true) {
                         scope.error("\${participant.name} has already been destroyed")

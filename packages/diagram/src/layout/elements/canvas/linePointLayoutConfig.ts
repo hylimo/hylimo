@@ -1,25 +1,9 @@
-import {
-    assertNumber,
-    assertObject,
-    ExecutableAbstractFunctionExpression,
-    FullObject,
-    fun,
-    isNumber,
-    numberType,
-    objectType,
-    or
-} from "@hylimo/core";
-import {
-    Size,
-    Element,
-    LinePoint,
-    Point,
-    CanvasConnection,
-    CanvasElement,
-    DefaultEditTypes
-} from "@hylimo/diagram-common";
-import { LayoutElement } from "../../layoutElement.js";
-import { Layout } from "../../engine/layout.js";
+import type { ExecutableAbstractFunctionExpression, FullObject } from "@hylimo/core";
+import { assertNumber, assertObject, fun, isNumber, numberType, objectType, or } from "@hylimo/core";
+import type { Size, Element, Point } from "@hylimo/diagram-common";
+import { LinePoint, CanvasConnection, CanvasElement, DefaultEditTypes } from "@hylimo/diagram-common";
+import type { LayoutElement } from "../../layoutElement.js";
+import type { Layout } from "../../engine/layout.js";
 import { CanvasPointLayoutConfig } from "./canvasPointLayoutConfig.js";
 import { elementType } from "../../../module/base/types.js";
 
@@ -41,6 +25,7 @@ export class LinePointLayoutConfig extends CanvasPointLayoutConfig {
     );
 
     override type = LinePoint.TYPE;
+    override idGroup = "pl";
 
     constructor() {
         super(

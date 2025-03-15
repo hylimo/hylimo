@@ -7,8 +7,9 @@ import {
     ToolboxEditPredictionRequestAction
 } from "@hylimo/diagram-protocol";
 import { injectable } from "inversify";
-import { ActionHandlerRegistry, DiagramServerProxy as SprottyDiagramServerProxy } from "sprotty";
-import { Action } from "sprotty-protocol";
+import type { ActionHandlerRegistry } from "sprotty";
+import { DiagramServerProxy as SprottyDiagramServerProxy } from "sprotty";
+import type { Action } from "sprotty-protocol";
 
 /**
  * DiagramServerProxy which handles additional commands

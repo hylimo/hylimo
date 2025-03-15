@@ -1,7 +1,7 @@
-import { Marker } from "@hylimo/diagram-common";
+import type { Marker } from "@hylimo/diagram-common";
 import { SElement } from "../sElement.js";
-import { Selectable } from "sprotty-protocol";
-import { SCanvasConnection } from "./sCanvasConnection.js";
+import type { Selectable } from "sprotty-protocol";
+import type { SCanvasConnection } from "./sCanvasConnection.js";
 
 /**
  * Model for Marker

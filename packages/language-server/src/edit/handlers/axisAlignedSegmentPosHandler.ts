@@ -1,6 +1,6 @@
 import { CanvasAxisAlignedSegment, DefaultEditTypes } from "@hylimo/diagram-common";
-import { AxisAlignedSegmentEdit, IncrementalUpdate } from "@hylimo/diagram-protocol";
-import { EditHandler } from "./editHandler.js";
+import type { AxisAlignedSegmentEdit, IncrementalUpdate } from "@hylimo/diagram-protocol";
+import type { EditHandler } from "./editHandler.js";
 
 /**
  * Handler for axis aligned segment pos edits

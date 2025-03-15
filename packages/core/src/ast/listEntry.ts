@@ -1,6 +1,7 @@
-import { InterpreterContext } from "../runtime/interpreter/interpreterContext.js";
-import { WrapperObject, WrapperObjectFieldRetriever } from "../runtime/objects/wrapperObject.js";
-import { Expression } from "./expression.js";
+import type { InterpreterContext } from "../runtime/interpreter/interpreterContext.js";
+import type { WrapperObject } from "../runtime/objects/wrapperObject.js";
+import { type WrapperObjectFieldRetriever } from "../runtime/objects/wrapperObject.js";
+import type { Expression } from "./expression.js";
 
 /**
  * A list entry either for function invokation or object expression

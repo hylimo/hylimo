@@ -1,5 +1,5 @@
-import { Range } from "@hylimo/core";
-import { CompletionItem as LspCompletionItem } from "vscode-languageserver";
+import type { Range } from "@hylimo/core";
+import type { CompletionItem as LspCompletionItem } from "vscode-languageserver";
 
 /**
  * Completion item with a text edit based on an AST range (instead of an LSP range)

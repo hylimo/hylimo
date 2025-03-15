@@ -1,7 +1,10 @@
-import { CanvasElement, Line, Point } from "@hylimo/diagram-common";
-import { LinearAnimatable } from "../../features/animation/model.js";
-import { PositionProvider } from "../../features/layout/positionProvider.js";
+import type { CanvasElement, Line } from "@hylimo/diagram-common";
+import { Bounds, Point } from "@hylimo/diagram-common";
+import type { LinearAnimatable } from "../../features/animation/model.js";
+import type { PositionProvider } from "../../features/layout/positionProvider.js";
 import { SCanvasContent } from "./sCanvasContent.js";
+import type { BoxSelectable } from "../../features/select/boxSelectFeature.js";
+import { applyToPoint } from "transformation-matrix";
 
 /**
  * Anbimated fields for SCanvasElement
@@ -11,7 +14,10 @@ const canvasElementAnimatedFields = new Set(["width", "height", "dx", "dy", "rot
 /**
  * Model for CanvasElement
  */
-export class SCanvasElement extends SCanvasContent implements CanvasElement, PositionProvider, LinearAnimatable {
+export class SCanvasElement
+    extends SCanvasContent
+    implements CanvasElement, PositionProvider, LinearAnimatable, BoxSelectable
+{
     override type!: typeof CanvasElement.TYPE;
     /**
      * The width of the element
@@ -69,5 +75,19 @@ export class SCanvasElement extends SCanvasContent implements CanvasElement, Pos
         } else {
             return [];
         }
+    }
+
+    isIncluded(bounds: Bounds): boolean {
+        const matrix = this.root.layoutEngine.localToAncestor(this.id, this.root.id);
+        if (!Bounds.contains(bounds, applyToPoint(matrix, { x: this.dx, y: this.dy }))) {
+            return false;
+        }
+        if (!Bounds.contains(bounds, applyToPoint(matrix, { x: this.dx + this.width, y: this.dy }))) {
+            return false;
+        }
+        if (!Bounds.contains(bounds, applyToPoint(matrix, { x: this.dx, y: this.dy + this.height }))) {
+            return false;
+        }
+        return Bounds.contains(bounds, applyToPoint(matrix, { x: this.dx + this.width, y: this.dy + this.height }));
     }
 }

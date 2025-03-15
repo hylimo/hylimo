@@ -2,7 +2,7 @@
 // @ts-nocheck
 // fork from foliojs/pdfkit until they update fontkit to 2.0.x
 // only changes the encode method used during subsetting
-import { Buffer } from "buffer";
+import { Buffer } from "buffer/";
 
 const toHex = function (num) {
     return `0000${num.toString(16)}`.slice(-4);

@@ -14,10 +14,11 @@
     },
     "dependencies": {
         "@hylimo/diagram": "^1.1.2",
+        "@hylimo/diagram-common": "^1.1.2",
         "@hylimo/diagram-render-svg": "^1.1.2",
         "pdfkit": "^0.16.0"
     },
     "devDependencies": {
-        "@types/pdfkit": "^0.13.8"
+        "@types/pdfkit": "^0.13.9"
     }
 }

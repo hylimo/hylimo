@@ -1,6 +1,6 @@
-import { Matrix } from "transformation-matrix";
-import { Point } from "../../common/point.js";
-import { Segment } from "./segment.js";
+import type { Matrix } from "transformation-matrix";
+import type { Point } from "../../common/point.js";
+import type { Segment } from "./segment.js";
 
 /**
  * A line beginning at a start point, and consisting of a set of segments.
@@ -16,6 +16,10 @@ export interface Line {
      * The segments of the line
      */
     segments: Segment[];
+    /**
+     * Whether the line is closed or not
+     */
+    isClosed: boolean;
 }
 
 /**

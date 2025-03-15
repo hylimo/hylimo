@@ -1,7 +1,8 @@
 import { DefaultEditTypes } from "@hylimo/diagram-common";
-import { Edit, ResizeEdit } from "@hylimo/diagram-protocol";
-import { Matrix } from "transformation-matrix";
+import type { Edit, ResizeEdit } from "@hylimo/diagram-protocol";
+import type { Matrix } from "transformation-matrix";
 import { MoveHandler } from "../../move/moveHandler.js";
+import type { ResizeMoveCursor } from "../../cursor/cursor.js";
 
 /**
  * Elements with an optional original width and height.
@@ -29,6 +30,7 @@ export class ResizeHandler extends MoveHandler {
      * @param originalHeight the original height of the primary resize element, used to calculate the resize factor.
      * @param groupedElements the elements grouped by size.
      * @param transformationMatrix the transformation matrix to apply to obtain the relative position.
+     * @param moveCursor the cursor to use while resizing.
      */
     constructor(
         private readonly scaleX: number | undefined,
@@ -36,12 +38,13 @@ export class ResizeHandler extends MoveHandler {
         private readonly originalWidth: number,
         private readonly originalHeight: number,
         private readonly groupedElements: ElementsGroupedBySize[],
-        transformationMatrix: Matrix
+        transformationMatrix: Matrix,
+        moveCursor: ResizeMoveCursor | undefined
     ) {
-        super(transformationMatrix);
+        super(transformationMatrix, moveCursor);
     }
 
-    override generateEdits(x: number, y: number): Edit[] {
+    override generateEdits(x: number, y: number, event: MouseEvent): Edit[] {
         let factorX: number | undefined = undefined;
         let factorY: number | undefined = undefined;
 
@@ -50,6 +53,11 @@ export class ResizeHandler extends MoveHandler {
         }
         if (this.scaleY !== undefined) {
             factorY = Math.abs((y * this.scaleY + this.originalHeight) / this.originalHeight);
+        }
+        if (event.shiftKey && factorX != undefined && factorY != undefined) {
+            const uniformFactor = Math.max(factorX, factorY);
+            factorX = uniformFactor;
+            factorY = uniformFactor;
         }
         const edits: Edit[] = [];
         for (const group of this.groupedElements) {

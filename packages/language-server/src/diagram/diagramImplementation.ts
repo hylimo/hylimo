@@ -1,5 +1,5 @@
-import { CompletionItem, Diagnostic, Position, Range } from "vscode-languageserver";
-import { DiagramConfig, Root } from "@hylimo/diagram-common";
+import type { CompletionItem, Diagnostic, Position, Range } from "vscode-languageserver";
+import type { DiagramConfig, Root } from "@hylimo/diagram-common";
 
 /**
  * Result of a diagram update

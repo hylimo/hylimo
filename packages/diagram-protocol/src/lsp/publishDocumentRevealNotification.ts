@@ -1,4 +1,5 @@
-import { DocumentUri, NotificationType, Range } from "vscode-languageserver-protocol";
+import type { DocumentUri, Range } from "vscode-languageserver-protocol";
+import { NotificationType } from "vscode-languageserver-protocol";
 
 /**
  * Namespace for the publish document reveal notification

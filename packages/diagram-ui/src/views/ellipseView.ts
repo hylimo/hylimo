@@ -1,7 +1,8 @@
 import { injectable } from "inversify";
-import { VNode, Attrs } from "snabbdom";
-import { IViewArgs, RenderingContext, IView, svg } from "sprotty";
-import { SEllipse } from "../model/sEllipse.js";
+import type { VNode, Attrs } from "snabbdom";
+import type { IViewArgs, RenderingContext, IView } from "sprotty";
+import { svg } from "sprotty";
+import type { SEllipse } from "../model/sEllipse.js";
 import { extractShapeStyleAttributes } from "@hylimo/diagram-render-svg";
 
 /**

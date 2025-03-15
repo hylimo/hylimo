@@ -1,5 +1,6 @@
-import { fun, id, InterpreterModule, numberType, optional } from "@hylimo/core";
+import { fun, id, numberType, optional } from "@hylimo/core";
 import { SCOPE } from "../../../../base/dslModule.js";
+import { ContentModule } from "../../contentModule.js";
 
 /**
  * Lost and found message are synonyms, so should use the same function.<br>
@@ -10,8 +11,8 @@ import { SCOPE } from "../../../../base/dslModule.js";
  */
 function message(type: string): string {
     return `
-            distance = args.distance ?? scope.externalMessageDistance
-            diameter = args.diameter ?? scope.externalMessageDiameter
+            distance = args.distance ?? scope.internal.config.externalMessageDistance
+            diameter = args.diameter ?? scope.internal.config.externalMessageDiameter
             dot = canvasElement(
                 content = ellipse(class = list("${type}-message")),
                 width = diameter,
@@ -34,7 +35,7 @@ function message(type: string): string {
  * - they store the line pointing down
  * - they receive a default position based on the previous elements
  */
-export const lostFoundMessageModule = InterpreterModule.create(
+export const lostFoundMessageModule = ContentModule.create(
     "uml/sequence/lostFound",
     ["uml/sequence/defaultValues"],
     [],

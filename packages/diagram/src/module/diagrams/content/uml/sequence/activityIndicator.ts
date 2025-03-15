@@ -1,13 +1,14 @@
-import { fun, id, InterpreterModule, numberType, optional } from "@hylimo/core";
+import { fun, id, numberType, optional } from "@hylimo/core";
 import { SCOPE } from "../../../../base/dslModule.js";
 import { participantType } from "./types.js";
+import { ContentModule } from "../../contentModule.js";
 
 /**
  * Defines an activity indicator.<br>
  * An activity indicator is the "white" rectangle on top of a activityIndicator.
  * Multiple indicators can be active simultaneously, in which case they are offset from each other by 'activityShift' on the x-axis (or whatever you passed yourself).
  */
-export const activityIndicatorModule = InterpreterModule.create(
+export const activityIndicatorModule = ContentModule.create(
     "uml/sequence/activityIndicator",
     ["uml/sequence/defaultValues"],
     [],
@@ -32,7 +33,7 @@ export const activityIndicatorModule = InterpreterModule.create(
                     }
 
                     activityIndicators = participant.activeActivityIndicators
-                    defaultLineshift = scope.activityShift
+                    defaultLineshift = scope.internal.config.activityShift
                     xShift = args.xShift
 
                     // xShift is relative to the most recent activity indicator, not to the root one
@@ -53,10 +54,10 @@ export const activityIndicatorModule = InterpreterModule.create(
                     // However, to be UML compliant, it must also be possible to start it at a corner
                     // Additionally, since it should be ABOVE the event, we must negate the argument
                     yStart = args.yOffset
-                    yStart = -1 * if (yStart != null) { yStart } { scope.margin }
-                    height = scope.margin - yStart // make the pillar a bit more aesthetically pleasing by adding a bit of margin on both sides - at least if the user wants it (yStart is supposed to be negative, so add it on top of the height)
+                    yStart = -1 * if (yStart != null) { yStart } { scope.internal.config.margin }
+                    height = scope.internal.config.margin - yStart // make the pillar a bit more aesthetically pleasing by adding a bit of margin on both sides - at least if the user wants it (yStart is supposed to be negative, so add it on top of the height)
 
-                    width = scope.activityWidth
+                    width = scope.internal.config.activityWidth
 
                     activityIndicatorElement = canvasElement(
                         content = rect(class = list("activity-indicator")),
@@ -73,7 +74,7 @@ export const activityIndicatorModule = InterpreterModule.create(
                     // - start: the (x,y) coordinate of the given event-actor combi
                     // - x=-0.5*activity indicatorwidth + xShift: In Hylimo coordinates, x is the upper left corner but we want it to be the center of the x-axis instead (unless there are multiple activity indicators simultaneously, then we want to offset them)
                     // - y=-margin: The line should not start at the event, but [margin] ahead  
-                    activityIndicatorElement.pos = scope.apos(participant.x - (0.5 * scope.activityWidth) + xShift, event.y + yStart)
+                    activityIndicatorElement.pos = scope.apos(participant.x - (0.5 * scope.internal.config.activityWidth) + xShift, event.y + yStart)
 
                     scope.internal.registerCanvasElement(activityIndicatorElement, args, args.self)
                     participant.activeActivityIndicators += activityIndicatorElement
@@ -84,7 +85,7 @@ export const activityIndicatorModule = InterpreterModule.create(
 
                     // When in debugging mode, visualize the coordinates of the new activity indicator here - they cannot be captured by 'event(...)' as this indicator didn't exist back then: 'event(...);activate(...)'
                     // Also works with multiple indicators as then the right point will simply be hidden behind the new indicator
-                    if(scope.enableDebugging) {
+                    if(scope.internal.config.enableDebugging) {
                         // We must offset the points by half their width as the indicator has been centered
                         _left = canvasElement(content = ellipse(fill = "orange", stroke = "unset"), width=7, height=7, hAlign = "center", vAlign = "center")
                         _left.pos = participant.left()

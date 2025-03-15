@@ -1,10 +1,11 @@
-import { booleanType, fun, functionType, id, InterpreterModule, listType, optional, stringType } from "@hylimo/core";
+import { booleanType, fun, functionType, id, listType, optional, stringType } from "@hylimo/core";
 import { createToolboxEdit, SCOPE } from "../../../base/dslModule.js";
+import { ContentModule } from "../contentModule.js";
 
 /**
  * Module providing the interface element
  */
-export const interfaceModule = InterpreterModule.create(
+export const interfaceModule = ContentModule.create(
     "uml/interface",
     [
         "uml/classifier/classifier",

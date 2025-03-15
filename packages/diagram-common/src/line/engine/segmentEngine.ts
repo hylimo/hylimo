@@ -1,5 +1,5 @@
-import { Point } from "../../common/point.js";
-import { Segment } from "../model/segment.js";
+import type { Point } from "../../common/point.js";
+import type { Segment } from "../model/segment.js";
 
 /**
  * Base class for all segment engines.

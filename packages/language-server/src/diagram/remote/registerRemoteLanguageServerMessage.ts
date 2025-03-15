@@ -1,4 +1,4 @@
-import { RemoteMessagePayload } from "@hylimo/diagram-protocol";
+import type { RemoteMessagePayload } from "@hylimo/diagram-protocol";
 
 /**
  * Message to register a remote language server.

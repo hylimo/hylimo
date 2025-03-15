@@ -1,37 +1,38 @@
-import { InterpreterModule, Parser } from "@hylimo/core";
-import {
+import type { InterpreterModule } from "@hylimo/core";
+import { Parser } from "@hylimo/core";
+import type {
     CompletionItem,
     CompletionParams,
     Connection,
     DocumentFormattingParams,
     InitializeResult,
-    Range,
     ServerCapabilities,
-    TextDocumentChangeEvent,
-    TextDocuments,
-    TextEdit,
-    uinteger
+    TextDocumentChangeEvent
 } from "vscode-languageserver";
-import { TextDocument, TextDocumentContentChangeEvent } from "vscode-languageserver-textdocument";
+import { Range, TextDocuments, TextEdit, uinteger } from "vscode-languageserver";
+import type { TextDocumentContentChangeEvent } from "vscode-languageserver-textdocument";
+import { TextDocument } from "vscode-languageserver-textdocument";
 import { Diagram } from "./diagram/diagram.js";
 import { Formatter } from "./format/formatter.js";
 import { DiagramEngine } from "@hylimo/diagram";
 import { DiagramServerManager } from "./diagramServerManager.js";
+import type {
+    OpenDiagramMessage,
+    DynamicLanguageServerConfig,
+    DiagramRequestMessage,
+    DiagramResponseMessage
+} from "@hylimo/diagram-protocol";
 import {
     DiagramActionNotification,
     DiagramCloseNotification,
     DiagramOpenNotification,
-    OpenDiagramMessage,
     SetLanguageServerIdNotification,
     ConfigNotification,
-    DynamicLanguageServerConfig,
-    DiagramRequest,
-    DiagramRequestMessage,
-    DiagramResponseMessage
+    DiagramRequest
 } from "@hylimo/diagram-protocol";
-import { SharedDiagramUtils } from "./sharedDiagramUtils.js";
+import type { SharedDiagramUtils } from "./sharedDiagramUtils.js";
 import { LocalDiagramImplementationManager } from "./diagram/local/localDiagramImplementationManager.js";
-import { DiagramImplementationManager } from "./diagram/diagramImplementationManager.js";
+import type { DiagramImplementationManager } from "./diagram/diagramImplementationManager.js";
 import { RemoteDiagramImplementationManager } from "./diagram/remote/remoteDiagramImplementationManager.js";
 import { CompletionEngine } from "./completion/completionEngine.js";
 import { Config } from "./config.js";

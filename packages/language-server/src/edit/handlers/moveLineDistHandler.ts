@@ -1,5 +1,5 @@
-import { IncrementalUpdate, MoveLposEdit } from "@hylimo/diagram-protocol";
-import { EditHandler } from "./editHandler.js";
+import type { IncrementalUpdate, MoveLposEdit } from "@hylimo/diagram-protocol";
+import type { EditHandler } from "./editHandler.js";
 import { DefaultEditTypes, LinePoint } from "@hylimo/diagram-common";
 
 /**

@@ -1,11 +1,6 @@
 import { injectable } from "inversify";
-import {
-    CommandExecutionContext,
-    CommandReturn,
-    CommandStack as SprottyCommandStack,
-    ICommand,
-    SModelRootImpl
-} from "sprotty";
+import type { CommandExecutionContext, CommandReturn, ICommand, SModelRootImpl } from "sprotty";
+import { CommandStack as SprottyCommandStack } from "sprotty";
 import { CancelableCommandExecutionContext } from "../features/animation/cancelableCommandExecutionContext.js";
 import { UpdateModelCommand } from "../features/update/updateModel.js";
 import { IncrementalUpdateModelCommand } from "../features/update/incrementalUpdateModel.js";
@@ -56,6 +51,9 @@ export class CommandStack extends SprottyCommandStack {
             commandSequenceNumber: (this.lastContext?.commandSequenceNumber ?? -1) + 1,
             get duration(): number {
                 return CancelableCommandExecutionContext.isCanceled(this) ? 0 : originalContext.duration;
+            },
+            set duration(value: number) {
+                originalContext.duration = value;
             },
             cancelState: this.lastContext?.cancelState ?? {
                 cancelUntil: -1,

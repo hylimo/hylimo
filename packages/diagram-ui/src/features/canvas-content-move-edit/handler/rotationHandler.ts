@@ -1,7 +1,8 @@
 import { DefaultEditTypes, Point } from "@hylimo/diagram-common";
 import { MoveHandler } from "../../move/moveHandler.js";
-import { Edit, RotateEdit } from "@hylimo/diagram-protocol";
-import { decomposeTSR, fromTwoMovingPoints, Matrix } from "transformation-matrix";
+import type { Edit, RotateEdit } from "@hylimo/diagram-protocol";
+import type { Matrix } from "transformation-matrix";
+import { decomposeTSR, fromTwoMovingPoints } from "transformation-matrix";
 
 /**
  * Move handler for rotating CanvasElements
@@ -20,7 +21,7 @@ export class RotationHandler extends MoveHandler {
         readonly currentRotation: number,
         transformMatrix: Matrix
     ) {
-        super(transformMatrix);
+        super(transformMatrix, "cursor-grab");
     }
 
     override generateEdits(x: number, y: number): Edit[] {

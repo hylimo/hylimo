@@ -1,4 +1,4 @@
-import { RemoteMessagePayload } from "@hylimo/diagram-protocol";
+import type { RemoteMessagePayload } from "@hylimo/diagram-protocol";
 
 /**
  * Base interface for all messages that are related to a diagram.

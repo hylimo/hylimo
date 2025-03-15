@@ -1,4 +1,4 @@
-import { BaseLayoutedDiagram } from "@hylimo/diagram-common";
+import type { BaseLayoutedDiagram } from "@hylimo/diagram-common";
 import { RequestType } from "vscode-languageserver-protocol";
 
 /**

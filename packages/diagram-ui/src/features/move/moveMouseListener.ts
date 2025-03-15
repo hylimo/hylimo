@@ -1,11 +1,12 @@
-import { IActionDispatcher, MouseListener, SModelElementImpl, TYPES as SPROTTY_TYPES } from "sprotty";
+import type { IActionDispatcher, SModelElementImpl } from "sprotty";
+import { MouseListener } from "sprotty";
 import { inject, injectable } from "inversify";
 import { TYPES } from "../types.js";
-import { TransactionIdProvider } from "../transaction/transactionIdProvider.js";
-import { Action } from "sprotty-protocol";
-import { SRoot } from "../../model/sRoot.js";
-import { TransactionalMoveAction } from "./transactionalMoveAction.js";
-import { MoveHandler } from "./moveHandler.js";
+import type { TransactionIdProvider } from "../transaction/transactionIdProvider.js";
+import type { Action } from "sprotty-protocol";
+import type { SRoot } from "../../model/sRoot.js";
+import type { TransactionalMoveAction } from "./transactionalMoveAction.js";
+import type { MoveHandler } from "./moveHandler.js";
 
 /**
  * Listener for mouse events to create transactional move operations
@@ -20,7 +21,7 @@ export class MoveMouseListener extends MouseListener {
     /**
      * The action dispatcher
      */
-    @inject(SPROTTY_TYPES.IActionDispatcher) actionDispatcher!: IActionDispatcher;
+    @inject(TYPES.IActionDispatcher) actionDispatcher!: IActionDispatcher;
 
     /**
      * The context of the current move
@@ -67,7 +68,7 @@ export class MoveMouseListener extends MouseListener {
         if (this.context == undefined || outstandingUpdates > this.context.maxUpdatesPerRevision) {
             return [];
         }
-        return this.generateActions(target, event, false);
+        return this.generateActions(target, event, event.buttons === 0);
     }
 
     override mouseUp(target: SModelElementImpl, event: MouseEvent): (Action | Promise<Action>)[] {

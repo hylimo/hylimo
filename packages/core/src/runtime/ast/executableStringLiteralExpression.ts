@@ -1,8 +1,8 @@
-import { StringLiteralExpression } from "../../ast/stringLiteralExpression.js";
-import { InterpreterContext } from "../interpreter/interpreterContext.js";
-import { BaseObject } from "../objects/baseObject.js";
+import type { StringLiteralExpression } from "../../ast/stringLiteralExpression.js";
+import type { InterpreterContext } from "../interpreter/interpreterContext.js";
+import type { BaseObject } from "../objects/baseObject.js";
 import { AbstractFunctionObject } from "../objects/functionObject.js";
-import { LabeledValue } from "../objects/labeledValue.js";
+import type { LabeledValue } from "../objects/labeledValue.js";
 import { StringObject } from "../objects/stringObject.js";
 import { SemanticFieldNames } from "../semanticFieldNames.js";
 import { ExecutableConstExpression } from "./executableConstExpression.js";

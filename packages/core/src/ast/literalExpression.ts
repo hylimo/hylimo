@@ -1,4 +1,4 @@
-import { ExpressionMetadata } from "./expressionMetadata.js";
+import type { ExpressionMetadata } from "./expressionMetadata.js";
 import { Expression } from "./expression.js";
 
 /**

@@ -1,4 +1,4 @@
-import { Edit, TransactionalAction } from "@hylimo/diagram-protocol";
+import type { Edit, TransactionalAction } from "@hylimo/diagram-protocol";
 import { MoveHandler } from "../../move/moveHandler.js";
 
 /**

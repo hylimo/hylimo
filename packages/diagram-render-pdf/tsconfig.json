@@ -9,6 +9,9 @@
             "path": "../diagram"
         },
         {
+            "path": "../diagram-common"
+        },
+        {
             "path": "../diagram-render-svg"
         }
     ],

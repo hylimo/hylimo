@@ -1,5 +1,6 @@
-import { CanvasLayoutEngine as CanvasLayoutEngineBase, Element } from "@hylimo/diagram-common";
-import { Layout } from "./layout.js";
+import type { Element } from "@hylimo/diagram-common";
+import { CanvasLayoutEngine as CanvasLayoutEngineBase } from "@hylimo/diagram-common";
+import type { Layout } from "./layout.js";
 
 /**
  * CanvasLayoutEngine which uses a layout to retrieve elements

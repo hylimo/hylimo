@@ -16,7 +16,7 @@
         "@types/uuid": "^10.0.0",
         "@types/wicg-file-system-access": "^2023.10.5",
         "@vite-pwa/vitepress": "^0.5.3",
-        "vitepress": "^1.6.0",
+        "vitepress": "^1.6.3",
         "vue": "^3.5.13"
     },
     "dependencies": {
@@ -25,17 +25,16 @@
         "@hylimo/diagram-render-svg": "^1.1.2",
         "@hylimo/diagram-ui": "^1.1.2",
         "@hylimo/language-server": "^1.1.2",
-        "@vueuse/core": "^12.4.0",
+        "@vueuse/core": "^13.0.0",
         "file-saver": "^2.0.5",
         "js-base64": "^3.7.7",
-        "monaco-editor": "npm:@codingame/monaco-vscode-editor-api@~11.1.2",
-        "monaco-editor-wrapper": "^6.1.1",
-        "monaco-languageclient": "^9.1.1",
+        "monaco-editor": "npm:@codingame/monaco-vscode-editor-api@~15.0.2",
+        "monaco-editor-wrapper": "^6.6.0",
+        "monaco-languageclient": "^9.5.0",
         "pako": "^2.1.0",
         "reflect-metadata": "^0.2.2",
-        "splitpanes": "^3.1.8",
+        "splitpanes": "^4.0.3",
         "sprotty": "^1.4.0",
-        "uuid": "^11.0.5",
         "vscode-languageserver": "^9.0.1",
         "vscode-languageserver-protocol": "^3.17.5"
     }

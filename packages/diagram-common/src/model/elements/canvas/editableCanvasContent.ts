@@ -1,4 +1,4 @@
-import { Element } from "../base/element.js";
+import type { Element } from "../base/element.js";
 
 /**
  * Shared interface for CanvasElements and CanvasConnections

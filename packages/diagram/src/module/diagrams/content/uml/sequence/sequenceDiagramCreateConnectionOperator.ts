@@ -1,4 +1,4 @@
-import { InterpreterModule } from "@hylimo/core";
+import { ContentModule } from "../../contentModule.js";
 
 /**
  * Module overwriting the default scope.internal.createConnectionOperator to support sequence diagram specific associations.<br>
@@ -8,7 +8,7 @@ import { InterpreterModule } from "@hylimo/core";
  * - when the event references the same instance, we must select the `right` instead of the `left` end as target to, (we do not want to change our x-coordinate)
  * - it must handle lost and found messages as we only know where to put it the moment the arrow is created
  */
-export const sequenceDiagramCreateConnectionOperatorModule = InterpreterModule.create(
+export const sequenceDiagramCreateConnectionOperatorModule = ContentModule.create(
     "uml/sequence/createConnectionOperator",
     [],
     [],

@@ -1,6 +1,6 @@
-import { Edit, ToolboxEdit } from "@hylimo/diagram-protocol";
+import type { Edit, ToolboxEdit } from "@hylimo/diagram-protocol";
 import { MoveHandler } from "../move/moveHandler.js";
-import { SRoot } from "../../model/sRoot.js";
+import type { SRoot } from "../../model/sRoot.js";
 
 /**
  * Create move handler to create canvas elements, typically used for toolbox edits
@@ -16,7 +16,7 @@ export class CreateElementMoveHandler extends MoveHandler {
         private readonly edit: `toolbox/${string}`,
         private readonly root: SRoot
     ) {
-        super(root.getMouseTransformationMatrix(), false);
+        super(root.getMouseTransformationMatrix(), undefined, false);
     }
 
     override generateEdits(x: number, y: number): Edit[] {

@@ -1,12 +1,13 @@
-import { CompletionItem, Position, Range } from "vscode-languageserver";
-import { DiagramImplementation, DiagramUpdateResult } from "../diagramImplementation.js";
+import type { CompletionItem, Position, Range } from "vscode-languageserver";
+import type { DiagramUpdateResult } from "../diagramImplementation.js";
+import { DiagramImplementation } from "../diagramImplementation.js";
 import {
     ReplyGenerateCompletionItemMessage,
     RequestGenerateCompletionItemMessage
 } from "./generateCompletionItemsMessage.js";
-import { RemoteDiagramImplementationManager } from "./remoteDiagramImplementationManager.js";
+import type { RemoteDiagramImplementationManager } from "./remoteDiagramImplementationManager.js";
 import { RequestUpdateDiagramMessage, ReplyUpdateDiagramMessage } from "./updateDiagramMessage.js";
-import { DiagramConfig, Root } from "@hylimo/diagram-common";
+import type { DiagramConfig, Root } from "@hylimo/diagram-common";
 import { ReplyGetSourceRangeMessage, RequestGetSourceRangeMessage } from "./getSourceRangeMessage.js";
 import {
     ReplyRenderPredictionDiagramMessage,

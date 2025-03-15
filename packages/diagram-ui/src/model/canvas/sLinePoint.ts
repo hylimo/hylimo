@@ -1,8 +1,9 @@
-import { LineEngine, LinePoint, Point } from "@hylimo/diagram-common";
-import { LinearAnimatable } from "../../features/animation/model.js";
+import type { LinePoint, Point } from "@hylimo/diagram-common";
+import { LineEngine } from "@hylimo/diagram-common";
+import type { LinearAnimatable } from "../../features/animation/model.js";
 import { SCanvasPoint } from "./sCanvasPoint.js";
-import { SCanvasConnection } from "./sCanvasConnection.js";
-import { SCanvasElement } from "./sCanvasElement.js";
+import type { SCanvasConnection } from "./sCanvasConnection.js";
+import type { SCanvasElement } from "./sCanvasElement.js";
 
 const linePointAnimatedFields = new Set(["pos"]);
 

@@ -1,7 +1,10 @@
-import { FullObject, numberType } from "@hylimo/core";
-import { Size, Point, Element, Marker } from "@hylimo/diagram-common";
-import { ContentCardinality, LayoutElement, SizeConstraints } from "../../layoutElement.js";
-import { Layout } from "../../engine/layout.js";
+import type { FullObject } from "@hylimo/core";
+import { numberType } from "@hylimo/core";
+import type { Size, Point, Element } from "@hylimo/diagram-common";
+import { Marker } from "@hylimo/diagram-common";
+import type { LayoutElement, SizeConstraints } from "../../layoutElement.js";
+import { ContentCardinality } from "../../layoutElement.js";
+import type { Layout } from "../../engine/layout.js";
 import { StyledElementLayoutConfig } from "../styledElementLayoutConfig.js";
 import { simpleElementType } from "../../../module/base/types.js";
 

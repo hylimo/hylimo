@@ -1,8 +1,8 @@
-import { BaseLayoutedDiagram } from "@hylimo/diagram-common";
-import { IncrementalUpdate, TransactionalAction } from "@hylimo/diagram-protocol";
-import { TextDocumentContentChangeEvent } from "vscode-languageserver-textdocument";
-import { Diagram } from "../diagram/diagram.js";
-import { SharedDiagramUtils } from "../sharedDiagramUtils.js";
+import type { BaseLayoutedDiagram } from "@hylimo/diagram-common";
+import type { IncrementalUpdate, TransactionalAction } from "@hylimo/diagram-protocol";
+import type { TextDocumentContentChangeEvent } from "vscode-languageserver-textdocument";
+import type { Diagram } from "../diagram/diagram.js";
+import type { SharedDiagramUtils } from "../sharedDiagramUtils.js";
 import { TransactionalEdit } from "./edit/transactionalEdit.js";
 
 /**
@@ -119,7 +119,7 @@ export class TransactionManager {
      */
     private createHandleActionResult(action: TransactionalAction): IncrementalUpdate[] {
         const currentDiagram = this.diagram.currentDiagram;
-        if (currentDiagram != undefined && this.edit != undefined && (action.sequenceNumber > 0 || !action.committed)) {
+        if (currentDiagram != undefined && this.edit != undefined) {
             return this.edit.predictActionDiff(this.diagram.currentDiagram!, this.lastAppliedAction, action);
         } else {
             return [];

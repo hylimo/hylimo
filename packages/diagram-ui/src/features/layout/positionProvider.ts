@@ -1,5 +1,5 @@
-import { Point } from "@hylimo/diagram-common";
-import { SModelElementImpl } from "sprotty";
+import type { Point } from "@hylimo/diagram-common";
+import type { SModelElementImpl } from "sprotty";
 
 /**
  * Provides a point which can be used as reference

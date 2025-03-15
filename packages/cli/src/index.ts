@@ -6,7 +6,7 @@ import { program } from "commander";
 import { PDFRenderer } from "@hylimo/diagram-render-pdf";
 import { SVGRenderer } from "@hylimo/diagram-render-svg";
 import { DiagramEngine } from "@hylimo/diagram";
-import { DiagramConfig } from "@hylimo/diagram-common";
+import type { DiagramConfig } from "@hylimo/diagram-common";
 
 program
     .version("1.0.0")

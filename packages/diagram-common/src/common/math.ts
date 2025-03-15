@@ -1,5 +1,5 @@
-import { Bounds } from "./bounds.js";
-import { Point } from "./point.js";
+import type { Bounds } from "./bounds.js";
+import type { Point } from "./point.js";
 
 /**
  * Alias for Point with other semantic
@@ -102,7 +102,7 @@ export namespace Math2D {
         if (denominator === 0) {
             return 0;
         }
-        return Math.acos(dot(a, b) / denominator);
+        return Math.acos(Math.min(Math.max(dot(a, b) / denominator, -1), 1));
     }
 
     /**
@@ -112,7 +112,7 @@ export namespace Math2D {
      * @returns the length of the vector
      */
     export function length(a: Vector): number {
-        return Math.sqrt(a.x * a.x + a.y * a.y);
+        return Math.hypot(a.x, a.y);
     }
 
     /**

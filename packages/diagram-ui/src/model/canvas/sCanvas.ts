@@ -1,9 +1,9 @@
-import { Canvas } from "@hylimo/diagram-common";
+import type { Canvas } from "@hylimo/diagram-common";
 import { SLayoutedElement } from "../sLayoutedElement.js";
 import { PointVisibilityManager } from "./pointVisibilityManager.js";
-import { LinearAnimatable } from "../../features/animation/model.js";
+import type { LinearAnimatable } from "../../features/animation/model.js";
 import { decomposeTSR } from "transformation-matrix";
-import { CanvasLike } from "./canvasLike.js";
+import type { CanvasLike } from "./canvasLike.js";
 
 /**
  * Animated fields for SCanvas

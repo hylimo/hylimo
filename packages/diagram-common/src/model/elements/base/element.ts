@@ -1,4 +1,4 @@
-import { EditSpecification } from "../editSpecification.js";
+import type { EditSpecification } from "../editSpecification.js";
 
 /**
  * Base class for all elements

@@ -1,5 +1,5 @@
 import { BooleanObject } from "../runtime/objects/booleanObject.js";
-import { Type } from "./base.js";
+import type { Type } from "./base.js";
 
 /**
  * Boolean type matching only booleans

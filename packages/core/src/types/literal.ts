@@ -1,5 +1,5 @@
 import { LiteralObject } from "../runtime/objects/literalObject.js";
-import { Type } from "./base.js";
+import type { Type } from "./base.js";
 
 /**
  * Type which checks if the provided value is a specific literal

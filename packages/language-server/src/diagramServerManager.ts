@@ -1,15 +1,13 @@
-import { Root } from "@hylimo/diagram-common";
-import { ActionMessage, GeneratorArguments, SModelRoot } from "sprotty-protocol";
-import { Connection } from "vscode-languageserver";
-import { Diagram } from "./diagram/diagram.js";
+import type { Root } from "@hylimo/diagram-common";
+import type { ActionMessage, GeneratorArguments, SModelRoot } from "sprotty-protocol";
+import type { Connection } from "vscode-languageserver";
+import type { Diagram } from "./diagram/diagram.js";
 import { DiagramServer } from "./edit/diagramServer.js";
+import type { IncrementalUpdate, EditorConfig, DynamicLanguageServerConfig } from "@hylimo/diagram-protocol";
 import {
-    IncrementalUpdate,
     IncrementalUpdateAction,
     DiagramActionNotification,
-    EditorConfigUpdatedAction,
-    EditorConfig,
-    DynamicLanguageServerConfig
+    EditorConfigUpdatedAction
 } from "@hylimo/diagram-protocol";
 
 /**

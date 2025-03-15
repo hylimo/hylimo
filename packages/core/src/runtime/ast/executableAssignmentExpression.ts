@@ -1,6 +1,6 @@
-import { AssignmentExpression } from "../../ast/assignmentExpression.js";
-import { InterpreterContext } from "../interpreter/interpreterContext.js";
-import { LabeledValue } from "../objects/labeledValue.js";
+import type { AssignmentExpression } from "../../ast/assignmentExpression.js";
+import type { InterpreterContext } from "../interpreter/interpreterContext.js";
+import type { LabeledValue } from "../objects/labeledValue.js";
 import { ExecutableExpression } from "./executableExpression.js";
 
 /**

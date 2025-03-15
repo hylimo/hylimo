@@ -1,6 +1,6 @@
-import { Size, Point, Element } from "@hylimo/diagram-common";
-import { LayoutElement, SizeConstraints } from "../layoutElement.js";
-import { Layout } from "../engine/layout.js";
+import type { Size, Point, Element } from "@hylimo/diagram-common";
+import type { LayoutElement, SizeConstraints } from "../layoutElement.js";
+import type { Layout } from "../engine/layout.js";
 import { PanelLayoutConfig } from "./panelLayoutConfig.js";
 
 /**

@@ -1,20 +1,12 @@
-import {
-    fun,
-    functionType,
-    id,
-    InterpreterModule,
-    listType,
-    optional,
-    or,
-    ParseableExpressions,
-    stringType
-} from "@hylimo/core";
+import type { ParseableExpressions } from "@hylimo/core";
+import { fun, functionType, id, listType, optional, or, stringType } from "@hylimo/core";
 import { createToolboxEdit, SCOPE } from "../../../base/dslModule.js";
+import { ContentModule } from "../contentModule.js";
 
 /**
  * Module providing the UML 'instance' function for object/sequence diagrams
  */
-export const instanceModule = InterpreterModule.create(
+export const instanceModule = ContentModule.create(
     "uml/instance",
     [
         "uml/classifier/classifier",

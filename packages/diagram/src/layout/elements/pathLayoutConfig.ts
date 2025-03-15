@@ -1,10 +1,13 @@
-import { enumType, FullObject, nullType, stringType } from "@hylimo/core";
-import { Size, Point, Element, Path, Stroke } from "@hylimo/diagram-common";
+import type { FullObject } from "@hylimo/core";
+import { enumType, nullType, stringType } from "@hylimo/core";
+import type { Size, Point, Element, Stroke } from "@hylimo/diagram-common";
+import { Path } from "@hylimo/diagram-common";
 import svgPath from "svgpath";
 import { svgPathBbox } from "@hylimo/diagram-common";
-import { ContentCardinality, LayoutElement, SizeConstraints } from "../layoutElement.js";
-import { LayoutedPath } from "../engine/layoutEngine.js";
-import { Layout } from "../engine/layout.js";
+import type { LayoutElement, SizeConstraints } from "../layoutElement.js";
+import { ContentCardinality } from "../layoutElement.js";
+import type { LayoutedPath } from "../engine/layoutEngine.js";
+import type { Layout } from "../engine/layout.js";
 import { ShapeLayoutConfig } from "./shapeLayoutConfig.js";
 
 /**

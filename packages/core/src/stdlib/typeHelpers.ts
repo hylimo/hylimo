@@ -1,6 +1,6 @@
-import { ExecutableListEntry } from "../runtime/ast/executableListEntry.js";
-import { ExecutableExpression } from "../runtime/ast/executableExpression.js";
-import { BaseObject } from "../runtime/objects/baseObject.js";
+import type { ExecutableListEntry } from "../runtime/ast/executableListEntry.js";
+import type { ExecutableExpression } from "../runtime/ast/executableExpression.js";
+import type { BaseObject } from "../runtime/objects/baseObject.js";
 import { BooleanObject } from "../runtime/objects/booleanObject.js";
 import { FullObject } from "../runtime/objects/fullObject.js";
 import { AbstractFunctionObject } from "../runtime/objects/functionObject.js";

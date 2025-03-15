@@ -1,13 +1,13 @@
-import { Expression } from "../../ast/expression.js";
-import { InterpreterContext } from "../interpreter/interpreterContext.js";
-import { LabeledValue } from "../objects/labeledValue.js";
+import type { Expression } from "../../ast/expression.js";
+import type { InterpreterContext } from "../interpreter/interpreterContext.js";
+import type { LabeledValue } from "../objects/labeledValue.js";
 // DO NOT CHANGE!
 // These classes must not be imported from their originating file directly.
 // Otherwise circular imports will cause runtime errors.
+import type { ExecutableListEntry } from "../../index.js";
 import {
     ExecutableFieldAssignmentExpression,
     ExecutableFieldAccessExpression,
-    ExecutableListEntry,
     ExecutableInvocationExpression,
     ExecutableFieldSelfInvocationExpression
 } from "../../index.js";

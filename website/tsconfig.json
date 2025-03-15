@@ -9,7 +9,8 @@
         "resolveJsonModule": true,
         "jsx": "preserve",
         "lib": ["esnext", "dom", "dom.iterable", "webworker"],
-        "types": ["vite/client"]
+        "types": ["vite/client"],
+        "verbatimModuleSyntax": true
     },
     "include": [".vitepress/**/*.vue", ".vitepress/**/*.ts"]
 }

@@ -1,19 +1,22 @@
-import { TextDocument, TextDocumentContentChangeEvent } from "vscode-languageserver-textdocument";
-import { SharedDiagramUtils } from "../sharedDiagramUtils.js";
-import { CompletionItem, Diagnostic, Position, TextDocumentEdit } from "vscode-languageserver";
+import type { TextDocumentContentChangeEvent } from "vscode-languageserver-textdocument";
+import { TextDocument } from "vscode-languageserver-textdocument";
+import type { SharedDiagramUtils } from "../sharedDiagramUtils.js";
+import type { CompletionItem, Diagnostic, Position, TextDocumentEdit } from "vscode-languageserver";
 import { TransactionManager } from "../edit/transactionManager.js";
+import type {
+    NavigateToSourceAction,
+    UpdateEditorConfigAction,
+    ToolboxEditPredictionRequestAction
+} from "@hylimo/diagram-protocol";
 import {
     UpdateEditorConfigNotification,
-    NavigateToSourceAction,
     PublishDocumentRevealNotification,
     TransactionalAction,
-    UpdateEditorConfigAction,
-    ToolboxEditPredictionRequestAction,
     ToolboxEditPredictionResponseAction
 } from "@hylimo/diagram-protocol";
-import { DiagramImplementation } from "./diagramImplementation.js";
+import type { DiagramImplementation } from "./diagramImplementation.js";
 import { BaseLayoutedDiagram } from "@hylimo/diagram-common";
-import { DiagramImplementationManager } from "./diagramImplementationManager.js";
+import type { DiagramImplementationManager } from "./diagramImplementationManager.js";
 import { TransactionalEdit } from "../edit/edit/transactionalEdit.js";
 
 /**

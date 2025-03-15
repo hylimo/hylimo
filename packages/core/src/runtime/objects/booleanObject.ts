@@ -1,5 +1,5 @@
-import { InterpreterContext } from "../interpreter/interpreterContext.js";
-import { FullObject } from "./fullObject.js";
+import type { InterpreterContext } from "../interpreter/interpreterContext.js";
+import type { FullObject } from "./fullObject.js";
 import { LiteralObject } from "./literalObject.js";
 
 /**

@@ -1,7 +1,7 @@
-import { SimpleStroke } from "./base/colored.js";
-import { Element } from "./base/element.js";
-import { FilledElement } from "./base/filledElement.js";
-import { LayoutedElement } from "./base/layoutedElement.js";
+import type { SimpleStroke } from "./base/colored.js";
+import type { Element } from "./base/element.js";
+import type { FilledElement } from "./base/filledElement.js";
+import type { LayoutedElement } from "./base/layoutedElement.js";
 
 /**
  * Text element

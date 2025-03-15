@@ -1,9 +1,9 @@
 import { Parser } from "@hylimo/core";
 import { CompletionAstTransformer } from "./completionAstTransformer.js";
 import { CompletionError } from "./completionError.js";
-import { CompletionItem } from "./completionItem.js";
-import { DiagramEngine } from "@hylimo/diagram";
-import { DiagramConfig } from "@hylimo/diagram-common";
+import type { CompletionItem } from "./completionItem.js";
+import type { DiagramEngine } from "@hylimo/diagram";
+import type { DiagramConfig } from "@hylimo/diagram-common";
 
 /**
  * Completion engine which can generate completion items by executing the given code

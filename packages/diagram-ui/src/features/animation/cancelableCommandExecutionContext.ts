@@ -1,4 +1,4 @@
-import { CommandExecutionContext } from "sprotty";
+import type { CommandExecutionContext } from "sprotty";
 
 /**
  * CommandExecutionContext which supports canceling animations

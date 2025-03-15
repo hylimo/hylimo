@@ -1,20 +1,17 @@
-import { computed, Plugin, Ref, shallowRef, toRaw, watch } from "vue";
+import type { Plugin, Ref } from "vue";
+import { computed, ref, shallowRef, toRaw, watch } from "vue";
+import type { NotificationHandler, NotificationType, Disposable } from "vscode-languageserver-protocol/browser.js";
 import {
     BrowserMessageReader,
     BrowserMessageWriter,
-    createProtocolConnection,
-    NotificationHandler,
-    NotificationType,
-    Disposable
+    createProtocolConnection
 } from "vscode-languageserver-protocol/browser.js";
 import { MonacoLanguageClient } from "monaco-languageclient";
 import { CloseAction, ErrorAction } from "vscode-languageclient";
+import type { DynamicLanguageServerConfig, EditorConfig, LanguageServerSettings } from "@hylimo/diagram-protocol";
 import {
     ConfigNotification,
-    DynamicLanguageServerConfig,
-    EditorConfig,
     UpdateEditorConfigNotification,
-    LanguageServerSettings,
     RemoteNotification,
     RemoteRequest,
     SetLanguageServerIdNotification
@@ -23,13 +20,13 @@ import * as monaco from "monaco-editor";
 import { customDarkTheme, customLightTheme, languageConfiguration, monarchTokenProvider } from "../util/language";
 import { useData } from "vitepress";
 import { useLocalStorage, throttledWatch } from "@vueuse/core";
-import { useWorkerFactory } from "monaco-editor-wrapper/workerFactory";
 import monacoEditorWorker from "monaco-editor/esm/vs/editor/editor.worker?worker";
-import { languageServerConfigKey, languageClientKey } from "./injectionKeys";
-import { configureAndInitVscodeApi } from "monaco-editor-wrapper";
-import { LogLevel } from "vscode/services";
+import { languageServerConfigKey, languageClientKey, diagramIdProviderKey } from "./injectionKeys";
 import { ConsoleLogger } from "monaco-languageclient/tools";
-import { checkServiceConsistency } from "monaco-editor-wrapper/vscode/services";
+import { augmentVscodeApiConfig, checkServiceConsistency } from "monaco-editor-wrapper/vscode/services";
+import { useWorkerFactory } from "monaco-languageclient/workerFactory";
+import { LogLevel } from "@codingame/monaco-vscode-api";
+import { initServices } from "monaco-languageclient/vscode/services";
 
 /**
  * Config for the diagram
@@ -136,7 +133,9 @@ export const lspPlugin: Plugin = {
         });
 
         const client = setupLanguageClient(isDark.value);
+        const idCounter = ref(1);
         app.provide(languageClientKey, shallowRef(client));
+        app.provide(diagramIdProviderKey, () => idCounter.value++);
 
         client.then((value) => {
             value.onNotification(UpdateEditorConfigNotification.type, (config) => {
@@ -183,26 +182,20 @@ async function setupLanguageClient(isDark: boolean) {
     const writer = new BrowserMessageWriter(worker);
 
     useWorkerFactory({
-        workerOverrides: {
-            ignoreMapping: true,
-            workerLoaders: {
-                TextEditorWorker: () => new monacoEditorWorker()
-            }
+        workerLoaders: {
+            TextEditorWorker: () => new monacoEditorWorker()
         }
     });
 
-    await configureAndInitVscodeApi(
-        "classic",
-        {
-            vscodeApiConfig: {},
-            logLevel: LogLevel.Warning
-        },
-        {
-            caller: "website",
-            performServiceConsistencyChecks: checkServiceConsistency,
-            logger: new ConsoleLogger(LogLevel.Warning)
-        }
-    );
+    const vscodeApiConfig = await augmentVscodeApiConfig("classic", {
+        vscodeApiConfig: {},
+        logLevel: LogLevel.Warning
+    });
+    await initServices(vscodeApiConfig, {
+        caller: "website",
+        performServiceConsistencyChecks: checkServiceConsistency,
+        logger: new ConsoleLogger(LogLevel.Warning)
+    });
 
     monaco.languages.register({ id: language });
     monaco.languages.setLanguageConfiguration(language, languageConfiguration);

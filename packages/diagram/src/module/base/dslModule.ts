@@ -1,8 +1,8 @@
+import type { ExecutableExpression, ParseableExpressions } from "@hylimo/core";
 import {
     assertString,
     assign,
     enumObject,
-    ExecutableExpression,
     fun,
     functionType,
     id,
@@ -15,7 +15,6 @@ import {
     objectType,
     optional,
     or,
-    ParseableExpressions,
     str,
     stringType,
     validateObject
@@ -140,14 +139,17 @@ export function connectionEditFragments(variable: "start" | "end"): {
  */
 const scopeExpressions: ParseableExpressions = [
     `
-        callback = it
+        (scopeEnhancer, config, defaultConfig) = args
+        config.proto = defaultConfig
+        callback = config[0]
         scope = [
             fonts = list(defaultFonts.roboto, defaultFonts.openSans, defaultFonts.sourceCodePro),
             contents = list(),
             internal = [
                 classCounter = 0,
                 styles = [styles = list()],
-                canvasAddEdits = []
+                canvasAddEdits = [],
+                config = config
             ]
         ]
     `,
@@ -374,7 +376,9 @@ const scopeExpressions: ParseableExpressions = [
                     scope.internal.registerCanvasElement(labelCanvasElement, args, self.canvasScope)
                     labelCanvasElement.rotation = rotation
                     labelCanvasElement
-                }
+                },
+                originalStart = self.originalStart,
+                originalEnd = self.originalEnd
             ]
             callback.callWithScope(result)
             _validateCanvasConnectionWithScope(result, args)
@@ -567,6 +571,8 @@ const scopeExpressions: ParseableExpressions = [
                 )
                 connection.startProvider = startProvider
                 connection.endProvider = endProvider
+                connection.originalStart = start
+                connection.originalEnd = end
                 scope.internal.registerCanvasElement(connection, target, canvasScope)
 
                 connection
@@ -821,29 +827,32 @@ export const dslModule = InterpreterModule.create(
     [DiagramModuleNames.DIAGRAM],
     [
         assign(
-            "generateDiagramEnvironment",
-            fun(["scopeEnhancer = it ?? { }", fun(scopeExpressions)], {
+            "generateDiagram",
+            fun(scopeExpressions, {
                 docs: `
-                        Creates a function which can be then used as a DSL function to create a diagram.
-                        The function takes a callback, which is invoked with a custom scope.
-                        By default, in this scope exist
+                        Creates a diagram.
+                        Takes a scope enhancer, and the diagram config (including the callback).
+                        First, a custom scope is created, which is enhanced with the scope enhancer.
+                        Then the callback is called with this custom scope.
+                        By default, in the custom scope exist
                             - styles: function to add more styles, can be called multiple times
                                       can also be used as operator after an element
                             - layout: function which takes a CanvasElement and applies pos, width and height to it
                             - contents: list of elements used as contents of the canvas
                             - pos: takes two positional parameters and creates a new absolutePoint
                             - fonts: list of fonts
-                        Additional function can be provided using the scopeEnhancer.
-                        The function than uses styles, fonts and contents to create and return the diagram
+                        Returns the created diagram
                     `,
                 params: [
                     [
                         0,
                         "the scope enhancer, a function which takes the scope and can modify it, optional",
                         optional(functionType)
-                    ]
+                    ],
+                    [1, "the configuration for the diagram, including the callback", objectType()],
+                    [2, "the default configuration for the diagram", objectType()]
                 ],
-                returns: "The diagram DSL function"
+                returns: "The created diagram"
             })
         )
     ]

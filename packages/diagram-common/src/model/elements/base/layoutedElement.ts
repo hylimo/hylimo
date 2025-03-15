@@ -1,5 +1,5 @@
-import { PositionedElement } from "./positionedElement.js";
-import { SizedElement } from "./sizedElement.js";
+import type { PositionedElement } from "./positionedElement.js";
+import type { SizedElement } from "./sizedElement.js";
 
 /**
  * Element with a position and a size

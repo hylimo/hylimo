@@ -1,5 +1,5 @@
-import { ToolboxEdit } from "@hylimo/diagram-protocol";
-import { EditHandler } from "./editHandler.js";
+import type { ToolboxEdit } from "@hylimo/diagram-protocol";
+import type { EditHandler } from "./editHandler.js";
 
 /**
  * Handler for toolbox edits

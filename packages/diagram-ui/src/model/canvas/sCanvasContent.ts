@@ -1,8 +1,8 @@
-import { Selectable } from "sprotty-protocol";
+import type { Selectable } from "sprotty-protocol";
 import { SElement } from "../sElement.js";
-import { SParentElementImpl } from "sprotty";
-import { CanvasLike } from "./canvasLike.js";
-import { LineProviderHoverDataProvider } from "../../features/line-provider-hover/lineProviderHoverData.js";
+import type { SParentElementImpl } from "sprotty";
+import type { CanvasLike } from "./canvasLike.js";
+import type { LineProviderHoverData } from "../../features/create-connection/createConnectionHoverData.js";
 
 /**
  * Base class for all canvas contents
@@ -23,10 +23,10 @@ export abstract class SCanvasContent extends SElement implements Selectable {
     /**
      * If defined, can provide information on how the user hovers over a line provider
      */
-    get hoverDataProvider(): LineProviderHoverDataProvider | undefined {
-        const provider = this.root.lineProviderHoverDataProvider;
-        if (provider?.target === this.id) {
-            return provider;
+    get hoverData(): LineProviderHoverData | undefined {
+        const data = this.root.createConnectionHoverData;
+        if (data != undefined && "target" in data && data.target === this.id) {
+            return data;
         }
         return undefined;
     }

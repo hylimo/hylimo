@@ -1,6 +1,6 @@
-import { ConnectionEdit, ConnectionEnd } from "@hylimo/diagram-protocol";
-import { EditHandler } from "./editHandler.js";
-import { Config } from "../../config.js";
+import type { ConnectionEdit, ConnectionEnd } from "@hylimo/diagram-protocol";
+import type { EditHandler } from "./editHandler.js";
+import type { Config } from "../../config.js";
 
 /**
  * Handler for connection edits

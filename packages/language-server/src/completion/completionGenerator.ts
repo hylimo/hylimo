@@ -1,19 +1,16 @@
-import {
-    AbstractFunctionObject,
+import type {
     AbstractInvocationExpression,
     BaseObject,
     ExecutableAbstractFunctionExpression,
-    ExecutableConstExpression,
     ExecutableListEntry,
-    FullObject,
     InterpreterContext,
-    LabeledValue,
-    SemanticFieldNames
+    LabeledValue
 } from "@hylimo/core";
+import { AbstractFunctionObject, ExecutableConstExpression, FullObject, SemanticFieldNames } from "@hylimo/core";
 import { CompletionError } from "./completionError.js";
-import { CompletionItem } from "./completionItem.js";
+import type { CompletionItem } from "./completionItem.js";
 import { CompletionItemKind, InsertTextFormat, InsertTextMode, MarkupKind } from "vscode-languageserver";
-import { Range } from "@hylimo/core";
+import type { Range } from "@hylimo/core";
 
 /**
  * If the given func throws an error during execution, the LSP tries to autocomplete the named parameters of this function

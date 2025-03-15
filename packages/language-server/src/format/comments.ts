@@ -1,6 +1,7 @@
 import { TokenType } from "@hylimo/core";
-import { Doc, doc } from "prettier";
-import { Path, Options, Node, Comment } from "./types.js";
+import type { Doc } from "prettier";
+import { doc } from "prettier";
+import type { Path, Options, Node, Comment } from "./types.js";
 
 const { join, hardline, lineSuffix } = doc.builders;
 

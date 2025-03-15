@@ -1,6 +1,7 @@
-import { CanvasLayoutEngine, Element } from "@hylimo/diagram-common";
-import { SRoot } from "../sRoot.js";
-import { SElement } from "../sElement.js";
+import type { Element } from "@hylimo/diagram-common";
+import { CanvasLayoutEngine } from "@hylimo/diagram-common";
+import type { SRoot } from "../sRoot.js";
+import type { SElement } from "../sElement.js";
 
 /**
  * CanvasLayoutEngine implementation for SCanvas

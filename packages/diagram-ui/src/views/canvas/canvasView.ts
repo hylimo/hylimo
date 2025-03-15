@@ -1,7 +1,8 @@
 import { injectable } from "inversify";
-import { VNode } from "snabbdom";
-import { IView, IViewArgs, RenderingContext, svg } from "sprotty";
-import { SCanvas } from "../../model/canvas/sCanvas.js";
+import type { VNode } from "snabbdom";
+import type { IView, IViewArgs, RenderingContext } from "sprotty";
+import { svg } from "sprotty";
+import type { SCanvas } from "../../model/canvas/sCanvas.js";
 
 /**
  * IView that represents a canvas

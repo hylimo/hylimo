@@ -1,5 +1,5 @@
 <template>
-    <div :class="{ hidden: hideMainContent }">
+    <div class="editor" :class="{ hidden: hideMainContent }">
         <Splitpanes :horizontal="horizontal">
             <Pane>
                 <div ref="editorElement" class="editor-element"></div>
@@ -18,28 +18,25 @@ import "reflect-metadata";
 import { Splitpanes, Pane } from "splitpanes";
 import "splitpanes/dist/splitpanes.css";
 import { ref, onBeforeUnmount, computed, watch } from "vue";
-import { ActionHandlerRegistry, IActionDispatcher, TYPES } from "sprotty";
-import { RequestModelAction, ActionMessage } from "sprotty-protocol";
+import { ActionHandlerRegistry, type IActionDispatcher } from "sprotty";
+import { RequestModelAction, type ActionMessage } from "sprotty-protocol";
 import {
     DiagramActionNotification,
     DiagramOpenNotification,
     PublishDocumentRevealNotification
 } from "@hylimo/diagram-protocol";
-import { createContainer, DiagramServerProxy, ResetCanvasBoundsAction } from "@hylimo/diagram-ui";
+import { createContainer, DiagramServerProxy, ResetCanvasBoundsAction, TYPES } from "@hylimo/diagram-ui";
 import { Root } from "@hylimo/diagram-common";
 import { onMounted } from "vue";
-import { EditorAppConfig, MonacoEditorLanguageClientWrapper } from "monaco-editor-wrapper";
+import { type EditorAppConfig, MonacoEditorLanguageClientWrapper } from "monaco-editor-wrapper";
 import { shallowRef } from "vue";
 import { inject } from "vue";
 import { language } from "../theme/lspPlugin";
-import { languageClientKey, languageServerConfigKey } from "../theme/injectionKeys";
+import { diagramIdProviderKey, languageClientKey, languageServerConfigKey } from "../theme/injectionKeys";
 import { Disposable } from "vscode-languageserver-protocol";
-import { useResizeObserver } from "@vueuse/core";
-import { v4 as uuid } from "uuid";
-import * as monaco from "monaco-editor";
+import { onKeyDown, useResizeObserver } from "@vueuse/core";
 import { useData } from "vitepress";
-
-const id = uuid();
+import * as monaco from '@codingame/monaco-vscode-editor-api';
 
 defineProps({
     horizontal: {
@@ -50,6 +47,7 @@ defineProps({
 
 const emit = defineEmits<{
     "update:diagram": [diagram: Root];
+    save: [];
 }>();
 
 const model = defineModel({
@@ -81,6 +79,8 @@ const sprottyWrapper = ref<HTMLElement | null>(null);
 const disposables = shallowRef<Disposable[]>([]);
 const languageClient = inject(languageClientKey)!;
 const languageServerConfig = inject(languageServerConfigKey)!;
+const diagramIdProvider = inject(diagramIdProviderKey)!;
+const id = ref(diagramIdProvider());
 const { isDark } = useData();
 const diagramBackground = computed(() => {
     const config = languageServerConfig.diagramConfig.value;
@@ -101,6 +101,19 @@ useResizeObserver(sprottyWrapper, () => {
     actionDispatcher.value?.dispatch({ kind: ResetCanvasBoundsAction.KIND } satisfies ResetCanvasBoundsAction);
 });
 
+onKeyDown(
+    "s",
+    (event) => {
+        if (!(event.ctrlKey || event.metaKey)) {
+            return;
+        }
+        emit("save");
+    },
+    {
+        target: editorElement
+    }
+);
+
 onMounted(async () => {
     const currentLanguageClient = await languageClient.value;
     const wrapper = new MonacoEditorLanguageClientWrapper();
@@ -108,7 +121,6 @@ onMounted(async () => {
     const editorAppConfig: EditorAppConfig = {
         editorOptions: {
             language,
-            model: null,
             automaticLayout: true,
             fixedOverflowWidgets: true,
             hover: {
@@ -120,7 +132,16 @@ onMounted(async () => {
             scrollbar: {
                 alwaysConsumeMouseWheel: false
             },
-            glyphMargin: false
+            glyphMargin: false,
+            // @ts-expect-error (outdated types due to @codingame/monaco-vscode-api) disable to prevent / to open the search bar
+            experimentalEditContextEnabled: false
+        },
+        codeResources: {
+            modified: {
+                text: model.value,
+                uri: `diagram-${id.value}.hyl`,
+                enforceLanguageId: language
+            }
         }
     };
     await wrapper.initAndStart({
@@ -135,9 +156,9 @@ onMounted(async () => {
     const editor = wrapper.getEditor()!;
     hideMainContent.value = false;
 
-    editorModel.value = monaco.editor.createModel(model.value, language);
-    editor.setModel(editorModel.value);
-    const pushStackElement = editorModel.value.pushStackElement.bind(editorModel.value);
+    wrapper.updateCodeResources
+    editorModel.value = editor.getModel()!;
+    const pushStackElement = editorModel.value.pushStackElement.bind(editorModel);
 
     // override pushStackElement to ignore undo stops during transactions
     editorModel.value.pushStackElement = () => {
@@ -222,7 +243,7 @@ onMounted(async () => {
         }
     }
 
-    const container = createContainer(`sprotty-container-${id}`);
+    const container = createContainer(`sprotty-container-${id.value}`);
     container.bind(LspDiagramServerProxy).toSelf().inSingletonScope();
     container.bind(TYPES.ModelSource).toService(LspDiagramServerProxy);
     const currentActionDispatcher = container.get<IActionDispatcher>(TYPES.IActionDispatcher);
@@ -262,6 +283,7 @@ onBeforeUnmount(() => {
     z-index: 5;
     background: transparent;
     transition: background-color 0s 0s;
+    position: relative;
 }
 
 .splitpanes--vertical .splitpanes__splitter {
@@ -276,10 +298,37 @@ onBeforeUnmount(() => {
     height: 4px;
 }
 
+@media (pointer: coarse) {
+    .splitpanes__splitter:before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 0;
+        opacity: 0;
+        z-index: 1;
+    }
+    .splitpanes__splitter:hover:before {
+        opacity: 1;
+    }
+    .splitpanes--vertical > .splitpanes__splitter:before {
+        left: -20px;
+        right: -20px;
+        height: 100%;
+    }
+    .splitpanes--horizontal > .splitpanes__splitter:before {
+        top: -20px;
+        bottom: -20px;
+        width: 100%;
+    }
+}
+
 .splitpanes.splitpanes--dragging .splitpanes__splitter,
 .splitpanes__splitter:hover {
-    transition: background-color 0s 0.25s;
     background: #007fd4;
+}
+
+.splitpanes__splitter:hover:not(.splitpanes--dragging) {
+    transition: background-color 0s 0.25s;
 }
 
 .splitpanes__pane {
@@ -301,5 +350,13 @@ onBeforeUnmount(() => {
 .splitpanes--horizontal .splitpanes__pane:not(:first-of-type)::before {
     height: 1px;
     width: 100%;
+}
+
+body:has(.splitpanes.splitpanes--vertical.splitpanes--dragging) * {
+    cursor: col-resize !important;
+}
+
+body:has(.splitpanes.splitpanes--horizontal.splitpanes--dragging) * {
+    cursor: row-resize !important;
 }
 </style>

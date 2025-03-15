@@ -1,4 +1,4 @@
-import { ActionMessage } from "sprotty-protocol";
+import type { ActionMessage } from "sprotty-protocol";
 import { NotificationType } from "vscode-languageserver-protocol";
 
 /**

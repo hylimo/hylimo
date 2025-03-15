@@ -1,21 +1,18 @@
 import { injectable } from "inversify";
-import { VNode } from "snabbdom";
-import { IViewArgs, RenderingContext, svg } from "sprotty";
-import { SRelativePoint } from "../../model/canvas/sRelativePoint.js";
+import type { VNode } from "snabbdom";
+import { svg } from "sprotty";
+import type { SRelativePoint } from "../../model/canvas/sRelativePoint.js";
 import { CanvasPointView } from "./canvasPointView.js";
 import { Point } from "@hylimo/diagram-common";
 import { SCanvasPoint } from "../../model/canvas/sCanvasPoint.js";
+import { RootView } from "../rootView.js";
 
 /**
  * IView that represents an RelativePoint
  */
 @injectable()
 export class RelativePointView extends CanvasPointView<SRelativePoint> {
-    override renderInternal(
-        model: Readonly<SRelativePoint>,
-        context: RenderingContext,
-        _args?: IViewArgs | undefined
-    ): VNode | undefined {
+    override renderInternal(model: Readonly<SRelativePoint>): VNode | undefined {
         const position = model.position;
         const target = model.targetPosition;
         const pointRadius = SCanvasPoint.POINT_SIZE / model.root.zoom / 2;
@@ -33,16 +30,14 @@ export class RelativePointView extends CanvasPointView<SRelativePoint> {
         } else {
             startX = target.x;
         }
-        const children: VNode[] = [this.renderPoint(model, context, position)];
+        const children: VNode[] = [...this.renderPoint(model, position)];
         if (!Point.equals(position, target)) {
             children.push(
-                svg("polyline", {
+                svg("polyline.canvas-dependency-line", {
                     attrs: {
                         points: `${startX},${startY} ${startX},${endY} ${endX},${endY}`,
-                        "marker-start": "url(#arrow)"
-                    },
-                    class: {
-                        "canvas-dependency-line": true
+                        "marker-start": `url(#${RootView.ARROW_MARKER_ID})`,
+                        "stroke-dasharray": 8
                     }
                 })
             );

@@ -1,5 +1,5 @@
-import { Element } from "./base/element.js";
-import { Shape } from "./shape.js";
+import type { Element } from "./base/element.js";
+import type { Shape } from "./shape.js";
 
 /**
  * A rectangle with content

@@ -1,5 +1,5 @@
-import { Element } from "../base/element.js";
-import { PositionedElement } from "../base/positionedElement.js";
+import type { Element } from "../base/element.js";
+import type { PositionedElement } from "../base/positionedElement.js";
 
 /**
  * Named point on a canvas

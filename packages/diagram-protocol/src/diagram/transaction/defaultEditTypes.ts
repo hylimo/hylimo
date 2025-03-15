@@ -1,5 +1,5 @@
-import { DefaultEditTypes, Point } from "@hylimo/diagram-common";
-import { Edit } from "./edit.js";
+import type { DefaultEditTypes, Point } from "@hylimo/diagram-common";
+import type { Edit } from "./edit.js";
 
 /**
  * Move edit

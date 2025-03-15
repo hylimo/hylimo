@@ -1,4 +1,4 @@
-import { Point, Line } from "@hylimo/diagram-common";
+import type { Point, Line } from "@hylimo/diagram-common";
 import { PanelLayoutConfig } from "./panelLayoutConfig.js";
 import { booleanType } from "@hylimo/core";
 
@@ -40,7 +40,8 @@ export abstract class BoxLayoutConfig extends PanelLayoutConfig {
         const allPoints = this.computeOutlinePointsFromParts(parts, createPoint);
         return {
             start: allPoints.at(-1)!,
-            segments: allPoints.map((point, index) => this.lineSegment(point.x, point.y, id, index))
+            segments: allPoints.map((point, index) => this.lineSegment(point.x, point.y, id, index)),
+            isClosed: true
         };
     }
 

@@ -1,8 +1,8 @@
-import { FullObject, objectToList } from "@hylimo/core";
+import type { FullObject } from "@hylimo/core";
+import { objectToList } from "@hylimo/core";
+import type { Size, Element, Bounds, MarkerLayoutInformation } from "@hylimo/diagram-common";
 import {
-    Size,
     Point,
-    Element,
     Canvas,
     CanvasElement,
     CanvasConnection,
@@ -10,15 +10,14 @@ import {
     RelativePoint,
     LinePoint,
     Math2D,
-    Bounds,
-    svgPathBbox,
-    MarkerLayoutInformation
+    svgPathBbox
 } from "@hylimo/diagram-common";
-import { ContentCardinality, LayoutElement } from "../../layoutElement.js";
-import { Layout } from "../../engine/layout.js";
+import type { LayoutElement } from "../../layoutElement.js";
+import { ContentCardinality } from "../../layoutElement.js";
+import type { Layout } from "../../engine/layout.js";
 import { StyledElementLayoutConfig } from "../styledElementLayoutConfig.js";
 import { elementType } from "../../../module/base/types.js";
-import { CanvasContentLayoutConfig } from "./canvasContentLayoutConfig.js";
+import type { CanvasContentLayoutConfig } from "./canvasContentLayoutConfig.js";
 
 /**
  * Layout config for the canvas

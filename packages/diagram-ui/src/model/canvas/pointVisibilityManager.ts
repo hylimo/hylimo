@@ -1,8 +1,8 @@
-import { SParentElementImpl } from "sprotty";
-import { CanvasLike } from "./canvasLike.js";
+import type { SParentElementImpl } from "sprotty";
+import type { CanvasLike } from "./canvasLike.js";
 import { SCanvasConnection } from "./sCanvasConnection.js";
 import { SCanvasContent } from "./sCanvasContent.js";
-import { SMarker } from "./sMarker.js";
+import type { SMarker } from "./sMarker.js";
 
 /**
  * Manages a lookup for visible points

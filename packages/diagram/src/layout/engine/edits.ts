@@ -1,29 +1,25 @@
+import type { FullObject, BaseObject, ParenthesisExpressionMetadata, ListEntry, Range } from "@hylimo/core";
 import {
-    FullObject,
     assertObject,
     SemanticFieldNames,
     isNull,
     assertString,
-    BaseObject,
     isString,
     assertNumber,
     isWrapperObject,
     Expression,
     assertWrapperObject,
     FunctionExpression,
-    AbstractInvocationExpression,
-    ParenthesisExpressionMetadata,
-    ListEntry,
-    Range
+    AbstractInvocationExpression
 } from "@hylimo/core";
-import {
+import type {
     TemplateEntry,
     EditSpecificationEntry,
     ReplaceEditSpecificationEntry,
     AddEditSpecificationEntry,
     AddArgEditSpecificationEntry
 } from "@hylimo/diagram-common";
-import { LayoutElement } from "../layoutElement.js";
+import type { LayoutElement } from "../layoutElement.js";
 
 /**
  * Converts the element to a EditSpecification

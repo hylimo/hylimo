@@ -6,6 +6,7 @@
             v-model="code"
             :horizontal="height > width && width < 800"
             @update:diagram="diagram = $event"
+            @save="save"
             class="main-content"
         />
         <ClientOnly>
@@ -42,18 +43,18 @@
 </template>
 <script setup lang="ts">
 import VPNav from "vitepress/dist/client/theme-default/components/VPNav.vue";
-import { onKeyStroke, StorageSerializers, useEventListener, useLocalStorage, useWindowSize } from "@vueuse/core";
+import { onKeyStroke, useEventListener, useLocalStorage, useWindowSize } from "@vueuse/core";
 import { defineClientComponent, useData } from "vitepress";
 import IconButton from "./IconButton.vue";
 import VPFlyout from "vitepress/dist/client/theme-default/components/VPFlyout.vue";
 import { Root } from "@hylimo/diagram-common";
-import { computed, inject, onBeforeMount, onMounted, ref, UnwrapRef } from "vue";
+import { computed, inject, onBeforeMount, ref, type UnwrapRef } from "vue";
 import { SVGRenderer } from "@hylimo/diagram-render-svg";
 import { PDFRenderer } from "@hylimo/diagram-render-pdf";
 import fileSaver from "file-saver";
 import { deserialize, serialize } from "../util/serialization.js";
 import RegisterSW from "./RegisterSW.vue";
-import { CodeWithFileHandle, openDiagram } from "../util/diagramOpener";
+import { openDiagram, type CodeWithFileHandle } from "../util/diagramOpener";
 import { languageServerConfigKey } from "../theme/injectionKeys";
 import DiagramChooser from "./settings/DiagramChooser.vue";
 
@@ -237,11 +238,7 @@ onKeyStroke("s", (event) => {
         return;
     }
     event.preventDefault();
-    if (codeWithFileHandle.value != undefined) {
-        saveFile();
-    } else {
-        downloadSource();
-    }
+    save();
 });
 
 onKeyStroke("E", (event) => {
@@ -251,6 +248,14 @@ onKeyStroke("E", (event) => {
     event.preventDefault();
     downloadSVG(false);
 });
+
+function save() {
+    if (codeWithFileHandle.value != undefined) {
+        saveFile();
+    } else {
+        downloadSource();
+    }
+}
 
 function downloadSVG(textAsPath: boolean) {
     const svgBlob = new Blob([svgRenderer.render(diagram.value!, textAsPath)], { type: "image/svg+xml;charset=utf-8" });

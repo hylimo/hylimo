@@ -1,4 +1,4 @@
-import { InjectionKey, ShallowRef } from "vue";
+import type { InjectionKey, ShallowRef } from "vue";
 import type { LanguageClientProxy, LanguageServerConfig } from "./lspPlugin";
 
 /**
@@ -11,3 +11,8 @@ export const languageClientKey = Symbol("languageClient") as InjectionKey<Shallo
  */
 
 export const languageServerConfigKey = Symbol("languageServerConfig") as InjectionKey<LanguageServerConfig>;
+
+/**
+ * Provider for diagram ids
+ */
+export const diagramIdProviderKey = Symbol("diagramIdProvider") as InjectionKey<() => number>;

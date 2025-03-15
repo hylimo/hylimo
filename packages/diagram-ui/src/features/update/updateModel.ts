@@ -1,29 +1,29 @@
 import { inject, injectable } from "inversify";
-import {
-    Animation,
+import type {
     CommandExecutionContext,
     CommandReturn,
-    CompoundAnimation,
-    forEachMatch,
     IActionDispatcher,
-    isSelectable,
     MatchResult,
     SModelElementImpl,
-    SModelRootImpl,
-    TYPES as SPROTTY_TYPES,
-    UpdateModelCommand as BaseUpdateModelCommand,
-    ViewportRootElementImpl,
     ModelIndexImpl
 } from "sprotty";
-import { SRoot } from "../../model/sRoot.js";
 import {
-    ElmentLinearInterpolationAnimation,
-    LinearInterpolationAnimation
-} from "../animation/linearInterpolationAnimation.js";
+    Animation,
+    CompoundAnimation,
+    forEachMatch,
+    isSelectable,
+    SModelRootImpl,
+    UpdateModelCommand as BaseUpdateModelCommand,
+    ViewportRootElementImpl
+} from "sprotty";
+import { SRoot } from "../../model/sRoot.js";
+import type { ElmentLinearInterpolationAnimation } from "../animation/linearInterpolationAnimation.js";
+import { LinearInterpolationAnimation } from "../animation/linearInterpolationAnimation.js";
 import { computeCommonAnimatableFields, isLinearAnimatable } from "../animation/model.js";
 import { createFitToScreenAction } from "../viewport/fitToScreenAction.js";
 import { TYPES } from "../types.js";
-import { TransactionStateProvider } from "../transaction/transactionStateProvider.js";
+import type { TransactionStateProvider } from "../transaction/transactionStateProvider.js";
+import { SCanvasConnection } from "../../model/canvas/sCanvasConnection.js";
 
 /**
  * Custom UpdateModelCommand which handles linear interpolation animations
@@ -33,7 +33,7 @@ export class UpdateModelCommand extends BaseUpdateModelCommand {
     /**
      * The action dispatcher to dispatch
      */
-    @inject(SPROTTY_TYPES.IActionDispatcher) private readonly dispatcher!: IActionDispatcher;
+    @inject(TYPES.IActionDispatcher) private readonly dispatcher!: IActionDispatcher;
 
     /**
      * The transaction state provider
@@ -69,7 +69,11 @@ export class UpdateModelCommand extends BaseUpdateModelCommand {
             animations.push(fadeAnimation);
         }
         const { distance } = calculateLevenshteinDistance(this.oldRoot.index, newRoot.index);
-        if (distance > 0 || animations.length === 0) {
+        if (
+            distance > 0 ||
+            animations.length === 0 ||
+            (this.transactionStateProvider.isInTransaction && (this.oldRoot as SRoot).incrementalUpdateCount < 3)
+        ) {
             return newRoot;
         } else if (animations.length > 1) {
             return new CompoundAnimation(newRoot, context, animations);
@@ -100,7 +104,10 @@ export class UpdateModelCommand extends BaseUpdateModelCommand {
             right.zoom = left.zoom;
         }
         if (left instanceof SRoot && right instanceof SRoot) {
-            right.lineProviderHoverDataProvider = left.lineProviderHoverDataProvider;
+            right.createConnectionHoverData = left.createConnectionHoverData;
+        }
+        if (left instanceof SCanvasConnection && right instanceof SCanvasConnection) {
+            left.splitPreviewDataProvider = right.splitPreviewDataProvider;
         }
         if (isLinearAnimatable(left) && isLinearAnimatable(right)) {
             const commonFields = computeCommonAnimatableFields(left, right);

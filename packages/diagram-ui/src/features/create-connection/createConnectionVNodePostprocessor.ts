@@ -1,8 +1,9 @@
 import { injectable, inject } from "inversify";
-import { VNode } from "snabbdom";
-import { IVNodePostprocessor, setAttr, SModelElementImpl } from "sprotty";
+import type { VNode } from "snabbdom";
+import type { IVNodePostprocessor, SModelElementImpl } from "sprotty";
+import { setAttr } from "sprotty";
 import { TYPES } from "../types.js";
-import { TransactionStateProvider } from "../transaction/transactionStateProvider.js";
+import type { TransactionStateProvider } from "../transaction/transactionStateProvider.js";
 import { SCanvasElement } from "../../model/canvas/sCanvasElement.js";
 import { SCanvasConnection } from "../../model/canvas/sCanvasConnection.js";
 
@@ -19,10 +20,7 @@ export class CreateConnectionVNodePostprocessor implements IVNodePostprocessor {
 
     decorate(vnode: VNode, element: SModelElementImpl): VNode {
         if (element instanceof SCanvasElement || element instanceof SCanvasConnection) {
-            if (
-                this.transactionStateProvider.types?.some((type) => type.startsWith("connection/")) &&
-                element.editExpression == undefined
-            ) {
+            if (this.transactionStateProvider.isInCreateConnectionTransaction && element.editExpression == undefined) {
                 setAttr(vnode, "pointer-events", "none");
             }
         }

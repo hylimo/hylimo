@@ -12,7 +12,7 @@ import { RectLayoutConfig } from "./elements/rectLayoutConfig.js";
 import { SpanLayoutConfig } from "./elements/spanLayoutConfig.js";
 import { TextLayoutConfig } from "./elements/textLayoutConfig.js";
 import { VBoxLayoutConfig } from "./elements/vboxLayoutConfig.js";
-import { LayoutConfig } from "./layoutElement.js";
+import type { LayoutConfig } from "./layoutElement.js";
 import { PathLayoutConfig } from "./elements/pathLayoutConfig.js";
 import { CanvasAxisAlignedSegmentLayoutConfig } from "./elements/canvas/canvasAxisAlignedSegmentLayoutConfig.js";
 import { EllipseLayoutConfig } from "./elements/ellipseLayoutConfig.js";

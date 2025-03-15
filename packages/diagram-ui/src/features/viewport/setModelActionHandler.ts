@@ -1,6 +1,6 @@
 import { injectable } from "inversify";
-import { IActionHandler, ICommand } from "sprotty";
-import { Action } from "sprotty-protocol";
+import type { IActionHandler, ICommand } from "sprotty";
+import type { Action } from "sprotty-protocol";
 import { createFitToScreenAction } from "./fitToScreenAction.js";
 
 /**

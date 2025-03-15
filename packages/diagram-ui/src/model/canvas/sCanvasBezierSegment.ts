@@ -1,14 +1,10 @@
-import {
-    CanvasBezierSegment,
-    DefaultEditTypes,
-    EditSpecification,
-    Point,
-    SegmentLayoutInformation
-} from "@hylimo/diagram-common";
-import { VNode } from "snabbdom";
+import type { CanvasBezierSegment, Point, SegmentLayoutInformation } from "@hylimo/diagram-common";
+import { DefaultEditTypes, EditSpecification } from "@hylimo/diagram-common";
+import type { VNode } from "snabbdom";
 import { svg } from "sprotty";
 import { SCanvasConnectionSegment } from "./sCanvasConnectionSegment.js";
-import { SCanvasPoint } from "./sCanvasPoint.js";
+import type { SCanvasPoint } from "./sCanvasPoint.js";
+import type { SCanvasConnection } from "./sCanvasConnection.js";
 
 /**
  * Model for CanvasBezierSegment
@@ -51,7 +47,10 @@ export class SCanvasBezierSegment extends SCanvasConnectionSegment implements Ca
         return [this.end, this.startControlPoint, this.endControlPoint];
     }
 
-    override generateControlViewElements(layout: SegmentLayoutInformation): VNode[] {
+    override generateControlViewElements(
+        model: Readonly<SCanvasConnection>,
+        layout: SegmentLayoutInformation
+    ): VNode[] {
         const c1 = this.startControlPointPosition;
         const c2 = this.endControlPointPosition;
         const className = "bezier-handle-line";

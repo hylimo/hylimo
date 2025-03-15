@@ -1,7 +1,9 @@
 import { IncrementalUpdateAction } from "@hylimo/diagram-protocol";
 import { injectable, inject } from "inversify";
-import { Command, CommandExecutionContext, CommandReturn, TYPES } from "sprotty";
-import { SRoot } from "../../model/sRoot.js";
+import type { CommandExecutionContext, CommandReturn } from "sprotty";
+import { Command } from "sprotty";
+import type { SRoot } from "../../model/sRoot.js";
+import { TYPES } from "../types.js";
 
 @injectable()
 export class IncrementalUpdateModelCommand extends Command {
@@ -13,6 +15,7 @@ export class IncrementalUpdateModelCommand extends Command {
         const root = context.root as SRoot;
         root.changeRevision++;
         root.sequenceNumber = this.action.sequenceNumber;
+        root.incrementalUpdateCount++;
         for (const update of this.action.updates) {
             const element = context.root.index.getById(update.target);
             if (element !== undefined) {

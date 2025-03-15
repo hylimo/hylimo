@@ -1,6 +1,6 @@
-import { Action, RequestAction } from "sprotty-protocol";
-import { ToolboxEditPredictionResponseAction } from "./toolboxEditPredictionResponseAction.js";
-import { ConnectionEdit, ToolboxEdit } from "../transaction/defaultEditTypes.js";
+import type { Action, RequestAction } from "sprotty-protocol";
+import type { ToolboxEditPredictionResponseAction } from "./toolboxEditPredictionResponseAction.js";
+import type { ConnectionEdit, ToolboxEdit } from "../transaction/defaultEditTypes.js";
 
 /**
  * Action to request a prediction for a toolbox or connection edit

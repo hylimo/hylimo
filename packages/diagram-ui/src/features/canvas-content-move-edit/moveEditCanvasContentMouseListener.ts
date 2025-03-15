@@ -1,24 +1,27 @@
 import { injectable } from "inversify";
-import { EditSpecification, DefaultEditTypes, EditSpecificationEntry, groupBy } from "@hylimo/diagram-common";
-import { findParentByFeature, isMoveable, MouseListener, SModelElementImpl } from "sprotty";
-import { Action } from "sprotty-protocol";
-import { SAbsolutePoint } from "../../model/canvas/sAbsolutePoint.js";
+import type { EditSpecificationEntry } from "@hylimo/diagram-common";
+import { EditSpecification, DefaultEditTypes, groupBy } from "@hylimo/diagram-common";
+import type { SModelElementImpl } from "sprotty";
+import { findParentByFeature, isMoveable } from "sprotty";
+import type { Action } from "sprotty-protocol";
+import type { SAbsolutePoint } from "../../model/canvas/sAbsolutePoint.js";
 import { SCanvasElement } from "../../model/canvas/sCanvasElement.js";
 import { SCanvasPoint } from "../../model/canvas/sCanvasPoint.js";
 import { SLinePoint } from "../../model/canvas/sLinePoint.js";
-import { SRelativePoint } from "../../model/canvas/sRelativePoint.js";
-import { MoveHandler } from "../move/moveHandler.js";
+import type { SRelativePoint } from "../../model/canvas/sRelativePoint.js";
+import type { MoveHandler } from "../move/moveHandler.js";
 import { TranslationMoveHandler } from "./handler/translationMoveHandler.js";
 import { LineMoveHandler } from "./handler/lineMoveHandler.js";
 import { CanvasElementView, ResizePosition } from "../../views/canvas/canvasElementView.js";
 import { RotationHandler } from "./handler/rotationHandler.js";
 import { SCanvasConnection } from "../../model/canvas/sCanvasConnection.js";
-import { SRoot } from "../../model/sRoot.js";
-import { ElementsGroupedBySize, ResizeHandler } from "./handler/resizeHandler.js";
+import type { SRoot } from "../../model/sRoot.js";
+import type { ElementsGroupedBySize } from "./handler/resizeHandler.js";
+import { ResizeHandler } from "./handler/resizeHandler.js";
 import { SCanvasAxisAlignedSegment } from "../../model/canvas/sCanvasAxisAlignedSegment.js";
 import { AxisAligedSegmentEditHandler } from "./handler/axisAlignedSegmentEditHandler.js";
+import type { Matrix } from "transformation-matrix";
 import {
-    Matrix,
     compose,
     translate,
     applyToPoint,
@@ -34,11 +37,8 @@ import { isCanvasLike } from "../../model/canvas/canvasLike.js";
 import { TransactionalMoveAction } from "../move/transactionalMoveAction.js";
 import { NoopMoveHandler } from "./handler/noopMoveHandler.js";
 import { SElement } from "../../model/sElement.js";
-
-/**
- * The maximum number of updates that can be performed on the same revision.
- */
-const maxUpdatesPerRevision = 5;
+import { findResizeIconClass } from "../cursor/resizeIcon.js";
+import { MouseListener } from "../../base/mouseListener.js";
 
 /**
  * If a resize scale exceeds this value, instead resize with scale 1 in the opposite direction is performed.
@@ -55,8 +55,18 @@ const maxResizeScale = 10;
  */
 @injectable()
 export class MoveEditCanvasContentMouseListener extends MouseListener {
+    /**
+     * The maximum number of updates that can be performed on the same revision.
+     */
+    static readonly MAX_UPDATES_PER_REVISION = 5;
+
     override mouseDown(target: SModelElementImpl, event: MouseEvent): Action[] {
-        if (event.button === 0 && !(event.ctrlKey || event.altKey)) {
+        if (
+            event.button === 0 &&
+            !(event.ctrlKey || event.altKey) &&
+            this.isRegularInteractionTool() &&
+            !this.isForcedScroll(event)
+        ) {
             const moveableTarget = findParentByFeature(target, isMoveable);
             if (moveableTarget != undefined && moveableTarget instanceof SElement) {
                 const parentCanvas = findParentByFeature(target, isCanvasLike);
@@ -65,8 +75,9 @@ export class MoveEditCanvasContentMouseListener extends MouseListener {
                 }
                 const action: TransactionalMoveAction = {
                     kind: TransactionalMoveAction.KIND,
-                    handlerProvider: () => this.createHandler(moveableTarget, event) ?? new NoopMoveHandler(identity()),
-                    maxUpdatesPerRevision
+                    handlerProvider: () =>
+                        this.createHandler(moveableTarget, event) ?? new NoopMoveHandler(identity(), undefined),
+                    maxUpdatesPerRevision: MoveEditCanvasContentMouseListener.MAX_UPDATES_PER_REVISION
                 };
                 return [action];
             }
@@ -127,7 +138,8 @@ export class MoveEditCanvasContentMouseListener extends MouseListener {
             start,
             end,
             vertical,
-            this.makeRelative(target.getMouseTransformationMatrix(), event)
+            this.makeRelative(target.getMouseTransformationMatrix(), event),
+            findResizeIconClass(targetElement.classList)
         );
     }
 
@@ -173,7 +185,8 @@ export class MoveEditCanvasContentMouseListener extends MouseListener {
             target.width,
             target.height,
             elements,
-            this.makeRelative(target.getMouseTransformationMatrix(), event)
+            this.makeRelative(target.getMouseTransformationMatrix(), event),
+            findResizeIconClass(classList)
         );
     }
 

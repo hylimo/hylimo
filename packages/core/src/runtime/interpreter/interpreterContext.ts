@@ -1,13 +1,14 @@
 import { assertNumber } from "../../stdlib/typeHelpers.js";
 import { numberType } from "../../types/number.js";
 import { jsFun } from "../executableAstHelper.js";
-import { BaseObject } from "../objects/baseObject.js";
+import type { BaseObject } from "../objects/baseObject.js";
 import { BooleanObject } from "../objects/booleanObject.js";
 import { FullObject } from "../objects/fullObject.js";
 import { NullObject } from "../objects/nullObject.js";
 import { NumberObject } from "../objects/numberObject.js";
 import { StringObject } from "../objects/stringObject.js";
-import { WrapperObjectFieldRetriever, WrapperObject } from "../objects/wrapperObject.js";
+import type { WrapperObjectFieldRetriever } from "../objects/wrapperObject.js";
+import { WrapperObject } from "../objects/wrapperObject.js";
 import { RuntimeError } from "../runtimeError.js";
 import { SemanticFieldNames } from "../semanticFieldNames.js";
 

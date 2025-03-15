@@ -1,16 +1,20 @@
-import { FullObject, InterpreterContext, nativeToList } from "@hylimo/core";
-import { Size, Point, Stroke, Canvas, FontFamilyConfig, FontData, DiagramConfig } from "@hylimo/diagram-common";
-import { FontManager, SubsetFontKey } from "../font/fontManager.js";
-import { TextLayoutResult, TextLayouter } from "../font/textLayouter.js";
+import type { FullObject, InterpreterContext } from "@hylimo/core";
+import { nativeToList } from "@hylimo/core";
+import type { Size, Stroke, FontFamilyConfig, FontData, DiagramConfig } from "@hylimo/diagram-common";
+import { Point, Canvas } from "@hylimo/diagram-common";
+import type { SubsetFontKey } from "../font/fontManager.js";
+import { FontManager } from "../font/fontManager.js";
+import type { TextLayoutResult } from "../font/textLayouter.js";
+import { TextLayouter } from "../font/textLayouter.js";
 import { generateStyles } from "../../styles.js";
-import { LayoutedDiagram } from "../diagramLayoutResult.js";
-import { LayoutConfig, LayoutElement, SizeConstraints } from "../layoutElement.js";
+import type { LayoutedDiagram } from "../diagramLayoutResult.js";
+import type { LayoutConfig, LayoutElement, SizeConstraints } from "../layoutElement.js";
 import { layouts } from "../layouts.js";
 import { FontCollection } from "../font/fontCollection.js";
 import { LayoutCache } from "./layoutCache.js";
-import { StretchMode } from "../elements/pathLayoutConfig.js";
+import type { StretchMode } from "../elements/pathLayoutConfig.js";
 import { Layout } from "./layout.js";
-import { SubsettedFont } from "../font/fontFamily.js";
+import type { SubsettedFont } from "../font/fontFamily.js";
 import { SubsetCollector } from "../font/subsetCollector.js";
 
 /**
@@ -189,7 +193,8 @@ export class LayoutEngine {
                     position: { x: -canvas.dx, y: -canvas.dy },
                     size: { width: canvas.width, height: canvas.height }
                 },
-                fonts: this.generateSubsettedFontData(layout)
+                fonts: this.generateSubsettedFontData(layout),
+                preview: predictionMode
             },
             elementLookup: layout.elementLookup,
             layoutElementLookup: layout.layoutElementLookup

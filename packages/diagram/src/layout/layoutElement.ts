@@ -1,8 +1,8 @@
-import { ExecutableAbstractFunctionExpression, FullObject, Type } from "@hylimo/core";
-import { EditSpecification, Element, Line, Point, Size } from "@hylimo/diagram-common";
-import { Layout } from "./engine/layout.js";
-import { Bounds } from "@hylimo/diagram-common";
-import { Matrix } from "transformation-matrix";
+import type { ExecutableAbstractFunctionExpression, FullObject, Type } from "@hylimo/core";
+import type { EditSpecification, Element, Line, Point, Size } from "@hylimo/diagram-common";
+import type { Layout } from "./engine/layout.js";
+import type { Bounds } from "@hylimo/diagram-common";
+import type { Matrix } from "transformation-matrix";
 
 /**
  * Size constraints from min to max size
@@ -236,6 +236,11 @@ export interface LayoutConfig {
      * What type of element is supported
      */
     type: string;
+    /**
+     * A string prefix which uses a specific group of ids for the element
+     * To keep short ids, should be short / a single character
+     */
+    idGroup: string;
     /**
      * List of style attributes it supports
      */

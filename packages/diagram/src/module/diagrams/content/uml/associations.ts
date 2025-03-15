@@ -1,9 +1,9 @@
-import { InterpreterModule } from "@hylimo/core";
+import { ContentModule } from "../contentModule.js";
 
 /**
  * Module providing association operators
  */
-export const associationsModule = InterpreterModule.create(
+export const associationsModule = ContentModule.create(
     "uml/associations",
     ["common/defaultMarkers"],
     [],
