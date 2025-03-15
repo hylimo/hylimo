@@ -36,7 +36,7 @@ import { diagramIdProviderKey, languageClientKey, languageServerConfigKey } from
 import { Disposable } from "vscode-languageserver-protocol";
 import { onKeyDown, useResizeObserver } from "@vueuse/core";
 import { useData } from "vitepress";
-import * as monaco from '@codingame/monaco-vscode-editor-api';
+import * as monaco from "@codingame/monaco-vscode-editor-api";
 
 defineProps({
     horizontal: {
@@ -156,7 +156,7 @@ onMounted(async () => {
     const editor = wrapper.getEditor()!;
     hideMainContent.value = false;
 
-    wrapper.updateCodeResources
+    wrapper.updateCodeResources;
     editorModel.value = editor.getModel()!;
     const pushStackElement = editorModel.value.pushStackElement.bind(editorModel);
 
