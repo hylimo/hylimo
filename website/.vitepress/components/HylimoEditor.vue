@@ -92,7 +92,7 @@ const transactionState = ref(TransactionState.None);
 const hideMainContent = ref(true);
 
 watch(model, (newValue) => {
-    if (editorModel.value != undefined) {
+    if (editorModel.value != undefined && newValue != editorModel.value.getValue()) {
         editorModel.value.setValue(newValue);
     }
 });

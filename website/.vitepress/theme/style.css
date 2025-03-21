@@ -111,15 +111,17 @@
     .nav-teleport-target#diagram-select {
         flex-grow: 1;
     }
+
+    body:has(.diagram-select) {
+        .VPNavBarMenu.menu {
+            flex-grow: 1;
+        }
+    }
 }
 
 body:has(.diagram-select) {
     .VPNavBarSearch {
         display: none;
-    }
-
-    .VPNavBarMenu.menu {
-        flex-grow: 1;
     }
 }
 

@@ -12,6 +12,7 @@
         <ClientOnly>
             <Teleport v-if="codeWithFileHandle == undefined" to="#diagram-select">
                 <DiagramChooser
+                    v-if="codeWithFileHandle == undefined"
                     v-model="filename"
                     :all-diagrams="allDiagrams"
                     @create-diagram="createDiagram"
@@ -96,10 +97,11 @@ const localStorageDiagrams = useLocalStorage<Record<string, Omit<DiagramMetadata
 
 const allDiagrams = computed(() => {
     const diagrams = localStorageDiagrams.value;
-    return Object.keys(diagrams)
-        .map((filename) => ({
+    return Object.entries(diagrams)
+        .filter(([filename]) => filename != "")
+        .map(([filename, value]) => ({
             filename,
-            ...diagrams[filename]
+            ...value
         }))
         .sort((a, b) => new Date(b.lastChange).getTime() - new Date(a.lastChange).getTime());
 });
@@ -120,19 +122,25 @@ const code = computed({
         if (codeWithFileHandle.value != undefined) {
             fileCode.value = value;
         } else {
-            saveCurrentDiagram(value);
+            if (localStorageCode.value != value) {
+                localStorageCode.value = value;
+                saveDiagram(filename.value, value);
+            }
         }
     }
 });
 
 function openMostRecentLocalstorageDiagram() {
     const diagrams = allDiagrams.value;
-    if (diagrams.length == 0) {
+    if (diagrams.length != 0) {
+        const diagram = diagrams[0];
+        filename.value = diagram.filename;
+    } else if (localStorageDiagrams.value[""] != undefined) {
+        filename.value = "";
+        loadLocalStorageDiagram("", localStorageDiagrams.value[""].version);
+    } else {
         localStorageCode.value = defaultDiagram;
-        return;
     }
-    const diagram = diagrams[0];
-    filename.value = diagram.filename;
 }
 
 watch(filename, (name) => {
@@ -148,35 +156,35 @@ function openLocalStorageDiagram(diagram: string) {
     const diagrams = localStorageDiagrams.value;
 
     if (localStorageDiagrams.value[diagram] == undefined) {
-        console.error(`diagram ${diagram} was not found. Possible options: ${diagrams}`);
-        return;
+        throw new Error(`diagram ${diagram} was not found. Possible options: ${diagrams}`);
     }
     const newDiagram = localStorageDiagrams.value[diagram];
 
     loadLocalStorageDiagram(diagram, newDiagram.version);
-    filename.value = diagram;
 }
 
 /**
- * Saves the current diagram to local storage.
+ * Saves the code under the given name in the local storage.
+ * Also updates metadata for the diagram.
  *
- * @param value the text of the current diagram
+ * @param name the diagram name
+ * @param code the diagram source code
  */
-function saveCurrentDiagram(value: string) {
+function saveDiagram(name: string, code: string) {
     const diagrams = localStorageDiagrams.value;
 
-    let diagramMetadata = localStorageDiagrams.value[filename.value];
+    let diagramMetadata = localStorageDiagrams.value[name];
     if (diagramMetadata == undefined) {
         diagramMetadata = {
             version: serializationVersion,
             lastChange: new Date().toISOString()
         };
-        diagrams[filename.value] = diagramMetadata;
+        diagrams[name] = diagramMetadata;
     } else {
         diagramMetadata.lastChange = new Date().toISOString();
     }
 
-    saveDiagramToLocalstorage(filename.value, diagramMetadata.version, value);
+    saveDiagramToLocalstorage(name, diagramMetadata.version, code);
 }
 
 /**
@@ -209,20 +217,24 @@ function loadLocalStorageDiagram(filename: string, version: number) {
     if (diagram) {
         localStorageCode.value = diagram;
     } else {
-        console.error(`Could not load diagram ${filename} as it does not exist.`);
+        throw new Error(`Could not load diagram ${filename} as it does not exist.`);
     }
 }
 
 function createDiagram(name: string) {
+    saveDiagram(name, code.value);
     filename.value = name;
-    saveCurrentDiagram(code.value);
 }
 
-function deleteDiagram(filename: string) {
-    const deletedDiagram = localStorageDiagrams.value[filename];
+function deleteDiagram(name: string) {
+    const deletedDiagram = localStorageDiagrams.value[name];
     if (deletedDiagram != undefined) {
-        delete localStorageDiagrams.value[filename];
-        deleteDiagramText(filename, deletedDiagram.version);
+        delete localStorageDiagrams.value[name];
+        deleteDiagramText(name, deletedDiagram.version);
+        if (name == filename.value) {
+            saveDiagram("", code.value);
+            filename.value = "";
+        }
     }
 }
 

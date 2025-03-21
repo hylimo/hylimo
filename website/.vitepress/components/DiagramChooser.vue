@@ -2,6 +2,7 @@
     <div class="diagram-chooser" ref="diagramChooser">
         <input
             v-model="inputFilenameOrPlaceholder"
+            ref="diagramSelect"
             class="diagram-select"
             :class="{ untitled: !showDialog && !inputFilename }"
             placeholder="Search or create diagram"
@@ -12,6 +13,7 @@
             @click="openDialog"
             @input="openDialog"
         />
+        <span class="vpi-file-stack-light select-icon" />
         <Transition name="dialog">
             <div v-show="showDialog && diagramEntries.length > 0" class="dialog" @mousemove="onMouseMove">
                 <div
@@ -38,7 +40,7 @@
                             last edited
                             <relative-time :datetime="diagram.lastChange" />
                         </span>
-                        <button class="delete-button icon" @click="deleteDiagram(diagram)">
+                        <button class="delete-button icon" @click.stop="deleteDiagram(diagram)">
                             <span class="vpi-trashcan" />
                         </button>
                     </template>
@@ -85,6 +87,7 @@ const showDialog = ref(false);
 const disableMouseOver = ref(true);
 const selectedIndex = ref(-1);
 const diagramChooser = ref<HTMLElement | null>(null);
+const diagramSelect = ref<HTMLInputElement | null>(null);
 const diagramEntries = ref<DiagramEntry[]>([]);
 
 const inputFilenameOrPlaceholder = computed({
@@ -115,7 +118,7 @@ const searchIndex = computed(() => {
     return markRaw(index);
 });
 
-watch(inputFilename, (name) => {
+watch([inputFilename, () => props.allDiagrams], ([name]) => {
     if (name.length === 0) {
         diagramEntries.value = props.allDiagrams;
         return;
@@ -137,13 +140,18 @@ function openDialog(): void {
     diagramEntries.value = props.allDiagrams;
 }
 
+function closeDialog(): void {
+    showDialog.value = false;
+    diagramSelect?.value?.blur();
+}
+
 function selectDiagram(diagram: DiagramEntry): void {
     if (diagram.isNew) {
         emit("createDiagram", diagram.filename);
     } else {
         filename.value = diagram.filename;
     }
-    showDialog.value = false;
+    closeDialog();
 }
 
 function deleteDiagram(diagram: DiagramEntry): void {
@@ -154,7 +162,7 @@ function deleteDiagram(diagram: DiagramEntry): void {
 }
 
 onClickOutside(diagramChooser, () => {
-    showDialog.value = false;
+    closeDialog();
 });
 
 watch(diagramEntries, (r) => {
@@ -212,7 +220,7 @@ onKeyStroke("Enter", (e) => {
 });
 
 onKeyStroke("Escape", () => {
-    showDialog.value = false;
+    closeDialog();
 });
 
 function onMouseMove(e: MouseEvent) {
@@ -233,15 +241,19 @@ function onMouseMove(e: MouseEvent) {
     position: relative;
 }
 
+@media (max-width: 768px) {
+    .diagram-chooser:not(.screen-menu) {
+        display: none;
+    }
+}
+
 .diagram-select {
     border-radius: 6px;
-    padding: 2px 12px 2px 4px;
+    padding: 2px 12px 2px 28px;
     height: 40px;
-    max-width: 40ch;
-    width: auto;
+    width: 30ch;
     flex-shrink: 1;
     box-sizing: border-box;
-    min-width: 5ch;
     background-color: var(--vp-c-bg-alt);
     border: 1px solid transparent;
 }
@@ -253,6 +265,17 @@ function onMouseMove(e: MouseEvent) {
 
 .diagram-select.untitled {
     font-style: italic;
+}
+
+.select-icon {
+    position: absolute;
+    left: 4px;
+    top: 0;
+    bottom: 0;
+    margin: auto;
+    width: 20px;
+    height: 20px;
+    pointer-events: none;
 }
 
 .available-diagram-filename {
