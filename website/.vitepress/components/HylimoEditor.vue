@@ -92,7 +92,7 @@ const transactionState = ref(TransactionState.None);
 const hideMainContent = ref(true);
 
 watch(model, (newValue) => {
-    if (editorModel.value) {
+    if (editorModel.value != undefined) {
         editorModel.value.setValue(newValue);
     }
 });
@@ -158,7 +158,7 @@ onMounted(async () => {
 
     wrapper.updateCodeResources;
     editorModel.value = editor.getModel()!;
-    const pushStackElement = editorModel.value.pushStackElement.bind(editorModel);
+    const pushStackElement = editorModel.value.pushStackElement.bind(editorModel.value);
 
     // override pushStackElement to ignore undo stops during transactions
     editorModel.value.pushStackElement = () => {

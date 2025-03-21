@@ -93,7 +93,7 @@
         display: flex !important;
     }
 
-    .VPNavBarMenu .nav-teleport-target:first-of-type::before {
+    .VPNavBarMenu .nav-teleport-target#copy-diagram-link::before {
         margin-right: 8px;
         margin-left: 8px;
         width: 1px;
@@ -106,6 +106,20 @@
         .container > .title {
             padding-left: 32px !important;
         }
+    }
+
+    .nav-teleport-target#diagram-select {
+        flex-grow: 1;
+    }
+}
+
+body:has(.diagram-select) {
+    .VPNavBarSearch {
+        display: none;
+    }
+
+    .VPNavBarMenu.menu {
+        flex-grow: 1;
     }
 }
 
