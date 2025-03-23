@@ -3,19 +3,35 @@
         <VPNav class="navbar" />
         <RegisterSW />
         <HylimoEditor
-            v-model="code"
+            v-if="diagramSource != undefined"
+            v-model="diagramSource.code.value"
             :horizontal="height > width && width < 800"
             @update:diagram="diagram = $event"
             @save="save"
             class="main-content"
         />
         <ClientOnly>
+            <Teleport to="#diagram-select">
+                <DiagramChooser
+                    :filename="diagramSource?.filename"
+                    :all-diagrams="allDiagrams"
+                    :readonly="diagramSource?.type == 'file'"
+                    @uopen-diagram="openDiagram($event).then((diagram) => (diagramSource = diagram))"
+                    @create-diagram="createDiagram($event, diagramSource?.code.value ?? defaultDiagram)"
+                    @delete-diagram="deleteDiagram"
+                ></DiagramChooser>
+            </Teleport>
             <Teleport to="#copy-diagram-link">
                 <IconButton label="Copy diagram link" icon="vpi-link" @click="copyLink" />
                 <span class="tooltip" :class="{ active: copiedSuccess }">Copied!</span>
             </Teleport>
-            <Teleport v-if="codeWithFileHandle != undefined" to="#save-diagram">
-                <IconButton label="Save diagram" icon="vpi-save" @click="saveFile" :disabled="!hasFileCodeChanges" />
+            <Teleport v-if="diagramSource?.canSave?.value != undefined" to="#save-diagram">
+                <IconButton
+                    label="Save diagram"
+                    icon="vpi-save"
+                    @click="saveDiagram"
+                    :disabled="!diagramSource.canSave.value"
+                />
                 <span class="tooltip" :class="{ active: savedSuccess }">Saved</span>
             </Teleport>
             <Teleport to="#export-diagram">
@@ -35,20 +51,22 @@
 </template>
 <script setup lang="ts">
 import VPNav from "vitepress/dist/client/theme-default/components/VPNav.vue";
-import { useLocalStorage, onKeyStroke, useWindowSize, useEventListener, onKeyDown } from "@vueuse/core";
+import { onKeyStroke, useEventListener, useWindowSize } from "@vueuse/core";
 import { defineClientComponent, useData } from "vitepress";
 import IconButton from "./IconButton.vue";
 import VPFlyout from "vitepress/dist/client/theme-default/components/VPFlyout.vue";
 import { Root } from "@hylimo/diagram-common";
-import { computed, inject, ref } from "vue";
+import { computed, inject, onBeforeMount, ref, shallowRef } from "vue";
 import { SVGRenderer } from "@hylimo/diagram-render-svg";
 import { PDFRenderer } from "@hylimo/diagram-render-pdf";
 import fileSaver from "file-saver";
-import { serialize, deserialize } from "../util/serialization.js";
-import { onBeforeMount } from "vue";
+import { deserialize, serialize } from "../util/serialization.js";
 import RegisterSW from "./RegisterSW.vue";
-import { openDiagram, type CodeWithFileHandle } from "../util/diagramOpener";
+import { openDiagramFromLaunchQueue } from "../util/diagramFileSource";
 import { languageServerConfigKey } from "../theme/injectionKeys";
+import DiagramChooser from "./DiagramChooser.vue";
+import { useDiagramStorage } from "../util/diagramStorageSource";
+import type { DiagramSource } from "../util/diagramSource";
 
 const HylimoEditor = defineClientComponent(() => import("./HylimoEditor.vue"));
 
@@ -56,26 +74,48 @@ const { isDark, site } = useData();
 const { width, height } = useWindowSize();
 const languageServerConfig = inject(languageServerConfigKey)!;
 
-const localStorageCode = useLocalStorage(
-    "code",
-    'classDiagram {\n    class("HelloWorld") {\n        public {\n            hello : string\n        }\n    }\n}'
-);
-const fileCode = ref<string>();
-const codeWithFileHandle = ref<CodeWithFileHandle>();
-const hasFileCodeChanges = computed(
-    () => fileCode.value != undefined && fileCode.value != codeWithFileHandle.value?.code
-);
-const code = computed({
-    get: () => fileCode.value ?? localStorageCode.value,
-    set: (value: string) => {
-        if (codeWithFileHandle.value != undefined) {
-            fileCode.value = value;
-        } else {
-            localStorageCode.value = value;
+const diagramSource = shallowRef<DiagramSource>();
+
+const { diagrams, addDiagram, removeDiagram, openDiagram, initialized } = useDiagramStorage();
+
+const allDiagrams = computed(() => {
+    return Object.values(diagrams.value)
+        .filter((diagram) => diagram.filename != "")
+        .sort((a, b) => new Date(b.lastChange).getTime() - new Date(a.lastChange).getTime());
+});
+
+const defaultDiagram =
+    'classDiagram {\n    class("HelloWorld") {\n        public {\n            hello : string\n        }\n    }\n}';
+
+async function createDiagram(name: string, code: string) {
+    await addDiagram(name, code);
+    diagramSource.value = await openDiagram(name);
+}
+
+async function deleteDiagram(name: string) {
+    const deletedDiagram = diagrams.value[name];
+    if (deletedDiagram != undefined) {
+        await removeDiagram(name);
+        if (name == diagramSource.value?.filename) {
+            await createDiagram("", diagramSource.value.code.value);
         }
     }
-});
-const baseName = computed(() => codeWithFileHandle.value?.fileHandle?.name?.match(/^(.*?)(\.hyl)?$/)?.[1] ?? "diagram");
+}
+
+async function openMostRecentDiagramFromStorage(): Promise<DiagramSource> {
+    await initialized;
+    const sortedDiagrams = allDiagrams.value;
+    if (sortedDiagrams.length != 0) {
+        const diagram = sortedDiagrams[0];
+        return openDiagram(diagram.filename);
+    } else {
+        if (diagrams.value[""] == undefined) {
+            await addDiagram("", defaultDiagram);
+        }
+        return openDiagram("");
+    }
+}
+
 const diagram = ref<Root>();
 const successMessageTimeout = 1000;
 const copiedSuccess = ref(false);
@@ -101,40 +141,45 @@ onKeyStroke("E", (event) => {
 });
 
 function save() {
-    if (codeWithFileHandle.value != undefined) {
-        saveFile();
+    if (diagramSource.value?.canSave?.value != undefined) {
+        saveDiagram();
     } else {
         downloadSource();
     }
 }
 
 function downloadSVG(textAsPath: boolean) {
+    const source = diagramSource.value;
+    if (source == undefined) {
+        return;
+    }
     const svgBlob = new Blob([svgRenderer.render(diagram.value!, textAsPath)], { type: "image/svg+xml;charset=utf-8" });
-    fileSaver.saveAs(svgBlob, baseName.value + ".svg");
+    fileSaver.saveAs(svgBlob, source.baseName + ".svg");
 }
 
 async function downloadPDF() {
+    const source = diagramSource.value;
+    if (source == undefined) {
+        return;
+    }
     const config = languageServerConfig.diagramConfig.value;
     const pdf = await pdfRenderer.render(
         diagram.value!,
         isDark.value ? config.darkBackgroundColor : config.lightBackgroundColor
     );
-    fileSaver.saveAs(new Blob(pdf, { type: "application/pdf" }), baseName.value + ".pdf");
+    fileSaver.saveAs(new Blob(pdf, { type: "application/pdf" }), source.baseName + ".pdf");
 }
 
 function downloadSource() {
-    fileSaver.saveAs(new Blob([code.value]), baseName.value + ".hyl");
+    const source = diagramSource.value;
+    if (source == undefined) {
+        return;
+    }
+    fileSaver.saveAs(new Blob([source.code.value]), source.baseName + ".hyl");
 }
 
-async function saveFile() {
-    const fileHandle = codeWithFileHandle.value?.fileHandle;
-    if (fileHandle == undefined) {
-        throw new Error("No file handle");
-    }
-    const writable = await fileHandle.createWritable();
-    await writable.write(code.value);
-    await writable.close();
-    codeWithFileHandle.value!.code = code.value;
+async function saveDiagram() {
+    await diagramSource.value?.save();
     savedSuccess.value = true;
     setTimeout(() => {
         savedSuccess.value = false;
@@ -142,7 +187,11 @@ async function saveFile() {
 }
 
 function copyLink() {
-    const data = serialize(code.value, "pako");
+    const source = diagramSource.value;
+    if (source == undefined) {
+        return;
+    }
+    const data = serialize(source.code.value, "pako");
     const url = new URL(site.value.base, window.location.href);
     navigator.clipboard.writeText(url.toString() + "#" + data);
     copiedSuccess.value = true;
@@ -151,30 +200,25 @@ function copyLink() {
     }, successMessageTimeout);
 }
 
-onBeforeMount(() => {
+async function openDiagramBeforeMount(): Promise<void> {
     const hash = window.location.hash;
     if (hash) {
-        try {
-            code.value = deserialize(hash.substring(1));
-            history.replaceState(null, "", window.location.pathname);
-        } catch (e) {
-            console.warn("Failed to deserialize diagram from URL", e);
-        }
+        await createDiagram("", deserialize(hash.substring(1)));
+        history.replaceState(null, "", window.location.pathname);
     } else {
-        openDiagram()
-            .then((diagram) => {
-                if (diagram != undefined) {
-                    codeWithFileHandle.value = diagram;
-                    fileCode.value = diagram.code;
-                }
-            })
-            .catch((e) => {
-                // eslint-disable-next-line no-console
-                console.error("Failed to open diagram", e);
-            });
+        const diagram = await openMostRecentDiagramFromStorage();
+        diagramSource.value = diagram;
+        const launchDiagram = await openDiagramFromLaunchQueue();
+        if (launchDiagram != undefined) {
+            diagramSource.value = launchDiagram;
+        }
     }
+}
+
+onBeforeMount(() => {
+    openDiagramBeforeMount();
     useEventListener(window, "beforeunload", (event) => {
-        if (hasFileCodeChanges.value) {
+        if (diagramSource.value?.canSave.value) {
             event.preventDefault();
         }
     });
@@ -186,9 +230,11 @@ onBeforeMount(() => {
     display: flex;
     flex-direction: column;
 }
+
 .navbar {
     position: relative;
 }
+
 .main-content {
     width: 100%;
     flex-grow: 1;

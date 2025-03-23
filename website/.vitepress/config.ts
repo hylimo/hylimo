@@ -13,6 +13,7 @@ export default withPwa(
                 height: 35
             },
             nav: [
+                { component: "NavTeleportTarget", props: { "target-id": "diagram-select" } },
                 { text: "Docs", link: "/docs/docs" },
                 { component: "NavTeleportTarget", props: { "target-id": "copy-diagram-link" } },
                 { component: "NavTeleportTarget", props: { "target-id": "save-diagram" } },
@@ -74,6 +75,13 @@ export default withPwa(
         vite: {
             resolve: {
                 dedupe: ["vscode"]
+            }
+        },
+        vue: {
+            template: {
+                compilerOptions: {
+                    isCustomElement: (tag) => tag == "relative-time"
+                }
             }
         },
         pwa: {

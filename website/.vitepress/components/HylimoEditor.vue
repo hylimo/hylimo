@@ -17,8 +17,8 @@ import "reflect-metadata";
 // @ts-ignore
 import { Splitpanes, Pane } from "splitpanes";
 import "splitpanes/dist/splitpanes.css";
-import { ref, onBeforeUnmount, computed } from "vue";
-import { ActionHandlerRegistry, type IActionDispatcher } from "sprotty";
+import { ref, onBeforeUnmount, computed, watch } from "vue";
+import type { ActionHandlerRegistry, IActionDispatcher } from "sprotty";
 import { RequestModelAction, type ActionMessage } from "sprotty-protocol";
 import {
     DiagramActionNotification,
@@ -33,9 +33,10 @@ import { shallowRef } from "vue";
 import { inject } from "vue";
 import { language } from "../theme/lspPlugin";
 import { diagramIdProviderKey, languageClientKey, languageServerConfigKey } from "../theme/injectionKeys";
-import { Disposable } from "vscode-languageserver-protocol";
+import type { Disposable } from "vscode-languageserver-protocol";
 import { onKeyDown, useResizeObserver } from "@vueuse/core";
 import { useData } from "vitepress";
+import * as monaco from "@codingame/monaco-vscode-editor-api";
 
 defineProps({
     horizontal: {
@@ -86,8 +87,15 @@ const diagramBackground = computed(() => {
     return isDark.value ? config.darkBackgroundColor : config.lightBackgroundColor;
 });
 const actionDispatcher = shallowRef<IActionDispatcher>();
+const editorModel = shallowRef<monaco.editor.ITextModel>();
 const transactionState = ref(TransactionState.None);
 const hideMainContent = ref(true);
+
+watch(model, (newValue) => {
+    if (editorModel.value != undefined && newValue != editorModel.value.getValue()) {
+        editorModel.value.setValue(newValue);
+    }
+});
 
 useResizeObserver(sprottyWrapper, () => {
     actionDispatcher.value?.dispatch({ kind: ResetCanvasBoundsAction.KIND } satisfies ResetCanvasBoundsAction);
@@ -148,17 +156,18 @@ onMounted(async () => {
     const editor = wrapper.getEditor()!;
     hideMainContent.value = false;
 
-    const editorModel = editor.getModel()!;
-    const pushStackElement = editorModel.pushStackElement.bind(editorModel);
+    wrapper.updateCodeResources;
+    editorModel.value = editor.getModel()!;
+    const pushStackElement = editorModel.value.pushStackElement.bind(editorModel.value);
 
     // override pushStackElement to ignore undo stops during transactions
-    editorModel.pushStackElement = () => {
+    editorModel.value.pushStackElement = () => {
         if (transactionState.value == TransactionState.None) {
             pushStackElement();
         }
     };
 
-    editorModel.onDidChangeContent(() => {
+    editorModel.value.onDidChangeContent(() => {
         model.value = editor.getValue();
         if (transactionState.value == TransactionState.Committed) {
             // it's important to do this here, as by this, the undo stop before applying the last update is still ignored,
@@ -225,7 +234,7 @@ onMounted(async () => {
         }
 
         protected override handleTransactionStart(): void {
-            editorModel.pushStackElement();
+            editorModel.value?.pushStackElement();
             transactionState.value = TransactionState.InProgress;
         }
 
