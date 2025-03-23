@@ -119,12 +119,6 @@
     }
 }
 
-body:has(.diagram-select) {
-    .VPNavBarSearch {
-        display: none;
-    }
-}
-
 .VPSocialLinks,
 .VPNavBarExtra {
     margin-right: 8px !important;

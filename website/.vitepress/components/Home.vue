@@ -16,7 +16,7 @@
                     :filename="diagramSource?.filename"
                     :all-diagrams="allDiagrams"
                     :readonly="diagramSource?.type == 'file'"
-                    @uopen-diagram="openDiagram($event).then((diagram) => (diagramSource = diagram))"
+                    @open-diagram="openDiagram($event).then((diagram) => (diagramSource = diagram))"
                     @create-diagram="createDiagram($event, diagramSource?.code.value ?? defaultDiagram)"
                     @delete-diagram="deleteDiagram"
                 ></DiagramChooser>
@@ -233,6 +233,10 @@ onBeforeMount(() => {
 
 .navbar {
     position: relative;
+}
+
+.navbar :deep(.VPNavBarSearch) {
+    display: none;
 }
 
 .main-content {

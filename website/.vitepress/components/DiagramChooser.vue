@@ -272,6 +272,9 @@ function onMouseMove(e: MouseEvent) {
     box-sizing: border-box;
     background-color: var(--vp-c-bg-alt);
     border: 1px solid transparent;
+    font-size: 13px;
+    font-family: var(--vp-font-family-base);
+    font-weight: 500;
 }
 
 .diagram-select:hover:not(:disabled),
@@ -292,6 +295,7 @@ function onMouseMove(e: MouseEvent) {
     width: 20px;
     height: 20px;
     pointer-events: none;
+    color: var(--vp-c-text-2);
 }
 
 .select-icon.vpi-file-light {

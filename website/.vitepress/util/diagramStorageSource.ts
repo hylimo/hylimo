@@ -118,6 +118,7 @@ export function useDiagramStorage(): DiagramStorage {
         const meta: DiagramMetadata = { filename, lastChange: new Date().toISOString() };
         await db.add("diagrams", diagram);
         await db.add("metadata", meta);
+        diagrams.value[filename] = meta;
         channel.postMessage({ added: meta });
     }
 
@@ -125,6 +126,7 @@ export function useDiagramStorage(): DiagramStorage {
         const db = await dbPromise;
         await db.delete("diagrams", filename);
         await db.delete("metadata", filename);
+        delete diagrams.value[filename];
         channel.postMessage({ removed: filename });
     }
 
