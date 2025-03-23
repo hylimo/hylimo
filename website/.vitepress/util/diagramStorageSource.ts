@@ -59,7 +59,11 @@ const channelName = "diagramsChange";
  * @returns An object with the metadata collection, initialization promise, and functions to load, save, add and remove diagrams.
  */
 export function useDiagramStorage() {
-    const dbPromise = getDB();
+    const dbPromise = new Promise<IDBPDatabase<DiagramDBSchema>>((resolve, reject) => {
+        if (!import.meta.env.SSR) {
+            getDB().then(resolve, reject);
+        }
+    });
     const diagrams = ref<Record<string, DiagramMetadata>>({});
     const channel = new BroadcastChannel(channelName);
 
