@@ -53,17 +53,55 @@ async function getDB(): Promise<IDBPDatabase<DiagramDBSchema>> {
  */
 const channelName = "diagramsChange";
 
+export interface DiagramStorage {
+    /**
+     * The collection of diagram metadata.
+     */
+    diagrams: Ref<Record<string, DiagramMetadata>>;
+    /**
+     * Add a new diagram to the storage.
+     *
+     * @param filename the filename of the diagram
+     * @param code initial code of the diagram
+     */
+    addDiagram: (filename: string, code: string) => Promise<void>;
+    /**
+     * Remove a diagram from the storage.
+     *
+     * @param filename the filename of the diagram
+     */
+    removeDiagram: (filename: string) => Promise<void>;
+    /**
+     * Open a diagram from the storage.
+     *
+     * @param filename the filename of the diagram
+     * @returns the diagram source
+     */
+    openDiagram: (filename: string) => Promise<DiagramSource>;
+    /**
+     * Promise that resolves when the storage is initialized.
+     */
+    initialized: Promise<void>;
+}
+
 /**
  * Hook to manage the storage of diagrams using IndexedDB.
  *
  * @returns An object with the metadata collection, initialization promise, and functions to load, save, add and remove diagrams.
  */
-export function useDiagramStorage() {
-    const dbPromise = new Promise<IDBPDatabase<DiagramDBSchema>>((resolve, reject) => {
-        if (!import.meta.env.SSR) {
-            getDB().then(resolve, reject);
-        }
-    });
+export function useDiagramStorage(): DiagramStorage {
+    if (import.meta.env.SSR) {
+        return {
+            diagrams: ref({}),
+            addDiagram: async () => {},
+            removeDiagram: async () => {},
+            openDiagram: async () => {
+                throw new Error("Method not implemented.");
+            },
+            initialized: Promise.resolve()
+        };
+    }
+    const dbPromise = getDB();
     const diagrams = ref<Record<string, DiagramMetadata>>({});
     const channel = new BroadcastChannel(channelName);
 

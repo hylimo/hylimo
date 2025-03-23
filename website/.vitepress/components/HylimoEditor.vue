@@ -18,7 +18,7 @@ import "reflect-metadata";
 import { Splitpanes, Pane } from "splitpanes";
 import "splitpanes/dist/splitpanes.css";
 import { ref, onBeforeUnmount, computed, watch } from "vue";
-import { ActionHandlerRegistry, type IActionDispatcher } from "sprotty";
+import type { ActionHandlerRegistry, IActionDispatcher } from "sprotty";
 import { RequestModelAction, type ActionMessage } from "sprotty-protocol";
 import {
     DiagramActionNotification,
@@ -33,7 +33,7 @@ import { shallowRef } from "vue";
 import { inject } from "vue";
 import { language } from "../theme/lspPlugin";
 import { diagramIdProviderKey, languageClientKey, languageServerConfigKey } from "../theme/injectionKeys";
-import { Disposable } from "vscode-languageserver-protocol";
+import type { Disposable } from "vscode-languageserver-protocol";
 import { onKeyDown, useResizeObserver } from "@vueuse/core";
 import { useData } from "vitepress";
 import * as monaco from "@codingame/monaco-vscode-editor-api";
