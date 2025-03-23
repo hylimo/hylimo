@@ -28,6 +28,7 @@
         "@hylimo/language-server": "^1.1.2",
         "@vueuse/core": "^13.0.0",
         "file-saver": "^2.0.5",
+        "idb": "^8.0.2",
         "js-base64": "^3.7.7",
         "lucide": "^0.482.0",
         "monaco-editor": "npm:@codingame/monaco-vscode-editor-api@~15.0.2",

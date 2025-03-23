@@ -1,3 +1,6 @@
+import { computed, ref, type Ref } from "vue";
+import type { DiagramSource } from "./diagramSource";
+
 declare global {
     interface LaunchParams {
         files: FileSystemHandle[];
@@ -13,25 +16,11 @@ declare global {
 }
 
 /**
- * A code file with a file handle.
- */
-export interface CodeWithFileHandle {
-    /**
-     * The code of the file.
-     */
-    code: string;
-    /**
-     * The file handle of the file.
-     */
-    fileHandle: FileSystemFileHandle;
-}
-
-/**
  * Tries to open a diagram contained within the browser launch queue.
  *
  * @returns the diagram included in the file handle or undefined if no file was found
  */
-export async function openDiagram(): Promise<CodeWithFileHandle | undefined> {
+export async function openDiagramFromLaunchQueue(): Promise<DiagramSource | undefined> {
     if (!("launchQueue" in window)) {
         return undefined;
     }
@@ -49,12 +38,40 @@ export async function openDiagram(): Promise<CodeWithFileHandle | undefined> {
 }
 
 /**
+ * A diagram source that is backed by a file.
+ */
+class DiagramFileSource implements DiagramSource {
+    readonly code: Ref<string>;
+    private readonly savedCode: Ref<string>;
+    readonly canSave: Ref<boolean | undefined>;
+    readonly type = "file";
+
+    constructor(
+        readonly filename: string,
+        readonly baseName: string,
+        private readonly fileHandle: FileSystemFileHandle,
+        code: string
+    ) {
+        this.code = ref(code);
+        this.savedCode = ref(code);
+        this.canSave = computed(() => this.code.value !== this.savedCode.value);
+    }
+
+    async save(): Promise<void> {
+        const writable = await this.fileHandle.createWritable();
+        await writable.write(this.code.value);
+        await writable.close();
+        this.savedCode.value = this.code.value;
+    }
+}
+
+/**
  * Loads the given diagram from the given file.
  *
  * @param files the files in the launch queue. Should only have a single element.
- * @returns the diagram included in the file handle or undefined if no file was found
+ * @returns the diagram source to use or undefined if no file was found
  */
-async function handleFiles(files: FileSystemHandle[]): Promise<CodeWithFileHandle | undefined> {
+async function handleFiles(files: FileSystemHandle[]): Promise<DiagramSource | undefined> {
     if (files.length === 0) {
         return;
     }
@@ -71,5 +88,7 @@ async function handleFiles(files: FileSystemHandle[]): Promise<CodeWithFileHandl
 
     const blob = await file.getFile();
     const text = await blob.text();
-    return { code: text, fileHandle: file };
+    const name = file.name;
+
+    return new DiagramFileSource(name, name.match(/^(.*?)(\.hyl)?$/)?.[1] ?? name, file, text);
 }

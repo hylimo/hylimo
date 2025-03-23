@@ -5,7 +5,8 @@
             ref="diagramSelect"
             class="diagram-select"
             :class="{ untitled: !showDialog && !inputFilename }"
-            placeholder="Search or create diagram"
+            :disabled="readonly"
+            :placeholder="filename != undefined ? 'Search or create diagram' : undefined"
             @focus="
                 ($event.target as HTMLInputElement).select();
                 openDialog();
@@ -13,7 +14,13 @@
             @click="openDialog"
             @input="openDialog"
         />
-        <span class="vpi-file-stack-light select-icon" />
+        <span
+            class="select-icon"
+            :class="{
+                'vpi-file-stack-light': !readonly,
+                'vpi-file-light': readonly
+            }"
+        />
         <Transition name="dialog">
             <div v-show="showDialog && diagramEntries.length > 0" class="dialog" @mousemove="onMouseMove">
                 <div
@@ -50,38 +57,45 @@
     </div>
 </template>
 <script setup lang="ts">
-import type { DiagramMetadata } from "./Home.vue";
 import { computed, markRaw, nextTick, ref, watch, type PropType } from "vue";
 import { onClickOutside, onKeyStroke, watchImmediate } from "@vueuse/core";
 import "@github/relative-time-element";
 import MiniSearch, { type SearchResult } from "minisearch";
+import type { DiagramMetadata } from "../util/diagramStorageSource";
 
 interface DiagramEntry extends DiagramMetadata {
     isNew?: true;
 }
 
 const props = defineProps({
+    filename: {
+        type: String,
+        required: false
+    },
     allDiagrams: {
         type: Array as PropType<DiagramMetadata[]>,
+        required: true
+    },
+    readonly: {
+        type: Boolean,
         required: true
     }
 });
 
 const emit = defineEmits<{
+    openDiagram: [value: string];
     deleteDiagram: [value: string];
     createDiagram: [value: string];
 }>();
 
-const filename = defineModel({
-    type: String,
-    required: true
-});
-
 const inputFilename = ref("");
 
-watchImmediate(filename, (name) => {
-    inputFilename.value = name;
-});
+watchImmediate(
+    () => props.filename,
+    (name) => {
+        inputFilename.value = name ?? "";
+    }
+);
 
 const showDialog = ref(false);
 const disableMouseOver = ref(true);
@@ -92,7 +106,9 @@ const diagramEntries = ref<DiagramEntry[]>([]);
 
 const inputFilenameOrPlaceholder = computed({
     get: () => {
-        if (showDialog.value) {
+        if (props.filename == undefined) {
+            return "";
+        } else if (showDialog.value) {
             return inputFilename.value;
         } else {
             return inputFilename.value || "Untitled diagram";
@@ -126,7 +142,7 @@ watch([inputFilename, () => props.allDiagrams], ([name]) => {
     const searchResults = searchIndex.value.search(name) as (DiagramMetadata & SearchResult)[];
     const newResults: (DiagramMetadata & { isNew?: true })[] = [];
     if (props.allDiagrams.every((d) => d.filename !== name)) {
-        newResults.push({ filename: name, isNew: true, version: 1, lastChange: new Date().toISOString() });
+        newResults.push({ filename: name, isNew: true, lastChange: new Date().toISOString() });
     }
     newResults.push(...searchResults);
     diagramEntries.value = newResults;
@@ -149,7 +165,7 @@ function selectDiagram(diagram: DiagramEntry): void {
     if (diagram.isNew) {
         emit("createDiagram", diagram.filename);
     } else {
-        filename.value = diagram.filename;
+        emit("openDiagram", diagram.filename);
     }
     closeDialog();
 }
@@ -258,8 +274,8 @@ function onMouseMove(e: MouseEvent) {
     border: 1px solid transparent;
 }
 
-.diagram-select:hover,
-.diagram-select:focus {
+.diagram-select:hover:not(:disabled),
+.diagram-select:focus:not(:disabled) {
     border-color: var(--vp-c-brand);
 }
 
@@ -276,6 +292,11 @@ function onMouseMove(e: MouseEvent) {
     width: 20px;
     height: 20px;
     pointer-events: none;
+}
+
+.select-icon.vpi-file-light {
+    width: 16px;
+    height: 16px;
 }
 
 .available-diagram-filename {
