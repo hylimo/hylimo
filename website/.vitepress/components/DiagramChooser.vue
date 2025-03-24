@@ -134,7 +134,8 @@ const searchIndex = computed(() => {
     return markRaw(index);
 });
 
-watch([inputFilename, () => props.allDiagrams], ([name]) => {
+function updateDiagramEntries(): void {
+    const name = inputFilename.value;
     if (name.length === 0) {
         diagramEntries.value = props.allDiagrams;
         return;
@@ -146,12 +147,19 @@ watch([inputFilename, () => props.allDiagrams], ([name]) => {
     }
     newResults.push(...searchResults);
     diagramEntries.value = newResults;
+}
+
+watch([inputFilename, () => props.allDiagrams], () => {
+    if (showDialog.value) {
+        updateDiagramEntries();
+    }
 });
 
 function openDialog(): void {
     if (showDialog.value) {
         return;
     }
+    updateDiagramEntries();
     showDialog.value = true;
     diagramEntries.value = props.allDiagrams;
 }
