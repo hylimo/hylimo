@@ -159,6 +159,7 @@ function openDialog(): void {
 function closeDialog(): void {
     showDialog.value = false;
     diagramSelect?.value?.blur();
+    inputFilename.value = props.filename ?? "";
 }
 
 function selectDiagram(diagram: DiagramEntry): void {
