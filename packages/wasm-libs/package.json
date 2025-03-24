@@ -13,7 +13,7 @@
         "build": "rollup -c"
     },
     "dependencies": {
-        "harfbuzzjs": "^0.4.5"
+        "harfbuzzjs": "^0.4.6"
     },
     "devDependencies": {
         "@rollup/plugin-node-resolve": "^16.0.1",
