@@ -14,6 +14,7 @@ import { SetViewportCommand } from "./viewport.js";
 import { ScrollMouseListener } from "./scroll.js";
 import { ZoomMouseListener } from "./zoom.js";
 import { TYPES } from "../types.js";
+import { PointerCapturePointerListener } from "./pointerCapturePointerListener.js";
 
 /**
  * Module which configures touch support for the viewport and other additional event handlers
@@ -23,6 +24,8 @@ export const viewportModule = new ContainerModule((bind, unbind, isBound) => {
     configureCommand({ bind, isBound }, CenterCommand);
     configureCommand({ bind, isBound }, FitToScreenCommand);
     configureCommand({ bind, isBound }, GetViewportCommand);
+    bind(PointerCapturePointerListener).toSelf().inSingletonScope();
+    bind(TYPES.IPointerListener).toService(PointerCapturePointerListener);
 
     // modified
     configureCommand({ bind, isBound }, SetViewportCommand);
@@ -33,6 +36,6 @@ export const viewportModule = new ContainerModule((bind, unbind, isBound) => {
     bind(TYPES.MouseListener).toService(ScrollMouseListener);
     bind(TYPES.MouseListener).toService(ZoomMouseListener);
     bind(ViewportTouchListener).toSelf().inSingletonScope();
-    bind(TYPES.IVNodePostprocessor).toService(ViewportTouchListener);
+    bind(TYPES.ITouchListener).toService(ViewportTouchListener);
     configureActionHandler({ bind, isBound }, SetModelAction.KIND, SetModelActionHandler);
 });

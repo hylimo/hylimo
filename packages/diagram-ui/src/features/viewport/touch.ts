@@ -1,16 +1,16 @@
 import { inject, injectable } from "inversify";
-import type { VNode } from "snabbdom";
-import type { IActionDispatcher, IVNodePostprocessor, SModelElementImpl, ViewerOptions } from "sprotty";
-import { findParentByFeature, getWindowScroll, isViewport, limit, on, SModelRootImpl } from "sprotty";
+import type { IActionDispatcher, SModelElementImpl, ViewerOptions, SModelRootImpl } from "sprotty";
+import { findParentByFeature, getWindowScroll, isViewport, limit } from "sprotty";
 import type { Action, Bounds, Viewport, Point } from "sprotty-protocol";
 import { SetViewportAction } from "sprotty-protocol";
 import { TYPES } from "../types.js";
+import { TouchListener } from "../contrib/touch-tool.js";
 
 /**
  * A touch listener that handles panning and zooming of the viewport
  */
 @injectable()
-export class ViewportTouchListener implements IVNodePostprocessor {
+export class ViewportTouchListener extends TouchListener {
     /**
      * The last positon a one-finger touch event occurred at
      * (Updated on touch start and touch move)
@@ -37,14 +37,7 @@ export class ViewportTouchListener implements IVNodePostprocessor {
      */
     @inject(TYPES.ViewerOptions) protected viewerOptions!: ViewerOptions;
 
-    /**
-     * Handler for the touch start event
-     *
-     * @param target the target element
-     * @param event the touch event
-     * @returns an array of actions to be dispatched
-     */
-    private touchStart(target: SModelElementImpl, event: TouchEvent): Action[] {
+    override touchStart(target: SModelElementImpl, event: TouchEvent): Action[] {
         const viewport = findParentByFeature(target, isViewport);
         if (viewport != undefined) {
             if (event.touches.length === 1) {
@@ -62,15 +55,7 @@ export class ViewportTouchListener implements IVNodePostprocessor {
         return [];
     }
 
-    /**
-     * Handler for the touch move event
-     * Handles both panning and zooming
-     *
-     * @param target the target element
-     * @param event the touch event
-     * @returns an array of actions to be dispatched
-     */
-    private touchMove(target: SModelElementImpl, event: TouchEvent): Action[] {
+    override touchMove(target: SModelElementImpl, event: TouchEvent): Action[] {
         const viewport = findParentByFeature(target, isViewport);
         if (viewport == undefined || event.touches.length < 1 || event.touches.length > 2) {
             return [];
@@ -141,14 +126,7 @@ export class ViewportTouchListener implements IVNodePostprocessor {
         return newViewport;
     }
 
-    /**
-     * Handler for the touch end event
-     *
-     * @param target the target element
-     * @param event the touch event
-     * @returns an array of actions to be dispatched
-     */
-    private touchEnd(target: SModelElementImpl, event: TouchEvent): Action[] {
+    override touchEnd(target: SModelElementImpl, event: TouchEvent): Action[] {
         if (event.touches.length === 0) {
             this.lastTouchPosition = undefined;
             this.lastTouchDistance = undefined;
@@ -188,40 +166,4 @@ export class ViewportTouchListener implements IVNodePostprocessor {
             y: (touches[0].clientY + touches[1].clientY) / 2 + windowScroll.y - canvasBounds.y
         };
     }
-
-    /**
-     * Handles a touch event by delegating to the appropriate handler
-     *
-     * @param methodName the name of the handler method
-     * @param model the model element
-     * @param event the touch event
-     */
-    private handleEvent(methodName: "touchStart" | "touchMove" | "touchEnd", model: SModelRootImpl, event: TouchEvent) {
-        const actions = this[methodName](model, event);
-        if (actions.length > 0) {
-            event.preventDefault();
-            this.actionDispatcher.dispatchAll(actions);
-        }
-    }
-
-    /**
-     * Adds event listeners to the vnode
-     *
-     * @param vnode the vnode to decorate
-     * @param element the model element
-     * @returns the decorated vnode
-     */
-    decorate(vnode: VNode, element: SModelElementImpl): VNode {
-        if (element instanceof SModelRootImpl) {
-            on(vnode, "touchstart", (event) => this.handleEvent("touchStart", element, event as TouchEvent));
-            on(vnode, "touchmove", (event) => this.handleEvent("touchMove", element, event as TouchEvent));
-            on(vnode, "touchend", (event) => this.handleEvent("touchEnd", element, event as TouchEvent));
-        }
-        return vnode;
-    }
-
-    /**
-     * No-op
-     */
-    postUpdate() {}
 }

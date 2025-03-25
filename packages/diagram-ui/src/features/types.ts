@@ -13,5 +13,7 @@ export const TYPES = {
     ToolTypeProvider: Symbol("ToolTypeProvider"),
     MoveCursorProvider: Symbol("MoveCursorProvider"),
     BoxSelectProvider: Symbol("BoxSelectProvider"),
-    KeyState: Symbol("KeyState")
+    KeyState: Symbol("KeyState"),
+    ITouchListener: Symbol("ITouchListener"),
+    IPointerListener: Symbol("IPointerListener")
 };

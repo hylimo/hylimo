@@ -93,17 +93,17 @@ function generateToolboxItem(context: Toolbox, toolboxEdit: ToolboxEditEntry): V
         "button.item",
         {
             on: {
-                mousedown: (event) => {
+                pointerdown: (event) => {
                     const action: TransactionalMoveAction = {
                         kind: TransactionalMoveAction.KIND,
-                        handlerProvider: (root) => new CreateElementMoveHandler(toolboxEdit.edit, root),
+                        handlerProvider: (root) =>
+                            new CreateElementMoveHandler(toolboxEdit.edit, root, event.pointerId),
                         maxUpdatesPerRevision: 1
                     };
                     if (!context.toolState.isLocked) {
                         context.updateTool(ToolboxToolType.CURSOR, false);
                     }
                     context.pointerEventsDisabled = true;
-                    event.preventDefault();
                     context.update();
                     context.actionDispatcher.dispatch(action);
                 },
