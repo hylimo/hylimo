@@ -57,23 +57,23 @@ export class PointerTool implements IVNodePostprocessor {
 
     decorate(vnode: VNode, element: SModelElementImpl): VNode {
         if (element instanceof SModelRootImpl) {
-            on(vnode, "pointerover", this.handleEvent.bind(this, "pointerover", element) as (e: Event) => void);
-            on(vnode, "pointerenter", this.handleEvent.bind(this, "pointerenter", element) as (e: Event) => void);
-            on(vnode, "pointerdown", this.handleEvent.bind(this, "pointerdown", element) as (e: Event) => void);
-            on(vnode, "pointermove", this.handleEvent.bind(this, "pointermove", element) as (e: Event) => void);
-            on(vnode, "pointerup", this.handleEvent.bind(this, "pointerup", element) as (e: Event) => void);
-            on(vnode, "pointercancel", this.handleEvent.bind(this, "pointercancel", element) as (e: Event) => void);
-            on(vnode, "pointerout", this.handleEvent.bind(this, "pointerout", element) as (e: Event) => void);
-            on(vnode, "pointerleave", this.handleEvent.bind(this, "pointerleave", element) as (e: Event) => void);
+            on(vnode, "pointerover", this.handleEvent.bind(this, "pointerOver", element) as (e: Event) => void);
+            on(vnode, "pointerenter", this.handleEvent.bind(this, "pointerEnter", element) as (e: Event) => void);
+            on(vnode, "pointerdown", this.handleEvent.bind(this, "pointerDown", element) as (e: Event) => void);
+            on(vnode, "pointermove", this.handleEvent.bind(this, "pointerMove", element) as (e: Event) => void);
+            on(vnode, "pointerup", this.handleEvent.bind(this, "pointerUp", element) as (e: Event) => void);
+            on(vnode, "pointercancel", this.handleEvent.bind(this, "pointerCancel", element) as (e: Event) => void);
+            on(vnode, "pointerout", this.handleEvent.bind(this, "pointerOut", element) as (e: Event) => void);
+            on(vnode, "pointerleave", this.handleEvent.bind(this, "pointerLeave", element) as (e: Event) => void);
             on(
                 vnode,
                 "gotpointercapture",
-                this.handleEvent.bind(this, "gotpointercapture", element) as (e: Event) => void
+                this.handleEvent.bind(this, "gotPointerCapture", element) as (e: Event) => void
             );
             on(
                 vnode,
                 "lostpointercapture",
-                this.handleEvent.bind(this, "lostpointercapture", element) as (e: Event) => void
+                this.handleEvent.bind(this, "lostPointerCapture", element) as (e: Event) => void
             );
         }
         return vnode;
@@ -83,60 +83,60 @@ export class PointerTool implements IVNodePostprocessor {
 }
 
 export type PointerEventKind =
-    | "pointerover"
-    | "pointerenter"
-    | "pointerdown"
-    | "pointermove"
-    | "pointerup"
-    | "pointercancel"
-    | "pointerout"
-    | "pointerleave"
-    | "gotpointercapture"
-    | "lostpointercapture";
+    | "pointerOver"
+    | "pointerEnter"
+    | "pointerDown"
+    | "pointerMove"
+    | "pointerUp"
+    | "pointerCancel"
+    | "pointerOut"
+    | "pointerLeave"
+    | "gotPointerCapture"
+    | "lostPointerCapture";
 
 export interface IPointerListener {
-    pointerover(target: SModelElementImpl, event: PointerEvent): (Action | Promise<Action>)[];
-    pointerenter(target: SModelElementImpl, event: PointerEvent): (Action | Promise<Action>)[];
-    pointerdown(target: SModelElementImpl, event: PointerEvent): (Action | Promise<Action>)[];
-    pointermove(target: SModelElementImpl, event: PointerEvent): (Action | Promise<Action>)[];
-    pointerup(target: SModelElementImpl, event: PointerEvent): (Action | Promise<Action>)[];
-    pointercancel(target: SModelElementImpl, event: PointerEvent): (Action | Promise<Action>)[];
-    pointerout(target: SModelElementImpl, event: PointerEvent): (Action | Promise<Action>)[];
-    pointerleave(target: SModelElementImpl, event: PointerEvent): (Action | Promise<Action>)[];
-    gotpointercapture(target: SModelElementImpl, event: PointerEvent): (Action | Promise<Action>)[];
-    lostpointercapture(target: SModelElementImpl, event: PointerEvent): (Action | Promise<Action>)[];
+    pointerOver(target: SModelElementImpl, event: PointerEvent): (Action | Promise<Action>)[];
+    pointerEnter(target: SModelElementImpl, event: PointerEvent): (Action | Promise<Action>)[];
+    pointerDown(target: SModelElementImpl, event: PointerEvent): (Action | Promise<Action>)[];
+    pointerMove(target: SModelElementImpl, event: PointerEvent): (Action | Promise<Action>)[];
+    pointerUp(target: SModelElementImpl, event: PointerEvent): (Action | Promise<Action>)[];
+    pointerCancel(target: SModelElementImpl, event: PointerEvent): (Action | Promise<Action>)[];
+    pointerOut(target: SModelElementImpl, event: PointerEvent): (Action | Promise<Action>)[];
+    pointerLeave(target: SModelElementImpl, event: PointerEvent): (Action | Promise<Action>)[];
+    gotPointerCapture(target: SModelElementImpl, event: PointerEvent): (Action | Promise<Action>)[];
+    lostPointerCapture(target: SModelElementImpl, event: PointerEvent): (Action | Promise<Action>)[];
 }
 
 @injectable()
 export class PointerListener implements IPointerListener {
-    pointerover(target: SModelElementImpl, event: PointerEvent): (Action | Promise<Action>)[] {
+    pointerOver(target: SModelElementImpl, event: PointerEvent): (Action | Promise<Action>)[] {
         return [];
     }
-    pointerenter(target: SModelElementImpl, event: PointerEvent): (Action | Promise<Action>)[] {
+    pointerEnter(target: SModelElementImpl, event: PointerEvent): (Action | Promise<Action>)[] {
         return [];
     }
-    pointerdown(target: SModelElementImpl, event: PointerEvent): (Action | Promise<Action>)[] {
+    pointerDown(target: SModelElementImpl, event: PointerEvent): (Action | Promise<Action>)[] {
         return [];
     }
-    pointermove(target: SModelElementImpl, event: PointerEvent): (Action | Promise<Action>)[] {
+    pointerMove(target: SModelElementImpl, event: PointerEvent): (Action | Promise<Action>)[] {
         return [];
     }
-    pointerup(target: SModelElementImpl, event: PointerEvent): (Action | Promise<Action>)[] {
+    pointerUp(target: SModelElementImpl, event: PointerEvent): (Action | Promise<Action>)[] {
         return [];
     }
-    pointercancel(target: SModelElementImpl, event: PointerEvent): (Action | Promise<Action>)[] {
+    pointerCancel(target: SModelElementImpl, event: PointerEvent): (Action | Promise<Action>)[] {
         return [];
     }
-    pointerout(target: SModelElementImpl, event: PointerEvent): (Action | Promise<Action>)[] {
+    pointerOut(target: SModelElementImpl, event: PointerEvent): (Action | Promise<Action>)[] {
         return [];
     }
-    pointerleave(target: SModelElementImpl, event: PointerEvent): (Action | Promise<Action>)[] {
+    pointerLeave(target: SModelElementImpl, event: PointerEvent): (Action | Promise<Action>)[] {
         return [];
     }
-    gotpointercapture(target: SModelElementImpl, event: PointerEvent): (Action | Promise<Action>)[] {
+    gotPointerCapture(target: SModelElementImpl, event: PointerEvent): (Action | Promise<Action>)[] {
         return [];
     }
-    lostpointercapture(target: SModelElementImpl, event: PointerEvent): (Action | Promise<Action>)[] {
+    lostPointerCapture(target: SModelElementImpl, event: PointerEvent): (Action | Promise<Action>)[] {
         return [];
     }
 }
