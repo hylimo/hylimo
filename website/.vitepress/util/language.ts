@@ -292,5 +292,7 @@ export const customLightTheme: editor.IStandaloneThemeData = {
             foreground: "#0000ff"
         }
     ],
-    colors: {}
+    colors: {
+        "editor.background": "#ffffff"
+    }
 };
