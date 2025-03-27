@@ -88,6 +88,7 @@ const diagramBackground = computed(() => {
 });
 const actionDispatcher = shallowRef<IActionDispatcher>();
 const editorModel = shallowRef<monaco.editor.ITextModel>();
+const editor = shallowRef<monaco.editor.IStandaloneCodeEditor>();
 const transactionState = ref(TransactionState.None);
 const hideMainContent = ref(true);
 
@@ -99,6 +100,9 @@ watch(model, (newValue) => {
 
 useResizeObserver(sprottyWrapper, () => {
     actionDispatcher.value?.dispatch({ kind: ResetCanvasBoundsAction.KIND } satisfies ResetCanvasBoundsAction);
+});
+useResizeObserver(editorElement, () => {
+    editor.value?.layout();
 });
 
 onKeyDown(
@@ -121,7 +125,6 @@ onMounted(async () => {
     const editorAppConfig: EditorAppConfig = {
         editorOptions: {
             language,
-            automaticLayout: true,
             fixedOverflowWidgets: true,
             hover: {
                 above: false
@@ -142,7 +145,8 @@ onMounted(async () => {
                 uri: `diagram-${id.value}.hyl`,
                 enforceLanguageId: language
             }
-        }
+        },
+        overrideAutomaticLayout: false
     };
     await wrapper.initAndStart({
         $type: "classic",
@@ -153,11 +157,13 @@ onMounted(async () => {
         }
     });
 
-    const editor = wrapper.getEditor()!;
+    const monacoEditor = wrapper.getEditor()!;
+    monacoEditor.layout();
+    editor.value = monacoEditor;
     hideMainContent.value = false;
 
     wrapper.updateCodeResources;
-    editorModel.value = editor.getModel()!;
+    editorModel.value = monacoEditor.getModel()!;
     const pushStackElement = editorModel.value.pushStackElement.bind(editorModel.value);
 
     // override pushStackElement to ignore undo stops during transactions
@@ -168,7 +174,7 @@ onMounted(async () => {
     };
 
     editorModel.value.onDidChangeContent(() => {
-        model.value = editor.getValue();
+        model.value = monacoEditor.getValue();
         if (transactionState.value == TransactionState.Committed) {
             // it's important to do this here, as by this, the undo stop before applying the last update is still ignored,
             // while the undo stop after applying counts as a normal undo stop
@@ -176,10 +182,10 @@ onMounted(async () => {
         }
     });
 
-    const uri = editor.getModel()?.uri?.toString();
+    const uri = monacoEditor.getModel()?.uri?.toString();
 
     const revealHandler = currentLanguageClient.onNotification(PublishDocumentRevealNotification.type, (message) => {
-        if (editor && message.uri == uri) {
+        if (monacoEditor && message.uri == uri) {
             const range = message.range;
             const editorRange = {
                 startLineNumber: range.start.line + 1,
@@ -187,8 +193,8 @@ onMounted(async () => {
                 endLineNumber: range.end.line + 1,
                 endColumn: range.end.character + 1
             };
-            editor.setSelection(editorRange);
-            editor.revealRange(editorRange);
+            monacoEditor.setSelection(editorRange);
+            monacoEditor.revealRange(editorRange);
         }
     });
     disposables.value.push(revealHandler);
@@ -224,13 +230,13 @@ onMounted(async () => {
         }
 
         protected override handleUndo(): void {
-            editor.focus();
-            editor.trigger("diagram", "undo", {});
+            monacoEditor.focus();
+            monacoEditor.trigger("diagram", "undo", {});
         }
 
         protected override handleRedo(): void {
-            editor.focus();
-            editor.trigger("diagram", "redo", {});
+            monacoEditor.focus();
+            monacoEditor.trigger("diagram", "redo", {});
         }
 
         protected override handleTransactionStart(): void {
