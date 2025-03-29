@@ -38,6 +38,30 @@ export async function openDiagramFromLaunchQueue(): Promise<DiagramSource | unde
 }
 
 /**
+ * Tries to open a diagram from the file system using the file picker.
+ *
+ * @returns the diagram included in the file handle or undefined if no file was found
+ */
+export async function openDiagramFromFile(): Promise<DiagramSource | undefined> {
+    if (!("showOpenFilePicker" in window)) {
+        return undefined;
+    }
+    return handleFiles(
+        await window.showOpenFilePicker({
+            multiple: false,
+            types: [
+                {
+                    description: "Hylimo Diagram",
+                    accept: {
+                        "text/hyl": [".hyl"]
+                    }
+                }
+            ]
+        })
+    );
+}
+
+/**
  * A diagram source that is backed by a file.
  */
 class DiagramFileSource implements DiagramSource {

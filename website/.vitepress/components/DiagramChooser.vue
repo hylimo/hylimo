@@ -5,8 +5,7 @@
             ref="diagramSelect"
             class="diagram-select"
             :class="{ untitled: !showDialog && !inputFilename }"
-            :disabled="readonly"
-            :placeholder="filename != undefined ? 'Search or create diagram' : undefined"
+            :placeholder="diagramSource != undefined ? 'Search or create diagram' : undefined"
             @focus="
                 ($event.target as HTMLInputElement).select();
                 openDialog();
@@ -17,8 +16,8 @@
         <span
             class="select-icon"
             :class="{
-                'vpi-file-stack-light': !readonly,
-                'vpi-file-light': readonly
+                'vpi-file-stack-light': diagramSource?.type !== 'file',
+                'vpi-file-light': diagramSource?.type === 'file'
             }"
         />
         <Transition name="dialog">
@@ -27,18 +26,33 @@
                     v-for="(diagram, index) in diagramEntries"
                     :key="diagram.filename"
                     class="item"
-                    :class="{ selected: index === selectedIndex, current: diagram.filename === filename }"
+                    :class="{
+                        selected: index === selectedIndex,
+                        current: diagram.filename === diagramSource?.filename && diagram.type === diagramSource?.type
+                    }"
                     :data-index="index"
                     @mouseenter="!disableMouseOver && (selectedIndex = index)"
                     @focusin="selectedIndex = index"
                     @click="selectDiagram(diagram)"
                 >
-                    <template v-if="diagram.isNew">
+                    <template v-if="diagram.type === 'new'">
                         <span class="filename"
                             >Create new: <span class="available-diagram-filename">{{ diagram.filename }}</span></span
                         >
                         <div class="icon">
                             <span class="vpi-plus" />
+                        </div>
+                    </template>
+                    <template v-else-if="diagram.type === 'file'">
+                        <span class="filename">{{ diagram.filename }}</span>
+                        <div class="icon">
+                            <span class="vpi-file" />
+                        </div>
+                    </template>
+                    <template v-else-if="diagram.type === 'open-file'">
+                        <span class="filename">Open file...</span>
+                        <div class="icon">
+                            <span class="vpi-folder-open" />
                         </div>
                     </template>
                     <template v-else>
@@ -62,28 +76,26 @@ import { onClickOutside, onKeyStroke, watchImmediate } from "@vueuse/core";
 import "@github/relative-time-element";
 import MiniSearch, { type SearchResult } from "minisearch";
 import type { DiagramMetadata } from "../util/diagramStorageSource";
+import type { DiagramSource } from "../util/diagramSource";
 
 interface DiagramEntry extends DiagramMetadata {
-    isNew?: true;
+    type: "file" | "open-file" | "new" | "browser";
 }
 
 const props = defineProps({
-    filename: {
-        type: String,
+    diagramSource: {
+        type: Object as PropType<DiagramSource>,
         required: false
     },
     allDiagrams: {
         type: Array as PropType<DiagramMetadata[]>,
-        required: true
-    },
-    readonly: {
-        type: Boolean,
         required: true
     }
 });
 
 const emit = defineEmits<{
     openDiagram: [value: string];
+    openFile: [];
     deleteDiagram: [value: string];
     createDiagram: [value: string];
 }>();
@@ -91,9 +103,9 @@ const emit = defineEmits<{
 const inputFilename = ref("");
 
 watchImmediate(
-    () => props.filename,
-    (name) => {
-        inputFilename.value = name ?? "";
+    () => props.diagramSource,
+    (source) => {
+        inputFilename.value = source?.filename ?? "";
     }
 );
 
@@ -106,7 +118,7 @@ const diagramEntries = ref<DiagramEntry[]>([]);
 
 const inputFilenameOrPlaceholder = computed({
     get: () => {
-        if (props.filename == undefined) {
+        if (props.diagramSource == undefined) {
             return "";
         } else if (showDialog.value) {
             return inputFilename.value;
@@ -121,29 +133,51 @@ const inputFilenameOrPlaceholder = computed({
 });
 
 const searchIndex = computed(() => {
-    const index = new MiniSearch<DiagramMetadata>({
+    const index = new MiniSearch<DiagramEntry>({
         fields: ["filename"],
-        storeFields: ["filename", "lastChange"],
+        storeFields: ["filename", "lastChange", "type"],
         idField: "filename",
         searchOptions: {
             prefix: true,
             fuzzy: 0.2
         }
     });
-    index.addAll(props.allDiagrams);
+    index.addAll(props.allDiagrams.map((diagram) => ({ ...diagram, type: "browser" }) as const));
+    if (props.diagramSource?.type === "file") {
+        index.add({
+            filename: props.diagramSource.filename,
+            lastChange: new Date().toISOString(),
+            type: "file"
+        });
+    }
     return markRaw(index);
 });
+
+function computDefaultDiagramEntries(): DiagramEntry[] {
+    const entries: DiagramEntry[] = [...props.allDiagrams.map((diagram) => ({ ...diagram, type: "browser" }) as const)];
+    if (props.diagramSource?.type === "file") {
+        entries.unshift({
+            filename: props.diagramSource.filename,
+            lastChange: new Date().toISOString(),
+            type: "file"
+        });
+    }
+    if ("showOpenFilePicker" in window) {
+        entries.unshift({ filename: "", type: "open-file", lastChange: new Date().toISOString() });
+    }
+    return entries;
+}
 
 function updateDiagramEntries(): void {
     const name = inputFilename.value;
     if (name.length === 0) {
-        diagramEntries.value = props.allDiagrams;
+        diagramEntries.value = computDefaultDiagramEntries();
         return;
     }
-    const searchResults = searchIndex.value.search(name) as (DiagramMetadata & SearchResult)[];
-    const newResults: (DiagramMetadata & { isNew?: true })[] = [];
+    const searchResults = searchIndex.value.search(name) as (DiagramEntry & SearchResult)[];
+    const newResults: DiagramEntry[] = [];
     if (props.allDiagrams.every((d) => d.filename !== name)) {
-        newResults.push({ filename: name, isNew: true, lastChange: new Date().toISOString() });
+        newResults.push({ filename: name, type: "new", lastChange: new Date().toISOString() });
     }
     newResults.push(...searchResults);
     diagramEntries.value = newResults;
@@ -159,21 +193,33 @@ function openDialog(): void {
     if (showDialog.value) {
         return;
     }
-    updateDiagramEntries();
+    diagramEntries.value = computDefaultDiagramEntries();
     showDialog.value = true;
-    diagramEntries.value = props.allDiagrams;
 }
 
 function closeDialog(): void {
     showDialog.value = false;
     diagramSelect?.value?.blur();
-    inputFilename.value = props.filename ?? "";
+    inputFilename.value = props.diagramSource?.filename ?? "";
 }
 
 function selectDiagram(diagram: DiagramEntry): void {
-    if (diagram.isNew) {
+    if (diagram.type === "file") {
+        closeDialog();
+        return;
+    }
+    if (props.diagramSource?.canSave?.value) {
+        const confirmed = window.confirm(`Discard changes to '${props.diagramSource.filename}'?`);
+        if (!confirmed) {
+            closeDialog();
+            return;
+        }
+    }
+    if (diagram.type === "new") {
         emit("createDiagram", diagram.filename);
-    } else {
+    } else if (diagram.type === "open-file") {
+        emit("openFile");
+    } else if (diagram.type === "browser") {
         emit("openDiagram", diagram.filename);
     }
     closeDialog();

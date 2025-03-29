@@ -13,10 +13,10 @@
         <ClientOnly>
             <Teleport to="#diagram-select">
                 <DiagramChooser
-                    :filename="diagramSource?.filename"
+                    :diagram-source="diagramSource"
                     :all-diagrams="allDiagrams"
-                    :readonly="diagramSource?.type == 'file'"
                     @open-diagram="openDiagram($event).then((diagram) => (diagramSource = diagram))"
+                    @open-file="openFile()"
                     @create-diagram="createDiagram($event, diagramSource?.code.value ?? defaultDiagram)"
                     @delete-diagram="deleteDiagram"
                 ></DiagramChooser>
@@ -62,7 +62,7 @@ import { PDFRenderer } from "@hylimo/diagram-render-pdf";
 import fileSaver from "file-saver";
 import { deserialize, serialize } from "../util/serialization.js";
 import RegisterSW from "./RegisterSW.vue";
-import { openDiagramFromLaunchQueue } from "../util/diagramFileSource";
+import { openDiagramFromFile, openDiagramFromLaunchQueue } from "../util/diagramFileSource";
 import { languageServerConfigKey } from "../theme/injectionKeys";
 import DiagramChooser from "./DiagramChooser.vue";
 import { useDiagramStorage } from "../util/diagramStorageSource";
@@ -90,6 +90,13 @@ const defaultDiagram =
 async function createDiagram(name: string, code: string) {
     await addDiagram(name, code);
     diagramSource.value = await openDiagram(name);
+}
+
+async function openFile() {
+    const newSource = await openDiagramFromFile();
+    if (newSource != undefined) {
+        diagramSource.value = newSource;
+    }
 }
 
 async function deleteDiagram(name: string) {
