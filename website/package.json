@@ -15,7 +15,7 @@
         "@types/pako": "^2.0.3",
         "@types/uuid": "^10.0.0",
         "@types/wicg-file-system-access": "^2023.10.5",
-        "@vite-pwa/vitepress": "^0.5.3",
+        "@vite-pwa/vitepress": "^1.0.0",
         "vitepress": "^1.6.3",
         "vue": "^3.5.13"
     },
