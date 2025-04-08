@@ -36,8 +36,6 @@ Hylimo walks through the diagram from left to right, and then from top to bottom
 
 First, declare all participants (`instance`, `actor`) in the order you want to display them as they will be positioned on the x axis in this order:
 
-:::info
-
 ```hylimo
 sequenceDiagram {
     instance("Bob")
@@ -45,8 +43,6 @@ sequenceDiagram {
     actor("Admin")
 }
 ```
-
-:::
 
 This example creates three participants, reading from left to right as `Bob`, `Shop` and lastly a user called `Admin`.
 
@@ -59,8 +55,6 @@ You can enable the debugging mode yourself by setting `enableDebugging = true`, 
 This is the precise purpose of it: It should help you understand what action will lead to what outcome.\
 Of course, once you want to finish your diagram, we recommend to turn it off again to not confuse your diagram readers.
 
-:::info
-
 ```hylimo
 sequenceDiagram(enableDebugging = true) {
     instance("Bob")
@@ -69,15 +63,11 @@ sequenceDiagram(enableDebugging = true) {
 }
 ```
 
-:::
-
 As you can see above, the name should be understandable for you to know exactly which action is symbolized by this event.
 This name will never be shown anywhere.
 
 For most cases, the default value for how far away the next event will be good-enough.
 Nevertheless, in cases where you want an explicit distance to the predecessor, you are free to do so:
-
-:::info
 
 ```hylimo
 sequenceDiagram(enableDebugging = true) {
@@ -87,8 +77,6 @@ sequenceDiagram(enableDebugging = true) {
 }
 ```
 
-:::
-
 This positions the event `50` pixels below its predecessor.
 Note that while negative values are allowed here, they won't make any sense:
 Instead, you can also move the previous event up by that amount and invert their meanings.
@@ -96,8 +84,6 @@ Instead, you can also move the previous event up by that amount and invert their
 Both `event` and `participant` names will be registered as variables if they didn't exist already.
 In case they existed already, the existing name takes precedence.
 If their name is already used by something else, you can assign the result of these functions to a variable of your own choosing:
-
-:::info
 
 ```hylimo
 sequenceDiagram {
@@ -109,13 +95,9 @@ sequenceDiagram {
 }
 ```
 
-:::
-
 Sometimes, you want to send messages where some time delta happens in between.\
 However, the normal Hylimo behavior for `A --> B` is to use the most recent event as y coordinate, not any y coordinate.\
 To achieve the time delta in spite of these inherent limitations, use the notation `participant.on(event)` which forces Hylimo to use the participant at the specified point in time:
-
-:::info
 
 ```hylimo
 sequenceDiagram(enableDebugging = true) {
@@ -128,8 +110,6 @@ sequenceDiagram(enableDebugging = true) {
 }
 ```
 
-:::
-
 Now, we have the basic knowledge to go on with the remaining features that are all relative to the latest event.
 
 ## Interacting with participants
@@ -137,8 +117,6 @@ Now, we have the basic knowledge to go on with the remaining features that are a
 There is a bunch of things you can do with participants, depending on if there is a latest defined event:
 
 - you can postpone the creation of a participant by defining it after an event:
-
-:::info
 
 ```hylimo
 sequenceDiagram(enableDebugging = true) {
@@ -148,11 +126,7 @@ sequenceDiagram(enableDebugging = true) {
 }
 ```
 
-:::
-
 - You can destroy a participant:
-
-:::info
 
 ```hylimo
 sequenceDiagram(enableDebugging = true) {
@@ -164,11 +138,7 @@ sequenceDiagram(enableDebugging = true) {
 }
 ```
 
-:::
-
 - You can reanimate a dead participant:
-
-:::info
 
 ```hylimo
 sequenceDiagram {
@@ -182,11 +152,7 @@ sequenceDiagram {
 }
 ```
 
-:::
-
 - You can activate and deactivate a participant, meaning that it is actively working on something:
-
-:::info
 
 ```hylimo
 sequenceDiagram(enableDebugging = true) {
@@ -199,15 +165,11 @@ sequenceDiagram(enableDebugging = true) {
 }
 ```
 
-:::
-
 Note as well that there are three dots when an event meets an activity indicator, except for the initial event. This has the following reason:\
 Hylimo automatically infers where to place the arrow between participants sending/receiving a message: In general, a sent message is sent on the right and a received message is received on the left side of the indicator (this is a simplified, slightly incorrect explanation for the sake of brevity). These `left` and `right` coordinates show exactly the points where a message will be send/received from.\
 The third point, the `center` shows where the event would have been located originally. It is "missing" when creating a new indicator as it is located behind the indicator (remember: Hylimo only knows what is currently available, and the indicator does not yet exist when it creates the points)
 
 - Even multiple times simultaneously:
-
-:::info
 
 ```hylimo
 sequenceDiagram {
@@ -223,8 +185,6 @@ sequenceDiagram {
 }
 ```
 
-:::
-
 As you can see in this example, you can also use events to simulate margins, as we explicitly defined a pseudo-event whose only purpose is to add 5 pixels on the y-axis between the first indicator and the second one.
 
 **important**: Since Hylimo only has access to the currently known state, we recommend the following order of execution:\
@@ -235,8 +195,6 @@ Messages are sent after `activate` operations.\
 ## Messages
 
 The following messages are available within sequence diagrams (in both directions, of course):
-
-:::info
 
 ```hylimo
 sequenceDiagram {
@@ -258,8 +216,6 @@ sequenceDiagram {
     A ..! B // destroy return message
 }
 ```
-
-:::
 
 ## Config properties
 
@@ -344,8 +300,6 @@ Creates a new event.
 Creates the dot signaling a message from an external source.
 Should always be used inline as a message from something else:
 
-:::info
-
 ```hylimo
 sequenceDiagram {
     instance("Bob")
@@ -353,8 +307,6 @@ sequenceDiagram {
     foundMessage() -->> Bob
 }
 ```
-
-:::
 
 Is exactly the same as `lostMessage`, the meaning comes from the direction in which you declare the message
 
@@ -422,8 +374,6 @@ Creates an instance which is an abstract concept of someone who participates in 
 Creates the dot signaling a message to an external source.
 Should always be used inline as a message to something else:
 
-:::info
-
 ```hylimo
 sequenceDiagram {
     instance("Bob")
@@ -431,8 +381,6 @@ sequenceDiagram {
     Bob -->> lostMessage()
 }
 ```
-
-:::
 
 Is exactly the same as `foundMessage`, the meaning comes from the direction in which you declare the message
 
@@ -484,8 +432,6 @@ Or in Hylimo terms, event coordinates symbolising these two corners.
 
 Here's an example frame:
 
-:::info
-
 ```hylimo
 sequenceDiagram {
     instance("Alice")
@@ -503,8 +449,6 @@ sequenceDiagram {
 }
 ```
 
-:::
-
 Unfortunately, as you need to know both start and end to create a frame, frames will always need to be the most recent component and thus hide any underlying element.
 We haven't found a better way around that yet.
 If you want to graphically edit i.e. a message below a frame, please comment out the frame and then edit the message for the time being.
@@ -513,8 +457,6 @@ If you want to graphically edit i.e. a message below a frame, please comment out
 
 You can nest frames arbitrarily if you have enough events and participants.\
 Simply declare a frame containing a subset of events/participants after the first one, and your subframe:
-
-:::info
 
 ```hylimo
 sequenceDiagram {
@@ -544,16 +486,12 @@ sequenceDiagram {
 }
 ```
 
-:::
-
 ### Frames with fragments
 
 A frame can receive a number of fragments.\
 A fragment is a separate section inside the frame, i.e. a `else if` for an `if`.\
 In other words, a frame can have an optional line on the top to separate it from its predecessor, and text/subtext just like the frame.\
 To declare a fragment, pass a function behind the frame where you can use the `fragment` function:
-
-:::info
 
 ```hylimo
 sequenceDiagram {
@@ -586,15 +524,11 @@ sequenceDiagram {
 
 ```
 
-:::
-
 ### Instanced actors
 
 An actor can be seen as an `instance` too if you need it to.
 In this case, the actor is an `instance` with a stickman on top.
 To build an instanced actor, pass the second parameter to `actor`, the function declaring instance variables:
-
-:::info
 
 ```hylimo
 sequenceDiagram {
@@ -616,8 +550,6 @@ sequenceDiagram {
 }
 ```
 
-:::
-
 ### Frames as per the UML standard
 
 Use the following code snippets to create frames that are explicitly recommended according to the UML specification:
@@ -627,8 +559,6 @@ Use the following code snippets to create frames that are explicitly recommended
 An `alt` frame only executes the given code only if the condition applies.\
 It represents an `if (else)` in the code.\
 It can be used for example as follows:
-
-:::info
 
 ```hylimo
 sequenceDiagram {
@@ -660,15 +590,11 @@ sequenceDiagram {
 }
 ```
 
-:::
-
 #### opt-frame
 
 An `opt` frame only executes the fragment where the condition is true.\
 It represents a `switch` in the code.\
 It can be used for example as follows:
-
-:::info
 
 ```hylimo
 sequenceDiagram {
@@ -700,8 +626,6 @@ sequenceDiagram {
 }
 ```
 
-:::
-
 #### loop-frame
 
 A `loop` frame executes the code within the frame as long as the condition is true.\
@@ -710,8 +634,6 @@ You can optionally stop executing early using a nested `break` frame.
 When the `break` frame is encountered and its condition (the subtext) is true, the loop is exited.
 
 It can be used for example as follows:
-
-:::info
 
 ```hylimo
 sequenceDiagram {
@@ -737,15 +659,11 @@ sequenceDiagram {
 }
 ```
 
-:::
-
 #### par-frame
 
 A `par` frame executes its fragments simultaneously.\
 It represents parallel execution in code.\
 It can be used for example as follows:
-
-:::info
 
 ```hylimo
 sequenceDiagram {
@@ -773,15 +691,11 @@ sequenceDiagram {
 }
 ```
 
-:::
-
 #### ref-frame
 
 A `ref` frame signifies that another part of this diagram/ another sequence diagram should be executed for the components contained inside of it.\
 It represents a method call in code.\
 It can be used for example as follows:
-
-:::info
 
 ```hylimo
 sequenceDiagram {
@@ -802,13 +716,9 @@ sequenceDiagram {
 }
 ```
 
-:::
-
 ## Example
 
 Here is an example for a webshop order:
-
-:::info
 
 ```hylimo
 sequenceDiagram(enableDebugging = true) {
@@ -845,5 +755,3 @@ sequenceDiagram(enableDebugging = true) {
     }
 }
 ```
-
-:::

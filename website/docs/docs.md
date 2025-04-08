@@ -32,7 +32,9 @@ classDiagram {
 }
 ```
 
-:::details Class diagram showcasing class, interface, package and comment
+### Class diagram showcasing class, interface, package and comment
+
+<br>
 
 ```hylimo
 classDiagram {
@@ -86,9 +88,9 @@ classDiagram {
 }
 ```
 
-:::
+### Class diagram for the HyLiMo language server
 
-:::details Class diagram for the HyLiMo language server
+<br>
 
 ```hylimo
 classDiagram {
@@ -239,9 +241,9 @@ classDiagram {
 }
 ```
 
-:::
+### Package diagram of HyLiMo
 
-:::details Package diagram of HyLiMo
+<br>
 
 ```hylimo
 classDiagram {
@@ -445,5 +447,3 @@ classDiagram {
     }
 }
 ```
-
-:::

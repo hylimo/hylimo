@@ -24,7 +24,9 @@ defineProps({
 .editor {
     width: 100%;
     height: 100%;
-    border-radius: 8px;
+    border-radius: 16px;
+    border: 1px solid var(--vp-c-border);
     overflow: hidden;
+    padding-top: 12px;
 }
 </style>
