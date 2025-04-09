@@ -1,5 +1,11 @@
 {
+    "name": "hylimo",
+    "version": "2.0.0",
     "private": true,
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/hylimo/hylimo.git"
+    },
     "workspaces": [
         "packages/*",
         "website"
@@ -40,6 +46,5 @@
                 }
             }
         ]
-    },
-    "version": "2.0.0"
+    }
 }

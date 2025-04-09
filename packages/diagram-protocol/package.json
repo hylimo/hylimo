@@ -2,6 +2,11 @@
     "name": "@hylimo/diagram-protocol",
     "version": "2.0.0",
     "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/hylimo/hylimo.git",
+        "directory": "packages/diagram-protocol"
+    },
     "type": "module",
     "main": "lib/index.js",
     "types": "lib/index.d.ts",
