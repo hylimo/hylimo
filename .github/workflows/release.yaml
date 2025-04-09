@@ -1,4 +1,4 @@
-name: Deploy to GitHub Pages
+name: Release Packages
 
 on:
   release:
@@ -9,7 +9,7 @@ permissions:
 
 jobs:
   deploy:
-    name: Deploy to GitHub Pages
+    name: Release Packages
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -17,6 +17,7 @@ jobs:
         with:
           node-version: 22.x
           cache: npm
+          registry-url: "https://registry.npmjs.org"
       - name: Install dependencies
         run: npm ci
       - name: Build packages
