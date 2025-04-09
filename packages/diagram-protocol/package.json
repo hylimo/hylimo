@@ -1,6 +1,6 @@
 {
     "name": "@hylimo/diagram-protocol",
-    "version": "1.1.2",
+    "version": "2.0.0",
     "license": "MIT",
     "type": "module",
     "main": "lib/index.js",
@@ -13,7 +13,7 @@
         "build": "tsc"
     },
     "dependencies": {
-        "@hylimo/diagram-common": "^1.1.2",
+        "@hylimo/diagram-common": "^2.0.0",
         "sprotty-protocol": "^1.4.0",
         "vscode-languageserver-protocol": "^3.17.5"
     }
