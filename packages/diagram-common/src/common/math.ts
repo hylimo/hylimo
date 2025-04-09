@@ -173,32 +173,33 @@ export namespace Math2D {
      * @param bounds the bounds to merge
      * @returns the merged bounds
      */
-    export function mergeBounds(...bounds: Bounds[]): Bounds {
-        if (bounds.length === 0) {
+    export function mergeBounds(bounds: Bounds[]): Bounds {
+        let minX = Infinity,
+            minY = Infinity,
+            maxX = -Infinity,
+            maxY = -Infinity;
+        let hasValidBounds = false;
+
+        for (const b of bounds) {
+            if (b.size.width > 0 && b.size.height > 0) {
+                hasValidBounds = true;
+                minX = Math.min(minX, b.position.x);
+                minY = Math.min(minY, b.position.y);
+                maxX = Math.max(maxX, b.position.x + b.size.width);
+                maxY = Math.max(maxY, b.position.y + b.size.height);
+            }
+        }
+
+        if (!hasValidBounds) {
             return {
-                position: {
-                    x: 0,
-                    y: 0
-                },
-                size: {
-                    width: 0,
-                    height: 0
-                }
+                position: { x: 0, y: 0 },
+                size: { width: 0, height: 0 }
             };
         }
-        const minX = Math.min(...bounds.map((b) => b.position.x));
-        const minY = Math.min(...bounds.map((b) => b.position.y));
-        const maxX = Math.max(...bounds.map((b) => b.position.x + b.size.width));
-        const maxY = Math.max(...bounds.map((b) => b.position.y + b.size.height));
+
         return {
-            position: {
-                x: minX,
-                y: minY
-            },
-            size: {
-                width: maxX - minX,
-                height: maxY - minY
-            }
+            position: { x: minX, y: minY },
+            size: { width: maxX - minX, height: maxY - minY }
         };
     }
 

@@ -67,7 +67,7 @@ export class CanvasLayoutConfig extends StyledElementLayoutConfig {
                 childBounds.push(...this.calculateConnectionBounds(child as CanvasConnection, layout));
             }
         }
-        const bounds = Math2D.mergeBounds(...childBounds);
+        const bounds = Math2D.mergeBounds(childBounds);
         element.childElements = [...children, ...layoutChildren];
         element.canvasBounds = bounds;
 
@@ -186,8 +186,8 @@ export class CanvasLayoutConfig extends StyledElementLayoutConfig {
      */
     private calculateMarkerBounds(markerLayout: MarkerLayoutInformation): Bounds {
         const marker = markerLayout.marker;
-        const x = -marker.width;
-        const y = -marker.height / 2;
+        const x = -marker.width * markerLayout.marker.refX;
+        const y = -marker.height * markerLayout.marker.refY;
         return this.calculateRotatedRectangleBounds(
             markerLayout.position,
             markerLayout.rotation,
