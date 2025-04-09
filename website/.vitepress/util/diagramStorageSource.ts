@@ -116,8 +116,8 @@ export function useDiagramStorage(): DiagramStorage {
         const db = await dbPromise;
         const diagram: Diagram = { filename, code };
         const meta: DiagramMetadata = { filename, lastChange: new Date().toISOString() };
-        await db.add("diagrams", diagram);
-        await db.add("metadata", meta);
+        await db.put("diagrams", diagram);
+        await db.put("metadata", meta);
         diagrams.value[filename] = meta;
         channel.postMessage({ added: meta });
     }
