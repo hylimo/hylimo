@@ -111,6 +111,7 @@ watchImmediate(
 
 const showDialog = ref(false);
 const disableMouseOver = ref(true);
+const didInputChange = ref(false);
 const selectedIndex = ref(-1);
 const diagramChooser = ref<HTMLElement | null>(null);
 const diagramSelect = ref<HTMLInputElement | null>(null);
@@ -128,6 +129,7 @@ const inputFilenameOrPlaceholder = computed({
     },
     set: (value) => {
         openDialog();
+        didInputChange.value = true;
         inputFilename.value = value;
     }
 });
@@ -170,7 +172,7 @@ function computDefaultDiagramEntries(): DiagramEntry[] {
 
 function updateDiagramEntries(): void {
     const name = inputFilename.value;
-    if (name.length === 0) {
+    if (name.length === 0 || !didInputChange.value) {
         diagramEntries.value = computDefaultDiagramEntries();
         return;
     }
@@ -193,7 +195,7 @@ function openDialog(): void {
     if (showDialog.value) {
         return;
     }
-    diagramEntries.value = computDefaultDiagramEntries();
+    updateDiagramEntries();
     showDialog.value = true;
 }
 
@@ -201,6 +203,7 @@ function closeDialog(): void {
     showDialog.value = false;
     diagramSelect?.value?.blur();
     inputFilename.value = props.diagramSource?.filename ?? "";
+    didInputChange.value = false;
 }
 
 function selectDiagram(diagram: DiagramEntry): void {
