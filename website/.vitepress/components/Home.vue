@@ -76,6 +76,8 @@ const languageServerConfig = inject(languageServerConfigKey)!;
 
 const diagramSource = shallowRef<DiagramSource>();
 
+const fileBaseName = computed(() => diagramSource.value?.baseName || "diagram");
+
 const { diagrams, addDiagram, removeDiagram, openDiagram, initialized } = useDiagramStorage();
 
 const allDiagrams = computed(() => {
@@ -161,7 +163,7 @@ function downloadSVG(textAsPath: boolean) {
         return;
     }
     const svgBlob = new Blob([svgRenderer.render(diagram.value!, textAsPath)], { type: "image/svg+xml;charset=utf-8" });
-    fileSaver.saveAs(svgBlob, source.baseName + ".svg");
+    fileSaver.saveAs(svgBlob, fileBaseName.value + ".svg");
 }
 
 async function downloadPDF() {
@@ -174,7 +176,7 @@ async function downloadPDF() {
         diagram.value!,
         isDark.value ? config.darkBackgroundColor : config.lightBackgroundColor
     );
-    fileSaver.saveAs(new Blob(pdf, { type: "application/pdf" }), source.baseName + ".pdf");
+    fileSaver.saveAs(new Blob(pdf, { type: "application/pdf" }), fileBaseName.value + ".pdf");
 }
 
 function downloadSource() {
@@ -182,7 +184,7 @@ function downloadSource() {
     if (source == undefined) {
         return;
     }
-    fileSaver.saveAs(new Blob([source.code.value]), source.baseName + ".hyl");
+    fileSaver.saveAs(new Blob([source.code.value]), fileBaseName.value + ".hyl");
 }
 
 async function saveDiagram() {
