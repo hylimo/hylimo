@@ -4,7 +4,7 @@ import { InterpreterModule } from "../../runtime/interpreter/interpreterModule.j
 import { SemanticFieldNames } from "../../runtime/semanticFieldNames.js";
 import { numberType } from "../../types/number.js";
 import { DefaultModuleNames } from "../defaultModuleNames.js";
-import { assertNumber } from "../typeHelpers.js";
+import { assertNumber, isNumber } from "../typeHelpers.js";
 
 /**
  * Name of the temporary field where the number prototype is assigned
@@ -198,6 +198,19 @@ export const numberModule = InterpreterModule.create(
                 )
             )
         ]).call(),
+        assign(
+            "isNumber",
+            jsFun(
+                (args, context) => {
+                    return context.newBoolean(isNumber(args.getFieldValue(0, context)));
+                },
+                {
+                    docs: "Checks if the provided value is a number.",
+                    params: [[0, "the value to check"]],
+                    returns: "true if the value is a number"
+                }
+            )
+        ),
         assign(
             mathObject,
             fun([

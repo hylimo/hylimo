@@ -1,12 +1,7 @@
-import { ExecutableNativeExpression } from "../../runtime/ast/executableNativeExpression.js";
-import { assign, fun } from "../../runtime/executableAstHelper.js";
+import { assign, jsFun } from "../../runtime/executableAstHelper.js";
 import { InterpreterModule } from "../../runtime/interpreter/interpreterModule.js";
 import { DefaultModuleNames } from "../defaultModuleNames.js";
-
-/**
- * Name of the wrapper object proto object
- */
-const wrapperProto = "wrapperProto";
+import { isWrapperObject } from "../typeHelpers.js";
 
 /**
  * Wrapper (object) module
@@ -17,8 +12,18 @@ export const wrapperModule = InterpreterModule.create(
     [],
     [DefaultModuleNames.COMMON],
     [
-        fun([
-            assign(wrapperProto, new ExecutableNativeExpression((context) => ({ value: context.wrapperPrototype })))
-        ]).call()
+        assign(
+            "isWrapperObject",
+            jsFun(
+                (args, context) => {
+                    return context.newBoolean(isWrapperObject(args.getFieldValue(0, context)));
+                },
+                {
+                    docs: "Checks if the provided value is a wrapper object.",
+                    params: [[0, "the value to check"]],
+                    returns: "true if the value is a wrapper object"
+                }
+            )
+        )
     ]
 );

@@ -4,7 +4,7 @@ import { InterpreterModule } from "../../runtime/interpreter/interpreterModule.j
 import { SemanticFieldNames } from "../../runtime/semanticFieldNames.js";
 import { stringType } from "../../types/string.js";
 import { DefaultModuleNames } from "../defaultModuleNames.js";
-import { assertString } from "../typeHelpers.js";
+import { assertString, isString } from "../typeHelpers.js";
 
 /**
  * Name of the temporary field where the string prototype is assigned
@@ -115,6 +115,19 @@ export const stringModule = InterpreterModule.create(
                     }
                 )
             )
-        ]).call()
+        ]).call(),
+        assign(
+            "isString",
+            jsFun(
+                (args, context) => {
+                    return context.newBoolean(isString(args.getFieldValue(0, context)));
+                },
+                {
+                    docs: "Checks if the provided value is a string.",
+                    params: [[0, "the value to check"]],
+                    returns: "true if the value is a string"
+                }
+            )
+        )
     ]
 );

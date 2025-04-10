@@ -365,7 +365,7 @@ const scopeExpressions: ParseableExpressions = [
                 },
                 label = {
                     (labelContent, pos, distance, rotation) = args
-                    if("".proto == labelContent.proto) {
+                    if(isString(labelContent)) {
                         labelContent = list(span(text = labelContent))
                     }
                     labelCanvasElement = canvasElement(
@@ -414,7 +414,7 @@ const scopeExpressions: ParseableExpressions = [
             result = [
                 label = {
                     (labelContent, x, y, rotation) = args
-                    if("".proto == labelContent.proto) {
+                    if(isString(labelContent)) {
                         labelContent = list(span(text = labelContent))
                     }
                     labelCanvasElement = canvasElement(

@@ -22,7 +22,7 @@ export const sequenceDiagramInstanceModule = ContentModule.create(
                     (name, class, callback) = args
                     title = name
                     if(class != null) {
-                        if(class.proto == "".proto) {
+                        if(isString(class)) {
                             title = name + ":" + class
                         } {
                             if(callback != null) {

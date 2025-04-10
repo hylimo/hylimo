@@ -34,10 +34,10 @@ export const sequenceDiagramCreateConnectionOperatorModule = ContentModule.creat
                     invertMessageDirection = (a.x != null) && (b.x != null) && (b.x < a.x) // <- must be '<', '<=' would be incorrect
 
                     // If necessary, unwrap to the left/ right side of the most recent activity indicator - calculated through the given left/right functions
-                    start = if(!(invertMessageDirection) && (a.right != null) && (a.right.proto == {}.proto)) {
+                    start = if(!(invertMessageDirection) && isFunction(a.right)) {
                         a.right()
                     } {
-                        if(invertMessageDirection && (a.left != null) && (a.left.proto == {}.proto)) {
+                        if(invertMessageDirection && isFunction(a.left)) {
                             a.left()
                         } {
                             a
@@ -47,14 +47,14 @@ export const sequenceDiagramCreateConnectionOperatorModule = ContentModule.creat
                     // For the end point, there's a specialty: If both events point at the same participant (self message, so same x coordinate), don't use the left point but the right one instead so that x is indeed the same
                     // Additionally, in this case, we don't want to draw a straight line but an axis aligned one by default
                     lineType = "line"
-                    end = if((b.x == a.x) && (b.right != null) && (b.right.proto == {}.proto)) {
+                    end = if((b.x == a.x) && isFunction(b.right)) {
                         lineType = "axisAligned"
                         b.right()
                     } {
-                        if(!(invertMessageDirection) && (b.left != null) && (b.left.proto == {}.proto)) {
+                        if(!(invertMessageDirection) && isFunction(b.left)) {
                             b.left()
                         } {
-                            if(invertMessageDirection && (b.right != null) && (b.right.proto == {}.proto)) {
+                            if(invertMessageDirection && isFunction(b.right)) {
                                 b.right()
                             } {
                                 b

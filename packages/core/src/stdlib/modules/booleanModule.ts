@@ -5,7 +5,7 @@ import { BooleanObject } from "../../runtime/objects/booleanObject.js";
 import { SemanticFieldNames } from "../../runtime/semanticFieldNames.js";
 import { booleanType } from "../../types/boolean.js";
 import { DefaultModuleNames } from "../defaultModuleNames.js";
-import { assertBoolean, assertSelfShortCircuitArguments } from "../typeHelpers.js";
+import { assertBoolean, assertSelfShortCircuitArguments, isBoolean } from "../typeHelpers.js";
 
 /**
  * Name of the boolean proto object
@@ -222,6 +222,19 @@ export const booleanModule = InterpreterModule.create(
                     docs: "Negates a boolean",
                     params: [[0, "the boolean to negate", booleanType]],
                     returns: "The negated argument"
+                }
+            )
+        ),
+        assign(
+            "isBoolean",
+            jsFun(
+                (args, context) => {
+                    return context.newBoolean(isBoolean(args.getFieldValue(0, context)));
+                },
+                {
+                    docs: "Checks if the provided value is a boolean.",
+                    params: [[0, "the value to check"]],
+                    returns: "true if the value is a boolean"
                 }
             )
         )

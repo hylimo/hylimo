@@ -5,7 +5,7 @@ import { SemanticFieldNames } from "../../runtime/semanticFieldNames.js";
 import { functionType } from "../../types/function.js";
 import { objectType } from "../../types/object.js";
 import { DefaultModuleNames } from "../defaultModuleNames.js";
-import { assertFunction, assertObject } from "../typeHelpers.js";
+import { assertFunction, assertObject, isFunction } from "../typeHelpers.js";
 
 /**
  * Name of the temporary field where the function prototype is assigned
@@ -47,6 +47,19 @@ export const functionModule = InterpreterModule.create(
                     }
                 )
             )
-        ]).call()
+        ]).call(),
+        assign(
+            "isFunction",
+            jsFun(
+                (args, context) => {
+                    return context.newBoolean(isFunction(args.getFieldValue(0, context)));
+                },
+                {
+                    docs: "Checks if the provided value is a function.",
+                    params: [[0, "the value to check"]],
+                    returns: "true if the value is a function"
+                }
+            )
+        )
     ]
 );

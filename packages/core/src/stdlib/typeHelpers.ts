@@ -121,6 +121,16 @@ export function assertFunction(
 }
 
 /**
+ * Checks if a value is a AbstractFunctionObject
+ *
+ * @param value the value to check
+ * @returns true iff it is a AbstractFunctionObject
+ */
+export function isFunction(value: BaseObject): value is AbstractFunctionObject<any> {
+    return value instanceof AbstractFunctionObject;
+}
+
+/**
  * Helper to check that an object is a FullObject, throws an error if not
  *
  * @param value the value to check

@@ -2,7 +2,7 @@ import { DefaultModuleNames } from "../defaultModuleNames.js";
 import { InterpreterModule } from "../../runtime/interpreter/interpreterModule.js";
 import { assign, fun, id, jsFun, native, num, str } from "../../runtime/executableAstHelper.js";
 import { SemanticFieldNames } from "../../runtime/semanticFieldNames.js";
-import { assertFunction, assertIndex, assertNumber, assertObject } from "../typeHelpers.js";
+import { assertFunction, assertIndex, assertNumber, assertObject, isObject } from "../typeHelpers.js";
 import type { LabeledValue } from "../../runtime/objects/labeledValue.js";
 import { generateArgs } from "../../runtime/objects/generateArgs.js";
 import { or } from "../../types/or.js";
@@ -229,6 +229,19 @@ export const objectModule = InterpreterModule.create(
                     docs: "Function which returns its arguments. Can be used to construct an object",
                     params: [[0, "all positional arguments: any"]],
                     returns: "An object with all provided params"
+                }
+            )
+        ),
+        assign(
+            "isObject",
+            jsFun(
+                (args, context) => {
+                    return context.newBoolean(isObject(args.getFieldValue(0, context)));
+                },
+                {
+                    docs: "Checks if the provided value is an object.",
+                    params: [[0, "the value to check"]],
+                    returns: "true if the value is an object"
                 }
             )
         )

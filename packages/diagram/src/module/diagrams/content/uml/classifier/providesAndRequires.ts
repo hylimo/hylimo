@@ -1,4 +1,4 @@
-import { fun, id, numberType, object, objectType, optional, stringType } from "@hylimo/core";
+import { fun, id, numberType, object, objectType, optional, or, stringType } from "@hylimo/core";
 import { LinePointLayoutConfig } from "../../../../../layout/elements/canvas/linePointLayoutConfig.js";
 import { SCOPE } from "../../../../base/dslModule.js";
 import { canvasContentType } from "../../../../base/types.js";
@@ -44,6 +44,11 @@ export const providesAndRequiresModule = ContentModule.create(
                                 fun(
                                     `
                                         (name, pos, target) = args
+                                        if(!(isString(name))) {
+                                            target = pos
+                                            pos = name
+                                            name = null
+                                        }
                                         this.dist = args.dist
                                         if(target == null) {
                                             target = canvasScope.lpos(element, pos, dist)
@@ -69,26 +74,32 @@ export const providesAndRequiresModule = ContentModule.create(
                                             }
                                         )
                                         interfaceConnection.contents[0]._verticalPos = 1
-                                        scope.internal.registerInDiagramScope(name, interfaceConnection)
-                                        (xLabelOffset, yLabelOffset) = args.namePos ?? [null, null]
-                                        nameLabelPos = canvasScope.rpos(interfaceConnection, xLabelOffset, yLabelOffset)
-                                        nameLabelPos.class = list("provided-interface-label-pos")
-                                        nameLabel = canvasElement(
-                                            content = text(contents = list(span(text = name)), class = list("label")),
-                                            class = list("label-element"),
-                                            pos = nameLabelPos
-                                        )
-                                        scope.internal.registerCanvasContent(nameLabel, args, canvasScope)
+                                        if(name != null) {
+                                            scope.internal.registerInDiagramScope(name, interfaceConnection)
+                                            (xLabelOffset, yLabelOffset) = args.namePos ?? [null, null]
+                                            nameLabelPos = canvasScope.rpos(interfaceConnection, xLabelOffset, yLabelOffset)
+                                            nameLabelPos.class = list("provided-interface-label-pos")
+                                            nameLabel = canvasElement(
+                                                content = text(contents = list(span(text = name)), class = list("label")),
+                                                class = list("label-element"),
+                                                pos = nameLabelPos
+                                            )
+                                            scope.internal.registerCanvasContent(nameLabel, args, canvasScope)
+                                        }
                                         interfaceConnection
                                     `,
                                     {
                                         docs: "Creates a provided interface relative to the classifier",
                                         params: [
-                                            [0, "Name of the provided interface", stringType],
+                                            [
+                                                0,
+                                                "Name of the provided interface (optional, can be omitted)",
+                                                optional(or(stringType, LinePointLayoutConfig.POS_TYPE))
+                                            ],
                                             [
                                                 1,
                                                 "Relative position on the outline",
-                                                optional(LinePointLayoutConfig.POS_TYPE)
+                                                optional(or(LinePointLayoutConfig.POS_TYPE, canvasContentType))
                                             ],
                                             [
                                                 2,
@@ -111,6 +122,11 @@ export const providesAndRequiresModule = ContentModule.create(
                                 fun(
                                     `
                                         (name, pos, target) = args
+                                        if(!(isString(name))) {
+                                            target = pos
+                                            pos = name
+                                            name = null
+                                        }
                                         this.dist = args.dist
                                         if(target == null) {
                                             target = canvasScope.lpos(element, pos, dist)
@@ -134,26 +150,32 @@ export const providesAndRequiresModule = ContentModule.create(
                                             }
                                         )
                                         interfaceConnection.contents[0]._verticalPos = 1
-                                        scope.internal.registerInDiagramScope(name, interfaceConnection)
-                                        (xLabelOffset, yLabelOffset) = args.namePos ?? [null, null]
-                                        nameLabelPos = canvasScope.rpos(interfaceConnection, xLabelOffset, yLabelOffset)
-                                        nameLabelPos.class = list("required-interface-label-pos")
-                                        nameLabel = canvasElement(
-                                            content = text(contents = list(span(text = name)), class = list("label")),
-                                            class = list("label-element"),
-                                            pos = nameLabelPos
-                                        )
-                                        scope.internal.registerCanvasContent(nameLabel, args, canvasScope)
+                                        if(name != null) {
+                                            scope.internal.registerInDiagramScope(name, interfaceConnection)
+                                            (xLabelOffset, yLabelOffset) = args.namePos ?? [null, null]
+                                            nameLabelPos = canvasScope.rpos(interfaceConnection, xLabelOffset, yLabelOffset)
+                                            nameLabelPos.class = list("required-interface-label-pos")
+                                            nameLabel = canvasElement(
+                                                content = text(contents = list(span(text = name)), class = list("label")),
+                                                class = list("label-element"),
+                                                pos = nameLabelPos
+                                            )
+                                            scope.internal.registerCanvasContent(nameLabel, args, canvasScope)
+                                        }
                                         interfaceConnection
                                     `,
                                     {
                                         docs: "Creates a required interface relative to the classifier",
                                         params: [
-                                            [0, "Name of the required interface", stringType],
+                                            [
+                                                0,
+                                                "Name of the required interface (optional, can be omitted)",
+                                                optional(or(stringType, LinePointLayoutConfig.POS_TYPE))
+                                            ],
                                             [
                                                 1,
                                                 "Relative position on the outline",
-                                                optional(LinePointLayoutConfig.POS_TYPE)
+                                                optional(or(LinePointLayoutConfig.POS_TYPE, canvasContentType))
                                             ],
                                             [2, "Target element for the interface", optional(canvasContentType)],
                                             [

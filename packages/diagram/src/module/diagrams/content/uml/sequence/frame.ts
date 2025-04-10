@@ -30,7 +30,7 @@ export const sequenceDiagramFrameModule = ContentModule.create(
                 parentRightX = parentLeftX + parent.width
                 width = parentRightX - parentLeftX
                 x = parentLeftX
-                y = if(topLineEvent.proto == 1.proto) { topLineEvent } { topLineEvent.y }
+                y = if(isNumber(topLineEvent)) { topLineEvent } { topLineEvent.y }
 
                 // The frame is offset by 'margin' from the event, but we want to connect the name to the frame border/fragment line
                 marginTop = marginTop ?? args.marginTop
