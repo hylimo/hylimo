@@ -45,12 +45,15 @@ export class ScrollMouseListener extends SprottyScrollMouseListener {
     }
 
     override mouseUp(target: SModelElementImpl, event: MouseEvent): Action[] {
-        const result = super.mouseUp(target, event);
-        const updateCursorAction: UpdateCursorAction = {
-            kind: UpdateCursorAction.KIND,
-            moveCursor: null
-        };
-        result.push(updateCursorAction);
+        const result: Action[] = [];
+        if (this.lastScrollPosition != undefined) {
+            const updateCursorAction: UpdateCursorAction = {
+                kind: UpdateCursorAction.KIND,
+                moveCursor: null
+            };
+            result.push(updateCursorAction);
+        }
+        result.push(...super.mouseUp(target, event));
         return result;
     }
 }
