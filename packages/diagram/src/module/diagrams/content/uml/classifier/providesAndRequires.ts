@@ -49,10 +49,10 @@ export const providesAndRequiresModule = ContentModule.create(
                                             pos = name
                                             name = null
                                         }
-                                        this.dist = args.dist
+                                        this.interfaceArgs = args
                                         if(target == null) {
-                                            target = canvasScope.lpos(element, pos, dist)
-                                            if(dist == null) {
+                                            target = canvasScope.lpos(element, pos, interfaceArgs.dist)
+                                            if(interfaceArgs.dist == null) {
                                                 target._distance = 100
                                             }
                                         } {
@@ -62,7 +62,7 @@ export const providesAndRequiresModule = ContentModule.create(
                                             canvasScope.lpos(element, pos),
                                             target,
                                             list("provided-interface-connection"),
-                                            args,
+                                            interfaceArgs,
                                             canvasScope,
                                             endMarkerFactory = {
                                                 marker(
@@ -76,7 +76,7 @@ export const providesAndRequiresModule = ContentModule.create(
                                         interfaceConnection.contents[0]._verticalPos = 1
                                         if(name != null) {
                                             scope.internal.registerInDiagramScope(name, interfaceConnection)
-                                            (xLabelOffset, yLabelOffset) = args.namePos ?? [null, null]
+                                            (xLabelOffset, yLabelOffset) = interfaceArgs.namePos ?? [null, null]
                                             nameLabelPos = canvasScope.rpos(interfaceConnection, xLabelOffset, yLabelOffset)
                                             nameLabelPos.class = list("provided-interface-label-pos")
                                             nameLabel = canvasElement(
@@ -84,7 +84,7 @@ export const providesAndRequiresModule = ContentModule.create(
                                                 class = list("label-element"),
                                                 pos = nameLabelPos
                                             )
-                                            scope.internal.registerCanvasContent(nameLabel, args, canvasScope)
+                                            scope.internal.registerCanvasContent(nameLabel, interfaceArgs, canvasScope)
                                         }
                                         interfaceConnection
                                     `,
@@ -127,10 +127,10 @@ export const providesAndRequiresModule = ContentModule.create(
                                             pos = name
                                             name = null
                                         }
-                                        this.dist = args.dist
+                                        this.interfaceArgs = args
                                         if(target == null) {
-                                            target = canvasScope.lpos(element, pos, dist)
-                                            if(dist == null) {
+                                            target = canvasScope.lpos(element, pos, interfaceArgs.dist)
+                                            if(interfaceArgs.dist == null) {
                                                 target._distance = 100
                                             }
                                         } {
@@ -140,7 +140,7 @@ export const providesAndRequiresModule = ContentModule.create(
                                             canvasScope.lpos(element, pos),
                                             target,
                                             list("required-interface-connection"),
-                                            args,
+                                            interfaceArgs,
                                             canvasScope,
                                             endMarkerFactory = {
                                                 marker(
@@ -152,7 +152,7 @@ export const providesAndRequiresModule = ContentModule.create(
                                         interfaceConnection.contents[0]._verticalPos = 1
                                         if(name != null) {
                                             scope.internal.registerInDiagramScope(name, interfaceConnection)
-                                            (xLabelOffset, yLabelOffset) = args.namePos ?? [null, null]
+                                            (xLabelOffset, yLabelOffset) = interfaceArgs.namePos ?? [null, null]
                                             nameLabelPos = canvasScope.rpos(interfaceConnection, xLabelOffset, yLabelOffset)
                                             nameLabelPos.class = list("required-interface-label-pos")
                                             nameLabel = canvasElement(
@@ -160,7 +160,7 @@ export const providesAndRequiresModule = ContentModule.create(
                                                 class = list("label-element"),
                                                 pos = nameLabelPos
                                             )
-                                            scope.internal.registerCanvasContent(nameLabel, args, canvasScope)
+                                            scope.internal.registerCanvasContent(nameLabel, interfaceArgs, canvasScope)
                                         }
                                         interfaceConnection
                                     `,
