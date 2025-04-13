@@ -112,10 +112,8 @@
         flex-grow: 1;
     }
 
-    body:has(.diagram-select) {
-        .VPNavBarMenu.menu {
-            flex-grow: 1;
-        }
+    .VPNavBarMenu.menu:has(.diagram-select) {
+        flex-grow: 1;
     }
 }
 

@@ -358,11 +358,11 @@ onBeforeUnmount(() => {
     width: 100%;
 }
 
-body:has(.splitpanes.splitpanes--vertical.splitpanes--dragging) * {
+.splitpanes.splitpanes--vertical.splitpanes--dragging {
     cursor: col-resize !important;
 }
 
-body:has(.splitpanes.splitpanes--horizontal.splitpanes--dragging) * {
+.splitpanes.splitpanes--horizontal.splitpanes--dragging {
     cursor: row-resize !important;
 }
 </style>
