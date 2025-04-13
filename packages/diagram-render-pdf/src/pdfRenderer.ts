@@ -17,8 +17,7 @@ import {
     extractOutlinedShapeAttributes,
     extractShapeStyleAttributes
 } from "@hylimo/diagram-render-svg";
-import EmbeddedFont from "./embeddedFont.js";
-import { createFont } from "@hylimo/diagram";
+import { Buffer } from "buffer/index.js";
 
 /**
  * Renderer which renders a diagram to pdf
@@ -74,9 +73,7 @@ export class PDFDiagramVisitor extends SimplifiedDiagramVisitor<PDFKit.PDFDocume
 
     override visitRoot(element: Root, context: PDFKit.PDFDocument): void {
         for (const font of element.fonts) {
-            const id = `F${++(context as any)._fontCount}`;
-            const embeddedFont = new EmbeddedFont(context, createFont(font.data), id);
-            (context as any)._fontFamilies[font.fontFamily] = embeddedFont;
+            context.registerFont(font.fontFamily, Buffer.from(font.data, "base64"));
         }
         const [width, height] = [
             element.rootBounds.size.width + 2 * this.margin,

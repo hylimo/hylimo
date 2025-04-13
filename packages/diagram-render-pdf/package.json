@@ -21,7 +21,7 @@
         "@hylimo/diagram": "^2.0.0",
         "@hylimo/diagram-common": "^2.0.0",
         "@hylimo/diagram-render-svg": "^2.0.0",
-        "pdfkit": "^0.16.0"
+        "pdfkit": "^0.17.0"
     },
     "devDependencies": {
         "@types/pdfkit": "^0.13.9"
