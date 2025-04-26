@@ -1,4 +1,4 @@
-import type { Edit, ToolboxEdit } from "@hylimo/diagram-protocol";
+import type { ToolboxEdit } from "@hylimo/diagram-protocol";
 import { MoveHandler, type HandleMoveResult } from "../move/moveHandler.js";
 import type { SRoot } from "../../model/sRoot.js";
 import type { SModelElementImpl } from "sprotty";

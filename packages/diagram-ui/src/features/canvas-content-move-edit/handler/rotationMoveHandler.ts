@@ -1,6 +1,6 @@
 import { DefaultEditTypes, Point } from "@hylimo/diagram-common";
 import { MoveHandler, type HandleMoveResult } from "../../move/moveHandler.js";
-import type { Edit, RotateEdit } from "@hylimo/diagram-protocol";
+import type { RotateEdit } from "@hylimo/diagram-protocol";
 import type { Matrix } from "transformation-matrix";
 import { decomposeTSR, fromTwoMovingPoints } from "transformation-matrix";
 

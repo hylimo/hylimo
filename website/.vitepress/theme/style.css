@@ -165,6 +165,7 @@
 :root {
     --diagram-layout-color: #606770;
     --diagram-layout-color-selected: var(--vp-c-brand);
+    --diagram-layout-color-snap: var(--vp-c-caution-2);
     --diagram-grid: #bbb;
     --toolbox-background: var(--vp-c-bg);
     --toolbox-primary: var(--vp-c-brand);

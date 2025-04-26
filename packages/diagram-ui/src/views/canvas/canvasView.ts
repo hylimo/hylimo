@@ -20,7 +20,7 @@ export class CanvasView extends CanvasLikeView implements IView {
                 }
             },
             ...context.renderChildren(model),
-            ...this.renderSnapLines(model),
+            ...this.renderSnapLines(model)
         );
     }
 }

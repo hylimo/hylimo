@@ -33,7 +33,8 @@ svg.hylimo {
     .canvas-dependency-line,
     .select-box,
     .select-canvas-connection,
-    .create-connection-outline {
+    .create-connection-outline,
+    .snap-line {
         vector-effect: non-scaling-stroke;
     }
 
@@ -100,6 +101,13 @@ svg.hylimo {
 
     .resize-corner {
         stroke-linecap: square;
+    }
+
+    .snap-line {
+        stroke: var(--diagram-layout-color-snap);
+        stroke-width: 1px;
+        pointer-events: none;
+        shape-rendering: crispEdges;
     }
 
     .cursor-resize-0,

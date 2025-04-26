@@ -148,6 +148,11 @@ export class TransactionManager {
                 const target = layoutedDiagram.elementLookup[incrementalUpdate.target];
                 Object.assign(target, incrementalUpdate.changes);
             }
+        } else {
+            layoutedDiagram.rootElement.transactionState = {
+                id: this.currentTransactionId!,
+                sequenceNumber: this.lastKnownAction?.sequenceNumber ?? 0
+            };
         }
         this.hasUpdatedDiagram = true;
         this.updateTextDocumentIfPossible();

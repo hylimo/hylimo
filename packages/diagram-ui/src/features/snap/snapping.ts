@@ -11,7 +11,7 @@ import {
 import type { SRoot } from "../../model/sRoot.js";
 import type { SElement } from "../../model/sElement.js";
 import type { SCanvas } from "../../model/canvas/sCanvas.js";
-import { applyToPoint, compose, inverse, rotateDEG, type Matrix } from "transformation-matrix";
+import { applyToPoint, compose, rotateDEG, type Matrix } from "transformation-matrix";
 
 /**
  * Snap distance for the snapping algorithm
@@ -177,6 +177,19 @@ export interface SnapResult {
     contextGlobalRotations: Map<string, number>;
 }
 
+export function getSnapData(root: SRoot, selectedElements: SElement[], ignoredElements: SElement[]): SnapData {
+    const ignoredElementsSet = new Set<string>();
+    for (const element of ignoredElements) {
+        ignoredElementsSet.add(element.id);
+    }
+    const snapElementData = getSnapElementData(root, selectedElements, ignoredElementsSet);
+    const snapReferenceData = getSnapReferenceData(root, new Set(snapElementData.keys()), ignoredElementsSet);
+    return {
+        data: snapElementData,
+        referenceData: snapReferenceData
+    };
+}
+
 /**
  * Calculates the points and bounds for the selected elements in all relevant contexts.
  * Selected elements that are in a canvas that is contained in an ignored element are ignored.
@@ -186,7 +199,7 @@ export interface SnapResult {
  * @param ignoredElements elements to ignore children of
  * @returns a map of context ids to their points and bounds
  */
-export function getSnapData(
+export function getSnapElementData(
     root: SRoot,
     selectedElements: SElement[],
     ignoredElements: Set<string>
@@ -203,10 +216,10 @@ export function getSnapData(
         ) {
             continue;
         }
-        if (!selectedElementsByContext.has(element.id)) {
-            selectedElementsByContext.set(element.id, [element]);
+        if (!selectedElementsByContext.has(element.parent.id)) {
+            selectedElementsByContext.set(element.parent.id, [element]);
         } else {
-            selectedElementsByContext.get(element.id)!.push(element);
+            selectedElementsByContext.get(element.parent.id)!.push(element);
         }
     }
     const result = new Map<string, ContextSnapData>();
@@ -307,7 +320,6 @@ export function getSnapReferenceData(
         const points: Point[] = [];
         const bounds: Bounds[] = [];
         elementQueue.push(...(canvas.children as SElement[]));
-        const contextToRoot = layoutEngine.localToAncestor(context, root.id);
         const contextToTarget = rotateDEG(-canvas.globalRotation);
         while (elementQueue.length > 0) {
             const element = elementQueue.pop()!;
@@ -376,10 +388,7 @@ export function getSnapReferenceData(
  * @param translation the translation vector
  * @returns the translated context informations
  */
-export function translateSnapData(
-    contextInfomations: SnapElementData,
-    translation: Vector
-): SnapElementData {
+export function translateSnapData(contextInfomations: SnapElementData, translation: Vector): SnapElementData {
     const result = new Map<string, ContextSnapData>();
     for (const [context, info] of contextInfomations.entries()) {
         const points = info.points.map((point) => Math2D.add(point, translation));
@@ -407,10 +416,7 @@ export function translateSnapData(
  * @param b the second map of reference points and bounds
  * @returns the generated intersection
  */
-export function intersectSnapReferenceDatas(
-    a: SnapReferenceData,
-    b: SnapReferenceData
-): SnapReferenceData {
+export function intersectSnapReferenceDatas(a: SnapReferenceData, b: SnapReferenceData): SnapReferenceData {
     const result = new Map<string, ContextSnapReferenceData>();
     for (const [context, aInfo] of a.entries()) {
         const bInfo = b.get(context);
@@ -461,7 +467,10 @@ export function getSnaps(
     }
 
     return {
-        snapOffset: minOffset,
+        snapOffset: {
+            x: nearestSnapsX[0]?.offset ?? 0,
+            y: nearestSnapsY[0]?.offset ?? 0
+        },
         nearestSnapsX,
         nearestSnapsY,
         contextGlobalRotations
@@ -948,7 +957,7 @@ function createPointSnapLines(
         if (!snapLines.has(context)) {
             snapLines.set(context, []);
         }
-        for (const [key, points] of entries.entries()) {
+        for (const [, points] of entries.entries()) {
             const snapLine: PointSnapLine = {
                 type: "points",
                 points: dedupePoints(points.sort(Point.compare))
@@ -960,7 +969,7 @@ function createPointSnapLines(
         if (!snapLines.has(context)) {
             snapLines.set(context, []);
         }
-        for (const [key, points] of entries.entries()) {
+        for (const [, points] of entries.entries()) {
             const snapLine: PointSnapLine = {
                 type: "points",
                 points: dedupePoints(points.sort(Point.compare))

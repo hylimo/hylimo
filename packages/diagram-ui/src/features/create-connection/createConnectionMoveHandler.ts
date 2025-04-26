@@ -1,4 +1,4 @@
-import type { ConnectionEdit, ConnectionEnd, Edit } from "@hylimo/diagram-protocol";
+import type { ConnectionEdit, ConnectionEnd } from "@hylimo/diagram-protocol";
 import type { SModelElementImpl } from "sprotty";
 import { findParentByFeature } from "sprotty";
 import { MoveHandler, type HandleMoveResult } from "../move/moveHandler.js";

@@ -1,4 +1,4 @@
-import type { Edit, TransactionalAction } from "@hylimo/diagram-protocol";
+import type { TransactionalAction } from "@hylimo/diagram-protocol";
 import { MoveHandler, type HandleMoveResult } from "../../move/moveHandler.js";
 
 /**
@@ -11,6 +11,6 @@ export class NoopMoveHandler extends MoveHandler {
     }
 
     override handleMove(): HandleMoveResult {
-        return { edits: [] }
+        return { edits: [] };
     }
 }

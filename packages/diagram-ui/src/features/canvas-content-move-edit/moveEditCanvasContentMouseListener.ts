@@ -41,13 +41,7 @@ import { findResizeIconClass } from "../cursor/resizeIcon.js";
 import { MouseListener } from "../../base/mouseListener.js";
 import { TYPES } from "../types.js";
 import type { SnapLinesStateManager } from "../snap/snapLinesStateManager.js";
-import {
-    getSnapData,
-    getSnapReferenceData,
-    type SnapData,
-    type SnapElementData,
-    type SnapReferenceData
-} from "../snap/snapping.js";
+import { getSnapData, type SnapData } from "../snap/snapping.js";
 
 /**
  * If a resize scale exceeds this value, instead resize with scale 1 in the opposite direction is performed.
@@ -436,15 +430,7 @@ export class MoveEditCanvasContentMouseListener extends MouseListener {
     }
 
     private computeSnapData(elements: SElement[], ignoredElements: SElement[], root: SRoot): SnapData | undefined {
-        const ignoredElementIds = new Set<string>();
-        for (const element of ignoredElements) {
-            ignoredElementIds.add(element.id);
-        }
-        const snapData = getSnapData(root, elements, ignoredElementIds);
-        return {
-            data: snapData,
-            referenceData: getSnapReferenceData(root, new Set(snapData.keys()), ignoredElementIds)
-        };
+        return getSnapData(root, elements, ignoredElements);
     }
 
     /**

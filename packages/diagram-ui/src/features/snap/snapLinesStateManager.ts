@@ -41,7 +41,7 @@ export class SnapLinesStateManager implements IActionHandler {
     /**
      * Returns the snap lines for the given context
      * Also cleans up the state and removes no longer needed entries
-     * 
+     *
      * @param context the context to get the snap lines for
      * @returns the snap lines for the given context
      */

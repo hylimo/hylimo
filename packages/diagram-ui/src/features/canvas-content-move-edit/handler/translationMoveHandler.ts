@@ -1,6 +1,7 @@
 import type { MoveEdit } from "@hylimo/diagram-protocol";
 import { MoveHandler, type HandleMoveResult } from "../../move/moveHandler.js";
-import { DefaultEditTypes, Math2D, Point } from "@hylimo/diagram-common";
+import type { Point } from "@hylimo/diagram-common";
+import { DefaultEditTypes, Math2D } from "@hylimo/diagram-common";
 import type { Matrix } from "transformation-matrix";
 import { applyToPoint, translate } from "transformation-matrix";
 import {
@@ -10,9 +11,7 @@ import {
     intersectSnapReferenceDatas,
     translateSnapData,
     type SnapData,
-    type SnapElementData,
-    type SnapLine,
-    type SnapReferenceData
+    type SnapLine
 } from "../../snap/snapping.js";
 import type { SModelElementImpl } from "sprotty";
 import type { SRoot } from "../../../model/sRoot.js";

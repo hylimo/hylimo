@@ -1,6 +1,6 @@
 import type { TransformedLine } from "@hylimo/diagram-common";
 import { DefaultEditTypes, LineEngine } from "@hylimo/diagram-common";
-import type { Edit, MoveLposEdit } from "@hylimo/diagram-protocol";
+import type { MoveLposEdit } from "@hylimo/diagram-protocol";
 import type { Matrix } from "transformation-matrix";
 import { MoveHandler, type HandleMoveResult } from "../../move/moveHandler.js";
 

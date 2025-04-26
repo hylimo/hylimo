@@ -1,4 +1,4 @@
-import type { AxisAlignedSegmentEdit, Edit } from "@hylimo/diagram-protocol";
+import type { AxisAlignedSegmentEdit } from "@hylimo/diagram-protocol";
 import { DefaultEditTypes } from "@hylimo/diagram-common";
 import type { Matrix } from "transformation-matrix";
 import { MoveHandler, type HandleMoveResult } from "../../move/moveHandler.js";
@@ -44,6 +44,6 @@ export class AxisAligedSegmentEditMoveHandler extends MoveHandler {
                 elements: [this.element]
             } satisfies AxisAlignedSegmentEdit
         ];
-        return { edits }
+        return { edits };
     }
 }
