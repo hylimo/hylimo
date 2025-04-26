@@ -1,5 +1,5 @@
 import type { Edit, ToolboxEdit } from "@hylimo/diagram-protocol";
-import { MoveHandler } from "../move/moveHandler.js";
+import { MoveHandler, type HandleMoveResult } from "../move/moveHandler.js";
 import type { SRoot } from "../../model/sRoot.js";
 import type { SModelElementImpl } from "sprotty";
 import type { Action } from "sprotty-protocol";
@@ -36,7 +36,7 @@ export class CreateElementMoveHandler extends MoveHandler {
         return super.generateActions(target, event, committed, transactionId, sequenceNumber);
     }
 
-    override generateEdits(x: number, y: number): Edit[] {
+    override handleMove(x: number, y: number): HandleMoveResult {
         let values: { x: number; y: number };
         if (this.hasMoved) {
             values = { x, y };
@@ -46,12 +46,13 @@ export class CreateElementMoveHandler extends MoveHandler {
                 y: this.root.scroll.y + this.root.canvasBounds.height / this.root.zoom / 2
             };
         }
-        return [
+        const edits = [
             {
                 types: [this.edit],
                 values,
                 elements: [this.root.id]
             } satisfies ToolboxEdit
         ];
+        return { edits };
     }
 }

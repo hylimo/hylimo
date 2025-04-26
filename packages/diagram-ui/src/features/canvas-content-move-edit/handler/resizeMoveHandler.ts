@@ -1,7 +1,7 @@
 import { DefaultEditTypes } from "@hylimo/diagram-common";
 import type { Edit, ResizeEdit } from "@hylimo/diagram-protocol";
 import type { Matrix } from "transformation-matrix";
-import { MoveHandler } from "../../move/moveHandler.js";
+import { MoveHandler, type HandleMoveResult } from "../../move/moveHandler.js";
 import type { ResizeMoveCursor } from "../../cursor/cursor.js";
 
 /**
@@ -20,7 +20,7 @@ export interface ElementsGroupedBySize {
  * A move handler that resizes the elements.
  * Expects relative coordinates to its own coordinate system.
  */
-export class ResizeHandler extends MoveHandler {
+export class ResizeMoveHandler extends MoveHandler {
     /**
      * Creates a new ResizeHandler.
      *
@@ -44,7 +44,7 @@ export class ResizeHandler extends MoveHandler {
         super(transformationMatrix, moveCursor);
     }
 
-    override generateEdits(x: number, y: number, event: MouseEvent): Edit[] {
+    override handleMove(x: number, y: number, event: MouseEvent): HandleMoveResult {
         let factorX: number | undefined = undefined;
         let factorY: number | undefined = undefined;
 
@@ -79,6 +79,6 @@ export class ResizeHandler extends MoveHandler {
                 values
             } satisfies ResizeEdit);
         }
-        return edits;
+        return { edits };
     }
 }

@@ -1,5 +1,5 @@
 import type { Edit, TransactionalAction } from "@hylimo/diagram-protocol";
-import { MoveHandler } from "../../move/moveHandler.js";
+import { MoveHandler, type HandleMoveResult } from "../../move/moveHandler.js";
 
 /**
  * Move handler that does nothing
@@ -10,7 +10,7 @@ export class NoopMoveHandler extends MoveHandler {
         return [];
     }
 
-    override generateEdits(): Edit[] {
-        return [];
+    override handleMove(): HandleMoveResult {
+        return { edits: [] }
     }
 }

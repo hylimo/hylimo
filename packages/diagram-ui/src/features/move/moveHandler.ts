@@ -6,6 +6,8 @@ import { applyToPoint } from "transformation-matrix";
 import type { Cursor } from "../cursor/cursor.js";
 import { UpdateCursorAction } from "../cursor/cursor.js";
 import type { Action } from "sprotty-protocol";
+import type { SnapLine } from "../snap/snapping.js";
+import { UpdateSnapLinesAction } from "../snap/updateSnapLines.js";
 
 /**
  * Handler which can handle transactional move operations
@@ -61,25 +63,51 @@ export abstract class MoveHandler {
             this.hasMoved = true;
         }
         const { x, y } = applyToPoint(this.transformationMatrix, { x: event.pageX, y: event.pageY });
+        const result = this.handleMove(x, y, event, target);
         const transactionalAction: TransactionalAction = {
             kind: TransactionalAction.KIND,
-            transactionId: transactionId,
-            sequenceNumber: sequenceNumber,
+            transactionId,
+            sequenceNumber,
             committed,
-            edits: this.generateEdits(x, y, event, target)
+            edits: result.edits
         };
         actions.push(transactionalAction);
+        if (result.snapLines != undefined && !committed) {
+            const updateSnapLinesAction: UpdateSnapLinesAction = {
+                kind: UpdateSnapLinesAction.KIND,
+                snapLines: result.snapLines,
+                transactionId,
+                sequenceNumber
+            };
+            actions.push(updateSnapLinesAction);
+        }
         return actions;
     }
 
     /**
-     * Generates the edits for the move
+     * Handles a move
+     * Returns edits to apply, and optionally new snap lines to show
      *
      * @param x the x coordinate in the root canvas coordinate system
      * @param y the y coordinate in the root canvas coordinate system
      * @param event the causing mouse event
      * @param target the target of the mouse event
-     * @returns the generated edit
+     * @returns the generated edits and optional snap lines
      */
-    abstract generateEdits(x: number, y: number, event: MouseEvent, target: SModelElementImpl): Edit[];
+    abstract handleMove(x: number, y: number, event: MouseEvent, target: SModelElementImpl): HandleMoveResult;
+}
+
+/**
+ * Result of a move operation
+ */
+export interface HandleMoveResult {
+    /**
+     * The edits to apply
+     */
+    edits: Edit[];
+    /**
+     * The snap lines to show
+     * If undefined, no snap lines are shown
+     */
+    snapLines?: Map<string, SnapLine[]>;
 }

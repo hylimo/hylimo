@@ -1,4 +1,4 @@
-import type { EditSpecification, FontData } from "@hylimo/diagram-common";
+import type { EditSpecification, FontData, TransactionState } from "@hylimo/diagram-common";
 import type { SModelElementImpl } from "sprotty";
 import { isSelectable, ModelIndexImpl, ViewportRootElementImpl } from "sprotty";
 import { SCanvasLayoutEngine } from "./canvas/sCanvasLayoutEngine.js";
@@ -78,6 +78,11 @@ export class SRoot extends ViewportRootElementImpl implements CanvasLike {
      * If defined, can provide information where a potential connection would be created
      */
     createConnectionHoverData?: CreateConnectionHoverData;
+
+    /**
+     * If this was rendered based on a transaction, the id and sequence number of the transaction
+     */
+    transactionState?: TransactionState;
 
     /**
      * The amount of time this model has been updated incrementally

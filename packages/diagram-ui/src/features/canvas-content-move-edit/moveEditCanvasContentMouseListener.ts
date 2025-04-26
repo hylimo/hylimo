@@ -1,4 +1,4 @@
-import { injectable } from "inversify";
+import { inject, injectable } from "inversify";
 import type { EditSpecificationEntry } from "@hylimo/diagram-common";
 import { EditSpecification, DefaultEditTypes, groupBy } from "@hylimo/diagram-common";
 import type { SModelElementImpl } from "sprotty";
@@ -13,13 +13,13 @@ import type { MoveHandler } from "../move/moveHandler.js";
 import { TranslationMoveHandler } from "./handler/translationMoveHandler.js";
 import { LineMoveHandler } from "./handler/lineMoveHandler.js";
 import { CanvasElementView, ResizePosition } from "../../views/canvas/canvasElementView.js";
-import { RotationHandler } from "./handler/rotationHandler.js";
+import { RotationMoveHandler } from "./handler/rotationMoveHandler.js";
 import { SCanvasConnection } from "../../model/canvas/sCanvasConnection.js";
 import type { SRoot } from "../../model/sRoot.js";
-import type { ElementsGroupedBySize } from "./handler/resizeHandler.js";
-import { ResizeHandler } from "./handler/resizeHandler.js";
+import type { ElementsGroupedBySize } from "./handler/resizeMoveHandler.js";
+import { ResizeMoveHandler } from "./handler/resizeMoveHandler.js";
 import { SCanvasAxisAlignedSegment } from "../../model/canvas/sCanvasAxisAlignedSegment.js";
-import { AxisAligedSegmentEditHandler } from "./handler/axisAlignedSegmentEditHandler.js";
+import { AxisAligedSegmentEditMoveHandler } from "./handler/axisAlignedSegmentEditMoveHandler.js";
 import type { Matrix } from "transformation-matrix";
 import {
     compose,
@@ -39,6 +39,15 @@ import { NoopMoveHandler } from "./handler/noopMoveHandler.js";
 import { SElement } from "../../model/sElement.js";
 import { findResizeIconClass } from "../cursor/resizeIcon.js";
 import { MouseListener } from "../../base/mouseListener.js";
+import { TYPES } from "../types.js";
+import type { SnapLinesStateManager } from "../snap/snapLinesStateManager.js";
+import {
+    getSnapData,
+    getSnapReferenceData,
+    type SnapData,
+    type SnapElementData,
+    type SnapReferenceData
+} from "../snap/snapping.js";
 
 /**
  * If a resize scale exceeds this value, instead resize with scale 1 in the opposite direction is performed.
@@ -59,6 +68,11 @@ export class MoveEditCanvasContentMouseListener extends MouseListener {
      * The maximum number of updates that can be performed on the same revision.
      */
     static readonly MAX_UPDATES_PER_REVISION = 5;
+
+    /**
+     * Manager for snap lines
+     */
+    @inject(TYPES.SnapLinesStateManager) readonly snapLinesStateManager!: SnapLinesStateManager;
 
     override mouseDown(target: SModelElementImpl, event: MouseEvent): Action[] {
         if (
@@ -126,13 +140,13 @@ export class MoveEditCanvasContentMouseListener extends MouseListener {
         target: SCanvasConnection,
         vertical: boolean,
         event: MouseEvent
-    ): AxisAligedSegmentEditHandler | undefined {
+    ): AxisAligedSegmentEditMoveHandler | undefined {
         const dataset = targetElement.dataset;
         const id = dataset.id!;
         const start = Number.parseFloat(dataset.start!);
         const end = Number.parseFloat(dataset.end!);
         const current = Number.parseFloat(dataset.current!);
-        return new AxisAligedSegmentEditHandler(
+        return new AxisAligedSegmentEditMoveHandler(
             id,
             current,
             start,
@@ -155,7 +169,7 @@ export class MoveEditCanvasContentMouseListener extends MouseListener {
         target: SCanvasElement,
         classList: DOMTokenList,
         event: MouseEvent
-    ): ResizeHandler | undefined {
+    ): ResizeMoveHandler | undefined {
         const resizedElements = target.root.selectedElements.filter(
             (element) => element instanceof SCanvasElement
         ) as SCanvasElement[];
@@ -179,7 +193,7 @@ export class MoveEditCanvasContentMouseListener extends MouseListener {
         if (!EditSpecification.isConsistent(groupedEntries)) {
             return undefined;
         }
-        return new ResizeHandler(
+        return new ResizeMoveHandler(
             scaleX,
             scaleY,
             target.width,
@@ -300,7 +314,7 @@ export class MoveEditCanvasContentMouseListener extends MouseListener {
         if (!(DefaultEditTypes.ROTATE in target.edits)) {
             return undefined;
         }
-        return new RotationHandler(target.id, target.rotation, target.getMouseTransformationMatrix());
+        return new RotationMoveHandler(target.id, target.rotation, target.getMouseTransformationMatrix());
     }
 
     /**
@@ -320,7 +334,10 @@ export class MoveEditCanvasContentMouseListener extends MouseListener {
             return undefined;
         }
 
-        const { movedElements, hasConflict } = new MovedElementsSelector(selected, target.index);
+        const { movedElements, hasConflict, implicitlyMovedElements } = new MovedElementsSelector(
+            selected,
+            target.index
+        );
         if (hasConflict) {
             return undefined;
         }
@@ -339,7 +356,9 @@ export class MoveEditCanvasContentMouseListener extends MouseListener {
             }
             return this.createLineMoveHandler(linePoints[0], event);
         }
-        return this.createTranslationMoveHandler(translateableElements, event, target.root as SRoot);
+        const root = target.root as SRoot;
+        const snapData = this.computeSnapData(selected, [...movedElements, ...implicitlyMovedElements], root);
+        return this.createTranslationMoveHandler(translateableElements, snapData, event, root);
     }
 
     /**
@@ -389,6 +408,7 @@ export class MoveEditCanvasContentMouseListener extends MouseListener {
      */
     private createTranslationMoveHandler(
         elements: (SCanvasElement | SAbsolutePoint | SRelativePoint)[],
+        snapData: SnapData | undefined,
         event: MouseEvent,
         root: SRoot
     ): MoveHandler | undefined {
@@ -409,8 +429,22 @@ export class MoveEditCanvasContentMouseListener extends MouseListener {
                 transformation: entry.transformation,
                 elements: entry.elements.map((element) => element.id)
             })),
+            snapData,
+            this.snapLinesStateManager,
             this.makeRelative(root.getMouseTransformationMatrix(), event)
         );
+    }
+
+    private computeSnapData(elements: SElement[], ignoredElements: SElement[], root: SRoot): SnapData | undefined {
+        const ignoredElementIds = new Set<string>();
+        for (const element of ignoredElements) {
+            ignoredElementIds.add(element.id);
+        }
+        const snapData = getSnapData(root, elements, ignoredElementIds);
+        return {
+            data: snapData,
+            referenceData: getSnapReferenceData(root, new Set(snapData.keys()), ignoredElementIds)
+        };
     }
 
     /**

@@ -3,6 +3,7 @@ import {
     Bounds,
     CanvasElement,
     LinePoint,
+    Math2D,
     Point,
     RelativePoint,
     type Vector
@@ -10,7 +11,7 @@ import {
 import type { SRoot } from "../../model/sRoot.js";
 import type { SElement } from "../../model/sElement.js";
 import type { SCanvas } from "../../model/canvas/sCanvas.js";
-import { applyToPoint, inverse, type Matrix } from "transformation-matrix";
+import { applyToPoint, compose, inverse, rotateDEG, type Matrix } from "transformation-matrix";
 
 /**
  * Snap distance for the snapping algorithm
@@ -22,20 +23,11 @@ const SNAP_DISTANCE = 8;
  */
 const VISIBLE_GAPS_LIMIT_PER_AXIS = 99999;
 
-/**
- * Snap distance with zoom value taken into consideration
- *
- * @param zoomValue the zoom value of the canvas
- * @returns the snap distance
- */
-export function getSnapDistance(zoomValue: number): number {
-    return SNAP_DISTANCE / zoomValue;
-}
-
 type PointPair = [Point, Point];
 
 export type PointSnap = {
     type: "point";
+    context: string;
     point: Point;
     referencePoint: Point;
     offset: number;
@@ -72,6 +64,7 @@ interface Gaps {
 
 export type GapSnap = {
     type: "gap";
+    context: string;
     direction: "center_horizontal" | "center_vertical" | "side_left" | "side_right" | "side_top" | "side_bottom";
     gap: Gap;
     bounds: Bounds;
@@ -99,7 +92,7 @@ export type SnapLine = PointSnapLine | GapSnapLine;
 /**
  * Information about elements to snap to in the context of a given canvas
  */
-export interface ContextReferenceInformation {
+export interface ContextSnapReferenceData {
     /**
      * The points used for snapping (sorted)
      */
@@ -115,9 +108,9 @@ export interface ContextReferenceInformation {
 }
 
 /**
- * Information about the dragged elements in the context of a given canvas
+ * Data about the dragged elements in the context of a given canvas
  */
-export interface ContextInformation {
+export interface ContextSnapData {
     /**
      * The points used for snapping (sorted)
      */
@@ -126,6 +119,21 @@ export interface ContextInformation {
      * The bounds of the elements, position in the context, but aligned with the root coordinate system
      */
     bounds: Bounds | undefined;
+}
+
+/**
+ * Snapping data for all contexts
+ */
+export type SnapReferenceData = Map<string, ContextSnapReferenceData>;
+
+/**
+ * Snap data for all contexts
+ */
+export type SnapElementData = Map<string, ContextSnapData>;
+
+export interface SnapData {
+    data: SnapElementData;
+    referenceData: SnapReferenceData;
 }
 
 export interface SnapOptions {
@@ -163,6 +171,10 @@ export interface SnapResult {
      * Nearest snaps for the y axis (used for calculating snap lines)
      */
     nearestSnapsY: Snaps;
+    /**
+     * Global rotation values for all contexts
+     */
+    contextGlobalRotations: Map<string, number>;
 }
 
 /**
@@ -174,11 +186,11 @@ export interface SnapResult {
  * @param ignoredElements elements to ignore children of
  * @returns a map of context ids to their points and bounds
  */
-export function getPointsAndBounds(
+export function getSnapData(
     root: SRoot,
     selectedElements: SElement[],
     ignoredElements: Set<string>
-): Map<string, ContextInformation> {
+): SnapElementData {
     const selectedElementsByContext = new Map<string, SElement[]>();
     for (const element of selectedElements) {
         if (
@@ -197,10 +209,11 @@ export function getPointsAndBounds(
             selectedElementsByContext.get(element.id)!.push(element);
         }
     }
-    const result = new Map<string, ContextInformation>();
+    const result = new Map<string, ContextSnapData>();
     const layoutEngine = root.layoutEngine;
     for (const [context, elements] of selectedElementsByContext.entries()) {
-        let current: SElement | SRoot = root.index.getById(context)! as SCanvas | SRoot;
+        const contextElement = root.index.getById(context)! as SCanvas | SRoot;
+        let current: SElement | SRoot = contextElement;
         let isIgnored = false;
         while (current !== root) {
             if (ignoredElements.has(current.id)) {
@@ -212,27 +225,25 @@ export function getPointsAndBounds(
         if (isIgnored) {
             continue;
         }
-        const rootToContextMatrix = inverse(layoutEngine.localToAncestor(context, root.id));
+        const contextToTarget = rotateDEG(-contextElement.globalRotation);
         if (elements.length === 1) {
             const element = elements[0];
             if (CanvasElement.isCanvasElement(element)) {
-                const elementToRootMatrix = layoutEngine.localToAncestor(element.id, root.id);
-                const corners = getCanvasElementCorners(elementToRootMatrix, element);
-                const center = getCanvasElementCenter(elementToRootMatrix, element);
-                const rootBounds = Bounds.ofPoints(corners);
+                const elementToTargetMatrix = compose(
+                    contextToTarget,
+                    layoutEngine.localToAncestor(element.id, context)
+                );
+                const corners = getCanvasElementCorners(elementToTargetMatrix, element);
+                const center = getCanvasElementCenter(elementToTargetMatrix, element);
+                const bounds = Bounds.ofPoints(corners);
                 result.set(context, {
-                    points: [...corners, center]
-                        .map((point) => applyToPoint(rootToContextMatrix, point))
-                        .sort(Point.compare),
-                    bounds: {
-                        position: applyToPoint(rootToContextMatrix, rootBounds.position),
-                        size: rootBounds.size
-                    }
+                    points: [...corners, center].sort(Point.compare),
+                    bounds
                 });
             } else {
                 const point = layoutEngine.getPoint(element.id, context);
                 result.set(context, {
-                    points: [applyToPoint(rootToContextMatrix, point)],
+                    points: [applyToPoint(contextToTarget, point)],
                     bounds: undefined
                 });
             }
@@ -240,31 +251,29 @@ export function getPointsAndBounds(
             const points: Point[] = [];
             for (const element of elements) {
                 if (CanvasElement.isCanvasElement(element)) {
-                    const elementToRootMatrix = layoutEngine.localToAncestor(element.id, root.id);
-                    const corners = getCanvasElementCorners(elementToRootMatrix, element);
+                    const elementToTargetMatrix = compose(
+                        contextToTarget,
+                        layoutEngine.localToAncestor(element.id, context)
+                    );
+                    const corners = getCanvasElementCorners(elementToTargetMatrix, element);
                     points.push(...corners);
                 } else {
-                    const point = layoutEngine.getPoint(element.id, root.id);
-                    points.push(point);
+                    const point = layoutEngine.getPoint(element.id, context);
+                    points.push(applyToPoint(contextToTarget, point));
                 }
             }
-            const rootBounds = Bounds.ofPoints(points);
+            const bounds = Bounds.ofPoints(points);
             result.set(context, {
                 points: [
-                    rootBounds.position,
-                    { x: rootBounds.position.x + rootBounds.size.width, y: rootBounds.position.y },
+                    bounds.position,
+                    { x: bounds.position.x + bounds.size.width, y: bounds.position.y },
                     {
-                        x: rootBounds.position.x + rootBounds.size.width,
-                        y: rootBounds.position.y + rootBounds.size.height
+                        x: bounds.position.x + bounds.size.width,
+                        y: bounds.position.y + bounds.size.height
                     },
-                    { x: rootBounds.position.x, y: rootBounds.position.y + rootBounds.size.height }
-                ]
-                    .map((point) => applyToPoint(rootToContextMatrix, point))
-                    .sort(Point.compare),
-                bounds: {
-                    position: applyToPoint(rootToContextMatrix, rootBounds.position),
-                    size: rootBounds.size
-                }
+                    { x: bounds.position.x, y: bounds.position.y + bounds.size.height }
+                ].sort(Point.compare),
+                bounds
             });
         }
     }
@@ -279,12 +288,12 @@ export function getPointsAndBounds(
  * @param ignoredElements elements which should not contribute to the reference points and bounds, even when they are visible
  * @returns a map of context ids to their reference points and bounds
  */
-export function getReferencePointsAndBounds(
+export function getSnapReferenceData(
     root: SRoot,
     contexts: Set<string>,
     ignoredElements: Set<string>
-): Map<string, ContextReferenceInformation> {
-    const result = new Map<string, ContextReferenceInformation>();
+): SnapReferenceData {
+    const result = new Map<string, ContextSnapReferenceData>();
     const checkedElements = new Set<string>();
     const visibleCheckedElements = new Set<string>();
     const visibleBounds: Bounds = {
@@ -298,7 +307,8 @@ export function getReferencePointsAndBounds(
         const points: Point[] = [];
         const bounds: Bounds[] = [];
         elementQueue.push(...(canvas.children as SElement[]));
-        const rootToContextMatrix = inverse(layoutEngine.localToAncestor(context, root.id));
+        const contextToRoot = layoutEngine.localToAncestor(context, root.id);
+        const contextToTarget = rotateDEG(-canvas.globalRotation);
         while (elementQueue.length > 0) {
             const element = elementQueue.pop()!;
             if (ignoredElements.has(element.id)) {
@@ -311,24 +321,21 @@ export function getReferencePointsAndBounds(
                 if (checkedElements.has(element.id) && !visibleCheckedElements.has(element.id)) {
                     continue;
                 }
-                const elementToRootMatrix = layoutEngine.localToAncestor(element.id, root.id);
-                const corners = getCanvasElementCorners(elementToRootMatrix, element);
+                const elementToContext = layoutEngine.localToAncestor(element.id, context);
+                const corners = getCanvasElementCorners(elementToContext, element);
                 if (!checkedElements.has(element.id)) {
                     checkedElements.add(element.id);
-                    if (!corners.some((point) => Bounds.contains(visibleBounds, point))) {
+                    if (
+                        !corners.some((point) => Bounds.contains(visibleBounds, applyToPoint(contextToTarget, point)))
+                    ) {
                         continue;
                     }
                     visibleCheckedElements.add(element.id);
                 }
-                points.push(getCanvasElementCenter(elementToRootMatrix, element));
-                for (const corner of corners) {
-                    points.push(applyToPoint(rootToContextMatrix, corner));
-                }
-                const rootBounds = Bounds.ofPoints(corners);
-                bounds.push({
-                    position: applyToPoint(rootToContextMatrix, rootBounds.position),
-                    size: rootBounds.size
-                });
+                const targetPoints = corners.map((corner) => applyToPoint(contextToTarget, corner));
+                points.push(...targetPoints);
+                points.push(getCanvasElementCenter(contextToTarget, element));
+                bounds.push(Bounds.ofPoints(targetPoints));
                 elementQueue.push(...element.children);
             } else if (
                 AbsolutePoint.isAbsolutePoint(element) ||
@@ -346,7 +353,7 @@ export function getReferencePointsAndBounds(
                 }
                 if (visibleCheckedElements.has(element.id)) {
                     const point = layoutEngine.getPoint(element.id, context);
-                    points.push(point);
+                    points.push(applyToPoint(contextToTarget, point));
                 }
             } else {
                 elementQueue.push(...element.children);
@@ -363,6 +370,35 @@ export function getReferencePointsAndBounds(
 }
 
 /**
+ * Translates the given context information by the given translation vector.
+ *
+ * @param contextInfomations the context informations to translate
+ * @param translation the translation vector
+ * @returns the translated context informations
+ */
+export function translateSnapData(
+    contextInfomations: SnapElementData,
+    translation: Vector
+): SnapElementData {
+    const result = new Map<string, ContextSnapData>();
+    for (const [context, info] of contextInfomations.entries()) {
+        const points = info.points.map((point) => Math2D.add(point, translation));
+        const bounds =
+            info.bounds != undefined
+                ? {
+                      position: Math2D.add(info.bounds.position, translation),
+                      size: info.bounds.size
+                  }
+                : undefined;
+        result.set(context, {
+            points,
+            bounds
+        });
+    }
+    return result;
+}
+
+/**
  * Intersects the given reference points and bounds per context.
  * Data for a context is only included, if it is present in both maps, and the global rotation is the same.
  * Then, an intersection of the points and bounds is calculated.
@@ -371,11 +407,11 @@ export function getReferencePointsAndBounds(
  * @param b the second map of reference points and bounds
  * @returns the generated intersection
  */
-export function intersectReferencePointsAndBounds(
-    a: Map<string, ContextReferenceInformation>,
-    b: Map<string, ContextReferenceInformation>
-): Map<string, ContextReferenceInformation> {
-    const result = new Map<string, ContextReferenceInformation>();
+export function intersectSnapReferenceDatas(
+    a: SnapReferenceData,
+    b: SnapReferenceData
+): SnapReferenceData {
+    const result = new Map<string, ContextSnapReferenceData>();
     for (const [context, aInfo] of a.entries()) {
         const bInfo = b.get(context);
         if (!bInfo || aInfo.globalRotation !== bInfo.globalRotation) {
@@ -389,6 +425,59 @@ export function intersectReferencePointsAndBounds(
             globalRotation: aInfo.globalRotation
         });
     }
+    return result;
+}
+
+export function getSnaps(
+    state: SnapElementData,
+    referenceState: SnapReferenceData,
+    zoom: number,
+    options: SnapOptions
+): SnapResult {
+    const snapDistance = getSnapDistance(zoom);
+    const nearestSnapsX: Snaps = [];
+    const nearestSnapsY: Snaps = [];
+    const minOffset: Vector = {
+        x: snapDistance,
+        y: snapDistance
+    };
+
+    for (const [context, info] of state.entries()) {
+        const referenceInfo = referenceState.get(context);
+        if (!referenceInfo) {
+            continue;
+        }
+        const visibleGaps = getVisibleGaps(referenceInfo.bounds);
+        if (options.snapGaps) {
+            getGapSnaps(info.bounds!, visibleGaps, nearestSnapsX, nearestSnapsY, minOffset, context, options);
+        }
+        if (options.snapPoints) {
+            getPointSnaps(referenceInfo.points, info.points, nearestSnapsX, nearestSnapsY, minOffset, context, options);
+        }
+    }
+    const contextGlobalRotations = new Map<string, number>();
+    for (const [context, info] of referenceState.entries()) {
+        contextGlobalRotations.set(context, info.globalRotation);
+    }
+
+    return {
+        snapOffset: minOffset,
+        nearestSnapsX,
+        nearestSnapsY,
+        contextGlobalRotations
+    };
+}
+
+export function getSnapLines(snapResult: SnapResult, transform: Matrix): Map<string, SnapLine[]> {
+    const { nearestSnapsX, nearestSnapsY } = snapResult;
+    const result = new Map<string, SnapLine[]>();
+    createPointSnapLines(nearestSnapsX, nearestSnapsY, transform, snapResult.contextGlobalRotations, result);
+    createGapSnapLines(
+        [...nearestSnapsX, ...nearestSnapsY].filter((snap) => snap.type === "gap"),
+        transform,
+        snapResult.contextGlobalRotations,
+        result
+    );
     return result;
 }
 
@@ -429,7 +518,7 @@ function getCanvasElementCenter(elementToRootMatrix: Matrix, element: SElement &
  * @param referenceBounds the bounds of elements to compute gaps for (usually visible, non-selected elements)
  * @returns the gaps between elements
  */
-export function getVisibleGaps(referenceBounds: Bounds[]): Gaps {
+function getVisibleGaps(referenceBounds: Bounds[]): Gaps {
     const horizontallySorted = referenceBounds.sort((a, b) => a.position.x - b.position.x);
 
     const horizontalGaps: Gap[] = [];
@@ -534,15 +623,16 @@ function getGapSnaps(
     nearestSnapsX: Snaps,
     nearestSnapsY: Snaps,
     minOffset: Vector,
+    context: string,
     options: SnapOptions
 ): void {
     const { horizontalGaps, verticalGaps } = visibleGaps;
 
     if (options.snapX) {
-        getHorizontalGapSnaps(elementBounds, horizontalGaps, minOffset, nearestSnapsX);
+        getHorizontalGapSnaps(elementBounds, horizontalGaps, minOffset, nearestSnapsX, context);
     }
     if (options.snapY) {
-        getVerticalGapSnaps(elementBounds, verticalGaps, minOffset, nearestSnapsY);
+        getVerticalGapSnaps(elementBounds, verticalGaps, minOffset, nearestSnapsY, context);
     }
 }
 
@@ -558,7 +648,8 @@ function getHorizontalGapSnaps(
     elementBounds: Bounds,
     horizontalGaps: Gap[],
     minOffset: Point,
-    nearestSnapsX: Snaps
+    nearestSnapsX: Snaps,
+    context: string
 ): void {
     const minX = round(elementBounds.position.x);
     const maxX = round(elementBounds.position.x + elementBounds.size.width);
@@ -584,6 +675,7 @@ function getHorizontalGapSnaps(
 
             const snap: GapSnap = {
                 type: "gap",
+                context,
                 direction: "center_horizontal",
                 gap,
                 offset: centerOffset,
@@ -607,6 +699,7 @@ function getHorizontalGapSnaps(
 
             const snap: GapSnap = {
                 type: "gap",
+                context,
                 direction: "side_right",
                 gap,
                 offset: sideOffsetRight,
@@ -629,6 +722,7 @@ function getHorizontalGapSnaps(
 
             const snap: GapSnap = {
                 type: "gap",
+                context,
                 direction: "side_left",
                 gap,
                 offset: sideOffsetLeft,
@@ -647,8 +741,15 @@ function getHorizontalGapSnaps(
  * @param verticalGaps The list of vertical gaps to consider.
  * @param minOffset The minimum offset to snap to (modified).
  * @param nearestSnapsY The list to save nearest snaps for the y-axis (modified).
+ * @param context The context in which the snapping is performed.
  */
-function getVerticalGapSnaps(elementBounds: Bounds, verticalGaps: Gap[], minOffset: Point, nearestSnapsY: Snaps): void {
+function getVerticalGapSnaps(
+    elementBounds: Bounds,
+    verticalGaps: Gap[],
+    minOffset: Point,
+    nearestSnapsY: Snaps,
+    context: string
+): void {
     const minY = round(elementBounds.position.y);
     const maxY = round(elementBounds.position.y + elementBounds.size.height);
     const centerY = (minY + maxY) / 2;
@@ -673,6 +774,7 @@ function getVerticalGapSnaps(elementBounds: Bounds, verticalGaps: Gap[], minOffs
 
             const snap: GapSnap = {
                 type: "gap",
+                context,
                 direction: "center_vertical",
                 gap,
                 offset: centerOffset,
@@ -696,6 +798,7 @@ function getVerticalGapSnaps(elementBounds: Bounds, verticalGaps: Gap[], minOffs
 
             const snap: GapSnap = {
                 type: "gap",
+                context,
                 direction: "side_top",
                 gap,
                 offset: sideOffsetTop,
@@ -718,6 +821,7 @@ function getVerticalGapSnaps(elementBounds: Bounds, verticalGaps: Gap[], minOffs
 
             const snap: GapSnap = {
                 type: "gap",
+                context,
                 direction: "side_bottom",
                 gap,
                 offset: sideOffsetBottom,
@@ -737,6 +841,7 @@ function getVerticalGapSnaps(elementBounds: Bounds, verticalGaps: Gap[], minOffs
  * @param nearestSnapsX list to save nearest snaps for x axis (modified)
  * @param nearestSnapsY list to save nearest snaps for y axis (modified)
  * @param minOffset minimum offset to snap to (modified)
+ * @param context the context in which the snapping is performed
  * @param options enable/disable snapping in x and y direction
  */
 function getPointSnaps(
@@ -745,6 +850,7 @@ function getPointSnaps(
     nearestSnapsX: Snaps,
     nearestSnapsY: Snaps,
     minOffset: Vector,
+    context: string,
     options: SnapOptions
 ): void {
     for (const thisSnapPoint of selectionSnapPoints) {
@@ -759,6 +865,7 @@ function getPointSnaps(
 
                 nearestSnapsX.push({
                     type: "point",
+                    context,
                     point: thisSnapPoint,
                     referencePoint: otherSnapPoint,
                     offset: offsetX
@@ -774,6 +881,7 @@ function getPointSnaps(
 
                 nearestSnapsY.push({
                     type: "point",
+                    context,
                     point: thisSnapPoint,
                     referencePoint: otherSnapPoint,
                     offset: offsetY
@@ -785,87 +893,41 @@ function getPointSnaps(
     }
 }
 
-export function getSnaps(
-    state: Map<string, ContextInformation>,
-    referenceState: Map<string, ContextReferenceInformation>,
-    zoom: number,
-    options: SnapOptions
-): SnapResult {
-    const snapDistance = getSnapDistance(zoom);
-    const nearestSnapsX: Snaps = [];
-    const nearestSnapsY: Snaps = [];
-    const minOffset: Vector = {
-        x: snapDistance,
-        y: snapDistance
+function createPointSnapLines(
+    nearestSnapsX: Snaps,
+    nearestSnapsY: Snaps,
+    transform: Matrix,
+    contextGlobalRotations: Map<string, number>,
+    snapLines: Map<string, SnapLine[]>
+): void {
+    const snapsX = new Map<string, Map<number, Point[]>>();
+    const snapsY = new Map<string, Map<number, Point[]>>();
+
+    const addPoints = (snaps: Map<string, Map<number, Point[]>>, context: string, key: number, points: Point[]) => {
+        if (!snaps.has(context)) {
+            snaps.set(context, new Map<number, Point[]>());
+        }
+        const contextSnaps = snaps.get(context)!;
+        if (!contextSnaps.has(key)) {
+            contextSnaps.set(key, []);
+        }
+        const snapPoints = contextSnaps.get(key)!;
+        const rotation = contextGlobalRotations.get(context)!;
+        const matrix = rotateDEG(rotation);
+        for (const point of points) {
+            snapPoints.push(applyToPoint(matrix, point));
+        }
     };
-
-    for (const [context, info] of state.entries()) {
-        const referenceInfo = referenceState.get(context);
-        if (!referenceInfo) {
-            continue;
-        }
-        const visibleGaps = getVisibleGaps(referenceInfo.bounds);
-        if (options.snapGaps) {
-            getGapSnaps(info.bounds!, visibleGaps, nearestSnapsX, nearestSnapsY, minOffset, options);
-        }
-        if (options.snapPoints) {
-            getPointSnaps(referenceInfo.points, info.points, nearestSnapsX, nearestSnapsY, minOffset, options);
-        }
-    }
-
-    return {
-        snapOffset: minOffset,
-        nearestSnapsX,
-        nearestSnapsY
-    };
-}
-
-export function getSnapLines(snapResult: SnapResult, transform: Matrix): SnapLine[] {
-    const { nearestSnapsX, nearestSnapsY } = snapResult;
-    const pointSnapLines = createPointSnapLines(nearestSnapsX, nearestSnapsY, transform);
-    const gapSnapLines = createGapSnapLines(
-        [...nearestSnapsX, ...nearestSnapsY].filter((snap) => snap.type === "gap"),
-        transform
-    );
-    return [...pointSnapLines, ...gapSnapLines];
-}
-
-function round(x: number): number {
-    const decimalPlaces = 6;
-    return Math.round(x * 10 ** decimalPlaces) / 10 ** decimalPlaces;
-}
-
-function dedupePoints(points: Point[]): Point[] {
-    const map = new Map<string, Point>();
-
-    for (const point of points) {
-        const key = `${point.x},${point.y}`;
-
-        if (!map.has(key)) {
-            map.set(key, point);
-        }
-    }
-
-    return Array.from(map.values());
-}
-
-function createPointSnapLines(nearestSnapsX: Snaps, nearestSnapsY: Snaps, transform: Matrix): PointSnapLine[] {
-    const snapsX = {} as { [key: string]: Point[] };
-    const snapsY = {} as { [key: string]: Point[] };
 
     if (nearestSnapsX.length > 0) {
         for (const snap of nearestSnapsX) {
             if (snap.type === "point") {
-                // key = thisPoint.x
                 const key = round(snap.point.x);
-                if (!snapsX[key]) {
-                    snapsX[key] = [];
-                }
                 const transformedPoint = applyToPoint(transform, snap.point);
-                snapsX[key].push(
+                addPoints(snapsX, snap.context, key, [
                     { x: round(transformedPoint.x), y: round(transformedPoint.y) },
                     { x: round(snap.referencePoint.x), y: round(snap.referencePoint.y) }
-                );
+                ]);
             }
         }
     }
@@ -873,67 +935,54 @@ function createPointSnapLines(nearestSnapsX: Snaps, nearestSnapsY: Snaps, transf
     if (nearestSnapsY.length > 0) {
         for (const snap of nearestSnapsY) {
             if (snap.type === "point") {
-                // key = thisPoint.y
                 const key = round(snap.point.y);
-                if (!snapsY[key]) {
-                    snapsY[key] = [];
-                }
                 const transformedPoint = applyToPoint(transform, snap.point);
-                snapsY[key].push(
+                addPoints(snapsY, snap.context, key, [
                     { x: round(transformedPoint.x), y: round(transformedPoint.y) },
                     { x: round(snap.referencePoint.x), y: round(snap.referencePoint.y) }
-                );
+                ]);
             }
         }
     }
-
-    return Object.entries(snapsX)
-        .map(([key, points]) => {
-            return {
+    for (const [context, entries] of snapsX.entries()) {
+        if (!snapLines.has(context)) {
+            snapLines.set(context, []);
+        }
+        for (const [key, points] of entries.entries()) {
+            const snapLine: PointSnapLine = {
                 type: "points",
-                points: dedupePoints(
-                    points
-                        .map((p) => {
-                            return { x: Number(key), y: p.y };
-                        })
-                        .sort((a, b) => a.y - b.y)
-                )
-            } as PointSnapLine;
-        })
-        .concat(
-            Object.entries(snapsY).map(([key, points]) => {
-                return {
-                    type: "points",
-                    points: dedupePoints(
-                        points
-                            .map((p) => {
-                                return { x: p.x, y: Number(key) };
-                            })
-                            .sort((a, b) => a.x - b.x)
-                    )
-                } as PointSnapLine;
-            })
-        );
-}
-
-function dedupeGapSnapLines(gapSnapLines: GapSnapLine[]): GapSnapLine[] {
-    const map = new Map<string, GapSnapLine>();
-
-    for (const gapSnapLine of gapSnapLines) {
-        const key = gapSnapLine.points.flatMap((point) => [round(point.x), round(point.y)]).join(",");
-
-        if (!map.has(key)) {
-            map.set(key, gapSnapLine);
+                points: dedupePoints(points.sort(Point.compare))
+            };
+            snapLines.get(context)!.push(snapLine);
         }
     }
-
-    return Array.from(map.values());
+    for (const [context, entries] of snapsY.entries()) {
+        if (!snapLines.has(context)) {
+            snapLines.set(context, []);
+        }
+        for (const [key, points] of entries.entries()) {
+            const snapLine: PointSnapLine = {
+                type: "points",
+                points: dedupePoints(points.sort(Point.compare))
+            };
+            snapLines.get(context)!.push(snapLine);
+        }
+    }
 }
 
-function createGapSnapLines(gapSnaps: GapSnap[], transform: Matrix): GapSnapLine[] {
-    const gapSnapLines: GapSnapLine[] = [];
+function createGapSnapLines(
+    gapSnaps: GapSnap[],
+    transform: Matrix,
+    contextGlobalRotations: Map<string, number>,
+    snapLines: Map<string, SnapLine[]>
+): void {
+    const gapSnapLinesByContext = new Map<string, GapSnapLine[]>();
 
     for (const gapSnap of gapSnaps) {
+        if (!gapSnapLinesByContext.has(gapSnap.context)) {
+            gapSnapLinesByContext.set(gapSnap.context, []);
+        }
+        const gapSnapLines = gapSnapLinesByContext.get(gapSnap.context)!;
         const bounds = gapSnap.bounds;
         const { x: minX, y: minY } = applyToPoint(transform, bounds.position);
         const { x: maxX, y: maxY } = applyToPoint(transform, {
@@ -1106,15 +1155,88 @@ function createGapSnapLines(gapSnaps: GapSnap[], transform: Matrix): GapSnapLine
             }
         }
     }
+    for (const [context, gapSnapLines] of gapSnapLinesByContext.entries()) {
+        if (!snapLines.has(context)) {
+            snapLines.set(context, []);
+        }
+        const existingSnapLines = snapLines.get(context)!;
+        const rotation = contextGlobalRotations.get(context)!;
+        const matrix = rotateDEG(rotation);
+        existingSnapLines.push(
+            ...dedupeGapSnapLines(
+                gapSnapLines.map((gapSnapLine) => {
+                    return {
+                        ...gapSnapLine,
+                        points: gapSnapLine.points.map((p) =>
+                            applyToPoint(matrix, { x: round(p.x), y: round(p.y) })
+                        ) as PointPair
+                    };
+                })
+            )
+        );
+    }
+    return;
+}
 
-    return dedupeGapSnapLines(
-        gapSnapLines.map((gapSnapLine) => {
-            return {
-                ...gapSnapLine,
-                points: gapSnapLine.points.map((p) => ({ x: round(p.x), y: round(p.y) })) as PointPair
-            };
-        })
-    );
+/**
+ * Deduplicates gap snap lines by their points.
+ *
+ * @param gapSnapLines The array of gap snap lines to deduplicate.
+ * @returns A new array with unique gap snap lines.
+ */
+function dedupeGapSnapLines(gapSnapLines: GapSnapLine[]): GapSnapLine[] {
+    const map = new Map<string, GapSnapLine>();
+
+    for (const gapSnapLine of gapSnapLines) {
+        const key = gapSnapLine.points.flatMap((point) => [round(point.x), round(point.y)]).join(",");
+
+        if (!map.has(key)) {
+            map.set(key, gapSnapLine);
+        }
+    }
+
+    return Array.from(map.values());
+}
+
+/**
+ * Snap distance with zoom value taken into consideration
+ *
+ * @param zoomValue the zoom value of the canvas
+ * @returns the snap distance
+ */
+function getSnapDistance(zoomValue: number): number {
+    return SNAP_DISTANCE / zoomValue;
+}
+
+/**
+ * Round a number to a fixed number of decimal places.
+ *
+ * @param x The number to round.
+ * @returns The rounded number.
+ */
+function round(x: number): number {
+    const decimalPlaces = 6;
+    return Math.round(x * 10 ** decimalPlaces) / 10 ** decimalPlaces;
+}
+
+/**
+ * Deduplicates points in an array by their x and y coordinates.
+ *
+ * @param points The array of points to deduplicate.
+ * @returns A new array with unique points.
+ */
+function dedupePoints(points: Point[]): Point[] {
+    const map = new Map<string, Point>();
+
+    for (const point of points) {
+        const key = `${point.x},${point.y}`;
+
+        if (!map.has(key)) {
+            map.set(key, point);
+        }
+    }
+
+    return Array.from(map.values());
 }
 
 /**

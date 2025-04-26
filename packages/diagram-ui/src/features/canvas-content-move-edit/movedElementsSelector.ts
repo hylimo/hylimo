@@ -28,6 +28,11 @@ export class MovedElementsSelector {
     movedElements: Set<SCanvasElement | SCanvasPoint> = new Set();
 
     /**
+     * Elements which are implicitely moved.
+     */
+    implicitlyMovedElements: Set<SCanvasElement | SCanvasPoint> = new Set();
+
+    /**
      * True if there is any conflict that prevents the move
      */
     hasConflict = false;
@@ -90,13 +95,12 @@ export class MovedElementsSelector {
      * Prunes the moved elements and points to remove implicitly moved elements.
      */
     private pruneMovedElements() {
-        const elementsToRemove = new Set<SCanvasElement | SCanvasPoint>();
         for (const element of this.movedElements) {
             if (this.isElementImplicitlyMoved(element)) {
-                elementsToRemove.add(element);
+                this.implicitlyMovedElements.add(element);
             }
         }
-        for (const element of elementsToRemove) {
+        for (const element of this.implicitlyMovedElements) {
             this.movedElements.delete(element);
         }
     }

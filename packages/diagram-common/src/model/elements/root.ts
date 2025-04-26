@@ -26,6 +26,24 @@ export interface Root extends Element {
      * Is this a preview element?
      */
     preview: boolean;
+    /**
+     * If this was rendered based on a transaction, the id and sequence number of the transaction
+     */
+    transactionState?: TransactionState;
+}
+
+/**
+ * The state of a transaction
+ */
+export interface TransactionState {
+    /**
+     * The id of the transaction
+     */
+    id: string;
+    /**
+     * The sequence number of the transaction
+     */
+    sequenceNumber: number;
 }
 
 export namespace Root {

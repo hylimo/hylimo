@@ -1,14 +1,14 @@
 import type { AxisAlignedSegmentEdit, Edit } from "@hylimo/diagram-protocol";
 import { DefaultEditTypes } from "@hylimo/diagram-common";
 import type { Matrix } from "transformation-matrix";
-import { MoveHandler } from "../../move/moveHandler.js";
+import { MoveHandler, type HandleMoveResult } from "../../move/moveHandler.js";
 import type { ResizeMoveCursor } from "../../cursor/cursor.js";
 
 /**
  * Move handler for moving the vertical segment of an axis aligned connection segment.
  * Expects relative coordinates in the canvas connection parent canvas coordinate system.
  */
-export class AxisAligedSegmentEditHandler extends MoveHandler {
+export class AxisAligedSegmentEditMoveHandler extends MoveHandler {
     /**
      * Creates a new AxisAligedSegmentEditHandler
      *
@@ -32,10 +32,10 @@ export class AxisAligedSegmentEditHandler extends MoveHandler {
         super(transformationMatrix, moveCursor);
     }
 
-    override generateEdits(x: number, y: number): Edit[] {
+    override handleMove(x: number, y: number): HandleMoveResult {
         const rawPos = (this.original + (this.vertical ? x : y) - this.start) / (this.end - this.start);
         const newPos = Math.min(1, Math.max(0, rawPos));
-        return [
+        const edits = [
             {
                 types: [DefaultEditTypes.AXIS_ALIGNED_SEGMENT_POS],
                 values: {
@@ -44,5 +44,6 @@ export class AxisAligedSegmentEditHandler extends MoveHandler {
                 elements: [this.element]
             } satisfies AxisAlignedSegmentEdit
         ];
+        return { edits }
     }
 }

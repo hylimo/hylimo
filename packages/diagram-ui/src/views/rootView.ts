@@ -9,12 +9,13 @@ import type { CursorProvider } from "../features/cursor/cursor.js";
 import type { BoxSelectProvider } from "../features/select/boxSelectProvider.js";
 import { convertFontsToCssStyle } from "@hylimo/diagram-common";
 import type { KeyState } from "../features/key-state/keyState.js";
+import { CanvasLikeView } from "./canvas/canvasLikeView.js";
 
 /**
  * IView that is the parent which handles
  */
 @injectable()
-export class RootView implements IView {
+export class RootView extends CanvasLikeView implements IView {
     /**
      * ID of the arrow marker
      */
@@ -69,6 +70,7 @@ export class RootView implements IView {
                     }
                 },
                 ...context.renderChildren(model, undefined),
+                ...this.renderSnapLines(model),
                 this.renderSelectBox()
             )
         );

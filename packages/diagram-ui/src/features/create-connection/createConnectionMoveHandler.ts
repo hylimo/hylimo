@@ -1,7 +1,7 @@
 import type { ConnectionEdit, ConnectionEnd, Edit } from "@hylimo/diagram-protocol";
 import type { SModelElementImpl } from "sprotty";
 import { findParentByFeature } from "sprotty";
-import { MoveHandler } from "../move/moveHandler.js";
+import { MoveHandler, type HandleMoveResult } from "../move/moveHandler.js";
 import type { Matrix } from "transformation-matrix";
 import { LineEngine } from "@hylimo/diagram-common";
 import { isLineProvider } from "./lineProvider.js";
@@ -26,7 +26,7 @@ export class CreateConnectionMoveHandler extends MoveHandler {
         super(transformationMatrix, "cursor-crosshair", false);
     }
 
-    override generateEdits(x: number, y: number, event: MouseEvent, target: SModelElementImpl): Edit[] {
+    override handleMove(x: number, y: number, event: MouseEvent, target: SModelElementImpl): HandleMoveResult {
         const lineProvider = findParentByFeature(target, isLineProvider);
         let end: ConnectionEnd = { x, y };
         if (lineProvider != undefined) {
@@ -39,7 +39,7 @@ export class CreateConnectionMoveHandler extends MoveHandler {
                 pos: projection.pos
             };
         }
-        return [
+        const edits = [
             {
                 types: [this.edit],
                 values: {
@@ -49,5 +49,6 @@ export class CreateConnectionMoveHandler extends MoveHandler {
                 elements: [target.root.id]
             } satisfies ConnectionEdit
         ];
+        return { edits };
     }
 }
