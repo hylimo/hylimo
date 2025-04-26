@@ -238,7 +238,7 @@ export function getSnapElementData(
         if (isIgnored) {
             continue;
         }
-        const contextToTarget = rotateDEG(-contextElement.globalRotation);
+        const contextToTarget = rotateDEG(contextElement.globalRotation);
         if (elements.length === 1) {
             const element = elements[0];
             if (CanvasElement.isCanvasElement(element)) {
@@ -320,7 +320,7 @@ export function getSnapReferenceData(
         const points: Point[] = [];
         const bounds: Bounds[] = [];
         elementQueue.push(...(canvas.children as SElement[]));
-        const contextToTarget = rotateDEG(-canvas.globalRotation);
+        const contextToTarget = rotateDEG(canvas.globalRotation);
         while (elementQueue.length > 0) {
             const element = elementQueue.pop()!;
             if (ignoredElements.has(element.id)) {
@@ -454,8 +454,8 @@ export function getSnaps(
             continue;
         }
         const visibleGaps = getVisibleGaps(referenceInfo.bounds);
-        if (options.snapGaps) {
-            getGapSnaps(info.bounds!, visibleGaps, nearestSnapsX, nearestSnapsY, minOffset, context, options);
+        if (options.snapGaps && info.bounds != undefined) {
+            getGapSnaps(info.bounds, visibleGaps, nearestSnapsX, nearestSnapsY, minOffset, context, options);
         }
         if (options.snapPoints) {
             getPointSnaps(referenceInfo.points, info.points, nearestSnapsX, nearestSnapsY, minOffset, context, options);
@@ -922,7 +922,7 @@ function createPointSnapLines(
         }
         const snapPoints = contextSnaps.get(key)!;
         const rotation = contextGlobalRotations.get(context)!;
-        const matrix = rotateDEG(rotation);
+        const matrix = rotateDEG(-rotation);
         for (const point of points) {
             snapPoints.push(applyToPoint(matrix, point));
         }
@@ -1170,7 +1170,7 @@ function createGapSnapLines(
         }
         const existingSnapLines = snapLines.get(context)!;
         const rotation = contextGlobalRotations.get(context)!;
-        const matrix = rotateDEG(rotation);
+        const matrix = rotateDEG(-rotation);
         existingSnapLines.push(
             ...dedupeGapSnapLines(
                 gapSnapLines.map((gapSnapLine) => {

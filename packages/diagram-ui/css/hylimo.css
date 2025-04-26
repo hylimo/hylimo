@@ -103,10 +103,15 @@ svg.hylimo {
         stroke-linecap: square;
     }
 
-    .snap-line {
+    .snap-line,
+    .snap-line-point,
+    .snap-line-gap {
         stroke: var(--diagram-layout-color-snap);
         stroke-width: 1px;
         pointer-events: none;
+    }
+
+    .snap-line {
         shape-rendering: crispEdges;
     }
 
