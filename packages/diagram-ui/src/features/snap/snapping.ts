@@ -85,9 +85,14 @@ export type PointSnapLine = {
     points: Point[];
 };
 
+export enum SnapDirection {
+    VERTICAL = "vertical",
+    HORIZONTAL = "horizontal"
+}
+
 export type GapSnapLine = {
     type: "gap";
-    direction: "horizontal" | "vertical";
+    direction: SnapDirection;
     points: PointPair;
 };
 
@@ -140,6 +145,15 @@ export interface SnapData {
     referenceData: SnapReferenceData;
 }
 
+export interface GapSnapOptions {
+    left: boolean;
+    right: boolean;
+    top: boolean;
+    bottom: boolean;
+    centerHorizontal: boolean;
+    centerVertical: boolean;
+}
+
 export interface SnapOptions {
     /**
      * If true, elements can be snapped in the x direction
@@ -156,7 +170,7 @@ export interface SnapOptions {
     /**
      * If true, gap snapping is enabled
      */
-    snapGaps: boolean;
+    snapGaps: boolean | GapSnapOptions;
 }
 
 /**
@@ -458,7 +472,7 @@ export function getSnaps(
             continue;
         }
         const visibleGaps = getVisibleGaps(referenceInfo.bounds);
-        if (options.snapGaps && info.bounds != undefined) {
+        if (options.snapGaps != false && info.bounds != undefined) {
             getGapSnaps(info.bounds, visibleGaps, nearestSnapsX, nearestSnapsY, minOffset, context, options);
         }
         if (options.snapPoints) {
@@ -495,30 +509,33 @@ export function getSnapLines(snapResult: SnapResult, transform: Matrix): Map<str
 }
 
 /**
- * Computes the corners of the given element in the root coordinate system
+ * Computes the corners of the given element in the target coordinate system.
  *
- * @param elementToRootMatrix the transformation matrix from the element to the root coordinate system
+ * @param elementToTargetMatrix the transformation matrix from the element to the target coordinate system
  * @param element the element to compute the corners for
- * @returns the corners of the element in the root coordinate system
+ * @returns the corners of the element in the target coordinate system
  */
-function getCanvasElementCorners(elementToRootMatrix: Matrix, element: SElement & CanvasElement) {
+export function getCanvasElementCorners(
+    elementToTargetMatrix: Matrix,
+    element: Pick<CanvasElement, "width" | "height" | "dx" | "dy">
+): [topLeft: Point, topRight: Point, bottomLeft: Point, bottomRight: Point] {
     return [
-        applyToPoint(elementToRootMatrix, { x: element.dx, y: element.dy }),
-        applyToPoint(elementToRootMatrix, { x: element.dx + element.width, y: element.dy }),
-        applyToPoint(elementToRootMatrix, { x: element.dx + element.width, y: element.dy + element.height }),
-        applyToPoint(elementToRootMatrix, { x: element.dx, y: element.dy + element.height })
+        applyToPoint(elementToTargetMatrix, { x: element.dx, y: element.dy }),
+        applyToPoint(elementToTargetMatrix, { x: element.dx + element.width, y: element.dy }),
+        applyToPoint(elementToTargetMatrix, { x: element.dx, y: element.dy + element.height }),
+        applyToPoint(elementToTargetMatrix, { x: element.dx + element.width, y: element.dy + element.height })
     ];
 }
 
 /**
- * Computes the center point of a canvas element in the root coordinate system.
+ * Computes the center point of a canvas element in the target coordinate system.
  *
- * @param elementToRootMatrix - The transformation matrix from the element's local coordinate system to the root coordinate system.
+ * @param elementToTargetMatrix - The transformation matrix from the element's local coordinate system to the target coordinate system.
  * @param element - The canvas element for which the center point is to be calculated.
- * @returns The center point of the canvas element in the root coordinate system.
+ * @returns The center point of the canvas element in the target coordinate system.
  */
-function getCanvasElementCenter(elementToRootMatrix: Matrix, element: SElement & CanvasElement) {
-    return applyToPoint(elementToRootMatrix, {
+function getCanvasElementCenter(elementToTargetMatrix: Matrix, element: SElement & CanvasElement): Point {
+    return applyToPoint(elementToTargetMatrix, {
         x: element.dx + element.width / 2,
         y: element.dy + element.height / 2
     });
@@ -640,12 +657,25 @@ function getGapSnaps(
     options: SnapOptions
 ): void {
     const { horizontalGaps, verticalGaps } = visibleGaps;
+    let snapGaps: GapSnapOptions;
+    if (options.snapGaps === true) {
+        snapGaps = {
+            left: true,
+            right: true,
+            top: true,
+            bottom: true,
+            centerHorizontal: true,
+            centerVertical: true
+        };
+    } else {
+        snapGaps = options.snapGaps as GapSnapOptions;
+    }
 
     if (options.snapX) {
-        getHorizontalGapSnaps(elementBounds, horizontalGaps, minOffset, nearestSnapsX, context);
+        getHorizontalGapSnaps(elementBounds, horizontalGaps, minOffset, nearestSnapsX, context, snapGaps);
     }
     if (options.snapY) {
-        getVerticalGapSnaps(elementBounds, verticalGaps, minOffset, nearestSnapsY, context);
+        getVerticalGapSnaps(elementBounds, verticalGaps, minOffset, nearestSnapsY, context, snapGaps);
     }
 }
 
@@ -656,13 +686,16 @@ function getGapSnaps(
  * @param horizontalGaps The list of horizontal gaps to consider.
  * @param minOffset The minimum offset to snap to (modified).
  * @param nearestSnapsX The list to save nearest snaps for the x-axis (modified).
+ * @param context The context in which the snapping is performed.
+ * @param snapGaps The options for snapping gaps.
  */
 function getHorizontalGapSnaps(
     elementBounds: Bounds,
     horizontalGaps: Gap[],
     minOffset: Point,
     nearestSnapsX: Snaps,
-    context: string
+    context: string,
+    snapGaps: GapSnapOptions
 ): void {
     const minX = round(elementBounds.position.x);
     const maxX = round(elementBounds.position.x + elementBounds.size.width);
@@ -675,12 +708,11 @@ function getHorizontalGapSnaps(
             continue;
         }
 
-        // center gap
         const gapMidX = gap.startSide[0].x + gap.length / 2;
         const centerOffset = round(gapMidX - centerX);
         const gapIsLargerThanSelection = gap.length > maxX - minX;
 
-        if (gapIsLargerThanSelection && Math.abs(centerOffset) <= minOffset.x) {
+        if (snapGaps.centerHorizontal && gapIsLargerThanSelection && Math.abs(centerOffset) <= minOffset.x) {
             if (Math.abs(centerOffset) < minOffset.x) {
                 nearestSnapsX.length = 0;
             }
@@ -699,12 +731,11 @@ function getHorizontalGapSnaps(
             continue;
         }
 
-        // side gap, from the right
         const endMaxX = gap.endBounds.position.x + gap.endBounds.size.width;
         const distanceToEndElementX = minX - endMaxX;
         const sideOffsetRight = round(gap.length - distanceToEndElementX);
 
-        if (Math.abs(sideOffsetRight) <= minOffset.x) {
+        if (snapGaps.right && Math.abs(sideOffsetRight) <= minOffset.x) {
             if (Math.abs(sideOffsetRight) < minOffset.x) {
                 nearestSnapsX.length = 0;
             }
@@ -722,12 +753,11 @@ function getHorizontalGapSnaps(
             continue;
         }
 
-        // side gap, from the left
         const startMinX = gap.startBounds.position.x;
         const distanceToStartElementX = startMinX - maxX;
         const sideOffsetLeft = round(distanceToStartElementX - gap.length);
 
-        if (Math.abs(sideOffsetLeft) <= minOffset.x) {
+        if (snapGaps.left && Math.abs(sideOffsetLeft) <= minOffset.x) {
             if (Math.abs(sideOffsetLeft) < minOffset.x) {
                 nearestSnapsX.length = 0;
             }
@@ -755,13 +785,15 @@ function getHorizontalGapSnaps(
  * @param minOffset The minimum offset to snap to (modified).
  * @param nearestSnapsY The list to save nearest snaps for the y-axis (modified).
  * @param context The context in which the snapping is performed.
+ * @param snapGaps The options for snapping gaps.
  */
 function getVerticalGapSnaps(
     elementBounds: Bounds,
     verticalGaps: Gap[],
     minOffset: Point,
     nearestSnapsY: Snaps,
-    context: string
+    context: string,
+    snapGaps: GapSnapOptions
 ): void {
     const minY = round(elementBounds.position.y);
     const maxY = round(elementBounds.position.y + elementBounds.size.height);
@@ -774,12 +806,11 @@ function getVerticalGapSnaps(
             continue;
         }
 
-        // center gap
         const gapMidY = gap.startSide[0].y + gap.length / 2;
         const centerOffset = round(gapMidY - centerY);
         const gapIsLargerThanSelection = gap.length > maxY - minY;
 
-        if (gapIsLargerThanSelection && Math.abs(centerOffset) <= minOffset.y) {
+        if (snapGaps.centerVertical && gapIsLargerThanSelection && Math.abs(centerOffset) <= minOffset.y) {
             if (Math.abs(centerOffset) < minOffset.y) {
                 nearestSnapsY.length = 0;
             }
@@ -798,12 +829,11 @@ function getVerticalGapSnaps(
             continue;
         }
 
-        // side gap, from the top
         const startMinY = gap.startBounds.position.y;
         const distanceToStartElementY = startMinY - maxY;
         const sideOffsetTop = round(distanceToStartElementY - gap.length);
 
-        if (Math.abs(sideOffsetTop) <= minOffset.y) {
+        if (snapGaps.top && Math.abs(sideOffsetTop) <= minOffset.y) {
             if (Math.abs(sideOffsetTop) < minOffset.y) {
                 nearestSnapsY.length = 0;
             }
@@ -821,12 +851,11 @@ function getVerticalGapSnaps(
             continue;
         }
 
-        // side gap, from the bottom
         const endMaxY = gap.endBounds.position.y + gap.endBounds.size.height;
         const distanceToEndElementY = round(minY - endMaxY);
         const sideOffsetBottom = gap.length - distanceToEndElementY;
 
-        if (Math.abs(sideOffsetBottom) <= minOffset.y) {
+        if (snapGaps.bottom && Math.abs(sideOffsetBottom) <= minOffset.y) {
             if (Math.abs(sideOffsetBottom) < minOffset.y) {
                 nearestSnapsY.length = 0;
             }
@@ -1023,7 +1052,7 @@ function createGapSnapLines(
                     gapSnapLines.push(
                         {
                             type: "gap",
-                            direction: "horizontal",
+                            direction: SnapDirection.HORIZONTAL,
                             points: [
                                 { x: gapSnap.gap.startSide[0].x, y: gapLineY },
                                 { x: minX, y: gapLineY }
@@ -1031,7 +1060,7 @@ function createGapSnapLines(
                         },
                         {
                             type: "gap",
-                            direction: "horizontal",
+                            direction: SnapDirection.HORIZONTAL,
                             points: [
                                 { x: maxX, y: gapLineY },
                                 { x: gapSnap.gap.endSide[0].x, y: gapLineY }
@@ -1048,7 +1077,7 @@ function createGapSnapLines(
                     gapSnapLines.push(
                         {
                             type: "gap",
-                            direction: "vertical",
+                            direction: SnapDirection.VERTICAL,
                             points: [
                                 { x: gapLineX, y: gapSnap.gap.startSide[0].y },
                                 { x: gapLineX, y: minY }
@@ -1056,7 +1085,7 @@ function createGapSnapLines(
                         },
                         {
                             type: "gap",
-                            direction: "vertical",
+                            direction: SnapDirection.VERTICAL,
                             points: [
                                 { x: gapLineX, y: maxY },
                                 { x: gapLineX, y: gapSnap.gap.endSide[0].y }
@@ -1073,7 +1102,7 @@ function createGapSnapLines(
                     gapSnapLines.push(
                         {
                             type: "gap",
-                            direction: "horizontal",
+                            direction:SnapDirection.HORIZONTAL,
                             points: [
                                 { x: startMaxX, y: gapLineY },
                                 { x: endMinX, y: gapLineY }
@@ -1081,7 +1110,7 @@ function createGapSnapLines(
                         },
                         {
                             type: "gap",
-                            direction: "horizontal",
+                            direction: SnapDirection.HORIZONTAL,
                             points: [
                                 { x: endMaxX, y: gapLineY },
                                 { x: minX, y: gapLineY }
@@ -1098,7 +1127,7 @@ function createGapSnapLines(
                     gapSnapLines.push(
                         {
                             type: "gap",
-                            direction: "horizontal",
+                            direction: SnapDirection.HORIZONTAL,
                             points: [
                                 { x: maxX, y: gapLineY },
                                 { x: startMinX, y: gapLineY }
@@ -1106,7 +1135,7 @@ function createGapSnapLines(
                         },
                         {
                             type: "gap",
-                            direction: "horizontal",
+                            direction: SnapDirection.HORIZONTAL,
                             points: [
                                 { x: startMaxX, y: gapLineY },
                                 { x: endMinX, y: gapLineY }
@@ -1123,7 +1152,7 @@ function createGapSnapLines(
                     gapSnapLines.push(
                         {
                             type: "gap",
-                            direction: "vertical",
+                            direction: SnapDirection.VERTICAL,
                             points: [
                                 { x: gapLineX, y: maxY },
                                 { x: gapLineX, y: startMinY }
@@ -1131,7 +1160,7 @@ function createGapSnapLines(
                         },
                         {
                             type: "gap",
-                            direction: "vertical",
+                            direction: SnapDirection.VERTICAL,
                             points: [
                                 { x: gapLineX, y: startMaxY },
                                 { x: gapLineX, y: endMinY }
@@ -1148,7 +1177,7 @@ function createGapSnapLines(
                     gapSnapLines.push(
                         {
                             type: "gap",
-                            direction: "vertical",
+                            direction: SnapDirection.VERTICAL,
                             points: [
                                 { x: gapLineX, y: startMaxY },
                                 { x: gapLineX, y: endMinY }
@@ -1156,7 +1185,7 @@ function createGapSnapLines(
                         },
                         {
                             type: "gap",
-                            direction: "vertical",
+                            direction: SnapDirection.VERTICAL,
                             points: [
                                 { x: gapLineX, y: endMaxY },
                                 { x: gapLineX, y: minY }

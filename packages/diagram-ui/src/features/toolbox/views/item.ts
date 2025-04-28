@@ -102,7 +102,9 @@ function generateToolboxItem(context: Toolbox, toolboxEdit: ToolboxEditEntry): V
                                 toolboxEdit.edit,
                                 root,
                                 event.pointerId,
-                                getSnapReferenceData(root, new Set([root.id]), new Set())
+                                context.configManager.config?.snappingEnabled == true
+                                    ? getSnapReferenceData(root, new Set([root.id]), new Set())
+                                    : undefined
                             ),
                         maxUpdatesPerRevision: 1
                     };

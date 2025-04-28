@@ -10,14 +10,14 @@ import { SCanvasPoint } from "../../model/canvas/sCanvasPoint.js";
 import { SLinePoint } from "../../model/canvas/sLinePoint.js";
 import type { SRelativePoint } from "../../model/canvas/sRelativePoint.js";
 import type { MoveHandler } from "../move/moveHandler.js";
-import { TranslationMoveHandler } from "./handler/translationMoveHandler.js";
+import { computeTranslateMoveSnapData, TranslationMoveHandler } from "./handler/translationMoveHandler.js";
 import { LineMoveHandler } from "./handler/lineMoveHandler.js";
 import { CanvasElementView, ResizePosition } from "../../views/canvas/canvasElementView.js";
 import { RotationMoveHandler } from "./handler/rotationMoveHandler.js";
 import { SCanvasConnection } from "../../model/canvas/sCanvasConnection.js";
 import type { SRoot } from "../../model/sRoot.js";
-import type { ElementsGroupedBySize } from "./handler/resizeMoveHandler.js";
-import { ResizeMoveHandler } from "./handler/resizeMoveHandler.js";
+import type { ElementsGroupedBySize, ResizeSnapData } from "./handler/resizeMoveHandler.js";
+import { computeResizeMoveSnapData, ResizeMoveHandler } from "./handler/resizeMoveHandler.js";
 import { SCanvasAxisAlignedSegment } from "../../model/canvas/sCanvasAxisAlignedSegment.js";
 import { AxisAligedSegmentEditMoveHandler } from "./handler/axisAlignedSegmentEditMoveHandler.js";
 import type { Matrix } from "transformation-matrix";
@@ -40,7 +40,7 @@ import { SElement } from "../../model/sElement.js";
 import { findResizeIconClass } from "../cursor/resizeIcon.js";
 import { MouseListener } from "../../base/mouseListener.js";
 import { TYPES } from "../types.js";
-import { getSnapElementData, getSnapReferenceData, type SnapData } from "../snap/snapping.js";
+import { type SnapData } from "../snap/snapping.js";
 import type { ConfigManager } from "../config/configManager.js";
 
 /**
@@ -194,7 +194,8 @@ export class MoveEditCanvasContentMouseListener extends MouseListener {
             target.height,
             elements,
             this.makeRelative(target.getMouseTransformationMatrix(), event),
-            findResizeIconClass(classList)
+            findResizeIconClass(classList),
+            this.computeResizeMoveSnapData(target, scaleX, scaleY, resizedElements, target.root as SRoot)
         );
     }
 
@@ -432,6 +433,15 @@ export class MoveEditCanvasContentMouseListener extends MouseListener {
         );
     }
 
+    /**
+     * Computes the snap data for translating elements.
+     * This includes the snap element data and the snap reference data.
+     *
+     * @param elements The elements to be translated.
+     * @param ignoredElements The elements to be ignored during snapping.
+     * @param root The root element of the model.
+     * @returns The computed snap data or undefined if snapping is disabled.
+     */
     private computeTranslateMoveSnapData(
         elements: SElement[],
         ignoredElements: SElement[],
@@ -440,16 +450,28 @@ export class MoveEditCanvasContentMouseListener extends MouseListener {
         if (this.configManager?.config?.snappingEnabled != true) {
             return undefined;
         }
-        const ignoredElementsSet = new Set<string>();
-        for (const element of ignoredElements) {
-            ignoredElementsSet.add(element.id);
+        return computeTranslateMoveSnapData(elements, ignoredElements, root);
+    }
+
+    /**
+     * Computes the snap reference data for resizing an element.
+     *
+     * @param element The element being resized.
+     * @param ignoredElements The elements to be ignored during snapping.
+     * @param root The root element of the model.
+     * @returns The computed snap reference data or undefined if snapping is disabled.
+     */
+    private computeResizeMoveSnapData(
+        element: SCanvasElement,
+        scaleX: number | undefined,
+        scaleY: number | undefined,
+        ignoredElements: SElement[],
+        root: SRoot
+    ): ResizeSnapData | undefined {
+        if (this.configManager?.config?.snappingEnabled != true) {
+            return undefined;
         }
-        const snapElementData = getSnapElementData(root, elements, ignoredElementsSet);
-        const snapReferenceData = getSnapReferenceData(root, new Set(snapElementData.keys()), ignoredElementsSet);
-        return {
-            data: snapElementData,
-            referenceData: snapReferenceData
-        };
+        return computeResizeMoveSnapData(element, scaleX, scaleY, ignoredElements, root);
     }
 
     /**

@@ -5,6 +5,7 @@ import { DefaultEditTypes, Math2D } from "@hylimo/diagram-common";
 import type { Matrix } from "transformation-matrix";
 import { applyToPoint, translate } from "transformation-matrix";
 import {
+    getSnapElementData,
     getSnapLines,
     getSnapReferenceData,
     getSnaps,
@@ -16,6 +17,7 @@ import {
 import type { SModelElementImpl } from "sprotty";
 import type { SRoot } from "../../../model/sRoot.js";
 import { findViewportZoom } from "../../../base/findViewportZoom.js";
+import type { SElement } from "../../../model/sElement.js";
 
 /**
  * Entry for a translation move operation
@@ -87,4 +89,26 @@ export class TranslationMoveHandler extends MoveHandler {
         });
         return { edits, snapLines };
     }
+}
+
+/**
+ * Computes the snap data for translating elements.
+ * This includes the snap element data and the snap reference data.
+ *
+ * @param elements The elements to be translated.
+ * @param ignoredElements The elements to be ignored during snapping.
+ * @param root The root element of the model.
+ * @returns The computed snap data
+ */
+export function computeTranslateMoveSnapData(elements: SElement[], ignoredElements: SElement[], root: SRoot): SnapData {
+    const ignoredElementsSet = new Set<string>();
+    for (const element of ignoredElements) {
+        ignoredElementsSet.add(element.id);
+    }
+    const snapElementData = getSnapElementData(root, elements, ignoredElementsSet);
+    const snapReferenceData = getSnapReferenceData(root, new Set(snapElementData.keys()), ignoredElementsSet);
+    return {
+        data: snapElementData,
+        referenceData: snapReferenceData
+    };
 }
