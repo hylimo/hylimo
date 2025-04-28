@@ -53,7 +53,7 @@ defineProps({
 }
 
 .icon-button:hover:not(:disabled) {
-    color: var(--vp-c-brand-1);
+    color: var(--vp-c-brand-1-1);
     transition: color 0.25s;
 }
 

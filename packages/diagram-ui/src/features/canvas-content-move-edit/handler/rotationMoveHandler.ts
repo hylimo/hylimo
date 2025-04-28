@@ -31,9 +31,7 @@ export class RotationMoveHandler extends MoveHandler {
             fromTwoMovingPoints(Point.ORIGIN, rotationIconPosition, Point.ORIGIN, mousePosition)
         );
         let newRotation = this.currentRotation + rotation.angle * (180 / Math.PI);
-        while (newRotation < 0) {
-            newRotation += 360;
-        }
+        newRotation = ((newRotation % 360) + 360) % 360;
         const edits = [
             {
                 types: [DefaultEditTypes.ROTATE],

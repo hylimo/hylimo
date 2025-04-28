@@ -72,7 +72,7 @@ onBeforeMount(async () => {
 
 .progress-bar {
     height: 4px;
-    background-color: var(--vp-c-brand-1);
+    background-color: var(--vp-c-brand-1-1);
     margin-left: auto;
 }
 </style>

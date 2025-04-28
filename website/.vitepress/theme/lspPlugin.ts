@@ -88,23 +88,39 @@ export const language = "syncscript";
  */
 export const lspPlugin: Plugin = {
     install(app) {
-        const languageServerSettings = useLocalStorage<LanguageServerSettings>("languageServerSettings", {
-            translationPrecision: 1,
-            resizePrecision: 1,
-            linePointPosPrecision: 0.001,
-            linePointDistancePrecision: 0.1,
-            axisAlignedPosPrecision: 0.001,
-            rotationPrecision: 1
-        });
-        const diagramConfig = useLocalStorage<DiagramConfig>("diagramConfig", {
-            lightPrimaryColor: "#000000",
-            lightBackgroundColor: "#ffffff",
-            darkPrimaryColor: "#ffffff",
-            darkBackgroundColor: "#1e1e1e",
-            enableFontSubsetting: true,
-            enableExternalFonts: false
-        });
-        const editorConfig = useLocalStorage<EditorConfig>("editorConfig", { toolboxEnabled: true });
+        const languageServerSettings = useLocalStorage<LanguageServerSettings>(
+            "languageServerSettings",
+            {
+                translationPrecision: 1,
+                resizePrecision: 1,
+                linePointPosPrecision: 0.001,
+                linePointDistancePrecision: 0.1,
+                axisAlignedPosPrecision: 0.001,
+                rotationPrecision: 1
+            },
+            { mergeDefaults: true }
+        );
+        const diagramConfig = useLocalStorage<DiagramConfig>(
+            "diagramConfig",
+            {
+                lightPrimaryColor: "#000000",
+                lightBackgroundColor: "#ffffff",
+                darkPrimaryColor: "#ffffff",
+                darkBackgroundColor: "#1e1e1e",
+                enableFontSubsetting: true,
+                enableExternalFonts: false
+            },
+            { mergeDefaults: true }
+        );
+        const editorConfig = useLocalStorage<EditorConfig>(
+            "editorConfig",
+            {
+                toolboxEnabled: true,
+                snappingEnabled: true,
+                gridEnabled: true
+            },
+            { mergeDefaults: true }
+        );
         app.provide(languageServerConfigKey, {
             settings: languageServerSettings,
             diagramConfig,

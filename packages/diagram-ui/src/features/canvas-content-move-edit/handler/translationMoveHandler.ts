@@ -16,7 +16,6 @@ import {
 import type { SModelElementImpl } from "sprotty";
 import type { SRoot } from "../../../model/sRoot.js";
 import { findViewportZoom } from "../../../base/findViewportZoom.js";
-import type { SnapLinesStateManager } from "../../snap/snapLinesStateManager.js";
 
 /**
  * Entry for a translation move operation
@@ -47,7 +46,6 @@ export class TranslationMoveHandler extends MoveHandler {
     constructor(
         readonly elements: ElementsGroupedByTransformation[],
         readonly snapData: SnapData | undefined,
-        readonly snapLineStateManager: SnapLinesStateManager,
         transformationMatrix: Matrix
     ) {
         super(transformationMatrix, "cursor-move");

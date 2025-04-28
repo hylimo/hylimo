@@ -25,7 +25,7 @@ const model = defineModel({
 }
 
 .VPSwitch.checked {
-    background-color: var(--vp-c-brand);
+    background-color: var(--vp-c-brand-1);
     transition:
         border-color 0.25s,
         background-color 0.4s ease !important;

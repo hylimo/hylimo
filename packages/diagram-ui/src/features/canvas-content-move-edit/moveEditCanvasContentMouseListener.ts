@@ -40,8 +40,8 @@ import { SElement } from "../../model/sElement.js";
 import { findResizeIconClass } from "../cursor/resizeIcon.js";
 import { MouseListener } from "../../base/mouseListener.js";
 import { TYPES } from "../types.js";
-import type { SnapLinesStateManager } from "../snap/snapLinesStateManager.js";
-import { getSnapData, type SnapData } from "../snap/snapping.js";
+import { getSnapElementData, getSnapReferenceData, type SnapData } from "../snap/snapping.js";
+import type { ConfigManager } from "../config/configManager.js";
 
 /**
  * If a resize scale exceeds this value, instead resize with scale 1 in the opposite direction is performed.
@@ -64,9 +64,9 @@ export class MoveEditCanvasContentMouseListener extends MouseListener {
     static readonly MAX_UPDATES_PER_REVISION = 5;
 
     /**
-     * Manager for snap lines
+     * ConfigManager used to get the editor config
      */
-    @inject(TYPES.SnapLinesStateManager) readonly snapLinesStateManager!: SnapLinesStateManager;
+    @inject(TYPES.ConfigManager) protected configManager!: ConfigManager;
 
     override mouseDown(target: SModelElementImpl, event: MouseEvent): Action[] {
         if (
@@ -351,7 +351,11 @@ export class MoveEditCanvasContentMouseListener extends MouseListener {
             return this.createLineMoveHandler(linePoints[0], event);
         }
         const root = target.root as SRoot;
-        const snapData = this.computeSnapData(selected, [...movedElements, ...implicitlyMovedElements], root);
+        const snapData = this.computeTranslateMoveSnapData(
+            selected,
+            [...movedElements, ...implicitlyMovedElements],
+            root
+        );
         return this.createTranslationMoveHandler(translateableElements, snapData, event, root);
     }
 
@@ -424,13 +428,28 @@ export class MoveEditCanvasContentMouseListener extends MouseListener {
                 elements: entry.elements.map((element) => element.id)
             })),
             snapData,
-            this.snapLinesStateManager,
             this.makeRelative(root.getMouseTransformationMatrix(), event)
         );
     }
 
-    private computeSnapData(elements: SElement[], ignoredElements: SElement[], root: SRoot): SnapData | undefined {
-        return getSnapData(root, elements, ignoredElements);
+    private computeTranslateMoveSnapData(
+        elements: SElement[],
+        ignoredElements: SElement[],
+        root: SRoot
+    ): SnapData | undefined {
+        if (this.configManager?.config?.snappingEnabled != true) {
+            return undefined;
+        }
+        const ignoredElementsSet = new Set<string>();
+        for (const element of ignoredElements) {
+            ignoredElementsSet.add(element.id);
+        }
+        const snapElementData = getSnapElementData(root, elements, ignoredElementsSet);
+        const snapReferenceData = getSnapReferenceData(root, new Set(snapElementData.keys()), ignoredElementsSet);
+        return {
+            data: snapElementData,
+            referenceData: snapReferenceData
+        };
     }
 
     /**

@@ -337,7 +337,7 @@ function onMouseMove(e: MouseEvent) {
 
 .diagram-select:hover:not(:disabled),
 .diagram-select:focus:not(:disabled) {
-    border-color: var(--vp-c-brand);
+    border-color: var(--vp-c-brand-1);
 }
 
 .diagram-select.untitled {
@@ -417,12 +417,12 @@ function onMouseMove(e: MouseEvent) {
     background-color: var(--vp-c-default-soft);
 
     .filename {
-        color: var(--vp-c-brand);
+        color: var(--vp-c-brand-1);
     }
 }
 
 .item.selected {
-    border-color: var(--vp-c-brand);
+    border-color: var(--vp-c-brand-1);
 }
 
 .icon {

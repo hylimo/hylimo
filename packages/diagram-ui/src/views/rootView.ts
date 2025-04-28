@@ -10,6 +10,7 @@ import type { BoxSelectProvider } from "../features/select/boxSelectProvider.js"
 import { convertFontsToCssStyle } from "@hylimo/diagram-common";
 import type { KeyState } from "../features/key-state/keyState.js";
 import { CanvasLikeView } from "./canvas/canvasLikeView.js";
+import type { ConfigManager } from "../features/config/configManager.js";
 
 /**
  * IView that is the parent which handles
@@ -47,6 +48,11 @@ export class RootView extends CanvasLikeView implements IView {
      * KeyState used to check if space is pressed
      */
     @inject(TYPES.KeyState) protected keyState!: KeyState;
+
+    /**
+     * ConfigManager used to get the editor config
+     */
+    @inject(TYPES.ConfigManager) protected configManager!: ConfigManager;
 
     render(model: Readonly<SRoot>, context: RenderingContext, _args?: IViewArgs | undefined): VNode {
         if (context.targetKind == "hidden") {
@@ -97,7 +103,7 @@ export class RootView extends CanvasLikeView implements IView {
      * @returns the VNode for the background or undefined if in preview mode
      */
     private renderBackground(model: Readonly<SRoot>): VNode | undefined {
-        if (model.preview) {
+        if (model.preview || this.configManager.config?.gridEnabled != true) {
             return undefined;
         }
         return svg("rect", {

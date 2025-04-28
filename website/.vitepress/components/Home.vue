@@ -270,7 +270,7 @@ onBeforeMount(() => {
 }
 
 .menu-button:hover {
-    color: var(--vp-c-brand-1);
+    color: var(--vp-c-brand-1-1);
     background-color: var(--vp-c-default-soft);
 }
 

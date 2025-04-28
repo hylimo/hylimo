@@ -66,7 +66,7 @@ watch(
 
 .color-picker-wrapper:hover,
 .color-picker-wrapper:focus-within {
-    border-color: var(--vp-c-brand);
+    border-color: var(--vp-c-brand-1);
 }
 
 .color-picker {

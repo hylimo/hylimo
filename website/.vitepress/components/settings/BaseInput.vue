@@ -27,7 +27,7 @@ const model = defineModel({
 
 .text-field:hover,
 .text-field:focus {
-    border-color: var(--vp-c-brand);
+    border-color: var(--vp-c-brand-1);
 }
 
 .text-field.invalid {

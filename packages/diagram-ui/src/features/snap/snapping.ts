@@ -1,7 +1,11 @@
 import {
     AbsolutePoint,
     Bounds,
+    CanvasAxisAlignedSegment,
+    CanvasBezierSegment,
+    CanvasConnection,
     CanvasElement,
+    CanvasLineSegment,
     LinePoint,
     Math2D,
     Point,
@@ -177,19 +181,6 @@ export interface SnapResult {
     contextGlobalRotations: Map<string, number>;
 }
 
-export function getSnapData(root: SRoot, selectedElements: SElement[], ignoredElements: SElement[]): SnapData {
-    const ignoredElementsSet = new Set<string>();
-    for (const element of ignoredElements) {
-        ignoredElementsSet.add(element.id);
-    }
-    const snapElementData = getSnapElementData(root, selectedElements, ignoredElementsSet);
-    const snapReferenceData = getSnapReferenceData(root, new Set(snapElementData.keys()), ignoredElementsSet);
-    return {
-        data: snapElementData,
-        referenceData: snapReferenceData
-    };
-}
-
 /**
  * Calculates the points and bounds for the selected elements in all relevant contexts.
  * Selected elements that are in a canvas that is contained in an ignored element are ignored.
@@ -321,6 +312,7 @@ export function getSnapReferenceData(
         const bounds: Bounds[] = [];
         elementQueue.push(...(canvas.children as SElement[]));
         const contextToTarget = rotateDEG(canvas.globalRotation);
+        const canvasPointIds: string[] = [];
         while (elementQueue.length > 0) {
             const element = elementQueue.pop()!;
             if (ignoredElements.has(element.id)) {
@@ -346,29 +338,41 @@ export function getSnapReferenceData(
                 }
                 const targetPoints = corners.map((corner) => applyToPoint(contextToTarget, corner));
                 points.push(...targetPoints);
-                points.push(getCanvasElementCenter(contextToTarget, element));
+                points.push(applyToPoint(contextToTarget, getCanvasElementCenter(elementToContext, element)));
                 bounds.push(Bounds.ofPoints(targetPoints));
                 elementQueue.push(...element.children);
+            } else if (CanvasConnection.isCanvasConnection(element)) {
+                if (ignoredElements.has(element.id)) {
+                    continue;
+                }
+                canvasPointIds.push(element.start);
+                elementQueue.push(...element.children);
             } else if (
-                AbsolutePoint.isAbsolutePoint(element) ||
-                RelativePoint.isRelativePoint(element) ||
-                LinePoint.isLinePoint(element)
+                CanvasLineSegment.isCanvasLineSegment(element) ||
+                CanvasAxisAlignedSegment.isCanvasAxisAlignedSegment(element) ||
+                CanvasBezierSegment.isCanvasBezierSegment(element)
             ) {
                 if (ignoredElements.has(element.id)) {
                     continue;
                 }
-                if (!checkedElements.has(element.id)) {
-                    checkedElements.add(element.id);
-                    if (Bounds.contains(visibleBounds, layoutEngine.getPoint(element.id, root.id))) {
-                        visibleCheckedElements.add(element.id);
-                    }
-                }
-                if (visibleCheckedElements.has(element.id)) {
-                    const point = layoutEngine.getPoint(element.id, context);
-                    points.push(applyToPoint(contextToTarget, point));
-                }
+                canvasPointIds.push(element.end);
             } else {
                 elementQueue.push(...element.children);
+            }
+        }
+        for (const pointId of canvasPointIds) {
+            if (ignoredElements.has(pointId)) {
+                continue;
+            }
+            if (!checkedElements.has(pointId)) {
+                checkedElements.add(pointId);
+                if (Bounds.contains(visibleBounds, layoutEngine.getPoint(pointId, root.id))) {
+                    visibleCheckedElements.add(pointId);
+                }
+            }
+            if (visibleCheckedElements.has(pointId)) {
+                const point = layoutEngine.getPoint(pointId, context);
+                points.push(applyToPoint(contextToTarget, point));
             }
         }
         result.set(context, {

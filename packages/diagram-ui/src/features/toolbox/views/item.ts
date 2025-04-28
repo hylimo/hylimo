@@ -9,6 +9,7 @@ import { generatePreviewIfAvailable } from "./preview.js";
 import { generateIcon } from "./icon.js";
 import { Search } from "lucide";
 import { ToolboxToolType } from "../toolType.js";
+import { getSnapReferenceData } from "../../snap/snapping.js";
 
 /**
  * Generates the UI for the toolbox items.
@@ -97,7 +98,12 @@ function generateToolboxItem(context: Toolbox, toolboxEdit: ToolboxEditEntry): V
                     const action: TransactionalMoveAction = {
                         kind: TransactionalMoveAction.KIND,
                         handlerProvider: (root) =>
-                            new CreateElementMoveHandler(toolboxEdit.edit, root, event.pointerId),
+                            new CreateElementMoveHandler(
+                                toolboxEdit.edit,
+                                root,
+                                event.pointerId,
+                                getSnapReferenceData(root, new Set([root.id]), new Set())
+                            ),
                         maxUpdatesPerRevision: 1
                     };
                     if (!context.toolState.isLocked) {
