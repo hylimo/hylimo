@@ -263,7 +263,7 @@ export class MoveEditCanvasContentMouseListener extends MouseListener {
             return undefined;
         }
         if (Math.abs(scaleX) > maxResizeScale) {
-            scaleX = Math.sign(scaleX) * -1;
+            scaleX = classList.contains(ResizePosition.LEFT) ? -1 : 1;
         }
         return scaleX;
     }
@@ -294,7 +294,7 @@ export class MoveEditCanvasContentMouseListener extends MouseListener {
             return undefined;
         }
         if (Math.abs(scaleY) > maxResizeScale) {
-            scaleY = Math.sign(scaleY) * -1;
+            scaleY = classList.contains(ResizePosition.TOP) ? -1 : 1;
         }
         return scaleY;
     }

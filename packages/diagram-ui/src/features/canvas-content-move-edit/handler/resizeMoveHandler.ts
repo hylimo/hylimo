@@ -1,6 +1,6 @@
 import { Bounds, DefaultEditTypes } from "@hylimo/diagram-common";
 import type { Edit, ResizeEdit } from "@hylimo/diagram-protocol";
-import { applyToPoint, compose, rotateDEG, scale, type Matrix } from "transformation-matrix";
+import { compose, inverse, rotateDEG, scale, type Matrix } from "transformation-matrix";
 import { MoveHandler, type HandleMoveResult } from "../../move/moveHandler.js";
 import type { ResizeMoveCursor } from "../../cursor/cursor.js";
 import {
@@ -11,11 +11,8 @@ import {
     SnapDirection,
     type ContextSnapData,
     type GapSnapOptions,
-    type SnapElementData,
     type SnapLine,
-    type SnapOptions,
-    type SnapReferenceData,
-    type SnapResult
+    type SnapReferenceData
 } from "../../snap/snapping.js";
 import type { SCanvasElement } from "../../../model/canvas/sCanvasElement.js";
 import type { SElement } from "../../../model/sElement.js";
@@ -147,6 +144,10 @@ export function computeResizeMoveSnapData(
     ignoredElements: SElement[],
     root: SRoot
 ): ResizeSnapData | undefined {
+    const rotation = element.parent.globalRotation + element.rotation;
+    if (rotation % 90 !== 0) {
+        return undefined;
+    }
     const ignoredElementsSet = new Set<string>();
     for (const element of ignoredElements) {
         ignoredElementsSet.add(element.id);
@@ -158,7 +159,7 @@ export function computeResizeMoveSnapData(
         rotateDEG(element.parent.globalRotation),
         layoutEngine.localToAncestor(element.id, context)
     );
-    const origin = applyToPoint(elementToTargetMatrix, { x: 0, y: 0 });
+    const targetToElementMatrix = inverse(elementToTargetMatrix);
     const current = {
         width: element.width,
         height: element.height,
@@ -179,19 +180,19 @@ export function computeResizeMoveSnapData(
     const resizedBounds = Bounds.ofPoints(resizedCorners);
     const minDiff = 0.25;
     const snapGaps: GapSnapOptions = {
-        top: Math.abs(resizedBounds.position.y - bounds.position.y) > minDiff,
-        left: Math.abs(resizedBounds.position.x - bounds.position.x) > minDiff,
-        bottom:
-            Math.abs(resizedBounds.position.y + resizedBounds.size.height - (bounds.position.y + bounds.size.height)) >
-            minDiff,
-        right:
+        right: Math.abs(resizedBounds.position.x - bounds.position.x) > minDiff,
+        left:
             Math.abs(resizedBounds.position.x + resizedBounds.size.width - (bounds.position.x + bounds.size.width)) >
             minDiff,
-        centerVertical:
+        centerHorizontal:
             Math.abs(
                 resizedBounds.position.x + resizedBounds.size.width / 2 - (bounds.position.x + bounds.size.width / 2)
             ) > minDiff,
-        centerHorizontal:
+        bottom: Math.abs(resizedBounds.position.y - bounds.position.y) > minDiff,
+        top:
+            Math.abs(resizedBounds.position.y + resizedBounds.size.height - (bounds.position.y + bounds.size.height)) >
+            minDiff,
+        centerVertical:
             Math.abs(
                 resizedBounds.position.y + resizedBounds.size.height / 2 - (bounds.position.y + bounds.size.height / 2)
             ) > minDiff
@@ -338,11 +339,10 @@ export function computeResizeMoveSnapData(
                     newFactorX = overrideFactorY;
                 }
             }
-            const transform = scale(
-                (newFactorX ?? 1) / (factorX ?? 1),
-                (newFactorY ?? 1) / (factorY ?? 1),
-                origin.x,
-                origin.y
+            const transform = compose(
+                elementToTargetMatrix,
+                scale((newFactorX ?? 1) / (factorX ?? 1), (newFactorY ?? 1) / (factorY ?? 1)),
+                targetToElementMatrix
             );
             if (factorXDirection != SnapDirection.HORIZONTAL && factorYDirection != SnapDirection.HORIZONTAL) {
                 result.nearestSnapsX.length = 0;

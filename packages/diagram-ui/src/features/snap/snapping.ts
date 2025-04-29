@@ -1102,7 +1102,7 @@ function createGapSnapLines(
                     gapSnapLines.push(
                         {
                             type: "gap",
-                            direction:SnapDirection.HORIZONTAL,
+                            direction: SnapDirection.HORIZONTAL,
                             points: [
                                 { x: startMaxX, y: gapLineY },
                                 { x: endMinX, y: gapLineY }
