@@ -16,8 +16,8 @@ import { CanvasElementView, ResizePosition } from "../../views/canvas/canvasElem
 import { RotationMoveHandler } from "./handler/rotationMoveHandler.js";
 import { SCanvasConnection } from "../../model/canvas/sCanvasConnection.js";
 import type { SRoot } from "../../model/sRoot.js";
-import type { ElementsGroupedBySize, ResizeSnapData } from "./handler/resizeMoveHandler.js";
-import { computeResizeMoveSnapData, ResizeMoveHandler } from "./handler/resizeMoveHandler.js";
+import type { ElementsGroupedBySize, ResizeSnapHandler } from "./handler/resizeMoveHandler.js";
+import { createResizeSnapHandler, ResizeMoveHandler } from "./handler/resizeMoveHandler.js";
 import { SCanvasAxisAlignedSegment } from "../../model/canvas/sCanvasAxisAlignedSegment.js";
 import { AxisAligedSegmentEditMoveHandler } from "./handler/axisAlignedSegmentEditMoveHandler.js";
 import type { Matrix } from "transformation-matrix";
@@ -195,7 +195,7 @@ export class MoveEditCanvasContentMouseListener extends MouseListener {
             elements,
             this.makeRelative(target.getMouseTransformationMatrix(), event),
             findResizeIconClass(classList),
-            this.computeResizeMoveSnapData(target, scaleX, scaleY, resizedElements, target.root as SRoot)
+            this.createResizeSnapHandler(target, scaleX, scaleY, resizedElements, target.root as SRoot)
         );
     }
 
@@ -454,24 +454,24 @@ export class MoveEditCanvasContentMouseListener extends MouseListener {
     }
 
     /**
-     * Computes the snap reference data for resizing an element.
+     * Creates the resize snap handler for the given element.
      *
      * @param element The element being resized.
      * @param ignoredElements The elements to be ignored during snapping.
      * @param root The root element of the model.
      * @returns The computed snap reference data or undefined if snapping is disabled.
      */
-    private computeResizeMoveSnapData(
+    private createResizeSnapHandler(
         element: SCanvasElement,
         scaleX: number | undefined,
         scaleY: number | undefined,
         ignoredElements: SElement[],
         root: SRoot
-    ): ResizeSnapData | undefined {
+    ): ResizeSnapHandler | undefined {
         if (this.configManager?.config?.snappingEnabled != true) {
             return undefined;
         }
-        return computeResizeMoveSnapData(element, scaleX, scaleY, ignoredElements, root);
+        return createResizeSnapHandler(element, scaleX, scaleY, ignoredElements, root);
     }
 
     /**

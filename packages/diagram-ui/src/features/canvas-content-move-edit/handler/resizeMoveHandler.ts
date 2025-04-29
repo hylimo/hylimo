@@ -29,19 +29,30 @@ export interface ElementsGroupedBySize {
     originalHeight?: number;
 }
 
-export interface ResizeSnapData {
-    referenceData: SnapReferenceData;
-    getSnappedFactorsAndLines: (
-        referenceData: SnapReferenceData,
-        zoom: number,
-        factorX: number | undefined,
-        factorY: number | undefined,
-        uniform: boolean
-    ) => {
-        factorX: number | undefined;
-        factorY: number | undefined;
-        snapLines: Map<string, SnapLine[]> | undefined;
-    };
+/**
+ * Context object for storing and passing snap factor related data between methods.
+ * Contains information about factor overrides and snap directions.
+ */
+interface SnapFactorContext {
+    /**
+     * Override for the x resize factor, if any snap was found.
+     */
+    overrideFactorX?: number;
+
+    /**
+     * Override for the y resize factor, if any snap was found.
+     */
+    overrideFactorY?: number;
+
+    /**
+     * Direction in which the x resize factor snapping was applied.
+     */
+    factorXDirection?: SnapDirection;
+
+    /**
+     * Direction in which the y resize factor snapping was applied.
+     */
+    factorYDirection?: SnapDirection;
 }
 
 /**
@@ -59,7 +70,7 @@ export class ResizeMoveHandler extends MoveHandler {
      * @param groupedElements the elements grouped by size.
      * @param transformationMatrix the transformation matrix to apply to obtain the relative position.
      * @param moveCursor the cursor to use while resizing.
-     * @param snapData the data for snapping, if enabled.
+     * @param snapHandler the handler for snapping, if enabled.
      */
     constructor(
         private readonly scaleX: number | undefined,
@@ -69,7 +80,7 @@ export class ResizeMoveHandler extends MoveHandler {
         private readonly groupedElements: ElementsGroupedBySize[],
         transformationMatrix: Matrix,
         moveCursor: ResizeMoveCursor | undefined,
-        private snapData: ResizeSnapData | undefined
+        private snapHandler: ResizeSnapHandler | undefined
     ) {
         super(transformationMatrix, moveCursor);
     }
@@ -91,9 +102,9 @@ export class ResizeMoveHandler extends MoveHandler {
             factorY = uniformFactor;
         }
         let snapLines: Map<string, SnapLine[]> | undefined;
-        if (this.snapData != undefined) {
-            const snapResult = this.snapData.getSnappedFactorsAndLines(
-                this.snapData.referenceData,
+        if (this.snapHandler != undefined) {
+            const snapResult = this.snapHandler.getSnappedFactorsAndLines(
+                this.snapHandler.referenceData,
                 findViewportZoom(target),
                 factorX,
                 factorY,
@@ -128,239 +139,466 @@ export class ResizeMoveHandler extends MoveHandler {
 }
 
 /**
- * Computes the snap reference data for resizing an element.
+ * Class that computes and provides snap reference data for resizing an element.
+ */
+export class ResizeSnapHandler {
+    /**
+     * The reference data for snapping.
+     */
+    readonly referenceData: SnapReferenceData;
+
+    /**
+     * The transformation matrix to convert between element and target coordinates.
+     */
+    private readonly elementToTargetMatrix: Matrix;
+    /**
+     * The transformation matrix to convert between target and element coordinates.
+     */
+    private readonly targetToElementMatrix: Matrix;
+    /**
+     * Properties of the CanvasElement before resizing.
+     */
+    private readonly current: { width: number; height: number; dx: number; dy: number };
+    /**
+     * The corners of the element in the target coordinate system.
+     */
+    private readonly corners: ReturnType<typeof getCanvasElementCorners>;
+    /**
+     * The snapping options for gaps.
+     */
+    private readonly gapSnapOptions: GapSnapOptions;
+    /**
+     * Indices of the corners that are used for (point) snapping.
+     */
+    private readonly snapPointIndices: number[];
+    /**
+     * The relative dx value of the element (between 0 and 1).
+     */
+    private readonly dxRelative: number;
+    /**
+     * The relative dy value of the element (between 0 and 1).
+     */
+    private readonly dyRelative: number;
+    /**
+     * The context ID of the element being resized.
+     */
+    private readonly context: string;
+
+    /**
+     * Creates a new ResizeMoveSnapDataComputer.
+     *
+     * @param element The element being resized
+     * @param scaleX The scale factor in x direction
+     * @param scaleY The scale factor in y direction
+     * @param root The root element of the model
+     * @param ignoredElements The elements to be ignored during snapping
+     */
+    constructor(
+        element: SCanvasElement,
+        scaleX: number | undefined,
+        scaleY: number | undefined,
+        root: SRoot,
+        ignoredElements: SElement[]
+    ) {
+        const layoutEngine = root.layoutEngine;
+        this.context = element.parent.id;
+
+        this.elementToTargetMatrix = compose(
+            rotateDEG(element.parent.globalRotation),
+            layoutEngine.localToAncestor(element.id, this.context)
+        );
+        this.targetToElementMatrix = inverse(this.elementToTargetMatrix);
+
+        this.current = {
+            width: element.width,
+            height: element.height,
+            dx: element.dx,
+            dy: element.dy
+        };
+
+        this.corners = getCanvasElementCorners(this.elementToTargetMatrix, this.current);
+        const bounds = Bounds.ofPoints(this.corners);
+
+        const factorX = scaleX != undefined ? (element.width + 1) / element.width : 1;
+        const factorY = scaleY != undefined ? (element.height + 1) / element.height : 1;
+        const resized = {
+            width: this.current.width * factorX,
+            height: this.current.height * factorY,
+            dx: this.current.dx * factorX,
+            dy: this.current.dy * factorY
+        };
+
+        const resizedCorners = getCanvasElementCorners(this.elementToTargetMatrix, resized);
+        const resizedBounds = Bounds.ofPoints(resizedCorners);
+
+        this.gapSnapOptions = this.calculateGapSnapOptions(bounds, resizedBounds);
+
+        this.snapPointIndices = [0, 1, 2, 3].filter(
+            (index) =>
+                Math.abs(resizedCorners[index].x - this.corners[index].x) > 0 ||
+                Math.abs(resizedCorners[index].y - this.corners[index].y) > 0
+        );
+
+        this.dxRelative = -element.dx / element.width;
+        this.dyRelative = -element.dy / element.height;
+
+        const ignoredElementsSet = new Set<string>();
+        for (const element of ignoredElements) {
+            ignoredElementsSet.add(element.id);
+        }
+        this.referenceData = getSnapReferenceData(root, new Set([this.context]), ignoredElementsSet);
+    }
+
+    /**
+     * Calculates gap snap options based on differences between original and resized element bounds
+     *
+     * @param bounds The original element bounds
+     * @param resizedBounds The resized element bounds
+     * @returns The gap snap options configuration
+     */
+    private calculateGapSnapOptions(bounds: Bounds, resizedBounds: Bounds): GapSnapOptions {
+        const left =
+            Math.abs(resizedBounds.position.x + resizedBounds.size.width - (bounds.position.x + bounds.size.width)) > 0;
+        const right = Math.abs(resizedBounds.position.x - bounds.position.x) > 0;
+        const top =
+            Math.abs(resizedBounds.position.y + resizedBounds.size.height - (bounds.position.y + bounds.size.height)) >
+            0;
+        const bottom = Math.abs(resizedBounds.position.y - bounds.position.y) > 0;
+
+        return {
+            right,
+            left,
+            centerHorizontal: left != right,
+            bottom,
+            top,
+            centerVertical: top != bottom
+        };
+    }
+
+    /**
+     * Gets the snapped factors and snap lines based on the current resize operation.
+     *
+     * @param referenceData The snap reference data
+     * @param zoom The current zoom level
+     * @param factorX The x resize factor
+     * @param factorY The y resize factor
+     * @param uniform Whether the resize should be uniform
+     * @returns The adjusted factors and snap lines
+     */
+    getSnappedFactorsAndLines(
+        referenceData: SnapReferenceData,
+        zoom: number,
+        factorX: number | undefined,
+        factorY: number | undefined,
+        uniform: boolean
+    ): {
+        factorX: number | undefined;
+        factorY: number | undefined;
+        snapLines: Map<string, SnapLine[]> | undefined;
+    } {
+        const resized = {
+            width: this.current.width * (factorX ?? 1),
+            height: this.current.height * (factorY ?? 1),
+            dx: this.current.dx * (factorX ?? 1),
+            dy: this.current.dy * (factorY ?? 1)
+        };
+        const resizedCorners = getCanvasElementCorners(this.elementToTargetMatrix, resized);
+
+        const snapData: ContextSnapData = {
+            bounds: Bounds.ofPoints(resizedCorners),
+            points: this.snapPointIndices.map((index) => resizedCorners[index])
+        };
+
+        const result = getSnaps(new Map([[this.context, snapData]]), referenceData, zoom, {
+            snapX: this.gapSnapOptions.left || this.gapSnapOptions.right,
+            snapY: this.gapSnapOptions.top || this.gapSnapOptions.bottom,
+            snapGaps: this.gapSnapOptions,
+            snapPoints: true
+        });
+
+        const { newFactorX, newFactorY } = this.processSnaps(result, factorX, factorY, uniform, resizedCorners);
+
+        const transform = compose(
+            this.elementToTargetMatrix,
+            scale((newFactorX ?? 1) / (factorX ?? 1), (newFactorY ?? 1) / (factorY ?? 1)),
+            this.targetToElementMatrix
+        );
+
+        const snapLines = getSnapLines(result, transform);
+
+        return {
+            factorX: newFactorX,
+            factorY: newFactorY,
+            snapLines
+        };
+    }
+
+    /**
+     * Processes snap results and calculates adjusted factors.
+     *
+     * @param result The snap result
+     * @param factorX The x resize factor
+     * @param factorY The y resize factor
+     * @param uniform Whether the resize should be uniform
+     * @param resizedCorners The corners of the resized element
+     * @returns The adjusted factors and their directions
+     */
+    private processSnaps(
+        result: ReturnType<typeof getSnaps>,
+        factorX: number | undefined,
+        factorY: number | undefined,
+        uniform: boolean,
+        resizedCorners: ReturnType<typeof getCanvasElementCorners>
+    ): {
+        newFactorX: number | undefined;
+        newFactorY: number | undefined;
+    } {
+        const context: SnapFactorContext = {};
+        this.adaptFactorsBasedOnSnaps(result, factorX, factorY, resizedCorners, context);
+        const resizeFactors = this.calculateFinalResizeFactors(factorX, factorY, uniform, context);
+
+        if (
+            context.factorXDirection !== SnapDirection.HORIZONTAL &&
+            context.factorYDirection !== SnapDirection.HORIZONTAL
+        ) {
+            result.nearestSnapsX.length = 0;
+        }
+        if (
+            context.factorXDirection !== SnapDirection.VERTICAL &&
+            context.factorYDirection !== SnapDirection.VERTICAL
+        ) {
+            result.nearestSnapsY.length = 0;
+        }
+        return resizeFactors;
+    }
+
+    /**
+     * Adapts factors based on snap results.
+     *
+     * @param result The snap result
+     * @param factorX The x resize factor
+     * @param factorY The y resize factor
+     * @param resizedCorners The corners of the resized element
+     * @param context The snap factor context to update
+     */
+    private adaptFactorsBasedOnSnaps(
+        result: ReturnType<typeof getSnaps>,
+        factorX: number | undefined,
+        factorY: number | undefined,
+        resizedCorners: ReturnType<typeof getCanvasElementCorners>,
+        context: SnapFactorContext
+    ): void {
+        if (result.nearestSnapsX.length > 0) {
+            const snapX = result.nearestSnapsX[0];
+            const target = this.getHorizontalSnapTarget(snapX);
+            const index = findMinIndexBy(resizedCorners, (corner) => Math.abs(corner.x - target));
+            const value = this.corners[index].x;
+            const x2 = this.corners[(index + 1) % 4].x;
+            const y2 = this.corners[(index + 2) % 4].x;
+            const cx = index % 2 === 0 ? this.dxRelative : 1 - this.dxRelative;
+            const cy = index < 2 ? this.dyRelative : 1 - this.dyRelative;
+
+            if (!this.adaptFactor(value, target, x2, cx, y2, cy, SnapDirection.HORIZONTAL, factorX, factorY, context)) {
+                result.nearestSnapsX.length = 0;
+            }
+        }
+
+        if (result.nearestSnapsY.length > 0) {
+            const snapY = result.nearestSnapsY[0];
+            const target = this.getVerticalSnapTarget(snapY);
+            const index = findMinIndexBy(resizedCorners, (corner) => Math.abs(corner.y - target));
+            const value = this.corners[index].y;
+            const x2 = this.corners[(index + 1) % 4].y;
+            const y2 = this.corners[(index + 2) % 4].y;
+            const cx = index % 2 === 0 ? this.dxRelative : 1 - this.dxRelative;
+            const cy = index < 2 ? this.dyRelative : 1 - this.dyRelative;
+
+            if (!this.adaptFactor(value, target, x2, cx, y2, cy, SnapDirection.VERTICAL, factorX, factorY, context)) {
+                result.nearestSnapsY.length = 0;
+            }
+        }
+    }
+
+    /**
+     * Calculates final factors based on context and uniform resize settings.
+     *
+     * @param factorX The x resize factor
+     * @param factorY The y resize factor
+     * @param uniform Whether the resize should be uniform
+     * @param context The snap factor context with overrides
+     * @returns The adjusted factors
+     */
+    private calculateFinalResizeFactors(
+        factorX: number | undefined,
+        factorY: number | undefined,
+        uniform: boolean,
+        context: SnapFactorContext
+    ): {
+        newFactorX: number | undefined;
+        newFactorY: number | undefined;
+    } {
+        let newFactorX = context.overrideFactorX ?? factorX;
+        let newFactorY = context.overrideFactorY ?? factorY;
+
+        if (uniform && (context.overrideFactorX != undefined || context.overrideFactorY != undefined)) {
+            if (context.overrideFactorX != undefined && context.overrideFactorY != undefined) {
+                if (context.overrideFactorX > context.overrideFactorY) {
+                    newFactorY = context.overrideFactorX;
+                    context.factorYDirection = context.factorXDirection;
+                } else {
+                    newFactorX = context.overrideFactorY;
+                    context.factorXDirection = context.factorYDirection;
+                }
+            } else if (context.overrideFactorX != undefined) {
+                newFactorY = context.overrideFactorX;
+            } else if (context.overrideFactorY != undefined) {
+                newFactorX = context.overrideFactorY;
+            }
+        }
+
+        return {
+            newFactorX,
+            newFactorY
+        };
+    }
+
+    /**
+     * Adapts factors based on snap constraints.
+     *
+     * @param value The original position value
+     * @param target The target position value to snap to
+     * @param x2 the neighboring position value in the x direction
+     * @param cx the relative attachement point in x direction
+     * @param y2 the neighboring position value in the y direction
+     * @param cy the relative attachement point in y direction
+     * @param snapDirection The snap direction (horizontal or vertical)
+     * @param factorX The current x resize factor
+     * @param factorY The current y resize factor
+     * @param context The snap factor context to update
+     * @returns true if adaptation was successful, false otherwise
+     */
+    private adaptFactor(
+        value: number,
+        target: number,
+        x2: number,
+        cx: number,
+        y2: number,
+        cy: number,
+        snapDirection: SnapDirection,
+        factorX: number | undefined,
+        factorY: number | undefined,
+        context: SnapFactorContext
+    ): boolean {
+        const factorXNew = (target - (value + (x2 - value) * cx)) / ((value - x2) * cx);
+        const factorYNew = (target - (value + (y2 - value) * cy)) / ((value - y2) * cy);
+
+        if (factorX != undefined) {
+            if (factorY == undefined || Math.abs(factorXNew - factorX) < Math.abs(factorYNew - factorY)) {
+                if (
+                    context.overrideFactorX == undefined ||
+                    Math.abs(factorXNew - factorX) < Math.abs(context.overrideFactorX - factorX)
+                ) {
+                    context.overrideFactorX = factorXNew;
+                    context.factorXDirection = snapDirection;
+                    return true;
+                }
+            }
+        }
+        if (factorY != undefined) {
+            if (factorX == undefined || Math.abs(factorYNew - factorY) < Math.abs(factorXNew - factorX)) {
+                if (
+                    context.overrideFactorY == undefined ||
+                    Math.abs(factorYNew - factorY) < Math.abs(context.overrideFactorY - factorY)
+                ) {
+                    context.overrideFactorY = factorYNew;
+                    context.factorYDirection = snapDirection;
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Gets the target position for horizontal snapping.
+     *
+     * @param snapX The horizontal snap data
+     * @returns The target x position
+     */
+    private getHorizontalSnapTarget(snapX: ReturnType<typeof getSnaps>["nearestSnapsX"][0]): number {
+        if (snapX.type === "point") {
+            return snapX.referencePoint.x;
+        } else if (snapX.direction === GapSnapDirection.SIDE_RIGHT) {
+            return snapX.bounds.position.x + snapX.offset;
+        } else if (snapX.direction === GapSnapDirection.SIDE_LEFT) {
+            return snapX.bounds.position.x + snapX.bounds.size.width + snapX.offset;
+        } else {
+            const { startBounds, endBounds } = snapX.gap;
+            return (
+                endBounds.position.x +
+                startBounds.position.x +
+                startBounds.size.width -
+                (this.gapSnapOptions.left ? snapX.bounds.position.x : snapX.bounds.position.x + snapX.bounds.size.width)
+            );
+        }
+    }
+
+    /**
+     * Gets the target position for vertical snapping.
+     *
+     * @param snapY The vertical snap data
+     * @returns The target y position
+     */
+    private getVerticalSnapTarget(snapY: ReturnType<typeof getSnaps>["nearestSnapsY"][0]): number {
+        if (snapY.type === "point") {
+            return snapY.referencePoint.y;
+        } else if (snapY.direction === GapSnapDirection.SIDE_BOTTOM) {
+            return snapY.bounds.position.y + snapY.offset;
+        } else if (snapY.direction === GapSnapDirection.SIDE_TOP) {
+            return snapY.bounds.position.y + snapY.bounds.size.height + snapY.offset;
+        } else {
+            const { startBounds, endBounds } = snapY.gap;
+            return (
+                endBounds.position.y +
+                startBounds.position.y +
+                startBounds.size.height -
+                (this.gapSnapOptions.top ? snapY.bounds.position.y : snapY.bounds.position.y + snapY.bounds.size.height)
+            );
+        }
+    }
+}
+
+/**
+ * Creates a ResizeMoveHandler for resizing elements.
  *
  * @param element The element being resized.
  * @param ignoredElements The elements to be ignored during snapping.
  * @param root The root element of the model.
  * @returns The computed snap reference data or undefined if snapping is disabled.
  */
-export function computeResizeMoveSnapData(
+export function createResizeSnapHandler(
     element: SCanvasElement,
     scaleX: number | undefined,
     scaleY: number | undefined,
     ignoredElements: SElement[],
     root: SRoot
-): ResizeSnapData | undefined {
+): ResizeSnapHandler | undefined {
     const rotation = element.parent.globalRotation + element.rotation;
     if (rotation % 90 !== 0) {
         return undefined;
     }
-    const ignoredElementsSet = new Set<string>();
-    for (const element of ignoredElements) {
-        ignoredElementsSet.add(element.id);
-    }
-    const referenceData = getSnapReferenceData(root, new Set([element.parent.id]), ignoredElementsSet);
-    const layoutEngine = root.layoutEngine;
-    const context = element.parent.id;
-    const elementToTargetMatrix = compose(
-        rotateDEG(element.parent.globalRotation),
-        layoutEngine.localToAncestor(element.id, context)
-    );
-    const targetToElementMatrix = inverse(elementToTargetMatrix);
-    const current = {
-        width: element.width,
-        height: element.height,
-        dx: element.dx,
-        dy: element.dy
-    };
-    const corners = getCanvasElementCorners(elementToTargetMatrix, current);
-    const bounds = Bounds.ofPoints(corners);
-    const factorX = scaleX != undefined ? (element.width + 1) / element.width : 1;
-    const factorY = scaleY != undefined ? (element.height + 1) / element.height : 1;
-    const resized = {
-        width: current.width * factorX,
-        height: current.height * factorY,
-        dx: element.dx * factorX,
-        dy: element.dy * factorY
-    };
-    const resizedCorners = getCanvasElementCorners(elementToTargetMatrix, resized);
-    const resizedBounds = Bounds.ofPoints(resizedCorners);
-    const left =
-        Math.abs(resizedBounds.position.x + resizedBounds.size.width - (bounds.position.x + bounds.size.width)) > 0;
-    const right = Math.abs(resizedBounds.position.x - bounds.position.x) > 0;
-    const top =
-        Math.abs(resizedBounds.position.y + resizedBounds.size.height - (bounds.position.y + bounds.size.height)) > 0;
-    const bottom = Math.abs(resizedBounds.position.y - bounds.position.y) > 0;
-    const snapGaps: GapSnapOptions = {
-        right,
-        left,
-        centerHorizontal: left != right,
-        bottom,
-        top,
-        centerVertical: top != bottom
-    };
-    const snapPointIndices = [0, 1, 2, 3].filter(
-        (index) =>
-            Math.abs(resizedCorners[index].x - corners[index].x) > 0 ||
-            Math.abs(resizedCorners[index].y - corners[index].y) > 0
-    );
-    const dxRelative = -element.dx / element.width;
-    const dyRelative = -element.dy / element.height;
-    return {
-        referenceData,
-        getSnappedFactorsAndLines: (referenceData, zoom, factorX, factorY, uniform) => {
-            const resized = {
-                width: current.width * (factorX ?? 1),
-                height: current.height * (factorY ?? 1),
-                dx: current.dx * (factorX ?? 1),
-                dy: current.dy * (factorY ?? 1)
-            };
-            const resizedCorners = getCanvasElementCorners(elementToTargetMatrix, resized);
-            const data: ContextSnapData = {
-                bounds: Bounds.ofPoints(resizedCorners),
-                points: snapPointIndices.map((index) => resizedCorners[index])
-            };
-            const result = getSnaps(new Map([[context, data]]), referenceData, zoom, {
-                snapX: snapGaps.left || snapGaps.right,
-                snapY: snapGaps.top || snapGaps.bottom,
-                snapGaps,
-                snapPoints: true
-            });
-            let overrideFactorX: number | undefined = undefined;
-            let overrideFactorY: number | undefined = undefined;
-            let factorXDirection: SnapDirection | undefined = undefined;
-            let factorYDirection: SnapDirection | undefined = undefined;
 
-            function adaptFactor(
-                value: number,
-                target: number,
-                x2: number,
-                cx: number,
-                y2: number,
-                cy: number,
-                snapDirection: SnapDirection
-            ): boolean {
-                const factorXNew = (target - (value + (x2 - value) * cx)) / ((value - x2) * cx);
-                const factorYNew = (target - (value + (y2 - value) * cy)) / ((value - y2) * cy);
-                if (factorX != undefined) {
-                    if (factorY == undefined || Math.abs(factorXNew - factorX) < Math.abs(factorYNew - factorY)) {
-                        if (
-                            overrideFactorX == undefined ||
-                            Math.abs(factorXNew - factorX) < Math.abs(overrideFactorX - factorX)
-                        ) {
-                            overrideFactorX = factorXNew;
-                            factorXDirection = snapDirection;
-                            return true;
-                        }
-                    }
-                }
-                if (factorY != undefined) {
-                    if (factorX == undefined || Math.abs(factorYNew - factorY) < Math.abs(factorXNew - factorX)) {
-                        if (
-                            overrideFactorY == undefined ||
-                            Math.abs(factorYNew - factorY) < Math.abs(overrideFactorY - factorY)
-                        ) {
-                            overrideFactorY = factorYNew;
-                            factorYDirection = snapDirection;
-                            return true;
-                        }
-                    }
-                }
-                return false;
-            }
-            if (result.nearestSnapsX.length > 0) {
-                const snapX = result.nearestSnapsX[0];
-                let target: number;
-                if (snapX.type === "point") {
-                    target = snapX.referencePoint.x;
-                } else if (snapX.direction === GapSnapDirection.SIDE_RIGHT) {
-                    target = snapX.bounds.position.x + snapX.offset;
-                } else if (snapX.direction === GapSnapDirection.SIDE_LEFT) {
-                    target = snapX.bounds.position.x + snapX.bounds.size.width + snapX.offset;
-                } else {
-                    const { startBounds, endBounds } = snapX.gap;
-                    target =
-                        endBounds.position.x +
-                        startBounds.position.x +
-                        startBounds.size.width -
-                        (left ? snapX.bounds.position.x : snapX.bounds.position.x + snapX.bounds.size.width);
-                }
-                const index = findMinIndexBy(resizedCorners, (corner) => Math.abs(corner.x - target));
-                if (
-                    !adaptFactor(
-                        corners[index].x,
-                        target,
-                        corners[(index + 1) % 4].x,
-                        index % 2 === 0 ? dxRelative : 1 - dxRelative,
-                        corners[(index + 2) % 4].x,
-                        index < 2 ? dyRelative : 1 - dyRelative,
-                        SnapDirection.HORIZONTAL
-                    )
-                ) {
-                    result.nearestSnapsX.length = 0;
-                }
-            }
-            if (result.nearestSnapsY.length > 0) {
-                const snapY = result.nearestSnapsY[0];
-                let target: number;
-                if (snapY.type === "point") {
-                    target = snapY.referencePoint.y;
-                } else if (snapY.direction === GapSnapDirection.SIDE_BOTTOM) {
-                    target = snapY.bounds.position.y + snapY.offset;
-                } else if (snapY.direction === GapSnapDirection.SIDE_TOP) {
-                    target = snapY.bounds.position.y + snapY.bounds.size.height + snapY.offset;
-                } else {
-                    const { startBounds, endBounds } = snapY.gap;
-                    target =
-                        endBounds.position.y +
-                        startBounds.position.y +
-                        startBounds.size.height -
-                        (top ? snapY.bounds.position.y : snapY.bounds.position.y + snapY.bounds.size.height);
-                }
-                const index = findMinIndexBy(resizedCorners, (corner) => Math.abs(corner.y - target));
-                if (
-                    !adaptFactor(
-                        corners[index].y,
-                        target,
-                        corners[(index + 1) % 4].y,
-                        index % 2 === 0 ? dxRelative : 1 - dxRelative,
-                        corners[(index + 2) % 4].y,
-                        index < 2 ? dyRelative : 1 - dyRelative,
-                        SnapDirection.VERTICAL
-                    )
-                ) {
-                    result.nearestSnapsY.length = 0;
-                }
-            }
-            let newFactorX = overrideFactorX ?? factorX;
-            let newFactorY = overrideFactorY ?? factorY;
-            if (uniform && (overrideFactorX != undefined || overrideFactorY != undefined)) {
-                if (overrideFactorX != undefined && overrideFactorY != undefined) {
-                    if (overrideFactorX > overrideFactorY) {
-                        newFactorY = overrideFactorX;
-                        factorYDirection = factorXDirection;
-                    } else {
-                        newFactorX = overrideFactorY;
-                        factorXDirection = factorYDirection;
-                    }
-                } else if (overrideFactorX != undefined) {
-                    newFactorY = overrideFactorX;
-                } else if (overrideFactorY != undefined) {
-                    newFactorX = overrideFactorY;
-                }
-            }
-            const transform = compose(
-                elementToTargetMatrix,
-                scale((newFactorX ?? 1) / (factorX ?? 1), (newFactorY ?? 1) / (factorY ?? 1)),
-                targetToElementMatrix
-            );
-            if (factorXDirection != SnapDirection.HORIZONTAL && factorYDirection != SnapDirection.HORIZONTAL) {
-                result.nearestSnapsX.length = 0;
-            }
-            if (factorXDirection != SnapDirection.VERTICAL && factorYDirection != SnapDirection.VERTICAL) {
-                result.nearestSnapsY.length = 0;
-            }
-            const snapLines = getSnapLines(result, transform);
-            return {
-                factorX: newFactorX,
-                factorY: newFactorY,
-                snapLines
-            };
-        }
-    };
+    return new ResizeSnapHandler(element, scaleX, scaleY, root, ignoredElements);
 }
 
+/**
+ * Finds the index of the minimum value in an array based on a callback function.
+ *
+ * @template T The type of elements in the array.
+ * @param array The array to search through.
+ * @param callback A function that takes an element of the array and returns a numeric value to compare.
+ * @returns The index of the element with the minimum value as determined by the callback function.
+ */
 function findMinIndexBy<T>(array: T[], callback: (value: T) => number): number {
     let minIndex = -1;
     let minValue = Number.POSITIVE_INFINITY;
