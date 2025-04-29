@@ -176,29 +176,24 @@ export function computeResizeMoveSnapData(
     };
     const resizedCorners = getCanvasElementCorners(elementToTargetMatrix, resized);
     const resizedBounds = Bounds.ofPoints(resizedCorners);
-    const minDiff = 0.25;
+    const left =
+        Math.abs(resizedBounds.position.x + resizedBounds.size.width - (bounds.position.x + bounds.size.width)) > 0;
+    const right = Math.abs(resizedBounds.position.x - bounds.position.x) > 0;
+    const top =
+        Math.abs(resizedBounds.position.y + resizedBounds.size.height - (bounds.position.y + bounds.size.height)) > 0;
+    const bottom = Math.abs(resizedBounds.position.y - bounds.position.y) > 0;
     const snapGaps: GapSnapOptions = {
-        right: Math.abs(resizedBounds.position.x - bounds.position.x) > minDiff,
-        left:
-            Math.abs(resizedBounds.position.x + resizedBounds.size.width - (bounds.position.x + bounds.size.width)) >
-            minDiff,
-        centerHorizontal:
-            Math.abs(
-                resizedBounds.position.x + resizedBounds.size.width / 2 - (bounds.position.x + bounds.size.width / 2)
-            ) > minDiff,
-        bottom: Math.abs(resizedBounds.position.y - bounds.position.y) > minDiff,
-        top:
-            Math.abs(resizedBounds.position.y + resizedBounds.size.height - (bounds.position.y + bounds.size.height)) >
-            minDiff,
-        centerVertical:
-            Math.abs(
-                resizedBounds.position.y + resizedBounds.size.height / 2 - (bounds.position.y + bounds.size.height / 2)
-            ) > minDiff
+        right,
+        left,
+        centerHorizontal: left != right,
+        bottom,
+        top,
+        centerVertical: top != bottom
     };
     const snapPointIndices = [0, 1, 2, 3].filter(
         (index) =>
-            Math.abs(resizedCorners[index].x - corners[index].x) > minDiff ||
-            Math.abs(resizedCorners[index].y - corners[index].y) > minDiff
+            Math.abs(resizedCorners[index].x - corners[index].x) > 0 ||
+            Math.abs(resizedCorners[index].y - corners[index].y) > 0
     );
     const dxRelative = -element.dx / element.width;
     const dyRelative = -element.dy / element.height;
@@ -266,17 +261,21 @@ export function computeResizeMoveSnapData(
             }
             if (result.nearestSnapsX.length > 0) {
                 const snapX = result.nearestSnapsX[0];
-                let reference: number;
+                let target: number;
                 if (snapX.type === "point") {
-                    reference = snapX.point.x;
+                    target = snapX.referencePoint.x;
                 } else if (snapX.direction === GapSnapDirection.SIDE_RIGHT) {
-                    reference = snapX.bounds.position.x;
+                    target = snapX.bounds.position.x + snapX.offset;
                 } else if (snapX.direction === GapSnapDirection.SIDE_LEFT) {
-                    reference = snapX.bounds.position.x + snapX.bounds.size.width;
+                    target = snapX.bounds.position.x + snapX.bounds.size.width + snapX.offset;
                 } else {
-                    reference = snapX.bounds.position.x + (dxRelative < 0.5 ? 0 : snapX.bounds.size.width);
+                    const { startBounds, endBounds } = snapX.gap;
+                    target =
+                        endBounds.position.x +
+                        startBounds.position.x +
+                        startBounds.size.width -
+                        (left ? snapX.bounds.position.x : snapX.bounds.position.x + snapX.bounds.size.width);
                 }
-                const target = reference + snapX.offset;
                 const index = findMinIndexBy(resizedCorners, (corner) => Math.abs(corner.x - target));
                 if (
                     !adaptFactor(
@@ -294,17 +293,21 @@ export function computeResizeMoveSnapData(
             }
             if (result.nearestSnapsY.length > 0) {
                 const snapY = result.nearestSnapsY[0];
-                let reference: number;
+                let target: number;
                 if (snapY.type === "point") {
-                    reference = snapY.point.y;
+                    target = snapY.referencePoint.y;
                 } else if (snapY.direction === GapSnapDirection.SIDE_BOTTOM) {
-                    reference = snapY.bounds.position.y;
+                    target = snapY.bounds.position.y + snapY.offset;
                 } else if (snapY.direction === GapSnapDirection.SIDE_TOP) {
-                    reference = snapY.bounds.position.y + snapY.bounds.size.height;
+                    target = snapY.bounds.position.y + snapY.bounds.size.height + snapY.offset;
                 } else {
-                    reference = snapY.bounds.position.y + (dyRelative < 0.5 ? 0 : snapY.bounds.size.height);
+                    const { startBounds, endBounds } = snapY.gap;
+                    target =
+                        endBounds.position.y +
+                        startBounds.position.y +
+                        startBounds.size.height -
+                        (top ? snapY.bounds.position.y : snapY.bounds.position.y + snapY.bounds.size.height);
                 }
-                const target = reference + snapY.offset;
                 const index = findMinIndexBy(resizedCorners, (corner) => Math.abs(corner.y - target));
                 if (
                     !adaptFactor(
