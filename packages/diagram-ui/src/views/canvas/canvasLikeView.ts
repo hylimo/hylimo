@@ -5,7 +5,7 @@ import type { SCanvas } from "../../model/canvas/sCanvas.js";
 import type { SRoot } from "../../model/sRoot.js";
 import type { VNode } from "snabbdom";
 import { svg } from "sprotty";
-import type { GapSnapLine, SnapLine } from "../../features/snap/snapping.js";
+import type { GapSnapLine, SnapLine } from "../../features/snap/model.js";
 import { Math2D, type Point } from "@hylimo/diagram-common";
 import { findViewportZoom } from "../../base/findViewportZoom.js";
 

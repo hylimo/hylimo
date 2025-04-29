@@ -1,4 +1,4 @@
-import type { SnapLine } from "./snapping.js";
+import type { SnapLine } from "./model.js";
 import type { Action } from "sprotty-protocol";
 
 /**

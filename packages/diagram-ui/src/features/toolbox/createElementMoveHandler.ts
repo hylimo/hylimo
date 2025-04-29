@@ -3,14 +3,8 @@ import { MoveHandler, type HandleMoveResult } from "../move/moveHandler.js";
 import type { SRoot } from "../../model/sRoot.js";
 import type { SModelElementImpl } from "sprotty";
 import type { Action } from "sprotty-protocol";
-import {
-    getSnapLines,
-    getSnapReferenceData,
-    getSnaps,
-    intersectSnapReferenceDatas,
-    type SnapLine,
-    type SnapReferenceData
-} from "../snap/snapping.js";
+import { getSnapLines, getSnapReferenceData, getSnaps, intersectSnapReferenceDatas } from "../snap/snapping.js";
+import { type SnapLine, type SnapReferenceData } from "../snap/model.js";
 import { findViewportZoom } from "../../base/findViewportZoom.js";
 import { Math2D } from "@hylimo/diagram-common";
 import { translate } from "transformation-matrix";

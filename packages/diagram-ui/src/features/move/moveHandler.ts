@@ -6,7 +6,7 @@ import { applyToPoint } from "transformation-matrix";
 import type { Cursor } from "../cursor/cursor.js";
 import { UpdateCursorAction } from "../cursor/cursor.js";
 import type { Action } from "sprotty-protocol";
-import type { SnapLine } from "../snap/snapping.js";
+import type { SnapLine } from "../snap/model.js";
 import { UpdateSnapLinesAction } from "../snap/updateSnapLines.js";
 
 /**

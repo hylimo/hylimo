@@ -5,7 +5,7 @@ import { UpdateSnapLinesAction } from "./updateSnapLines.js";
 import { TransactionalAction } from "@hylimo/diagram-protocol";
 import type { SRoot } from "../../model/sRoot.js";
 import type { SCanvas } from "../../model/canvas/sCanvas.js";
-import type { SnapLine } from "./snapping.js";
+import type { SnapLine } from "./model.js";
 
 /**
  * State manager for snap lines

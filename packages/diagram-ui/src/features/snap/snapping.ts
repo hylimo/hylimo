@@ -16,6 +16,26 @@ import type { SRoot } from "../../model/sRoot.js";
 import type { SElement } from "../../model/sElement.js";
 import type { SCanvas } from "../../model/canvas/sCanvas.js";
 import { applyToPoint, compose, rotateDEG, type Matrix } from "transformation-matrix";
+import type { CanvasLayoutEngine } from "@hylimo/diagram";
+import type {
+    SnapElementData,
+    ContextSnapData,
+    SnapReferenceData,
+    ContextSnapReferenceData,
+    SnapOptions,
+    SnapResult,
+    Snaps,
+    SnapLine,
+    Gaps,
+    Gap,
+    GapSnapOptions,
+    GapSnap,
+    PointSnapLine,
+    GapSnapLine,
+    InclusiveRange,
+    PointPair
+} from "./model.js";
+import { GapSnapDirection, SnapDirection } from "./model.js";
 
 /**
  * Snap distance for the snapping algorithm
@@ -26,174 +46,6 @@ const SNAP_DISTANCE = 8;
  * do not comput more gaps per axis than this limit
  */
 const VISIBLE_GAPS_LIMIT_PER_AXIS = 99999;
-
-type PointPair = [Point, Point];
-
-export type PointSnap = {
-    type: "point";
-    context: string;
-    point: Point;
-    referencePoint: Point;
-    offset: number;
-};
-
-export type InclusiveRange = [number, number];
-
-/**
- * Gap between two elements/bounds
- *
- * start side ↓     length
- * ┌───────────┐◄───────────────►
- * │           │-----------------┌───────────┐
- * │  start    │       ↑         │           │
- * │  element  │    overlap      │  end      │
- * │           │       ↓         │  element  │
- * └───────────┘-----------------│           │
- *                               └───────────┘
- *                               ↑ end side
- */
-export type Gap = {
-    startBounds: Bounds;
-    endBounds: Bounds;
-    startSide: [Point, Point];
-    endSide: [Point, Point];
-    overlap: InclusiveRange;
-    length: number;
-};
-
-interface Gaps {
-    horizontalGaps: Gap[];
-    verticalGaps: Gap[];
-}
-
-export type GapSnap = {
-    type: "gap";
-    context: string;
-    direction: "center_horizontal" | "center_vertical" | "side_left" | "side_right" | "side_top" | "side_bottom";
-    gap: Gap;
-    bounds: Bounds;
-    offset: number;
-};
-
-export type GapSnaps = GapSnap[];
-
-export type Snap = GapSnap | PointSnap;
-export type Snaps = Snap[];
-
-export type PointSnapLine = {
-    type: "points";
-    points: Point[];
-};
-
-export enum SnapDirection {
-    VERTICAL = "vertical",
-    HORIZONTAL = "horizontal"
-}
-
-export type GapSnapLine = {
-    type: "gap";
-    direction: SnapDirection;
-    points: PointPair;
-};
-
-export type SnapLine = PointSnapLine | GapSnapLine;
-
-/**
- * Information about elements to snap to in the context of a given canvas
- */
-export interface ContextSnapReferenceData {
-    /**
-     * The points used for snapping (sorted)
-     */
-    points: Point[];
-    /**
-     * The bounds of the elements, position in the context, but aligned with the root coordinate system, sorted
-     */
-    bounds: Bounds[];
-    /**
-     * The global rotation of the canvas
-     */
-    globalRotation: number;
-}
-
-/**
- * Data about the dragged elements in the context of a given canvas
- */
-export interface ContextSnapData {
-    /**
-     * The points used for snapping (sorted)
-     */
-    points: Point[];
-    /**
-     * The bounds of the elements, position in the context, but aligned with the root coordinate system
-     */
-    bounds: Bounds | undefined;
-}
-
-/**
- * Snapping data for all contexts
- */
-export type SnapReferenceData = Map<string, ContextSnapReferenceData>;
-
-/**
- * Snap data for all contexts
- */
-export type SnapElementData = Map<string, ContextSnapData>;
-
-export interface SnapData {
-    data: SnapElementData;
-    referenceData: SnapReferenceData;
-}
-
-export interface GapSnapOptions {
-    left: boolean;
-    right: boolean;
-    top: boolean;
-    bottom: boolean;
-    centerHorizontal: boolean;
-    centerVertical: boolean;
-}
-
-export interface SnapOptions {
-    /**
-     * If true, elements can be snapped in the x direction
-     */
-    snapX: boolean;
-    /**
-     * If true, elements can be snapped in the y direction
-     */
-    snapY: boolean;
-    /**
-     * If true, point snapping is enabled
-     */
-    snapPoints: boolean;
-    /**
-     * If true, gap snapping is enabled
-     */
-    snapGaps: boolean | GapSnapOptions;
-}
-
-/**
- * Snapping result
- */
-export interface SnapResult {
-    /**
-     * The offset to snap to
-     */
-    snapOffset: Vector;
-    /**
-     * Nearest snaps for the x axis (used for calculating snap lines)
-     */
-    nearestSnapsX: Snaps;
-    /**
-     * Nearest snaps for the y axis (used for calculating snap lines)
-     */
-    nearestSnapsY: Snaps;
-    /**
-     * Global rotation values for all contexts
-     */
-    contextGlobalRotations: Map<string, number>;
-}
 
 /**
  * Calculates the points and bounds for the selected elements in all relevant contexts.
@@ -209,8 +61,33 @@ export function getSnapElementData(
     selectedElements: SElement[],
     ignoredElements: Set<string>
 ): SnapElementData {
-    const selectedElementsByContext = new Map<string, SElement[]>();
-    for (const element of selectedElements) {
+    const selectedElementsByContext = groupElementsByContext(selectedElements);
+    const result = new Map<string, ContextSnapData>();
+    const layoutEngine = root.layoutEngine;
+
+    for (const [contextId, elements] of selectedElementsByContext.entries()) {
+        const contextElement = root.index.getById(contextId)! as SCanvas | SRoot;
+        if (isContextIgnored(contextElement, root, ignoredElements)) {
+            continue;
+        }
+
+        const contextSnapData = createContextSnapData(contextElement, elements, layoutEngine);
+        result.set(contextId, contextSnapData);
+    }
+
+    return result;
+}
+
+/**
+ * Groups elements by their parent context ID
+ *
+ * @param elements The elements to group
+ * @returns A map of context IDs to their contained elements
+ */
+function groupElementsByContext(elements: SElement[]): Map<string, SElement[]> {
+    const elementsByContext = new Map<string, SElement[]>();
+
+    for (const element of elements) {
         if (
             !(
                 CanvasElement.isCanvasElement(element) ||
@@ -221,81 +98,133 @@ export function getSnapElementData(
         ) {
             continue;
         }
-        if (!selectedElementsByContext.has(element.parent.id)) {
-            selectedElementsByContext.set(element.parent.id, [element]);
+
+        if (!elementsByContext.has(element.parent.id)) {
+            elementsByContext.set(element.parent.id, [element]);
         } else {
-            selectedElementsByContext.get(element.parent.id)!.push(element);
+            elementsByContext.get(element.parent.id)!.push(element);
         }
     }
-    const result = new Map<string, ContextSnapData>();
-    const layoutEngine = root.layoutEngine;
-    for (const [context, elements] of selectedElementsByContext.entries()) {
-        const contextElement = root.index.getById(context)! as SCanvas | SRoot;
-        let current: SElement | SRoot = contextElement;
-        let isIgnored = false;
-        while (current !== root) {
-            if (ignoredElements.has(current.id)) {
-                isIgnored = true;
-                break;
-            }
-            current = (current as SElement).parent as SElement | SRoot;
+
+    return elementsByContext;
+}
+
+/**
+ * Checks if a context should be ignored based on the ignored elements set
+ *
+ * @param contextElement The context element to check
+ * @param root The root element
+ * @param ignoredElements Set of element IDs to ignore
+ * @returns True if the context should be ignored, false otherwise
+ */
+function isContextIgnored(contextElement: SCanvas | SRoot, root: SRoot, ignoredElements: Set<string>): boolean {
+    let current: SElement | SRoot = contextElement;
+
+    while (current !== root) {
+        if (ignoredElements.has(current.id)) {
+            return true;
         }
-        if (isIgnored) {
-            continue;
-        }
-        const contextToTarget = rotateDEG(contextElement.globalRotation);
-        if (elements.length === 1) {
-            const element = elements[0];
-            if (CanvasElement.isCanvasElement(element)) {
-                const elementToTargetMatrix = compose(
-                    contextToTarget,
-                    layoutEngine.localToAncestor(element.id, context)
-                );
-                const corners = getCanvasElementCorners(elementToTargetMatrix, element);
-                const center = getCanvasElementCenter(elementToTargetMatrix, element);
-                const bounds = Bounds.ofPoints(corners);
-                result.set(context, {
-                    points: [...corners, center].sort(Point.compare),
-                    bounds
-                });
-            } else {
-                const point = layoutEngine.getPoint(element.id, context);
-                result.set(context, {
-                    points: [applyToPoint(contextToTarget, point)],
-                    bounds: undefined
-                });
-            }
+        current = (current as SElement).parent as SElement | SRoot;
+    }
+
+    return false;
+}
+
+/**
+ * Creates snap data for a context and its elements
+ *
+ * @param contextElement The context element
+ * @param elements The elements in this context
+ * @param layoutEngine The layout engine
+ * @returns Context snap data containing points and bounds
+ */
+function createContextSnapData(
+    contextElement: SCanvas | SRoot,
+    elements: SElement[],
+    layoutEngine: any
+): ContextSnapData {
+    const contextToTarget = rotateDEG(contextElement.globalRotation);
+    const contextId = contextElement.id;
+
+    if (elements.length === 1) {
+        return createSingleElementSnapData(elements[0], contextId, contextToTarget, layoutEngine);
+    }
+
+    return createMultiElementSnapData(elements, contextId, contextToTarget, layoutEngine);
+}
+
+/**
+ * Creates snap data for a single element
+ *
+ * @param element The element to create snap data for
+ * @param contextId The context ID
+ * @param contextToTarget The transformation matrix
+ * @param layoutEngine The layout engine
+ * @returns Context snap data for the single element
+ */
+function createSingleElementSnapData(
+    element: SElement,
+    contextId: string,
+    contextToTarget: Matrix,
+    layoutEngine: CanvasLayoutEngine
+): ContextSnapData {
+    if (CanvasElement.isCanvasElement(element)) {
+        const elementToTargetMatrix = compose(contextToTarget, layoutEngine.localToAncestor(element.id, contextId));
+        const corners = getCanvasElementCorners(elementToTargetMatrix, element);
+        const center = getCanvasElementCenter(elementToTargetMatrix, element);
+        const bounds = Bounds.ofPoints(corners);
+
+        return {
+            points: [...corners, center].sort(Point.compare),
+            bounds
+        };
+    } else {
+        const point = layoutEngine.getPoint(element.id, contextId);
+        return {
+            points: [applyToPoint(contextToTarget, point)],
+            bounds: undefined
+        };
+    }
+}
+
+/**
+ * Creates snap data for multiple elements
+ *
+ * @param elements The elements to create snap data for
+ * @param contextId The context ID
+ * @param contextToTarget The transformation matrix
+ * @param layoutEngine The layout engine
+ * @returns Context snap data for the multiple elements
+ */
+function createMultiElementSnapData(
+    elements: SElement[],
+    contextId: string,
+    contextToTarget: Matrix,
+    layoutEngine: CanvasLayoutEngine
+): ContextSnapData {
+    const points: Point[] = [];
+
+    for (const element of elements) {
+        if (CanvasElement.isCanvasElement(element)) {
+            const elementToTargetMatrix = compose(contextToTarget, layoutEngine.localToAncestor(element.id, contextId));
+            const corners = getCanvasElementCorners(elementToTargetMatrix, element);
+            points.push(...corners);
         } else {
-            const points: Point[] = [];
-            for (const element of elements) {
-                if (CanvasElement.isCanvasElement(element)) {
-                    const elementToTargetMatrix = compose(
-                        contextToTarget,
-                        layoutEngine.localToAncestor(element.id, context)
-                    );
-                    const corners = getCanvasElementCorners(elementToTargetMatrix, element);
-                    points.push(...corners);
-                } else {
-                    const point = layoutEngine.getPoint(element.id, context);
-                    points.push(applyToPoint(contextToTarget, point));
-                }
-            }
-            const bounds = Bounds.ofPoints(points);
-            result.set(context, {
-                points: [
-                    bounds.position,
-                    { x: bounds.position.x + bounds.size.width, y: bounds.position.y },
-                    {
-                        x: bounds.position.x + bounds.size.width,
-                        y: bounds.position.y + bounds.size.height
-                    },
-                    { x: bounds.position.x, y: bounds.position.y + bounds.size.height }
-                ].sort(Point.compare),
-                bounds
-            });
+            const point = layoutEngine.getPoint(element.id, contextId);
+            points.push(applyToPoint(contextToTarget, point));
         }
     }
-    return result;
+
+    const bounds = Bounds.ofPoints(points);
+    return {
+        points: [
+            bounds.position,
+            { x: bounds.position.x + bounds.size.width, y: bounds.position.y },
+            { x: bounds.position.x + bounds.size.width, y: bounds.position.y + bounds.size.height },
+            { x: bounds.position.x, y: bounds.position.y + bounds.size.height }
+        ].sort(Point.compare),
+        bounds
+    };
 }
 
 /**
@@ -452,6 +381,15 @@ export function intersectSnapReferenceDatas(a: SnapReferenceData, b: SnapReferen
     return result;
 }
 
+/**
+ * Calculates snapping information for elements based on reference data.
+ *
+ * @param state The current state of the elements being moved/snapped
+ * @param referenceState Reference data for elements to snap against
+ * @param zoom The current zoom level of the viewport
+ * @param options Configuration options for the snapping behavior
+ * @returns Snap result containing offset and snap lines information
+ */
 export function getSnaps(
     state: SnapElementData,
     referenceState: SnapReferenceData,
@@ -471,7 +409,7 @@ export function getSnaps(
         if (!referenceInfo) {
             continue;
         }
-        const visibleGaps = getVisibleGaps(referenceInfo.bounds);
+        const visibleGaps = getGaps(referenceInfo.bounds);
         if (options.snapGaps != false && info.bounds != undefined) {
             getGapSnaps(info.bounds, visibleGaps, nearestSnapsX, nearestSnapsY, minOffset, context, options);
         }
@@ -495,6 +433,13 @@ export function getSnaps(
     };
 }
 
+/**
+ * Converts snap results into visual snap lines for rendering.
+ *
+ * @param snapResult The snap result containing nearest snaps for x and y axes
+ * @param transform The transformation matrix to apply to the snap lines
+ * @returns Map of snap lines grouped by context ID
+ */
 export function getSnapLines(snapResult: SnapResult, transform: Matrix): Map<string, SnapLine[]> {
     const { nearestSnapsX, nearestSnapsY } = snapResult;
     const result = new Map<string, SnapLine[]>();
@@ -542,25 +487,35 @@ function getCanvasElementCenter(elementToTargetMatrix: Matrix, element: SElement
 }
 
 /**
- * Computes the visible gaps between elements
+ * Computes the gaps between elements
  * Used in {@code getGapSnaps}
  *
  * @param referenceBounds the bounds of elements to compute gaps for (usually visible, non-selected elements)
  * @returns the gaps between elements
  */
-function getVisibleGaps(referenceBounds: Bounds[]): Gaps {
-    const horizontallySorted = referenceBounds.sort((a, b) => a.position.x - b.position.x);
+function getGaps(referenceBounds: Bounds[]): Gaps {
+    return {
+        horizontalGaps: getHorizontalGaps(referenceBounds),
+        verticalGaps: getVerticalGaps(referenceBounds)
+    };
+}
 
+/**
+ * Computes the horizontal gaps between elements
+ *
+ * @param referenceBounds the bounds of elements to compute gaps for
+ * @returns the horizontal gaps between elements
+ */
+function getHorizontalGaps(referenceBounds: Bounds[]): Gap[] {
+    const horizontallySorted = referenceBounds.sort((a, b) => a.position.x - b.position.x);
     const horizontalGaps: Gap[] = [];
 
-    let c = 0;
-
-    horizontal: for (let i = 0; i < horizontallySorted.length; i++) {
+    for (let i = 0; i < horizontallySorted.length; i++) {
         const startBounds = horizontallySorted[i];
 
         for (let j = i + 1; j < horizontallySorted.length; j++) {
-            if (++c > VISIBLE_GAPS_LIMIT_PER_AXIS) {
-                break horizontal;
+            if (horizontalGaps.length >= VISIBLE_GAPS_LIMIT_PER_AXIS) {
+                return horizontalGaps;
             }
 
             const endBounds = horizontallySorted[j];
@@ -590,19 +545,27 @@ function getVisibleGaps(referenceBounds: Bounds[]): Gaps {
         }
     }
 
-    const verticallySorted = referenceBounds.sort((a, b) => a.position.y - b.position.y);
+    return horizontalGaps;
+}
 
+/**
+ * Computes the vertical gaps between elements
+ *
+ * @param referenceBounds the bounds of elements to compute gaps for
+ * @returns the vertical gaps between elements
+ */
+function getVerticalGaps(referenceBounds: Bounds[]): Gap[] {
+    const verticallySorted = referenceBounds.sort((a, b) => a.position.y - b.position.y);
     const verticalGaps: Gap[] = [];
 
-    c = 0;
-
-    vertical: for (let i = 0; i < verticallySorted.length; i++) {
+    for (let i = 0; i < verticallySorted.length; i++) {
         const startBounds = verticallySorted[i];
 
         for (let j = i + 1; j < verticallySorted.length; j++) {
-            if (++c > VISIBLE_GAPS_LIMIT_PER_AXIS) {
-                break vertical;
+            if (verticalGaps.length >= VISIBLE_GAPS_LIMIT_PER_AXIS) {
+                return verticalGaps;
             }
+
             const endBounds = verticallySorted[j];
 
             const startMinX = startBounds.position.x;
@@ -631,10 +594,7 @@ function getVisibleGaps(referenceBounds: Bounds[]): Gaps {
         }
     }
 
-    return {
-        horizontalGaps,
-        verticalGaps
-    };
+    return verticalGaps;
 }
 
 /**
@@ -721,7 +681,7 @@ function getHorizontalGapSnaps(
             const snap: GapSnap = {
                 type: "gap",
                 context,
-                direction: "center_horizontal",
+                direction: GapSnapDirection.CENTER_HORIZONTAL,
                 gap,
                 offset: centerOffset,
                 bounds: elementBounds
@@ -744,7 +704,7 @@ function getHorizontalGapSnaps(
             const snap: GapSnap = {
                 type: "gap",
                 context,
-                direction: "side_right",
+                direction: GapSnapDirection.SIDE_RIGHT,
                 gap,
                 offset: sideOffsetRight,
                 bounds: elementBounds
@@ -766,7 +726,7 @@ function getHorizontalGapSnaps(
             const snap: GapSnap = {
                 type: "gap",
                 context,
-                direction: "side_left",
+                direction: GapSnapDirection.SIDE_LEFT,
                 gap,
                 offset: sideOffsetLeft,
                 bounds: elementBounds
@@ -819,7 +779,7 @@ function getVerticalGapSnaps(
             const snap: GapSnap = {
                 type: "gap",
                 context,
-                direction: "center_vertical",
+                direction: GapSnapDirection.CENTER_VERTICAL,
                 gap,
                 offset: centerOffset,
                 bounds: elementBounds
@@ -842,7 +802,7 @@ function getVerticalGapSnaps(
             const snap: GapSnap = {
                 type: "gap",
                 context,
-                direction: "side_top",
+                direction: GapSnapDirection.SIDE_TOP,
                 gap,
                 offset: sideOffsetTop,
                 bounds: elementBounds
@@ -864,7 +824,7 @@ function getVerticalGapSnaps(
             const snap: GapSnap = {
                 type: "gap",
                 context,
-                direction: "side_bottom",
+                direction: GapSnapDirection.SIDE_BOTTOM,
                 gap,
                 offset: sideOffsetBottom,
                 bounds: elementBounds
@@ -935,6 +895,16 @@ function getPointSnaps(
     }
 }
 
+/**
+ * Creates snap lines from point snaps for rendering.
+ * Groups points by context and coordinate to create visual guides.
+ *
+ * @param nearestSnapsX The nearest snaps in the X direction
+ * @param nearestSnapsY The nearest snaps in the Y direction
+ * @param transform The transformation matrix to apply to the snap points
+ * @param contextGlobalRotations Map of global rotation values for each context
+ * @param snapLines The map to populate with snap lines (modified)
+ */
 function createPointSnapLines(
     nearestSnapsX: Snaps,
     nearestSnapsY: Snaps,
@@ -1012,12 +982,33 @@ function createPointSnapLines(
     }
 }
 
+/**
+ * Creates snap lines from gap snaps for rendering.
+ * Generates visual guides for various gap snap types (center, sides) based on detected gaps.
+ *
+ * @param gapSnaps The gap snaps for which to create snap lines
+ * @param transform The transformation matrix to apply to the snap points
+ * @param contextGlobalRotations Map of global rotation values for each context
+ * @param snapLines The map to populate with snap lines (modified)
+ */
 function createGapSnapLines(
     gapSnaps: GapSnap[],
     transform: Matrix,
     contextGlobalRotations: Map<string, number>,
     snapLines: Map<string, SnapLine[]>
 ): void {
+    const gapSnapLinesByContext = groupGapSnapsByContext(gapSnaps, transform);
+    applyGapSnapLinesToResult(gapSnapLinesByContext, contextGlobalRotations, snapLines);
+}
+
+/**
+ * Groups gap snaps by context and creates snap lines for each gap snap.
+ *
+ * @param gapSnaps The gap snaps to group by context
+ * @param transform The transformation matrix to apply to the snap points
+ * @returns A map of context IDs to gap snap lines
+ */
+function groupGapSnapsByContext(gapSnaps: GapSnap[], transform: Matrix): Map<string, GapSnapLine[]> {
     const gapSnapLinesByContext = new Map<string, GapSnapLine[]>();
 
     for (const gapSnap of gapSnaps) {
@@ -1031,172 +1022,81 @@ function createGapSnapLines(
             x: bounds.position.x + bounds.size.width,
             y: bounds.position.y + bounds.size.height
         });
-        const startMinX = gapSnap.gap.startBounds.position.x;
-        const startMinY = gapSnap.gap.startBounds.position.y;
-        const startMaxX = startMinX + gapSnap.gap.startBounds.size.width;
-        const startMaxY = startMinY + gapSnap.gap.startBounds.size.height;
-        const endMinX = gapSnap.gap.endBounds.position.x;
-        const endMinY = gapSnap.gap.endBounds.position.y;
-        const endMaxX = endMinX + gapSnap.gap.endBounds.size.width;
-        const endMaxY = endMinY + gapSnap.gap.endBounds.size.height;
 
         const verticalIntersection = rangeIntersection([minY, maxY], gapSnap.gap.overlap);
-
         const horizontalGapIntersection = rangeIntersection([minX, maxX], gapSnap.gap.overlap);
 
-        switch (gapSnap.direction) {
-            case "center_horizontal": {
-                if (verticalIntersection) {
-                    const gapLineY = (verticalIntersection[0] + verticalIntersection[1]) / 2;
-
-                    gapSnapLines.push(
-                        {
-                            type: "gap",
-                            direction: SnapDirection.HORIZONTAL,
-                            points: [
-                                { x: gapSnap.gap.startSide[0].x, y: gapLineY },
-                                { x: minX, y: gapLineY }
-                            ]
-                        },
-                        {
-                            type: "gap",
-                            direction: SnapDirection.HORIZONTAL,
-                            points: [
-                                { x: maxX, y: gapLineY },
-                                { x: gapSnap.gap.endSide[0].x, y: gapLineY }
-                            ]
-                        }
-                    );
-                }
-                break;
-            }
-            case "center_vertical": {
-                if (horizontalGapIntersection) {
-                    const gapLineX = (horizontalGapIntersection[0] + horizontalGapIntersection[1]) / 2;
-
-                    gapSnapLines.push(
-                        {
-                            type: "gap",
-                            direction: SnapDirection.VERTICAL,
-                            points: [
-                                { x: gapLineX, y: gapSnap.gap.startSide[0].y },
-                                { x: gapLineX, y: minY }
-                            ]
-                        },
-                        {
-                            type: "gap",
-                            direction: SnapDirection.VERTICAL,
-                            points: [
-                                { x: gapLineX, y: maxY },
-                                { x: gapLineX, y: gapSnap.gap.endSide[0].y }
-                            ]
-                        }
-                    );
-                }
-                break;
-            }
-            case "side_right": {
-                if (verticalIntersection) {
-                    const gapLineY = (verticalIntersection[0] + verticalIntersection[1]) / 2;
-
-                    gapSnapLines.push(
-                        {
-                            type: "gap",
-                            direction: SnapDirection.HORIZONTAL,
-                            points: [
-                                { x: startMaxX, y: gapLineY },
-                                { x: endMinX, y: gapLineY }
-                            ]
-                        },
-                        {
-                            type: "gap",
-                            direction: SnapDirection.HORIZONTAL,
-                            points: [
-                                { x: endMaxX, y: gapLineY },
-                                { x: minX, y: gapLineY }
-                            ]
-                        }
-                    );
-                }
-                break;
-            }
-            case "side_left": {
-                if (verticalIntersection) {
-                    const gapLineY = (verticalIntersection[0] + verticalIntersection[1]) / 2;
-
-                    gapSnapLines.push(
-                        {
-                            type: "gap",
-                            direction: SnapDirection.HORIZONTAL,
-                            points: [
-                                { x: maxX, y: gapLineY },
-                                { x: startMinX, y: gapLineY }
-                            ]
-                        },
-                        {
-                            type: "gap",
-                            direction: SnapDirection.HORIZONTAL,
-                            points: [
-                                { x: startMaxX, y: gapLineY },
-                                { x: endMinX, y: gapLineY }
-                            ]
-                        }
-                    );
-                }
-                break;
-            }
-            case "side_top": {
-                if (horizontalGapIntersection) {
-                    const gapLineX = (horizontalGapIntersection[0] + horizontalGapIntersection[1]) / 2;
-
-                    gapSnapLines.push(
-                        {
-                            type: "gap",
-                            direction: SnapDirection.VERTICAL,
-                            points: [
-                                { x: gapLineX, y: maxY },
-                                { x: gapLineX, y: startMinY }
-                            ]
-                        },
-                        {
-                            type: "gap",
-                            direction: SnapDirection.VERTICAL,
-                            points: [
-                                { x: gapLineX, y: startMaxY },
-                                { x: gapLineX, y: endMinY }
-                            ]
-                        }
-                    );
-                }
-                break;
-            }
-            case "side_bottom": {
-                if (horizontalGapIntersection) {
-                    const gapLineX = (horizontalGapIntersection[0] + horizontalGapIntersection[1]) / 2;
-
-                    gapSnapLines.push(
-                        {
-                            type: "gap",
-                            direction: SnapDirection.VERTICAL,
-                            points: [
-                                { x: gapLineX, y: startMaxY },
-                                { x: gapLineX, y: endMinY }
-                            ]
-                        },
-                        {
-                            type: "gap",
-                            direction: SnapDirection.VERTICAL,
-                            points: [
-                                { x: gapLineX, y: endMaxY },
-                                { x: gapLineX, y: minY }
-                            ]
-                        }
-                    );
-                }
-                break;
-            }
-        }
+        createGapSnapLinesForDirection(
+            gapSnap,
+            verticalIntersection,
+            horizontalGapIntersection,
+            minX,
+            maxX,
+            minY,
+            maxY,
+            gapSnapLines
+        );
     }
+
+    return gapSnapLinesByContext;
+}
+
+/**
+ * Creates gap snap lines for a specific direction based on the gap snap type.
+ *
+ * @param gapSnap The gap snap to create snap lines for
+ * @param verticalIntersection The vertical intersection of the gap with the bounds
+ * @param horizontalGapIntersection The horizontal intersection of the gap with the bounds
+ * @param minX The minimum x coordinate of the bounds
+ * @param maxX The maximum x coordinate of the bounds
+ * @param minY The minimum y coordinate of the bounds
+ * @param maxY The maximum y coordinate of the bounds
+ * @param gapSnapLines The array to add the snap lines to
+ */
+function createGapSnapLinesForDirection(
+    gapSnap: GapSnap,
+    verticalIntersection: InclusiveRange | null,
+    horizontalGapIntersection: InclusiveRange | null,
+    minX: number,
+    maxX: number,
+    minY: number,
+    maxY: number,
+    gapSnapLines: GapSnapLine[]
+): void {
+    switch (gapSnap.direction) {
+        case GapSnapDirection.CENTER_HORIZONTAL:
+            createCenterHorizontalSnapLines(gapSnap, verticalIntersection, minX, maxX, gapSnapLines);
+            break;
+        case GapSnapDirection.CENTER_VERTICAL:
+            createCenterVerticalSnapLines(gapSnap, horizontalGapIntersection, minY, maxY, gapSnapLines);
+            break;
+        case GapSnapDirection.SIDE_RIGHT:
+            createSideRightSnapLines(gapSnap, verticalIntersection, minX, gapSnapLines);
+            break;
+        case GapSnapDirection.SIDE_LEFT:
+            createSideLeftSnapLines(gapSnap, verticalIntersection, maxX, gapSnapLines);
+            break;
+        case GapSnapDirection.SIDE_TOP:
+            createSideTopSnapLines(gapSnap, horizontalGapIntersection, maxY, gapSnapLines);
+            break;
+        case GapSnapDirection.SIDE_BOTTOM:
+            createSideBottomSnapLines(gapSnap, horizontalGapIntersection, minY, gapSnapLines);
+            break;
+    }
+}
+
+/**
+ * Applies transformed gap snap lines to the result map.
+ *
+ * @param gapSnapLinesByContext Map of context IDs to gap snap lines
+ * @param contextGlobalRotations Map of global rotation values for each context
+ * @param snapLines The map to populate with snap lines (modified)
+ */
+function applyGapSnapLinesToResult(
+    gapSnapLinesByContext: Map<string, GapSnapLine[]>,
+    contextGlobalRotations: Map<string, number>,
+    snapLines: Map<string, SnapLine[]>
+): void {
     for (const [context, gapSnapLines] of gapSnapLinesByContext.entries()) {
         if (!snapLines.has(context)) {
             snapLines.set(context, []);
@@ -1217,7 +1117,250 @@ function createGapSnapLines(
             )
         );
     }
-    return;
+}
+
+/**
+ * Creates center horizontal snap lines for a gap
+ *
+ * @param gapSnap The gap snap to create snap lines for
+ * @param verticalIntersection The vertical intersection of the gap with the bounds
+ * @param minX The minimum x coordinate of the bounds
+ * @param maxX The maximum x coordinate of the bounds
+ * @param gapSnapLines The array to add the snap lines to
+ */
+function createCenterHorizontalSnapLines(
+    gapSnap: GapSnap,
+    verticalIntersection: InclusiveRange | null,
+    minX: number,
+    maxX: number,
+    gapSnapLines: GapSnapLine[]
+): void {
+    if (verticalIntersection) {
+        const gapLineY = (verticalIntersection[0] + verticalIntersection[1]) / 2;
+
+        gapSnapLines.push(
+            {
+                type: "gap",
+                direction: SnapDirection.HORIZONTAL,
+                points: [
+                    { x: gapSnap.gap.startSide[0].x, y: gapLineY },
+                    { x: minX, y: gapLineY }
+                ]
+            },
+            {
+                type: "gap",
+                direction: SnapDirection.HORIZONTAL,
+                points: [
+                    { x: maxX, y: gapLineY },
+                    { x: gapSnap.gap.endSide[0].x, y: gapLineY }
+                ]
+            }
+        );
+    }
+}
+
+/**
+ * Creates center vertical snap lines for a gap
+ *
+ * @param gapSnap The gap snap to create snap lines for
+ * @param horizontalGapIntersection The horizontal intersection of the gap with the bounds
+ * @param minY The minimum y coordinate of the bounds
+ * @param maxY The maximum y coordinate of the bounds
+ * @param gapSnapLines The array to add the snap lines to
+ */
+function createCenterVerticalSnapLines(
+    gapSnap: GapSnap,
+    horizontalGapIntersection: InclusiveRange | null,
+    minY: number,
+    maxY: number,
+    gapSnapLines: GapSnapLine[]
+): void {
+    if (horizontalGapIntersection) {
+        const gapLineX = (horizontalGapIntersection[0] + horizontalGapIntersection[1]) / 2;
+
+        gapSnapLines.push(
+            {
+                type: "gap",
+                direction: SnapDirection.VERTICAL,
+                points: [
+                    { x: gapLineX, y: gapSnap.gap.startSide[0].y },
+                    { x: gapLineX, y: minY }
+                ]
+            },
+            {
+                type: "gap",
+                direction: SnapDirection.VERTICAL,
+                points: [
+                    { x: gapLineX, y: maxY },
+                    { x: gapLineX, y: gapSnap.gap.endSide[0].y }
+                ]
+            }
+        );
+    }
+}
+
+/**
+ * Creates side right snap lines for a gap
+ *
+ * @param gapSnap The gap snap to create snap lines for
+ * @param verticalIntersection The vertical intersection of the gap with the bounds
+ * @param minX The minimum x coordinate of the bounds
+ * @param gapSnapLines The array to add the snap lines to
+ */
+function createSideRightSnapLines(
+    gapSnap: GapSnap,
+    verticalIntersection: InclusiveRange | null,
+    minX: number,
+    gapSnapLines: GapSnapLine[]
+): void {
+    if (verticalIntersection) {
+        const gapLineY = (verticalIntersection[0] + verticalIntersection[1]) / 2;
+        const startMaxX = gapSnap.gap.startBounds.position.x + gapSnap.gap.startBounds.size.width;
+        const endMinX = gapSnap.gap.endBounds.position.x;
+        const endMaxX = endMinX + gapSnap.gap.endBounds.size.width;
+
+        gapSnapLines.push(
+            {
+                type: "gap",
+                direction: SnapDirection.HORIZONTAL,
+                points: [
+                    { x: startMaxX, y: gapLineY },
+                    { x: endMinX, y: gapLineY }
+                ]
+            },
+            {
+                type: "gap",
+                direction: SnapDirection.HORIZONTAL,
+                points: [
+                    { x: endMaxX, y: gapLineY },
+                    { x: minX, y: gapLineY }
+                ]
+            }
+        );
+    }
+}
+
+/**
+ * Creates side left snap lines for a gap
+ *
+ * @param gapSnap The gap snap to create snap lines for
+ * @param verticalIntersection The vertical intersection of the gap with the bounds
+ * @param maxX The maximum x coordinate of the bounds
+ * @param gapSnapLines The array to add the snap lines to
+ */
+function createSideLeftSnapLines(
+    gapSnap: GapSnap,
+    verticalIntersection: InclusiveRange | null,
+    maxX: number,
+    gapSnapLines: GapSnapLine[]
+): void {
+    if (verticalIntersection) {
+        const gapLineY = (verticalIntersection[0] + verticalIntersection[1]) / 2;
+        const startMinX = gapSnap.gap.startBounds.position.x;
+        const startMaxX = startMinX + gapSnap.gap.startBounds.size.width;
+        const endMinX = gapSnap.gap.endBounds.position.x;
+
+        gapSnapLines.push(
+            {
+                type: "gap",
+                direction: SnapDirection.HORIZONTAL,
+                points: [
+                    { x: maxX, y: gapLineY },
+                    { x: startMinX, y: gapLineY }
+                ]
+            },
+            {
+                type: "gap",
+                direction: SnapDirection.HORIZONTAL,
+                points: [
+                    { x: startMaxX, y: gapLineY },
+                    { x: endMinX, y: gapLineY }
+                ]
+            }
+        );
+    }
+}
+
+/**
+ * Creates side top snap lines for a gap
+ *
+ * @param gapSnap The gap snap to create snap lines for
+ * @param horizontalGapIntersection The horizontal intersection of the gap with the bounds
+ * @param maxY The maximum y coordinate of the bounds
+ * @param gapSnapLines The array to add the snap lines to
+ */
+function createSideTopSnapLines(
+    gapSnap: GapSnap,
+    horizontalGapIntersection: InclusiveRange | null,
+    maxY: number,
+    gapSnapLines: GapSnapLine[]
+): void {
+    if (horizontalGapIntersection) {
+        const gapLineX = (horizontalGapIntersection[0] + horizontalGapIntersection[1]) / 2;
+        const startMinY = gapSnap.gap.startBounds.position.y;
+        const startMaxY = startMinY + gapSnap.gap.startBounds.size.height;
+        const endMinY = gapSnap.gap.endBounds.position.y;
+
+        gapSnapLines.push(
+            {
+                type: "gap",
+                direction: SnapDirection.VERTICAL,
+                points: [
+                    { x: gapLineX, y: maxY },
+                    { x: gapLineX, y: startMinY }
+                ]
+            },
+            {
+                type: "gap",
+                direction: SnapDirection.VERTICAL,
+                points: [
+                    { x: gapLineX, y: startMaxY },
+                    { x: gapLineX, y: endMinY }
+                ]
+            }
+        );
+    }
+}
+
+/**
+ * Creates side bottom snap lines for a gap
+ *
+ * @param gapSnap The gap snap to create snap lines for
+ * @param horizontalGapIntersection The horizontal intersection of the gap with the bounds
+ * @param minY The minimum y coordinate of the bounds
+ * @param gapSnapLines The array to add the snap lines to
+ */
+function createSideBottomSnapLines(
+    gapSnap: GapSnap,
+    horizontalGapIntersection: InclusiveRange | null,
+    minY: number,
+    gapSnapLines: GapSnapLine[]
+): void {
+    if (horizontalGapIntersection) {
+        const gapLineX = (horizontalGapIntersection[0] + horizontalGapIntersection[1]) / 2;
+        const startMaxY = gapSnap.gap.startBounds.position.y + gapSnap.gap.startBounds.size.height;
+        const endMinY = gapSnap.gap.endBounds.position.y;
+        const endMaxY = endMinY + gapSnap.gap.endBounds.size.height;
+
+        gapSnapLines.push(
+            {
+                type: "gap",
+                direction: SnapDirection.VERTICAL,
+                points: [
+                    { x: gapLineX, y: startMaxY },
+                    { x: gapLineX, y: endMinY }
+                ]
+            },
+            {
+                type: "gap",
+                direction: SnapDirection.VERTICAL,
+                points: [
+                    { x: gapLineX, y: endMaxY },
+                    { x: gapLineX, y: minY }
+                ]
+            }
+        );
+    }
 }
 
 /**

@@ -10,10 +10,9 @@ import {
     getSnapReferenceData,
     getSnaps,
     intersectSnapReferenceDatas,
-    translateSnapData,
-    type SnapData,
-    type SnapLine
+    translateSnapData
 } from "../../snap/snapping.js";
+import { type SnapData, type SnapLine } from "../../snap/model.js";
 import type { SModelElementImpl } from "sprotty";
 import type { SRoot } from "../../../model/sRoot.js";
 import { findViewportZoom } from "../../../base/findViewportZoom.js";

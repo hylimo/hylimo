@@ -40,7 +40,7 @@ import { SElement } from "../../model/sElement.js";
 import { findResizeIconClass } from "../cursor/resizeIcon.js";
 import { MouseListener } from "../../base/mouseListener.js";
 import { TYPES } from "../types.js";
-import { type SnapData } from "../snap/snapping.js";
+import { type SnapData } from "../snap/model.js";
 import type { ConfigManager } from "../config/configManager.js";
 
 /**

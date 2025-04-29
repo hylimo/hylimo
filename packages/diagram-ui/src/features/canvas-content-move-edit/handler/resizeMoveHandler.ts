@@ -3,17 +3,15 @@ import type { Edit, ResizeEdit } from "@hylimo/diagram-protocol";
 import { compose, inverse, rotateDEG, scale, type Matrix } from "transformation-matrix";
 import { MoveHandler, type HandleMoveResult } from "../../move/moveHandler.js";
 import type { ResizeMoveCursor } from "../../cursor/cursor.js";
+import { getCanvasElementCorners, getSnapLines, getSnapReferenceData, getSnaps } from "../../snap/snapping.js";
 import {
-    getCanvasElementCorners,
-    getSnapLines,
-    getSnapReferenceData,
-    getSnaps,
+    GapSnapDirection,
     SnapDirection,
     type ContextSnapData,
     type GapSnapOptions,
     type SnapLine,
     type SnapReferenceData
-} from "../../snap/snapping.js";
+} from "../../snap/model.js";
 import type { SCanvasElement } from "../../../model/canvas/sCanvasElement.js";
 import type { SElement } from "../../../model/sElement.js";
 import type { SRoot } from "../../../model/sRoot.js";
@@ -271,9 +269,9 @@ export function computeResizeMoveSnapData(
                 let reference: number;
                 if (snapX.type === "point") {
                     reference = snapX.point.x;
-                } else if (snapX.direction === "side_right") {
+                } else if (snapX.direction === GapSnapDirection.SIDE_RIGHT) {
                     reference = snapX.bounds.position.x;
-                } else if (snapX.direction === "side_left") {
+                } else if (snapX.direction === GapSnapDirection.SIDE_LEFT) {
                     reference = snapX.bounds.position.x + snapX.bounds.size.width;
                 } else {
                     reference = snapX.bounds.position.x + (dxRelative < 0.5 ? 0 : snapX.bounds.size.width);
@@ -299,9 +297,9 @@ export function computeResizeMoveSnapData(
                 let reference: number;
                 if (snapY.type === "point") {
                     reference = snapY.point.y;
-                } else if (snapY.direction === "side_bottom") {
+                } else if (snapY.direction === GapSnapDirection.SIDE_BOTTOM) {
                     reference = snapY.bounds.position.y;
-                } else if (snapY.direction === "side_top") {
+                } else if (snapY.direction === GapSnapDirection.SIDE_TOP) {
                     reference = snapY.bounds.position.y + snapY.bounds.size.height;
                 } else {
                     reference = snapY.bounds.position.y + (dyRelative < 0.5 ? 0 : snapY.bounds.size.height);
