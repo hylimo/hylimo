@@ -3,11 +3,13 @@ import { MoveHandler, type HandleMoveResult } from "../move/moveHandler.js";
 import type { SRoot } from "../../model/sRoot.js";
 import type { SModelElementImpl } from "sprotty";
 import type { Action } from "sprotty-protocol";
-import { getSnapLines, getSnapReferenceData, getSnaps, intersectSnapReferenceDatas } from "../snap/snapping.js";
-import { type SnapLine, type SnapReferenceData } from "../snap/model.js";
+import { getSnapLines, getSnapReferenceData, getSnaps } from "../snap/snapping.js";
+import { type SnapLine } from "../snap/model.js";
 import { findViewportZoom } from "../../base/findViewportZoom.js";
+import type { Point } from "@hylimo/diagram-common";
 import { Math2D } from "@hylimo/diagram-common";
 import { translate } from "transformation-matrix";
+import { SnapHandler } from "../snap/snapHandler.js";
 
 /**
  * Create move handler to create canvas elements, typically used for toolbox edits
@@ -19,13 +21,13 @@ export class CreateElementMoveHandler extends MoveHandler {
      * @param edit the edit to perform
      * @param root the root element
      * @param pointerId the pointer id, used to set pointer capture
-     * @param snapReferenceData the reference data used for snapping, if enabled
+     * @param snapHandler the snap handler to use for snapping, if enabled
      */
     constructor(
         private readonly edit: `toolbox/${string}`,
         private readonly root: SRoot,
         private readonly pointerId: number,
-        private snapReferenceData: SnapReferenceData | undefined
+        private readonly snapHandler: CreateElementSnapHandler | undefined
     ) {
         super(root.getMouseTransformationMatrix(), undefined, false);
     }
@@ -48,28 +50,13 @@ export class CreateElementMoveHandler extends MoveHandler {
         let snapLines: Map<string, SnapLine[]> | undefined = undefined;
         if (this.hasMoved) {
             values = { x, y };
-            if (this.snapReferenceData != undefined) {
+            if (this.snapHandler != undefined) {
                 const root = target.root as SRoot;
-                const contexts = new Set(this.snapReferenceData.keys());
-                const newReferenceData = getSnapReferenceData(root, contexts, new Set());
-                this.snapReferenceData = intersectSnapReferenceDatas(this.snapReferenceData, newReferenceData);
-                const snapElementData = {
-                    bounds: undefined,
-                    points: [values]
-                };
-                const snapResult = getSnaps(
-                    new Map([[root.id, snapElementData]]),
-                    this.snapReferenceData,
-                    findViewportZoom(target),
-                    {
-                        snapX: true,
-                        snapY: true,
-                        snapGaps: false,
-                        snapPoints: true
-                    }
-                );
-                values = Math2D.add(values, snapResult.snapOffset);
-                snapLines = getSnapLines(snapResult, translate(snapResult.snapOffset.x, snapResult.snapOffset.y));
+                this.snapHandler.updateReferenceData(root);
+                const zoom = findViewportZoom(root);
+                const { snappedValues, snapLines: newSnapLines } = this.snapHandler.snap(values, zoom);
+                values = snappedValues;
+                snapLines = newSnapLines;
             }
         } else {
             values = {
@@ -85,5 +72,57 @@ export class CreateElementMoveHandler extends MoveHandler {
             } satisfies ToolboxEdit
         ];
         return { edits, snapLines };
+    }
+}
+
+/**
+ * Snap handler for creating new elements
+ */
+export class CreateElementSnapHandler extends SnapHandler {
+    /**
+     * The context of the snap handler, the id of the root element
+     */
+    private readonly context: string;
+
+    /**
+     * Creates a new create element snap handler
+     *
+     * @param root the root element
+     */
+    constructor(root: SRoot) {
+        super(getSnapReferenceData(root, new Set([root.id]), new Set()));
+        this.context = root.id;
+    }
+
+    /**
+     * Gets the snapped values and snap lines based on the current translation
+     *
+     * @param values the current translation
+     * @param zoom the current zoom level
+     * @returns the snapped values and snap lines
+     */
+    snap(
+        values: Point,
+        zoom: number
+    ): {
+        snappedValues: Point;
+        snapLines: Map<string, SnapLine[]> | undefined;
+    } {
+        const snapElementData = {
+            bounds: undefined,
+            points: [values]
+        };
+        const snapResult = getSnaps(new Map([[this.context, snapElementData]]), this.referenceData, zoom, {
+            snapX: true,
+            snapY: true,
+            snapGaps: false,
+            snapPoints: true
+        });
+        const snappedValues = Math2D.add(values, snapResult.snapOffset);
+        const snapLines = getSnapLines(snapResult, translate(snapResult.snapOffset.x, snapResult.snapOffset.y));
+        return {
+            snappedValues,
+            snapLines
+        };
     }
 }

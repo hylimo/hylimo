@@ -4,10 +4,10 @@ import type { Point, Bounds, Vector } from "@hylimo/diagram-common";
  * Represents a pair of points, typically used for defining line segments in snap lines.
  */
 export type PointPair = [Point, Point];
+
 /**
  * Represents a snap point used during snapping calculations.
  */
-
 export type PointSnap = {
     /**
      * Identifies this snap as a point snap.
@@ -31,7 +31,11 @@ export type PointSnap = {
     offset: number;
 };
 
+/**
+ * Represents a point in a 2D coordinate system.
+ */
 export type InclusiveRange = [number, number];
+
 /**
  * Gap between two elements/bounds
  *
@@ -45,7 +49,6 @@ export type InclusiveRange = [number, number];
  *                               └───────────┘
  *                               ↑ end side
  */
-
 export type Gap = {
     /**
      * Bounds of the starting element
@@ -72,6 +75,7 @@ export type Gap = {
      */
     length: number;
 };
+
 /**
  * Container for horizontal and vertical gaps between elements
  */
@@ -85,10 +89,10 @@ export interface Gaps {
      */
     verticalGaps: Gap[];
 }
+
 /**
  * Direction of a gap snap.
  */
-
 export enum GapSnapDirection {
     /**
      * Snap to the horizontal center of a gap.
@@ -115,10 +119,10 @@ export enum GapSnapDirection {
      */
     SIDE_BOTTOM = "side_bottom"
 }
+
 /**
  * Represents a snap to a gap between elements.
  */
-
 export type GapSnap = {
     /**
      * Identifies this snap as a gap snap.
@@ -145,25 +149,25 @@ export type GapSnap = {
      */
     offset: number;
 };
+
 /**
  * Collection of gap snaps
  */
-
 export type GapSnaps = GapSnap[];
+
 /**
  * Union type for different kinds of snaps (point or gap)
  */
-
 export type Snap = GapSnap | PointSnap;
+
 /**
  * Collection of snaps
  */
-
 export type Snaps = Snap[];
+
 /**
  * Represents a snap line created from point snaps.
  */
-
 export type PointSnapLine = {
     /**
      * Identifies this snap line as a points-based snap line.
@@ -174,10 +178,10 @@ export type PointSnapLine = {
      */
     points: Point[];
 };
+
 /**
  * Direction of a snap line.
  */
-
 export enum SnapDirection {
     /**
      * Vertical snap line (along Y-axis).
@@ -188,10 +192,10 @@ export enum SnapDirection {
      */
     HORIZONTAL = "horizontal"
 }
+
 /**
  * Represents a snap line created from gap snaps.
  */
-
 export type GapSnapLine = {
     /**
      * Identifies this snap line as a gap-based snap line.
@@ -206,15 +210,15 @@ export type GapSnapLine = {
      */
     points: PointPair;
 };
+
 /**
  * Union type for different kinds of snap lines (point-based or gap-based)
  */
-
 export type SnapLine = PointSnapLine | GapSnapLine;
+
 /**
  * Information about elements to snap to in the context of a given canvas
  */
-
 export interface ContextSnapReferenceData {
     /**
      * The points used for snapping (sorted)
@@ -229,10 +233,10 @@ export interface ContextSnapReferenceData {
      */
     globalRotation: number;
 }
+
 /**
  * Data about the dragged elements in the context of a given canvas
  */
-
 export interface ContextSnapData {
     /**
      * The points used for snapping (sorted)
@@ -243,34 +247,20 @@ export interface ContextSnapData {
      */
     bounds: Bounds | undefined;
 }
+
 /**
  * Snapping data for all contexts
  */
-
 export type SnapReferenceData = Map<string, ContextSnapReferenceData>;
+
 /**
  * Snap data for all contexts
  */
-
 export type SnapElementData = Map<string, ContextSnapData>;
-/**
- * Data structure containing snap information required for snapping calculations
- */
 
-export interface SnapData {
-    /**
-     * Map of element data by context ID
-     */
-    data: SnapElementData;
-    /**
-     * Map of reference data by context ID
-     */
-    referenceData: SnapReferenceData;
-}
 /**
  * Configuration options for gap snapping behavior
  */
-
 export interface GapSnapOptions {
     /**
      * Enable snapping to the left side of gaps
@@ -300,7 +290,6 @@ export interface GapSnapOptions {
 /**
  * Configuration options for the snapping behavior
  */
-
 export interface SnapOptions {
     /**
      * If true, elements can be snapped in the x direction
@@ -319,10 +308,10 @@ export interface SnapOptions {
      */
     snapGaps: boolean | GapSnapOptions;
 }
+
 /**
  * Snapping result
  */
-
 export interface SnapResult {
     /**
      * The offset to snap to

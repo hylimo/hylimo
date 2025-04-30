@@ -9,14 +9,14 @@ import {
     getSnapLines,
     getSnapReferenceData,
     getSnaps,
-    intersectSnapReferenceDatas,
     translateSnapData
 } from "../../snap/snapping.js";
-import { type SnapData, type SnapLine } from "../../snap/model.js";
+import { type SnapElementData, type SnapLine } from "../../snap/model.js";
 import type { SModelElementImpl } from "sprotty";
 import type { SRoot } from "../../../model/sRoot.js";
 import { findViewportZoom } from "../../../base/findViewportZoom.js";
 import type { SElement } from "../../../model/sElement.js";
+import { SnapHandler } from "../../snap/snapHandler.js";
 
 /**
  * Entry for a translation move operation
@@ -41,12 +41,12 @@ export class TranslationMoveHandler extends MoveHandler {
      * Creats a new TranslateMovehandler
      *
      * @param elements the ids of the points to move
-     * @param snapData the data used for snapping, if enabled
+     * @param snapHandler the snap handler to use for snapping, if enabled
      * @param transformationMatrix the transformation matrix to apply to obtain the relative position
      */
     constructor(
         readonly elements: ElementsGroupedByTransformation[],
-        readonly snapData: SnapData | undefined,
+        readonly snapHandler: TranslationSnapHandler | undefined,
         transformationMatrix: Matrix
     ) {
         super(transformationMatrix, "cursor-move");
@@ -60,23 +60,18 @@ export class TranslationMoveHandler extends MoveHandler {
             y: moveY ? y : 0
         };
         let snapLines: Map<string, SnapLine[]> | undefined = undefined;
-        if (this.snapData != undefined) {
-            const contexts = new Set(this.snapData.referenceData.keys());
-            const newReferenceData = getSnapReferenceData(target.root as SRoot, contexts, new Set());
-            this.snapData.referenceData = intersectSnapReferenceDatas(this.snapData.referenceData, newReferenceData);
-            const snapResult = getSnaps(
-                translateSnapData(this.snapData.data, dragVector),
-                this.snapData.referenceData,
-                findViewportZoom(target),
-                {
-                    snapX: moveX,
-                    snapY: moveY,
-                    snapGaps: true,
-                    snapPoints: true
-                }
+        if (this.snapHandler != undefined) {
+            const root = target.root as SRoot;
+            this.snapHandler.updateReferenceData(root);
+            const zoom = findViewportZoom(root);
+            const { snappedDragVector, snapLines: newSnapLines } = this.snapHandler.snap(
+                dragVector,
+                moveX,
+                moveY,
+                zoom
             );
-            dragVector = Math2D.add(dragVector, snapResult.snapOffset);
-            snapLines = getSnapLines(snapResult, translate(snapResult.snapOffset.x, snapResult.snapOffset.y));
+            dragVector = snappedDragVector;
+            snapLines = newSnapLines;
         }
         const edits = this.elements.map(({ elements, transformation }) => {
             const transformed = applyToPoint(transformation, dragVector);
@@ -91,23 +86,57 @@ export class TranslationMoveHandler extends MoveHandler {
 }
 
 /**
- * Computes the snap data for translating elements.
- * This includes the snap element data and the snap reference data.
- *
- * @param elements The elements to be translated.
- * @param ignoredElements The elements to be ignored during snapping.
- * @param root The root element of the model.
- * @returns The computed snap data
+ * Snap handler for translating elements
  */
-export function computeTranslateMoveSnapData(elements: SElement[], ignoredElements: SElement[], root: SRoot): SnapData {
-    const ignoredElementsSet = new Set<string>();
-    for (const element of ignoredElements) {
-        ignoredElementsSet.add(element.id);
+export class TranslationSnapHandler extends SnapHandler {
+    /**
+     * Intitial snap element data for a drag vector (0, 0)
+     */
+    private readonly snapElementData: SnapElementData;
+
+    /**
+     * Creates a new create element snap handler
+     *
+     * @param root the root element
+     */
+    constructor(elements: SElement[], ignoredElements: SElement[], root: SRoot) {
+        const ignoredElementsSet = new Set<string>();
+        for (const element of ignoredElements) {
+            ignoredElementsSet.add(element.id);
+        }
+        const snapElementData = getSnapElementData(root, elements, ignoredElementsSet);
+        super(getSnapReferenceData(root, new Set(snapElementData.keys()), ignoredElementsSet));
+        this.snapElementData = snapElementData;
     }
-    const snapElementData = getSnapElementData(root, elements, ignoredElementsSet);
-    const snapReferenceData = getSnapReferenceData(root, new Set(snapElementData.keys()), ignoredElementsSet);
-    return {
-        data: snapElementData,
-        referenceData: snapReferenceData
-    };
+
+    /**
+     * Gets the snapped values and snap lines based on the current translation
+     *
+     * @param dragVector the current translation
+     * @param target the target elememt
+     * @param zoom the current zoom level
+     * @returns the snapped values and snap lines
+     */
+    snap(
+        dragVector: Point,
+        moveX: boolean,
+        moveY: boolean,
+        zoom: number
+    ): {
+        snappedDragVector: Point;
+        snapLines: Map<string, SnapLine[]> | undefined;
+    } {
+        const snapResult = getSnaps(translateSnapData(this.snapElementData, dragVector), this.referenceData, zoom, {
+            snapX: moveX,
+            snapY: moveY,
+            snapGaps: true,
+            snapPoints: true
+        });
+        const snappedDragVector = Math2D.add(dragVector, snapResult.snapOffset);
+        const snapLines = getSnapLines(snapResult, translate(snapResult.snapOffset.x, snapResult.snapOffset.y));
+        return {
+            snappedDragVector,
+            snapLines
+        };
+    }
 }

@@ -9,13 +9,14 @@ import {
     SnapDirection,
     type ContextSnapData,
     type GapSnapOptions,
-    type SnapLine,
-    type SnapReferenceData
+    type SnapLine
 } from "../../snap/model.js";
 import type { SCanvasElement } from "../../../model/canvas/sCanvasElement.js";
 import type { SElement } from "../../../model/sElement.js";
 import type { SRoot } from "../../../model/sRoot.js";
 import { findViewportZoom } from "../../../base/findViewportZoom.js";
+import { SnapHandler } from "../../snap/snapHandler.js";
+import type { SModelElementImpl } from "sprotty";
 
 /**
  * Elements with an optional original width and height.
@@ -85,7 +86,7 @@ export class ResizeMoveHandler extends MoveHandler {
         super(transformationMatrix, moveCursor);
     }
 
-    override handleMove(x: number, y: number, event: MouseEvent, target: SElement): HandleMoveResult {
+    override handleMove(x: number, y: number, event: MouseEvent, target: SModelElementImpl): HandleMoveResult {
         let factorX: number | undefined = undefined;
         let factorY: number | undefined = undefined;
 
@@ -101,15 +102,10 @@ export class ResizeMoveHandler extends MoveHandler {
             factorX = uniformFactor;
             factorY = uniformFactor;
         }
-        let snapLines: Map<string, SnapLine[]> | undefined;
+        let snapLines: Map<string, SnapLine[]> | undefined = undefined;
         if (this.snapHandler != undefined) {
-            const snapResult = this.snapHandler.getSnappedFactorsAndLines(
-                this.snapHandler.referenceData,
-                findViewportZoom(target),
-                factorX,
-                factorY,
-                uniform
-            );
+            this.snapHandler.updateReferenceData(target.root as SRoot);
+            const snapResult = this.snapHandler.snap(findViewportZoom(target), factorX, factorY, uniform);
             factorX = snapResult.factorX;
             factorY = snapResult.factorY;
             snapLines = snapResult.snapLines;
@@ -139,14 +135,9 @@ export class ResizeMoveHandler extends MoveHandler {
 }
 
 /**
- * Class that computes and provides snap reference data for resizing an element.
+ * Snap handler for resizing canvas elements
  */
-export class ResizeSnapHandler {
-    /**
-     * The reference data for snapping.
-     */
-    readonly referenceData: SnapReferenceData;
-
+export class ResizeSnapHandler extends SnapHandler {
     /**
      * The transformation matrix to convert between element and target coordinates.
      */
@@ -200,8 +191,16 @@ export class ResizeSnapHandler {
         root: SRoot,
         ignoredElements: SElement[]
     ) {
+        const ignoredElementsSet = new Set<string>();
+        for (const element of ignoredElements) {
+            ignoredElementsSet.add(element.id);
+        }
+        const context = element.parent.id;
+
+        super(getSnapReferenceData(root, new Set([context]), ignoredElementsSet));
+
         const layoutEngine = root.layoutEngine;
-        this.context = element.parent.id;
+        this.context = context;
 
         this.elementToTargetMatrix = compose(
             rotateDEG(element.parent.globalRotation),
@@ -241,12 +240,6 @@ export class ResizeSnapHandler {
 
         this.dxRelative = -element.dx / element.width;
         this.dyRelative = -element.dy / element.height;
-
-        const ignoredElementsSet = new Set<string>();
-        for (const element of ignoredElements) {
-            ignoredElementsSet.add(element.id);
-        }
-        this.referenceData = getSnapReferenceData(root, new Set([this.context]), ignoredElementsSet);
     }
 
     /**
@@ -285,8 +278,7 @@ export class ResizeSnapHandler {
      * @param uniform Whether the resize should be uniform
      * @returns The adjusted factors and snap lines
      */
-    getSnappedFactorsAndLines(
-        referenceData: SnapReferenceData,
+    snap(
         zoom: number,
         factorX: number | undefined,
         factorY: number | undefined,
@@ -309,7 +301,7 @@ export class ResizeSnapHandler {
             points: this.snapPointIndices.map((index) => resizedCorners[index])
         };
 
-        const result = getSnaps(new Map([[this.context, snapData]]), referenceData, zoom, {
+        const result = getSnaps(new Map([[this.context, snapData]]), this.referenceData, zoom, {
             snapX: this.gapSnapOptions.left || this.gapSnapOptions.right,
             snapY: this.gapSnapOptions.top || this.gapSnapOptions.bottom,
             snapGaps: this.gapSnapOptions,

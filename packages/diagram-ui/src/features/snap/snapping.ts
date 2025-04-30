@@ -438,9 +438,9 @@ export function getSnaps(
  *
  * @param snapResult The snap result containing nearest snaps for x and y axes
  * @param transform The transformation matrix to apply to the snap lines
- * @returns Map of snap lines grouped by context ID
+ * @returns Map of snap lines grouped by context ID, or undefined if no snap lines are found
  */
-export function getSnapLines(snapResult: SnapResult, transform: Matrix): Map<string, SnapLine[]> {
+export function getSnapLines(snapResult: SnapResult, transform: Matrix): Map<string, SnapLine[]> | undefined {
     const { nearestSnapsX, nearestSnapsY } = snapResult;
     const result = new Map<string, SnapLine[]>();
     createPointSnapLines(nearestSnapsX, nearestSnapsY, transform, snapResult.contextGlobalRotations, result);
@@ -450,6 +450,9 @@ export function getSnapLines(snapResult: SnapResult, transform: Matrix): Map<str
         snapResult.contextGlobalRotations,
         result
     );
+    if (result.size === 0) {
+        return undefined;
+    }
     return result;
 }
 

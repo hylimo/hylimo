@@ -4,12 +4,11 @@ import { h } from "snabbdom";
 import type { Toolbox, ToolboxEditEntry } from "../toolbox.js";
 import type { SearchResult } from "minisearch";
 import { TransactionalMoveAction } from "../../move/transactionalMoveAction.js";
-import { CreateElementMoveHandler } from "../createElementMoveHandler.js";
+import { CreateElementMoveHandler, CreateElementSnapHandler } from "../createElementMoveHandler.js";
 import { generatePreviewIfAvailable } from "./preview.js";
 import { generateIcon } from "./icon.js";
 import { Search } from "lucide";
 import { ToolboxToolType } from "../toolType.js";
-import { getSnapReferenceData } from "../../snap/snapping.js";
 
 /**
  * Generates the UI for the toolbox items.
@@ -103,7 +102,7 @@ function generateToolboxItem(context: Toolbox, toolboxEdit: ToolboxEditEntry): V
                                 root,
                                 event.pointerId,
                                 context.configManager.config?.snappingEnabled == true
-                                    ? getSnapReferenceData(root, new Set([root.id]), new Set())
+                                    ? new CreateElementSnapHandler(root)
                                     : undefined
                             ),
                         maxUpdatesPerRevision: 1

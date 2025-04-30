@@ -52,6 +52,8 @@ export * from "./features/select/boxSelectProvider.js";
 export * from "./features/select/di.config.js";
 export * from "./features/select/selectMouseListener.js";
 export * from "./features/snap/di.config.js";
+export * from "./features/snap/model.js";
+export * from "./features/snap/snapHandler.js";
 export * from "./features/snap/snapLinesStateManager.js";
 export * from "./features/snap/snapping.js";
 export * from "./features/snap/updateSnapLines.js";
