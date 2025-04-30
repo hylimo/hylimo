@@ -21,7 +21,7 @@ import { createResizeSnapHandler, ResizeMoveHandler } from "./handler/resizeMove
 import { SCanvasAxisAlignedSegment } from "../../model/canvas/sCanvasAxisAlignedSegment.js";
 import type { AxisAlignedSegmentEditSnapHandler } from "./handler/axisAlignedSegmentEditMoveHandler.js";
 import {
-    AxisAligedSegmentEditMoveHandler,
+    AxisAlignedSegmentEditMoveHandler,
     createAxisAlignedSegmentEditSnapHandler
 } from "./handler/axisAlignedSegmentEditMoveHandler.js";
 import type { Matrix } from "transformation-matrix";
@@ -137,7 +137,7 @@ export class MoveEditCanvasContentMouseListener extends MouseListener {
         target: SCanvasConnection,
         vertical: boolean,
         event: MouseEvent
-    ): AxisAligedSegmentEditMoveHandler | undefined {
+    ): AxisAlignedSegmentEditMoveHandler | undefined {
         const dataset = targetElement.dataset;
         const id = dataset.id!;
         const start = Number.parseFloat(dataset.start!);
@@ -145,7 +145,7 @@ export class MoveEditCanvasContentMouseListener extends MouseListener {
         const current = Number.parseFloat(dataset.current!);
         const otherStart = Number.parseFloat(dataset.startOther!);
         const otherEnd = Number.parseFloat(dataset.endOther!);
-        return new AxisAligedSegmentEditMoveHandler(
+        return new AxisAlignedSegmentEditMoveHandler(
             id,
             current,
             start,

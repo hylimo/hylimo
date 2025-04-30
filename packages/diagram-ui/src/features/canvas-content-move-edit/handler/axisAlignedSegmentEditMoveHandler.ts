@@ -20,9 +20,9 @@ export interface AxisAlignedSegmentEditSnapData {
  * Move handler for moving the vertical segment of an axis aligned connection segment.
  * Expects relative coordinates in the canvas connection parent canvas coordinate system.
  */
-export class AxisAligedSegmentEditMoveHandler extends MoveHandler {
+export class AxisAlignedSegmentEditMoveHandler extends MoveHandler {
     /**
-     * Creates a new AxisAligedSegmentEditHandler
+     * Creates a new AxisAlignedSegmentEditHandler
      *
      * @param element the id of the CanvasAxisAlignedConnectionSegment to move
      * @param original the original verticalPos/horizontalPos of the segment
