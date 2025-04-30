@@ -199,9 +199,9 @@ export class MoveEditCanvasContentMouseListener extends MouseListener {
             target.width,
             target.height,
             elements,
+            this.createResizeSnapHandler(target, scaleX, scaleY, resizedElements, target.root as SRoot),
             this.makeRelative(target.getMouseTransformationMatrix(), event),
-            findResizeIconClass(classList),
-            this.createResizeSnapHandler(target, scaleX, scaleY, resizedElements, target.root as SRoot)
+            findResizeIconClass(classList)
         );
     }
 
@@ -463,6 +463,8 @@ export class MoveEditCanvasContentMouseListener extends MouseListener {
      * Creates the resize snap handler for the given element.
      *
      * @param element The element being resized.
+     * @param scaleX The scale factor in the x direction.
+     * @param scaleY The scale factor in the y direction.
      * @param ignoredElements The elements to be ignored during snapping.
      * @param root The root element of the model.
      * @returns The computed snap reference data or undefined if snapping is disabled.

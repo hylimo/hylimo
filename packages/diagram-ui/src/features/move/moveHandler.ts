@@ -6,7 +6,7 @@ import { applyToPoint } from "transformation-matrix";
 import type { Cursor } from "../cursor/cursor.js";
 import { UpdateCursorAction } from "../cursor/cursor.js";
 import type { Action } from "sprotty-protocol";
-import type { SnapLine } from "../snap/model.js";
+import type { SnapLines } from "../snap/model.js";
 import { UpdateSnapLinesAction } from "../snap/updateSnapLines.js";
 
 /**
@@ -109,5 +109,5 @@ export interface HandleMoveResult {
      * The snap lines to show
      * If undefined, no snap lines are shown
      */
-    snapLines?: Map<string, SnapLine[]>;
+    snapLines?: SnapLines;
 }

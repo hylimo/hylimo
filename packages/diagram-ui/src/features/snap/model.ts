@@ -217,6 +217,11 @@ export type GapSnapLine = {
 export type SnapLine = PointSnapLine | GapSnapLine;
 
 /**
+ * Collection of snap lines by context
+ */
+export type SnapLines = Map<string, SnapLine[]>;
+
+/**
  * Information about elements to snap to in the context of a given canvas
  */
 export interface ContextSnapReferenceData {

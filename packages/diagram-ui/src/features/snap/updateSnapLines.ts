@@ -1,4 +1,4 @@
-import type { SnapLine } from "./model.js";
+import type { SnapLines } from "./model.js";
 import type { Action } from "sprotty-protocol";
 
 /**
@@ -9,7 +9,7 @@ export interface UpdateSnapLinesAction extends Action {
     /**
      * The snap lines to display by their context
      */
-    snapLines: Map<string, SnapLine[]>;
+    snapLines: SnapLines;
     /**
      * The id of the transaction
      */

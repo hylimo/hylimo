@@ -9,7 +9,7 @@ import {
     SnapDirection,
     type ContextSnapData,
     type GapSnapOptions,
-    type SnapLine
+    type SnapLines
 } from "../../snap/model.js";
 import type { SCanvasElement } from "../../../model/canvas/sCanvasElement.js";
 import type { SElement } from "../../../model/sElement.js";
@@ -79,9 +79,9 @@ export class ResizeMoveHandler extends MoveHandler {
         private readonly originalWidth: number,
         private readonly originalHeight: number,
         private readonly groupedElements: ElementsGroupedBySize[],
+        private readonly snapHandler: ResizeSnapHandler | undefined,
         transformationMatrix: Matrix,
-        moveCursor: ResizeMoveCursor | undefined,
-        private snapHandler: ResizeSnapHandler | undefined
+        moveCursor: ResizeMoveCursor | undefined
     ) {
         super(transformationMatrix, moveCursor);
     }
@@ -102,7 +102,7 @@ export class ResizeMoveHandler extends MoveHandler {
             factorX = uniformFactor;
             factorY = uniformFactor;
         }
-        let snapLines: Map<string, SnapLine[]> | undefined = undefined;
+        let snapLines: SnapLines | undefined = undefined;
         if (this.snapHandler != undefined) {
             this.snapHandler.updateReferenceData(target.root as SRoot);
             const snapResult = this.snapHandler.snap(findViewportZoom(target), factorX, factorY, uniform);
@@ -271,7 +271,6 @@ export class ResizeSnapHandler extends SnapHandler {
     /**
      * Gets the snapped factors and snap lines based on the current resize operation.
      *
-     * @param referenceData The snap reference data
      * @param zoom The current zoom level
      * @param factorX The x resize factor
      * @param factorY The y resize factor
@@ -286,7 +285,7 @@ export class ResizeSnapHandler extends SnapHandler {
     ): {
         factorX: number | undefined;
         factorY: number | undefined;
-        snapLines: Map<string, SnapLine[]> | undefined;
+        snapLines: SnapLines | undefined;
     } {
         const resized = {
             width: this.current.width * (factorX ?? 1),
@@ -564,6 +563,8 @@ export class ResizeSnapHandler extends SnapHandler {
  * Creates a ResizeMoveHandler for resizing elements.
  *
  * @param element The element being resized.
+ * @param scaleX The scale factor in x direction.
+ * @param scaleY The scale factor in y direction.
  * @param ignoredElements The elements to be ignored during snapping.
  * @param root The root element of the model.
  * @returns The computed snap reference data or undefined if snapping is disabled.
@@ -586,7 +587,6 @@ export function createResizeSnapHandler(
 /**
  * Finds the index of the minimum value in an array based on a callback function.
  *
- * @template T The type of elements in the array.
  * @param array The array to search through.
  * @param callback A function that takes an element of the array and returns a numeric value to compare.
  * @returns The index of the element with the minimum value as determined by the callback function.

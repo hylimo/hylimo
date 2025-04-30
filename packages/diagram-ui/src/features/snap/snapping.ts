@@ -26,6 +26,7 @@ import type {
     SnapResult,
     Snaps,
     SnapLine,
+    SnapLines,
     Gaps,
     Gap,
     GapSnapOptions,
@@ -440,7 +441,7 @@ export function getSnaps(
  * @param transform The transformation matrix to apply to the snap lines
  * @returns Map of snap lines grouped by context ID, or undefined if no snap lines are found
  */
-export function getSnapLines(snapResult: SnapResult, transform: Matrix): Map<string, SnapLine[]> | undefined {
+export function getSnapLines(snapResult: SnapResult, transform: Matrix): SnapLines | undefined {
     const { nearestSnapsX, nearestSnapsY } = snapResult;
     const result = new Map<string, SnapLine[]>();
     createPointSnapLines(nearestSnapsX, nearestSnapsY, transform, snapResult.contextGlobalRotations, result);
@@ -913,7 +914,7 @@ function createPointSnapLines(
     nearestSnapsY: Snaps,
     transform: Matrix,
     contextGlobalRotations: Map<string, number>,
-    snapLines: Map<string, SnapLine[]>
+    snapLines: SnapLines
 ): void {
     const snapsX = new Map<string, Map<number, Point[]>>();
     const snapsY = new Map<string, Map<number, Point[]>>();
@@ -998,7 +999,7 @@ function createGapSnapLines(
     gapSnaps: GapSnap[],
     transform: Matrix,
     contextGlobalRotations: Map<string, number>,
-    snapLines: Map<string, SnapLine[]>
+    snapLines: SnapLines
 ): void {
     const gapSnapLinesByContext = groupGapSnapsByContext(gapSnaps, transform);
     applyGapSnapLinesToResult(gapSnapLinesByContext, contextGlobalRotations, snapLines);
@@ -1098,7 +1099,7 @@ function createGapSnapLinesForDirection(
 function applyGapSnapLinesToResult(
     gapSnapLinesByContext: Map<string, GapSnapLine[]>,
     contextGlobalRotations: Map<string, number>,
-    snapLines: Map<string, SnapLine[]>
+    snapLines: SnapLines
 ): void {
     for (const [context, gapSnapLines] of gapSnapLinesByContext.entries()) {
         if (!snapLines.has(context)) {

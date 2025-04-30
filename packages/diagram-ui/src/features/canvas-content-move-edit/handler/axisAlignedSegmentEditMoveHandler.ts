@@ -3,18 +3,13 @@ import { DefaultEditTypes } from "@hylimo/diagram-common";
 import { applyToPoint, rotateDEG, translate, type Matrix } from "transformation-matrix";
 import { MoveHandler, type HandleMoveResult } from "../../move/moveHandler.js";
 import type { ResizeMoveCursor } from "../../cursor/cursor.js";
-import type { SnapLine, SnapOptions, SnapReferenceData } from "../../snap/model.js";
+import type { SnapLines } from "../../snap/model.js";
 import { SnapHandler } from "../../snap/snapHandler.js";
 import type { SRoot } from "../../../model/sRoot.js";
 import { getSnapLines, getSnapReferenceData, getSnaps } from "../../snap/snapping.js";
 import type { SCanvasConnection } from "../../../model/canvas/sCanvasConnection.js";
 import type { SModelElementImpl } from "sprotty";
 import { findViewportZoom } from "../../../base/findViewportZoom.js";
-
-export interface AxisAlignedSegmentEditSnapData {
-    referenceData: SnapReferenceData;
-    options: SnapOptions;
-}
 
 /**
  * Move handler for moving the vertical segment of an axis aligned connection segment.
@@ -29,6 +24,7 @@ export class AxisAlignedSegmentEditMoveHandler extends MoveHandler {
      * @param start the x/y cooridnate of the start of the whole axis aligned segment
      * @param end the x/y cooridnate of the end of the whole axis aligned segment
      * @param vertical true if the vertical segment is moved, otherwise false
+     * @param snapHandler the snap handler to use for snapping functionality, if enabled
      * @param transformationMatrix transformation matrix to apply to obtain the relative position
      * @param moveCursor the cursor to use while moving
      */
@@ -49,7 +45,7 @@ export class AxisAlignedSegmentEditMoveHandler extends MoveHandler {
         const rawValue = this.original + (this.vertical ? x : y);
         const rawPos = (rawValue - this.start) / (this.end - this.start);
         let newPos = Math.min(1, Math.max(0, rawPos));
-        let snapLines: Map<string, SnapLine[]> | undefined = undefined;
+        let snapLines: SnapLines | undefined = undefined;
         if (this.snapHandler != undefined) {
             const root = target.root as SRoot;
             const zoom = findViewportZoom(root);
@@ -140,7 +136,7 @@ export class AxisAlignedSegmentEditSnapHandler extends SnapHandler {
         zoom: number
     ): {
         snappedValue: number;
-        snapLines: Map<string, SnapLine[]> | undefined;
+        snapLines: SnapLines | undefined;
     } {
         const snapElementData = {
             bounds: undefined,

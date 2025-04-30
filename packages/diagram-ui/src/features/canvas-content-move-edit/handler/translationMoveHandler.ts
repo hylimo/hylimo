@@ -11,7 +11,7 @@ import {
     getSnaps,
     translateSnapData
 } from "../../snap/snapping.js";
-import { type SnapElementData, type SnapLine } from "../../snap/model.js";
+import { type SnapElementData, type SnapLines } from "../../snap/model.js";
 import type { SModelElementImpl } from "sprotty";
 import type { SRoot } from "../../../model/sRoot.js";
 import { findViewportZoom } from "../../../base/findViewportZoom.js";
@@ -59,7 +59,7 @@ export class TranslationMoveHandler extends MoveHandler {
             x: moveX ? x : 0,
             y: moveY ? y : 0
         };
-        let snapLines: Map<string, SnapLine[]> | undefined = undefined;
+        let snapLines: SnapLines | undefined = undefined;
         if (this.snapHandler != undefined) {
             const root = target.root as SRoot;
             this.snapHandler.updateReferenceData(root);
@@ -97,6 +97,8 @@ export class TranslationSnapHandler extends SnapHandler {
     /**
      * Creates a new create element snap handler
      *
+     * @param elements the elements to snap to
+     * @param ignoredElements the elements to ignore
      * @param root the root element
      */
     constructor(elements: SElement[], ignoredElements: SElement[], root: SRoot) {
@@ -113,7 +115,8 @@ export class TranslationSnapHandler extends SnapHandler {
      * Gets the snapped values and snap lines based on the current translation
      *
      * @param dragVector the current translation
-     * @param target the target elememt
+     * @param moveX true if the x coordinate should be snapped
+     * @param moveY true if the y coordinate should be snapped
      * @param zoom the current zoom level
      * @returns the snapped values and snap lines
      */
@@ -124,7 +127,7 @@ export class TranslationSnapHandler extends SnapHandler {
         zoom: number
     ): {
         snappedDragVector: Point;
-        snapLines: Map<string, SnapLine[]> | undefined;
+        snapLines: SnapLines | undefined;
     } {
         const snapResult = getSnaps(translateSnapData(this.snapElementData, dragVector), this.referenceData, zoom, {
             snapX: moveX,
