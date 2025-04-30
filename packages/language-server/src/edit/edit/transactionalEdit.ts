@@ -135,6 +135,7 @@ export class TransactionalEdit {
         newest: TransactionalAction
     ): IncrementalUpdate[] {
         const res: IncrementalUpdate[] = [];
+        const transactionStateEdit = this.createTransactionStateUpdate(layoutedDiagram, newest);
         for (let i = 0; i < this.action.edits.length; i++) {
             const edit = this.action.edits[i];
             const elements = edit
@@ -152,12 +153,35 @@ export class TransactionalEdit {
                     if (prediction != undefined) {
                         res.push(...prediction);
                     } else {
-                        return [];
+                        return [transactionStateEdit];
                     }
                 }
             }
         }
+        res.push(transactionStateEdit);
         return res;
+    }
+
+    /**
+     * Creates an incremental update for the transaction state
+     *
+     * @param layoutedDiagram the layouted diagram to use
+     * @param newest the newest action
+     * @returns the incremental update which updates the transaction state
+     */
+    private createTransactionStateUpdate(
+        layoutedDiagram: BaseLayoutedDiagram,
+        newest: TransactionalAction
+    ): IncrementalUpdate {
+        return {
+            target: layoutedDiagram.rootElement.id,
+            changes: {
+                transactionState: {
+                    id: this.transactionId,
+                    sequenceNumber: newest.sequenceNumber
+                }
+            }
+        };
     }
 
     /**

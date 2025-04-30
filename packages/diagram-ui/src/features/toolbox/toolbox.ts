@@ -135,7 +135,7 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler, Conn
      * @param modelRendererFactory The model renderer factory, used to obtain the model renderer
      */
     constructor(
-        @inject(TYPES.ConfigManager) private readonly configManager: ConfigManager,
+        @inject(TYPES.ConfigManager) readonly configManager: ConfigManager,
         @inject(TYPES.ModelRendererFactory) modelRendererFactory: ModelRendererFactory
     ) {
         super();

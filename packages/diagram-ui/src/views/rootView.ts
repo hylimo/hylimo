@@ -9,12 +9,14 @@ import type { CursorProvider } from "../features/cursor/cursor.js";
 import type { BoxSelectProvider } from "../features/select/boxSelectProvider.js";
 import { convertFontsToCssStyle } from "@hylimo/diagram-common";
 import type { KeyState } from "../features/key-state/keyState.js";
+import { CanvasLikeView } from "./canvas/canvasLikeView.js";
+import type { ConfigManager } from "../features/config/configManager.js";
 
 /**
  * IView that is the parent which handles
  */
 @injectable()
-export class RootView implements IView {
+export class RootView extends CanvasLikeView implements IView {
     /**
      * ID of the arrow marker
      */
@@ -47,6 +49,11 @@ export class RootView implements IView {
      */
     @inject(TYPES.KeyState) protected keyState!: KeyState;
 
+    /**
+     * ConfigManager used to get the editor config
+     */
+    @inject(TYPES.ConfigManager) protected configManager!: ConfigManager;
+
     render(model: Readonly<SRoot>, context: RenderingContext, _args?: IViewArgs | undefined): VNode {
         if (context.targetKind == "hidden") {
             return svg("svg.hylimo", null);
@@ -69,6 +76,7 @@ export class RootView implements IView {
                     }
                 },
                 ...context.renderChildren(model, undefined),
+                ...this.renderSnapLines(model),
                 this.renderSelectBox()
             )
         );
@@ -95,7 +103,7 @@ export class RootView implements IView {
      * @returns the VNode for the background or undefined if in preview mode
      */
     private renderBackground(model: Readonly<SRoot>): VNode | undefined {
-        if (model.preview) {
+        if (model.preview || this.configManager.config?.gridEnabled != true) {
             return undefined;
         }
         return svg("rect", {

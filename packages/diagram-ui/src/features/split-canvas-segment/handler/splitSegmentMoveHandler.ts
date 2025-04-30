@@ -1,5 +1,5 @@
 import type { Point } from "@hylimo/diagram-common";
-import { MoveHandler } from "../../move/moveHandler.js";
+import { MoveHandler, type HandleMoveResult } from "../../move/moveHandler.js";
 import type { Matrix } from "transformation-matrix";
 import type { Edit } from "@hylimo/diagram-protocol";
 
@@ -20,17 +20,17 @@ export abstract class SplitSegmentMoveHandler extends MoveHandler {
         super(transformationMatrix, "cursor-crosshair", false);
     }
 
-    override generateEdits(x: number, y: number): Edit[] {
-        if (this.hasMoved) {
-            return this.generateSplitSegmentEdits(x, y);
-        } else {
-            return this.generateSplitSegmentEdits(this.initialPoint.x, this.initialPoint.y);
-        }
+    override handleMove(x: number, y: number): HandleMoveResult {
+        const edits = this.generateSplitSegmentEdits(
+            this.hasMoved ? x : this.initialPoint.x,
+            this.hasMoved ? y : this.initialPoint.y
+        );
+        return { edits };
     }
 
     /**
      * Generates the split segment edits
-     * Called by {@link generateEdits}, but uses initialPoint when the mouse was not dragged yet
+     * Called by {@link handleMove}, but uses initialPoint when the mouse was not dragged yet
      *
      * @param x the x coordinate in the root canvas coordinate system
      * @param y the y coordinate in the root canvas coordinate system

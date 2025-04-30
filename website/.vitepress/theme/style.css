@@ -164,10 +164,11 @@
 
 :root {
     --diagram-layout-color: #606770;
-    --diagram-layout-color-selected: var(--vp-c-brand);
+    --diagram-layout-color-selected: var(--vp-c-brand-1);
+    --diagram-layout-color-snap: var(--vp-c-green-2);
     --diagram-grid: #bbb;
     --toolbox-background: var(--vp-c-bg);
-    --toolbox-primary: var(--vp-c-brand);
+    --toolbox-primary: var(--vp-c-brand-1);
     --toolbox-box-shadow: var(--vp-shadow-4);
     --toolbox-background-1: var(--vp-c-gray-1);
     --toolbox-background-2: var(--vp-c-gray-2);
@@ -177,6 +178,7 @@
 
 .dark {
     --diagram-layout-color: #dadde1;
+    --diagram-layout-color-snap: var(--vp-c-warning-2);
     --diagram-grid: #444;
     --toolbox-background: var(--vp-c-bg-alt);
 }

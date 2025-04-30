@@ -96,7 +96,9 @@ export class SCanvasAxisAlignedSegment
                 x2: x,
                 y2,
                 "data-start": startX,
+                "data-start-other": y1,
                 "data-end": endX,
+                "data-end-other": y2,
                 "data-current": x,
                 "data-id": this.id
             },
@@ -133,7 +135,9 @@ export class SCanvasAxisAlignedSegment
                 x2,
                 y2: y,
                 "data-start": startY,
+                "data-start-other": x1,
                 "data-end": endY,
+                "data-end-other": x2,
                 "data-current": y,
                 "data-id": this.id
             },

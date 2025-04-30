@@ -15,5 +15,6 @@ export const TYPES = {
     BoxSelectProvider: Symbol("BoxSelectProvider"),
     KeyState: Symbol("KeyState"),
     ITouchListener: Symbol("ITouchListener"),
-    IPointerListener: Symbol("IPointerListener")
+    IPointerListener: Symbol("IPointerListener"),
+    SnapLinesStateManager: Symbol("SnapLinesStateManager")
 };

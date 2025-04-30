@@ -1,8 +1,8 @@
 import type { TransformedLine } from "@hylimo/diagram-common";
 import { DefaultEditTypes, LineEngine } from "@hylimo/diagram-common";
-import type { Edit, MoveLposEdit } from "@hylimo/diagram-protocol";
+import type { MoveLposEdit } from "@hylimo/diagram-protocol";
 import type { Matrix } from "transformation-matrix";
-import { MoveHandler } from "../../move/moveHandler.js";
+import { MoveHandler, type HandleMoveResult } from "../../move/moveHandler.js";
 
 /**
  * Move handler for line point moves
@@ -28,7 +28,7 @@ export class LineMoveHandler extends MoveHandler {
         super(transformMatrix, "cursor-move");
     }
 
-    override generateEdits(x: number, y: number): Edit[] {
+    override handleMove(x: number, y: number): HandleMoveResult {
         const nearest = LineEngine.DEFAULT.projectPoint({ x, y }, this.line);
         let pos: number | [number, number];
         if (this.hasSegment) {
@@ -40,12 +40,13 @@ export class LineMoveHandler extends MoveHandler {
         if (!this.onLine) {
             types.push(DefaultEditTypes.MOVE_LPOS_DIST);
         }
-        return [
+        const edits = [
             {
                 types,
                 values: { pos, dist: this.onLine ? 0 : nearest.distance },
                 elements: [this.point]
             } satisfies MoveLposEdit
         ];
+        return { edits };
     }
 }

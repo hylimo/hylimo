@@ -1,7 +1,6 @@
 import type {
     CanvasConnection,
     CanvasConnectionLayout,
-    Point,
     ProjectionResult,
     Stroke,
     TransformedLine
@@ -9,7 +8,6 @@ import type {
 import type { LinearAnimatable } from "../../features/animation/model.js";
 import { SCanvasConnectionSegment } from "./sCanvasConnectionSegment.js";
 import { SCanvasContent } from "./sCanvasContent.js";
-import type { SCanvasPoint } from "./sCanvasPoint.js";
 import { SMarker } from "./sMarker.js";
 
 /**
@@ -31,10 +29,6 @@ export class SCanvasConnection extends SCanvasContent implements CanvasConnectio
      * The color of the stroke
      */
     stroke?: Stroke;
-    /**
-     * Getter for the position associated with start
-     */
-    startPosition!: Point;
     /**
      * The start marker if existing
      */
@@ -71,10 +65,6 @@ export class SCanvasConnection extends SCanvasContent implements CanvasConnectio
     constructor() {
         super();
 
-        this.cachedProperty<Point>("startPosition", () => {
-            const target = this.index.getById(this.start) as SCanvasPoint;
-            return target.position;
-        });
         this.cachedProperty<SMarker | null>("startMarker", () => {
             const res = this.children.find((child) => child instanceof SMarker && child.pos === "start") ?? null;
             return res as SMarker | null;

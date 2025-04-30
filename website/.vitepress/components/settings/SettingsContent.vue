@@ -15,6 +15,8 @@
                 />
                 <NumberInputItem subtitle="Axis aligned pos precision" v-model="settings.axisAlignedPosPrecision" />
                 <NumberInputItem subtitle="Rotation precision" v-model="settings.rotationPrecision" />
+                <BooleanInputItem subtitle="Grid" v-model="editorConfig.gridEnabled" />
+                <BooleanInputItem subtitle="Snap to elements/points" v-model="editorConfig.snappingEnabled" />
             </template>
             <template v-else-if="tab == 'theme'">
                 <ColorInputItem subtitle="Light mode primary color" v-model="diagramConfig.lightPrimaryColor" />
@@ -40,6 +42,7 @@ import BooleanInputItem from "./BooleanInputItem.vue";
 const languageServerConfig = inject(languageServerConfigKey)!;
 const settings = languageServerConfig.settings;
 const diagramConfig = languageServerConfig.diagramConfig;
+const editorConfig = languageServerConfig.editorConfig;
 
 const tabs = [
     { name: "Graphical editor", id: "graphical-editor" },
