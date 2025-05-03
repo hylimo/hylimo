@@ -312,17 +312,20 @@ const scopeExpressions: ParseableExpressions = [
 
             range(segmentCount - 1).forEach {
                 endPoint = positions.get(3 * it + 2)
+                endControlPoint = scope.rpos(
+                    endPoint,
+                    -(positions.get(3 * it + 3)),
+                    -(positions.get(3 * it + 4))
+                )
+                endControlPoint.edits["${DefaultEditTypes.MOVE_X}"] = createAdditiveEdit(positions.get(3 * it + 3), "(- dx)")
+                endControlPoint.edits["${DefaultEditTypes.MOVE_Y}"] = createAdditiveEdit(positions.get(3 * it + 4), "(- dy)")
                 segment = canvasBezierSegment(
                     startControlPoint = scope.rpos(
                         startPoint,
                         positions.get(3 * it),
                         positions.get(3 * it + 1)
                     ),
-                    endControlPoint = scope.rpos(
-                        endPoint,
-                        -(positions.get(3 * it + 3)),
-                        -(positions.get(3 * it + 4))
-                    ),
+                    endControlPoint = endControlPoint,
                     end = endPoint
                 )
                 segment.edits[
