@@ -153,7 +153,7 @@ function convertNumberOrIdentifier(expression: Expression): string {
 }
 
 /**
- * Converts a multiplicity element, can either be a string or a range using the '..' operator
+ * Converts a multiplicity element, can either be a string, identifier, number, or a range using the '..' operator
  *
  * @param expression the expression to convert
  * @returns the multiplicity element without enclosing square brackets
@@ -161,12 +161,14 @@ function convertNumberOrIdentifier(expression: Expression): string {
 function convertMultiplicityElement(expression: Expression): string {
     if (expression instanceof StringLiteralExpression) {
         return convertString(expression);
+    } else if (expression instanceof IdentifierExpression || expression instanceof NumberLiteralExpression) {
+        return convertNumberOrIdentifier(expression);
     } else if (expression instanceof OperatorExpression && isRangeOperator(expression)) {
         const left = expression.left;
         const right = expression.right;
         return convertNumberOrIdentifier(left) + ".." + convertNumberOrIdentifier(right);
     } else {
-        throw new RuntimeError("Expected string or range with '..'", expression);
+        throw new RuntimeError("Expected string, number, identifier, or range with '..'", expression);
     }
 }
 

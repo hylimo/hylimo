@@ -26,7 +26,7 @@
         "vue": "^3.5.13"
     },
     "dependencies": {
-        "@github/relative-time-element": "^4.4.5",
+        "@github/relative-time-element": "^4.4.6",
         "@hylimo/core": "^2.0.0",
         "@hylimo/diagram-render-pdf": "^2.0.0",
         "@hylimo/diagram-render-svg": "^2.0.0",
