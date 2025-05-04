@@ -7,7 +7,6 @@ import {
     CanvasElement,
     CanvasLineSegment,
     LinePoint,
-    Math2D,
     Point,
     RelativePoint,
     type Vector
@@ -34,7 +33,8 @@ import type {
     PointSnapLine,
     GapSnapLine,
     InclusiveRange,
-    PointPair
+    PointPair,
+    SnapState
 } from "./model.js";
 import { GapSnapDirection, SnapDirection } from "./model.js";
 
@@ -330,32 +330,6 @@ export function getSnapReferenceData(
 }
 
 /**
- * Translates the given context information by the given translation vector.
- *
- * @param contextInfomations the context informations to translate
- * @param translation the translation vector
- * @returns the translated context informations
- */
-export function translateSnapData(contextInfomations: SnapElementData, translation: Vector): SnapElementData {
-    const result = new Map<string, ContextSnapData>();
-    for (const [context, info] of contextInfomations.entries()) {
-        const points = info.points.map((point) => Math2D.add(point, translation));
-        const bounds =
-            info.bounds != undefined
-                ? {
-                      position: Math2D.add(info.bounds.position, translation),
-                      size: info.bounds.size
-                  }
-                : undefined;
-        result.set(context, {
-            points,
-            bounds
-        });
-    }
-    return result;
-}
-
-/**
  * Intersects the given reference points and bounds per context.
  * Data for a context is only included, if it is present in both maps, and the global rotation is the same.
  * Then, an intersection of the points and bounds is calculated.
@@ -388,6 +362,7 @@ export function intersectSnapReferenceDatas(a: SnapReferenceData, b: SnapReferen
  * @param state The current state of the elements being moved/snapped
  * @param referenceState Reference data for elements to snap against
  * @param zoom The current zoom level of the viewport
+ * @param elementOffset The offset to apply to the elements being moved (applied to the state)
  * @param options Configuration options for the snapping behavior
  * @returns Snap result containing offset and snap lines information
  */
@@ -395,14 +370,17 @@ export function getSnaps(
     state: SnapElementData,
     referenceState: SnapReferenceData,
     zoom: number,
+    elementOffset: Vector,
     options: SnapOptions
 ): SnapResult {
     const snapDistance = getSnapDistance(zoom);
-    const nearestSnapsX: Snaps = [];
-    const nearestSnapsY: Snaps = [];
-    const minOffset: Vector = {
-        x: snapDistance,
-        y: snapDistance
+    const snapState: SnapState = {
+        nearestSnapsX: [],
+        nearestSnapsY: [],
+        minOffset: {
+            x: snapDistance,
+            y: snapDistance
+        }
     };
 
     for (const [context, info] of state.entries()) {
@@ -412,10 +390,10 @@ export function getSnaps(
         }
         const visibleGaps = getGaps(referenceInfo.bounds);
         if (options.snapGaps != false && info.bounds != undefined) {
-            getGapSnaps(info.bounds, visibleGaps, nearestSnapsX, nearestSnapsY, minOffset, context, options);
+            getGapSnaps(info.bounds, elementOffset, visibleGaps, snapState, context, options);
         }
         if (options.snapPoints) {
-            getPointSnaps(referenceInfo.points, info.points, nearestSnapsX, nearestSnapsY, minOffset, context, options);
+            getPointSnaps(referenceInfo.points, info.points, elementOffset, snapState, context, options);
         }
     }
     const contextGlobalRotations = new Map<string, number>();
@@ -425,11 +403,11 @@ export function getSnaps(
 
     return {
         snapOffset: {
-            x: nearestSnapsX[0]?.offset ?? 0,
-            y: nearestSnapsY[0]?.offset ?? 0
+            x: snapState.nearestSnapsX[0]?.offset ?? elementOffset.x,
+            y: snapState.nearestSnapsY[0]?.offset ?? elementOffset.y
         },
-        nearestSnapsX,
-        nearestSnapsY,
+        nearestSnapsX: snapState.nearestSnapsX,
+        nearestSnapsY: snapState.nearestSnapsY,
         contextGlobalRotations
     };
 }
@@ -605,18 +583,17 @@ function getVerticalGaps(referenceBounds: Bounds[]): Gap[] {
  * Computes the gap snaps
  *
  * @param elementBounds the bounds of the elements to move
+ * @param elementOffset The offset to apply to the elements being moved
  * @param visibleGaps visible gaps from {@code getVisibleGaps}
- * @param nearestSnapsX list to save nearest snaps for x axis (modified)
- * @param nearestSnapsY list to save nearest snaps for y axis (modified)
- * @param minOffset minimum offset to snap to (modified)
+ * @param snapState The current snap state with nearest snaps and minimum offset
+ * @param context The context in which the snapping is performed
  * @param options enable/disable snapping in x and y direction
  */
 function getGapSnaps(
     elementBounds: Bounds,
+    elementOffset: Vector,
     visibleGaps: Gaps,
-    nearestSnapsX: Snaps,
-    nearestSnapsY: Snaps,
-    minOffset: Vector,
+    snapState: SnapState,
     context: string,
     options: SnapOptions
 ): void {
@@ -636,10 +613,10 @@ function getGapSnaps(
     }
 
     if (options.snapX) {
-        getHorizontalGapSnaps(elementBounds, horizontalGaps, minOffset, nearestSnapsX, context, snapGaps);
+        getHorizontalGapSnaps(elementBounds, elementOffset, horizontalGaps, snapState, context, snapGaps);
     }
     if (options.snapY) {
-        getVerticalGapSnaps(elementBounds, verticalGaps, minOffset, nearestSnapsY, context, snapGaps);
+        getVerticalGapSnaps(elementBounds, elementOffset, verticalGaps, snapState, context, snapGaps);
     }
 }
 
@@ -647,20 +624,21 @@ function getGapSnaps(
  * Computes horizontal gap snaps for the given element bounds and horizontal gaps.
  *
  * @param elementBounds The bounds of the element being moved.
+ * @param elementOffset The offset to apply to the elements being moved
  * @param horizontalGaps The list of horizontal gaps to consider.
- * @param minOffset The minimum offset to snap to (modified).
- * @param nearestSnapsX The list to save nearest snaps for the x-axis (modified).
+ * @param snapState The current snap state with nearest snaps and minimum offset
  * @param context The context in which the snapping is performed.
  * @param snapGaps The options for snapping gaps.
  */
 function getHorizontalGapSnaps(
     elementBounds: Bounds,
+    elementOffset: Vector,
     horizontalGaps: Gap[],
-    minOffset: Point,
-    nearestSnapsX: Snaps,
+    snapState: SnapState,
     context: string,
     snapGaps: GapSnapOptions
 ): void {
+    const { nearestSnapsX, minOffset } = snapState;
     const minX = round(elementBounds.position.x);
     const maxX = round(elementBounds.position.x + elementBounds.size.width);
     const centerX = (minX + maxX) / 2;
@@ -676,11 +654,15 @@ function getHorizontalGapSnaps(
         const centerOffset = round(gapMidX - centerX);
         const gapIsLargerThanSelection = gap.length > maxX - minX;
 
-        if (snapGaps.centerHorizontal && gapIsLargerThanSelection && Math.abs(centerOffset) <= minOffset.x) {
-            if (Math.abs(centerOffset) < minOffset.x) {
+        if (
+            snapGaps.centerHorizontal &&
+            gapIsLargerThanSelection &&
+            Math.abs(centerOffset - elementOffset.x) <= minOffset.x
+        ) {
+            if (Math.abs(centerOffset - elementOffset.x) < minOffset.x) {
                 nearestSnapsX.length = 0;
             }
-            minOffset.x = Math.abs(centerOffset);
+            minOffset.x = Math.abs(centerOffset - elementOffset.x);
 
             const snap: GapSnap = {
                 type: "gap",
@@ -699,11 +681,11 @@ function getHorizontalGapSnaps(
         const distanceToEndElementX = minX - endMaxX;
         const sideOffsetRight = round(gap.length - distanceToEndElementX);
 
-        if (snapGaps.right && Math.abs(sideOffsetRight) <= minOffset.x) {
-            if (Math.abs(sideOffsetRight) < minOffset.x) {
+        if (snapGaps.right && Math.abs(sideOffsetRight - elementOffset.x) <= minOffset.x) {
+            if (Math.abs(sideOffsetRight - elementOffset.x) < minOffset.x) {
                 nearestSnapsX.length = 0;
             }
-            minOffset.x = Math.abs(sideOffsetRight);
+            minOffset.x = Math.abs(sideOffsetRight - elementOffset.x);
 
             const snap: GapSnap = {
                 type: "gap",
@@ -721,11 +703,11 @@ function getHorizontalGapSnaps(
         const distanceToStartElementX = startMinX - maxX;
         const sideOffsetLeft = round(distanceToStartElementX - gap.length);
 
-        if (snapGaps.left && Math.abs(sideOffsetLeft) <= minOffset.x) {
-            if (Math.abs(sideOffsetLeft) < minOffset.x) {
+        if (snapGaps.left && Math.abs(sideOffsetLeft - elementOffset.x) <= minOffset.x) {
+            if (Math.abs(sideOffsetLeft - elementOffset.x) < minOffset.x) {
                 nearestSnapsX.length = 0;
             }
-            minOffset.x = Math.abs(sideOffsetLeft);
+            minOffset.x = Math.abs(sideOffsetLeft - elementOffset.x);
 
             const snap: GapSnap = {
                 type: "gap",
@@ -745,20 +727,21 @@ function getHorizontalGapSnaps(
  * Computes vertical gap snaps for the given element bounds and vertical gaps.
  *
  * @param elementBounds The bounds of the element being moved.
+ * @param elementOffset The offset to apply to the elements being moved
  * @param verticalGaps The list of vertical gaps to consider.
- * @param minOffset The minimum offset to snap to (modified).
- * @param nearestSnapsY The list to save nearest snaps for the y-axis (modified).
+ * @param snapState The current snap state with nearest snaps and minimum offset
  * @param context The context in which the snapping is performed.
  * @param snapGaps The options for snapping gaps.
  */
 function getVerticalGapSnaps(
     elementBounds: Bounds,
+    elementOffset: Vector,
     verticalGaps: Gap[],
-    minOffset: Point,
-    nearestSnapsY: Snaps,
+    snapState: SnapState,
     context: string,
     snapGaps: GapSnapOptions
 ): void {
+    const { nearestSnapsY, minOffset } = snapState;
     const minY = round(elementBounds.position.y);
     const maxY = round(elementBounds.position.y + elementBounds.size.height);
     const centerY = (minY + maxY) / 2;
@@ -774,11 +757,15 @@ function getVerticalGapSnaps(
         const centerOffset = round(gapMidY - centerY);
         const gapIsLargerThanSelection = gap.length > maxY - minY;
 
-        if (snapGaps.centerVertical && gapIsLargerThanSelection && Math.abs(centerOffset) <= minOffset.y) {
-            if (Math.abs(centerOffset) < minOffset.y) {
+        if (
+            snapGaps.centerVertical &&
+            gapIsLargerThanSelection &&
+            Math.abs(centerOffset - elementOffset.y) <= minOffset.y
+        ) {
+            if (Math.abs(centerOffset - elementOffset.y) < minOffset.y) {
                 nearestSnapsY.length = 0;
             }
-            minOffset.y = Math.abs(centerOffset);
+            minOffset.y = Math.abs(centerOffset - elementOffset.y);
 
             const snap: GapSnap = {
                 type: "gap",
@@ -797,11 +784,11 @@ function getVerticalGapSnaps(
         const distanceToStartElementY = startMinY - maxY;
         const sideOffsetTop = round(distanceToStartElementY - gap.length);
 
-        if (snapGaps.top && Math.abs(sideOffsetTop) <= minOffset.y) {
-            if (Math.abs(sideOffsetTop) < minOffset.y) {
+        if (snapGaps.top && Math.abs(sideOffsetTop - elementOffset.y) <= minOffset.y) {
+            if (Math.abs(sideOffsetTop - elementOffset.y) < minOffset.y) {
                 nearestSnapsY.length = 0;
             }
-            minOffset.y = Math.abs(sideOffsetTop);
+            minOffset.y = Math.abs(sideOffsetTop - elementOffset.y);
 
             const snap: GapSnap = {
                 type: "gap",
@@ -819,11 +806,11 @@ function getVerticalGapSnaps(
         const distanceToEndElementY = round(minY - endMaxY);
         const sideOffsetBottom = gap.length - distanceToEndElementY;
 
-        if (snapGaps.bottom && Math.abs(sideOffsetBottom) <= minOffset.y) {
-            if (Math.abs(sideOffsetBottom) < minOffset.y) {
+        if (snapGaps.bottom && Math.abs(sideOffsetBottom - elementOffset.y) <= minOffset.y) {
+            if (Math.abs(sideOffsetBottom - elementOffset.y) < minOffset.y) {
                 nearestSnapsY.length = 0;
             }
-            minOffset.y = Math.abs(sideOffsetBottom);
+            minOffset.y = Math.abs(sideOffsetBottom - elementOffset.y);
 
             const snap: GapSnap = {
                 type: "gap",
@@ -843,29 +830,30 @@ function getVerticalGapSnaps(
  * Computes the point snaps
  *
  * @param referenceSnapPoints the reference snap points (usually visible, non-selected elements)
- * @param selectionSnapPoints the selection snap points (usually selected elements)
- * @param nearestSnapsX list to save nearest snaps for x axis (modified)
- * @param nearestSnapsY list to save nearest snaps for y axis (modified)
- * @param minOffset minimum offset to snap to (modified)
+ * @param elementSnapPoints the element snap points (usually selected elements)
+ * @param elementOffset The offset to apply to the elements being moved
+ * @param snapState The current snap state with nearest snaps and minimum offset
  * @param context the context in which the snapping is performed
  * @param options enable/disable snapping in x and y direction
  */
 function getPointSnaps(
     referenceSnapPoints: Point[],
-    selectionSnapPoints: Point[],
-    nearestSnapsX: Snaps,
-    nearestSnapsY: Snaps,
-    minOffset: Vector,
+    elementSnapPoints: Point[],
+    elementOffset: Vector,
+    snapState: SnapState,
     context: string,
     options: SnapOptions
 ): void {
-    for (const thisSnapPoint of selectionSnapPoints) {
+    const { nearestSnapsX, nearestSnapsY, minOffset } = snapState;
+    for (const thisSnapPoint of elementSnapPoints) {
         for (const otherSnapPoint of referenceSnapPoints) {
             const offsetX = otherSnapPoint.x - thisSnapPoint.x;
             const offsetY = otherSnapPoint.y - thisSnapPoint.y;
+            const actualOffsetX = offsetX - elementOffset.x;
+            const actualOffsetY = offsetY - elementOffset.y;
 
-            if (options.snapX && Math.abs(offsetX) <= minOffset.x) {
-                if (Math.abs(offsetX) < minOffset.x) {
+            if (options.snapX && Math.abs(actualOffsetX) <= minOffset.x) {
+                if (Math.abs(actualOffsetX) < minOffset.x) {
                     nearestSnapsX.length = 0;
                 }
 
@@ -877,11 +865,11 @@ function getPointSnaps(
                     offset: offsetX
                 });
 
-                minOffset.x = Math.abs(offsetX);
+                minOffset.x = Math.abs(actualOffsetX);
             }
 
-            if (options.snapY && Math.abs(offsetY) <= minOffset.y) {
-                if (Math.abs(offsetY) < minOffset.y) {
+            if (options.snapY && Math.abs(actualOffsetY) <= minOffset.y) {
+                if (Math.abs(actualOffsetY) < minOffset.y) {
                     nearestSnapsY.length = 0;
                 }
 
@@ -893,7 +881,7 @@ function getPointSnaps(
                     offset: offsetY
                 });
 
-                minOffset.y = Math.abs(offsetY);
+                minOffset.y = Math.abs(actualOffsetY);
             }
         }
     }

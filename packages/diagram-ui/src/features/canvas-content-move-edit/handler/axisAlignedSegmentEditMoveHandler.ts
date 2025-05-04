@@ -142,23 +142,27 @@ export class AxisAlignedSegmentEditSnapHandler extends SnapHandler {
             bounds: undefined,
             points: [
                 {
-                    x: this.vertical ? value : this.start,
-                    y: this.vertical ? this.start : value
+                    x: this.vertical ? 0 : this.start,
+                    y: this.vertical ? this.start : 0
                 },
                 {
-                    x: this.vertical ? value : this.end,
-                    y: this.vertical ? this.end : value
+                    x: this.vertical ? 0 : this.end,
+                    y: this.vertical ? this.end : 0
                 }
             ].map((point) => applyToPoint(this.contextToTargetMatrix, point))
         };
-        const snapResult = getSnaps(new Map([[this.context, snapElementData]]), this.referenceData, zoom, {
+        const offset = applyToPoint(this.contextToTargetMatrix, {
+            x: this.vertical ? value : 0,
+            y: this.vertical ? 0 : value
+        });
+        const snapResult = getSnaps(new Map([[this.context, snapElementData]]), this.referenceData, zoom, offset, {
             snapX: this.effectivelyVertical,
             snapY: !this.effectivelyVertical,
             snapGaps: false,
             snapPoints: true
         });
         const convertedSnapOffset = applyToPoint(this.targetToContextMatrix, snapResult.snapOffset);
-        const snappedValue = value + (this.vertical ? convertedSnapOffset.x : convertedSnapOffset.y);
+        const snappedValue = this.vertical ? convertedSnapOffset.x : convertedSnapOffset.y;
         const snapLines = getSnapLines(snapResult, translate(snapResult.snapOffset.x, snapResult.snapOffset.y));
         return {
             snappedValue,

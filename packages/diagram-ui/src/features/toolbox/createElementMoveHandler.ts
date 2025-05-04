@@ -7,7 +7,6 @@ import { getSnapLines, getSnapReferenceData, getSnaps } from "../snap/snapping.j
 import { type SnapLine } from "../snap/model.js";
 import { findViewportZoom } from "../../base/findViewportZoom.js";
 import type { Point } from "@hylimo/diagram-common";
-import { Math2D } from "@hylimo/diagram-common";
 import { translate } from "transformation-matrix";
 import { SnapHandler } from "../snap/snapHandler.js";
 
@@ -110,18 +109,17 @@ export class CreateElementSnapHandler extends SnapHandler {
     } {
         const snapElementData = {
             bounds: undefined,
-            points: [values]
+            points: [{ x: 0, y: 0 }]
         };
-        const snapResult = getSnaps(new Map([[this.context, snapElementData]]), this.referenceData, zoom, {
+        const snapResult = getSnaps(new Map([[this.context, snapElementData]]), this.referenceData, zoom, values, {
             snapX: true,
             snapY: true,
             snapGaps: false,
             snapPoints: true
         });
-        const snappedValues = Math2D.add(values, snapResult.snapOffset);
         const snapLines = getSnapLines(snapResult, translate(snapResult.snapOffset.x, snapResult.snapOffset.y));
         return {
-            snappedValues,
+            snappedValues: snapResult.snapOffset,
             snapLines
         };
     }

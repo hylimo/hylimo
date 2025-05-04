@@ -1,16 +1,10 @@
 import type { MoveEdit } from "@hylimo/diagram-protocol";
 import { MoveHandler, type HandleMoveResult } from "../../move/moveHandler.js";
 import type { Point } from "@hylimo/diagram-common";
-import { DefaultEditTypes, Math2D } from "@hylimo/diagram-common";
+import { DefaultEditTypes } from "@hylimo/diagram-common";
 import type { Matrix } from "transformation-matrix";
 import { applyToPoint, translate } from "transformation-matrix";
-import {
-    getSnapElementData,
-    getSnapLines,
-    getSnapReferenceData,
-    getSnaps,
-    translateSnapData
-} from "../../snap/snapping.js";
+import { getSnapElementData, getSnapLines, getSnapReferenceData, getSnaps } from "../../snap/snapping.js";
 import { type SnapElementData, type SnapLines } from "../../snap/model.js";
 import type { SModelElementImpl } from "sprotty";
 import type { SRoot } from "../../../model/sRoot.js";
@@ -129,16 +123,15 @@ export class TranslationSnapHandler extends SnapHandler {
         snappedDragVector: Point;
         snapLines: SnapLines | undefined;
     } {
-        const snapResult = getSnaps(translateSnapData(this.snapElementData, dragVector), this.referenceData, zoom, {
+        const snapResult = getSnaps(this.snapElementData, this.referenceData, zoom, dragVector, {
             snapX: moveX,
             snapY: moveY,
             snapGaps: true,
             snapPoints: true
         });
-        const snappedDragVector = Math2D.add(dragVector, snapResult.snapOffset);
         const snapLines = getSnapLines(snapResult, translate(snapResult.snapOffset.x, snapResult.snapOffset.y));
         return {
-            snappedDragVector,
+            snappedDragVector: snapResult.snapOffset,
             snapLines
         };
     }

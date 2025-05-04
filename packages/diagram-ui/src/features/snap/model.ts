@@ -319,7 +319,8 @@ export interface SnapOptions {
  */
 export interface SnapResult {
     /**
-     * The offset to snap to
+     * The offset to snap to, NOT including the elementOffset
+     * If snapping in a direction is not possible, the elementOffset is returned
      */
     snapOffset: Vector;
     /**
@@ -334,4 +335,22 @@ export interface SnapResult {
      * Global rotation values for all contexts
      */
     contextGlobalRotations: Map<string, number>;
+}
+
+/**
+ * Internal state for performing snapping
+ */
+export interface SnapState {
+    /**
+     * Nearest snaps for the x axis (used for calculating snap lines)
+     */
+    nearestSnapsX: Snaps;
+    /**
+     * Nearest snaps for the y axis (used for calculating snap lines)
+     */
+    nearestSnapsY: Snaps;
+    /**
+     * The minimum offset to snap to (absolute value)
+     */
+    minOffset: Vector;
 }

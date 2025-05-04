@@ -300,12 +300,18 @@ export class ResizeSnapHandler extends SnapHandler {
             points: this.snapPointIndices.map((index) => resizedCorners[index])
         };
 
-        const result = getSnaps(new Map([[this.context, snapData]]), this.referenceData, zoom, {
-            snapX: this.gapSnapOptions.left || this.gapSnapOptions.right,
-            snapY: this.gapSnapOptions.top || this.gapSnapOptions.bottom,
-            snapGaps: this.gapSnapOptions,
-            snapPoints: true
-        });
+        const result = getSnaps(
+            new Map([[this.context, snapData]]),
+            this.referenceData,
+            zoom,
+            { x: 0, y: 0 },
+            {
+                snapX: this.gapSnapOptions.left || this.gapSnapOptions.right,
+                snapY: this.gapSnapOptions.top || this.gapSnapOptions.bottom,
+                snapGaps: this.gapSnapOptions,
+                snapPoints: true
+            }
+        );
 
         const { newFactorX, newFactorY } = this.processSnaps(result, factorX, factorY, uniform, resizedCorners);
 
