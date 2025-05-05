@@ -1,6 +1,6 @@
 import type { SRoot } from "../../model/sRoot.js";
 import type { SnapReferenceData } from "./model.js";
-import { getSnapReferenceData, intersectSnapReferenceDatas } from "./snapping.js";
+import { getSnapReferenceData, intersectSnapReferenceDatas } from "./snapData.js";
 
 /**
  * Base class for snap handlers.

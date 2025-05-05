@@ -409,8 +409,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ============================== excalidraw/excalidraw ==============================
 https://github.com/excalidraw/excalidraw
 files:
-  - src/features/snap/snapping.ts
-  - src/features/snap/model.ts
+  - src/features/snap
 
 MIT License
 

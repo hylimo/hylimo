@@ -3,12 +3,13 @@ import { MoveHandler, type HandleMoveResult } from "../move/moveHandler.js";
 import type { SRoot } from "../../model/sRoot.js";
 import type { SModelElementImpl } from "sprotty";
 import type { Action } from "sprotty-protocol";
-import { getSnapLines, getSnapReferenceData, getSnaps } from "../snap/snapping.js";
+import { getSnapLines, getSnaps } from "../snap/snapping.js";
 import { type SnapLine } from "../snap/model.js";
 import { findViewportZoom } from "../../base/findViewportZoom.js";
 import type { Point } from "@hylimo/diagram-common";
 import { translate } from "transformation-matrix";
 import { SnapHandler } from "../snap/snapHandler.js";
+import { getSnapReferenceData } from "../snap/snapData.js";
 
 /**
  * Create move handler to create canvas elements, typically used for toolbox edits
@@ -115,7 +116,8 @@ export class CreateElementSnapHandler extends SnapHandler {
             snapX: true,
             snapY: true,
             snapGaps: false,
-            snapPoints: true
+            snapPoints: true,
+            snapSize: false
         });
         const snapLines = getSnapLines(snapResult, translate(snapResult.snapOffset.x, snapResult.snapOffset.y));
         return {

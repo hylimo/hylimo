@@ -4,13 +4,14 @@ import type { Point } from "@hylimo/diagram-common";
 import { DefaultEditTypes } from "@hylimo/diagram-common";
 import type { Matrix } from "transformation-matrix";
 import { applyToPoint, translate } from "transformation-matrix";
-import { getSnapElementData, getSnapLines, getSnapReferenceData, getSnaps } from "../../snap/snapping.js";
+import { getSnapLines, getSnaps } from "../../snap/snapping.js";
 import { type SnapElementData, type SnapLines } from "../../snap/model.js";
 import type { SModelElementImpl } from "sprotty";
 import type { SRoot } from "../../../model/sRoot.js";
 import { findViewportZoom } from "../../../base/findViewportZoom.js";
 import type { SElement } from "../../../model/sElement.js";
 import { SnapHandler } from "../../snap/snapHandler.js";
+import { getSnapElementData, getSnapReferenceData } from "../../snap/snapData.js";
 
 /**
  * Entry for a translation move operation
@@ -127,7 +128,8 @@ export class TranslationSnapHandler extends SnapHandler {
             snapX: moveX,
             snapY: moveY,
             snapGaps: true,
-            snapPoints: true
+            snapPoints: true,
+            snapSize: false
         });
         const snapLines = getSnapLines(snapResult, translate(snapResult.snapOffset.x, snapResult.snapOffset.y));
         return {

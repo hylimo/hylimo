@@ -5,7 +5,7 @@ import type { SCanvas } from "../../model/canvas/sCanvas.js";
 import type { SRoot } from "../../model/sRoot.js";
 import type { VNode } from "snabbdom";
 import { svg } from "sprotty";
-import type { GapSnapLine, SnapLine } from "../../features/snap/model.js";
+import { SnapLineType, type GapSnapLine, type SnapLine } from "../../features/snap/model.js";
 import { Math2D, type Point } from "@hylimo/diagram-common";
 import { findViewportZoom } from "../../base/findViewportZoom.js";
 
@@ -14,6 +14,11 @@ import { findViewportZoom } from "../../base/findViewportZoom.js";
  */
 @injectable()
 export abstract class CanvasLikeView {
+    /**
+     * ID of the arrow marker
+     */
+    static readonly SNAP_ARROW_MARKER_ID = "snap-arrow";
+
     /**
      * The manager for the snap lines
      */
@@ -34,9 +39,9 @@ export abstract class CanvasLikeView {
         const zoom = findViewportZoom(model);
         for (const line of snapLines) {
             result.push(this.renderSnapLine(line));
-            if (line.type === "gap") {
+            if (line.type === SnapLineType.GAP) {
                 result.push(...this.renderGapSnapLines(line, zoom));
-            } else if (line.type === "points") {
+            } else if (line.type === SnapLineType.POINTS) {
                 for (const point of line.points) {
                     result.push(this.renderSnapLinePoint(point, zoom));
                 }
@@ -52,13 +57,18 @@ export abstract class CanvasLikeView {
      * @returns the rendered snap line as a VNode
      */
     private renderSnapLine(line: SnapLine): VNode {
+        const attrs: Record<string, string | number> = {
+            x1: line.points[0].x,
+            y1: line.points[0].y,
+            x2: line.points.at(-1)!.x,
+            y2: line.points.at(-1)!.y
+        };
+        if (line.type === SnapLineType.SIZE) {
+            attrs["marker-start"] = `url(#${CanvasLikeView.SNAP_ARROW_MARKER_ID})`;
+            attrs["marker-end"] = `url(#${CanvasLikeView.SNAP_ARROW_MARKER_ID})`;
+        }
         return svg("line.snap-line", {
-            attrs: {
-                x1: line.points[0].x,
-                y1: line.points[0].y,
-                x2: line.points.at(-1)!.x,
-                y2: line.points.at(-1)!.y
-            }
+            attrs
         });
     }
 

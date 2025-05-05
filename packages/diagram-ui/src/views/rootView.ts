@@ -179,7 +179,13 @@ export class RootView extends CanvasLikeView implements IView {
      * @returns the VNode for the defs section
      */
     private renderDefs(model: Readonly<SRoot>): VNode {
-        return svg("defs", null, this.renderArrowMarker(), this.renderBackgroundPattern(model));
+        return svg(
+            "defs",
+            null,
+            this.renderArrowMarker(RootView.ARROW_MARKER_ID, "arrow-marker"),
+            this.renderArrowMarker(RootView.SNAP_ARROW_MARKER_ID, "snap-arrow-marker"),
+            this.renderBackgroundPattern(model)
+        );
     }
 
     /**
@@ -219,14 +225,16 @@ export class RootView extends CanvasLikeView implements IView {
     /**
      * Renders the arrow marker
      *
+     * @param id the id of the marker
+     * @param pathClass the class of the path
      * @returns the VNode for the arrow marker
      */
-    private renderArrowMarker(): VNode {
+    private renderArrowMarker(id: string, pathClass: string): VNode {
         return svg(
             "marker",
             {
                 attrs: {
-                    id: RootView.ARROW_MARKER_ID,
+                    id,
                     viewBox: "0 0 10 10",
                     refX: 9,
                     refY: 5,
@@ -236,9 +244,12 @@ export class RootView extends CanvasLikeView implements IView {
                     orient: "auto-start-reverse"
                 }
             },
-            svg("path.arrow-marker", {
+            svg("path", {
                 attrs: {
                     d: "M 0 0 L 10 5 L 0 10 z"
+                },
+                class: {
+                    [pathClass]: true
                 }
             })
         );

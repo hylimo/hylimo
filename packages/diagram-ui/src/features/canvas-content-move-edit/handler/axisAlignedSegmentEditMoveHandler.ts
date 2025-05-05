@@ -6,10 +6,11 @@ import type { ResizeMoveCursor } from "../../cursor/cursor.js";
 import type { SnapLines } from "../../snap/model.js";
 import { SnapHandler } from "../../snap/snapHandler.js";
 import type { SRoot } from "../../../model/sRoot.js";
-import { getSnapLines, getSnapReferenceData, getSnaps } from "../../snap/snapping.js";
+import { getSnapLines, getSnaps } from "../../snap/snapping.js";
 import type { SCanvasConnection } from "../../../model/canvas/sCanvasConnection.js";
 import type { SModelElementImpl } from "sprotty";
 import { findViewportZoom } from "../../../base/findViewportZoom.js";
+import { getSnapReferenceData } from "../../snap/snapData.js";
 
 /**
  * Move handler for moving the vertical segment of an axis aligned connection segment.
@@ -159,7 +160,8 @@ export class AxisAlignedSegmentEditSnapHandler extends SnapHandler {
             snapX: this.effectivelyVertical,
             snapY: !this.effectivelyVertical,
             snapGaps: false,
-            snapPoints: true
+            snapPoints: true,
+            snapSize: false
         });
         const convertedSnapOffset = applyToPoint(this.targetToContextMatrix, snapResult.snapOffset);
         const snappedValue = this.vertical ? convertedSnapOffset.x : convertedSnapOffset.y;

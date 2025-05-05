@@ -1,6 +1,24 @@
 import type { Point, Bounds, Vector } from "@hylimo/diagram-common";
 
 /**
+ * Represents the type of snap
+ */
+export enum SnapType {
+    /**
+     * Gap snap
+     */
+    GAP = "gap",
+    /**
+     * Point snap
+     */
+    POINT = "point",
+    /**
+     * Size snap
+     */
+    SIZE = "size"
+}
+
+/**
  * Represents a pair of points, typically used for defining line segments in snap lines.
  */
 export type PointPair = [Point, Point];
@@ -12,7 +30,7 @@ export type PointSnap = {
     /**
      * Identifies this snap as a point snap.
      */
-    type: "point";
+    type: SnapType.POINT;
     /**
      * The ID of the context (canvas) in which this snap occurs.
      */
@@ -49,7 +67,7 @@ export type InclusiveRange = [number, number];
  *                               └───────────┘
  *                               ↑ end side
  */
-export type Gap = {
+export interface Gap {
     /**
      * Bounds of the starting element
      */
@@ -74,7 +92,7 @@ export type Gap = {
      * Length of the gap between the elements
      */
     length: number;
-};
+}
 
 /**
  * Container for horizontal and vertical gaps between elements
@@ -123,11 +141,11 @@ export enum GapSnapDirection {
 /**
  * Represents a snap to a gap between elements.
  */
-export type GapSnap = {
+export interface GapSnap {
     /**
      * Identifies this snap as a gap snap.
      */
-    type: "gap";
+    type: SnapType.GAP;
     /**
      * The ID of the context (canvas) in which this snap occurs.
      */
@@ -148,7 +166,33 @@ export type GapSnap = {
      * The distance to snap in pixels.
      */
     offset: number;
-};
+}
+
+/**
+ * Represents a snap to the size of an element
+ */
+export interface SizeSnap {
+    /**
+     * Identifies this snap as a size snap.
+     */
+    type: SnapType.SIZE;
+    /**
+     * The ID of the context (canvas) in which this snap occurs.
+     */
+    context: string;
+    /**
+     * The bounds of the element being snapped.
+     */
+    bounds: Bounds;
+    /**
+     * The bounds of the target element to which size snapping is applied.
+     */
+    targetBounds: Bounds;
+    /**
+     * Offset, always NaN
+     */
+    offset: number;
+}
 
 /**
  * Collection of gap snaps
@@ -158,12 +202,30 @@ export type GapSnaps = GapSnap[];
 /**
  * Union type for different kinds of snaps (point or gap)
  */
-export type Snap = GapSnap | PointSnap;
+export type Snap = GapSnap | PointSnap | SizeSnap;
 
 /**
  * Collection of snaps
  */
 export type Snaps = Snap[];
+
+/**
+ * Represents the type of snap line.
+ */
+export enum SnapLineType {
+    /**
+     * Point-based snap line
+     */
+    POINTS = "points",
+    /**
+     * Gap-based snap line
+     */
+    GAP = "gap",
+    /**
+     * Size-based snap line
+     */
+    SIZE = "size"
+}
 
 /**
  * Represents a snap line created from point snaps.
@@ -172,7 +234,7 @@ export type PointSnapLine = {
     /**
      * Identifies this snap line as a points-based snap line.
      */
-    type: "points";
+    type: SnapLineType.POINTS;
     /**
      * The points that make up this snap line.
      */
@@ -200,7 +262,7 @@ export type GapSnapLine = {
     /**
      * Identifies this snap line as a gap-based snap line.
      */
-    type: "gap";
+    type: SnapLineType.GAP;
     /**
      * Direction of the snap line (horizontal or vertical).
      */
@@ -212,9 +274,23 @@ export type GapSnapLine = {
 };
 
 /**
+ * Represents a snap line created from size snaps.
+ */
+export type SizeSnapLine = {
+    /**
+     * Identifies this snap line as a size-based snap line.
+     */
+    type: SnapLineType.SIZE;
+    /**
+     * Pair of points defining the start and end of the snap line.
+     */
+    points: PointPair;
+};
+
+/**
  * Union type for different kinds of snap lines (point-based or gap-based)
  */
-export type SnapLine = PointSnapLine | GapSnapLine;
+export type SnapLine = PointSnapLine | GapSnapLine | SizeSnapLine;
 
 /**
  * Collection of snap lines by context
@@ -292,6 +368,21 @@ export interface GapSnapOptions {
      */
     centerVertical: boolean;
 }
+
+/**
+ * Options for size snapping behavior
+ */
+export interface SizeSnapOptions {
+    /**
+     * The factor by which to multiply the  horizontal size different to get the distance used to find the nearest snap
+     */
+    horizontal: number;
+    /**
+     * The factor by which to multiply the vertical size different to get the distance used to find the nearest snap
+     */
+    vertical: number;
+}
+
 /**
  * Configuration options for the snapping behavior
  */
@@ -312,6 +403,10 @@ export interface SnapOptions {
      * If true or a GapSnapOptions object, gap snapping is enabled
      */
     snapGaps: boolean | GapSnapOptions;
+    /**
+     * If not false, parameters required for size snapping
+     */
+    snapSize: false | SizeSnapOptions;
 }
 
 /**

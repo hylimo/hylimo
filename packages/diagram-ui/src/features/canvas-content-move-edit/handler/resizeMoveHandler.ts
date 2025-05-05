@@ -3,12 +3,14 @@ import type { Edit, ResizeEdit } from "@hylimo/diagram-protocol";
 import { compose, inverse, rotateDEG, scale, type Matrix } from "transformation-matrix";
 import { MoveHandler, type HandleMoveResult } from "../../move/moveHandler.js";
 import type { ResizeMoveCursor } from "../../cursor/cursor.js";
-import { getCanvasElementCorners, getSnapLines, getSnapReferenceData, getSnaps } from "../../snap/snapping.js";
+import { getSnapLines, getSnaps } from "../../snap/snapping.js";
 import {
     GapSnapDirection,
     SnapDirection,
+    SnapType,
     type ContextSnapData,
     type GapSnapOptions,
+    type Snap,
     type SnapLines
 } from "../../snap/model.js";
 import type { SCanvasElement } from "../../../model/canvas/sCanvasElement.js";
@@ -17,6 +19,8 @@ import type { SRoot } from "../../../model/sRoot.js";
 import { findViewportZoom } from "../../../base/findViewportZoom.js";
 import { SnapHandler } from "../../snap/snapHandler.js";
 import type { SModelElementImpl } from "sprotty";
+import { getSnapReferenceData } from "../../snap/snapData.js";
+import { getCanvasElementCorners } from "../../snap/util.js";
 
 /**
  * Elements with an optional original width and height.
@@ -25,8 +29,17 @@ import type { SModelElementImpl } from "sprotty";
  * At least one of the two must be given.
  */
 export interface ElementsGroupedBySize {
+    /**
+     * The ids of the elements in the group.
+     */
     elements: string[];
+    /**
+     * The original width of the elements in the group, or undefined if the elements have different widths.
+     */
     originalWidth?: number;
+    /**
+     * The original height of the elements in the group, or undefined if the elements have different heights.
+     */
     originalHeight?: number;
 }
 
@@ -183,13 +196,15 @@ export class ResizeSnapHandler extends SnapHandler {
      * @param scaleY The scale factor in y direction
      * @param root The root element of the model
      * @param ignoredElements The elements to be ignored during snapping
+     * @param effectiveRotation The effective rotation of the element in quaters (1 = 90 degrees etc.)
      */
     constructor(
         element: SCanvasElement,
-        scaleX: number | undefined,
-        scaleY: number | undefined,
+        private readonly scaleX: number | undefined,
+        private readonly scaleY: number | undefined,
         root: SRoot,
-        ignoredElements: SElement[]
+        ignoredElements: SElement[],
+        private readonly effectiveRotation: number
     ) {
         const ignoredElementsSet = new Set<string>();
         for (const element of ignoredElements) {
@@ -300,6 +315,7 @@ export class ResizeSnapHandler extends SnapHandler {
             points: this.snapPointIndices.map((index) => resizedCorners[index])
         };
 
+        const axisFlipped = this.effectiveRotation % 2 === 1;
         const result = getSnaps(
             new Map([[this.context, snapData]]),
             this.referenceData,
@@ -309,7 +325,11 @@ export class ResizeSnapHandler extends SnapHandler {
                 snapX: this.gapSnapOptions.left || this.gapSnapOptions.right,
                 snapY: this.gapSnapOptions.top || this.gapSnapOptions.bottom,
                 snapGaps: this.gapSnapOptions,
-                snapPoints: true
+                snapPoints: true,
+                snapSize: {
+                    horizontal: 1 / ((axisFlipped ? this.scaleY : this.scaleX) ?? 1),
+                    vertical: 1 / ((axisFlipped ? this.scaleX : this.scaleY) ?? 1)
+                }
             }
         );
 
@@ -387,6 +407,42 @@ export class ResizeSnapHandler extends SnapHandler {
     ): void {
         if (result.nearestSnapsX.length > 0) {
             const snapX = result.nearestSnapsX[0];
+            this.adaptFactorsBasedOnXSnap(snapX, result, factorX, factorY, resizedCorners, context);
+        }
+
+        if (result.nearestSnapsY.length > 0) {
+            const snapY = result.nearestSnapsY[0];
+            this.adaptFactorsBasedOnYSnap(snapY, result, factorX, factorY, resizedCorners, context);
+        }
+    }
+
+    /**
+     * Adapts factors based on the horizontal snap result.
+     *
+     * @param snapX The horizontal snap data
+     * @param result The snap result
+     * @param factorX The x resize factor
+     * @param factorY The y resize factor
+     * @param resizedCorners The corners of the resized element
+     * @param context The snap factor context to update
+     */
+    private adaptFactorsBasedOnXSnap(
+        snapX: Snap,
+        result: ReturnType<typeof getSnaps>,
+        factorX: number | undefined,
+        factorY: number | undefined,
+        resizedCorners: ReturnType<typeof getCanvasElementCorners>,
+        context: SnapFactorContext
+    ) {
+        if (snapX.type === SnapType.SIZE) {
+            if (this.effectiveRotation % 2 === 0 && factorX != undefined) {
+                context.overrideFactorX = snapX.targetBounds.size.width / this.current.width;
+                context.factorXDirection = SnapDirection.HORIZONTAL;
+            } else if (this.effectiveRotation % 2 === 1 && factorY != undefined) {
+                context.overrideFactorY = snapX.targetBounds.size.width / this.current.height;
+                context.factorYDirection = SnapDirection.HORIZONTAL;
+            }
+        } else {
             const target = this.getHorizontalSnapTarget(snapX);
             const index = findMinIndexBy(resizedCorners, (corner) => Math.abs(corner.x - target));
             const value = this.corners[index].x;
@@ -399,9 +455,35 @@ export class ResizeSnapHandler extends SnapHandler {
                 result.nearestSnapsX.length = 0;
             }
         }
+    }
 
-        if (result.nearestSnapsY.length > 0) {
-            const snapY = result.nearestSnapsY[0];
+    /**
+     * Adapts factors based on the vertical snap result.
+     *
+     * @param snapY The vertical snap data
+     * @param result The snap result
+     * @param factorX The x resize factor
+     * @param factorY The y resize factor
+     * @param resizedCorners The corners of the resized element
+     * @param context The snap factor context to update
+     */
+    private adaptFactorsBasedOnYSnap(
+        snapY: Snap,
+        result: ReturnType<typeof getSnaps>,
+        factorX: number | undefined,
+        factorY: number | undefined,
+        resizedCorners: ReturnType<typeof getCanvasElementCorners>,
+        context: SnapFactorContext
+    ) {
+        if (snapY.type === SnapType.SIZE) {
+            if (this.effectiveRotation % 2 === 0 && factorY != undefined) {
+                context.overrideFactorY = snapY.targetBounds.size.height / this.current.height;
+                context.factorYDirection = SnapDirection.VERTICAL;
+            } else if (this.effectiveRotation % 2 === 1 && factorX != undefined) {
+                context.overrideFactorX = snapY.targetBounds.size.height / this.current.width;
+                context.factorXDirection = SnapDirection.VERTICAL;
+            }
+        } else {
             const target = this.getVerticalSnapTarget(snapY);
             const index = findMinIndexBy(resizedCorners, (corner) => Math.abs(corner.y - target));
             const value = this.corners[index].y;
@@ -491,26 +573,16 @@ export class ResizeSnapHandler extends SnapHandler {
 
         if (factorX != undefined) {
             if (factorY == undefined || Math.abs(factorXNew - factorX) < Math.abs(factorYNew - factorY)) {
-                if (
-                    context.overrideFactorX == undefined ||
-                    Math.abs(factorXNew - factorX) < Math.abs(context.overrideFactorX - factorX)
-                ) {
-                    context.overrideFactorX = factorXNew;
-                    context.factorXDirection = snapDirection;
-                    return true;
-                }
+                context.overrideFactorX = factorXNew;
+                context.factorXDirection = snapDirection;
+                return true;
             }
         }
         if (factorY != undefined) {
             if (factorX == undefined || Math.abs(factorYNew - factorY) < Math.abs(factorXNew - factorX)) {
-                if (
-                    context.overrideFactorY == undefined ||
-                    Math.abs(factorYNew - factorY) < Math.abs(context.overrideFactorY - factorY)
-                ) {
-                    context.overrideFactorY = factorYNew;
-                    context.factorYDirection = snapDirection;
-                    return true;
-                }
+                context.overrideFactorY = factorYNew;
+                context.factorYDirection = snapDirection;
+                return true;
             }
         }
         return false;
@@ -523,7 +595,10 @@ export class ResizeSnapHandler extends SnapHandler {
      * @returns The target x position
      */
     private getHorizontalSnapTarget(snapX: ReturnType<typeof getSnaps>["nearestSnapsX"][0]): number {
-        if (snapX.type === "point") {
+        if (snapX.type === SnapType.SIZE) {
+            throw new Error("Unexpected snap type");
+        }
+        if (snapX.type === SnapType.POINT) {
             return snapX.referencePoint.x;
         } else if (snapX.direction === GapSnapDirection.SIDE_RIGHT) {
             return snapX.bounds.position.x + snapX.offset;
@@ -547,7 +622,10 @@ export class ResizeSnapHandler extends SnapHandler {
      * @returns The target y position
      */
     private getVerticalSnapTarget(snapY: ReturnType<typeof getSnaps>["nearestSnapsY"][0]): number {
-        if (snapY.type === "point") {
+        if (snapY.type === SnapType.SIZE) {
+            throw new Error("Unexpected snap type");
+        }
+        if (snapY.type === SnapType.POINT) {
             return snapY.referencePoint.y;
         } else if (snapY.direction === GapSnapDirection.SIDE_BOTTOM) {
             return snapY.bounds.position.y + snapY.offset;
@@ -586,8 +664,9 @@ export function createResizeSnapHandler(
     if (rotation % 90 !== 0) {
         return undefined;
     }
+    const effectiveRotation = (((rotation / 90) % 4) + 4) % 4;
 
-    return new ResizeSnapHandler(element, scaleX, scaleY, root, ignoredElements);
+    return new ResizeSnapHandler(element, scaleX, scaleY, root, ignoredElements, effectiveRotation);
 }
 
 /**

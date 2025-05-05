@@ -115,6 +115,10 @@ svg.hylimo {
         shape-rendering: crispEdges;
     }
 
+    .snap-arrow-marker {
+        fill: var(--diagram-layout-color-snap);
+    }
+
     .cursor-resize-0,
     .cursor-resize-4 {
         cursor: nwse-resize;
