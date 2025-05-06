@@ -11,6 +11,7 @@ export function convertFontsToCssStyle(fonts: FontData[]): string {
         .map((font) => {
             return `@font-face {
                 font-family: ${font.fontFamily};
+                font-display: block;
                 src: url(data:font/ttf;base64,${font.data});
             }`;
         })

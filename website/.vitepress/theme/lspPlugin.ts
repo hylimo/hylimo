@@ -197,12 +197,6 @@ async function setupLanguageClient(isDark: boolean) {
     const reader = new BrowserMessageReader(worker);
     const writer = new BrowserMessageWriter(worker);
 
-    useWorkerFactory({
-        workerLoaders: {
-            TextEditorWorker: () => new monacoEditorWorker()
-        }
-    });
-
     const vscodeApiConfig = await augmentVscodeApiConfig("classic", {
         vscodeApiConfig: {},
         logLevel: LogLevel.Warning
@@ -210,6 +204,13 @@ async function setupLanguageClient(isDark: boolean) {
     await initServices(vscodeApiConfig, {
         caller: "website",
         performServiceConsistencyChecks: checkServiceConsistency,
+        monacoWorkerFactory: () => {
+            useWorkerFactory({
+                workerLoaders: {
+                    TextEditorWorker: () => new monacoEditorWorker()
+                }
+            });
+        },
         logger: new ConsoleLogger(LogLevel.Warning)
     });
 

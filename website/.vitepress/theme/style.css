@@ -126,6 +126,10 @@
     margin-right: 10px;
 }
 
+html {
+    -webkit-tap-highlight-color: transparent;
+}
+
 /* Sprotty */
 
 .sprotty-wrapper {

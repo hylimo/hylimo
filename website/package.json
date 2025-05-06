@@ -26,7 +26,7 @@
         "vue": "^3.5.13"
     },
     "dependencies": {
-        "@github/relative-time-element": "^4.4.6",
+        "@github/relative-time-element": "^4.4.7",
         "@hylimo/core": "^2.0.0",
         "@hylimo/diagram-render-pdf": "^2.0.0",
         "@hylimo/diagram-render-svg": "^2.0.0",
@@ -37,9 +37,9 @@
         "idb": "^8.0.2",
         "js-base64": "^3.7.7",
         "minisearch": "^7.1.2",
-        "monaco-editor": "npm:@codingame/monaco-vscode-editor-api@~15.0.3",
-        "monaco-editor-wrapper": "^6.6.0",
-        "monaco-languageclient": "^9.5.0",
+        "monaco-editor": "npm:@codingame/monaco-vscode-editor-api@~16.1.1",
+        "monaco-editor-wrapper": "^6.7.0",
+        "monaco-languageclient": "^9.6.0",
         "pako": "^2.1.0",
         "reflect-metadata": "^0.2.2",
         "splitpanes": "^4.0.3",
