@@ -16,7 +16,7 @@ import {
     type PointPair,
     SnapLineType
 } from "./model.js";
-import { rangesOverlap, rangeIntersection, round } from "./util.js";
+import { rangesOverlap, rangeIntersection, round, shouldAddSnapX, shouldAddSnapY } from "./util.js";
 
 /**
  * do not comput more gaps per axis than this limit
@@ -193,7 +193,7 @@ function getHorizontalGapSnaps(
     context: string,
     snapGaps: GapSnapOptions
 ): void {
-    const { nearestSnapsX, minOffset } = snapState;
+    const { nearestSnapsX } = snapState;
     const minX = round(elementBounds.position.x);
     const maxX = round(elementBounds.position.x + elementBounds.size.width);
     const centerX = (minX + maxX) / 2;
@@ -213,13 +213,8 @@ function getHorizontalGapSnaps(
         if (
             snapGaps.centerHorizontal &&
             gapIsLargerThanSelection &&
-            Math.abs(centerOffset - elementOffset.x) <= minOffset.x
+            shouldAddSnapX(snapState, centerOffset - elementOffset.x)
         ) {
-            if (Math.abs(centerOffset - elementOffset.x) < minOffset.x) {
-                nearestSnapsX.length = 0;
-            }
-            minOffset.x = Math.abs(centerOffset - elementOffset.x);
-
             const snap: GapSnap = {
                 type: SnapType.GAP,
                 context,
@@ -237,12 +232,7 @@ function getHorizontalGapSnaps(
         const distanceToEndElementX = minX - endMaxX;
         const sideOffsetRight = round(gap.length - distanceToEndElementX);
 
-        if (snapGaps.right && Math.abs(sideOffsetRight - elementOffset.x) <= minOffset.x) {
-            if (Math.abs(sideOffsetRight - elementOffset.x) < minOffset.x) {
-                nearestSnapsX.length = 0;
-            }
-            minOffset.x = Math.abs(sideOffsetRight - elementOffset.x);
-
+        if (snapGaps.right && shouldAddSnapX(snapState, sideOffsetRight - elementOffset.x)) {
             const snap: GapSnap = {
                 type: SnapType.GAP,
                 context,
@@ -259,12 +249,7 @@ function getHorizontalGapSnaps(
         const distanceToStartElementX = startMinX - maxX;
         const sideOffsetLeft = round(distanceToStartElementX - gap.length);
 
-        if (snapGaps.left && Math.abs(sideOffsetLeft - elementOffset.x) <= minOffset.x) {
-            if (Math.abs(sideOffsetLeft - elementOffset.x) < minOffset.x) {
-                nearestSnapsX.length = 0;
-            }
-            minOffset.x = Math.abs(sideOffsetLeft - elementOffset.x);
-
+        if (snapGaps.left && shouldAddSnapX(snapState, sideOffsetLeft - elementOffset.x)) {
             const snap: GapSnap = {
                 type: SnapType.GAP,
                 context,
@@ -297,7 +282,7 @@ function getVerticalGapSnaps(
     context: string,
     snapGaps: GapSnapOptions
 ): void {
-    const { nearestSnapsY, minOffset } = snapState;
+    const { nearestSnapsY } = snapState;
     const minY = round(elementBounds.position.y);
     const maxY = round(elementBounds.position.y + elementBounds.size.height);
     const centerY = (minY + maxY) / 2;
@@ -317,13 +302,8 @@ function getVerticalGapSnaps(
         if (
             snapGaps.centerVertical &&
             gapIsLargerThanSelection &&
-            Math.abs(centerOffset - elementOffset.y) <= minOffset.y
+            shouldAddSnapY(snapState, centerOffset - elementOffset.y)
         ) {
-            if (Math.abs(centerOffset - elementOffset.y) < minOffset.y) {
-                nearestSnapsY.length = 0;
-            }
-            minOffset.y = Math.abs(centerOffset - elementOffset.y);
-
             const snap: GapSnap = {
                 type: SnapType.GAP,
                 context,
@@ -341,12 +321,7 @@ function getVerticalGapSnaps(
         const distanceToStartElementY = startMinY - maxY;
         const sideOffsetTop = round(distanceToStartElementY - gap.length);
 
-        if (snapGaps.top && Math.abs(sideOffsetTop - elementOffset.y) <= minOffset.y) {
-            if (Math.abs(sideOffsetTop - elementOffset.y) < minOffset.y) {
-                nearestSnapsY.length = 0;
-            }
-            minOffset.y = Math.abs(sideOffsetTop - elementOffset.y);
-
+        if (snapGaps.top && shouldAddSnapY(snapState, sideOffsetTop - elementOffset.y)) {
             const snap: GapSnap = {
                 type: SnapType.GAP,
                 context,
@@ -363,12 +338,7 @@ function getVerticalGapSnaps(
         const distanceToEndElementY = round(minY - endMaxY);
         const sideOffsetBottom = gap.length - distanceToEndElementY;
 
-        if (snapGaps.bottom && Math.abs(sideOffsetBottom - elementOffset.y) <= minOffset.y) {
-            if (Math.abs(sideOffsetBottom - elementOffset.y) < minOffset.y) {
-                nearestSnapsY.length = 0;
-            }
-            minOffset.y = Math.abs(sideOffsetBottom - elementOffset.y);
-
+        if (snapGaps.bottom && shouldAddSnapY(snapState, sideOffsetBottom - elementOffset.y)) {
             const snap: GapSnap = {
                 type: SnapType.GAP,
                 context,

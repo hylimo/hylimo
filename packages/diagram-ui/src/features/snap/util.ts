@@ -1,7 +1,14 @@
-import type { CanvasElement, Point } from "@hylimo/diagram-common";
+import type { CanvasElement, Point, Vector } from "@hylimo/diagram-common";
 import { type Matrix, applyToPoint } from "transformation-matrix";
 import type { SElement } from "../../model/sElement.js";
-import type { InclusiveRange } from "./model.js";
+import type { InclusiveRange, SnapState } from "./model.js";
+
+/**
+ * Due to floating point precision issues, slightly worse snap targets should also be displayed.
+ * This is the precision used to determine if two points are close enough to be considered equal.
+ * Note that this is only visual, and does not affect the actual snapping.
+ */
+const SNAPPING_PRECISION = 10 ** -6;
 
 /**
  * Computes the corners of the given element in the target coordinate system.
@@ -131,4 +138,72 @@ export function intersectSortedArrays<T>(a: T[], b: T[], compare: (x: T, y: T) =
         }
     }
     return result;
+}
+
+/**
+ * Determines if a snap offset should be added to the X-direction snap collection.
+ * Manages the nearest snap tracking state by comparing the current offset against the minimum.
+ * If the offset is significantly better than current minimum, it clears existing snaps.
+ * If it's close enough to the minimum (within precision), it allows adding multiple snaps.
+ * Note that cleanupNearestSnaps() should be called eventually to remove snaps that are too far.
+ *
+ * @param state The current snap state tracking minimum offsets and snap collections
+ * @param offset The offset value to evaluate
+ * @returns True if the offset should be added to the snap collection, false otherwise
+ */
+export function shouldAddSnapX(state: SnapState, offset: number) {
+    const absoluteOffset = Math.abs(offset);
+    if (absoluteOffset < state.minOffset.x) {
+        if (absoluteOffset + SNAPPING_PRECISION < state.minOffset.x) {
+            state.nearestSnapsX.length = 0;
+        }
+        state.minOffset.x = absoluteOffset;
+        return true;
+    } else if (absoluteOffset - SNAPPING_PRECISION < state.minOffset.x) {
+        return true;
+    }
+    return false;
+}
+
+/**
+ * Determines if a snap offset should be added to the Y-direction snap collection.
+ * Manages the nearest snap tracking state by comparing the current offset against the minimum.
+ * If the offset is significantly better than current minimum, it clears existing snaps.
+ * If it's close enough to the minimum (within precision), it allows adding multiple snaps.
+ * Note that cleanupNearestSnaps() should be called eventually to remove snaps that are too far.
+ *
+ * @param state The current snap state tracking minimum offsets and snap collections
+ * @param offset The offset value to evaluate
+ * @returns True if the offset should be added to the snap collection, false otherwise
+ */
+export function shouldAddSnapY(state: SnapState, offset: number) {
+    const absoluteOffset = Math.abs(offset);
+    if (absoluteOffset < state.minOffset.y) {
+        if (absoluteOffset + SNAPPING_PRECISION < state.minOffset.y) {
+            state.nearestSnapsY.length = 0;
+        }
+        state.minOffset.y = absoluteOffset;
+        return true;
+    } else if (absoluteOffset - SNAPPING_PRECISION < state.minOffset.y) {
+        return true;
+    }
+    return false;
+}
+
+/**
+ * Removes snaps from the nearest snap collections that are too far from the minimum offset.
+ * This ensures that only snaps within the acceptable precision range are kept.
+ * Used to filter out snaps that may have been valid during collection but are now outside
+ * the threshold when considering the element's current offset.
+ *
+ * @param state The snap state containing snap collections to clean up
+ * @param elementOffset The current offset of the element being snapped
+ */
+export function cleanupNearestSnaps(state: SnapState, elementOffset: Vector): void {
+    state.nearestSnapsX = state.nearestSnapsX.filter(
+        (snap) => snap.offset - elementOffset.x - SNAPPING_PRECISION <= state.minOffset.x
+    );
+    state.nearestSnapsY = state.nearestSnapsY.filter(
+        (snap) => snap.offset - elementOffset.y - SNAPPING_PRECISION <= state.minOffset.y
+    );
 }

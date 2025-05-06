@@ -189,7 +189,7 @@ export interface SizeSnap {
      */
     targetBounds: Bounds;
     /**
-     * Offset, always NaN
+     * Offset, only for internal use, must not use for snapping
      */
     offset: number;
 }

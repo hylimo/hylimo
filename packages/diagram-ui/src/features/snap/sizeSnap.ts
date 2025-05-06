@@ -11,15 +11,15 @@ import {
     type Snaps,
     type SnapState
 } from "./model.js";
-import { rangesOverlap, round } from "./util.js";
+import { rangesOverlap, round, shouldAddSnapX, shouldAddSnapY } from "./util.js";
 import { applyToPoint, rotateDEG, type Matrix } from "transformation-matrix";
 
 /**
  * Processes size snapping for an element against target bounds.
  * Finds matching size elements and updates the snap state accordingly.
  *
- * @param elementBoundsThe bounds of the element being snapped
- * @param elementOffsetThe offset vector of the element
+ * @param elementBounds the bounds of the element being snapped
+ * @param elementOffset the offset to apply to the elements being moved
  * @param targetBoundsArray of potential target bounds to snap to
  * @param snapStateCurrent snap state to update
  * @param contextSnap context identifier
@@ -46,18 +46,19 @@ export function getSizeSnaps(
     );
 
     if (options.snapX) {
-        handleHorizontalSizeSnap(elementBounds, relevantTargetBounds, snapState, context, options);
+        handleHorizontalSizeSnap(elementBounds, elementOffset, relevantTargetBounds, snapState, context, options);
     }
 
     if (options.snapY) {
-        handleVerticalSizeSnap(elementBounds, relevantTargetBounds, snapState, context, options);
+        handleVerticalSizeSnap(elementBounds, elementOffset, relevantTargetBounds, snapState, context, options);
     }
 }
 
 /**
  * Handles horizontal (width) size snapping logic.
  *
- * @param elementBoundsThe bounds of the element being snapped
+ * @param elementBounds the bounds of the element being snapped
+ * @param elementOffset the offset to apply to the elements being moved
  * @param relevantTargetBoundsFiltered array of potential target bounds
  * @param snapStateCurrent snap state to update
  * @param contextSnap context identifier
@@ -65,6 +66,7 @@ export function getSizeSnaps(
  */
 function handleHorizontalSizeSnap(
     elementBounds: Bounds,
+    elementOffset: Vector,
     relevantTargetBounds: Bounds[],
     snapState: SnapState,
     context: string,
@@ -72,19 +74,15 @@ function handleHorizontalSizeSnap(
 ): void {
     const factor = (options.snapSize as SizeSnapOptions).horizontal;
     for (const targetBounds of relevantTargetBounds) {
-        const diff = Math.abs((elementBounds.size.width - targetBounds.size.width) * factor);
-        if (diff <= snapState.minOffset.x) {
-            if (diff < snapState.minOffset.x) {
-                snapState.nearestSnapsX.length = 0;
-            }
+        const diff = (elementBounds.size.width - targetBounds.size.width) * factor;
+        if (shouldAddSnapX(snapState, diff)) {
             snapState.nearestSnapsX.push({
                 type: SnapType.SIZE,
                 context,
-                offset: Number.NaN,
+                offset: elementOffset.x + diff,
                 targetBounds,
                 bounds: elementBounds
             });
-            snapState.minOffset.x = diff;
         }
     }
 }
@@ -92,7 +90,8 @@ function handleHorizontalSizeSnap(
 /**
  * Handles vertical (height) size snapping logic.
  *
- * @param elementBoundsThe bounds of the element being snapped
+ * @param elementBounds the bounds of the element being snapped
+ * @param elementOffset the offset to apply to the elements being moved
  * @param relevantTargetBoundsFiltered array of potential target bounds
  * @param snapStateCurrent snap state to update
  * @param contextSnap context identifier
@@ -100,6 +99,7 @@ function handleHorizontalSizeSnap(
  */
 function handleVerticalSizeSnap(
     elementBounds: Bounds,
+    elementOffset: Vector,
     relevantTargetBounds: Bounds[],
     snapState: SnapState,
     context: string,
@@ -107,19 +107,15 @@ function handleVerticalSizeSnap(
 ): void {
     const factor = (options.snapSize as SizeSnapOptions).vertical;
     for (const targetBounds of relevantTargetBounds) {
-        const diff = Math.abs((elementBounds.size.height - targetBounds.size.height) * factor);
-        if (diff <= snapState.minOffset.y) {
-            if (diff < snapState.minOffset.y) {
-                snapState.nearestSnapsY.length = 0;
-            }
+        const diff = (elementBounds.size.height - targetBounds.size.height) * factor;
+        if (shouldAddSnapY(snapState, diff)) {
             snapState.nearestSnapsY.push({
                 type: SnapType.SIZE,
                 context,
-                offset: Number.NaN,
+                offset: elementOffset.y + diff,
                 targetBounds,
                 bounds: elementBounds
             });
-            snapState.minOffset.y = diff;
         }
     }
 }
@@ -147,7 +143,6 @@ export function createSizeSnapLines(
     createHorizontalSizeSnapLines(nearestSnapsX, transform, sizeSnapLinesByContext);
     createVerticalSizeSnapLines(nearestSnapsY, transform, sizeSnapLinesByContext);
 
-    // Apply rotations and add snap lines to the result map
     for (const [context, sizeSnapLines] of sizeSnapLinesByContext.entries()) {
         if (!snapLines.has(context)) {
             snapLines.set(context, []);

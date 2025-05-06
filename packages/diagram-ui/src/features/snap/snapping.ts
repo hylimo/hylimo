@@ -13,6 +13,7 @@ import { createPointSnapLines, getPointSnaps } from "./pointSnap.js";
 import { createGapSnapLines, getGaps, getGapSnaps } from "./gapSnap.js";
 import type { Vector } from "@hylimo/diagram-common";
 import { createSizeSnapLines, getSizeSnaps } from "./sizeSnap.js";
+import { cleanupNearestSnaps } from "./util.js";
 
 /**
  * Snap distance for the snapping algorithm
@@ -62,6 +63,7 @@ export function getSnaps(
             getSizeSnaps(info.bounds, elementOffset, referenceInfo.bounds, snapState, context, options);
         }
     }
+    cleanupNearestSnaps(snapState, elementOffset);
     const contextGlobalRotations = new Map<string, number>();
     for (const [context, info] of referenceState.entries()) {
         contextGlobalRotations.set(context, info.globalRotation);

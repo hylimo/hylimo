@@ -9,7 +9,7 @@ import {
     type PointSnapLine,
     SnapLineType
 } from "./model.js";
-import { dedupePoints, round } from "./util.js";
+import { dedupePoints, round, shouldAddSnapX, shouldAddSnapY } from "./util.js";
 
 /**
  * Computes the point snaps
@@ -29,7 +29,7 @@ export function getPointSnaps(
     context: string,
     options: SnapOptions
 ): void {
-    const { nearestSnapsX, nearestSnapsY, minOffset } = snapState;
+    const { nearestSnapsX, nearestSnapsY } = snapState;
     for (const thisSnapPoint of elementSnapPoints) {
         for (const otherSnapPoint of referenceSnapPoints) {
             const offsetX = otherSnapPoint.x - thisSnapPoint.x;
@@ -37,11 +37,7 @@ export function getPointSnaps(
             const actualOffsetX = offsetX - elementOffset.x;
             const actualOffsetY = offsetY - elementOffset.y;
 
-            if (options.snapX && Math.abs(actualOffsetX) <= minOffset.x) {
-                if (Math.abs(actualOffsetX) < minOffset.x) {
-                    nearestSnapsX.length = 0;
-                }
-
+            if (options.snapX && shouldAddSnapX(snapState, actualOffsetX)) {
                 nearestSnapsX.push({
                     type: SnapType.POINT,
                     context,
@@ -49,15 +45,9 @@ export function getPointSnaps(
                     referencePoint: otherSnapPoint,
                     offset: offsetX
                 });
-
-                minOffset.x = Math.abs(actualOffsetX);
             }
 
-            if (options.snapY && Math.abs(actualOffsetY) <= minOffset.y) {
-                if (Math.abs(actualOffsetY) < minOffset.y) {
-                    nearestSnapsY.length = 0;
-                }
-
+            if (options.snapY && shouldAddSnapY(snapState, actualOffsetY)) {
                 nearestSnapsY.push({
                     type: SnapType.POINT,
                     context,
@@ -65,8 +55,6 @@ export function getPointSnaps(
                     referencePoint: otherSnapPoint,
                     offset: offsetY
                 });
-
-                minOffset.y = Math.abs(actualOffsetY);
             }
         }
     }
