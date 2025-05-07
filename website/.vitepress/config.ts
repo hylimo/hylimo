@@ -75,6 +75,9 @@ export default withPwa(
         vite: {
             resolve: {
                 dedupe: ["vscode"]
+            },
+            worker: {
+                format: "es"
             }
         },
         vue: {
