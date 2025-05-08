@@ -2,7 +2,7 @@ import type { CanvasConnectionSegment } from "./canvasConnectionSegment.js";
 import { calculateMarkerRenderInformationInternal } from "./canvasConnectionSegment.js";
 import type { Element } from "../base/element.js";
 import type { Marker, MarkerLayoutInformation } from "./marker.js";
-import { Point } from "../../../common/point.js";
+import type { Point } from "../../../common/point.js";
 
 /**
  * Axis aligned connection segment, consiting of a vertical and one or two horizontal segments.
