@@ -27,6 +27,12 @@ export namespace CanvasAxisAlignedSegment {
     export const TYPE = "canvasAxisAlignedSegment";
 
     /**
+     * Epsilon value for floating point comparisons to avoid
+     * markers being rotated in a direction of a very small segment
+     */
+    const MARKER_EPSILON = 10 ** -6;
+
+    /**
      * Checks if an element is a CanvasAxisAlignedSegment
      *
      * @param value the element to check
@@ -62,12 +68,23 @@ export namespace CanvasAxisAlignedSegment {
     ): MarkerLayoutInformation {
         let helperPos: Point;
         if (pos > -1 && pos <= 0) {
-            helperPos = { x: point.x, y: endPoint.y };
+            if (
+                Math.abs(point.y - endPoint.y) < MARKER_EPSILON &&
+                Math.abs((point.y - endPoint.y) / (point.x - endPoint.x)) < MARKER_EPSILON
+            ) {
+                helperPos = { x: endPoint.x, y: point.y };
+            } else {
+                helperPos = { x: point.x, y: endPoint.y };
+            }
         } else {
-            helperPos = { x: endPoint.x, y: point.y };
-        }
-        if (Point.equals(helperPos, point)) {
-            helperPos = endPoint;
+            if (
+                Math.abs(point.x - endPoint.x) < MARKER_EPSILON &&
+                Math.abs((point.x - endPoint.x) / (point.y - endPoint.y)) < MARKER_EPSILON
+            ) {
+                helperPos = { x: point.x, y: endPoint.y };
+            } else {
+                helperPos = { x: endPoint.x, y: point.y };
+            }
         }
         return calculateMarkerRenderInformationInternal(point, helperPos, marker);
     }
