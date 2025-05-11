@@ -374,12 +374,16 @@ export class MoveEditCanvasContentMouseListener extends MouseListener {
      * @returns the created move handler or undefined if no handler could be created
      */
     private createLineMoveHandler(linePoint: SLinePoint, event: MouseEvent): MoveHandler | undefined {
+        const editPos = linePoint.edits[DefaultEditTypes.MOVE_LPOS_POS] != undefined;
+        const editDist = linePoint.edits[DefaultEditTypes.MOVE_LPOS_DIST] != undefined && !(editPos && event.shiftKey);
         const editSpecifications: EditSpecificationEntry[] = [];
-        editSpecifications.push(linePoint.edits[DefaultEditTypes.MOVE_LPOS_POS]);
-        if (linePoint.edits[DefaultEditTypes.MOVE_LPOS_DIST] != undefined) {
+        if (editPos) {
+            editSpecifications.push(linePoint.edits[DefaultEditTypes.MOVE_LPOS_POS]);
+        }
+        if (editDist) {
             editSpecifications.push(linePoint.edits[DefaultEditTypes.MOVE_LPOS_DIST]);
         }
-        if (!EditSpecification.isConsistent([editSpecifications])) {
+        if (editSpecifications.length == 0 || !EditSpecification.isConsistent([editSpecifications])) {
             return undefined;
         }
         const root = linePoint.root;
@@ -393,7 +397,8 @@ export class MoveEditCanvasContentMouseListener extends MouseListener {
         );
         return new LineMoveHandler(
             linePoint.id,
-            linePoint.edits[DefaultEditTypes.MOVE_LPOS_DIST] == undefined || event.shiftKey,
+            editPos,
+            editDist,
             linePoint.segment != undefined,
             root.layoutEngine.layoutLine(
                 root.index.getById(linePoint.lineProvider) as SCanvasConnection | SCanvasElement,
@@ -422,10 +427,27 @@ export class MoveEditCanvasContentMouseListener extends MouseListener {
             return undefined;
         }
         const entries = this.computeTranslationMoveEntries(elements);
+        const moveX = entries.every((entry) =>
+            entry.elements.every((element) => element.edits[DefaultEditTypes.MOVE_X] != undefined)
+        );
+        const moveY = entries.every((entry) =>
+            entry.elements.every((element) => element.edits[DefaultEditTypes.MOVE_Y] != undefined)
+        );
+        if (!moveX && !moveY) {
+            return undefined;
+        }
+        if (!(moveX && moveY) && entries.length > 1) {
+            return undefined;
+        }
         const editSpecifications = entries.map((entry) => {
-            return entry.elements.flatMap((element) => {
-                return [element.edits[DefaultEditTypes.MOVE_X], element.edits[DefaultEditTypes.MOVE_Y]];
-            });
+            const res: (EditSpecificationEntry | undefined)[] = [];
+            if (moveX) {
+                entry.elements.forEach((element) => res.push(element.edits[DefaultEditTypes.MOVE_X]));
+            }
+            if (moveY) {
+                entry.elements.forEach((element) => res.push(element.edits[DefaultEditTypes.MOVE_Y]));
+            }
+            return res;
         });
         if (!EditSpecification.isConsistent(editSpecifications)) {
             return undefined;
@@ -433,9 +455,12 @@ export class MoveEditCanvasContentMouseListener extends MouseListener {
         return new TranslationMoveHandler(
             entries.map((entry) => ({
                 transformation: entry.transformation,
+                globalRotation: entry.globalRotation,
                 elements: entry.elements.map((element) => element.id)
             })),
             snapHandler,
+            moveX,
+            moveY,
             this.makeRelative(root.getMouseTransformationMatrix(), event)
         );
     }
@@ -528,6 +553,7 @@ export class MoveEditCanvasContentMouseListener extends MouseListener {
                 if (!entries.has(key)) {
                     entries.set(key, {
                         transformation: compose(scale(tsrScale.sx, tsrScale.sy), rotate(tsrRotation.angle)),
+                        globalRotation: parentCanvas.globalRotation,
                         elements: []
                     });
                 }
@@ -557,6 +583,10 @@ export interface TranslationMoveEntry {
      * The transformation applied to the dx and dy values
      */
     transformation: Matrix;
+    /**
+     * The global rotaiton of the context
+     */
+    globalRotation: number;
     /**
      * The elements to move
      */

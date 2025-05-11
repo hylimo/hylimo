@@ -24,7 +24,7 @@
         "@mapbox/unitbezier": "^0.0.1",
         "bezier-js": "^6.1.4",
         "inversify": "^6.2.2",
-        "lucide": "^0.507.0",
+        "lucide": "^0.509.0",
         "minisearch": "^7.1.2",
         "snabbdom": "^3.6.2",
         "sprotty": "^1.4.0",

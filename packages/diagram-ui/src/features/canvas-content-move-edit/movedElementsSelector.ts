@@ -81,7 +81,7 @@ export class MovedElementsSelector {
                     }
                 } else if (element instanceof SRelativePoint) {
                     const editable =
-                        DefaultEditTypes.MOVE_X in element.edits && DefaultEditTypes.MOVE_Y in element.edits;
+                        DefaultEditTypes.MOVE_X in element.edits || DefaultEditTypes.MOVE_Y in element.edits;
                     if (!editable) {
                         newElements.add(this.index.getById(element.target) as SCanvasContent);
                     }
