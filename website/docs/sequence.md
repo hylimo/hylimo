@@ -456,7 +456,8 @@ The top and bottom side should be `event`s as their main purpose is being a y-co
 The left and right side should be participants such as `actor`s or `instance`s, as those have the x-coordinate information.\
 Due to having to know these coordinates, you can only declare the frame after both events have been declared.
 
-Additionally, there are a couple of optional attributes:\
+Additionally, there are a couple of optional attributes:
+
 - `text`: the small text in the upper-left corner of the frame describing the type of frame, i.e. `if`, `loop`, or whatever else you want
 - `subtext`: Additional text next to the categorisation, i.e. a condition for the conditional or loop
 - `hasIcon`: Overrides if the border on the upper-left is shown. By default, it is `false` if `text` hasn't been set, and `true` if it is set
