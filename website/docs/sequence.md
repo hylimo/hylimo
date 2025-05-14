@@ -217,6 +217,30 @@ sequenceDiagram {
 }
 ```
 
+## Labels
+
+Oftentimes, you want to display text on a message.\
+To do this in Hylimo you can use the following construct (not exclusive to sequence diagrams, works in every other diagrams as well):
+
+```hyl
+sequenceDiagram {
+    instance("A")
+    instance("B")
+    event("E1")
+    A --> B with {
+        label("text") // positioned at the beginning - 0% of the length
+    }
+    event("E2")
+    A --> B with {
+        label("text", 0.5) // positioned in the middle - 50% of the length
+    }
+    event("E3")
+    A --> B with {
+        label("text", 0.75, 10) // positioned near the end - 75% of the length, 10 pixels upwards, negative values are possible to shift downward
+    }
+}
+```
+
 ## Config properties
 
 The following config properties are available for sequence diagrams:
@@ -426,9 +450,19 @@ Sequence diagrams offer many features that are rather intended for experienced u
 ### Frames
 
 A `frame` is a rectangle containing a bunch of events, optionally with a text naming it and a subtext for further explanation.\
-To declare a frame, you have to supply two mandatory attributes:\
-Its top-left and bottom-right corner.\
-Or in Hylimo terms, event coordinates symbolising these two corners.
+To declare a frame, you have to supply four mandatory attributes:\
+Its top, left, bottom, and right side.\
+The top and bottom side should be `event`s as their main purpose is being a y-coordinate.\
+The left and right side should be participants such as `actor`s or `instance`s, as those have the x-coordinate information.\
+Due to having to know these coordinates, you can only declare the frame after both events have been declared.
+
+Additionally, there are a couple of optional attributes:\
+- `text`: the small text in the upper-left corner of the frame describing the type of frame, i.e. `if`, `loop`, or whatever else you want
+- `subtext`: Additional text next to the categorisation, i.e. a condition for the conditional or loop
+- `hasIcon`: Overrides if the border on the upper-left is shown. By default, it is `false` if `text` hasn't been set, and `true` if it is set
+- `margin`: Sets the margin in pixels to all sides
+- `margin(X,Y)`: Sets the margin in pixels on both sides of this axis. Overrides `margin`.\
+- `margin(Top,Left,Bottom,Right)`: Sets the margin in pixels individually on this side. Overrides all other margins
 
 Here's an example frame:
 
@@ -449,9 +483,9 @@ sequenceDiagram {
 }
 ```
 
-Unfortunately, as you need to know both start and end to create a frame, frames will always need to be the most recent component and thus hide any underlying element.
-We haven't found a better way around that yet.
-If you want to graphically edit i.e. a message below a frame, please comment out the frame and then edit the message for the time being.
+Unfortunately, as the frame must be declared last, frames will always need to be the most recent component and thus hide any underlying element from being selected in the UI.\
+We haven't found a way around that yet.\
+If you want to graphically edit i.e. a message inside a frame, please comment out the frame and then edit the message for the time being.
 
 ### Nested Frames
 
