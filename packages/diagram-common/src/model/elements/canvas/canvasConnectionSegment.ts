@@ -1,6 +1,6 @@
 import { Point } from "../../../common/point.js";
 import type { Element } from "../base/element.js";
-import type { Marker, MarkerLayoutInformation } from "./marker.js";
+import { Marker, type MarkerLayoutInformation } from "./marker.js";
 import { Math2D } from "../../../common/math.js";
 
 /**
@@ -33,7 +33,7 @@ export function calculateMarkerRenderInformationInternal(
             position: pos
         };
     }
-    const markerWidth = marker.width * (1 - marker.lineStart) * marker.refX;
+    const markerWidth = Marker.markerWidth(marker);
     const rotation = (Math.atan2(pos.y - helperPos.y, pos.x - helperPos.x) * 180) / Math.PI;
     const normalizedDelta = Math2D.normalize(Math2D.sub(helperPos, pos));
     const newPoint = Math2D.add(pos, Math2D.scale(normalizedDelta, markerWidth));

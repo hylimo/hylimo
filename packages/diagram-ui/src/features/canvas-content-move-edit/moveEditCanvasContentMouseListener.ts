@@ -1,6 +1,6 @@
 import { inject, injectable } from "inversify";
 import type { EditSpecificationEntry } from "@hylimo/diagram-common";
-import { EditSpecification, DefaultEditTypes, groupBy } from "@hylimo/diagram-common";
+import { EditSpecification, DefaultEditTypes, groupBy, Marker } from "@hylimo/diagram-common";
 import type { SModelElementImpl } from "sprotty";
 import { findParentByFeature, isMoveable } from "sprotty";
 import type { Action } from "sprotty-protocol";
@@ -18,7 +18,7 @@ import { SCanvasConnection } from "../../model/canvas/sCanvasConnection.js";
 import type { SRoot } from "../../model/sRoot.js";
 import type { ElementsGroupedBySize, ResizeSnapHandler } from "./handler/resizeMoveHandler.js";
 import { createResizeSnapHandler, ResizeMoveHandler } from "./handler/resizeMoveHandler.js";
-import { SCanvasAxisAlignedSegment } from "../../model/canvas/sCanvasAxisAlignedSegment.js";
+import type { SCanvasAxisAlignedSegment } from "../../model/canvas/sCanvasAxisAlignedSegment.js";
 import type { AxisAlignedSegmentEditSnapHandler } from "./handler/axisAlignedSegmentEditMoveHandler.js";
 import {
     AxisAlignedSegmentEditMoveHandler,
@@ -113,11 +113,7 @@ export class MoveEditCanvasContentMouseListener extends MouseListener {
                 return this.createResizeHandler(target, classList, event);
             }
         } else if (target instanceof SCanvasConnection && classList != undefined) {
-            if (classList.contains(SCanvasAxisAlignedSegment.SEGMENT_EDIT_CLASS_Y)) {
-                return this.createAxisAlignedSegmentHandler(targetElement as HTMLElement, target, true, event);
-            } else if (classList.contains(SCanvasAxisAlignedSegment.SEGMENT_EDIT_CLASS_X)) {
-                return this.createAxisAlignedSegmentHandler(targetElement as HTMLElement, target, false, event);
-            }
+            return this.createAxisAlignedSegmentHandler(targetElement as HTMLElement, target, event);
         }
         return this.createMoveHandler(target, event);
     }
@@ -128,25 +124,62 @@ export class MoveEditCanvasContentMouseListener extends MouseListener {
      *
      * @param targetElement the clicked svg element
      * @param target the clicked canvas connection
-     * @param vertical true if the vertical segment is moved, false if the horizontal segment is moved
      * @param event the mouse event
      * @returns the move handler if move is supported, otherwise undefined
      */
     private createAxisAlignedSegmentHandler(
         targetElement: HTMLElement,
         target: SCanvasConnection,
-        vertical: boolean,
         event: MouseEvent
     ): AxisAlignedSegmentEditMoveHandler | undefined {
         const dataset = targetElement.dataset;
-        const id = dataset.id!;
-        const start = Number.parseFloat(dataset.start!);
-        const end = Number.parseFloat(dataset.end!);
-        const current = Number.parseFloat(dataset.current!);
-        const otherStart = Number.parseFloat(dataset.startOther!);
-        const otherEnd = Number.parseFloat(dataset.endOther!);
+        let start: number;
+        let end: number;
+        let current: number;
+        let vertical: boolean;
+        let otherStart: number;
+        let otherEnd: number;
+        const index = parseInt(dataset.index!);
+        const segmentIndex = parseInt(dataset.segmentIndex!);
+        const segment = target.segments[index] as SCanvasAxisAlignedSegment;
+        const layout = target.layout.segments[index];
+        if (segment.pos >= 0) {
+            vertical = segmentIndex === 1;
+            if (segmentIndex === 0) {
+                current = layout.originalStart.y;
+            } else if (segmentIndex === 1) {
+                current = layout.start.x + segment.pos * (layout.end.x - layout.start.x);
+            } else {
+                current = layout.originalEnd.y;
+            }
+        } else {
+            vertical = segmentIndex !== 1;
+            if (segmentIndex === 0) {
+                current = layout.originalStart.x;
+            } else if (segmentIndex === 1) {
+                current = layout.end.y + segment.pos * (layout.end.y - layout.start.y);
+            } else {
+                current = layout.originalEnd.x;
+            }
+        }
+        const startOffset = index === 0 && target.startMarker != undefined ? Marker.markerWidth(target.startMarker) : 0;
+        const isLastSegment = index === target.segments.length - 1;
+        const endOffset = isLastSegment && target.endMarker != undefined ? Marker.markerWidth(target.endMarker) : 0;
+        if (vertical) {
+            const dx = layout.originalEnd.x - layout.originalStart.x;
+            start = layout.originalStart.x + Math.sign(dx) * startOffset;
+            end = layout.originalEnd.x - Math.sign(dx) * endOffset;
+            otherStart = layout.originalStart.y;
+            otherEnd = layout.originalEnd.y;
+        } else {
+            const dy = layout.originalEnd.y - layout.originalStart.y;
+            start = layout.originalStart.y + Math.sign(dy) * startOffset;
+            end = layout.originalEnd.y - Math.sign(dy) * endOffset;
+            otherStart = layout.originalStart.x;
+            otherEnd = layout.originalEnd.x;
+        }
         return new AxisAlignedSegmentEditMoveHandler(
-            id,
+            segment.id,
             current,
             start,
             end,

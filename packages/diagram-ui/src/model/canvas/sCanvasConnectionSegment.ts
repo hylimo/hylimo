@@ -37,9 +37,14 @@ export abstract class SCanvasConnectionSegment extends SElement {
      *
      * @param model the parent connection
      * @param layout defines the segment start and end points
+     * @param index the index of the segment
      * @returns the generated nodes
      */
-    abstract generateControlViewElements(model: Readonly<SCanvasConnection>, layout: SegmentLayoutInformation): VNode[];
+    abstract generateControlViewElements(
+        model: Readonly<SCanvasConnection>,
+        layout: SegmentLayoutInformation,
+        index: number
+    ): VNode[];
 
     /**
      * Checks if this segment can be split using an edit

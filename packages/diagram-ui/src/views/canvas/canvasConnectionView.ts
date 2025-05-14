@@ -90,7 +90,7 @@ export class CanvasConnectionView extends EditableCanvasContentView implements I
         for (let i = 0; i < segments.length; i++) {
             const segment = segments[i];
             if (showControlElements) {
-                childControlElements.push(...segment.generateControlViewElements(model, layout.segments[i]));
+                childControlElements.push(...segment.generateControlViewElements(model, layout.segments[i], i));
             }
         }
         return { path: layout.path, childControlElements };

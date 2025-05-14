@@ -50,6 +50,16 @@ export namespace Marker {
     export function isMarker(value: Element): value is Marker {
         return value.type === TYPE;
     }
+
+    /**
+     * Calculates the effective width of the marker, meaning the length the line is offset by the marker
+     *
+     * @param marker the marker to calculate the width for
+     * @returns the effective width of the marker
+     */
+    export function markerWidth(marker: Marker): number {
+        return marker.width * (1 - marker.lineStart) * marker.refX;
+    }
 }
 /**
  * Information required to layout a CanvasConnectionSegment with a marker
