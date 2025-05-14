@@ -9,6 +9,7 @@ export const TYPES = {
     TransactionStateProvider: Symbol("TransactionStateProvider"),
     CreateAndMoveMouseListener: Symbol("CreateAndMoveMouseListener"),
     ConfigManager: Symbol("ConfigManager"),
+    SettingsProvider: Symbol("SettingsProvider"),
     ConnectionEditProvider: Symbol("ConnectionEditProvider"),
     ToolTypeProvider: Symbol("ToolTypeProvider"),
     MoveCursorProvider: Symbol("MoveCursorProvider"),

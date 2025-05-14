@@ -255,7 +255,7 @@ export class LanguageServer {
         if (!diagram) {
             throw new Error(`Unknown diagram: ${params.diagramUri}`);
         }
-        this.diagramServerManager.addClient(params.clientId, diagram, this.diagramUtils.config.editorConfig);
+        this.diagramServerManager.addClient(params.clientId, diagram, this.diagramUtils.config);
     }
 
     /**

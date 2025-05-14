@@ -45,6 +45,7 @@ import { findResizeIconClass } from "../cursor/resizeIcon.js";
 import { MouseListener } from "../../base/mouseListener.js";
 import { TYPES } from "../types.js";
 import type { ConfigManager } from "../config/configManager.js";
+import type { SettingsProvider } from "../settings/settingsProvider.js";
 
 /**
  * If a resize scale exceeds this value, instead resize with scale 1 in the opposite direction is performed.
@@ -70,6 +71,11 @@ export class MoveEditCanvasContentMouseListener extends MouseListener {
      * ConfigManager used to get the editor config
      */
     @inject(TYPES.ConfigManager) protected configManager!: ConfigManager;
+
+    /**
+     * The settings provider
+     */
+    @inject(TYPES.SettingsProvider) protected settingsProvider!: SettingsProvider;
 
     override mouseDown(target: SModelElementImpl, event: MouseEvent): Action[] {
         if (
@@ -437,6 +443,8 @@ export class MoveEditCanvasContentMouseListener extends MouseListener {
                 root.index.getById(linePoint.lineProvider) as SCanvasConnection | SCanvasElement,
                 canvas.id
             ),
+            this.settingsProvider.settings?.linePointPosPrecision,
+            linePoint.distance,
             compose(mouseOffset, canvasTransformationMatrix)
         );
     }

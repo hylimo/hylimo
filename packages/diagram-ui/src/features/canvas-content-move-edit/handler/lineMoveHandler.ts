@@ -1,8 +1,9 @@
 import type { TransformedLine } from "@hylimo/diagram-common";
-import { DefaultEditTypes, LineEngine } from "@hylimo/diagram-common";
+import { DefaultEditTypes } from "@hylimo/diagram-common";
 import type { MoveLposEdit } from "@hylimo/diagram-protocol";
 import type { Matrix } from "transformation-matrix";
 import { MoveHandler, type HandleMoveResult } from "../../move/moveHandler.js";
+import { projectPointOnLine } from "../../../base/projectPointOnLine.js";
 
 /**
  * Move handler for line point moves
@@ -17,6 +18,8 @@ export class LineMoveHandler extends MoveHandler {
      * @param editDist if true, the distance to the line can be modified
      * @param hasSegment if true, the segment index is defined
      * @param line the line on which the point is
+     * @param posPrecision the precision to use for rounding the position
+     * @param distance the current distance of the point to edit
      * @param transformationMatrix the transformation matrix to apply to obtain the relative position
      */
     constructor(
@@ -25,13 +28,23 @@ export class LineMoveHandler extends MoveHandler {
         readonly editDist: boolean,
         readonly hasSegment: boolean,
         readonly line: TransformedLine,
+        readonly posPrecision: number | undefined,
+        readonly distance: number | undefined,
         transformMatrix: Matrix
     ) {
         super(transformMatrix, "cursor-move");
     }
 
     override handleMove(x: number, y: number): HandleMoveResult {
-        const nearest = LineEngine.DEFAULT.projectPoint({ x, y }, this.line);
+        const nearest = projectPointOnLine(
+            { x, y },
+            this.line,
+            {
+                posPrecision: this.posPrecision,
+                hasSegment: this.hasSegment
+            },
+            this.editDist ? undefined : (this.distance ?? 0)
+        );
         let pos: number | [number, number];
         if (this.hasSegment) {
             pos = [nearest.segment, nearest.relativePos];

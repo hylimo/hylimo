@@ -2,6 +2,7 @@ export * from "./diagram/editor-config/editorConfig.js";
 export * from "./diagram/editor-config/editorConfigUpdatedAction.js";
 export * from "./diagram/editor-config/updateEditorConfigAction.js";
 export * from "./diagram/navigation/navigateToSourceAction.js";
+export * from "./diagram/settings/settingsUpdatedAction.js";
 export * from "./diagram/toolbox/toolboxEditPredictionRequestAction.js";
 export * from "./diagram/toolbox/toolboxEditPredictionResponseAction.js";
 export * from "./diagram/transaction/defaultEditTypes.js";

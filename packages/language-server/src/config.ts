@@ -1,5 +1,5 @@
 import type { DiagramConfig } from "@hylimo/diagram-common";
-import type { DynamicLanguageServerConfig, EditorConfig, LanguageServerSettings } from "@hylimo/diagram-protocol";
+import type { DynamicLanguageServerConfig, EditorConfig, SharedSettings } from "@hylimo/diagram-protocol";
 
 /**
  * Dynamic configuration for a diagram language server
@@ -13,7 +13,7 @@ export class Config implements DynamicLanguageServerConfig {
      * The settings for the language server
      * The are permanent values which can be modified by the user
      */
-    readonly settings: LanguageServerSettings;
+    readonly settings: SharedSettings;
     /**
      * The configuration for the graphical editor
      */

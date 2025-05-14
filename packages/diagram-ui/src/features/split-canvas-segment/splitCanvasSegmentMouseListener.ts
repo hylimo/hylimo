@@ -22,6 +22,8 @@ import { SplitBezierSegmentMoveHandler } from "./handler/splitBezierSegmentMoveH
 import { SplitAxisAlignedSegmentMoveHandler } from "./handler/splitAxisAlignedSegmentMoveHandler.js";
 import { TransactionalMoveAction } from "../move/transactionalMoveAction.js";
 import { MoveEditCanvasContentMouseListener } from "../canvas-content-move-edit/moveEditCanvasContentMouseListener.js";
+import { projectPointOnLine } from "../../base/projectPointOnLine.js";
+import type { SettingsProvider } from "../settings/settingsProvider.js";
 
 /**
  * Listener for splitting canvas connection segments by shift-clicking on them
@@ -32,6 +34,11 @@ export class SplitCanvasSegmentMouseListener extends MouseListener {
      * The transaction id provider
      */
     @inject(TYPES.TransactionIdProvider) transactionIdProvider!: TransactionIdProvider;
+
+    /**
+     * The settings provider
+     */
+    @inject(TYPES.SettingsProvider) protected settingsProvider!: SettingsProvider;
 
     override mouseDown(target: SModelElementImpl, event: MouseEvent): Action[] {
         if (!this.canSplit(target, event)) {
@@ -105,7 +112,15 @@ export class SplitCanvasSegmentMouseListener extends MouseListener {
         const canvas = target.parent;
         const transformationMatrix = canvas.getMouseTransformationMatrix();
         const coordinates = applyToPoint(transformationMatrix, { x: event.clientX, y: event.clientY });
-        const projectedPoint = LineEngine.DEFAULT.projectPoint(coordinates, target.line);
+        const projectedPoint = projectPointOnLine(
+            coordinates,
+            target.line,
+            {
+                posPrecision: this.settingsProvider.settings?.linePointPosPrecision,
+                hasSegment: false
+            },
+            0
+        );
         return { projectedPoint, transformationMatrix };
     }
 

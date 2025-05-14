@@ -1,6 +1,6 @@
 import type { DiagramConfig } from "@hylimo/diagram-common";
 import { NotificationType } from "vscode-languageserver-protocol";
-import type { LanguageServerSettings } from "./settings.js";
+import type { SharedSettings } from "./settings.js";
 import type { EditorConfig } from "../diagram/editor-config/editorConfig.js";
 
 /**
@@ -15,7 +15,7 @@ export interface DynamicLanguageServerConfig {
      * The settings for the language server
      * These are permanent values which can be modified by the user
      */
-    settings: LanguageServerSettings;
+    settings: SharedSettings;
     /**
      * The configuration for the graphical editor
      */

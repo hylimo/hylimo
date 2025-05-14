@@ -8,7 +8,7 @@ import {
 } from "vscode-languageserver-protocol/browser.js";
 import { MonacoLanguageClient } from "monaco-languageclient";
 import { CloseAction, ErrorAction } from "vscode-languageclient";
-import type { DynamicLanguageServerConfig, EditorConfig, LanguageServerSettings } from "@hylimo/diagram-protocol";
+import type { DynamicLanguageServerConfig, EditorConfig, SharedSettings } from "@hylimo/diagram-protocol";
 import {
     ConfigNotification,
     UpdateEditorConfigNotification,
@@ -65,7 +65,7 @@ export interface LanguageServerConfig {
     /**
      * Settings, primarily for graphical interaction
      */
-    settings: Ref<LanguageServerSettings>;
+    settings: Ref<SharedSettings>;
     /**
      * Diagram configuration
      */
@@ -88,8 +88,8 @@ export const language = "syncscript";
  */
 export const lspPlugin: Plugin = {
     install(app) {
-        const languageServerSettings = useLocalStorage<LanguageServerSettings>(
-            "languageServerSettings",
+        const sharedSettings = useLocalStorage<SharedSettings>(
+            "sharedSettings",
             {
                 translationPrecision: 1,
                 resizePrecision: 1,
@@ -122,7 +122,7 @@ export const lspPlugin: Plugin = {
             { mergeDefaults: true }
         );
         app.provide(languageServerConfigKey, {
-            settings: languageServerSettings,
+            settings: sharedSettings,
             diagramConfig,
             editorConfig
         });
@@ -139,7 +139,7 @@ export const lspPlugin: Plugin = {
                     enableFontSubsetting: diagramConfig.value.enableFontSubsetting,
                     enableExternalFonts: diagramConfig.value.enableExternalFonts
                 },
-                settings: languageServerSettings.value,
+                settings: sharedSettings.value,
                 editorConfig: editorConfig.value
             };
         });

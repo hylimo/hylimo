@@ -3,8 +3,8 @@ import type { SModelElementImpl } from "sprotty";
 import { findParentByFeature } from "sprotty";
 import { MoveHandler, type HandleMoveResult } from "../move/moveHandler.js";
 import type { Matrix } from "transformation-matrix";
-import { LineEngine } from "@hylimo/diagram-common";
 import { isLineProvider } from "./lineProvider.js";
+import { projectPointOnLine } from "../../base/projectPointOnLine.js";
 
 /**
  * Move handler for creating connections
@@ -21,6 +21,7 @@ export class CreateConnectionMoveHandler extends MoveHandler {
     constructor(
         private readonly edit: `connection/${string}`,
         private readonly start: ConnectionEnd,
+        private readonly posPrecision: number | undefined,
         transformationMatrix: Matrix
     ) {
         super(transformationMatrix, "cursor-crosshair", false);
@@ -32,7 +33,12 @@ export class CreateConnectionMoveHandler extends MoveHandler {
         if (lineProvider != undefined) {
             const root = lineProvider.root;
             const line = root.layoutEngine.layoutLine(lineProvider, root.id);
-            const projection = LineEngine.DEFAULT.projectPoint({ x, y }, line);
+            const projection = projectPointOnLine(
+                { x, y },
+                line,
+                { posPrecision: this.posPrecision, hasSegment: false },
+                0
+            );
             end = {
                 ...end,
                 expression: lineProvider.editExpression!,

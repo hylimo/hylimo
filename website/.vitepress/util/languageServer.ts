@@ -17,7 +17,9 @@ const languageServer = new LanguageServer({
         },
         settings: {},
         editorConfig: {
-            toolboxEnabled: true
+            toolboxEnabled: true,
+            snappingEnabled: true,
+            gridEnabled: true
         }
     },
     connection,

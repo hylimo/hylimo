@@ -35,9 +35,10 @@ export class LineEngine {
      *
      * @param point the point to which the nearest point should be found
      * @param transformedLine line with associated transform
+     * @param forcedDistance if provided, the distance to the line at which the point should be located
      * @returns the position of the closest point on the line
      */
-    projectPoint(point: Point, transformedLine: TransformedLine): ProjectionResult {
+    projectPoint(point: Point, transformedLine: TransformedLine, forcedDistance: number | undefined): ProjectionResult {
         const { line, transform } = transformedLine;
         if (line.segments.length == 0) {
             return {
@@ -56,7 +57,12 @@ export class LineEngine {
         let startPosition = line.start;
         for (let i = 0; i < line.segments.length; i++) {
             const segment = line.segments[i];
-            const { distToExpected, distToLine, candidate } = this.projectOnSegment(segment, localPoint, startPosition);
+            const { distToExpected, distToLine, candidate } = this.projectOnSegment(
+                segment,
+                localPoint,
+                startPosition,
+                forcedDistance
+            );
             if (
                 (distToExpected < minDistToExpected && minDistToExpected > 1) ||
                 (distToExpected <= 1 && candidate.distance < minDistanceToLine)
@@ -90,12 +96,14 @@ export class LineEngine {
      * @param segment the segment on which the point should be projected
      * @param localPoint the point to project
      * @param startPosition the start position of the segment
+     * @param forcedDistance if provided, the distance to the line at which the point should be located
      * @returns the projection candidate data
      */
     private projectOnSegment(
         segment: Segment,
         localPoint: Point,
-        startPosition: Point
+        startPosition: Point,
+        forcedDistance: number | undefined
     ): {
         distToExpected: number;
         distToLine: number;
@@ -106,6 +114,7 @@ export class LineEngine {
         const normal = engine.getNormalVector(candidate.position, segment, startPosition);
         const d2 = normal.x ** 2 + normal.y ** 2;
         const distToLine =
+            forcedDistance ??
             ((localPoint.x - candidate.point.x) * normal.x + (localPoint.y - candidate.point.y) * normal.y) / d2;
         const expectedPoint = engine.getPoint(candidate.position, distToLine, segment, startPosition);
         const distToExpected = Math2D.distance(expectedPoint, localPoint);

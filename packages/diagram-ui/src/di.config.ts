@@ -79,6 +79,7 @@ import { boxSelectFeature } from "./features/select/boxSelectFeature.js";
 import { keyStateModule } from "./features/key-state/di.config.js";
 import { contribModule } from "./features/contrib/di.config.js";
 import { snapModule } from "./features/snap/di.config.js";
+import { settingsModule } from "./features/settings/di.config.js";
 
 /**
  * The module used
@@ -155,7 +156,8 @@ export function createContainer(widgetId: string): Container {
         selectModule,
         keyStateModule,
         snapModule,
-        contribModule
+        contribModule,
+        settingsModule
     );
     container.load(diagramModule);
 

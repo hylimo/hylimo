@@ -1,7 +1,7 @@
 /**
- * The settings for the language server
+ * Shared settings for the language server and diagram editor.
  */
-export interface LanguageServerSettings {
+export interface SharedSettings {
     /**
      * The precision of absolute/relative points
      */

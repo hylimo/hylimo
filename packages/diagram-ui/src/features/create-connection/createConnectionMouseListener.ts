@@ -5,7 +5,6 @@ import type { Action } from "sprotty-protocol";
 import type { SCanvasElement } from "../../model/canvas/sCanvasElement.js";
 import type { SCanvasConnection } from "../../model/canvas/sCanvasConnection.js";
 import type { Point } from "@hylimo/diagram-common";
-import { LineEngine } from "@hylimo/diagram-common";
 import { applyToPoint } from "transformation-matrix";
 import { TransactionalMoveAction } from "../move/transactionalMoveAction.js";
 import { CreateConnectionMoveHandler } from "./createConnectionMoveHandler.js";
@@ -19,6 +18,8 @@ import { ToolboxToolType } from "../toolbox/toolType.js";
 import { isLineProvider } from "./lineProvider.js";
 import type { TransactionStateProvider } from "../transaction/transactionStateProvider.js";
 import { MouseListener } from "../../base/mouseListener.js";
+import type { SettingsProvider } from "../settings/settingsProvider.js";
+import { projectPointOnLine } from "../../base/projectPointOnLine.js";
 
 /**
  * Mouse listener for updating the connection creation UI based on mouse movements
@@ -34,6 +35,11 @@ export class CreateConnectionMouseListener extends MouseListener {
      * The transaction state provider that keeps track of the current transaction state.
      */
     @inject(TYPES.TransactionStateProvider) protected transactionStateProvider!: TransactionStateProvider;
+
+    /**
+     * The settings provider
+     */
+    @inject(TYPES.SettingsProvider) protected settingsProvider!: SettingsProvider;
 
     override mouseDown(target: SModelElementImpl, event: MouseEvent): Action[] {
         if (this.toolTypeProvider.toolType !== ToolboxToolType.CONNECT || this.isForcedScroll(event)) {
@@ -79,7 +85,13 @@ export class CreateConnectionMouseListener extends MouseListener {
         return {
             kind: TransactionalMoveAction.KIND,
             maxUpdatesPerRevision: 1,
-            handlerProvider: () => new CreateConnectionMoveHandler(edit, start, root.getMouseTransformationMatrix())
+            handlerProvider: () =>
+                new CreateConnectionMoveHandler(
+                    edit,
+                    start,
+                    this.settingsProvider.settings?.linePointPosPrecision,
+                    root.getMouseTransformationMatrix()
+                )
         };
     }
 
@@ -122,7 +134,15 @@ export class CreateConnectionMouseListener extends MouseListener {
         const context = target.parent;
         const line = target.root.layoutEngine.layoutLine(target, context.id);
         const point = applyToPoint(context.getMouseTransformationMatrix(), { x: event.pageX, y: event.pageY });
-        const projectionResult = LineEngine.DEFAULT.projectPoint(point, line);
+        const projectionResult = projectPointOnLine(
+            point,
+            line,
+            {
+                posPrecision: this.settingsProvider.settings?.linePointPosPrecision,
+                hasSegment: false
+            },
+            0
+        );
         return {
             line,
             projectionResult,
