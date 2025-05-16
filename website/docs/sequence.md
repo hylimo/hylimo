@@ -222,7 +222,7 @@ sequenceDiagram {
 Oftentimes, you want to display text on a message.\
 To do this in Hylimo you can use the following construct (not exclusive to sequence diagrams, works in every other diagrams as well):
 
-```hyl
+```hylimo
 sequenceDiagram {
     instance("A")
     instance("B")
