@@ -39,7 +39,12 @@
                     <button class="menu-button" :disabled="diagram == undefined" @click="downloadSVG(false)">
                         SVG
                     </button>
-                    <button class="menu-button" :disabled="diagram == undefined" title="Powerpoint and many others do not support embedded fonts, so the text is converted to a path instead" @click="downloadSVG(true)">
+                    <button
+                        class="menu-button"
+                        :disabled="diagram == undefined"
+                        title="Powerpoint and many others do not support embedded fonts, so the text is converted to a path instead"
+                        @click="downloadSVG(true)"
+                    >
                         SVG (text as path)
                     </button>
                     <button class="menu-button" :disabled="diagram == undefined" @click="downloadPDF">PDF</button>
