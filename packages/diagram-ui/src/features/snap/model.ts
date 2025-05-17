@@ -430,6 +430,10 @@ export interface SnapResult {
      * Global rotation values for all contexts
      */
     contextGlobalRotations: Map<string, number>;
+    /**
+     * The original offset applied to the elements being moved (before snapping)
+     */
+    elementOffset: Vector;
 }
 
 /**

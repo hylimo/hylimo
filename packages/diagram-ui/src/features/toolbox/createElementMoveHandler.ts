@@ -1,13 +1,13 @@
-import type { ToolboxEdit } from "@hylimo/diagram-protocol";
+import { SharedSettings, type ToolboxEdit } from "@hylimo/diagram-protocol";
 import { MoveHandler, type HandleMoveResult } from "../move/moveHandler.js";
 import type { SRoot } from "../../model/sRoot.js";
 import type { SModelElementImpl } from "sprotty";
 import type { Action } from "sprotty-protocol";
-import { getSnapLines, getSnaps } from "../snap/snapping.js";
+import { filterValidSnaps, getSnapLines, getSnaps } from "../snap/snapping.js";
 import { type SnapLine } from "../snap/model.js";
 import { findViewportZoom } from "../../base/findViewportZoom.js";
 import type { Point } from "@hylimo/diagram-common";
-import { translate } from "transformation-matrix";
+import { translate, type Matrix } from "transformation-matrix";
 import { SnapHandler } from "../snap/snapHandler.js";
 import { getSnapReferenceData } from "../snap/snapData.js";
 
@@ -88,9 +88,10 @@ export class CreateElementSnapHandler extends SnapHandler {
      * Creates a new create element snap handler
      *
      * @param root the root element
+     * @param settings the shared settings
      */
-    constructor(root: SRoot) {
-        super(getSnapReferenceData(root, new Set([root.id]), new Set()));
+    constructor(root: SRoot, settings: SharedSettings | undefined) {
+        super(getSnapReferenceData(root, new Set([root.id]), new Set()), settings);
         this.context = root.id;
     }
 
@@ -119,10 +120,24 @@ export class CreateElementSnapHandler extends SnapHandler {
             snapPoints: true,
             snapSize: false
         });
-        const snapLines = getSnapLines(snapResult, translate(snapResult.snapOffset.x, snapResult.snapOffset.y));
+        filterValidSnaps(snapResult, this.createRoundedTranslation(values));
+        const snapLines = getSnapLines(snapResult, this.createRoundedTranslation(values));
         return {
             snappedValues: snapResult.snapOffset,
             snapLines
         };
+    }
+
+    /**
+     * Creates a translation matrix with rounded coordinates
+     *
+     * @param point the point to translate by after rounding
+     * @returns a translation matrix with the rounded coordinates
+     */
+    private createRoundedTranslation(point: Point): Matrix {
+        return translate(
+            SharedSettings.roundToTranslationPrecision(this.settings, point.x),
+            SharedSettings.roundToTranslationPrecision(this.settings, point.y)
+        );
     }
 }

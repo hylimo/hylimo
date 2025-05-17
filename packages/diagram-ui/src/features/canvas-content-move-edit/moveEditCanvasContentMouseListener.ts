@@ -522,7 +522,7 @@ export class MoveEditCanvasContentMouseListener extends MouseListener {
         if (this.configManager?.config?.snappingEnabled != true) {
             return undefined;
         }
-        return new TranslationSnapHandler(elements, ignoredElements, root);
+        return new TranslationSnapHandler(elements, ignoredElements, root, this.settingsProvider.settings);
     }
 
     /**
@@ -545,7 +545,7 @@ export class MoveEditCanvasContentMouseListener extends MouseListener {
         if (this.configManager?.config?.snappingEnabled != true) {
             return undefined;
         }
-        return createResizeSnapHandler(element, scaleX, scaleY, ignoredElements, root);
+        return createResizeSnapHandler(element, scaleX, scaleY, ignoredElements, root, this.settingsProvider.settings);
     }
 
     /**
@@ -554,20 +554,26 @@ export class MoveEditCanvasContentMouseListener extends MouseListener {
      *
      * @param connection the canvas connection containing the segment being edited
      * @param vertical whether the segment being moved is vertical (true) or horizontal (false)
-     * @param start the start coordinate of the segment for the off-axis
-     * @param end the end coordinate of the segment for the off-axis
+     * @param otherStart the start coordinate of the segment for the off-axis
+     * @param otherEnd the end coordinate of the segment for the off-axis
      * @returns a new AxisAlignedSegmentEditSnapHandler instance or undefined if snapping is disabled
      */
     private createAxisAlignedSegmentEditSnapHandler(
         connection: SCanvasConnection,
         vertical: boolean,
-        start: number,
-        end: number
+        otherStart: number,
+        otherEnd: number
     ): AxisAlignedSegmentEditSnapHandler | undefined {
         if (this.configManager?.config?.snappingEnabled != true) {
             return undefined;
         }
-        return createAxisAlignedSegmentEditSnapHandler(connection, vertical, start, end);
+        return createAxisAlignedSegmentEditSnapHandler(
+            connection,
+            vertical,
+            otherStart,
+            otherEnd,
+            this.settingsProvider.settings
+        );
     }
 
     /**

@@ -1,3 +1,4 @@
+import type { SharedSettings } from "@hylimo/diagram-protocol";
 import type { SRoot } from "../../model/sRoot.js";
 import type { SnapReferenceData } from "./model.js";
 import { getSnapReferenceData, intersectSnapReferenceDatas } from "./snapData.js";
@@ -7,11 +8,22 @@ import { getSnapReferenceData, intersectSnapReferenceDatas } from "./snapData.js
  */
 export abstract class SnapHandler {
     /**
-     * Creates a new SnapHandler.
-
-     * @param referenceData the reference data to use for snapping
+     * Shared settings for the snap handler.
      */
-    constructor(protected referenceData: SnapReferenceData) {}
+    protected readonly settings: SharedSettings;
+
+    /**
+     * Creates a new SnapHandler.
+     *
+     * @param referenceData the reference data to use for snapping
+     * @param settings the shared settings for the snap handler
+     */
+    constructor(
+        protected referenceData: SnapReferenceData,
+        settings: SharedSettings | undefined
+    ) {
+        this.settings = settings ?? {};
+    }
 
     /**
      * Updates the reference data for snapping based on the current context.

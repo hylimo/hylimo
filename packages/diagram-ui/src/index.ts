@@ -55,6 +55,7 @@ export * from "./features/select/selectMouseListener.js";
 export * from "./features/settings/di.config.js";
 export * from "./features/settings/settingsProvider.js";
 export * from "./features/snap/di.config.js";
+export * from "./features/snap/filterSnaps.js";
 export * from "./features/snap/gapSnap.js";
 export * from "./features/snap/model.js";
 export * from "./features/snap/pointSnap.js";

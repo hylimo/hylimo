@@ -1,6 +1,7 @@
 import type { IncrementalUpdate, MoveLposEdit } from "@hylimo/diagram-protocol";
 import type { EditHandler } from "./editHandler.js";
 import { DefaultEditTypes, LinePoint } from "@hylimo/diagram-common";
+import { SharedSettings } from "@hylimo/diagram-protocol";
 
 /**
  * Handler for lpos dist edits
@@ -24,6 +25,8 @@ export const moveLineDistHandler: EditHandler<MoveLposEdit> = {
     },
 
     transformEdit(edit, config) {
-        edit.values.dist = config.roundToLinePointDistancePrecision(edit.values.dist);
+        if (edit.values.dist != undefined) {
+            edit.values.dist = SharedSettings.roundToLinePointDistancePrecision(config.settings, edit.values.dist);
+        }
     }
 };

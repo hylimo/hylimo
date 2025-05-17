@@ -2,6 +2,7 @@ import type { IncrementalUpdate, MoveEdit } from "@hylimo/diagram-protocol";
 import type { EditHandler } from "./editHandler.js";
 import { AbsolutePoint, DefaultEditTypes } from "@hylimo/diagram-common";
 import { computeElementsToUpdate } from "./translationHandlerUtils.js";
+import { SharedSettings } from "@hylimo/diagram-protocol";
 
 /**
  * Handler for moveY edits
@@ -37,6 +38,8 @@ export const moveYHandler: EditHandler<MoveEdit> = {
     },
 
     transformEdit(edit, config) {
-        edit.values.dy = config.roundToTranslationPrecision(edit.values.dy);
+        if (edit.values.dy != undefined) {
+            edit.values.dy = SharedSettings.roundToTranslationPrecision(config.settings, edit.values.dy);
+        }
     }
 };

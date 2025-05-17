@@ -1,4 +1,4 @@
-import type { AxisAlignedSegmentEdit } from "@hylimo/diagram-protocol";
+import { SharedSettings, type AxisAlignedSegmentEdit } from "@hylimo/diagram-protocol";
 import { DefaultEditTypes } from "@hylimo/diagram-common";
 import { applyToPoint, rotateDEG, translate, type Matrix } from "transformation-matrix";
 import { MoveHandler, type HandleMoveResult } from "../../move/moveHandler.js";
@@ -6,11 +6,27 @@ import type { ResizeMoveCursor } from "../../cursor/cursor.js";
 import type { SnapLines } from "../../snap/model.js";
 import { SnapHandler } from "../../snap/snapHandler.js";
 import type { SRoot } from "../../../model/sRoot.js";
-import { getSnapLines, getSnaps } from "../../snap/snapping.js";
+import { getSnapLines, getSnaps, SNAP_TOLERANCE } from "../../snap/snapping.js";
 import type { SCanvasConnection } from "../../../model/canvas/sCanvasConnection.js";
 import type { SModelElementImpl } from "sprotty";
 import { findViewportZoom } from "../../../base/findViewportZoom.js";
 import { getSnapReferenceData } from "../../snap/snapData.js";
+
+/**
+ * Represents the result of a snap operation for an axis-aligned segment.
+ * Contains information about the snapped position and any snap lines that should be displayed.
+ */
+interface AxisAlignedSegmentSnapResult {
+    /**
+     * The position value after snapping, normalized between 0 and 1
+     */
+    snappedPos: number;
+
+    /**
+     * Visual snap lines to display in the UI, if any
+     */
+    snapLines: SnapLines | undefined;
+}
 
 /**
  * Move handler for moving the vertical segment of an axis aligned connection segment.
@@ -51,11 +67,10 @@ export class AxisAlignedSegmentEditMoveHandler extends MoveHandler {
             const root = target.root as SRoot;
             const zoom = findViewportZoom(root);
             this.snapHandler.updateReferenceData(root);
-            const { snappedValue, snapLines: newSnapLines } = this.snapHandler.snap(rawValue, zoom);
-            const potentialNewPos = (snappedValue - this.start) / (this.end - this.start);
-            if (potentialNewPos >= 0 && potentialNewPos <= 1) {
-                newPos = potentialNewPos;
-                snapLines = newSnapLines;
+            const snapResult = this.snapHandler.snap(rawValue, this.start, this.end, zoom);
+            if (snapResult != undefined) {
+                newPos = snapResult.snappedPos;
+                snapLines = snapResult.snapLines;
             }
         }
         const edits = [
@@ -101,19 +116,20 @@ export class AxisAlignedSegmentEditSnapHandler extends SnapHandler {
      *
      * @param connection the canvas connection containing the segment being edited
      * @param vertical whether the segment being moved is vertical (true) or horizontal (false)
-     * @param start the start coordinate of the segment for the off-axis
-     * @param end the end coordinate of the segment for the off-axis
+     * @param otherStart the start coordinate of the segment for the off-axis
+     * @param otherEnd the end coordinate of the segment for the off-axis
      */
     constructor(
         connection: SCanvasConnection,
         private readonly vertical: boolean,
-        private readonly start: number,
-        private readonly end: number
+        private readonly otherStart: number,
+        private readonly otherEnd: number,
+        settings: SharedSettings | undefined
     ) {
         const root = connection.root;
         const canvas = connection.parent;
 
-        super(getSnapReferenceData(root, new Set([canvas.id]), new Set()));
+        super(getSnapReferenceData(root, new Set([canvas.id]), new Set()), settings);
 
         this.context = canvas.id;
         this.contextToTargetMatrix = rotateDEG(canvas.globalRotation);
@@ -129,26 +145,53 @@ export class AxisAlignedSegmentEditSnapHandler extends SnapHandler {
      * Gets the snapped value and associated snap lines based on the current position
      *
      * @param value the current position value of the segment being edited
+     * @param start the x/y cooridnate of the start of the whole axis aligned segment
+     * @param end the x/y cooridnate of the end of the whole axis aligned segment
      * @param zoom the current zoom level of the viewport
-     * @returns an object containing the snapped value and snap lines to display
+     * @returns an object containing the snapped pos and snap lines to display
      */
-    snap(
-        value: number,
-        zoom: number
-    ): {
-        snappedValue: number;
-        snapLines: SnapLines | undefined;
-    } {
+    snap(value: number, start: number, end: number, zoom: number): AxisAlignedSegmentSnapResult | undefined {
+        const snapResult = this.getSnapResult(value, zoom);
+
+        const convertedSnapOffset = applyToPoint(this.targetToContextMatrix, snapResult.snapOffset);
+        const snappedValue = this.vertical ? convertedSnapOffset.x : convertedSnapOffset.y;
+
+        const potentialNewPos = (snappedValue - start) / (end - start);
+        if (potentialNewPos < 0 && potentialNewPos > 1) {
+            return undefined;
+        }
+        const roundedPos = SharedSettings.roundToAxisAlignedPosPrecision(this.settings, potentialNewPos);
+        const rounedValue = roundedPos * (end - start) + start;
+        if (Math.abs(rounedValue - snappedValue) >= SNAP_TOLERANCE) {
+            return undefined;
+        }
+
+        const snapLines = getSnapLines(snapResult, translate(snapResult.snapOffset.x, snapResult.snapOffset.y));
+
+        return {
+            snappedPos: roundedPos,
+            snapLines
+        };
+    }
+
+    /**
+     * Gets snap result data based on the current value
+     *
+     * @param value the current position value of the segment being edited
+     * @param zoom the current zoom level of the viewport
+     * @returns the snap result data
+     */
+    private getSnapResult(value: number, zoom: number) {
         const snapElementData = {
             bounds: undefined,
             points: [
                 {
-                    x: this.vertical ? 0 : this.start,
-                    y: this.vertical ? this.start : 0
+                    x: this.vertical ? 0 : this.otherStart,
+                    y: this.vertical ? this.otherStart : 0
                 },
                 {
-                    x: this.vertical ? 0 : this.end,
-                    y: this.vertical ? this.end : 0
+                    x: this.vertical ? 0 : this.otherEnd,
+                    y: this.vertical ? this.otherEnd : 0
                 }
             ].map((point) => applyToPoint(this.contextToTargetMatrix, point))
         };
@@ -156,20 +199,13 @@ export class AxisAlignedSegmentEditSnapHandler extends SnapHandler {
             x: this.vertical ? value : 0,
             y: this.vertical ? 0 : value
         });
-        const snapResult = getSnaps(new Map([[this.context, snapElementData]]), this.referenceData, zoom, offset, {
+        return getSnaps(new Map([[this.context, snapElementData]]), this.referenceData, zoom, offset, {
             snapX: this.effectivelyVertical,
             snapY: !this.effectivelyVertical,
             snapGaps: false,
             snapPoints: true,
             snapSize: false
         });
-        const convertedSnapOffset = applyToPoint(this.targetToContextMatrix, snapResult.snapOffset);
-        const snappedValue = this.vertical ? convertedSnapOffset.x : convertedSnapOffset.y;
-        const snapLines = getSnapLines(snapResult, translate(snapResult.snapOffset.x, snapResult.snapOffset.y));
-        return {
-            snappedValue,
-            snapLines
-        };
     }
 }
 
@@ -179,19 +215,20 @@ export class AxisAlignedSegmentEditSnapHandler extends SnapHandler {
  *
  * @param connection the canvas connection containing the segment being edited
  * @param vertical whether the segment being moved is vertical (true) or horizontal (false)
- * @param start the start coordinate of the segment for the off-axis
- * @param end the end coordinate of the segment for the off-axis
+ * @param otherStart the start coordinate of the segment for the off-axis
+ * @param otherEnd the end coordinate of the segment for the off-axis
  * @returns a new AxisAlignedSegmentEditSnapHandler instance or undefined if the canvas rotation isn't a multiple of 90 degrees
  */
 export function createAxisAlignedSegmentEditSnapHandler(
     connection: SCanvasConnection,
     vertical: boolean,
-    start: number,
-    end: number
+    otherStart: number,
+    otherEnd: number,
+    settings: SharedSettings | undefined
 ): AxisAlignedSegmentEditSnapHandler | undefined {
     const rotation = connection.parent.globalRotation;
     if (rotation % 90 !== 0) {
         return undefined;
     }
-    return new AxisAlignedSegmentEditSnapHandler(connection, vertical, start, end);
+    return new AxisAlignedSegmentEditSnapHandler(connection, vertical, otherStart, otherEnd, settings);
 }

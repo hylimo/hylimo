@@ -1,6 +1,7 @@
 import { CanvasAxisAlignedSegment, DefaultEditTypes } from "@hylimo/diagram-common";
 import type { AxisAlignedSegmentEdit, IncrementalUpdate } from "@hylimo/diagram-protocol";
 import type { EditHandler } from "./editHandler.js";
+import { SharedSettings } from "@hylimo/diagram-protocol";
 
 /**
  * Handler for axis aligned segment pos edits
@@ -24,6 +25,8 @@ export const axisAlignedSegmentPosHandler: EditHandler<AxisAlignedSegmentEdit> =
     },
 
     transformEdit(edit, config) {
-        edit.values.pos = config.roundToAxisAlignedPosPrecision(edit.values.pos);
+        if (edit.values.pos != undefined) {
+            edit.values.pos = SharedSettings.roundToAxisAlignedPosPrecision(config.settings, edit.values.pos);
+        }
     }
 };

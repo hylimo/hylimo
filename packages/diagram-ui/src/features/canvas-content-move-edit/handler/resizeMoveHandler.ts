@@ -1,9 +1,9 @@
 import { Bounds, DefaultEditTypes } from "@hylimo/diagram-common";
-import type { Edit, ResizeEdit } from "@hylimo/diagram-protocol";
+import { SharedSettings, type Edit, type ResizeEdit } from "@hylimo/diagram-protocol";
 import { compose, inverse, rotateDEG, scale, type Matrix } from "transformation-matrix";
 import { MoveHandler, type HandleMoveResult } from "../../move/moveHandler.js";
 import type { ResizeMoveCursor } from "../../cursor/cursor.js";
-import { getSnapLines, getSnaps } from "../../snap/snapping.js";
+import { filterValidSnaps, getSnapLines, getSnaps } from "../../snap/snapping.js";
 import {
     GapSnapDirection,
     SnapDirection,
@@ -11,7 +11,8 @@ import {
     type ContextSnapData,
     type GapSnapOptions,
     type Snap,
-    type SnapLines
+    type SnapLines,
+    type SnapResult
 } from "../../snap/model.js";
 import type { SCanvasElement } from "../../../model/canvas/sCanvasElement.js";
 import type { SElement } from "../../../model/sElement.js";
@@ -67,6 +68,26 @@ interface SnapFactorContext {
      * Direction in which the y resize factor snapping was applied.
      */
     factorYDirection?: SnapDirection;
+}
+
+/**
+ * Represents the resize factors resulting from snap operations.
+ * Contains the adjusted scaling factors after snapping has been applied.
+ */
+interface SnapResizeFactors {
+    /**
+     * The adjusted horizontal resize factor after snapping.
+     * Represents how much the element should be scaled horizontally relative to its original width.
+     * Undefined if no horizontal resizing is being performed.
+     */
+    newFactorX: number | undefined;
+
+    /**
+     * The adjusted vertical resize factor after snapping.
+     * Represents how much the element should be scaled vertically relative to its original height.
+     * Undefined if no vertical resizing is being performed.
+     */
+    newFactorY: number | undefined;
 }
 
 /**
@@ -204,7 +225,8 @@ export class ResizeSnapHandler extends SnapHandler {
         private readonly scaleY: number | undefined,
         root: SRoot,
         ignoredElements: SElement[],
-        private readonly effectiveRotation: number
+        private readonly effectiveRotation: number,
+        settings: SharedSettings | undefined
     ) {
         const ignoredElementsSet = new Set<string>();
         for (const element of ignoredElements) {
@@ -212,7 +234,7 @@ export class ResizeSnapHandler extends SnapHandler {
         }
         const context = element.parent.id;
 
-        super(getSnapReferenceData(root, new Set([context]), ignoredElementsSet));
+        super(getSnapReferenceData(root, new Set([context]), ignoredElementsSet), settings);
 
         const layoutEngine = root.layoutEngine;
         this.context = context;
@@ -333,21 +355,45 @@ export class ResizeSnapHandler extends SnapHandler {
             }
         );
 
-        const { newFactorX, newFactorY } = this.processSnaps(result, factorX, factorY, uniform, resizedCorners);
+        let newFactors = this.processSnaps(result, factorX, factorY, uniform, resizedCorners);
+        const hasChanges = filterValidSnaps(result, this.createRoundedScale(factorX, factorY, newFactors));
+        if (hasChanges) {
+            newFactors = this.processSnaps(result, factorX, factorY, uniform, resizedCorners);
+        }
 
-        const transform = compose(
-            this.elementToTargetMatrix,
-            scale((newFactorX ?? 1) / (factorX ?? 1), (newFactorY ?? 1) / (factorY ?? 1)),
-            this.targetToElementMatrix
-        );
-
-        const snapLines = getSnapLines(result, transform);
+        const snapLines = getSnapLines(result, this.createRoundedScale(factorX, factorY, newFactors));
 
         return {
-            factorX: newFactorX,
-            factorY: newFactorY,
+            factorX: newFactors.newFactorX,
+            factorY: newFactors.newFactorY,
             snapLines
         };
+    }
+
+    /**
+     * Creates a scale matrix for resizing the element.
+     *
+     * @param factorX the x resize factor
+     * @param factorY the y resize factor
+     * @param newFactors the new resize factors
+     * @returns a translation matrix with the rounded coordinates
+     */
+    private createRoundedScale(
+        factorX: number | undefined,
+        factorY: number | undefined,
+        newFactors: SnapResizeFactors
+    ): Matrix {
+        const dw = this.current.width * (newFactors.newFactorX ?? 1) - this.current.width;
+        const dh = this.current.height * (newFactors.newFactorY ?? 1) - this.current.height;
+        const newFactorX =
+            (this.current.width + SharedSettings.roundToResizePrecision(this.settings, dw)) / this.current.width;
+        const newFactorY =
+            (this.current.height + SharedSettings.roundToResizePrecision(this.settings, dh)) / this.current.height;
+        return compose(
+            this.elementToTargetMatrix,
+            scale(newFactorX / (factorX ?? 1), newFactorY / (factorY ?? 1)),
+            this.targetToElementMatrix
+        );
     }
 
     /**
@@ -361,15 +407,12 @@ export class ResizeSnapHandler extends SnapHandler {
      * @returns The adjusted factors and their directions
      */
     private processSnaps(
-        result: ReturnType<typeof getSnaps>,
+        result: SnapResult,
         factorX: number | undefined,
         factorY: number | undefined,
         uniform: boolean,
         resizedCorners: ReturnType<typeof getCanvasElementCorners>
-    ): {
-        newFactorX: number | undefined;
-        newFactorY: number | undefined;
-    } {
+    ): SnapResizeFactors {
         const context: SnapFactorContext = {};
         this.adaptFactorsBasedOnSnaps(result, factorX, factorY, resizedCorners, context);
         const resizeFactors = this.calculateFinalResizeFactors(factorX, factorY, uniform, context);
@@ -399,7 +442,7 @@ export class ResizeSnapHandler extends SnapHandler {
      * @param context The snap factor context to update
      */
     private adaptFactorsBasedOnSnaps(
-        result: ReturnType<typeof getSnaps>,
+        result: SnapResult,
         factorX: number | undefined,
         factorY: number | undefined,
         resizedCorners: ReturnType<typeof getCanvasElementCorners>,
@@ -428,7 +471,7 @@ export class ResizeSnapHandler extends SnapHandler {
      */
     private adaptFactorsBasedOnXSnap(
         snapX: Snap,
-        result: ReturnType<typeof getSnaps>,
+        result: SnapResult,
         factorX: number | undefined,
         factorY: number | undefined,
         resizedCorners: ReturnType<typeof getCanvasElementCorners>,
@@ -469,7 +512,7 @@ export class ResizeSnapHandler extends SnapHandler {
      */
     private adaptFactorsBasedOnYSnap(
         snapY: Snap,
-        result: ReturnType<typeof getSnaps>,
+        result: SnapResult,
         factorX: number | undefined,
         factorY: number | undefined,
         resizedCorners: ReturnType<typeof getCanvasElementCorners>,
@@ -594,7 +637,7 @@ export class ResizeSnapHandler extends SnapHandler {
      * @param snapX The horizontal snap data
      * @returns The target x position
      */
-    private getHorizontalSnapTarget(snapX: ReturnType<typeof getSnaps>["nearestSnapsX"][0]): number {
+    private getHorizontalSnapTarget(snapX: SnapResult["nearestSnapsX"][0]): number {
         if (snapX.type === SnapType.SIZE) {
             throw new Error("Unexpected snap type");
         }
@@ -621,7 +664,7 @@ export class ResizeSnapHandler extends SnapHandler {
      * @param snapY The vertical snap data
      * @returns The target y position
      */
-    private getVerticalSnapTarget(snapY: ReturnType<typeof getSnaps>["nearestSnapsY"][0]): number {
+    private getVerticalSnapTarget(snapY: SnapResult["nearestSnapsY"][0]): number {
         if (snapY.type === SnapType.SIZE) {
             throw new Error("Unexpected snap type");
         }
@@ -658,7 +701,8 @@ export function createResizeSnapHandler(
     scaleX: number | undefined,
     scaleY: number | undefined,
     ignoredElements: SElement[],
-    root: SRoot
+    root: SRoot,
+    settings: SharedSettings | undefined
 ): ResizeSnapHandler | undefined {
     const rotation = element.parent.globalRotation + element.rotation;
     if (rotation % 90 !== 0) {
@@ -666,7 +710,7 @@ export function createResizeSnapHandler(
     }
     const effectiveRotation = (((rotation / 90) % 4) + 4) % 4;
 
-    return new ResizeSnapHandler(element, scaleX, scaleY, root, ignoredElements, effectiveRotation);
+    return new ResizeSnapHandler(element, scaleX, scaleY, root, ignoredElements, effectiveRotation, settings);
 }
 
 /**

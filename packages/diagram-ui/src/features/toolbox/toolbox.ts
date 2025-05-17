@@ -30,6 +30,7 @@ import type { Cursor } from "../cursor/cursor.js";
 import { UpdateCursorAction } from "../cursor/cursor.js";
 import { ToolState } from "./toolState.js";
 import { SetToolAction } from "./setToolAction.js";
+import type { SettingsProvider } from "../settings/settingsProvider.js";
 
 /**
  * UI Extension which displays the graphical toolbox.
@@ -127,6 +128,11 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler, Conn
      * The tool state.
      */
     @inject(ToolState) toolState!: ToolState;
+
+    /**
+     * The settings provider
+     */
+    @inject(TYPES.SettingsProvider) readonly settingsProvider!: SettingsProvider;
 
     /**
      * Creates a new toolbox.

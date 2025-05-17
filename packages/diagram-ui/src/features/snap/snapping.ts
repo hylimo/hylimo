@@ -1,4 +1,4 @@
-import type { Matrix } from "transformation-matrix";
+import { type Matrix } from "transformation-matrix";
 import {
     SnapType,
     type SnapElementData,
@@ -11,14 +11,21 @@ import {
 } from "./model.js";
 import { createPointSnapLines, getPointSnaps } from "./pointSnap.js";
 import { createGapSnapLines, getGaps, getGapSnaps } from "./gapSnap.js";
-import type { Vector } from "@hylimo/diagram-common";
+import { Point, type Vector } from "@hylimo/diagram-common";
 import { createSizeSnapLines, getSizeSnaps } from "./sizeSnap.js";
 import { cleanupNearestSnaps } from "./util.js";
+import { filterValidSnapsX, filterValidSnapsY } from "./filterSnaps.js";
 
 /**
  * Snap distance for the snapping algorithm
  */
 const SNAP_DISTANCE = 8;
+
+/**
+ * Tolerance for snapping to be considered valid
+ * This is used to filter out snaps that are too far away from the actual snap point due to rounding.
+ */
+export const SNAP_TOLERANCE = 2.5;
 
 /**
  * Calculates snapping information for elements based on reference data.
@@ -76,8 +83,33 @@ export function getSnaps(
         },
         nearestSnapsX: snapState.nearestSnapsX,
         nearestSnapsY: snapState.nearestSnapsY,
-        contextGlobalRotations
+        contextGlobalRotations,
+        elementOffset
     };
+}
+
+/**
+ * Due to rounding, actual snap points may sometimes be slightly off.
+ * If the distance to the actual snap point is larger than a threshold, snaps are ignored.
+ * Modifies the snap result in place.
+ *
+ * @param snapResult the snap result where snaps are potentially removed
+ * @param transform the transform to apply
+ * @returns true if the snap result has changed
+ */
+export function filterValidSnaps(snapResult: SnapResult, transform: Matrix): boolean {
+    const validSnapsX = filterValidSnapsX(snapResult.nearestSnapsX, transform);
+    const validSnapsY = filterValidSnapsY(snapResult.nearestSnapsY, transform);
+
+    snapResult.nearestSnapsX = validSnapsX;
+    snapResult.nearestSnapsY = validSnapsY;
+    const newSnapOffset = {
+        x: validSnapsX[0]?.offset ?? snapResult.elementOffset.x,
+        y: validSnapsY[0]?.offset ?? snapResult.elementOffset.y
+    };
+    const hasChanged = !Point.equals(newSnapOffset, snapResult.snapOffset);
+    snapResult.snapOffset = newSnapOffset;
+    return hasChanged;
 }
 
 /**

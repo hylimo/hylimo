@@ -23,7 +23,7 @@
         "@types/wicg-file-system-access": "^2023.10.6",
         "@vite-pwa/vitepress": "^1.0.0",
         "vitepress": "2.0.0-alpha.4",
-        "vue": "^3.5.13"
+        "vue": "^3.5.14"
     },
     "dependencies": {
         "@github/relative-time-element": "^4.4.8",

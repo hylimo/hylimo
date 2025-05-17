@@ -1,10 +1,10 @@
-import type { MoveEdit } from "@hylimo/diagram-protocol";
+import { SharedSettings, type MoveEdit } from "@hylimo/diagram-protocol";
 import { MoveHandler, type HandleMoveResult } from "../../move/moveHandler.js";
 import type { Point, Vector } from "@hylimo/diagram-common";
 import { DefaultEditTypes } from "@hylimo/diagram-common";
 import type { Matrix } from "transformation-matrix";
 import { applyToPoint, translate } from "transformation-matrix";
-import { getSnapLines, getSnaps } from "../../snap/snapping.js";
+import { filterValidSnaps, getSnapLines, getSnaps } from "../../snap/snapping.js";
 import { type SnapElementData, type SnapLines } from "../../snap/model.js";
 import type { SModelElementImpl } from "sprotty";
 import type { SRoot } from "../../../model/sRoot.js";
@@ -142,13 +142,13 @@ export class TranslationSnapHandler extends SnapHandler {
      * @param ignoredElements the elements to ignore
      * @param root the root element
      */
-    constructor(elements: SElement[], ignoredElements: SElement[], root: SRoot) {
+    constructor(elements: SElement[], ignoredElements: SElement[], root: SRoot, settings: SharedSettings | undefined) {
         const ignoredElementsSet = new Set<string>();
         for (const element of ignoredElements) {
             ignoredElementsSet.add(element.id);
         }
         const snapElementData = getSnapElementData(root, elements, ignoredElementsSet);
-        super(getSnapReferenceData(root, new Set(snapElementData.keys()), ignoredElementsSet));
+        super(getSnapReferenceData(root, new Set(snapElementData.keys()), ignoredElementsSet), settings);
         this.snapElementData = snapElementData;
     }
 
@@ -177,10 +177,24 @@ export class TranslationSnapHandler extends SnapHandler {
             snapPoints: true,
             snapSize: false
         });
-        const snapLines = getSnapLines(snapResult, translate(snapResult.snapOffset.x, snapResult.snapOffset.y));
+        filterValidSnaps(snapResult, this.createRoundedTranslation(snapResult.snapOffset));
+        const snapLines = getSnapLines(snapResult, this.createRoundedTranslation(snapResult.snapOffset));
         return {
             snappedDragVector: snapResult.snapOffset,
             snapLines
         };
+    }
+
+    /**
+     * Creates a translation matrix with rounded coordinates
+     *
+     * @param point the point to translate by after rounding
+     * @returns a translation matrix with the rounded coordinates
+     */
+    private createRoundedTranslation(point: Point): Matrix {
+        return translate(
+            SharedSettings.roundToTranslationPrecision(this.settings, point.x),
+            SharedSettings.roundToTranslationPrecision(this.settings, point.y)
+        );
     }
 }

@@ -101,7 +101,7 @@ export function createPointSnapLines(
             const key = round(snap.point.x);
             const transformedPoint = applyToPoint(transform, snap.point);
             addPoints(snapsX, snap.context, key, [
-                { x: round(transformedPoint.x), y: round(transformedPoint.y) },
+                { x: round(snap.referencePoint.x), y: round(transformedPoint.y) },
                 { x: round(snap.referencePoint.x), y: round(snap.referencePoint.y) }
             ]);
         }
@@ -112,7 +112,7 @@ export function createPointSnapLines(
             const key = round(snap.point.y);
             const transformedPoint = applyToPoint(transform, snap.point);
             addPoints(snapsY, snap.context, key, [
-                { x: round(transformedPoint.x), y: round(transformedPoint.y) },
+                { x: round(transformedPoint.x), y: round(snap.referencePoint.y) },
                 { x: round(snap.referencePoint.x), y: round(snap.referencePoint.y) }
             ]);
         }

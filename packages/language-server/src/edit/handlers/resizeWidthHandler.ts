@@ -1,4 +1,5 @@
 import { CanvasElement, DefaultEditTypes } from "@hylimo/diagram-common";
+import { SharedSettings } from "@hylimo/diagram-protocol";
 import type { IncrementalUpdate, ResizeEdit } from "@hylimo/diagram-protocol";
 import type { EditHandler } from "./editHandler.js";
 
@@ -27,7 +28,7 @@ export const resizeWidth: EditHandler<ResizeEdit> = {
 
     transformEdit(edit, config) {
         const { width, dw } = edit.values;
-        edit.values.dw = config.roundToResizePrecision(dw!);
+        edit.values.dw = SharedSettings.roundToResizePrecision(config.settings, dw!);
         edit.values.width = width! - (dw! - edit.values.dw);
     }
 };

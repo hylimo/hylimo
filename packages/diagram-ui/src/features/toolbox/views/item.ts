@@ -102,7 +102,7 @@ function generateToolboxItem(context: Toolbox, toolboxEdit: ToolboxEditEntry): V
                                 root,
                                 event.pointerId,
                                 context.configManager.config?.snappingEnabled == true
-                                    ? new CreateElementSnapHandler(root)
+                                    ? new CreateElementSnapHandler(root, context.settingsProvider.settings)
                                     : undefined
                             ),
                         maxUpdatesPerRevision: 1

@@ -1,6 +1,7 @@
 import type { ConnectionEdit, ConnectionEnd } from "@hylimo/diagram-protocol";
 import type { EditHandler } from "./editHandler.js";
 import type { Config } from "../../config.js";
+import { SharedSettings } from "@hylimo/diagram-protocol";
 
 /**
  * Handler for connection edits
@@ -26,9 +27,9 @@ export const connectionHandler: EditHandler<ConnectionEdit> = {
  */
 function transformConnectionEnd(connectionEnd: ConnectionEnd, config: Config) {
     if ("expression" in connectionEnd) {
-        connectionEnd.pos = config.roundToLinePointPosPrecision(connectionEnd.pos);
+        connectionEnd.pos = SharedSettings.roundToLinePointPosPrecision(config.settings, connectionEnd.pos);
     } else {
-        connectionEnd.x = config.roundToTranslationPrecision(connectionEnd.x);
-        connectionEnd.y = config.roundToTranslationPrecision(connectionEnd.y);
+        connectionEnd.x = SharedSettings.roundToTranslationPrecision(config.settings, connectionEnd.x);
+        connectionEnd.y = SharedSettings.roundToTranslationPrecision(config.settings, connectionEnd.y);
     }
 }
