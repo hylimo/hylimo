@@ -80,14 +80,14 @@ interface SnapResizeFactors {
      * Represents how much the element should be scaled horizontally relative to its original width.
      * Undefined if no horizontal resizing is being performed.
      */
-    newFactorX: number | undefined;
+    factorX: number | undefined;
 
     /**
      * The adjusted vertical resize factor after snapping.
      * Represents how much the element should be scaled vertically relative to its original height.
      * Undefined if no vertical resizing is being performed.
      */
-    newFactorY: number | undefined;
+    factorY: number | undefined;
 }
 
 /**
@@ -324,11 +324,12 @@ export class ResizeSnapHandler extends SnapHandler {
         factorY: number | undefined;
         snapLines: SnapLines | undefined;
     } {
+        const { factorX: roundedFactorX, factorY: roundedFactorY } = this.calculateRoundedFactors({ factorX, factorY });
         const resized = {
-            width: this.current.width * (factorX ?? 1),
-            height: this.current.height * (factorY ?? 1),
-            dx: this.current.dx * (factorX ?? 1),
-            dy: this.current.dy * (factorY ?? 1)
+            width: this.current.width * (roundedFactorX ?? 1),
+            height: this.current.height * (roundedFactorY ?? 1),
+            dx: this.current.dx * (roundedFactorX ?? 1),
+            dy: this.current.dy * (roundedFactorY ?? 1)
         };
         const resizedCorners = getCanvasElementCorners(this.elementToTargetMatrix, resized);
 
@@ -355,17 +356,20 @@ export class ResizeSnapHandler extends SnapHandler {
             }
         );
 
-        let newFactors = this.processSnaps(result, factorX, factorY, uniform, resizedCorners);
-        const hasChanges = filterValidSnaps(result, this.createRoundedScale(factorX, factorY, newFactors));
+        let newFactors = this.processSnaps(result, roundedFactorX, roundedFactorY, uniform, resizedCorners);
+        const hasChanges = filterValidSnaps(
+            result,
+            this.createRoundedScale(roundedFactorX, roundedFactorY, newFactors)
+        );
         if (hasChanges) {
-            newFactors = this.processSnaps(result, factorX, factorY, uniform, resizedCorners);
+            newFactors = this.processSnaps(result, roundedFactorX, roundedFactorY, uniform, resizedCorners);
         }
 
-        const snapLines = getSnapLines(result, this.createRoundedScale(factorX, factorY, newFactors));
+        const snapLines = getSnapLines(result, this.createRoundedScale(roundedFactorX, roundedFactorY, newFactors));
 
         return {
-            factorX: newFactors.newFactorX,
-            factorY: newFactors.newFactorY,
+            factorX: newFactors.factorX,
+            factorY: newFactors.factorY,
             snapLines
         };
     }
@@ -381,19 +385,37 @@ export class ResizeSnapHandler extends SnapHandler {
     private createRoundedScale(
         factorX: number | undefined,
         factorY: number | undefined,
-        newFactors: SnapResizeFactors
+        newFactorsFromSnap: SnapResizeFactors
     ): Matrix {
-        const dw = this.current.width * (newFactors.newFactorX ?? 1) - this.current.width;
-        const dh = this.current.height * (newFactors.newFactorY ?? 1) - this.current.height;
-        const newFactorX =
-            (this.current.width + SharedSettings.roundToResizePrecision(this.settings, dw)) / this.current.width;
-        const newFactorY =
-            (this.current.height + SharedSettings.roundToResizePrecision(this.settings, dh)) / this.current.height;
+        const roundedFactors = this.calculateRoundedFactors(newFactorsFromSnap);
+
         return compose(
             this.elementToTargetMatrix,
-            scale(newFactorX / (factorX ?? 1), newFactorY / (factorY ?? 1)),
+            scale((roundedFactors.factorX ?? 1) / (factorX ?? 1), (roundedFactors.factorY ?? 1) / (factorY ?? 1)),
             this.targetToElementMatrix
         );
+    }
+
+    /**
+     * Calculates the rounded resize factors based on the input factors.
+     *
+     * @param inputFactors The resize factors before rounding.
+     * @returns The rounded resize factors.
+     */
+    private calculateRoundedFactors(inputFactors: SnapResizeFactors): SnapResizeFactors {
+        let roundedFactorX: number | undefined;
+        let roundedFactorY: number | undefined;
+        if (inputFactors.factorX != undefined) {
+            const dw = this.current.width * inputFactors.factorX - this.current.width;
+            roundedFactorX =
+                (this.current.width + SharedSettings.roundToResizePrecision(this.settings, dw)) / this.current.width;
+        }
+        if (inputFactors.factorY != undefined) {
+            const dh = this.current.height * inputFactors.factorY - this.current.height;
+            roundedFactorY =
+                (this.current.height + SharedSettings.roundToResizePrecision(this.settings, dh)) / this.current.height;
+        }
+        return { factorX: roundedFactorX, factorY: roundedFactorY };
     }
 
     /**
@@ -555,10 +577,7 @@ export class ResizeSnapHandler extends SnapHandler {
         factorY: number | undefined,
         uniform: boolean,
         context: SnapFactorContext
-    ): {
-        newFactorX: number | undefined;
-        newFactorY: number | undefined;
-    } {
+    ): SnapResizeFactors {
         let newFactorX = context.overrideFactorX ?? factorX;
         let newFactorY = context.overrideFactorY ?? factorY;
 
@@ -579,8 +598,8 @@ export class ResizeSnapHandler extends SnapHandler {
         }
 
         return {
-            newFactorX,
-            newFactorY
+            factorX: newFactorX,
+            factorY: newFactorY
         };
     }
 

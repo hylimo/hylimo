@@ -170,13 +170,19 @@ export class TranslationSnapHandler extends SnapHandler {
         snappedDragVector: Point;
         snapLines: SnapLines | undefined;
     } {
-        const snapResult = getSnaps(this.snapElementData, this.referenceData, zoom, dragVector, {
-            snapX,
-            snapY,
-            snapGaps: true,
-            snapPoints: true,
-            snapSize: false
-        });
+        const snapResult = getSnaps(
+            this.snapElementData,
+            this.referenceData,
+            zoom,
+            this.roundToTranslationPrecision(dragVector),
+            {
+                snapX,
+                snapY,
+                snapGaps: true,
+                snapPoints: true,
+                snapSize: false
+            }
+        );
         filterValidSnaps(snapResult, this.createRoundedTranslation(snapResult.snapOffset));
         const snapLines = getSnapLines(snapResult, this.createRoundedTranslation(snapResult.snapOffset));
         return {
@@ -192,9 +198,21 @@ export class TranslationSnapHandler extends SnapHandler {
      * @returns a translation matrix with the rounded coordinates
      */
     private createRoundedTranslation(point: Point): Matrix {
-        return translate(
-            SharedSettings.roundToTranslationPrecision(this.settings, point.x),
-            SharedSettings.roundToTranslationPrecision(this.settings, point.y)
-        );
+        const roundedPoint = this.roundToTranslationPrecision(point);
+        return translate(roundedPoint.x, roundedPoint.y);
+    }
+
+    /**
+     * Rounds the coordinates of a point to the translation precision specified in the settings.
+     * This ensures consistent precision when elements are moved or created on the canvas.
+     *
+     * @param point The point whose coordinates need to be rounded
+     * @returns A new point with coordinates rounded according to translation precision settings
+     */
+    private roundToTranslationPrecision(point: Point): Point {
+        return {
+            x: SharedSettings.roundToTranslationPrecision(this.settings, point.x),
+            y: SharedSettings.roundToTranslationPrecision(this.settings, point.y)
+        };
     }
 }

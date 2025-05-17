@@ -113,15 +113,21 @@ export class CreateElementSnapHandler extends SnapHandler {
             bounds: undefined,
             points: [{ x: 0, y: 0 }]
         };
-        const snapResult = getSnaps(new Map([[this.context, snapElementData]]), this.referenceData, zoom, values, {
-            snapX: true,
-            snapY: true,
-            snapGaps: false,
-            snapPoints: true,
-            snapSize: false
-        });
-        filterValidSnaps(snapResult, this.createRoundedTranslation(values));
-        const snapLines = getSnapLines(snapResult, this.createRoundedTranslation(values));
+        const snapResult = getSnaps(
+            new Map([[this.context, snapElementData]]),
+            this.referenceData,
+            zoom,
+            this.roundToTranslationPrecision(values),
+            {
+                snapX: true,
+                snapY: true,
+                snapGaps: false,
+                snapPoints: true,
+                snapSize: false
+            }
+        );
+        filterValidSnaps(snapResult, this.createRoundedTranslation(snapResult.snapOffset));
+        const snapLines = getSnapLines(snapResult, this.createRoundedTranslation(snapResult.snapOffset));
         return {
             snappedValues: snapResult.snapOffset,
             snapLines
@@ -135,9 +141,21 @@ export class CreateElementSnapHandler extends SnapHandler {
      * @returns a translation matrix with the rounded coordinates
      */
     private createRoundedTranslation(point: Point): Matrix {
-        return translate(
-            SharedSettings.roundToTranslationPrecision(this.settings, point.x),
-            SharedSettings.roundToTranslationPrecision(this.settings, point.y)
-        );
+        const roundedPoint = this.roundToTranslationPrecision(point);
+        return translate(roundedPoint.x, roundedPoint.y);
+    }
+
+    /**
+     * Rounds the coordinates of a point to the translation precision specified in the settings.
+     * This ensures consistent precision when elements are moved or created on the canvas.
+     *
+     * @param point The point whose coordinates need to be rounded
+     * @returns A new point with coordinates rounded according to translation precision settings
+     */
+    private roundToTranslationPrecision(point: Point): Point {
+        return {
+            x: SharedSettings.roundToTranslationPrecision(this.settings, point.x),
+            y: SharedSettings.roundToTranslationPrecision(this.settings, point.y)
+        };
     }
 }

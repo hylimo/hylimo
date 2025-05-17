@@ -67,7 +67,7 @@ export class AxisAlignedSegmentEditMoveHandler extends MoveHandler {
             const root = target.root as SRoot;
             const zoom = findViewportZoom(root);
             this.snapHandler.updateReferenceData(root);
-            const snapResult = this.snapHandler.snap(rawValue, this.start, this.end, zoom);
+            const snapResult = this.snapHandler.snap(newPos, this.start, this.end, zoom);
             if (snapResult != undefined) {
                 newPos = snapResult.snappedPos;
                 snapLines = snapResult.snapLines;
@@ -144,13 +144,14 @@ export class AxisAlignedSegmentEditSnapHandler extends SnapHandler {
     /**
      * Gets the snapped value and associated snap lines based on the current position
      *
-     * @param value the current position value of the segment being edited
+     * @param pos the current position value of the segment being edited
      * @param start the x/y cooridnate of the start of the whole axis aligned segment
      * @param end the x/y cooridnate of the end of the whole axis aligned segment
      * @param zoom the current zoom level of the viewport
      * @returns an object containing the snapped pos and snap lines to display
      */
-    snap(value: number, start: number, end: number, zoom: number): AxisAlignedSegmentSnapResult | undefined {
+    snap(pos: number, start: number, end: number, zoom: number): AxisAlignedSegmentSnapResult | undefined {
+        const value = SharedSettings.roundToAxisAlignedPosPrecision(this.settings, pos) * (end - start) + start;
         const snapResult = this.getSnapResult(value, zoom);
 
         const convertedSnapOffset = applyToPoint(this.targetToContextMatrix, snapResult.snapOffset);
