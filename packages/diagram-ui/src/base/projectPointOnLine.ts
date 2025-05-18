@@ -36,13 +36,18 @@ export function projectPointOnLine(
 ): ProjectionResult {
     const originalProjection = LineEngine.DEFAULT.projectPoint(point, transformedLine, forcedDistance);
     const { posPrecision, hasSegment: isSegment } = roundingInformation;
-    if (posPrecision == undefined) {
+    if (posPrecision == undefined && isSegment) {
         return originalProjection;
     }
     const valueToRound = isSegment ? originalProjection.relativePos : originalProjection.pos;
     const optionsToTest: number[] = [];
-    const roundedValue = Math.min(Math.max(SharedSettings.roundToPrecision(valueToRound, posPrecision), 0), 1);
-    optionsToTest.push(roundedValue, roundedValue + posPrecision, roundedValue - posPrecision);
+    if (posPrecision == undefined) {
+        const roundedValue = Number(valueToRound.toPrecision(15));
+        optionsToTest.push(roundedValue, roundedValue + 10 ** -15, roundedValue - 10 ** -15);
+    } else {
+        const roundedValue = Math.min(Math.max(SharedSettings.roundToPrecision(valueToRound, posPrecision), 0), 1);
+        optionsToTest.push(roundedValue, roundedValue + posPrecision, roundedValue - posPrecision);
+    }
 
     if (forcedDistance !== undefined) {
         return findBestProjectionWithFixedDistance(
