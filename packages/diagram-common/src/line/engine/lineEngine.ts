@@ -22,6 +22,13 @@ export class LineEngine {
     static DEFAULT = new LineEngine();
 
     /**
+     * Due to rounding errors, multiple equally good projection points may have
+     * slightly different distances to the point to project.
+     * Of all in this range, the one with the smallest distance to the line is chosen.
+     */
+    private static readonly DISTANCE_PRECISION = 0.1;
+
+    /**
      * Map of all known engines
      */
     private engines = new Map<string, SegmentEngine<any>>([
@@ -63,9 +70,10 @@ export class LineEngine {
                 startPosition,
                 forcedDistance
             );
+            const distDelta = Math.abs(distToExpected - minDistToExpected);
             if (
-                (distToExpected < minDistToExpected && minDistToExpected > 1) ||
-                (distToExpected <= 1 && candidate.distance < minDistanceToLine)
+                (distToExpected < minDistToExpected && distDelta > LineEngine.DISTANCE_PRECISION) ||
+                (distDelta <= LineEngine.DISTANCE_PRECISION && candidate.distance < minDistanceToLine)
             ) {
                 relativePosition = candidate.position;
                 segmentIndex = i;

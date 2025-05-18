@@ -37,7 +37,7 @@ export namespace SharedSettings {
      * @param precision the precision to use
      * @returns the rounded value
      */
-    function roundToPrecision(value: number, precision: number | undefined): number {
+    export function roundToPrecision(value: number, precision: number | undefined): number {
         if (precision == undefined) {
             return value;
         }

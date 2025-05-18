@@ -3,6 +3,7 @@ import type { ProjectionResult } from "@hylimo/diagram-common";
 import type { Point } from "@hylimo/diagram-common";
 import type { TransformedLine } from "@hylimo/diagram-common";
 import { Math2D } from "@hylimo/diagram-common";
+import { SharedSettings } from "@hylimo/diagram-protocol";
 
 /**
  * Rounding information for the projectPointOnLine function
@@ -39,22 +40,9 @@ export function projectPointOnLine(
         return originalProjection;
     }
     const valueToRound = isSegment ? originalProjection.relativePos : originalProjection.pos;
-    const roundedDown = Math.floor(valueToRound / posPrecision) * posPrecision;
-    const roundedUp = Math.ceil(valueToRound / posPrecision) * posPrecision;
-    const isDownInRange = roundedDown >= 0 && roundedDown <= 1;
-    const isUpInRange = roundedUp >= 0 && roundedUp <= 1;
-
-    if (!isDownInRange && !isUpInRange) {
-        return originalProjection;
-    }
-
     const optionsToTest: number[] = [];
-    if (isDownInRange) {
-        optionsToTest.push(roundedDown);
-    }
-    if (isUpInRange) {
-        optionsToTest.push(roundedUp);
-    }
+    const roundedValue = Math.min(Math.max(SharedSettings.roundToPrecision(valueToRound, posPrecision), 0), 1);
+    optionsToTest.push(roundedValue, roundedValue + posPrecision, roundedValue - posPrecision);
 
     if (forcedDistance !== undefined) {
         return findBestProjectionWithFixedDistance(
@@ -99,6 +87,9 @@ function findBestProjectionWithFixedDistance(
     let minDistance = Number.POSITIVE_INFINITY;
 
     for (const roundedValue of optionsToTest) {
+        if (roundedValue < 0 || roundedValue > 1) {
+            continue;
+        }
         const result = createProjectionResult(
             roundedValue,
             isSegment,
@@ -140,7 +131,6 @@ function findBestProjectionWithOptimalDistance(
 ): ProjectionResult {
     let bestResult = originalProjection;
     let minDistance = Number.POSITIVE_INFINITY;
-
     for (const roundedValue of optionsToTest) {
         const baseResult = createProjectionResult(
             roundedValue,

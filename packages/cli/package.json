@@ -22,7 +22,7 @@
         "@hylimo/diagram-common": "^2.0.0",
         "@hylimo/diagram-render-pdf": "^2.0.0",
         "@hylimo/diagram-render-svg": "^2.0.0",
-        "commander": "^13.1.0"
+        "commander": "^14.0.0"
     },
     "bin": {
         "cli": "lib/index.js"
