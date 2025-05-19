@@ -1,5 +1,5 @@
 import { DefaultEditTypes, LinePoint } from "@hylimo/diagram-common";
-import type { IModelIndex } from "sprotty";
+import type { ModelIndexImpl } from "sprotty";
 import { findParentByFeature } from "sprotty";
 import { SAbsolutePoint } from "../../model/canvas/sAbsolutePoint.js";
 import { SCanvasConnection } from "../../model/canvas/sCanvasConnection.js";
@@ -51,9 +51,10 @@ export class MovedElementsSelector {
      */
     constructor(
         selected: (SCanvasElement | SCanvasPoint | SMarker)[],
-        private readonly index: IModelIndex
+        private readonly index: ModelIndexImpl
     ) {
         this.registerElements(new Set(selected));
+        this.registerAdditionalImplicitlyMovedElements();
         this.pruneMovedElements();
     }
 
@@ -88,6 +89,20 @@ export class MovedElementsSelector {
                 }
             }
             currentElements = newElements;
+        }
+    }
+
+    /**
+     * Registers all elements which are implicitly moved.
+     * This is done by checking if the element is moved and if it is not already in the moved elements set.
+     */
+    private registerAdditionalImplicitlyMovedElements(): void {
+        for (const element of this.index.all()) {
+            if (element instanceof SCanvasElement || element instanceof SCanvasPoint) {
+                if (this.isElementImplicitlyMoved(element)) {
+                    this.implicitlyMovedElements.add(element);
+                }
+            }
         }
     }
 

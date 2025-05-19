@@ -151,16 +151,12 @@ function findBestProjectionWithOptimalDistance(
             originalProjection.segment
         );
 
-        const pointOnLine = isSegment
-            ? LineEngine.DEFAULT.getPoint(baseResult.relativePos, baseResult.segment, 0, transformedLine)
-            : LineEngine.DEFAULT.getPoint(baseResult.pos, undefined, 0, transformedLine);
-        const normalVector = isSegment
-            ? LineEngine.DEFAULT.getNormalVector(baseResult.relativePos, baseResult.segment, transformedLine)
-            : LineEngine.DEFAULT.getNormalVector(baseResult.pos, undefined, transformedLine);
-        const dx = point.x - pointOnLine.x;
-        const dy = point.y - pointOnLine.y;
-        const d2 = normalVector.x ** 2 + normalVector.y ** 2;
-        const optimalDistance = (dx * normalVector.x + dy * normalVector.y) / d2;
+        const optimalDistance = findOptimalDistanceFromLine(
+            isSegment ? baseResult.relativePos : baseResult.pos,
+            isSegment ? baseResult.segment : undefined,
+            transformedLine,
+            point
+        );
 
         const result = {
             ...baseResult,
@@ -179,6 +175,21 @@ function findBestProjectionWithOptimalDistance(
     }
     bestResult.distance = SharedSettings.roundToLinePointDistancePrecision(settings, bestResult.distance);
     return bestResult;
+}
+
+export function findOptimalDistanceFromLine(
+    pos: number,
+    segment: number | undefined,
+    transformedLine: TransformedLine,
+    point: Point
+) {
+    const pointOnLine = LineEngine.DEFAULT.getPoint(pos, segment, 0, transformedLine);
+    const normalVector = LineEngine.DEFAULT.getNormalVector(pos, segment, transformedLine);
+    const dx = point.x - pointOnLine.x;
+    const dy = point.y - pointOnLine.y;
+    const d2 = normalVector.x ** 2 + normalVector.y ** 2;
+    const optimalDistance = (dx * normalVector.x + dy * normalVector.y) / d2;
+    return optimalDistance;
 }
 
 /**

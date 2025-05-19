@@ -1,5 +1,5 @@
 import { inject, injectable } from "inversify";
-import type { EditSpecificationEntry } from "@hylimo/diagram-common";
+import type { EditSpecificationEntry, Point, TransformedLine } from "@hylimo/diagram-common";
 import { EditSpecification, DefaultEditTypes, groupBy, Marker } from "@hylimo/diagram-common";
 import type { SModelElementImpl } from "sprotty";
 import { findParentByFeature, isMoveable } from "sprotty";
@@ -11,7 +11,7 @@ import { SLinePoint } from "../../model/canvas/sLinePoint.js";
 import type { SRelativePoint } from "../../model/canvas/sRelativePoint.js";
 import type { MoveHandler } from "../move/moveHandler.js";
 import { TranslationMoveHandler, TranslationSnapHandler } from "./handler/translationMoveHandler.js";
-import { LineMoveHandler } from "./handler/lineMoveHandler.js";
+import { LineMoveHandler, LineSnapHandler } from "./handler/lineMoveHandler.js";
 import { CanvasElementView, ResizePosition } from "../../views/canvas/canvasElementView.js";
 import { RotationMoveHandler } from "./handler/rotationMoveHandler.js";
 import { SCanvasConnection } from "../../model/canvas/sCanvasConnection.js";
@@ -394,7 +394,10 @@ export class MoveEditCanvasContentMouseListener extends MouseListener {
             if (linePoints.length > 1 || translateableElements.length > 0) {
                 return undefined;
             }
-            return this.createLineMoveHandler(linePoints[0], event);
+            return this.createLineMoveHandler(linePoints[0], event, selected, [
+                ...movedElements,
+                ...implicitlyMovedElements
+            ]);
         }
         const root = target.root as SRoot;
         const snapData = this.createTranslationSnapHandler(
@@ -412,7 +415,12 @@ export class MoveEditCanvasContentMouseListener extends MouseListener {
      * @param event the mouse event
      * @returns the created move handler or undefined if no handler could be created
      */
-    private createLineMoveHandler(linePoint: SLinePoint, event: MouseEvent): MoveHandler | undefined {
+    private createLineMoveHandler(
+        linePoint: SLinePoint,
+        event: MouseEvent,
+        elements: SElement[],
+        ignoredElements: SElement[]
+    ): MoveHandler | undefined {
         const editPos = linePoint.edits[DefaultEditTypes.MOVE_LPOS_POS] != undefined;
         const editDist = linePoint.edits[DefaultEditTypes.MOVE_LPOS_DIST] != undefined && !(editPos && event.shiftKey);
         const editSpecifications: EditSpecificationEntry[] = [];
@@ -426,26 +434,28 @@ export class MoveEditCanvasContentMouseListener extends MouseListener {
             return undefined;
         }
         const root = linePoint.root;
-        const canvas = linePoint.parent;
-        const canvasTransformationMatrix = canvas.getMouseTransformationMatrix();
-        const initialMousePosition = applyToPoint(canvasTransformationMatrix, { x: event.pageX, y: event.pageY });
-        const initialPointPosition = root.layoutEngine.getPoint(linePoint.id, canvas.id);
+        const rootTransformationMatrix = root.getMouseTransformationMatrix();
+        const initialMousePosition = applyToPoint(rootTransformationMatrix, { x: event.pageX, y: event.pageY });
+        const initialPointPosition = root.layoutEngine.getPoint(linePoint.id, root.id);
         const mouseOffset = translate(
             initialPointPosition.x - initialMousePosition.x,
             initialPointPosition.y - initialMousePosition.y
         );
+        const line = root.layoutEngine.layoutLine(
+            root.index.getById(linePoint.lineProvider) as SCanvasConnection | SCanvasElement,
+            root.id
+        );
+        const snapHandler = this.createLineSnapHandler(elements, ignoredElements, root, initialPointPosition, line);
         return new LineMoveHandler(
             linePoint.id,
             editPos,
             editDist,
-            linePoint.segment != undefined,
-            root.layoutEngine.layoutLine(
-                root.index.getById(linePoint.lineProvider) as SCanvasConnection | SCanvasElement,
-                canvas.id
-            ),
-            this.settingsProvider.settings?.linePointPosPrecision,
+            line,
+            this.settingsProvider.settings ?? {},
+            linePoint.segment == undefined ? linePoint.pos : [linePoint.segment, linePoint.pos],
             linePoint.distance,
-            compose(mouseOffset, canvasTransformationMatrix)
+            snapHandler,
+            compose(mouseOffset, rootTransformationMatrix)
         );
     }
 
@@ -572,6 +582,26 @@ export class MoveEditCanvasContentMouseListener extends MouseListener {
             vertical,
             otherStart,
             otherEnd,
+            this.settingsProvider.settings
+        );
+    }
+
+    private createLineSnapHandler(
+        elements: SElement[],
+        ignoredElements: SElement[],
+        root: SRoot,
+        originalPoint: Point,
+        line: TransformedLine
+    ): LineSnapHandler | undefined {
+        if (this.configManager?.config?.snappingEnabled != true) {
+            return undefined;
+        }
+        return new LineSnapHandler(
+            elements,
+            ignoredElements,
+            root,
+            originalPoint,
+            line,
             this.settingsProvider.settings
         );
     }

@@ -89,7 +89,7 @@ export class CreateConnectionMouseListener extends MouseListener {
                 new CreateConnectionMoveHandler(
                     edit,
                     start,
-                    this.settingsProvider.settings?.linePointPosPrecision,
+                    this.settingsProvider.settings,
                     root.getMouseTransformationMatrix()
                 )
         };
@@ -138,7 +138,7 @@ export class CreateConnectionMouseListener extends MouseListener {
             point,
             line,
             {
-                posPrecision: this.settingsProvider.settings?.linePointPosPrecision,
+                settings: this.settingsProvider.settings ?? {},
                 hasSegment: false
             },
             0
