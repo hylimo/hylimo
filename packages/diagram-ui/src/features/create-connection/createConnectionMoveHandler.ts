@@ -36,8 +36,8 @@ export class CreateConnectionMoveHandler extends MoveHandler {
             const projection = projectPointOnLine(
                 { x, y },
                 line,
-                { 
-                    settings: this.settings ?? {}, 
+                {
+                    settings: this.settings ?? {},
                     hasSegment: false
                 },
                 0

@@ -103,7 +103,7 @@ export class MoveEditCanvasContentMouseListener extends MouseListener {
     }
 
     /**
-     * Creats the handler for the current move
+     * Creates the handler for the current move
      *
      * @param target the element which was clicked
      * @param event the mouse event
@@ -202,7 +202,8 @@ export class MoveEditCanvasContentMouseListener extends MouseListener {
      *
      * @param target the primary target of the resize
      * @param classList classes of the svg element on which the resize was triggered
-     * @returns the resize handler if resize is supported, otherwise null
+     * @param event the mouse event
+     * @returns the resize handler if resize is supported, otherwise undefined
      */
     private createResizeHandler(
         target: SCanvasElement,
@@ -358,7 +359,7 @@ export class MoveEditCanvasContentMouseListener extends MouseListener {
     }
 
     /**
-     * Creats the handler for the current move based on the selected elements.
+     * Creates the handler for the current move based on the selected elements.
      * Handles move events, meaning moving points on the canvas.
      *
      * @param target the element which was clicked
@@ -413,6 +414,8 @@ export class MoveEditCanvasContentMouseListener extends MouseListener {
      *
      * @param linePoint the point to move
      * @param event the mouse event
+     * @param elements all selected elements
+     * @param ignoredElements elements that should be ignored during snapping
      * @returns the created move handler or undefined if no handler could be created
      */
     private createLineMoveHandler(
@@ -586,6 +589,16 @@ export class MoveEditCanvasContentMouseListener extends MouseListener {
         );
     }
 
+    /**
+     * Creates a snap handler for line point movement.
+     *
+     * @param elements the elements to be moved
+     * @param ignoredElements the elements to be ignored during snapping
+     * @param root the root element of the model
+     * @param originalPoint the original position of the point being moved
+     * @param line the line the point belongs to
+     * @returns a new LineSnapHandler instance or undefined if snapping is disabled
+     */
     private createLineSnapHandler(
         elements: SElement[],
         ignoredElements: SElement[],
@@ -643,6 +656,7 @@ export class MoveEditCanvasContentMouseListener extends MouseListener {
     /**
      * Computes a transformation matrix which makes future positions relative to the provided event.
      *
+     * @param matrix the transformation matrix to apply
      * @param event the mouse event
      * @returns the transformation matrix
      */
@@ -661,7 +675,7 @@ export interface TranslationMoveEntry {
      */
     transformation: Matrix;
     /**
-     * The global rotaiton of the context
+     * The global rotation of the context
      */
     globalRotation: number;
     /**
