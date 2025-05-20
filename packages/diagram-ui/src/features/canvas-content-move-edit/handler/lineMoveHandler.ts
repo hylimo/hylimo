@@ -9,28 +9,28 @@ import type { SnapElementData, SnapLines, SnapResult } from "../../snap/model.js
 import type { SElement } from "../../../model/sElement.js";
 import type { SRoot } from "../../../model/sRoot.js";
 import { getSnapElementData, getSnapReferenceData } from "../../snap/snapData.js";
-import { filterValidSnaps, getSnapLines, getSnaps, SNAP_TOLERANCE } from "../../snap/snapping.js";
+import { filterValidSnaps, getSnapDistance, getSnapLines, getSnaps, SNAP_TOLERANCE } from "../../snap/snapping.js";
 import type { SModelElementImpl } from "sprotty";
 import { findViewportZoom } from "../../../base/findViewportZoom.js";
 
 /**
- * Result of a line snap operation
- * Contains the snapped position, distance, and any snap guide lines to display
+ * Result of a position or distance edit operation
+ * Contains the calculated position, distance, and any snap guide lines to display
  */
-interface LineSnapResult {
+interface LineEditResult {
     /**
-     * The snapped position on the line
+     * The position on the line
      * Can be either a single number (absolute position) or a tuple of [segment, relative position]
      */
-    snappedPos: number | [number, number];
+    pos: number | [number, number];
 
     /**
-     * The snapped distance from the line
+     * The distance from the line
      */
-    snappedDistance: number;
+    dist: number;
 
     /**
-     * Visual guide lines to display for the snap
+     * Visual guide lines to display for the snap, if any
      */
     snapLines: SnapLines | undefined;
 }
@@ -109,13 +109,9 @@ export class LineMoveHandler extends MoveHandler {
      * @param root the root element
      * @returns the position, distance, and snap lines
      */
-    private handlePositionEdit(
-        x: number,
-        y: number,
-        root: SRoot
-    ): { pos: number | [number, number] | undefined; dist: number | undefined; snapLines: SnapLines | undefined } {
-        let pos: number | [number, number] | undefined;
-        let dist: number | undefined;
+    private handlePositionEdit(x: number, y: number, root: SRoot): LineEditResult {
+        let pos: number | [number, number] | undefined = undefined;
+        let dist: number | undefined = undefined;
         let snapLines: SnapLines | undefined = undefined;
 
         if (this.snapHandler != undefined) {
@@ -149,11 +145,7 @@ export class LineMoveHandler extends MoveHandler {
      * @param root the root element containing the viewport information
      * @returns the snapped position data if snapping was successful, undefined otherwise
      */
-    private trySnapPosition(
-        x: number,
-        y: number,
-        root: SRoot
-    ): { pos: number | [number, number]; dist: number; snapLines: SnapLines | undefined } | undefined {
+    private trySnapPosition(x: number, y: number, root: SRoot): LineEditResult | undefined {
         const snapProjection = projectPointOnLine(
             { x, y },
             this.line,
@@ -168,14 +160,13 @@ export class LineMoveHandler extends MoveHandler {
 
         const targetPoint = LineEngine.DEFAULT.getPoint(
             snapProjection.pos,
-            snapProjection.segment,
+            undefined,
             snapProjection.distance,
             this.line
         );
 
         const distToLine =
-            Math.abs((x - targetPoint.x) * normal.x + (y - targetPoint.y) * normal.y) / Math.hypot(normal.x, normal.y);
-
+            Math.abs((x - targetPoint.x) * normal.y - (y - targetPoint.y) * normal.x) / Math.hypot(normal.x, normal.y);
         if (distToLine <= SNAP_TOLERANCE) {
             const zoom = findViewportZoom(root);
             const [segment, position] = this.hasSegment
@@ -193,8 +184,8 @@ export class LineMoveHandler extends MoveHandler {
 
             if (snapResult != undefined) {
                 return {
-                    pos: snapResult.snappedPos,
-                    dist: snapResult.snappedDistance,
+                    pos: snapResult.pos,
+                    dist: snapResult.dist,
                     snapLines: snapResult.snapLines
                 };
             }
@@ -232,11 +223,7 @@ export class LineMoveHandler extends MoveHandler {
      * @param root the root element containing the viewport information
      * @returns the position, calculated distance, and any snap guide lines
      */
-    private handleDistanceEdit(
-        x: number,
-        y: number,
-        root: SRoot
-    ): { pos: number | [number, number]; dist: number; snapLines: SnapLines | undefined } {
+    private handleDistanceEdit(x: number, y: number, root: SRoot): LineEditResult {
         const pos = this.initialPos;
         const [segment, position] = Array.isArray(pos) ? pos : [undefined, pos ?? 0];
         let dist = findOptimalDistanceFromLine(position, segment, this.line, { x, y });
@@ -253,7 +240,7 @@ export class LineMoveHandler extends MoveHandler {
             );
 
             if (snapResult != undefined) {
-                dist = snapResult.snappedDistance;
+                dist = snapResult.dist;
                 snapLines = snapResult.snapLines;
             }
         }
@@ -354,17 +341,16 @@ export class LineSnapHandler extends SnapHandler {
         zoom: number,
         editPos: boolean,
         editDist: boolean
-    ): LineSnapResult | undefined {
+    ): LineEditResult | undefined {
         const targetPoint = LineEngine.DEFAULT.getPoint(pos, segment, distance, this.line);
         const translation = Math2D.sub(targetPoint, this.originalPoint);
         const hasSegment = segment != undefined;
         const snapResult = this.calculateSnapResult(zoom, translation);
         const snappedPoint = Math2D.add(this.originalPoint, snapResult.snapOffset);
-
         if (editPos) {
             return this.handlePositionSnap(distance, hasSegment, editDist, snapResult, snappedPoint);
         } else if (editDist) {
-            return this.handleDistanceSnap(pos, segment, distance, targetPoint, snapResult, snappedPoint);
+            return this.handleDistanceSnap(pos, segment, distance, targetPoint, snapResult, snappedPoint, zoom);
         } else {
             return undefined;
         }
@@ -405,7 +391,7 @@ export class LineSnapHandler extends SnapHandler {
         editDist: boolean,
         snapResult: SnapResult,
         snappedPoint: Point
-    ): LineSnapResult | undefined {
+    ): LineEditResult | undefined {
         const nearest = projectPointOnLine(
             snappedPoint,
             this.line,
@@ -418,14 +404,15 @@ export class LineSnapHandler extends SnapHandler {
 
         const snappedTransform = this.calculateSnappedTransform(nearest);
 
-        if (!this.areSnapsValid(snapResult, snappedTransform)) {
+        filterValidSnaps(snapResult, snappedTransform);
+        if (snapResult.nearestSnapsX.length == 0 && snapResult.nearestSnapsY.length == 0) {
             return undefined;
         }
 
         const snapLines = getSnapLines(snapResult, snappedTransform);
         return {
-            snappedPos: hasSegment ? [nearest.segment, nearest.relativePos] : nearest.pos,
-            snappedDistance: editDist ? nearest.distance : distance,
+            pos: hasSegment ? [nearest.segment, nearest.relativePos] : nearest.pos,
+            dist: editDist ? nearest.distance : distance,
             snapLines
         };
     }
@@ -444,19 +431,6 @@ export class LineSnapHandler extends SnapHandler {
     }
 
     /**
-     * Checks if the snaps are valid after applying a transformation
-     * Filters the snap result based on the transformation and verifies that at least one valid snap exists
-     *
-     * @param snapResult the snap result from the snapping system
-     * @param transform the transformation to apply
-     * @returns true if at least one valid snap exists after filtering, false otherwise
-     */
-    private areSnapsValid(snapResult: SnapResult, transform: Matrix): boolean {
-        filterValidSnaps(snapResult, transform);
-        return snapResult.nearestSnapsX.length > 0 || snapResult.nearestSnapsY.length > 0;
-    }
-
-    /**
      * Handles snapping when editing a point's distance from the line
      * Processes distance snapping logic, computes appropriate transformations, and validates the result
      *
@@ -466,6 +440,7 @@ export class LineSnapHandler extends SnapHandler {
      * @param targetPoint the original target point
      * @param snapResult the snap result from the snapping system
      * @param snappedPoint the snapped point coordinates
+     * @param zoom the current zoom level of the viewport
      * @returns the snap result with position and distance information if valid, undefined otherwise
      */
     private handleDistanceSnap(
@@ -474,33 +449,36 @@ export class LineSnapHandler extends SnapHandler {
         distance: number,
         targetPoint: Point,
         snapResult: SnapResult,
-        snappedPoint: Point
-    ): LineSnapResult | undefined {
+        snappedPoint: Point,
+        zoom: number
+    ): LineEditResult | undefined {
         const normal = LineEngine.DEFAULT.getNormalVector(pos, segment, this.line);
-        const snappedDistance = this.calculateSnappedDistance(normal, distance, snapResult, snappedPoint);
+        const pointOnLine = LineEngine.DEFAULT.getPoint(pos, segment, 0, this.line);
+        const snappedDistance = this.calculateSnappedDistance(pointOnLine, normal, distance, snapResult, snappedPoint);
 
         if (snappedDistance == undefined) {
             return undefined;
         }
 
         const roundedDistance = SharedSettings.roundToLinePointDistancePrecision(this.settings, snappedDistance);
+        const newSnappedPoint = LineEngine.DEFAULT.getPoint(pos, segment, roundedDistance, this.line);
 
-        if (!this.isSnappedDistanceValid(pos, segment, roundedDistance, targetPoint)) {
+        if (Math2D.distance(targetPoint, newSnappedPoint) > getSnapDistance(zoom)) {
             return undefined;
         }
 
-        const newSnappedPoint = LineEngine.DEFAULT.getPoint(pos, segment, roundedDistance, this.line);
         const newTranslation = Math2D.sub(newSnappedPoint, this.originalPoint);
         const transform = translate(newTranslation.x, newTranslation.y);
 
-        if (!this.areSnapsValid(snapResult, transform)) {
+        filterValidSnaps(snapResult, transform);
+        if (snapResult.nearestSnapsX.length == 0 && snapResult.nearestSnapsY.length == 0) {
             return undefined;
         }
 
         const snapLines = getSnapLines(snapResult, transform);
         return {
-            snappedPos: segment != undefined ? [segment, pos] : pos,
-            snappedDistance: roundedDistance,
+            pos: segment != undefined ? [segment, pos] : pos,
+            dist: roundedDistance,
             snapLines
         };
     }
@@ -510,6 +488,7 @@ export class LineSnapHandler extends SnapHandler {
      * Projects the snap offset onto the normal vector to determine the appropriate distance value
      * Handles cases for both x and y axis snapping, choosing the best result
      *
+     * @param pointOnLine the point on the line at the given position
      * @param normal the normal vector to the line at the given position
      * @param distance the current distance from the line
      * @param snapResult the snap result from the snapping system
@@ -517,6 +496,7 @@ export class LineSnapHandler extends SnapHandler {
      * @returns the calculated distance value if a valid snap was found, undefined otherwise
      */
     private calculateSnappedDistance(
+        pointOnLine: Point,
         normal: Point,
         distance: number,
         snapResult: SnapResult,
@@ -525,38 +505,17 @@ export class LineSnapHandler extends SnapHandler {
         let snappedDistance: number | undefined;
 
         if (snapResult.nearestSnapsX.length > 0 && normal.x != 0) {
-            const t = (snappedPoint.x - this.originalPoint.x) / normal.x / Math2D.length(normal);
+            const t = (snappedPoint.x - pointOnLine.x) / normal.x / Math2D.length(normal);
             snappedDistance = t;
         }
 
         if (snapResult.nearestSnapsY.length > 0 && normal.y != 0) {
-            const t = (snappedPoint.y - this.originalPoint.y) / normal.y / Math2D.length(normal);
+            const t = (snappedPoint.y - pointOnLine.y) / normal.y / Math2D.length(normal);
             if (snappedDistance == undefined || Math.abs(t - distance) < Math.abs(snappedDistance - distance)) {
                 snappedDistance = t;
             }
         }
 
         return snappedDistance;
-    }
-
-    /**
-     * Checks if the snapped distance is valid by verifying that the resulting point
-     * is within the snap tolerance of the target point
-     * This ensures that distance snapping doesn't result in the point jumping to an unexpected location
-     *
-     * @param pos the position on the line
-     * @param segment the segment index if using segment-based positioning, undefined otherwise
-     * @param distance the calculated distance value
-     * @param targetPoint the original target point
-     * @returns true if the distance results in a valid snapped position, false otherwise
-     */
-    private isSnappedDistanceValid(
-        pos: number,
-        segment: number | undefined,
-        distance: number,
-        targetPoint: Point
-    ): boolean {
-        const newSnappedPoint = LineEngine.DEFAULT.getPoint(pos, segment, distance, this.line);
-        return Math2D.distance(targetPoint, newSnappedPoint) <= SNAP_TOLERANCE;
     }
 }

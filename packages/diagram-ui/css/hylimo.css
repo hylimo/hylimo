@@ -34,7 +34,8 @@ svg.hylimo {
     .select-box,
     .select-canvas-connection,
     .create-connection-outline,
-    .snap-line {
+    .snap-line,
+    .snap-line-point {
         vector-effect: non-scaling-stroke;
     }
 
