@@ -54,8 +54,8 @@ export class MovedElementsSelector {
         private readonly index: ModelIndexImpl
     ) {
         this.registerElements(new Set(selected));
-        this.registerAdditionalImplicitlyMovedElements();
         this.pruneMovedElements();
+        this.registerAdditionalImplicitlyMovedElements();
     }
 
     /**
@@ -99,7 +99,7 @@ export class MovedElementsSelector {
     private registerAdditionalImplicitlyMovedElements(): void {
         for (const element of this.index.all()) {
             if (element instanceof SCanvasElement || element instanceof SCanvasPoint) {
-                if (this.isElementImplicitlyMoved(element)) {
+                if (!this.movedElements.has(element) && this.isElementImplicitlyMoved(element, false)) {
                     this.implicitlyMovedElements.add(element);
                 }
             }
@@ -111,7 +111,7 @@ export class MovedElementsSelector {
      */
     private pruneMovedElements() {
         for (const element of this.movedElements) {
-            if (this.isElementImplicitlyMoved(element)) {
+            if (this.isElementImplicitlyMoved(element, true)) {
                 this.implicitlyMovedElements.add(element);
             }
         }
@@ -124,16 +124,17 @@ export class MovedElementsSelector {
      * Checks if an element is moved.
      *
      * @param elementId the id of the element to check
+     * @param consistencyChecks if false, consistency checks are skipped
      * @returns true if the element is moved, otherwise false
      */
-    private isMoved(elementId: string): boolean {
+    private isMoved(elementId: string, consistencyChecks: boolean): boolean {
         const fromLookup = this.isMovedLookup.get(elementId);
         if (fromLookup != undefined) {
             return fromLookup;
         }
         const element = this.index.getById(elementId);
         if (element instanceof SCanvasElement || element instanceof SCanvasPoint) {
-            const isMoved = this.isElementMoved(element);
+            const isMoved = this.isElementMoved(element, consistencyChecks);
             this.isMovedLookup.set(elementId, isMoved);
             return isMoved;
         } else {
@@ -145,13 +146,14 @@ export class MovedElementsSelector {
      * Checks if an element is moved.
      *
      * @param element the element to check
+     * @param consistencyChecks if false, consistency checks are skipped
      * @returns true if the element is moved, otherwise false
      */
-    private isElementMoved(element: SCanvasElement | SCanvasPoint): boolean {
+    private isElementMoved(element: SCanvasElement | SCanvasPoint, consistencyChecks: boolean): boolean {
         if (this.movedElements.has(element)) {
             return true;
         }
-        return this.isElementImplicitlyMoved(element);
+        return this.isElementImplicitlyMoved(element, consistencyChecks);
     }
 
     /**
@@ -162,33 +164,34 @@ export class MovedElementsSelector {
      * - An absolute point is moved if the parent canvas is moved.
      *
      * @param element the element to check
+     * @param consistencyChecks if false, consistency checks are skipped
      * @returns true if the element is implicitly moved, otherwise false
      */
-    private isElementImplicitlyMoved(element: SCanvasElement | SCanvasPoint): boolean {
+    private isElementImplicitlyMoved(element: SCanvasElement | SCanvasPoint, consistencyChecks: boolean): boolean {
         if (element instanceof SCanvasElement) {
             if (element.pos != undefined) {
-                return this.isMoved(element.pos);
+                return this.isMoved(element.pos, consistencyChecks);
             }
-            return this.isParentCanvasImplicitlyMoved(element);
+            return this.isParentCanvasImplicitlyMoved(element, consistencyChecks);
         } else if (element instanceof SRelativePoint) {
             const target = this.index.getById(element.target) as SCanvasPoint | SCanvasElement | SCanvasConnection;
             if (target instanceof SCanvasConnection) {
-                return this.isMoved(target.segments.at(-1)!.end);
+                return this.isMoved(target.segments.at(-1)!.end, consistencyChecks);
             } else {
-                return this.isMoved(element.target);
+                return this.isMoved(element.target, consistencyChecks);
             }
         } else if (element instanceof SLinePoint) {
             const lineProviderId = element.lineProvider;
             const lineProvider = this.index.getById(lineProviderId) as SCanvasContent;
             if (lineProvider instanceof SCanvasElement) {
-                return this.isMoved(lineProviderId);
+                return this.isMoved(lineProviderId, consistencyChecks);
             }
             if (lineProvider instanceof SCanvasConnection) {
                 const affectedSegment = LinePoint.calcSegmentIndex(element.pos, lineProvider.segments.length);
-                return this.isCanvasConnectionSegmentMoved(lineProvider, affectedSegment);
+                return this.isCanvasConnectionSegmentMoved(lineProvider, affectedSegment, consistencyChecks);
             }
         } else if (element instanceof SAbsolutePoint) {
-            return this.isParentCanvasImplicitlyMoved(element);
+            return this.isParentCanvasImplicitlyMoved(element, consistencyChecks);
         }
         return false;
     }
@@ -200,9 +203,14 @@ export class MovedElementsSelector {
      *
      * @param connection the connection to check
      * @param segmentIndex the index of the segment to check
+     * @param consistencyChecks if false, consistency checks are skipped
      * @returns true if the segment is moved, otherwise false
      */
-    private isCanvasConnectionSegmentMoved(connection: SCanvasConnection, segmentIndex: number): boolean {
+    private isCanvasConnectionSegmentMoved(
+        connection: SCanvasConnection,
+        segmentIndex: number,
+        consistencyChecks: boolean
+    ): boolean {
         const relevantPoints: string[] = [];
         if (segmentIndex === 0) {
             relevantPoints.push(connection.start);
@@ -214,23 +222,25 @@ export class MovedElementsSelector {
         if (segment instanceof SCanvasBezierSegment) {
             relevantPoints.push(segment.startControlPoint, segment.endControlPoint);
         }
-        const isMoved = relevantPoints.map((point) => this.isMoved(point));
-        if (isMoved.every((moved) => moved)) {
-            return true;
-        }
-        if (isMoved.some((moved) => moved)) {
+        const isMoved = relevantPoints.map((point) => this.isMoved(point, consistencyChecks));
+        const result = isMoved.some((moved) => moved);
+        if (consistencyChecks && result && isMoved.some((moved) => !moved)) {
             this.hasConflict = true;
         }
-        return false;
+        return result;
     }
 
     /**
      * Checks if an element is moved implicitly by a parent canvas (which is located inside another SCanvasElement or SMarker).
      *
      * @param element the element to check
+     * @param consistencyChecks if false, consistency checks are skipped
      * @returns true if the element is moved implicitly by a parent canvas, otherwise false
      */
-    private isParentCanvasImplicitlyMoved(element: SCanvasElement | SAbsolutePoint): boolean {
+    private isParentCanvasImplicitlyMoved(
+        element: SCanvasElement | SAbsolutePoint,
+        consistencyChecks: boolean
+    ): boolean {
         const canvas = element.parent as CanvasLike & SElement;
         const isCanvasMoved = this.isMovedLookup.get(canvas.id);
         if (isCanvasMoved != undefined) {
@@ -242,11 +252,11 @@ export class MovedElementsSelector {
         ) as SMarker | SCanvasElement | undefined;
         let isParentCanvasMoved = false;
         if (parentCanvasContent instanceof SCanvasElement) {
-            isParentCanvasMoved = this.isMoved(parentCanvasContent.id);
+            isParentCanvasMoved = this.isMoved(parentCanvasContent.id, consistencyChecks);
         } else if (parentCanvasContent instanceof SMarker) {
             const connection = parentCanvasContent.parent as SCanvasConnection;
             const segmentIndex = parentCanvasContent.pos == "start" ? 0 : connection.segments.length - 1;
-            isParentCanvasMoved = this.isCanvasConnectionSegmentMoved(connection, segmentIndex);
+            isParentCanvasMoved = this.isCanvasConnectionSegmentMoved(connection, segmentIndex, consistencyChecks);
         }
         this.isMovedLookup.set(canvas.id, isParentCanvasMoved);
         return isParentCanvasMoved;
