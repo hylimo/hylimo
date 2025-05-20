@@ -116,7 +116,7 @@ export class SplitCanvasSegmentMouseListener extends MouseListener {
             coordinates,
             target.line,
             {
-                posPrecision: this.settingsProvider.settings?.linePointPosPrecision,
+                settings: this.settingsProvider.settings ?? {},
                 hasSegment: false
             },
             0

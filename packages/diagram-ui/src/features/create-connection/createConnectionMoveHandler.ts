@@ -1,4 +1,4 @@
-import type { ConnectionEdit, ConnectionEnd } from "@hylimo/diagram-protocol";
+import type { ConnectionEdit, ConnectionEnd, SharedSettings } from "@hylimo/diagram-protocol";
 import type { SModelElementImpl } from "sprotty";
 import { findParentByFeature } from "sprotty";
 import { MoveHandler, type HandleMoveResult } from "../move/moveHandler.js";
@@ -21,7 +21,7 @@ export class CreateConnectionMoveHandler extends MoveHandler {
     constructor(
         private readonly edit: `connection/${string}`,
         private readonly start: ConnectionEnd,
-        private readonly posPrecision: number | undefined,
+        private readonly settings: SharedSettings | undefined,
         transformationMatrix: Matrix
     ) {
         super(transformationMatrix, "cursor-crosshair", false);
@@ -36,7 +36,10 @@ export class CreateConnectionMoveHandler extends MoveHandler {
             const projection = projectPointOnLine(
                 { x, y },
                 line,
-                { posPrecision: this.posPrecision, hasSegment: false },
+                {
+                    settings: this.settings ?? {},
+                    hasSegment: false
+                },
                 0
             );
             end = {

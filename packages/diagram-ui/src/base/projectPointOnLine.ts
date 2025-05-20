@@ -10,9 +10,9 @@ import { SharedSettings } from "@hylimo/diagram-protocol";
  */
 export interface RoundingInformation {
     /**
-     * The precision to use for rounding
+     * Provider for precisions
      */
-    posPrecision: number | undefined;
+    settings: SharedSettings;
     /**
      * Whether to round the relativePos (true) or the pos (false)
      */
@@ -35,7 +35,10 @@ export function projectPointOnLine(
     forcedDistance: number | undefined
 ): ProjectionResult {
     const originalProjection = LineEngine.DEFAULT.projectPoint(point, transformedLine, forcedDistance);
-    const { posPrecision, hasSegment: isSegment } = roundingInformation;
+    const {
+        settings: { linePointPosPrecision: posPrecision },
+        hasSegment: isSegment
+    } = roundingInformation;
     if (posPrecision == undefined && isSegment) {
         return originalProjection;
     }
@@ -64,7 +67,8 @@ export function projectPointOnLine(
             transformedLine,
             optionsToTest,
             originalProjection,
-            isSegment
+            isSegment,
+            roundingInformation.settings
         );
     }
 }
@@ -125,6 +129,7 @@ function findBestProjectionWithFixedDistance(
  * @param optionsToTest the rounded position values to test
  * @param originalProjection the original projection result
  * @param isSegment whether the rounded value is the relative position
+ * @param settings the shared settings used for rounding the distance
  * @returns the best projection result
  */
 function findBestProjectionWithOptimalDistance(
@@ -132,7 +137,8 @@ function findBestProjectionWithOptimalDistance(
     transformedLine: TransformedLine,
     optionsToTest: number[],
     originalProjection: ProjectionResult,
-    isSegment: boolean
+    isSegment: boolean,
+    settings: SharedSettings
 ): ProjectionResult {
     let bestResult = originalProjection;
     let minDistance = Number.POSITIVE_INFINITY;
@@ -145,16 +151,12 @@ function findBestProjectionWithOptimalDistance(
             originalProjection.segment
         );
 
-        const pointOnLine = isSegment
-            ? LineEngine.DEFAULT.getPoint(baseResult.relativePos, baseResult.segment, 0, transformedLine)
-            : LineEngine.DEFAULT.getPoint(baseResult.pos, undefined, 0, transformedLine);
-        const normalVector = isSegment
-            ? LineEngine.DEFAULT.getNormalVector(baseResult.relativePos, baseResult.segment, transformedLine)
-            : LineEngine.DEFAULT.getNormalVector(baseResult.pos, undefined, transformedLine);
-        const dx = point.x - pointOnLine.x;
-        const dy = point.y - pointOnLine.y;
-        const d2 = normalVector.x ** 2 + normalVector.y ** 2;
-        const optimalDistance = (dx * normalVector.x + dy * normalVector.y) / d2;
+        const optimalDistance = findOptimalDistanceFromLine(
+            isSegment ? baseResult.relativePos : baseResult.pos,
+            isSegment ? baseResult.segment : undefined,
+            transformedLine,
+            point
+        );
 
         const result = {
             ...baseResult,
@@ -171,8 +173,23 @@ function findBestProjectionWithOptimalDistance(
             bestResult = result;
         }
     }
-
+    bestResult.distance = SharedSettings.roundToLinePointDistancePrecision(settings, bestResult.distance);
     return bestResult;
+}
+
+export function findOptimalDistanceFromLine(
+    pos: number,
+    segment: number | undefined,
+    transformedLine: TransformedLine,
+    point: Point
+) {
+    const pointOnLine = LineEngine.DEFAULT.getPoint(pos, segment, 0, transformedLine);
+    const normalVector = LineEngine.DEFAULT.getNormalVector(pos, segment, transformedLine);
+    const dx = point.x - pointOnLine.x;
+    const dy = point.y - pointOnLine.y;
+    const d2 = normalVector.x ** 2 + normalVector.y ** 2;
+    const optimalDistance = (dx * normalVector.x + dy * normalVector.y) / d2;
+    return optimalDistance;
 }
 
 /**
