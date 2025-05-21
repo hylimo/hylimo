@@ -2,7 +2,7 @@ import type { Point, ProjectionResult, TransformedLine } from "@hylimo/diagram-c
 import { DefaultEditTypes, LineEngine, Math2D } from "@hylimo/diagram-common";
 import { SharedSettings, type MoveLposEdit } from "@hylimo/diagram-protocol";
 import { translate, type Matrix } from "transformation-matrix";
-import { MoveHandler, type HandleMoveResult } from "../../move/moveHandler.js";
+import { type HandleMoveResult } from "../../move/moveHandler.js";
 import { findOptimalDistanceFromLine, projectPointOnLine } from "../../../base/projectPointOnLine.js";
 import { SnapHandler } from "../../snap/snapHandler.js";
 import type { SnapElementData, SnapLines, SnapResult } from "../../snap/model.js";
@@ -12,6 +12,7 @@ import { getSnapElementData, getSnapReferenceData } from "../../snap/snapData.js
 import { filterValidSnaps, getSnapDistance, getSnapLines, getSnaps, SNAP_TOLERANCE } from "../../snap/snapping.js";
 import type { SModelElementImpl } from "sprotty";
 import { findViewportZoom } from "../../../base/findViewportZoom.js";
+import { SnapMoveHandler } from "../../snap/snapMoveHandler.js";
 
 /**
  * Result of a position or distance edit operation
@@ -41,7 +42,7 @@ interface LineEditResult {
  * Handles both position editing (moving along the line) and distance editing (moving perpendicular to the line).
  * Supports snapping to improve precision during editing operations.
  */
-export class LineMoveHandler extends MoveHandler {
+export class LineMoveHandler extends SnapMoveHandler<LineSnapHandler> {
     /**
      * True if the pos is defined relative to a segment
      */
@@ -53,11 +54,16 @@ export class LineMoveHandler extends MoveHandler {
      * @param point the id of the point to move
      * @param editPos if true, the position of the point can be modified
      * @param editDist if true, the distance to the line can be modified
-     * @param hasSegment if true, the segment index is defined
      * @param line the line on which the point is
-     * @param posPrecision the precision to use for rounding the position
+     * @param settings the shared settings containing precision values
+     * @param initialPos the initial position of the point on the line
      * @param initialDistance the current distance of the point to edit
-     * @param transformationMatrix the transformation matrix to apply to obtain the relative position
+     * @param elements elements to consider for snapping
+     * @param ignoredElements elements to ignore when snapping
+     * @param root the root element of the diagram
+     * @param originalPoint the original point position before moving
+     * @param snappingEnabled whether snapping is enabled
+     * @param transformMatrix the transformation matrix to apply to obtain the relative position
      */
     constructor(
         private readonly point: string,
@@ -67,10 +73,15 @@ export class LineMoveHandler extends MoveHandler {
         private readonly settings: SharedSettings,
         private readonly initialPos: number | [number, number],
         private readonly initialDistance: number | undefined,
-        private readonly snapHandler: LineSnapHandler | undefined,
+        elements: SElement[],
+        ignoredElements: Set<string>,
+        root: SRoot,
+        originalPoint: Point,
+        snappingEnabled: boolean,
         transformMatrix: Matrix
     ) {
-        super(transformMatrix, "cursor-move");
+        const snapHandler = new LineSnapHandler(elements, ignoredElements, root, originalPoint, line, settings);
+        super(snapHandler, snappingEnabled, transformMatrix, "cursor-move");
         this.hasSegment = Array.isArray(initialPos);
     }
 
@@ -80,17 +91,17 @@ export class LineMoveHandler extends MoveHandler {
         let snapLines: SnapLines | undefined = undefined;
         const root = target.root as SRoot;
 
-        if (this.snapHandler != undefined) {
+        if (this.isSnappingEnabled(event)) {
             this.snapHandler.updateReferenceData(root);
         }
 
         if (this.editPos) {
-            const result = this.handlePositionEdit(x, y, root);
+            const result = this.handlePositionEdit(x, y, root, event);
             pos = result.pos;
             dist = result.dist;
             snapLines = result.snapLines;
         } else {
-            const result = this.handleDistanceEdit(x, y, root);
+            const result = this.handleDistanceEdit(x, y, root, event);
             pos = result.pos;
             dist = result.dist;
             snapLines = result.snapLines;
@@ -107,14 +118,15 @@ export class LineMoveHandler extends MoveHandler {
      * @param x the x coordinate
      * @param y the y coordinate
      * @param root the root element
+     * @param event the causing mouse event
      * @returns the position, distance, and snap lines
      */
-    private handlePositionEdit(x: number, y: number, root: SRoot): LineEditResult {
+    private handlePositionEdit(x: number, y: number, root: SRoot, event: MouseEvent): LineEditResult {
         let pos: number | [number, number] | undefined = undefined;
         let dist: number | undefined = undefined;
         let snapLines: SnapLines | undefined = undefined;
 
-        if (this.snapHandler != undefined) {
+        if (this.isSnappingEnabled(event)) {
             const snapResult = this.trySnapPosition(x, y, root);
             if (snapResult != undefined) {
                 pos = snapResult.pos;
@@ -221,15 +233,16 @@ export class LineMoveHandler extends MoveHandler {
      * @param x the x coordinate of the mouse position
      * @param y the y coordinate of the mouse position
      * @param root the root element containing the viewport information
+     * @param event the causing mouse event
      * @returns the position, calculated distance, and any snap guide lines
      */
-    private handleDistanceEdit(x: number, y: number, root: SRoot): LineEditResult {
+    private handleDistanceEdit(x: number, y: number, root: SRoot, event: MouseEvent): LineEditResult {
         const pos = this.initialPos;
         const [segment, position] = Array.isArray(pos) ? pos : [undefined, pos ?? 0];
         let dist = findOptimalDistanceFromLine(position, segment, this.line, { x, y });
         let snapLines: SnapLines | undefined = undefined;
 
-        if (this.snapHandler != undefined) {
+        if (this.isSnappingEnabled(event)) {
             const snapResult = this.snapHandler.snap(
                 position,
                 segment,
@@ -289,7 +302,7 @@ export class LineMoveHandler extends MoveHandler {
  * Provides snapping functionality when moving points on a line, handling both position and distance snapping
  * Works with the overall snapping system to provide consistent behavior across the diagram
  */
-export class LineSnapHandler extends SnapHandler {
+class LineSnapHandler extends SnapHandler {
     /**
      * Intitial snap element data for a drag vector (0, 0)
      */
@@ -307,18 +320,14 @@ export class LineSnapHandler extends SnapHandler {
      */
     constructor(
         elements: SElement[],
-        ignoredElements: SElement[],
+        ignoredElements: Set<string>,
         root: SRoot,
         private readonly originalPoint: Point,
         private readonly line: TransformedLine,
         settings: SharedSettings | undefined
     ) {
-        const ignoredElementsSet = new Set<string>();
-        for (const element of ignoredElements) {
-            ignoredElementsSet.add(element.id);
-        }
-        const snapElementData = getSnapElementData(root, elements, ignoredElementsSet);
-        super(getSnapReferenceData(root, new Set(snapElementData.keys()), ignoredElementsSet), settings);
+        const snapElementData = getSnapElementData(root, elements, ignoredElements);
+        super(getSnapReferenceData(root, new Set(snapElementData.keys()), ignoredElements), settings);
         this.snapElementData = snapElementData;
     }
 

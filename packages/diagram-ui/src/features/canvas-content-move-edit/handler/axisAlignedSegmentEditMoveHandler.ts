@@ -1,7 +1,7 @@
 import { SharedSettings, type AxisAlignedSegmentEdit } from "@hylimo/diagram-protocol";
 import { DefaultEditTypes } from "@hylimo/diagram-common";
 import { applyToPoint, rotateDEG, translate, type Matrix } from "transformation-matrix";
-import { MoveHandler, type HandleMoveResult } from "../../move/moveHandler.js";
+import { type HandleMoveResult } from "../../move/moveHandler.js";
 import type { ResizeMoveCursor } from "../../cursor/cursor.js";
 import type { SnapLines } from "../../snap/model.js";
 import { SnapHandler } from "../../snap/snapHandler.js";
@@ -11,6 +11,8 @@ import type { SCanvasConnection } from "../../../model/canvas/sCanvasConnection.
 import type { SModelElementImpl } from "sprotty";
 import { findViewportZoom } from "../../../base/findViewportZoom.js";
 import { getSnapReferenceData } from "../../snap/snapData.js";
+import { SnapMoveHandler } from "../../snap/snapMoveHandler.js";
+import type { SCanvasAxisAlignedSegment } from "../../../model/canvas/sCanvasAxisAlignedSegment.js";
 
 /**
  * Represents the result of a snap operation for an axis-aligned segment.
@@ -32,7 +34,12 @@ interface AxisAlignedSegmentSnapResult {
  * Move handler for moving the vertical segment of an axis aligned connection segment.
  * Expects relative coordinates in the canvas connection parent canvas coordinate system.
  */
-export class AxisAlignedSegmentEditMoveHandler extends MoveHandler {
+export class AxisAlignedSegmentEditMoveHandler extends SnapMoveHandler<AxisAlignedSegmentEditSnapHandler | undefined> {
+    /**
+     * The id of the CanvasAxisAlignedConnectionSegment to move
+     */
+    private readonly element: string;
+
     /**
      * Creates a new AxisAlignedSegmentEditHandler
      *
@@ -46,16 +53,32 @@ export class AxisAlignedSegmentEditMoveHandler extends MoveHandler {
      * @param moveCursor the cursor to use while moving
      */
     constructor(
-        readonly element: string,
-        readonly original: number,
-        readonly start: number,
-        readonly end: number,
-        readonly vertical: boolean,
-        readonly snapHandler: AxisAlignedSegmentEditSnapHandler | undefined,
+        private readonly original: number,
+        private readonly start: number,
+        private readonly end: number,
+        private readonly vertical: boolean,
+        segment: SCanvasAxisAlignedSegment,
+        otherStart: number,
+        otherEnd: number,
+        settings: SharedSettings | undefined,
+        snappingEnabled: boolean,
         transformationMatrix: Matrix,
         moveCursor: ResizeMoveCursor | undefined
     ) {
-        super(transformationMatrix, moveCursor);
+        const connection = segment.parent;
+        const rotation = connection.parent.globalRotation;
+        let snapHandler: AxisAlignedSegmentEditSnapHandler | undefined = undefined;
+        if (rotation % 90 === 0) {
+            snapHandler = new AxisAlignedSegmentEditSnapHandler(
+                connection,
+                vertical,
+                otherStart,
+                vertical ? otherEnd : end,
+                settings
+            );
+        }
+        super(snapHandler, snappingEnabled, transformationMatrix, moveCursor);
+        this.element = segment.id;
     }
 
     override handleMove(x: number, y: number, event: MouseEvent, target: SModelElementImpl): HandleMoveResult {
@@ -63,7 +86,7 @@ export class AxisAlignedSegmentEditMoveHandler extends MoveHandler {
         const rawPos = (rawValue - this.start) / (this.end - this.start);
         let newPos = Math.min(1, Math.max(0, rawPos));
         let snapLines: SnapLines | undefined = undefined;
-        if (this.snapHandler != undefined) {
+        if (this.snapHandler != undefined && this.isSnappingEnabled(event)) {
             const root = target.root as SRoot;
             const zoom = findViewportZoom(root);
             this.snapHandler.updateReferenceData(root);
@@ -90,7 +113,7 @@ export class AxisAlignedSegmentEditMoveHandler extends MoveHandler {
  * Snap handler for axis aligned segment edits.
  * Handles snapping functionality when moving axis aligned segments in a connection.
  */
-export class AxisAlignedSegmentEditSnapHandler extends SnapHandler {
+class AxisAlignedSegmentEditSnapHandler extends SnapHandler {
     /**
      * Canvas id that serves as the context for snapping operations
      */
@@ -208,28 +231,4 @@ export class AxisAlignedSegmentEditSnapHandler extends SnapHandler {
             snapSize: false
         });
     }
-}
-
-/**
- * Creates a snap handler for axis aligned segment edits.
- * This factory function creates a snap handler only if the connection's parent canvas has a rotation that's a multiple of 90 degrees.
- *
- * @param connection the canvas connection containing the segment being edited
- * @param vertical whether the segment being moved is vertical (true) or horizontal (false)
- * @param otherStart the start coordinate of the segment for the off-axis
- * @param otherEnd the end coordinate of the segment for the off-axis
- * @returns a new AxisAlignedSegmentEditSnapHandler instance or undefined if the canvas rotation isn't a multiple of 90 degrees
- */
-export function createAxisAlignedSegmentEditSnapHandler(
-    connection: SCanvasConnection,
-    vertical: boolean,
-    otherStart: number,
-    otherEnd: number,
-    settings: SharedSettings | undefined
-): AxisAlignedSegmentEditSnapHandler | undefined {
-    const rotation = connection.parent.globalRotation;
-    if (rotation % 90 !== 0) {
-        return undefined;
-    }
-    return new AxisAlignedSegmentEditSnapHandler(connection, vertical, otherStart, otherEnd, settings);
 }

@@ -63,6 +63,7 @@ export * from "./features/snap/sizeSnap.js";
 export * from "./features/snap/snapData.js";
 export * from "./features/snap/snapHandler.js";
 export * from "./features/snap/snapLinesStateManager.js";
+export * from "./features/snap/snapMoveHandler.js";
 export * from "./features/snap/snapping.js";
 export * from "./features/snap/updateSnapLines.js";
 export * from "./features/snap/util.js";

@@ -43,6 +43,20 @@ export class MovedElementsSelector {
     private readonly isMovedLookup: Map<string, boolean> = new Map();
 
     /**
+     * Returns the (implicitely) moved element ids
+     */
+    get movedOrImplicitlyMovedElementIds(): Set<string> {
+        const movedOrImplicitlyMovedElementIds = new Set<string>();
+        for (const element of this.movedElements) {
+            movedOrImplicitlyMovedElementIds.add(element.id);
+        }
+        for (const element of this.implicitlyMovedElements) {
+            movedOrImplicitlyMovedElementIds.add(element.id);
+        }
+        return movedOrImplicitlyMovedElementIds;
+    }
+
+    /**
      * Creates a new moved elements selector.
      * The results are available immediately after creation.
      *
@@ -50,7 +64,7 @@ export class MovedElementsSelector {
      * @param index index for element lookup
      */
     constructor(
-        selected: (SCanvasElement | SCanvasPoint | SMarker)[],
+        readonly selected: (SCanvasElement | SCanvasPoint | SMarker)[],
         private readonly index: ModelIndexImpl
     ) {
         this.registerElements(new Set(selected));

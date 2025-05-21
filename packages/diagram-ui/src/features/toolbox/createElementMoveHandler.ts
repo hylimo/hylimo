@@ -1,5 +1,5 @@
 import { SharedSettings, type ToolboxEdit } from "@hylimo/diagram-protocol";
-import { MoveHandler, type HandleMoveResult } from "../move/moveHandler.js";
+import { type HandleMoveResult } from "../move/moveHandler.js";
 import type { SRoot } from "../../model/sRoot.js";
 import type { SModelElementImpl } from "sprotty";
 import type { Action } from "sprotty-protocol";
@@ -10,11 +10,12 @@ import type { Point } from "@hylimo/diagram-common";
 import { translate, type Matrix } from "transformation-matrix";
 import { SnapHandler } from "../snap/snapHandler.js";
 import { getSnapReferenceData } from "../snap/snapData.js";
+import { SnapMoveHandler } from "../snap/snapMoveHandler.js";
 
 /**
  * Create move handler to create canvas elements, typically used for toolbox edits
  */
-export class CreateElementMoveHandler extends MoveHandler {
+export class CreateElementMoveHandler extends SnapMoveHandler<CreateElementSnapHandler> {
     /**
      * Creates a new create element move handler
      *
@@ -22,14 +23,18 @@ export class CreateElementMoveHandler extends MoveHandler {
      * @param root the root element
      * @param pointerId the pointer id, used to set pointer capture
      * @param snapHandler the snap handler to use for snapping, if enabled
+     * @param settings the shared settings
+     * @param snappingEnabled whether snapping is enabled
      */
     constructor(
         private readonly edit: `toolbox/${string}`,
         private readonly root: SRoot,
         private readonly pointerId: number,
-        private readonly snapHandler: CreateElementSnapHandler | undefined
+        settings: SharedSettings | undefined,
+        snappingEnabled: boolean
     ) {
-        super(root.getMouseTransformationMatrix(), undefined, false);
+        const snapHandler = new CreateElementSnapHandler(root, settings);
+        super(snapHandler, snappingEnabled, root.getMouseTransformationMatrix(), undefined, false);
     }
 
     override generateActions(
@@ -50,7 +55,7 @@ export class CreateElementMoveHandler extends MoveHandler {
         let snapLines: Map<string, SnapLine[]> | undefined = undefined;
         if (this.hasMoved) {
             values = { x, y };
-            if (this.snapHandler != undefined) {
+            if (this.isSnappingEnabled(event)) {
                 const root = target.root as SRoot;
                 this.snapHandler.updateReferenceData(root);
                 const zoom = findViewportZoom(root);
@@ -78,7 +83,7 @@ export class CreateElementMoveHandler extends MoveHandler {
 /**
  * Snap handler for creating new elements
  */
-export class CreateElementSnapHandler extends SnapHandler {
+class CreateElementSnapHandler extends SnapHandler {
     /**
      * The context of the snap handler, the id of the root element
      */

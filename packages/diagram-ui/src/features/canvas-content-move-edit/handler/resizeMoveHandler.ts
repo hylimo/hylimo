@@ -1,7 +1,7 @@
 import { Bounds, DefaultEditTypes } from "@hylimo/diagram-common";
 import { SharedSettings, type Edit, type ResizeEdit } from "@hylimo/diagram-protocol";
 import { compose, inverse, rotateDEG, scale, type Matrix } from "transformation-matrix";
-import { MoveHandler, type HandleMoveResult } from "../../move/moveHandler.js";
+import { type HandleMoveResult } from "../../move/moveHandler.js";
 import type { ResizeMoveCursor } from "../../cursor/cursor.js";
 import { filterValidSnaps, getSnapLines, getSnaps } from "../../snap/snapping.js";
 import {
@@ -15,13 +15,13 @@ import {
     type SnapResult
 } from "../../snap/model.js";
 import type { SCanvasElement } from "../../../model/canvas/sCanvasElement.js";
-import type { SElement } from "../../../model/sElement.js";
 import type { SRoot } from "../../../model/sRoot.js";
 import { findViewportZoom } from "../../../base/findViewportZoom.js";
 import { SnapHandler } from "../../snap/snapHandler.js";
 import type { SModelElementImpl } from "sprotty";
 import { getSnapReferenceData } from "../../snap/snapData.js";
 import { getCanvasElementCorners } from "../../snap/util.js";
+import { SnapMoveHandler } from "../../snap/snapMoveHandler.js";
 
 /**
  * Elements with an optional original width and height.
@@ -94,30 +94,50 @@ interface SnapResizeFactors {
  * A move handler that resizes the elements.
  * Expects relative coordinates to its own coordinate system.
  */
-export class ResizeMoveHandler extends MoveHandler {
+export class ResizeMoveHandler extends SnapMoveHandler<ResizeSnapHandler | undefined> {
+    /**
+     * The original width of the primary resize element, used to calculate the resize factor.
+     */
+    private readonly originalWidth: number;
+
+    /**
+     * The original height of the primary resize element, used to calculate the resize factor.
+     */
+    private readonly originalHeight: number;
+
     /**
      * Creates a new ResizeHandler.
      *
+     * @param element the canvas element to resize.
+     * @param ignoredElements the set of element IDs to ignore during operations.
+     * @param settings the shared settings used for operations.
      * @param scaleX the scale factor in x direction. The resize is scaled by this to account for resize in the opposite direction.
      * @param scaleY the scale factor in y direction. The resize is scaled by this to account for resize in the opposite direction.
-     * @param originalWidth the original width of the primary resize element, used to calculate the resize factor.
-     * @param originalHeight the original height of the primary resize element, used to calculate the resize factor.
      * @param groupedElements the elements grouped by size.
+     * @param snappingEnabled whether snapping is enabled.
      * @param transformationMatrix the transformation matrix to apply to obtain the relative position.
      * @param moveCursor the cursor to use while resizing.
-     * @param snapHandler the handler for snapping, if enabled.
      */
     constructor(
+        element: SCanvasElement,
+        ignoredElements: Set<string>,
+        settings: SharedSettings | undefined,
         private readonly scaleX: number | undefined,
         private readonly scaleY: number | undefined,
-        private readonly originalWidth: number,
-        private readonly originalHeight: number,
         private readonly groupedElements: ElementsGroupedBySize[],
-        private readonly snapHandler: ResizeSnapHandler | undefined,
+        snappingEnabled: boolean,
         transformationMatrix: Matrix,
         moveCursor: ResizeMoveCursor | undefined
     ) {
-        super(transformationMatrix, moveCursor);
+        const rotation = element.parent.globalRotation + element.rotation;
+        let snapHandler: ResizeSnapHandler | undefined = undefined;
+        if (rotation % 90 === 0) {
+            const effectiveRotation = (((rotation / 90) % 4) + 4) % 4;
+            snapHandler = new ResizeSnapHandler(element, scaleX, scaleY, ignoredElements, effectiveRotation, settings);
+        }
+        super(snapHandler, snappingEnabled, transformationMatrix, moveCursor);
+        this.originalWidth = element.width;
+        this.originalHeight = element.height;
     }
 
     override handleMove(x: number, y: number, event: MouseEvent, target: SModelElementImpl): HandleMoveResult {
@@ -137,7 +157,7 @@ export class ResizeMoveHandler extends MoveHandler {
             factorY = uniformFactor;
         }
         let snapLines: SnapLines | undefined = undefined;
-        if (this.snapHandler != undefined) {
+        if (this.snapHandler != undefined && this.isSnappingEnabled(event)) {
             this.snapHandler.updateReferenceData(target.root as SRoot);
             const snapResult = this.snapHandler.snap(findViewportZoom(target), factorX, factorY, uniform);
             factorX = snapResult.factorX;
@@ -171,7 +191,7 @@ export class ResizeMoveHandler extends MoveHandler {
 /**
  * Snap handler for resizing canvas elements
  */
-export class ResizeSnapHandler extends SnapHandler {
+class ResizeSnapHandler extends SnapHandler {
     /**
      * The transformation matrix to convert between element and target coordinates.
      */
@@ -215,26 +235,21 @@ export class ResizeSnapHandler extends SnapHandler {
      * @param element The element being resized
      * @param scaleX The scale factor in x direction
      * @param scaleY The scale factor in y direction
-     * @param root The root element of the model
      * @param ignoredElements The elements to be ignored during snapping
      * @param effectiveRotation The effective rotation of the element in quaters (1 = 90 degrees etc.)
+     * @param settings the shared settings for snap data computation
      */
     constructor(
         element: SCanvasElement,
         private readonly scaleX: number | undefined,
         private readonly scaleY: number | undefined,
-        root: SRoot,
-        ignoredElements: SElement[],
+        ignoredElements: Set<string>,
         private readonly effectiveRotation: number,
         settings: SharedSettings | undefined
     ) {
-        const ignoredElementsSet = new Set<string>();
-        for (const element of ignoredElements) {
-            ignoredElementsSet.add(element.id);
-        }
         const context = element.parent.id;
-
-        super(getSnapReferenceData(root, new Set([context]), ignoredElementsSet), settings);
+        const root = element.root;
+        super(getSnapReferenceData(root, new Set([context]), ignoredElements), settings);
 
         const layoutEngine = root.layoutEngine;
         this.context = context;
@@ -703,33 +718,6 @@ export class ResizeSnapHandler extends SnapHandler {
             );
         }
     }
-}
-
-/**
- * Creates a ResizeMoveHandler for resizing elements.
- *
- * @param element The element being resized.
- * @param scaleX The scale factor in x direction.
- * @param scaleY The scale factor in y direction.
- * @param ignoredElements The elements to be ignored during snapping.
- * @param root The root element of the model.
- * @returns The computed snap reference data or undefined if snapping is disabled.
- */
-export function createResizeSnapHandler(
-    element: SCanvasElement,
-    scaleX: number | undefined,
-    scaleY: number | undefined,
-    ignoredElements: SElement[],
-    root: SRoot,
-    settings: SharedSettings | undefined
-): ResizeSnapHandler | undefined {
-    const rotation = element.parent.globalRotation + element.rotation;
-    if (rotation % 90 !== 0) {
-        return undefined;
-    }
-    const effectiveRotation = (((rotation / 90) % 4) + 4) % 4;
-
-    return new ResizeSnapHandler(element, scaleX, scaleY, root, ignoredElements, effectiveRotation, settings);
 }
 
 /**

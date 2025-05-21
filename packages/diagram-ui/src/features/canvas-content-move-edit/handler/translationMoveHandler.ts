@@ -1,5 +1,5 @@
 import { SharedSettings, type MoveEdit } from "@hylimo/diagram-protocol";
-import { MoveHandler, type HandleMoveResult } from "../../move/moveHandler.js";
+import { type HandleMoveResult } from "../../move/moveHandler.js";
 import type { Point, Vector } from "@hylimo/diagram-common";
 import { DefaultEditTypes } from "@hylimo/diagram-common";
 import type { Matrix } from "transformation-matrix";
@@ -12,6 +12,7 @@ import { findViewportZoom } from "../../../base/findViewportZoom.js";
 import type { SElement } from "../../../model/sElement.js";
 import { SnapHandler } from "../../snap/snapHandler.js";
 import { getSnapElementData, getSnapReferenceData } from "../../snap/snapData.js";
+import { SnapMoveHandler } from "../../snap/snapMoveHandler.js";
 
 /**
  * Entry for a translation move operation
@@ -35,7 +36,7 @@ export interface ElementsGroupedByTransformation {
  * Move handler for translations of absolute and relative points.
  * Expects relative coordinates in the root canvas coordinate system.
  */
-export class TranslationMoveHandler extends MoveHandler {
+export class TranslationMoveHandler extends SnapMoveHandler<TranslationSnapHandler> {
     /**
      * True if the x coordinate should be snapped
      */
@@ -46,27 +47,36 @@ export class TranslationMoveHandler extends MoveHandler {
     readonly snapY: boolean;
 
     /**
-     * Creats a new TranslateMovehandler
+     * Creates a new TranslationMoveHandler
      *
-     * @param elements the ids of the points to move
-     * @param snapHandler the snap handler to use for snapping, if enabled
+     * @param elementsByTransformation the ids of the points to move grouped by transformation
      * @param moveX if true, the x coordinate can be modified
      * @param moveY if true, the y coordinate can be modified
+     * @param elements the elements to consider for snapping
+     * @param ignoredElements the elements to ignore for snapping
+     * @param root the root element containing the diagram
+     * @param settings shared settings for the diagram
+     * @param snappingEnabled whether snapping is enabled
      * @param transformationMatrix the transformation matrix to apply to obtain the relative position
      */
     constructor(
-        readonly elements: ElementsGroupedByTransformation[],
-        readonly snapHandler: TranslationSnapHandler | undefined,
-        readonly moveX: boolean,
-        readonly moveY: boolean,
+        private readonly elementsByTransformation: ElementsGroupedByTransformation[],
+        private readonly moveX: boolean,
+        private readonly moveY: boolean,
+        elements: SElement[],
+        ignoredElements: Set<string>,
+        root: SRoot,
+        settings: SharedSettings | undefined,
+        snappingEnabled: boolean,
         transformationMatrix: Matrix
     ) {
-        super(transformationMatrix, "cursor-move");
+        const snapHandler = new TranslationSnapHandler(elements, ignoredElements, root, settings);
+        super(snapHandler, snappingEnabled, transformationMatrix, "cursor-move");
         if (moveX && moveY) {
             this.snapX = true;
             this.snapY = true;
         } else {
-            const effectiveRotations = elements.map(({ globalRotation }) => globalRotation / 90);
+            const effectiveRotations = elementsByTransformation.map(({ globalRotation }) => globalRotation / 90);
             const regular = effectiveRotations.every((rotation) => rotation % 2 === 0);
             const rotated = effectiveRotations.every((rotation) => rotation % 2 === 1);
             this.snapX = (moveX && regular) || (moveY && rotated);
@@ -94,7 +104,7 @@ export class TranslationMoveHandler extends MoveHandler {
             };
         }
         let snapLines: SnapLines | undefined = undefined;
-        if (this.snapHandler != undefined) {
+        if (this.isSnappingEnabled(event)) {
             const root = target.root as SRoot;
             this.snapHandler.updateReferenceData(root);
             const zoom = findViewportZoom(root);
@@ -107,7 +117,7 @@ export class TranslationMoveHandler extends MoveHandler {
             dragVector = snappedDragVector;
             snapLines = newSnapLines;
         }
-        const edits = this.elements.map(({ elements, transformation }) => {
+        const edits = this.elementsByTransformation.map(({ elements, transformation }) => {
             const transformed = applyToPoint(transformation, dragVector);
             const types: MoveEdit["types"] = [];
             if (this.moveX) {
@@ -129,7 +139,7 @@ export class TranslationMoveHandler extends MoveHandler {
 /**
  * Snap handler for translating elements
  */
-export class TranslationSnapHandler extends SnapHandler {
+class TranslationSnapHandler extends SnapHandler {
     /**
      * Intitial snap element data for a drag vector (0, 0)
      */
@@ -141,14 +151,11 @@ export class TranslationSnapHandler extends SnapHandler {
      * @param elements the elements to snap to
      * @param ignoredElements the elements to ignore
      * @param root the root element
+     * @param settings the shared settings for snap data computation
      */
-    constructor(elements: SElement[], ignoredElements: SElement[], root: SRoot, settings: SharedSettings | undefined) {
-        const ignoredElementsSet = new Set<string>();
-        for (const element of ignoredElements) {
-            ignoredElementsSet.add(element.id);
-        }
-        const snapElementData = getSnapElementData(root, elements, ignoredElementsSet);
-        super(getSnapReferenceData(root, new Set(snapElementData.keys()), ignoredElementsSet), settings);
+    constructor(elements: SElement[], ignoredElements: Set<string>, root: SRoot, settings: SharedSettings | undefined) {
+        const snapElementData = getSnapElementData(root, elements, ignoredElements);
+        super(getSnapReferenceData(root, new Set(snapElementData.keys()), ignoredElements), settings);
         this.snapElementData = snapElementData;
     }
 
