@@ -13,6 +13,7 @@ svg.hylimo {
     .selected-outline {
         fill: none;
         stroke: var(--diagram-layout-color-selected);
+        pointer-events: none;
     }
 
     .selected-outline,
@@ -163,7 +164,8 @@ svg.hylimo {
     }
 
     .selected-outline,
-    .canvas-point.selected {
+    .canvas-point.selected,
+    .canvas-element.selected {
         cursor: move;
     }
 

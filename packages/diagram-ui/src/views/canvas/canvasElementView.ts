@@ -57,6 +57,9 @@ export class CanvasElementView extends EditableCanvasContentView implements IVie
             {
                 attrs: {
                     transform: `translate(${position.x}, ${position.y}) rotate(${model.rotation})`
+                },
+                class: {
+                    selected: model.selected
                 }
             },
             ...children
