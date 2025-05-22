@@ -18,14 +18,16 @@ The following elements are supported:
 
 ### `class`
 
-Creats a new class element, with the defined name, and optional properties and operations:
+Creates a new class element, with the defined name, and optional properties and operations:
 
-```
-class("Hello world") {
-    public {
-        x : Int
-        test : String
-        print(value : String) : void
+```hylimo
+classDiagram {
+    class("Hello world") {
+        public {
+            x : Int
+            test : String
+            print(value : String) : void
+        }
     }
 }
 ```
@@ -40,44 +42,99 @@ Five different types of visibility are supported:
 - `package`
 - `default` (no visibility)
 
-Using the `section` function, one can also add another section to the body of the class
+Using the `section` function, one can also add another section to the body of the class:
 
-```
-class("Test") {
-    section(
-        "A new string entry",
-        "The next string entry"
-    )
-}
-```
-
-To mark a class as abstract, one can use the `abstract` named argument:
-
-```
-class("Test", abstract = true) {
-    // ...
-}
-```
-
-Last, the `keywords` named argument can be used to add keywords or stereotypes in guillemets (`«` and `»`):
-
-```
-class("TestEnum", keywords = list("enumeration")) {
-    public {
-        A
-        B
-        C
+```hylimo
+classDiagram {
+    class("Test") {
+        section(
+            "A new string entry",
+            "The next string entry"
+        )
     }
 }
 ```
 
 To simplify using classes later in the diagram, `class` automatically sets itself on the current scope if the variable is not yet defined:
 
+```hylimo
+classDiagram {
+    class("Test")
+    
+    // is equivalent to
+    Test = class("Test")
+}
 ```
-class("Test")
 
-// is equivalent to
-Test = class("Test")
+#### abstract
+
+To mark a class as abstract, one can use the `abstract` named argument:
+
+```hylimo
+classDiagram {
+    class("Test", abstract = true) {
+        // ...
+    }
+}
+```
+
+#### keywords
+
+The `keywords` named argument can be used to add keywords or stereotypes in guillemets (`«` and `»`):
+
+```hylimo
+classDiagram {
+    class("TestEnum", keywords = list("Metaclass")) {
+        public {
+            A
+            B
+            C
+        }
+    }
+}
+```
+
+#### nesting
+
+Classes can now contain other classes as nested elements, allowing for a more organized hierarchy:
+
+```hylimo
+classDiagram {
+    class("OuterClass") {
+        public {
+            outerProperty : String
+        }
+        
+        class("InnerClass") {
+            public {
+                innerProperty : Int
+            }
+        }
+    }
+}
+```
+
+The nested class is scoped within its parent class and will be visually displayed inside the outer class.
+
+#### ports
+
+Classes can now have ports, which are connection points on the class boundary. Ports can be defined either inside the class block or using dot notation outside the class:
+
+```hylimo
+classDiagram {
+    class("ClassWithPorts") {
+        public {
+            input : String
+            output : String
+        }
+        
+        // Define a port inside the class
+        port()
+    }
+
+    // Define a port outside of the class
+    ClassWithPorts.port(0.5)
+}
 ```
 
 ### `interface`
@@ -85,14 +142,64 @@ Test = class("Test")
 Creates a new interface element.
 Identical to `class`, however automatically adds the `«interface»` keyword.
 
-```
-interface("Test") {
-    // ...
+```hylimo
+classDiagram {
+    interface("Test") {
+        // ...
+    }
+    
+    // is equivalent to
+    class("Test", keywords = list("interface")) {
+        // ...
+    }
 }
+```
 
-// is equivalent to
-class("Test", keywords = list("interface")) {
-    // ...
+### `enum`
+
+Creates an enumeration class. Enums are a special type of class and support all class functionality. You can define enum entries using the `entries` block:
+
+```hylimo
+classDiagram {
+    enum("Color") {
+        entries {
+            RED
+            GREEN
+            BLUE
+        }
+    }
+}
+```
+
+This is equivalent to creating a class with the "enumeration" keyword:
+
+```hylimo
+classDiagram {
+    class("Color", keywords = list("enumeration")) {
+        default {
+            RED
+            GREEN
+            BLUE
+        }
+    }
+}
+```
+
+Enums can also have additional properties and methods like regular classes:
+
+```hylimo
+classDiagram {
+    enum("Status") {
+        entries {
+            PENDING
+            ACTIVE
+            COMPLETED
+        }
+        
+        public {
+            getDescription() : String
+        }
+    }
 }
 ```
 
@@ -100,28 +207,47 @@ class("Test", keywords = list("interface")) {
 
 Creates a UML package with a name
 
-```
-package("Test")
-```
-
-Optionally, a function can be passed as second parameter, while this function is executed, it has no additional semantics:
-
-```
-package("Test") {
-    class("TestClass")
+```hylimo
+classDiagram {
+    package("Test")
 }
-
-// is equivalent to
-package("Test)
-class("TestClass")
 ```
+
+Packages can contain nested elements, similar to classes:
+
+```hylimo
+classDiagram {
+    package("TestPackage") {
+        class("TestClass") {
+            public {
+                test : String
+            }
+        }
+        
+        interface("TestInterface") layout {
+            pos = apos(390, 0)
+        }
+        
+        // Nested packages are also possible
+        package("NestedPackage") {
+            class("NestedClass")
+        } layout {
+            pos = apos(0, 110)
+        }
+    }
+}
+```
+
+The nested elements are scoped within the package and will be visually displayed inside the package.
 
 ### `comment`
 
 Allows creating UML comments:
 
-```
-comment("This is a comment")
+```hylimo
+classDiagram {
+    comment("This is a comment")
+}
 ```
 
 ## Connections / Associations
@@ -139,3 +265,4 @@ The following operators are supported:
 - `--!` for an association not-navigatable in one direction
 - `-->` for an association navigatable in one direction
 - ... and several combinations of the above, e.g, `!--!`, `*-->`, ...
+
