@@ -66,7 +66,7 @@ classDiagram {
 }
 ```
 
-#### abstract
+#### Abstract
 
 To mark a class as abstract, one can use the `abstract` named argument:
 
@@ -78,7 +78,7 @@ classDiagram {
 }
 ```
 
-#### keywords
+#### Keywords
 
 The `keywords` named argument can be used to add keywords or stereotypes in guillemets (`«` and `»`):
 
@@ -94,7 +94,7 @@ classDiagram {
 }
 ```
 
-#### nesting
+#### Nesting
 
 Classes can now contain other classes as nested elements, allowing for a more organized hierarchy:
 
@@ -116,7 +116,7 @@ classDiagram {
 
 The nested class is scoped within its parent class and will be visually displayed inside the outer class.
 
-#### ports
+#### Ports
 
 Classes can now have ports, which are connection points on the class boundary. Ports can be defined either inside the class block or using dot notation outside the class:
 
@@ -136,6 +136,8 @@ classDiagram {
     ClassWithPorts.port(0.5)
 }
 ```
+
+For more details, see [UML Component Diagram](component.md#ports)
 
 ### `interface`
 
