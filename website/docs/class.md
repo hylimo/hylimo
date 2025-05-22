@@ -60,7 +60,7 @@ To simplify using classes later in the diagram, `class` automatically sets itsel
 ```hylimo
 classDiagram {
     class("Test")
-    
+
     // is equivalent to
     Test = class("Test")
 }
@@ -104,7 +104,7 @@ classDiagram {
         public {
             outerProperty : String
         }
-        
+
         class("InnerClass") {
             public {
                 innerProperty : Int
@@ -127,7 +127,7 @@ classDiagram {
             input : String
             output : String
         }
-        
+
         // Define a port inside the class
         port()
     }
@@ -149,7 +149,7 @@ classDiagram {
     interface("Test") {
         // ...
     }
-    
+
     // is equivalent to
     class("Test", keywords = list("interface")) {
         // ...
@@ -197,7 +197,7 @@ classDiagram {
             ACTIVE
             COMPLETED
         }
-        
+
         public {
             getDescription() : String
         }
@@ -225,11 +225,11 @@ classDiagram {
                 test : String
             }
         }
-        
+
         interface("TestInterface") layout {
             pos = apos(390, 0)
         }
-        
+
         // Nested packages are also possible
         package("NestedPackage") {
             class("NestedClass")
@@ -267,4 +267,3 @@ The following operators are supported:
 - `--!` for an association not-navigatable in one direction
 - `-->` for an association navigatable in one direction
 - ... and several combinations of the above, e.g, `!--!`, `*-->`, ...
-

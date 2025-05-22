@@ -81,17 +81,18 @@ componentDiagram {
 }
 ```
 
-- **Syntax:**  
+- **Syntax:**
   - `provides([name], pos, [target], dist = dist, namePos = [x, y])`
   - `requires(pos, [target])`
-  - All arguments are optional.  
-  - `name` is the interface name (can be omitted).  
-  - `pos` is the relative position on the component outline (0 = top, 0.5 = right, etc.).  
-  - `target` can be used for directly connected notation.  
-  - `dist` controls the distance of the interface symbol from the component.  
+  - All arguments are optional.
+  - `name` is the interface name (can be omitted).
+  - `pos` is the relative position on the component outline (0 = top, 0.5 = right, etc.).
+  - `target` can be used for directly connected notation.
+  - `dist` controls the distance of the interface symbol from the component.
   - `namePos` can adjust the label position.
 
 Example for directly connected notation:
+
 ```hylimo
 componentDiagram {
     component("Service A")
