@@ -1,7 +1,7 @@
 import type { Expression } from "@hylimo/core";
 import {
-    assertString,
     assign,
+    booleanType,
     ExecutableConstExpression,
     fun,
     FunctionObject,
@@ -13,7 +13,9 @@ import {
     num,
     NumberLiteralExpression,
     OperatorExpression,
+    optional,
     RuntimeError,
+    str,
     StringLiteralExpression
 } from "@hylimo/core";
 import { ContentModule } from "../../contentModule.js";
@@ -27,6 +29,24 @@ export const propertiesAndMethodsModule = ContentModule.create(
     [],
     [],
     [
+        `
+            _convertEntry = {
+                (visibility, entry, originalArgs) = args
+                if(originalArgs.abstract == true) {
+                    if(originalArgs.static == true) {
+                        list(span(text = visibility), span(text = entry, class = list("entry-abstract", "entry-static")))
+                    } {
+                        list(span(text = visibility), span(text = entry, class = list("entry-abstract")))
+                    }
+                } {
+                    if(originalArgs.static == true) {
+                        list(span(text = visibility), span(text = entry, class = list("entry-static")))
+                    } {
+                        visibility + entry
+                    }
+                }
+            }
+        `,
         assign(
             "_classifierEntryScopeGenerator",
             fun([
@@ -42,19 +62,25 @@ export const propertiesAndMethodsModule = ContentModule.create(
                         const expressions = scopeFunction.definition.expressions.map(
                             (expression) => expression.expression
                         );
-                        const visibility = assertString(context.getField("visibility"));
                         const scope = context.getField("scope");
                         const [fields, functions] = convertFieldsAndFunctions(expressions);
+                        const conversionFunction = context.getField("_convertEntry");
+                        const visibility = context.currentScope.getField("visibility", context);
+                        const visibilityArg = { value: new ExecutableConstExpression(visibility) };
+                        const parentArg = { value: new ExecutableConstExpression({ value: args }) };
 
                         function addEntriesToScope(entries: string[], index: number): void {
                             if (entries.length > 0) {
+                                const convertedEntries = entries.map((entry) => {
+                                    const convertedEntry = conversionFunction.invoke(
+                                        [visibilityArg, { value: str(entry) }, parentArg],
+                                        context
+                                    );
+                                    return { value: new ExecutableConstExpression(convertedEntry) };
+                                });
                                 scope.invoke(
                                     [
-                                        ...entries.map((entry) => ({
-                                            value: new ExecutableConstExpression({
-                                                value: context.newString(visibility + entry)
-                                            })
-                                        })),
+                                        ...convertedEntries,
                                         {
                                             name: "section",
                                             value: num(index)
@@ -82,7 +108,11 @@ export const propertiesAndMethodsModule = ContentModule.create(
                             Example: \`point(x : int, y : int) : Point\`.
                             Use newlines to separate fields and functions.
                         `,
-                        params: [[0, "the function which defines the fields and functions", functionType]],
+                        params: [
+                            [0, "the function which defines the fields and functions", functionType],
+                            ["abstract", "if true, the entry is marked as abstract", optional(booleanType)],
+                            ["static", "if true, the entry is marked as static", optional(booleanType)]
+                        ],
                         returns: "null"
                     }
                 )
@@ -100,6 +130,16 @@ export const propertiesAndMethodsModule = ContentModule.create(
                 },
                 { }
             ]
+
+            
+            scope.styles {
+                cls("entry-abstract") {
+                    fontStyle = "italic"
+                }
+                cls("entry-static") {
+                    underline = true
+                }
+            }
         `
     ]
 );

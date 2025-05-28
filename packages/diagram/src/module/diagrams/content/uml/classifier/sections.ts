@@ -36,7 +36,11 @@ export const sectionsModule = ContentModule.create(
                     if (section != null) {
                         contents += path(path = "M 0 0 L 1 0", class = list("separator"))
                         section.forEach {
-                            contents += text(contents = list(span(text = it)))
+                            sectionContent = it
+                            if(isString(sectionContent)) {
+                                sectionContent = list(span(text = sectionContent))
+                            }
+                            contents += text(contents = sectionContent)
                         }
                     }
                 }

@@ -26,6 +26,7 @@ classDiagram {
         public {
             x : Int
             test : String
+            examples : String [0 .. *]
             print(value : String) : void
         }
     }
@@ -41,6 +42,21 @@ Five different types of visibility are supported:
 - `protected`
 - `package`
 - `default` (no visibility)
+
+In addition, by providing named arguments `abstract` or `private` to the scope function call, inner entries are in italics / underlined respectively:
+
+```hylimo
+classDiagram {
+    class("Hello world") {
+        public(abstract = true) {
+            print(value : String) : void
+        }
+        public(static = true) {
+            create()
+        }
+    }
+}
+```
 
 Using the `section` function, one can also add another section to the body of the class:
 
