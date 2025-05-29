@@ -5,5 +5,7 @@ layout: false
 <Home />
 
 <script setup>
-import Home from ".vitepress/components/Home.vue";
+import { defineClientComponent } from "vitepress"
+
+const Home = defineClientComponent(() => import(".vitepress/components/Home.vue"))
 </script>

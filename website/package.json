@@ -23,7 +23,7 @@
         "@types/wicg-file-system-access": "^2023.10.6",
         "@vite-pwa/vitepress": "^1.0.0",
         "vitepress": "2.0.0-alpha.4",
-        "vue": "^3.5.15"
+        "vue": "^3.5.16"
     },
     "dependencies": {
         "@github/relative-time-element": "^4.4.8",
@@ -37,9 +37,9 @@
         "idb": "^8.0.3",
         "js-base64": "^3.7.7",
         "minisearch": "^7.1.2",
-        "monaco-editor": "npm:@codingame/monaco-vscode-editor-api@~16.1.1",
-        "monaco-editor-wrapper": "^6.7.0",
-        "monaco-languageclient": "^9.6.0",
+        "monaco-editor": "npm:@codingame/monaco-vscode-editor-api@~17.1.2",
+        "monaco-editor-wrapper": "^6.8.0",
+        "monaco-languageclient": "^9.7.0",
         "pako": "^2.1.0",
         "reflect-metadata": "^0.2.2",
         "splitpanes": "^4.0.4",
