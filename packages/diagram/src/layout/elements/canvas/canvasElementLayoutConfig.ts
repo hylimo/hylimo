@@ -1,13 +1,19 @@
 import type { FullObject, ExecutableAbstractFunctionExpression } from "@hylimo/core";
-import { numberType, optional, fun } from "@hylimo/core";
+import { numberType, optional, fun, objectToList } from "@hylimo/core";
 import type { Size, Point, Element } from "@hylimo/diagram-common";
 import { CanvasElement, DefaultEditTypes } from "@hylimo/diagram-common";
 import { canvasPointType, simpleElementType } from "../../../module/base/types.js";
 import type { LayoutElement, SizeConstraints } from "../../layoutElement.js";
 import { ContentCardinality, HorizontalAlignment, VerticalAlignment } from "../../layoutElement.js";
 import type { Layout } from "../../engine/layout.js";
-import { alignStyleAttributes, sizeStyleAttributes, visibilityStyleAttributes } from "../attributes.js";
+import {
+    alignStyleAttributes,
+    containerStyleAttributes,
+    sizeStyleAttributes,
+    visibilityStyleAttributes
+} from "../attributes.js";
 import { EditableCanvasContentLayoutConfig } from "./editableCanvasContentLayoutConfig.js";
+import { getContentLayoutConfig } from "../layout/contentLayout.js";
 
 /**
  * Layout config for canvas element
@@ -34,21 +40,20 @@ export class CanvasElementLayoutConfig extends EditableCanvasContentLayoutConfig
                     type: numberType
                 },
                 ...sizeStyleAttributes,
-                ...visibilityStyleAttributes
+                ...visibilityStyleAttributes,
+                ...containerStyleAttributes
             ],
             simpleElementType,
-            ContentCardinality.ExactlyOne
+            ContentCardinality.Many
         );
     }
 
     override measure(layout: Layout, element: LayoutElement, constraints: SizeConstraints): Size {
-        const content = element.children[0];
-        const contentElement = layout.measure(content, constraints);
-        return contentElement.measuredSize!;
+        return getContentLayoutConfig(element).measure(layout, element, constraints);
     }
 
     override layout(layout: Layout, element: LayoutElement, position: Point, size: Size, id: string): Element[] {
-        const content = element.children[0];
+        const contentLayoutConfig = getContentLayoutConfig(element);
         let dx = 0;
         const hAlign = element.styles.hAlign;
         if (hAlign === HorizontalAlignment.RIGHT) {
@@ -64,6 +69,10 @@ export class CanvasElementLayoutConfig extends EditableCanvasContentLayoutConfig
             dy = -size.height / 2;
         }
 
+        const contentPosition = {
+            x: dx,
+            y: dy
+        };
         const result: CanvasElement = {
             id,
             type: CanvasElement.TYPE,
@@ -72,8 +81,8 @@ export class CanvasElementLayoutConfig extends EditableCanvasContentLayoutConfig
             dy,
             pos: this.extractPos(layout, element),
             rotation: element.element.getLocalFieldOrUndefined("_rotation")?.value?.toNative() ?? 0,
-            children: layout.layout(content, { x: dx, y: dy }, size),
-            outline: layout.outline(content),
+            children: contentLayoutConfig.layout(layout, element, contentPosition, size, id),
+            outline: contentLayoutConfig.outline(layout, element, contentPosition, size, id),
             edits: element.edits,
             editExpression: element.element.getLocalFieldOrUndefined("editExpression")?.value?.toNative()
         };
@@ -81,8 +90,12 @@ export class CanvasElementLayoutConfig extends EditableCanvasContentLayoutConfig
     }
 
     override getChildren(element: LayoutElement): FullObject[] {
-        const content = element.element.getLocalFieldOrUndefined("content")?.value as FullObject;
-        return [content];
+        const contents = element.element.getLocalFieldOrUndefined("contents")?.value as FullObject | undefined;
+        if (contents) {
+            return objectToList(contents) as FullObject[];
+        } else {
+            return [];
+        }
     }
 
     /**

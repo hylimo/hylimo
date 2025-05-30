@@ -1,6 +1,6 @@
 import type { Element, Line, Point, Size } from "@hylimo/diagram-common";
-import type { LayoutElement, SizeConstraints } from "../layoutElement.js";
-import type { Layout } from "../engine/layout.js";
+import type { LayoutElement, SizeConstraints } from "../../layoutElement.js";
+import type { Layout } from "../../engine/layout.js";
 import type { BoxOutlinePart } from "./boxLayoutConfig.js";
 import { BoxLayoutConfig } from "./boxLayoutConfig.js";
 
@@ -8,7 +8,7 @@ import { BoxLayoutConfig } from "./boxLayoutConfig.js";
  * Layout config for vbox
  */
 export class VBoxLayoutConfig extends BoxLayoutConfig {
-    override type = "vbox";
+    readonly type = "vbox";
 
     constructor() {
         super();

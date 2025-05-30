@@ -11,9 +11,9 @@ export const elementModule = ContentModule.create(
         scope.element = {
             callbackOrElement = it
             this.element = if(callbackOrElement._type == "element") {
-                canvasElement(content = callbackOrElement)
+                canvasElement(contents = list(callbackOrElement))
             } {
-                canvasElement(content = callbackOrElement())
+                canvasElement(callbackOrElement)
             }
             scope.internal.registerCanvasElement(this.element, args, args.self)
         }

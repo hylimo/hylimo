@@ -5,6 +5,7 @@ import type { LayoutElement, SizeConstraints } from "../layoutElement.js";
 import { addToConstraints, addToSize } from "../layoutElement.js";
 import type { Layout } from "../engine/layout.js";
 import { ContentShapeLayoutConfig } from "./contentShapeLayoutConfig.js";
+import { getContentLayoutConfig } from "./layout/contentLayout.js";
 
 /**
  * Layout config for rect
@@ -28,13 +29,13 @@ export class RectLayoutConfig extends ContentShapeLayoutConfig {
     override measure(layout: Layout, element: LayoutElement, constraints: SizeConstraints): Size {
         this.normalizeStrokeWidth(element);
         const strokeWidth = element.styles.strokeWidth;
-        const content = element.children[0];
-        if (content) {
-            const contentElement = layout.measure(
-                content,
+        if (element.children.length > 0) {
+            const contentsSize = getContentLayoutConfig(element).measure(
+                layout,
+                element,
                 addToConstraints(constraints, -2 * strokeWidth, -2 * strokeWidth)
             );
-            const size = addToSize(contentElement.measuredSize!, 2 * strokeWidth, 2 * strokeWidth);
+            const size = addToSize(contentsSize, 2 * strokeWidth, 2 * strokeWidth);
             return size;
         } else {
             return constraints.min;
@@ -57,8 +58,7 @@ export class RectLayoutConfig extends ContentShapeLayoutConfig {
             children: [],
             edits: element.edits
         };
-        const content = element.children[0];
-        if (content) {
+        if (element.children.length > 0) {
             let contentSize = size;
             let contentPosition = position;
             const strokeWidth = result.stroke?.width;
@@ -66,7 +66,9 @@ export class RectLayoutConfig extends ContentShapeLayoutConfig {
                 contentSize = addToSize(contentSize, -2 * strokeWidth, -2 * strokeWidth);
                 contentPosition = { x: position.x + strokeWidth, y: position.y + strokeWidth };
             }
-            result.children.push(...layout.layout(content, contentPosition, contentSize));
+            result.children.push(
+                ...getContentLayoutConfig(element).layout(layout, element, contentPosition, contentSize, id)
+            );
         }
         if (element.isHidden) {
             return result.children;

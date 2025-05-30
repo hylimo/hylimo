@@ -1,6 +1,6 @@
 import { enumType, numberType, stringType } from "@hylimo/core";
 import type { FilledElement, StrokedElement } from "@hylimo/diagram-common";
-import { HorizontalAlignment, VerticalAlignment, Visibility } from "../layoutElement.js";
+import { ContainerLayout, HorizontalAlignment, VerticalAlignment, Visibility } from "../layoutElement.js";
 import { LineCap, LineJoin } from "@hylimo/diagram-common";
 
 /**
@@ -51,12 +51,35 @@ export const alignStyleAttributes = [
 ];
 
 /**
+ * Layout attributes for flexbox-like layout
+ * These attributes define how an element behaves in a flex container
+ */
+export const layoutStyleAttributes = [
+    {
+        name: "basis",
+        description: "The base size for the element, for the primary axis",
+        type: numberType
+    },
+    {
+        name: "grow",
+        description: "The grow factor for the element, for the primary axis",
+        type: numberType
+    },
+    {
+        name: "shrink",
+        description: "The shrink factor for the element, for the primary axis",
+        type: numberType
+    }
+];
+
+/**
  * Default style attributes, including margin, alignment, and size attributes
  */
 export const defaultStyleAttributes = [
     ...visibilityStyleAttributes,
     ...sizeStyleAttributes,
     ...alignStyleAttributes,
+    ...layoutStyleAttributes,
     { name: "marginTop", description: "optional top margin of the element, must be a number", type: numberType },
     {
         name: "marginRight",
@@ -126,6 +149,17 @@ export const fillStyleAttributes = [
  * Shape style attributes, includes fill and stroke attributes
  */
 export const shapeStyleAttributes = [...strokeStyleAttributes, ...fillStyleAttributes];
+
+/**
+ * Container style attributes, used for layout containers
+ */
+export const containerStyleAttributes = [
+    {
+        name: "layout",
+        description: "the layout of the container, must be one of 'vbox', 'hbox', 'grid' or 'absolute'",
+        type: enumType(ContainerLayout)
+    }
+];
 
 /**
  * Extracts stroke style properties from a style record

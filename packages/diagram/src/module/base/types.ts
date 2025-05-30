@@ -45,15 +45,6 @@ export const canvasContentType = elementType(
 );
 
 /**
- * Type for any simple element which can e.g. be used inside a vbox or hbox
+ * Type for any simple element which can e.g. be used inside a rect or container
  */
-export const simpleElementType = elementType(
-    Canvas.TYPE,
-    Text.TYPE,
-    Rect.TYPE,
-    Ellipse.TYPE,
-    Path.TYPE,
-    "vbox",
-    "hbox",
-    "stack"
-);
+export const simpleElementType = elementType(Canvas.TYPE, Text.TYPE, Rect.TYPE, Ellipse.TYPE, Path.TYPE, "container");

@@ -7,6 +7,7 @@ import type {
 } from "@hylimo/core";
 import {
     assign,
+    bool,
     booleanType,
     DefaultModuleNames,
     ExecutableConstExpression,
@@ -20,7 +21,6 @@ import {
     literal,
     namedType,
     nullType,
-    num,
     objectType,
     optional,
     or,
@@ -111,7 +111,7 @@ export const allStyleAttributes = computeAllStyleAttributes();
  * @returns the callback which provides the create element function
  */
 function createElementFunction(element: LayoutConfig): ExecutableExpression {
-    const contentCardinality = extractContentCardinality(element);
+    const canHaveChildren = hasChildren(element);
 
     return fun([
         id(SemanticFieldNames.THIS).assignField(
@@ -138,7 +138,7 @@ function createElementFunction(element: LayoutConfig): ExecutableExpression {
                             value: new ExecutableConstExpression({ value: args })
                         },
                         {
-                            value: num(contentCardinality)
+                            value: bool(canHaveChildren)
                         }
                     ],
                     context
@@ -162,19 +162,18 @@ function createElementFunction(element: LayoutConfig): ExecutableExpression {
 }
 
 /**
- * Extracts the content attribute and cardinality from the element
+ * Extracts if the element can have children
  *
- * @param element the element to extract the content attribute and cardinality from
- * @returns the cardinality number and the content attributes
+ * @param element the element to check
+ * @returns true if the element can have children, false otherwise
  */
-function extractContentCardinality(element: LayoutConfig): number {
+function hasChildren(element: LayoutConfig): boolean {
     const contentCardinality = element.contentCardinality;
-    if (contentCardinality === ContentCardinality.ExactlyOne || contentCardinality === ContentCardinality.Optional) {
-        return 1;
-    } else if (contentCardinality === ContentCardinality.Many || contentCardinality === ContentCardinality.AtLeastOne) {
-        return Number.POSITIVE_INFINITY;
+    if (contentCardinality === ContentCardinality.Many || contentCardinality === ContentCardinality.AtLeastOne) {
+        return true;
+    } else {
+        return false;
     }
-    return 0;
 }
 
 /**
@@ -240,26 +239,20 @@ export class DiagramModule implements InterpreterModule {
                 "_evaluateElement",
                 fun(
                     `
-                        (element, elementArgs, contentsCardinality) = args
+                        (element, elementArgs, hasChildren) = args
                         
                         this.scope = elementArgs.self
-                        if(contentsCardinality > 0) {
+                        if(hasChildren) {
                             this.callback = elementArgs.get(0)
                             if(callback != null) {
                                 scopeObject = []
-                                if(contentsCardinality == 1) {
-                                    scopeObject.addContent = {
-                                        element.content = it
-                                    }
-                                } {
-                                    scopeObject.addContent = {
-                                        this.content = it
-                                        this.element = element
-                                        if(element.contents == null) {
-                                            element.contents = list(content)
-                                        } {
-                                            element.contents.add(content)
-                                        }
+                                scopeObject.addContent = {
+                                    this.content = it
+                                    this.element = element
+                                    if(element.contents == null) {
+                                        element.contents = list(content)
+                                    } {
+                                        element.contents.add(content)
                                     }
                                 }
                                 callback.callWithScope(scopeObject)

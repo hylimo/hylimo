@@ -1,16 +1,16 @@
 import type { Size, Point, Element } from "@hylimo/diagram-common";
-import type { LayoutElement, SizeConstraints } from "../layoutElement.js";
-import type { Layout } from "../engine/layout.js";
-import { PanelLayoutConfig } from "./panelLayoutConfig.js";
+import type { LayoutElement, SizeConstraints } from "../../layoutElement.js";
+import type { Layout } from "../../engine/layout.js";
+import { ContentLayoutConfig } from "./contentLayoutConfig.js";
 
 /**
  * Layout config for stack
  */
-export class StackLayoutConfig extends PanelLayoutConfig {
+export class StackLayoutConfig extends ContentLayoutConfig {
     override type = "stack";
 
     constructor() {
-        super([], []);
+        super();
     }
 
     override measure(layout: Layout, element: LayoutElement, constraints: SizeConstraints): Size {
