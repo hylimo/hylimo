@@ -175,6 +175,10 @@ export interface LayoutElement {
      */
     requestedSize?: Size;
     /**
+     * The size constraints for the element computed during measure
+     */
+    sizeConstraints?: SizeConstraints;
+    /**
      * Bounds provided at layout
      */
     layoutBounds?: Bounds;

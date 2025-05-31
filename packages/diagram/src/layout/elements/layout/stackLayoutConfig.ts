@@ -20,9 +20,8 @@ export class StackLayoutConfig extends ContentLayoutConfig {
             let width = constraints.min.width;
             const contentElements: LayoutElement[] = [];
             for (const content of contents) {
-                const layoutedContent = layout.measure(content, constraints);
-                contentElements.push(layoutedContent);
-                const contentSize = layoutedContent.measuredSize!;
+                const contentSize = layout.measure(content, constraints);
+                contentElements.push(content);
                 width = Math.max(width, contentSize.width);
                 height = Math.max(height, contentSize.height);
             }

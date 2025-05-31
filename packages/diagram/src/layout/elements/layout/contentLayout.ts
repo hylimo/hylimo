@@ -22,6 +22,6 @@ const layoutMap = new Map<string, ContentLayoutConfig>(layouts.map((layout) => [
  * @returns the content layout config
  */
 export function getContentLayoutConfig(element: LayoutElement): ContentLayoutConfig {
-    const type = element.styles.layout ?? "vbox";
+    const type = element.styles.layout ?? "stack";
     return layoutMap.get(type)!;
 }

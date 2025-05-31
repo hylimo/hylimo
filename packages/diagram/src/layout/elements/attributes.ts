@@ -56,7 +56,7 @@ export const alignStyleAttributes = [
  */
 export const layoutStyleAttributes = [
     {
-        name: "basis",
+        name: "base",
         description: "The base size for the element, for the primary axis",
         type: numberType
     },
