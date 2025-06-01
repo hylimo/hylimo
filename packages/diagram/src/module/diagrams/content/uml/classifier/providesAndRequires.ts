@@ -66,7 +66,9 @@ export const providesAndRequiresModule = ContentModule.create(
                                             canvasScope,
                                             endMarkerFactory = {
                                                 marker(
-                                                    content = ellipse(class = list("provided-interface")),
+                                                    contents = list(
+                                                        ellipse(class = list("provided-interface"))
+                                                    ),
                                                     lineStart = 0,
                                                     refX = 0.5,
                                                     refY = 0.5
@@ -144,7 +146,12 @@ export const providesAndRequiresModule = ContentModule.create(
                                             canvasScope,
                                             endMarkerFactory = {
                                                 marker(
-                                                    content = path(path = "M 0 1 A 1 1 0 0 1 0 -1", class = list("required-interface")),
+                                                    contents = list(
+                                                        path(
+                                                            path = "M 0 1 A 1 1 0 0 1 0 -1", 
+                                                            class = list("required-interface")
+                                                        )
+                                                    ),
                                                     lineStart = 0
                                                 )
                                             }

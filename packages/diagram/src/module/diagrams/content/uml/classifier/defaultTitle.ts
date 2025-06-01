@@ -25,7 +25,7 @@ export const defaultTitleModule = ContentModule.create(
                 title += span(text = " {abstract}")
             }
             contents += text(contents = title, class = list("title"))
-            vbox(contents = contents, class = list("title-container"))
+            container(contents = contents, class = list("title-container"))
         }
 
         scope.internal.defaultTitleContentHandler = [
@@ -34,6 +34,12 @@ export const defaultTitleModule = ContentModule.create(
                 args.contents += scope.internal.defaultTitle(args.args.title, args.args.keywords, args.args.abstract) 
             }
         ]
+
+        scope.styles {
+            cls("title-container") {
+                layout = "vbox"
+            }
+        }
     `,
     [
         [

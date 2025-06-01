@@ -22,21 +22,19 @@ export const packageModule = ContentModule.create(
     
                     packageElement = canvasElement(
                         class = list("package-element"),
-                        content = vbox(
-                            contents = list(
-                                stack(
-                                    contents = list(
-                                        rect(content = scope.internal.defaultTitle(name, keywords), class = list("title-wrapper")),
-                                        path(path = "M 0 0 V 1", hAlign = "left"),
-                                        path(path = "M 0 0 V 1", hAlign = "right"),
-                                        path(path = "M 0 0 H 1", vAlign = "top")
-                                    ),
-                                    class = list("package")
+                        contents = list(
+                            container(
+                                contents = list(
+                                    rect(contents = list(scope.internal.defaultTitle(name, keywords)), class = list("title-wrapper")),
+                                    path(path = "M 0 0 V 1", hAlign = "left"),
+                                    path(path = "M 0 0 V 1", hAlign = "right"),
+                                    path(path = "M 0 0 H 1", vAlign = "top")
                                 ),
-                                rect(
-                                    content = canvas(contents = result.contents, class = list("package-canvas")),
-                                    class = list("package-body")
-                                )
+                                class = list("package")
+                            ),
+                            rect(
+                                contents = list(canvas(contents = result.contents, class = list("package-canvas"))),
+                                class = list("package-body")
                             )
                         )
                     )
@@ -74,12 +72,15 @@ export const packageModule = ContentModule.create(
                     minWidth = 300
                         cls("package-body") {
                         minHeight = 50
+                        grow = 1
+                        shrink = 1
                     }
+                    layout = "vbox"
                     cls("package-canvas") {
                         margin = var("subcanvasMargin")
                     }
                     cls("package") {
-                        type("vbox") {
+                        cls("title-container") {
                             margin = 5
                         }
                         cls("title-wrapper") {

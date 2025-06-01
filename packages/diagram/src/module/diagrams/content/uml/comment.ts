@@ -21,22 +21,20 @@ export const commentModule = ContentModule.create(
                 `
                     textContent = it
                     commentElement = canvasElement(
-                        content = stack(
-                            contents = list(
-                                path(path = "M0 0 H 1", vAlign = "top", class = list("comment-top")),
-                                path(path = "M0 0 H 1", vAlign = "bottom"),
-                                path(path = "M0 0 V 1", hAlign = "left"),
-                                path(path = "M0 0 V 1", hAlign = "right", class = list("comment-right")),
-                                vbox(
-                                    contents = list(
-                                        path(
-                                            path = "M 0 0 V 1 H 1 Z",
-                                            hAlign = "right",
-                                            vAlign = "top",
-                                            class = list("comment-triangle")
-                                        ),
-                                        text(contents = list(span(text = textContent)), class = list("comment"))
-                                    )
+                        contents = list(
+                            path(path = "M0 0 H 1", vAlign = "top", class = list("comment-top")),
+                            path(path = "M0 0 H 1", vAlign = "bottom"),
+                            path(path = "M0 0 V 1", hAlign = "left"),
+                            path(path = "M0 0 V 1", hAlign = "right", class = list("comment-right")),
+                            container(
+                                contents = list(
+                                    path(
+                                        path = "M 0 0 V 1 H 1 Z",
+                                        hAlign = "right",
+                                        vAlign = "top",
+                                        class = list("comment-triangle")
+                                    ),
+                                    text(contents = list(span(text = textContent)), class = list("comment"))
                                 )
                             )
                         ),
@@ -94,6 +92,9 @@ export const commentModule = ContentModule.create(
                     type("path") {
                         stroke = var("primary")
                         strokeWidth = var("strokeWidth")
+                    }
+                    type("container") {
+                        layout = "vbox"
                     }
                 }
             }

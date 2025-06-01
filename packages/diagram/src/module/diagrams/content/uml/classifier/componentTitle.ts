@@ -17,7 +17,7 @@ export const componentTitleModule = ContentModule.create(
         scope.internal.componentTitleContentHandler = [
             { },
             {
-                args.contents += stack(
+                args.contents += container(
                     contents = list(
                         scope.internal.defaultTitle(args.args.title, args.args.keywords, args.args.abstract),
                         path(path = "${componentIconPath}", class = list("component-icon"))

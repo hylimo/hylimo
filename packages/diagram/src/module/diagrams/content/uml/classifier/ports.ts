@@ -32,7 +32,7 @@ export const portsModule = ContentModule.create(
                                         callback = optionalCallback ?? {}
                                         portElement = canvasElement(
                                             class = list("port-element"),
-                                            content = rect(class = list("port")),
+                                            contents = list(rect(class = list("port"))),
                                             pos = canvasScope.lpos(element, pos)
                                         )
                                         portElement.pos.class = list("port-pos")
