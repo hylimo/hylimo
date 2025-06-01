@@ -33,7 +33,7 @@ export class CanvasAxisAlignedSegmentLayoutConfig extends CanvasConnectionSegmen
             type: CanvasAxisAlignedSegment.TYPE,
             children: [],
             end: this.getContentId(layout, element, "end"),
-            pos: Math.max(Math.min(verticalPosValue?.value?.toNative(), 1), 0),
+            pos: Math.max(Math.min(verticalPosValue?.value?.toNative(), 1), -1),
             edits: element.edits
         };
         return [result];

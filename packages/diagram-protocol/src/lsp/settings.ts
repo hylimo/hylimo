@@ -90,14 +90,14 @@ export namespace SharedSettings {
 
     /**
      * Rounds a value to the axis aligned pos precision
-     * Also clamps the value to the range [0, 1]
+     * Also clamps the value to the range [-1, 1]
      *
      * @param settings the shared settings
      * @param value the value to round
      * @returns the rounded value
      */
     export function roundToAxisAlignedPosPrecision(settings: SharedSettings, value: number): number {
-        return Math.max(Math.min(roundToPrecision(value, settings.axisAlignedPosPrecision), 1), 0);
+        return Math.max(Math.min(roundToPrecision(value, settings.axisAlignedPosPrecision), 1), -1);
     }
 
     /**
