@@ -41,7 +41,7 @@ export const instanceModule = ContentModule.create(
                             if(callback != null) {
                                 error("Both the class name and body of instance '\${name}' are set to functions which is not allowed. Either provide a class name string as second argument, or pass at most two arguments")
                             }
-                            callback = class // shift $1 -> $2 when necessary, both the class name and the callback function are optional
+                            callback = class
                         }
                     }
                     scope.internal.createInstance(name, callback, title = title, keywords = args.keywords, args = args)
@@ -49,17 +49,13 @@ export const instanceModule = ContentModule.create(
                 {
                     docs: "Creates an instance.",
                     params: [
-                        [
-                            0,
-                            "the optional name of the instance. If the next argument is missing, this argument will be treated as the class name",
-                            stringType
-                        ],
-                        [1, "the class name of this instance", optional(or(stringType, functionType))],
+                        [0, "the name of the instance", stringType],
+                        [1, "the optional class name of this instance", optional(or(stringType, functionType))],
                         [2, "the callback function of this instance", optional(functionType)],
-                        ["keywords", "the keywords of the class", optional(listType(stringType))]
+                        ["keywords", "the keywords of the instance", optional(listType(stringType))]
                     ],
                     snippet: `("$1") {\n    $2\n}`,
-                    returns: "The created class"
+                    returns: "The created instance"
                 }
             )
         ),

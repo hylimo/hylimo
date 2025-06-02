@@ -107,7 +107,10 @@ export class VBoxLayoutConfig extends BoxLayoutConfig {
             height += length;
             if (content.measuredSize?.height !== length) {
                 const measuredSize = layout.measure(content, {
-                    min: contentConstraints.min,
+                    min: {
+                        width: contentConstraints.min.width,
+                        height: length
+                    },
                     max: {
                         width: constraints.max.width,
                         height: length

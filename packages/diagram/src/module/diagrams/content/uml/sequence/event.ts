@@ -33,7 +33,7 @@ export const eventModule = ContentModule.create(
                     if(scope.internal.config.enableDebugging) {
                         start = scope.apos(-100, eventObject.y) // a little bit to the left of the diagram to leave space for the participants
 
-                        name = canvasElement(content = text(contents = list(span(text = name, fill = "red", stroke = "unset"))), hAlign = "right", vAlign = "center")
+                        name = canvasElement(contents = list(text(contents = list(span(text = name, fill = "red", stroke = "unset")))), hAlign = "right", vAlign = "center")
                         name.pos = start
                         scope.internal.registerCanvasElement(name, originalArgs, originalArgs.self)
 
@@ -56,13 +56,13 @@ export const eventModule = ContentModule.create(
 
                         // When in debugging mode, visualize the coordinates of all events
                         if(scope.internal.config.enableDebugging) {
-                            _left = canvasElement(content = ellipse(fill = "orange", stroke = "unset"), width=7, height=7, hAlign = "center", vAlign = "center")
+                            _left = canvasElement(contents = list(ellipse(fill = "orange", stroke = "unset"), width=7, height=7, hAlign = "center", vAlign = "center"))
                             _left.pos = participant.left(eventObject)
                             scope.internal.registerCanvasElement(_left, originalArgs, originalArgs.self)
-                            _center = canvasElement(content = ellipse(fill = "orange", stroke = "unset"), width=7, height=7, hAlign = "center", vAlign = "center")
+                            _center = canvasElement(contents = list(ellipse(fill = "orange", stroke = "unset"), width=7, height=7, hAlign = "center", vAlign = "center"))
                             _center.pos = scope.apos(participant.x, eventObject.y)
                             scope.internal.registerCanvasElement(_center, originalArgs, originalArgs.self)
-                            _right = canvasElement(content = ellipse(fill = "orange", stroke = "unset"), width=7, height=7, hAlign = "center", vAlign = "center")
+                            _right = canvasElement(contents = list(ellipse(fill = "orange", stroke = "unset"), width=7, height=7, hAlign = "center", vAlign = "center"))
                             _right.pos = participant.right(eventObject)
                             scope.internal.registerCanvasElement(_right, originalArgs, originalArgs.self)
                         }

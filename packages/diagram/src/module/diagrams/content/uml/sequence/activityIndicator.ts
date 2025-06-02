@@ -60,7 +60,7 @@ export const activityIndicatorModule = ContentModule.create(
                     width = scope.internal.config.activityWidth
 
                     activityIndicatorElement = canvasElement(
-                        content = rect(class = list("activity-indicator")),
+                        contents = list(rect(class = list("activity-indicator"))),
                         class = list("activity-indicator-element"),
                         width = width,
                         height = height
@@ -87,11 +87,11 @@ export const activityIndicatorModule = ContentModule.create(
                     // Also works with multiple indicators as then the right point will simply be hidden behind the new indicator
                     if(scope.internal.config.enableDebugging) {
                         // We must offset the points by half their width as the indicator has been centered
-                        _left = canvasElement(content = ellipse(fill = "orange", stroke = "unset"), width=7, height=7, hAlign = "center", vAlign = "center")
+                        _left = canvasElement(contents = list(ellipse(fill = "orange", stroke = "unset"), width=7, height=7, hAlign = "center", vAlign = "center"))
                         _left.pos = participant.left()
                         scope.internal.registerCanvasElement(_left, originalArgs, originalArgs.self)
                         // No 'center' as this doesn't make sense when we have multiple indicators
-                        _right = canvasElement(content = ellipse(fill = "orange", stroke = "unset"), width=7, height=7, hAlign = "center", vAlign = "center")
+                        _right = canvasElement(contents = list(ellipse(fill = "orange", stroke = "unset"), width=7, height=7, hAlign = "center", vAlign = "center"))
                         _right.pos = participant.right()
                         scope.internal.registerCanvasElement(_right, originalArgs, originalArgs.self)
                     }

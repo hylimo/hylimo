@@ -107,7 +107,10 @@ export class HBoxLayoutConfig extends BoxLayoutConfig {
             width += length;
             if (content.measuredSize?.width !== length) {
                 const measuredSize = layout.measure(content, {
-                    min: contentConstraints.min,
+                    min: {
+                        width: length,
+                        height: constraints.min.height
+                    },
                     max: {
                         width: length,
                         height: constraints.max.height

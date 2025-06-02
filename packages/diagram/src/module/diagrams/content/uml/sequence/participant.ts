@@ -221,9 +221,11 @@ export const participantModule = ContentModule.create(
                     originalArgs = args
                     if(participant.declaringEvent != scope.internal.lastSequenceDiagramEvent) {
                         cross = canvasElement(
-                            content = path(
-                                path = "M 0 0 L 1 1 M 1 0 L 0 1",
-                                class = list("destroy-cross-path")
+                            contents = list(
+                                path(
+                                    path = "M 0 0 L 1 1 M 1 0 L 0 1",
+                                    class = list("destroy-cross-path")
+                                )
                             ),
                             class = list("destroy-cross-path-element"),
                             width = crossSize,

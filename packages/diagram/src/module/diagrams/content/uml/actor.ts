@@ -1,5 +1,5 @@
 import type { ParseableExpressions } from "@hylimo/core";
-import { fun, id, optional, stringType } from "@hylimo/core";
+import { fun, functionType, id, listType, optional, or, stringType } from "@hylimo/core";
 import { createToolboxEdit, SCOPE } from "../../../base/dslModule.js";
 import { ContentModule } from "../contentModule.js";
 
@@ -15,22 +15,23 @@ const stickmanIconPath =
  */
 export const actorModule = ContentModule.create(
     "uml/actor",
-    [],
+    ["uml/instance"],
     [],
     [
         `
             scope.internal.createActor = {
                 (name) = args
-                elements = list()
+                elements = list(path(path = "${stickmanIconPath}", stretch = "uniform", class = list("actor-icon")))
                 if(name != null) {
                     elements += text(contents = list(span(text = name)))
                 }
-                elements += path(path = "${stickmanIconPath}", stretch = "uniform")
 
                 actorElement = canvasElement(
-                    content = rect(
-                        content = vbox(contents = elements, inverse = true),
-                        class = list("actor")
+                    contents = list(
+                        rect(
+                            contents = elements,
+                            class = list("actor")
+                        )
                     ),
                     class = list("actor-element")
                 )
@@ -46,32 +47,77 @@ export const actorModule = ContentModule.create(
             "actor",
             fun(
                 `
-                    (name) = args
-                    scope.internal.createActor(name, args = args)
+                    (name, class, callback) = args
+                    this.actorArgs = args
+                    println("What is going on here?")
+                    title = name
+                    if(class != null) {
+                        if(isString(class)) {
+                            title = name + ":" + class
+                        } {
+                            if(callback != null) {
+                                error("Both the class name and body of actor '\${name}' are set to functions which is not allowed. Either provide a class name string as second argument, or pass at most two arguments")
+                            }
+                            callback = class
+                        }
+                    }
+                    
+                    if(callback != null) {
+                        this.actor = scope.internal.createInstance(name, callback, title = title, keywords = actorArgs.keywords, args = actorArgs)
+                        actor.class += "actor-element"
+                        this.elements = list(
+                            path(path = "${stickmanIconPath}", stretch = "uniform", class = list("actor-icon")),
+                            actor.contents[0]
+                        )
+                        actor.contents = list(
+                            rect(
+                                contents = elements,
+                                class = list("actor")
+                            )
+                        )
+                        actor
+                    } {
+                        scope.internal.createActor(title, args = actorArgs)
+                    }
                 `,
                 {
                     docs: "Creates an actor.",
-                    params: [[0, "the optional name of the actor", optional(stringType)]],
+                    params: [
+                        [0, "the name of the actor", stringType],
+                        [1, "the optional class name of this actor", optional(or(stringType, functionType))],
+                        [2, "the callback function of this actor", optional(functionType)],
+                        ["keywords", "the keywords of the actor", optional(listType(stringType))]
+                    ],
                     snippet: `("$1")`,
-                    returns: "The created class"
+                    returns: "The created actor"
                 }
             )
         ),
         `
             scope.styles {
-                cls("actor") {
-                    stroke = unset
+                cls("actor-element") {
+                    hAlign = "center"
 
-                    type("text") {
-                        hAlign = "center"
-                    }
-                    type("path") {
-                        hAlign = "center"
+                    cls("actor") {
+                        stroke = unset
+                        layout = "vbox"
+
+                        type("text") {
+                            hAlign = "center"
+                        }
+                        cls("actor-icon") {
+                            hAlign = "center"
+                            base = 60
+                            grow = 1
+                            shrink = 1
+                        }
                     }
                 }
-                cls("actor-element") {
-                    minHeight = 80
-                    hAlign = "center"
+
+                cls("instance-element") {
+                    cls("actor-icon") {
+                        marginBottom = 5
+                    }
                 }
             }
         `,

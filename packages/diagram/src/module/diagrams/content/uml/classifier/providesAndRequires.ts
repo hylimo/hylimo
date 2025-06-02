@@ -82,7 +82,7 @@ export const providesAndRequiresModule = ContentModule.create(
                                             nameLabelPos = canvasScope.rpos(interfaceConnection, xLabelOffset, yLabelOffset)
                                             nameLabelPos.class = list("provided-interface-label-pos")
                                             nameLabel = canvasElement(
-                                                content = text(contents = list(span(text = name)), class = list("label")),
+                                                contents = list(text(contents = list(span(text = name)), class = list("label"))),
                                                 class = list("label-element"),
                                                 pos = nameLabelPos
                                             )
@@ -163,7 +163,7 @@ export const providesAndRequiresModule = ContentModule.create(
                                             nameLabelPos = canvasScope.rpos(interfaceConnection, xLabelOffset, yLabelOffset)
                                             nameLabelPos.class = list("required-interface-label-pos")
                                             nameLabel = canvasElement(
-                                                content = text(contents = list(span(text = name)), class = list("label")),
+                                                contents = list(text(contents = list(span(text = name)), class = list("label"))),
                                                 class = list("label-element"),
                                                 pos = nameLabelPos
                                             )
