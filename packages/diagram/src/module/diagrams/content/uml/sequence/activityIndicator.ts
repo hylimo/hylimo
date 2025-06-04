@@ -29,7 +29,7 @@ export const activityIndicatorModule = ContentModule.create(
                     }
 
                     if(participant.alive != true) {
-                        error("'\${participant.name}' has already been destroyed and thus cannot be activated anymore")
+                        error("participant has already been destroyed and thus cannot be activated anymore")
                     }
 
                     activityIndicators = participant.activeActivityIndicators
@@ -60,7 +60,7 @@ export const activityIndicatorModule = ContentModule.create(
                     width = scope.internal.config.activityWidth
 
                     activityIndicatorElement = canvasElement(
-                        content = rect(class = list("activity-indicator")),
+                        contents = list(rect(class = list("activity-indicator"))),
                         class = list("activity-indicator-element"),
                         width = width,
                         height = height
@@ -79,7 +79,7 @@ export const activityIndicatorModule = ContentModule.create(
                     scope.internal.registerCanvasElement(activityIndicatorElement, args, args.self)
                     participant.activeActivityIndicators += activityIndicatorElement
                     if(participant.events[event.name] == null) {
-                        scope.error("participant '\${participant.name}' does not seem to have data for event '\${event.name}' which shouldn't happen")
+                        scope.error("participant does not seem to have data for event '\${event.name}' which shouldn't happen")
                     }
                     participant.events[event.name].activityIndicators += activityIndicatorElement
 
@@ -87,11 +87,11 @@ export const activityIndicatorModule = ContentModule.create(
                     // Also works with multiple indicators as then the right point will simply be hidden behind the new indicator
                     if(scope.internal.config.enableDebugging) {
                         // We must offset the points by half their width as the indicator has been centered
-                        _left = canvasElement(content = ellipse(fill = "orange", stroke = "unset"), width=7, height=7, hAlign = "center", vAlign = "center")
+                        _left = canvasElement(contents = list(ellipse(fill = "orange", stroke = "unset")), width=7, height=7, hAlign = "center", vAlign = "center")
                         _left.pos = participant.left()
                         scope.internal.registerCanvasElement(_left, originalArgs, originalArgs.self)
                         // No 'center' as this doesn't make sense when we have multiple indicators
-                        _right = canvasElement(content = ellipse(fill = "orange", stroke = "unset"), width=7, height=7, hAlign = "center", vAlign = "center")
+                        _right = canvasElement(contents = list(ellipse(fill = "orange", stroke = "unset")), width=7, height=7, hAlign = "center", vAlign = "center")
                         _right.pos = participant.right()
                         scope.internal.registerCanvasElement(_right, originalArgs, originalArgs.self)
                     }
@@ -134,12 +134,12 @@ export const activityIndicatorModule = ContentModule.create(
                     }
 
                     if(participant.activeActivityIndicators.length == 0) {
-                        error("Cannot deactivate participant '\${participant.name}' as it has not been activated")
+                        error("Cannot deactivate participant as it has not been activated")
                     }
 
                     eventName = scope.internal.lastSequenceDiagramEvent.name
                     if(participant.events[eventName] == null) {
-                        scope.error("participant '\${participant.name}' does not seem to have data for event '\${eventName}' which shouldn't happen")
+                        scope.error("participant does not seem to have data for event '\${eventName}' which shouldn't happen")
                     }
                     participant.events[eventName].activityIndicators.remove()
                     activityIndicator = participant.activeActivityIndicators.remove()

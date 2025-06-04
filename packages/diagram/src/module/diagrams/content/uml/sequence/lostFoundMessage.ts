@@ -14,7 +14,7 @@ function message(type: string): string {
             distance = args.distance ?? scope.internal.config.externalMessageDistance
             diameter = args.diameter ?? scope.internal.config.externalMessageDiameter
             dot = canvasElement(
-                content = ellipse(class = list("${type}-message")),
+                contents = list(ellipse(class = list("${type}-message"))),
                 width = diameter,
                 height = diameter,
                 class = list("${type}-message-element")

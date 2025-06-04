@@ -27,13 +27,13 @@ export const classifierModule = ContentModule.create(
                             classifierContents = list()
                             renderedClassifier = rect(
                                 class = list("classifier", type),
-                                content = vbox(contents = classifierContents)
+                                contents = list(container(contents = classifierContents, class = list("classifier-container")))
                             )
                             if(classifierArgs.abstract == true) {
                                 renderedClassifier.class += "abstract"
                             }
                             classifierElement = canvasElement(
-                                content = renderedClassifier,
+                                contents = list(renderedClassifier),
                                 class = list("classifier-element", type + "-element")
                             )
                             contentHandlers.forEach {
@@ -97,8 +97,9 @@ export const classifierModule = ContentModule.create(
                     minWidth = 300
 
                     cls("classifier") {
-                        type("vbox") {
+                        cls("classifier-container") {
                             margin = 5
+                            layout = "vbox"
                         }
                     }
                     cls("separator") {

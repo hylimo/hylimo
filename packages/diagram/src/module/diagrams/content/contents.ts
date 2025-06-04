@@ -22,11 +22,9 @@ import { readingDirectionModule } from "./uml/readingDirection.js";
 import { contentModule } from "./uml/classifier/content.js";
 import { componentTitleModule } from "./uml/classifier/componentTitle.js";
 import { instanceModule } from "./uml/instance.js";
-import { sequenceDiagramInstanceModule } from "./uml/sequence/sequenceDiagramInstance.js";
 import { actorModule } from "./uml/actor.js";
 import { eventModule } from "./uml/sequence/event.js";
 import { activityIndicatorModule } from "./uml/sequence/activityIndicator.js";
-import { sequenceDiagramActorModule } from "./uml/sequence/sequenceDiagramActor.js";
 import { sequenceDiagramAssociationsModule } from "./uml/sequence/sequenceDiagramAssociations.js";
 import { participantModule } from "./uml/sequence/participant.js";
 import { lostFoundMessageModule } from "./uml/sequence/lostFoundMessage.js";
@@ -67,9 +65,7 @@ export const contents: ContentModule[] = [
     providesAndRequiresModule,
     readingDirectionModule,
     sectionsModule,
-    sequenceDiagramActorModule,
     sequenceDiagramAssociationsModule,
     sequenceDiagramCreateConnectionOperatorModule,
-    sequenceDiagramInstanceModule,
     valuesModule
 ];

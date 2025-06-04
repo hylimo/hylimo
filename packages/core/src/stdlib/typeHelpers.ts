@@ -10,6 +10,7 @@ import { RuntimeError } from "../runtime/runtimeError.js";
 import { SemanticFieldNames } from "../runtime/semanticFieldNames.js";
 import { WrapperObject } from "../runtime/objects/wrapperObject.js";
 import { NullObject } from "../runtime/objects/nullObject.js";
+import type { ExecutableAbstractFunctionExpression } from "../runtime/ast/executableAbstractFunctionExpression.js";
 
 type Description = string | (() => string);
 
@@ -114,7 +115,7 @@ export function isBoolean(value: BaseObject): value is BooleanObject {
 export function assertFunction(
     value: BaseObject,
     description: Description = ""
-): asserts value is AbstractFunctionObject<any> {
+): asserts value is AbstractFunctionObject<ExecutableAbstractFunctionExpression> {
     if (!(value instanceof AbstractFunctionObject)) {
         throw new RuntimeError(`${describe(description)} is not a function`);
     }

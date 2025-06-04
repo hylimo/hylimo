@@ -3,6 +3,7 @@ import { Point, Ellipse, Math2D, ArcSegment } from "@hylimo/diagram-common";
 import type { LayoutElement, SizeConstraints } from "../layoutElement.js";
 import type { Layout } from "../engine/layout.js";
 import { ContentShapeLayoutConfig } from "./contentShapeLayoutConfig.js";
+import { getContentLayoutConfig } from "./layout/contentLayout.js";
 
 /**
  * Layout config for ellipse
@@ -17,13 +18,12 @@ export class EllipseLayoutConfig extends ContentShapeLayoutConfig {
     override measure(layout: Layout, element: LayoutElement, constraints: SizeConstraints): Size {
         this.normalizeStrokeWidth(element);
         const strokeWidth = element.styles.strokeWidth;
-        const content = element.children[0];
-        if (content) {
-            const contentElement = layout.measure(content, {
+        if (element.children.length > 0) {
+            const contentsSize = getContentLayoutConfig(element).measure(layout, element, {
                 min: this.calculateInnerSize(constraints.min, strokeWidth),
                 max: this.calculateInnerSize(constraints.max, strokeWidth)
             });
-            return this.calculateOuterSize(contentElement.measuredSize!, strokeWidth);
+            return this.calculateOuterSize(contentsSize, strokeWidth);
         } else {
             return constraints.min;
         }
@@ -39,14 +39,15 @@ export class EllipseLayoutConfig extends ContentShapeLayoutConfig {
             children: [],
             edits: element.edits
         };
-        const content = element.children[0];
-        if (content != undefined) {
+        if (element.children.length > 0) {
             const contentSize = this.calculateInnerSize(size, result.stroke?.width ?? 0);
             const contentPosition = Math2D.add(position, {
                 x: (size.width - contentSize.width) / 2,
                 y: (size.height - contentSize.height) / 2
             });
-            result.children.push(...layout.layout(content, contentPosition, contentSize));
+            result.children.push(
+                ...getContentLayoutConfig(element).layout(layout, element, contentPosition, contentSize, id)
+            );
         }
         if (element.isHidden) {
             return result.children;

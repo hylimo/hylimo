@@ -64,7 +64,7 @@ export const sequenceDiagramFrameModule = ContentModule.create(
                 // Case 1: Both name and border are present
                 if((borderElement != null) && (nameElement != null)) {
                     name = canvasElement(
-                        content = stack(contents = list(borderElement, nameElement)),
+                        contents = list(container(contents = list(borderElement, nameElement))),
                         class = list("fragment-name-element")
                     )
                     name.pos = scope.apos(x, y)
@@ -75,7 +75,7 @@ export const sequenceDiagramFrameModule = ContentModule.create(
                     // Case 2: Only border is present
                     if(borderElement != null) {
                         border = canvasElement(
-                            content = borderElement,
+                            contents = list(borderElement),
                             class = list("fragment-name-element")
                         )
                         border.pos = scope.apos(x, y)
@@ -88,7 +88,7 @@ export const sequenceDiagramFrameModule = ContentModule.create(
                     // Case 3: Only name is present
                     if(nameElement != null) {
                         name = canvasElement(
-                            content = nameElement,
+                            contents = list(nameElement),
                             class = list("fragment-name-element")
                         )
                         name.pos = scope.apos(x, y)
@@ -99,7 +99,10 @@ export const sequenceDiagramFrameModule = ContentModule.create(
 
                 // And lastly, the subtext if present
                 if(fragmentSubtext != null) {
-                    label = canvasElement(content = text(contents = list(span(text = fragmentSubtext)), class = list("fragment-subtext")), class = list("fragment-subtext-element"))
+                    label = canvasElement(
+                        contents = list(text(contents = list(span(text = fragmentSubtext)), class = list("fragment-subtext"))),
+                        class = list("fragment-subtext-element")
+                    )
                     if(fragment.nameElement != null) {
                         // For some reason, the rpos without lpos means relative to the left instead of the right side  
                         label.pos = scope.rpos(scope.lpos(fragment.nameElement, 0.90), 20, 0)
@@ -186,7 +189,7 @@ export const sequenceDiagramFrameModule = ContentModule.create(
 
                         // Add the frame
                         frameElement = canvasElement(
-                            content = rect(class = list("frame")),
+                            contents = list(rect(class = list("frame"))),
                             class = list("frame-element"),
                             width = width,
                             height = height

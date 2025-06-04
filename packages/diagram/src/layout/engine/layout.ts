@@ -211,60 +211,65 @@ export class Layout {
      *
      * @param layoutElement the element to measure
      * @param constraints size constraitns required for measure
-     * @returns the generated LayoutElement
+     * @returns the measured size
      */
-    measure(layoutElement: LayoutElement, constraints: SizeConstraints): LayoutElement {
+    measure(layoutElement: LayoutElement, constraints: SizeConstraints): Size {
+        const computedConstraints = this.computeSizeConstraints(layoutElement, constraints);
         if (layoutElement.isCollapsed) {
             const collapsedSize = { width: 0, height: 0 };
-            const collapsedConstraints = { min: collapsedSize, max: collapsedSize };
-            layoutElement.layoutConfig.measure(this, layoutElement, collapsedConstraints);
+            layoutElement.layoutConfig.measure(this, layoutElement, computedConstraints);
             layoutElement.measuredSize = collapsedSize;
             layoutElement.requestedSize = collapsedSize;
+            return collapsedSize;
         } else {
-            const styles = layoutElement.styles;
-            const layoutInformation = layoutElement.layoutInformation!;
-            const marginX = layoutInformation.marginLeft + layoutInformation.marginRight;
-            const marginY = layoutInformation.marginTop + layoutInformation.marginBottom;
-            const computedConstraints = this.computeSizeConstraints(styles, constraints, marginX, marginY);
             const requestedSize = layoutElement.layoutConfig.measure(this, layoutElement, computedConstraints);
-            const computedSize = addToSize(requestedSize, marginX, marginY);
+            const layoutInformation = layoutElement.layoutInformation!;
+            const computedSize = addToSize(
+                requestedSize,
+                layoutInformation.marginLeft + layoutInformation.marginRight,
+                layoutInformation.marginTop + layoutInformation.marginBottom
+            );
             const realSize = matchToConstraints(computedSize, constraints);
             layoutElement.measuredSize = realSize;
             layoutElement.requestedSize = requestedSize;
+            return realSize;
         }
-        return layoutElement;
     }
 
     /**
-     * Generates a new id based on the parent element
+     * Computes the size constraints for an element and the provided constraints.
+     * Also uses the styles of the element to further limit the constraints.
      *
-     * @param layoutConfig the layout config of the element
-     * @param parent the parent element
-     * @returns the generated id
-     */
-    private generateId(layoutConfig: LayoutConfig, parent: LayoutElement | undefined): string {
-        const parentIdWithGroup = parent == undefined ? layoutConfig.idGroup : `${parent.id}_${layoutConfig.idGroup}`;
-        const counter = this.elementIdCounter.get(parentIdWithGroup) ?? 0;
-        const id = parentIdWithGroup + counter;
-        this.elementIdCounter.set(parentIdWithGroup, counter + 1);
-        return id;
-    }
-
-    /**
-     * Computes size constraints for measure based on the provided styles and margin, and the constraints.
-     *
-     * @param styles styles providing min/max width/height
-     * @param constraints constraints to further limit
-     * @param marginX margin in x direction
-     * @param marginY margin in y direction
+     * @param element the elements to compute the constraints for
+     * @param constraints the constraints to use for the computation
      * @returns the computed size constraints
      */
-    private computeSizeConstraints(
-        styles: Record<string, any>,
-        constraints: SizeConstraints,
-        marginX: number,
-        marginY: number
-    ): SizeConstraints {
+    computeSizeConstraints(element: LayoutElement, constraints: SizeConstraints): SizeConstraints {
+        let sizeConstraints: SizeConstraints;
+        if (element.isCollapsed) {
+            sizeConstraints = {
+                min: { width: 0, height: 0 },
+                max: { width: 0, height: 0 }
+            };
+        } else {
+            sizeConstraints = this.computeVisibleSizeConstraints(element, constraints);
+        }
+        element.sizeConstraints = sizeConstraints;
+        return sizeConstraints;
+    }
+
+    /**
+     * Computes the size constraints for a visible (non-collapsed) element.
+     *
+     * @param element the elements to compute the constraints for
+     * @param constraints the constraints to use for the computation
+     * @returns the computed size constraints for the visible element
+     */
+    private computeVisibleSizeConstraints(element: LayoutElement, constraints: SizeConstraints): SizeConstraints {
+        const styles = element.styles;
+        const layoutInformation = element.layoutInformation!;
+        const marginX = layoutInformation.marginLeft + layoutInformation.marginRight;
+        const marginY = layoutInformation.marginTop + layoutInformation.marginBottom;
         let minWidth = 0;
         let minHeight = 0;
         if (styles.hAlign == undefined) {
@@ -291,6 +296,21 @@ export class Layout {
                 height: maxHeight
             }
         };
+    }
+
+    /**
+     * Generates a new id based on the parent element
+     *
+     * @param layoutConfig the layout config of the element
+     * @param parent the parent element
+     * @returns the generated id
+     */
+    private generateId(layoutConfig: LayoutConfig, parent: LayoutElement | undefined): string {
+        const parentIdWithGroup = parent == undefined ? layoutConfig.idGroup : `${parent.id}_${layoutConfig.idGroup}`;
+        const counter = this.elementIdCounter.get(parentIdWithGroup) ?? 0;
+        const id = parentIdWithGroup + counter;
+        this.elementIdCounter.set(parentIdWithGroup, counter + 1);
+        return id;
     }
 
     /**

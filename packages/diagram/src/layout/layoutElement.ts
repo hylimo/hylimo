@@ -118,6 +118,27 @@ export enum Visibility {
 }
 
 /**
+ * Defines the layout of a container element
+ */
+export enum ContainerLayout {
+    /**
+     * The element is laid out in a vertical box
+     * The children are stacked vertically
+     */
+    VBOX = "vbox",
+    /**
+     * The element is laid out in a horizontal box
+     * The children are stacked horizontally
+     */
+    HBOX = "hbox",
+    /**
+     * The element is laid out in a stack
+     * The children are stacked on top of each other
+     */
+    STACK = "stack"
+}
+
+/**
  * The element to layout
  */
 export interface LayoutElement {
@@ -153,6 +174,10 @@ export interface LayoutElement {
      * The size the element requested
      */
     requestedSize?: Size;
+    /**
+     * The size constraints for the element computed during measure
+     */
+    sizeConstraints?: SizeConstraints;
     /**
      * Bounds provided at layout
      */
@@ -210,14 +235,6 @@ export enum ContentCardinality {
      * 0
      */
     None,
-    /**
-     * 0..1
-     */
-    Optional,
-    /**
-     * 1
-     */
-    ExactlyOne,
     /**
      * 0..*
      */

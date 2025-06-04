@@ -42,7 +42,7 @@ export class CanvasLayoutConfig extends StyledElementLayoutConfig {
 
     override measure(layout: Layout, element: LayoutElement): Size {
         const contents = element.children;
-        const layoutedContents = contents.map((content) =>
+        contents.map((content) =>
             layout.measure(content, {
                 min: { width: 0, height: 0 },
                 max: { width: Number.POSITIVE_INFINITY, height: Number.POSITIVE_INFINITY }
@@ -51,7 +51,7 @@ export class CanvasLayoutConfig extends StyledElementLayoutConfig {
 
         const children: Element[] = [];
         const layoutChildren: Element[] = [];
-        for (const content of layoutedContents) {
+        for (const content of contents) {
             const newChildren = layout.layout(content, Point.ORIGIN, content.measuredSize!);
             if ((content.layoutConfig as CanvasContentLayoutConfig).isLayoutContent || content.isHidden) {
                 layoutChildren.push(...newChildren);

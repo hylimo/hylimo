@@ -248,31 +248,32 @@ classDiagram {
 ```hylimo
 classDiagram {
     customPackage = {
-        this.package = package("") layout {
+        name = it
+        package("") {
+            element {
+                text {
+                    span(text = name) styles {
+                        fontSize = 15
+                        fontWeight = "bold"
+                    }
+                }
+            }
+        } layout {
             width = 200
         }
-        package.content.contents.get(1).content = text(
-            contents = list(span(text = it, class = list("package-body"))),
-            vAlign = VAlign.Center,
-            hAlign = HAlign.Center
-        )
-        package
     }
 
     styles {
-        cls("package-body") {
-            fontSize = 15
-            fontWeight = "bold"
+        cls("package-canvas") {
+            variables.subcanvasMargin = 15
+            hAlign = HAlign.Center
         }
         cls("title-wrapper") {
-            type("span") {
-                fontSize = 10
-            }
+            //visibility = Visibility.Collapse
         }
         cls("package") {
             width = 60
             height = 25
-            marginTop = -25
         }
         cls("package-element") {
             vAlign = VAlign.Bottom
@@ -313,10 +314,6 @@ classDiagram {
 
     _fonts = customPackage("fonts") layout {
         pos = rpos(core, hdist, 0)
-    } styles {
-        cls("package") {
-            marginTop = 0
-        }
     }
 
     languageServer = customPackage("language-server") layout {

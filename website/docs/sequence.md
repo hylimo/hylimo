@@ -312,6 +312,7 @@ Destroys the given participant.
 ### event
 
 Creates a new event.
+
 **params**:
 
 - 0: the name of the event. Can be used as variable afterward if not already declared

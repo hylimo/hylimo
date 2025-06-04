@@ -11,56 +11,68 @@ export const defaultMarkersModule = ContentModule.create(
         scope.defaultMarkers = [
             diamond = {
                 marker(
-                    content = path(
-                        path = "M 1 0 L 0 1 L -1 0 L 0 -1 Z",
-                        class = list("diamond-marker-path", "marker-path")
+                    contents = list(
+                        path(
+                            path = "M 1 0 L 0 1 L -1 0 L 0 -1 Z",
+                            class = list("diamond-marker-path", "marker-path")
+                        )
                     ),
-                    class=list("diamond-marker", "marker")
+                    class = list("diamond-marker", "marker")
                 )
             },
             filledDiamond = {
                 marker(
-                    content = path(
-                        path = "M 1 0 L 0 1 L -1 0 L 0 -1 Z",
-                        class = list("filled-diamond-marker-path", "marker-path", "filled-marker-path")
+                    contents = list(
+                        path(
+                            path = "M 1 0 L 0 1 L -1 0 L 0 -1 Z",
+                            class = list("filled-diamond-marker-path", "marker-path", "filled-marker-path")
+                        )
                     ),
-                    class=list("filled-diamond-marker", "marker")
+                    class = list("filled-diamond-marker", "marker")
                 )
             },
             arrow = {
                 marker(
-                    content = path(
-                        path = "M 0 0 L 10 6 L 0 12",
-                        class = list("arrow-marker-path", "marker-path")
+                    contents = list(
+                        path(
+                            path = "M 0 0 L 10 6 L 0 12",
+                            class = list("arrow-marker-path", "marker-path")
+                        )
                     ),
-                    class=list("arrow-marker", "marker")
+                    class = list("arrow-marker", "marker")
                 )
             },
             cross = {
                 marker(
-                    content = path(
-                        path = "M 0 0 L 1 1 M 1 0 L 0 1",
-                        class = list("cross-marker-path", "marker-path")
+                    contents = list(
+                        path(
+                            path = "M 0 0 L 1 1 M 1 0 L 0 1",
+                            class = list("cross-marker-path", "marker-path")
+                        )
                     ),
-                    class=list("cross-marker", "marker")
+                    class = list("cross-marker", "marker")
                 )
             },
             triangle = {
                 marker(
-                    content = path(
-                        path = "M 0 0 L 10 6 L 0 12 Z",
-                        class = list("triangle-marker-path", "marker-path")
+                    contents = list(
+                        path(
+                            path = "M 0 0 L 10 6 L 0 12 Z",
+                            class = list("triangle-marker-path", "marker-path")
+                        )
                     ),
-                    class=list("triangle-marker", "marker")
+                    class = list("triangle-marker", "marker")
                 )
             },
             filledTriangle = {
                 marker(
-                    content = path(
-                        path = "M 0 0 L 10 6 L 0 12 Z",
-                        class = list("filled-triangle-marker-path", "marker-path", "filled-marker-path")
+                    contents = list(
+                        path(
+                            path = "M 0 0 L 10 6 L 0 12 Z",
+                            class = list("filled-triangle-marker-path", "marker-path", "filled-marker-path")
+                        )
                     ),
-                    class=list("filled-triangle-marker", "marker")
+                    class = list("filled-triangle-marker", "marker")
                 )
             }
         ]

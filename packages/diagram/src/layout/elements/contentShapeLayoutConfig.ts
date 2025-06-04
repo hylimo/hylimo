@@ -2,7 +2,8 @@ import type { AttributeConfig, LayoutElement } from "../layoutElement.js";
 import { ContentCardinality } from "../layoutElement.js";
 import { ShapeLayoutConfig } from "./shapeLayoutConfig.js";
 import { simpleElementType } from "../../module/base/types.js";
-import type { FullObject } from "@hylimo/core";
+import { objectToList, type FullObject } from "@hylimo/core";
+import { containerStyleAttributes } from "./attributes.js";
 
 /**
  * Base class for all shape layout configs with a content
@@ -15,14 +16,20 @@ export abstract class ContentShapeLayoutConfig extends ShapeLayoutConfig {
      * @param additionalStyleAttributes the supported additional style attributes
      */
     constructor(additionalAttributes: AttributeConfig[], additionalStyleAttributes: AttributeConfig[]) {
-        super(additionalAttributes, additionalStyleAttributes, simpleElementType, ContentCardinality.Optional);
+        super(
+            additionalAttributes,
+            [...additionalStyleAttributes, ...containerStyleAttributes],
+            simpleElementType,
+            ContentCardinality.Many
+        );
     }
 
     override getChildren(element: LayoutElement): FullObject[] {
-        const content = element.element.getLocalFieldOrUndefined("content")?.value as FullObject | undefined;
-        if (content != undefined) {
-            return [content];
+        const contents = element.element.getLocalFieldOrUndefined("contents")?.value as FullObject | undefined;
+        if (contents) {
+            return objectToList(contents) as FullObject[];
+        } else {
+            return [];
         }
-        return [];
     }
 }

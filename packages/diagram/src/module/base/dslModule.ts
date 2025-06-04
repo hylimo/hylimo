@@ -372,7 +372,7 @@ const scopeExpressions: ParseableExpressions = [
                         labelContent = list(span(text = labelContent))
                     }
                     labelCanvasElement = canvasElement(
-                        content = text(contents = labelContent, class = list("label")),
+                        contents = list(text(contents = labelContent, class = list("label"))),
                         pos = self.canvasScope.lpos(self, pos, distance),
                         class = list("label-element")
                     )
@@ -421,7 +421,7 @@ const scopeExpressions: ParseableExpressions = [
                         labelContent = list(span(text = labelContent))
                     }
                     labelCanvasElement = canvasElement(
-                        content = text(contents = labelContent, class = list("label")),
+                        contents = list(text(contents = labelContent, class = list("label"))),
                         pos = self.canvasScope.rpos(self, x, y),
                         class = list("label-element")
                     )

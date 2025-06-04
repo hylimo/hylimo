@@ -71,7 +71,6 @@ const participantEventDetails = namedType(
 export const participantType = namedType(
     objectType(
         new Map([
-            ["name", stringType],
             ["lifeline", canvasContentType],
             ["events", mapType(participantEventDetails)],
             ["activeActivityIndicators", listType(activityIndicatorType)],
