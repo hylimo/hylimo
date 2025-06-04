@@ -25,7 +25,7 @@ export const packageModule = ContentModule.create(
                         contents = list(
                             container(
                                 contents = list(
-                                    rect(contents = list(scope.internal.defaultTitle(name, keywords)), class = list("title-wrapper")),
+                                    container(contents = list(scope.internal.defaultTitle(name, keywords)), class = list("title-wrapper")),
                                     path(path = "M 0 0 V 1", hAlign = "left"),
                                     path(path = "M 0 0 V 1", hAlign = "right"),
                                     path(path = "M 0 0 H 1", vAlign = "top")
@@ -87,7 +87,6 @@ export const packageModule = ContentModule.create(
                             marginLeft = var("strokeWidth")
                             marginRight = var("strokeWidth")
                             marginTop = var("strokeWidth")
-                            stroke = unset
                         }
                         minWidth = 100
                         hAlign = "left"

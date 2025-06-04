@@ -28,7 +28,7 @@ export const actorModule = ContentModule.create(
 
                 actorElement = canvasElement(
                     contents = list(
-                        rect(
+                        container(
                             contents = elements,
                             class = list("actor")
                         )
@@ -47,20 +47,8 @@ export const actorModule = ContentModule.create(
             "actor",
             fun(
                 `
-                    (name, class, callback) = args
-                    this.actorArgs = args
-                    println("What is going on here?")
-                    title = name
-                    if(class != null) {
-                        if(isString(class)) {
-                            title = name + ":" + class
-                        } {
-                            if(callback != null) {
-                                error("Both the class name and body of actor '\${name}' are set to functions which is not allowed. Either provide a class name string as second argument, or pass at most two arguments")
-                            }
-                            callback = class
-                        }
-                    }
+                    (name, title, callback) = scope.internal.parseInstanceArgs(args)
+                    actorArgs = args
                     
                     if(callback != null) {
                         this.actor = scope.internal.createInstance(name, callback, title = title, keywords = actorArgs.keywords, args = actorArgs)
@@ -70,7 +58,7 @@ export const actorModule = ContentModule.create(
                             actor.contents[0]
                         )
                         actor.contents = list(
-                            rect(
+                            container(
                                 contents = elements,
                                 class = list("actor")
                             )
@@ -99,7 +87,6 @@ export const actorModule = ContentModule.create(
                     hAlign = "center"
 
                     cls("actor") {
-                        stroke = unset
                         layout = "vbox"
 
                         type("text") {

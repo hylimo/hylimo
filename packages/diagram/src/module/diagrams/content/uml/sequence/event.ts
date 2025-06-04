@@ -56,13 +56,13 @@ export const eventModule = ContentModule.create(
 
                         // When in debugging mode, visualize the coordinates of all events
                         if(scope.internal.config.enableDebugging) {
-                            _left = canvasElement(contents = list(ellipse(fill = "orange", stroke = "unset"), width=7, height=7, hAlign = "center", vAlign = "center"))
+                            _left = canvasElement(contents = list(ellipse(fill = "orange", stroke = "unset")), width=7, height=7, hAlign = "center", vAlign = "center")
                             _left.pos = participant.left(eventObject)
                             scope.internal.registerCanvasElement(_left, originalArgs, originalArgs.self)
-                            _center = canvasElement(contents = list(ellipse(fill = "orange", stroke = "unset"), width=7, height=7, hAlign = "center", vAlign = "center"))
+                            _center = canvasElement(contents = list(ellipse(fill = "orange", stroke = "unset")), width=7, height=7, hAlign = "center", vAlign = "center")
                             _center.pos = scope.apos(participant.x, eventObject.y)
                             scope.internal.registerCanvasElement(_center, originalArgs, originalArgs.self)
-                            _right = canvasElement(contents = list(ellipse(fill = "orange", stroke = "unset"), width=7, height=7, hAlign = "center", vAlign = "center"))
+                            _right = canvasElement(contents = list(ellipse(fill = "orange", stroke = "unset")), width=7, height=7, hAlign = "center", vAlign = "center")
                             _right.pos = participant.right(eventObject)
                             scope.internal.registerCanvasElement(_right, originalArgs, originalArgs.self)
                         }

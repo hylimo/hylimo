@@ -180,7 +180,7 @@ export abstract class SimpleObject extends BaseObject {
         _args: ExecutableListEntry[],
         _context: InterpreterContext,
         _scope?: FullObject,
-        _callExpression?: AbstractInvocationExpression
+        _callExpression?: AbstractInvocationExpression | OperatorExpression
     ): LabeledValue {
         throw new RuntimeError("Invoke not supported");
     }

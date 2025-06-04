@@ -27,29 +27,39 @@ export const instanceModule = ContentModule.create(
                     scope.internal.contentContentHandler
                 )
             )
+
+            scope.internal.parseInstanceArgs = {
+                (name, class, callback) = args[0]
+                this.title = name ?? ""
+                name = name ?? class
+                if(class != null) {
+                    if(isString(class)) {
+                        title = title + ":" + class
+                    } {
+                        if(callback != null) {
+                            error("Both the class name and body of instance '\${name}' are set to functions which is not allowed. Either provide a class name string as second argument, or pass at most two arguments")
+                        }
+                        callback = class
+                    }
+                }
+                [name, title, callback]
+            }
         `,
         id(SCOPE).assignField(
             "instance",
             fun(
                 `
-                    (name, class, callback) = args
-                    title = name
-                    if(class != null) {
-                        if(isString(class)) {
-                            title = name + ":" + class
-                        } {
-                            if(callback != null) {
-                                error("Both the class name and body of instance '\${name}' are set to functions which is not allowed. Either provide a class name string as second argument, or pass at most two arguments")
-                            }
-                            callback = class
-                        }
-                    }
+                    (name, title, callback) = scope.internal.parseInstanceArgs(args)
                     scope.internal.createInstance(name, callback, title = title, keywords = args.keywords, args = args)
                 `,
                 {
                     docs: "Creates an instance.",
                     params: [
-                        [0, "the name of the instance", stringType],
+                        [
+                            0,
+                            "the optional name of the instance, if not given, the second parameter must be provided",
+                            optional(stringType)
+                        ],
                         [1, "the optional class name of this instance", optional(or(stringType, functionType))],
                         [2, "the callback function of this instance", optional(functionType)],
                         ["keywords", "the keywords of the instance", optional(listType(stringType))]

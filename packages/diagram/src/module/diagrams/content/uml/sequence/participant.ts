@@ -1,4 +1,4 @@
-import { fun, functionType, id, numberType, optional, stringType } from "@hylimo/core";
+import { fun, functionType, id, numberType, optional } from "@hylimo/core";
 import { SCOPE } from "../../../../base/dslModule.js";
 import { eventType, participantType } from "./types.js";
 import { canvasContentType } from "../../../../base/types.js";
@@ -20,9 +20,8 @@ export const participantModule = ContentModule.create(
                 fun(
                     [
                         `
-                            (name, participantElement) = args
+                            (participantElement) = args
                             participantElement.alive = true
-                            participantElement.name = name
                             participantElement.below = args.below
                             participantElement.events = []
 
@@ -83,7 +82,6 @@ export const participantModule = ContentModule.create(
                                 }}
 
                             participantElement.parentEvent = event
-                            participantElement.participantName = participantElement.name
 
                             // We want to bottom align top level participants, and only them
                             // Later participants should be center aligned
@@ -99,12 +97,12 @@ export const participantModule = ContentModule.create(
                                 `
                                     event = it
                                     participant = participantElement
-                                    left =  {
+                                    left = {
                                         if(event == participant.declaringEvent) {
                                             scope.lpos(participant, 0.5) // On the left of the participant
                                         } {
                                             if(participant.events[event.name] == null) {
-                                                scope.error("Participant '\${participant.name}' does not have data for event '\${event.name}'")
+                                                scope.error("Participant does not have data for event '\${event.name}'")
                                             }
                                             activityIndicators = participant.events[event.name].activityIndicators
                                             leftX = participant.x + (if(activityIndicators.length > 0) { activityIndicators.get(activityIndicators.length - 1).leftX } { 0 })
@@ -116,7 +114,7 @@ export const participantModule = ContentModule.create(
                                             scope.lpos(participant, 0) // On the right of the participant
                                         } {
                                             if(participant.events[event.name] == null) {
-                                                scope.error("Participant '\${participant.name}' does not have data for event '\${event.name}'")
+                                                scope.error("Participant does not have data for event '\${event.name}'")
                                             }
                                             activityIndicators = participant.events[event.name].activityIndicators
                                             rightX = participant.x + (if(activityIndicators.length > 0) { activityIndicators.get(activityIndicators.length - 1).rightX } { 0 })
@@ -134,9 +132,9 @@ export const participantModule = ContentModule.create(
                             )
                         ),
                         `
-                            scope.internal.canvasAddEdits["toolbox/Activate instance or actor/\${name}"] = "'activate(' & \${nameToJsonataStringLiteral(name)} & ')'"
-                            scope.internal.canvasAddEdits["toolbox/Deactive instance or actor/\${name}"] = "'deactivate(' & \${nameToJsonataStringLiteral(name)} & ')'"
-                            scope.internal.canvasAddEdits["toolbox/Destroy instance or actor/\${name}"] = "'destroy(' & \${nameToJsonataStringLiteral(name)} & ')'"
+                            //scope.internal.canvasAddEdits["toolbox/Activate instance or actor/\${name}"] = "'activate(' & \${nameToJsonataStringLiteral(name)} & ')'"
+                            //scope.internal.canvasAddEdits["toolbox/Deactive instance or actor/\${name}"] = "'deactivate(' & \${nameToJsonataStringLiteral(name)} & ')'"
+                            //scope.internal.canvasAddEdits["toolbox/Destroy instance or actor/\${name}"] = "'destroy(' & \${nameToJsonataStringLiteral(name)} & ')'"
 
                             participantElement
                         `
@@ -144,8 +142,7 @@ export const participantModule = ContentModule.create(
                     {
                         docs: "Enriches the given already created participant with all sequence diagram specific data",
                         params: [
-                            [0, "the name of this participant", stringType],
-                            [1, "the already created participant element", canvasContentType],
+                            [0, "the already created participant element", canvasContentType],
                             [
                                 "below",
                                 "another participant below which to position this participant",
@@ -201,7 +198,7 @@ export const participantModule = ContentModule.create(
                     crossSize = args.crossSize ?? scope.internal.config.destroyingCrossSize
 
                     if(participant.alive != true) {
-                        scope.error("\${participant.name} has already been destroyed")
+                        scope.error("participant has already been destroyed")
                     }
 
                     // Remove active activity indicators
