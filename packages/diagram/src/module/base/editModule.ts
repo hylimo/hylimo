@@ -31,7 +31,7 @@ import { DiagramModuleNames } from "../diagramModuleNames.js";
 function generateEdit(
     target: Expression<any>,
     template: LabeledValue,
-    type: "replace" | "add" | "add-arg",
+    type: "replace" | "add" | "add-arg" |"append",
     context: InterpreterContext
 ): BaseObject {
     const edit = context.newObject();
@@ -263,16 +263,12 @@ export const editModule = InterpreterModule.create(
                     }
                     const scope = args.getField(1, context).value;
                     const expression = args.getField(2, context).value;
-                    return generateReplaceEdit(
-                        target,
-                        [
-                            target.toWrapperObject(context),
-                            context.newString(
-                                `' ${assertString(scope)} {\n    ' & $replace(${assertString(expression)}, '\n', '\n    ') & '\n}'`
-                            )
-                        ],
+                    return generateEdit(
+                        target as Expression<any>,
+                        { value: context.newString(`' ${assertString(scope)} {\n    ' & $replace(${assertString(expression)}, '\n', '\n    ') & '\n}'`) },
+                        "append",
                         context
-                    );
+                    )
                 },
                 {
                     docs: "Creates an append scope edit",

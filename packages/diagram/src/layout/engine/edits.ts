@@ -52,6 +52,8 @@ export function applyEdits(layoutElement: LayoutElement): void {
 function parseTemplate(template: BaseObject): TemplateEntry[] {
     if (isString(template)) {
         return [template.value];
+    }  else if (isWrapperObject(template) && template.wrapped instanceof Expression) {
+        return [{ range: template.wrapped.range }];
     }
     assertObject(template);
     const parsedTemplate: TemplateEntry[] = [];
@@ -96,6 +98,12 @@ function generateEditSpecificationEntry(
             range: targetExpression.range,
             template: parsedTemplate
         } satisfies ReplaceEditSpecificationEntry;
+    } else if (type === "append") {
+        return {
+            type: "replace",
+            range: targetExpression.range,
+            template: [{ range: targetExpression.range }, ...parsedTemplate]
+        }
     } else {
         throw new Error(`Unknown type ${type}`);
     }

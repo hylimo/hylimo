@@ -640,7 +640,6 @@ const scopeExpressions: ParseableExpressions = [
                     )
                     element.edits["${DefaultEditTypes.RESIZE_WIDTH}"] = this.resizeEdit
                     element.edits["${DefaultEditTypes.RESIZE_HEIGHT}"] = this.resizeEdit
-
                     element
                 `
             )
