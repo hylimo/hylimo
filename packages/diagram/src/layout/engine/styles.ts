@@ -1,24 +1,93 @@
+import type { InterpreterContext } from "@hylimo/core";
 import {
     assertObject,
     assertString,
     ExecutableConstExpression,
     FullObject,
-    InterpreterContext,
     objectToList,
     type LabeledValue
 } from "@hylimo/core";
-import { SelectorType, type Selector } from "../../styles.js";
 import type { LayoutElement } from "../layoutElement.js";
 
+/**
+ * Different types of selectors
+ */
+enum SelectorType {
+    /**
+     * Class selector, matches class
+     */
+    CLASS = "class",
+    /**
+     * Type selector, matches type
+     */
+    TYPE = "type",
+    /**
+     * Any selector, maches any element
+     */
+    ANY = "any"
+}
+
+/**
+ * A selector which is part of the selector chain
+ */
+interface Selector {
+    /**
+     * The type of the selector
+     */
+    type: SelectorType;
+    /**
+     * The value of the selector
+     */
+    value: string;
+}
+
+/**
+ * Represents a single style context with its selector, variables, and child contexts.
+ * Each StyleContext can match against layout elements based on its selector and provides
+ * style values and variables when matched.
+ */
 export class StyleContext {
+    /**
+     * Flag indicating whether this context has been initialized
+     */
     private isInitialized: boolean = false;
+
+    /**
+     * Flag indicating whether this context is currently active (matched)
+     */
     isActive: boolean = false;
+
+    /**
+     * Child style contexts that are nested within this context
+     */
     children: StyleContext[] = [];
+
+    /**
+     * Cache for variable lookups to avoid repeated property access
+     */
     variablesLookup: Map<string, LabeledValue | null> = new Map();
+
+    /**
+     * Cache for value lookups to avoid repeated property access
+     */
     valuesLookup: Map<string, LabeledValue | null> = new Map();
+
+    /**
+     * Variables object containing all variables defined in this context
+     */
     variables?: FullObject;
+
+    /**
+     * The selector used to match elements against this style context
+     */
     selector: Selector;
 
+    /**
+     * Creates a new StyleContext from a style object.
+     * Extracts the selector type and value from the style object.
+     *
+     * @param styleObject The full object containing style definition with selector information
+     */
     constructor(private readonly styleObject: FullObject) {
         this.selector = {
             type: assertString(
@@ -29,6 +98,11 @@ export class StyleContext {
         };
     }
 
+    /**
+     * Initializes the style context by loading child styles and variables.
+     * This is called lazily when the context becomes active for the first time.
+     * Sets up child StyleContext instances and extracts variables object.
+     */
     initialize(): void {
         if (this.isInitialized) {
             return;
@@ -46,6 +120,13 @@ export class StyleContext {
         }
     }
 
+    /**
+     * Gets the value of a variable defined in this style context.
+     * Uses caching to avoid repeated lookups of the same variable.
+     *
+     * @param name The name of the variable to retrieve
+     * @returns The labeled value of the variable, or null if not found
+     */
     getVariable(name: string): LabeledValue | null {
         if (this.variables == undefined) {
             return null;
@@ -59,6 +140,13 @@ export class StyleContext {
         return value;
     }
 
+    /**
+     * Gets a style property value from this style context.
+     * Uses caching to avoid repeated lookups of the same property.
+     *
+     * @param name The name of the style property to retrieve
+     * @returns The labeled value of the property, or null if not found
+     */
     getValue(name: string): LabeledValue | null {
         const value = this.valuesLookup.get(name);
         if (value !== undefined) {
@@ -70,9 +158,11 @@ export class StyleContext {
     }
 
     /**
-     * Checks if an element matches a selector
-     * @param element the element to check
-     * @param selector the selector to check
+     * Checks if a layout element matches this style context's selector.
+     * Supports class selectors (matching element classes), type selectors
+     * (matching element types), and the universal selector (matching any element).
+     *
+     * @param element The layout element to check against the selector
      * @returns true if the element matches the selector, otherwise false
      */
     matchesSelector(element: LayoutElement): boolean {
@@ -86,11 +176,33 @@ export class StyleContext {
     }
 }
 
+/**
+ * Evaluates and manages style contexts for layout elements.
+ * Handles matching elements against style selectors and maintains
+ * an active style stack for nested style application.
+ */
 export class StyleEvaluator {
+    /**
+     * All available style contexts
+     */
     contexts: StyleContext[];
+
+    /**
+     * Stack of currently active style contexts
+     */
     activeStyleStack: StyleContext[] = [];
+
+    /**
+     * Stack tracking the number of active styles at each nesting level
+     */
     activeStyleCountStack: number[] = [];
 
+    /**
+     * Creates a new StyleEvaluator with the given styles object.
+     * Extracts all top-level style contexts from the styles object.
+     *
+     * @param styles The full object containing all style definitions
+     */
     constructor(styles: FullObject) {
         this.contexts = objectToList(styles.getLocalFieldOrUndefined("styles")!.value as FullObject).map((style) => {
             assertObject(style!);
@@ -98,7 +210,15 @@ export class StyleEvaluator {
         });
     }
 
-    matchStyles(layoutElement: LayoutElement): StyleContext[] {
+    /**
+     * Begins style matching for a layout element.
+     * Finds all style contexts that match the element and updates the active style stack.
+     * The returned contexts are in reverse order (most specific first).
+     *
+     * @param layoutElement The layout element to match styles against
+     * @returns Array of matching style contexts in reverse order (most specific first)
+     */
+    beginMatchStyles(layoutElement: LayoutElement): StyleContext[] {
         const matchedContexts: StyleContext[] = [];
         const currentActiveCount = this.activeStyleStack.length;
         for (const context of this.contexts) {
@@ -109,6 +229,11 @@ export class StyleEvaluator {
         return matchedContexts;
     }
 
+    /**
+     * Ends style matching for the current element.
+     * Removes the styles that were added during the last beginMatchStyles call
+     * from the active style stack.
+     */
     endMatchStyles(): void {
         const count = this.activeStyleCountStack.pop()!;
         if (count > 0) {
@@ -116,6 +241,15 @@ export class StyleEvaluator {
         }
     }
 
+    /**
+     * Recursively matches a layout element against a style context and its children.
+     * If the context matches, it's added to the matched contexts and activated.
+     * Child contexts are only processed if the parent context was already active.
+     *
+     * @param layoutElement The layout element to match against
+     * @param context The style context to check for matching
+     * @param matchedContexts Array to collect all matching contexts
+     */
     private matchStylesRecursive(
         layoutElement: LayoutElement,
         context: StyleContext,

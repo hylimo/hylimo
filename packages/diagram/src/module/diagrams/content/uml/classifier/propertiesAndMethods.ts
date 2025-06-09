@@ -137,11 +137,13 @@ export const propertiesAndMethodsModule = ContentModule.create(
 
             
             scope.styles {
-                cls("entry-abstract") {
-                    fontStyle = "italic"
-                }
-                cls("entry-static") {
-                    underline = true
+                type("text") {
+                    cls("entry-abstract") {
+                        fontStyle = "italic"
+                    }
+                    cls("entry-static") {
+                        underline = true
+                    }
                 }
             }
         `

@@ -1,24 +1,14 @@
-import type { InterpreterContext, LabeledValue } from "@hylimo/core";
-import {
-    FullObject,
-    assertString,
-    nativeToList,
-    RuntimeError,
-    isObject,
-    isNull,
-    ExecutableConstExpression,
-    validateObject
-} from "@hylimo/core";
+import type { InterpreterContext, FullObject } from "@hylimo/core";
+import { assertString, nativeToList, RuntimeError, isNull, validateObject } from "@hylimo/core";
 import type { Line, Point, Size } from "@hylimo/diagram-common";
 import type { FontCollection } from "../font/fontCollection.js";
-import type { StyleList, Selector, Style } from "../../styles.js";
-import { SelectorType } from "../../styles.js";
 import type { LayoutElement, LayoutInformation, SizeConstraints, LayoutConfig } from "../layoutElement.js";
 import { addToSize, matchToConstraints, HorizontalAlignment, VerticalAlignment, Visibility } from "../layoutElement.js";
 import type { LayoutEngine } from "./layoutEngine.js";
 import type { Element } from "@hylimo/diagram-common";
 import { applyEdits } from "./edits.js";
 import { CanvasLayoutEngine } from "./canvasLayoutEngine.js";
+import type { StyleContext } from "./styles.js";
 import { StyleEvaluator, StyleValueParser } from "./styles.js";
 
 /**
@@ -80,10 +70,10 @@ export class Layout {
      * Computes the styles based on the provided element
      *
      * @param layoutElement the layout element where the styles should be updated
+     * @param matchingStyles the styles which match the element
      */
-    private applyStyles(layoutElement: LayoutElement): void {
+    private applyStyles(layoutElement: LayoutElement, matchingStyles: StyleContext[]): void {
         const styleAttributes = layoutElement.layoutConfig.styleAttributes;
-        const matchingStyles = this.styleEvaluator.matchStyles(layoutElement);
         const styleValueParser = new StyleValueParser(matchingStyles, this.context);
         const styles: Record<string, any> = {};
         for (const attributeConfig of styleAttributes) {
@@ -155,7 +145,8 @@ export class Layout {
         };
         this.elementIdLookup.set(element, id);
         this.layoutElementLookup.set(id, layoutElement);
-        this.applyStyles(layoutElement);
+        const matchingStyles = this.styleEvaluator.beginMatchStyles(layoutElement);
+        this.applyStyles(layoutElement, matchingStyles);
         this.applyVisibility(layoutElement);
         applyEdits(layoutElement);
         layoutElement.children.push(
@@ -163,6 +154,7 @@ export class Layout {
         );
         const layoutInformation = this.computeLayoutInformation(layoutElement.styles);
         layoutElement.layoutInformation = layoutInformation;
+        this.styleEvaluator.endMatchStyles();
         return layoutElement;
     }
 

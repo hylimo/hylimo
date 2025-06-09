@@ -96,12 +96,6 @@ export const activityIndicatorModule = ContentModule.create(
                         scope.internal.registerCanvasElement(_right, originalArgs, originalArgs.self)
                     }
 
-                    scope.styles {
-                        cls("activity-indicator") {
-                            fill = var("background")
-                        }
-                    }
-
                     activityIndicatorElement
                 `,
                 {
@@ -151,6 +145,13 @@ export const activityIndicatorModule = ContentModule.create(
                     returns: "nothing"
                 }
             )
-        )
+        ),
+        `
+            scope.styles {
+                cls("activity-indicator") {
+                    fill = var("background")
+                }
+            }
+        `
     ]
 );

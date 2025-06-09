@@ -78,14 +78,14 @@ export const portsModule = ContentModule.create(
             ),
         `
             scope.styles {
-                vars {
-                    portSize = 20
-                }
                 cls("port-element") {
+                    variables.portSize = 20
+
                     vAlign = "center"
                     hAlign = "center"
                     width = var("portSize")
                     height = var("portSize")
+
                     cls("port") {
                         fill = var("background")
                     }

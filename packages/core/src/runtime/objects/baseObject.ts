@@ -48,7 +48,7 @@ export abstract class BaseObject {
 
     /**
      * Wrapper for getField which uses this as self
-     * 
+     *
      * @param key the identifier of the field
      * @param context context in which this is performed
      * @returns the field entry
@@ -59,7 +59,7 @@ export abstract class BaseObject {
 
     /**
      * Wrapper for getFields which uses this as self
-     * 
+     *
      * @param key the identifier of the field
      * @param value the new value of the field
      * @param context context in which this is performed

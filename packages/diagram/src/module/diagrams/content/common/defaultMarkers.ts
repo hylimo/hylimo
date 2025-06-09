@@ -78,30 +78,32 @@ export const defaultMarkersModule = ContentModule.create(
         ]
 
         scope.styles {
-            cls("arrow-marker") {
-                lineStart = 1
-            }
-            cls("cross-marker") {
-                lineStart = 1
-            }
-            cls("marker-path") {
-                height = 17.5
-                width = 17.5
-            }
-            cls("diamond-marker-path") {
-                width = 28
-            }
-            cls("filled-diamond-marker-path") {
-                width = 28
-            }
-            cls("filled-marker-path") {
-                fill = var("primary")
-            }
-            cls("arrow-marker-path") {
-                strokeLineJoin = "bevel"
-            }
-            cls("cross-marker-path") {
-                marginRight = 5
+            type("connection") {
+                cls("arrow-marker") {
+                    lineStart = 1
+                }
+                cls("cross-marker") {
+                    lineStart = 1
+                }
+                cls("marker-path") {
+                    height = 17.5
+                    width = 17.5
+                }
+                cls("diamond-marker-path") {
+                    width = 28
+                }
+                cls("filled-diamond-marker-path") {
+                    width = 28
+                }
+                cls("filled-marker-path") {
+                    fill = var("primary")
+                }
+                cls("arrow-marker-path") {
+                    strokeLineJoin = "bevel"
+                }
+                cls("cross-marker-path") {
+                    marginRight = 5
+                }
             }
         }
     `

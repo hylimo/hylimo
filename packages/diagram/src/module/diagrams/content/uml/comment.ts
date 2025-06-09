@@ -65,14 +65,15 @@ export const commentModule = ContentModule.create(
         ),
         `
             scope.styles {
-                vars {
-                    commentTriangleSize = 20
-                }
                 cls("comment-element") {
                     vAlign = "center"
                     hAlign = "center"
                     minWidth = 80
                     maxWidth = 300
+
+                    vars {
+                        commentTriangleSize = 20
+                    }
 
                     cls("comment") {
                         marginRight = 5

@@ -153,16 +153,6 @@ export const participantModule = ContentModule.create(
                     }
                 )
             ),
-        `
-            scope.styles {
-                cls("top-level-participant") {
-                    vAlign = "bottom"
-                }
-                cls("non-top-level-participant") {
-                    vAlign = "center"
-                }
-            }
-        `,
         id(SCOPE).assignField(
             "virtualParticipant",
             fun(
@@ -228,12 +218,6 @@ export const participantModule = ContentModule.create(
                             width = crossSize,
                             height = crossSize
                         )
-                        scope.styles {
-                            cls("destroy-cross-path-element") {
-                                vAlign = "center"
-                                hAlign = "center"
-                            }
-                        }
 
                         cross.pos = scope.apos(participant.x, scope.internal.lastSequenceDiagramEvent.y)
                         scope.internal.registerCanvasElement(cross, originalArgs, originalArgs.self)
@@ -257,6 +241,20 @@ export const participantModule = ContentModule.create(
                     returns: "the created cross"
                 }
             )
-        )
+        ),
+        `
+            scope.styles {
+                cls("top-level-participant") {
+                    vAlign = "bottom"
+                }
+                cls("non-top-level-participant") {
+                    vAlign = "center"
+                }
+                cls("destroy-cross-path-element") {
+                    vAlign = "center"
+                    hAlign = "center"
+                }
+            }
+        `
     ]
 );

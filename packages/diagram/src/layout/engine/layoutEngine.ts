@@ -153,13 +153,7 @@ export class LayoutEngine {
         context: InterpreterContext
     ): LayoutWithRoot {
         const nativeFonts = nativeToList(fonts.toNative());
-        const layout = new Layout(
-            this,
-            styles,
-            new FontCollection(),
-            nativeFonts[0].fontFamily,
-            context
-        );
+        const layout = new Layout(this, styles, new FontCollection(), nativeFonts[0].fontFamily, context);
         const layoutElement = layout.create(element, undefined);
         return new LayoutWithRoot(layoutElement, layout, nativeFonts);
     }

@@ -67,9 +67,7 @@ export abstract class ElementLayoutConfig extends BaseLayoutConfig implements La
             description: attribute.description,
             type: optional(attribute.type)
         }));
-        this.styleAttributeNames = new Set(
-            this.styleAttributes.map((attribute) => attribute.name)
-        );
+        this.styleAttributeNames = new Set(this.styleAttributes.map((attribute) => attribute.name));
         this.contentAttributes = this.computeContentAttributes();
     }
 
