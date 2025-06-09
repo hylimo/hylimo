@@ -15,7 +15,7 @@ export const reflectionModule = InterpreterModule.create(
             "reflect",
             jsFun(
                 (args, context) => {
-                    const value = args.getField(0, context);
+                    const value = args.getSelfField(0, context);
                     if (value.source != undefined) {
                         return value.source.toWrapperObject(context);
                     } else {

@@ -24,6 +24,6 @@ export class ExecutableFieldAccessExpression extends ExecutableExpression<FieldA
 
     override evaluateInternal(context: InterpreterContext): LabeledValue {
         const targetValue = this.target.evaluate(context).value;
-        return targetValue.getField(this.name, context);
+        return targetValue.getSelfField(this.name, context);
     }
 }

@@ -43,7 +43,9 @@ export const entriesModule = ContentModule.create(
                                         value: num(2)
                                     }
                                 ],
-                                context
+                                context,
+                                undefined,
+                                undefined
                             );
                         }
 

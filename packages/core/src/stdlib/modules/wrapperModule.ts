@@ -16,7 +16,7 @@ export const wrapperModule = InterpreterModule.create(
             "isWrapperObject",
             jsFun(
                 (args, context) => {
-                    return context.newBoolean(isWrapperObject(args.getFieldValue(0, context)));
+                    return context.newBoolean(isWrapperObject(args.getSelfFieldValue(0, context)));
                 },
                 {
                     docs: "Checks if the provided value is a wrapper object.",

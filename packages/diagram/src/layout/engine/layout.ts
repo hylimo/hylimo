@@ -127,14 +127,14 @@ export class Layout {
         const styles: Record<string, any> = {};
         for (const attributeConfig of styleAttributes) {
             const name = attributeConfig.name;
-            const elementValue = layoutElement.element.getField(name, this.context).value;
+            const elementValue = layoutElement.element.getSelfField(name, this.context).value;
             if (!isNull(elementValue)) {
                 styles[name] = elementValue.toNative();
             } else {
                 const styleValue = styleValueParser.getValue(name);
                 if (styleValue != undefined) {
-                    layoutElement.element.setField(name, styleValue, this.context);
-                    styles[name] = layoutElement.element.getField(name, this.context)?.value?.toNative();
+                    layoutElement.element.setSelfLocalField(name, styleValue, this.context);
+                    styles[name] = layoutElement.element.getSelfField(name, this.context)?.value?.toNative();
                 }
             }
         }
@@ -556,13 +556,15 @@ class StyleValueParser {
             const variableName = value.getLocalFieldOrUndefined("name")?.value?.toNative();
             return this.getVariableValue(variableName);
         } else if (type === "calc") {
-            const operator = value.getLocalField("operator", this.context).value;
+            const operator = value.getSelfField("operator", this.context).value;
             const result = operator.invoke(
                 [
-                    { value: new ExecutableConstExpression(this.parse(value.getLocalField("left", this.context))) },
-                    { value: new ExecutableConstExpression(this.parse(value.getLocalField("right", this.context))) }
+                    { value: new ExecutableConstExpression(this.parse(value.getSelfField("left", this.context))) },
+                    { value: new ExecutableConstExpression(this.parse(value.getSelfField("right", this.context))) }
                 ],
-                this.context
+                this.context,
+                undefined,
+                undefined
             );
             return { value: result.value, source: labeledValue.source };
         } else {

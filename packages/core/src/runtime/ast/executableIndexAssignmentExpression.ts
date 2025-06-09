@@ -29,7 +29,7 @@ export class ExecutableIndexAssignmentExpression extends ExecutableExpression<In
         const targetValue = this.target.evaluate(context).value;
         const valueValue = this.value.evaluateWithSource(context);
         const indexValue = this.index.evaluate(context).value;
-        targetValue.setLocalField(assertIndex(indexValue), valueValue, context);
+        targetValue.setSelfLocalField(assertIndex(indexValue), valueValue, context);
         return valueValue;
     }
 }

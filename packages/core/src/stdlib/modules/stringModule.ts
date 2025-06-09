@@ -26,8 +26,8 @@ export const stringModule = InterpreterModule.create(
                 jsFun(
                     (args, context) => {
                         return context.newBoolean(
-                            assertString(args.getFieldValue(SemanticFieldNames.SELF, context)) <
-                                assertString(args.getFieldValue(0, context))
+                            assertString(args.getSelfFieldValue(SemanticFieldNames.SELF, context)) <
+                                assertString(args.getSelfFieldValue(0, context))
                         );
                     },
                     {
@@ -45,8 +45,8 @@ export const stringModule = InterpreterModule.create(
                 jsFun(
                     (args, context) => {
                         return context.newBoolean(
-                            assertString(args.getFieldValue(SemanticFieldNames.SELF, context)) >
-                                assertString(args.getFieldValue(0, context))
+                            assertString(args.getSelfFieldValue(SemanticFieldNames.SELF, context)) >
+                                assertString(args.getSelfFieldValue(0, context))
                         );
                     },
                     {
@@ -64,8 +64,8 @@ export const stringModule = InterpreterModule.create(
                 jsFun(
                     (args, context) => {
                         return context.newBoolean(
-                            assertString(args.getFieldValue(SemanticFieldNames.SELF, context)) <=
-                                assertString(args.getFieldValue(0, context))
+                            assertString(args.getSelfFieldValue(SemanticFieldNames.SELF, context)) <=
+                                assertString(args.getSelfFieldValue(0, context))
                         );
                     },
                     {
@@ -83,8 +83,8 @@ export const stringModule = InterpreterModule.create(
                 jsFun(
                     (args, context) => {
                         return context.newBoolean(
-                            assertString(args.getFieldValue(SemanticFieldNames.SELF, context)) >=
-                                assertString(args.getFieldValue(0, context))
+                            assertString(args.getSelfFieldValue(SemanticFieldNames.SELF, context)) >=
+                                assertString(args.getSelfFieldValue(0, context))
                         );
                     },
                     {
@@ -101,8 +101,8 @@ export const stringModule = InterpreterModule.create(
                 "+",
                 jsFun(
                     (args, context) => {
-                        const self = assertString(args.getFieldValue(SemanticFieldNames.SELF, context));
-                        const other = assertString(args.getFieldValue(0, context));
+                        const self = assertString(args.getSelfFieldValue(SemanticFieldNames.SELF, context));
+                        const other = assertString(args.getSelfFieldValue(0, context));
                         return context.newString(self + other);
                     },
                     {
@@ -120,7 +120,7 @@ export const stringModule = InterpreterModule.create(
             "isString",
             jsFun(
                 (args, context) => {
-                    return context.newBoolean(isString(args.getFieldValue(0, context)));
+                    return context.newBoolean(isString(args.getSelfFieldValue(0, context)));
                 },
                 {
                     docs: "Checks if the provided value is a string.",

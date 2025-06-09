@@ -20,13 +20,13 @@ export const importedParticipantsModule = ContentModule.create(
         assign(
             "_importParticipant",
             jsFun((args, context) => {
-                const participantFunction = args.getFieldValue(0, context);
+                const participantFunction = args.getSelfFieldValue(0, context);
                 assertFunction(participantFunction);
                 const docs = participantFunction.definition.documentation;
                 const createParticipant = context
                     .getField(SCOPE)
-                    .getFieldValue("internal", context)
-                    .getFieldValue("createSequenceDiagramParticipant", context);
+                    .getSelfFieldValue("internal", context)
+                    .getSelfFieldValue("createSequenceDiagramParticipant", context);
                 assertFunction(createParticipant);
                 return native(
                     (args, context, _scope, callExpression) => {
@@ -40,10 +40,12 @@ export const importedParticipantsModule = ContentModule.create(
                             if (entry.name != undefined) {
                                 newArgs.push({
                                     name: entry.name,
-                                    value: new ExecutableConstExpression(argsObject.getField(entry.name, context))
+                                    value: new ExecutableConstExpression(argsObject.getSelfField(entry.name, context))
                                 });
                             } else {
-                                newArgs.push({ value: new ExecutableConstExpression(argsObject.getField(i, context)) });
+                                newArgs.push({
+                                    value: new ExecutableConstExpression(argsObject.getSelfField(i, context))
+                                });
                                 i++;
                             }
                         }
@@ -53,10 +55,12 @@ export const importedParticipantsModule = ContentModule.create(
                                 { value: new ExecutableConstExpression(result) },
                                 {
                                     name: "below",
-                                    value: new ExecutableConstExpression(argsObject.getField("below", context))
+                                    value: new ExecutableConstExpression(argsObject.getSelfField("below", context))
                                 }
                             ],
-                            context
+                            context,
+                            undefined,
+                            undefined
                         );
                     },
                     {

@@ -54,7 +54,7 @@ export class ExecutableCompletionExpression extends ExecutableExpression<Express
      */
     private transformCompletionContext(value: BaseObject, context: InterpreterContext): CompletionItem[] {
         const items: CompletionItem[] = [];
-        for (const [key, entry] of value.getFields(context)) {
+        for (const [key, entry] of value.getFields(context, value)) {
             const value = entry.value;
             const docs = this.getDocsDescription(value, context) ?? this.getFieldDescription(value, context, key) ?? "";
             const snippet: string | undefined = this.getDocSnippet(value, context);
@@ -85,7 +85,7 @@ export class ExecutableCompletionExpression extends ExecutableExpression<Express
         if (value.isNull) {
             return undefined;
         }
-        const docs = value.getFieldValue(SemanticFieldNames.DOCS, context);
+        const docs = value.getSelfFieldValue(SemanticFieldNames.DOCS, context);
         if (docs instanceof FullObject) {
             return docs;
         } else {
@@ -105,7 +105,7 @@ export class ExecutableCompletionExpression extends ExecutableExpression<Express
         if (docs == undefined) {
             return undefined;
         }
-        const description = docs.getFieldValue("docs", context);
+        const description = docs.getSelfFieldValue("docs", context);
         return (
             description.toString(context, 3) +
             "\n\n" +
@@ -129,7 +129,7 @@ export class ExecutableCompletionExpression extends ExecutableExpression<Express
         if (docs == undefined) {
             return undefined;
         }
-        const snippet = docs.getFieldValue("snippet", context);
+        const snippet = docs.getSelfFieldValue("snippet", context);
         if (snippet.isNull) {
             return undefined;
         }
@@ -149,11 +149,11 @@ export class ExecutableCompletionExpression extends ExecutableExpression<Express
         if (docs == undefined) {
             return undefined;
         }
-        const fields = docs.getField("fields", context);
+        const fields = docs.getSelfField("fields", context);
         if (!(fields instanceof FullObject)) {
             return undefined;
         }
-        const fieldDocs = fields.getFieldValue(field, context);
+        const fieldDocs = fields.getSelfFieldValue(field, context);
         if (fieldDocs.isNull) {
             return undefined;
         }
@@ -170,7 +170,7 @@ export class ExecutableCompletionExpression extends ExecutableExpression<Express
      * @returns the field as string or undefined if not found
      */
     private getDocField(docs: FullObject, field: string, context: InterpreterContext): string | undefined {
-        const docField = docs.getFieldValue(field, context);
+        const docField = docs.getSelfFieldValue(field, context);
         if (docField.isNull) {
             return undefined;
         }

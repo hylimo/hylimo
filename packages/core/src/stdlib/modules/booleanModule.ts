@@ -86,8 +86,8 @@ export const booleanModule = InterpreterModule.create(
                 jsFun(
                     (args, context) => {
                         return context.newBoolean(
-                            assertBoolean(args.getFieldValue(SemanticFieldNames.SELF, context)) &&
-                                assertBoolean(args.getFieldValue(0, context))
+                            assertBoolean(args.getSelfFieldValue(SemanticFieldNames.SELF, context)) &&
+                                assertBoolean(args.getSelfFieldValue(0, context))
                         );
                     },
                     {
@@ -105,8 +105,8 @@ export const booleanModule = InterpreterModule.create(
                 jsFun(
                     (args, context) => {
                         return context.newBoolean(
-                            assertBoolean(args.getFieldValue(SemanticFieldNames.SELF, context)) ||
-                                assertBoolean(args.getFieldValue(0, context))
+                            assertBoolean(args.getSelfFieldValue(SemanticFieldNames.SELF, context)) ||
+                                assertBoolean(args.getSelfFieldValue(0, context))
                         );
                     },
                     {
@@ -124,8 +124,8 @@ export const booleanModule = InterpreterModule.create(
                 jsFun(
                     (args, context) => {
                         return context.newBoolean(
-                            assertBoolean(args.getFieldValue(SemanticFieldNames.SELF, context)) <
-                                assertBoolean(args.getFieldValue(0, context))
+                            assertBoolean(args.getSelfFieldValue(SemanticFieldNames.SELF, context)) <
+                                assertBoolean(args.getSelfFieldValue(0, context))
                         );
                     },
                     {
@@ -147,8 +147,8 @@ export const booleanModule = InterpreterModule.create(
                 jsFun(
                     (args, context) => {
                         return context.newBoolean(
-                            assertBoolean(args.getFieldValue(SemanticFieldNames.SELF, context)) >
-                                assertBoolean(args.getFieldValue(0, context))
+                            assertBoolean(args.getSelfFieldValue(SemanticFieldNames.SELF, context)) >
+                                assertBoolean(args.getSelfFieldValue(0, context))
                         );
                     },
                     {
@@ -170,8 +170,8 @@ export const booleanModule = InterpreterModule.create(
                 jsFun(
                     (args, context) => {
                         return context.newBoolean(
-                            assertBoolean(args.getFieldValue(SemanticFieldNames.SELF, context)) <=
-                                assertBoolean(args.getFieldValue(0, context))
+                            assertBoolean(args.getSelfFieldValue(SemanticFieldNames.SELF, context)) <=
+                                assertBoolean(args.getSelfFieldValue(0, context))
                         );
                     },
                     {
@@ -193,8 +193,8 @@ export const booleanModule = InterpreterModule.create(
                 jsFun(
                     (args, context) => {
                         return context.newBoolean(
-                            assertBoolean(args.getFieldValue(SemanticFieldNames.SELF, context)) >=
-                                assertBoolean(args.getFieldValue(0, context))
+                            assertBoolean(args.getSelfFieldValue(SemanticFieldNames.SELF, context)) >=
+                                assertBoolean(args.getSelfFieldValue(0, context))
                         );
                     },
                     {
@@ -216,7 +216,7 @@ export const booleanModule = InterpreterModule.create(
             "!",
             jsFun(
                 (args, context) => {
-                    return context.newBoolean(!assertBoolean(args.getFieldValue(0, context)));
+                    return context.newBoolean(!assertBoolean(args.getSelfFieldValue(0, context)));
                 },
                 {
                     docs: "Negates a boolean",
@@ -229,7 +229,7 @@ export const booleanModule = InterpreterModule.create(
             "isBoolean",
             jsFun(
                 (args, context) => {
-                    return context.newBoolean(isBoolean(args.getFieldValue(0, context)));
+                    return context.newBoolean(isBoolean(args.getSelfFieldValue(0, context)));
                 },
                 {
                     docs: "Checks if the provided value is a boolean.",

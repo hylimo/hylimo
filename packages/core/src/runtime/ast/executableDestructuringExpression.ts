@@ -25,7 +25,7 @@ export class ExecutableDestructuringExpression extends ExecutableExpression<Dest
     override evaluateInternal(context: InterpreterContext): LabeledValue {
         const valueValue = this.value.evaluateWithSource(context);
         for (let i = 0; i < this.names.length; i++) {
-            context.currentScope.setLocalField(this.names[i], valueValue.value.getField(i, context), context);
+            context.currentScope.setSelfLocalField(this.names[i], valueValue.value.getSelfField(i, context), context);
         }
         return valueValue;
     }

@@ -31,14 +31,14 @@ export class FullObject extends BaseObject {
         return false;
     }
 
-    override getField(key: string | number, context: InterpreterContext, self?: BaseObject): LabeledValue {
+    override getField(key: string | number, context: InterpreterContext, self: BaseObject): LabeledValue {
         this.checkValidKey(key);
-        return this.getFieldInternal(key, context, self ?? this);
+        return this.getFieldInternal(key, context, self);
     }
 
-    override getFields(context: InterpreterContext, self?: BaseObject): Map<string | number, LabeledValue> {
+    override getFields(context: InterpreterContext, self: BaseObject): Map<string | number, LabeledValue> {
         const proto = this.proto;
-        const entries: Map<string | number, LabeledValue> = proto?.getFields(context, self ?? this) ?? new Map();
+        const entries: Map<string | number, LabeledValue> = proto?.getFields(context, self) ?? new Map();
         for (const [key, value] of this.fields) {
             entries.set(key, value);
         }
@@ -119,10 +119,10 @@ export class FullObject extends BaseObject {
      * @param self the object to get the field from
      * @returns the value of the field
      */
-    getLocalField(key: string | number, context: InterpreterContext, self?: BaseObject): LabeledValue {
+    getLocalField(key: string | number, context: InterpreterContext, self: BaseObject): LabeledValue {
         const property = this.getProperty(key);
         if (property !== undefined) {
-            return property.get(self ?? this, context);
+            return property.get(self, context);
         }
         const value = this.fields.get(key);
         if (value !== undefined) {
@@ -148,9 +148,9 @@ export class FullObject extends BaseObject {
         }
     }
 
-    override setField(key: string | number, value: LabeledValue, context: InterpreterContext, self?: BaseObject): void {
+    override setField(key: string | number, value: LabeledValue, context: InterpreterContext, self: BaseObject): void {
         this.checkValidKey(key);
-        if (!this.setExistingField(key, value, context, self ?? this)) {
+        if (!this.setExistingField(key, value, context, self)) {
             this.setLocalField(key, value, context, self);
         }
     }
@@ -175,7 +175,7 @@ export class FullObject extends BaseObject {
             return true;
         } else {
             const proto = this.proto;
-            if (proto) {
+            if (proto != undefined) {
                 return proto.setExistingField(key, value, context, self);
             } else {
                 return false;
@@ -187,7 +187,7 @@ export class FullObject extends BaseObject {
         key: string | number,
         value: LabeledValue,
         context: InterpreterContext,
-        self?: BaseObject
+        self: BaseObject
     ): void {
         const isProto = key === SemanticFieldNames.PROTO;
         if (isProto) {
@@ -200,7 +200,7 @@ export class FullObject extends BaseObject {
         } else {
             const property = this.getProperty(key);
             if (property !== undefined) {
-                property.set(self ?? this, value, context);
+                property.set(self, value, context);
             } else {
                 this.fields.set(key, value);
             }
@@ -317,8 +317,8 @@ export class FullObject extends BaseObject {
     override invoke(
         _args: ExecutableListEntry[],
         _context: InterpreterContext,
-        _scope?: FullObject,
-        _callExpression?: AbstractInvocationExpression | OperatorExpression
+        _scope: FullObject,
+        _callExpression: AbstractInvocationExpression | OperatorExpression | undefined
     ): LabeledValue {
         throw new RuntimeError("Invoke not supported");
     }

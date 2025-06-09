@@ -65,7 +65,7 @@ export const propertiesAndMethodsModule = ContentModule.create(
                         const scope = context.getField("scope");
                         const [fields, functions] = convertFieldsAndFunctions(expressions);
                         const conversionFunction = context.getField("_convertEntry");
-                        const visibility = context.currentScope.getField("visibility", context);
+                        const visibility = context.currentScope.getSelfField("visibility", context);
                         const visibilityArg = { value: new ExecutableConstExpression(visibility) };
                         const parentArg = { value: new ExecutableConstExpression({ value: args }) };
 
@@ -74,7 +74,9 @@ export const propertiesAndMethodsModule = ContentModule.create(
                                 const convertedEntries = entries.map((entry) => {
                                     const convertedEntry = conversionFunction.invoke(
                                         [visibilityArg, { value: str(entry) }, parentArg],
-                                        context
+                                        context,
+                                        undefined,
+                                        undefined
                                     );
                                     return { value: new ExecutableConstExpression(convertedEntry) };
                                 });
@@ -86,7 +88,9 @@ export const propertiesAndMethodsModule = ContentModule.create(
                                             value: num(index)
                                         }
                                     ],
-                                    context
+                                    context,
+                                    undefined,
+                                    undefined
                                 );
                             }
                         }

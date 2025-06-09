@@ -32,17 +32,17 @@ export const commonModule = InterpreterModule.create(
             "if",
             jsFun(
                 (args, context) => {
-                    if (assertBoolean(args.getFieldValue(0, context))) {
-                        const ifBranch = args.getFieldValue(1, context);
+                    if (assertBoolean(args.getSelfFieldValue(0, context))) {
+                        const ifBranch = args.getSelfFieldValue(1, context);
                         assertFunction(ifBranch);
-                        return ifBranch.invoke([], context);
+                        return ifBranch.invoke([], context, undefined, undefined);
                     } else {
-                        const elseBranch = args.getFieldValue(2, context);
+                        const elseBranch = args.getSelfFieldValue(2, context);
                         if (elseBranch.isNull) {
                             return context.null;
                         } else {
                             assertFunction(elseBranch);
-                            return elseBranch.invoke([], context);
+                            return elseBranch.invoke([], context, undefined, undefined);
                         }
                     }
                 },
@@ -65,18 +65,18 @@ export const commonModule = InterpreterModule.create(
             "while",
             jsFun(
                 (args, context) => {
-                    const condition = args.getFieldValue(0, context);
-                    const body = args.getFieldValue(1, context);
+                    const condition = args.getSelfFieldValue(0, context);
+                    const body = args.getSelfFieldValue(1, context);
                     assertFunction(condition);
                     assertFunction(body);
                     let lastValue: LabeledValue = { value: context.null };
 
                     while (true) {
-                        const conditionRes = condition.invoke([], context).value;
+                        const conditionRes = condition.invoke([], context, undefined, undefined).value;
                         if (!assertBoolean(conditionRes, "result of the condition function")) {
                             break;
                         }
-                        lastValue = body.invoke([], context);
+                        lastValue = body.invoke([], context, undefined, undefined);
                     }
                     return lastValue;
                 },
@@ -95,11 +95,11 @@ export const commonModule = InterpreterModule.create(
             "toStr",
             jsFun(
                 (args, context) => {
-                    const value = args.getField(0, context);
+                    const value = args.getSelfField(0, context);
                     if (value.value.isNull) {
                         return context.newString("null");
                     } else {
-                        const toString = value.value.getFieldValue("toString", context);
+                        const toString = value.value.getSelfFieldValue("toString", context);
                         return toString.invoke(
                             [
                                 {
@@ -107,7 +107,9 @@ export const commonModule = InterpreterModule.create(
                                     value: new ExecutableConstExpression(value)
                                 }
                             ],
-                            context
+                            context,
+                            undefined,
+                            undefined
                         );
                     }
                 },
@@ -122,7 +124,7 @@ export const commonModule = InterpreterModule.create(
             "error",
             jsFun(
                 (args, context) => {
-                    throw new RuntimeError(assertString(args.getFieldValue(0, context)));
+                    throw new RuntimeError(assertString(args.getSelfFieldValue(0, context)));
                 },
                 {
                     docs: "Throws an error with the specified message.",
@@ -145,7 +147,7 @@ export const commonModule = InterpreterModule.create(
                         throw new RuntimeError("noedit must be called with a function expression");
                     }
                     expression.markNoEdit();
-                    return fun.evaluate(context).value.invoke([], context);
+                    return fun.evaluate(context).value.invoke([], context, undefined, undefined);
                 },
                 {
                     docs: "Must be called with a single function expression, which is created locally. Marks the function as not editable recursively, and executes the function immediately, returning its result.",

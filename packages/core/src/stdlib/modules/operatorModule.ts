@@ -28,13 +28,15 @@ export const operatorModule = InterpreterModule.create(
                         }
                         const target = args[0].value.evaluateWithSource(context);
                         return target.value
-                            .getFieldValue(operator, context)
+                            .getSelfFieldValue(operator, context)
                             .invoke(
                                 [
                                     args[1],
                                     { name: SemanticFieldNames.SELF, value: new ExecutableConstExpression(target) }
                                 ],
-                                context
+                                context,
+                                undefined,
+                                undefined
                             );
                     },
                     {
@@ -52,19 +54,21 @@ export const operatorModule = InterpreterModule.create(
             "==",
             jsFun(
                 (args, context) => {
-                    const first = args.getField(0, context);
-                    const second = args.getField(1, context);
+                    const first = args.getSelfField(0, context);
+                    const second = args.getSelfField(1, context);
                     if (first.value.isNull) {
                         return context.newBoolean(second.value.isNull);
                     } else {
                         return first.value
-                            .getFieldValue("==", context)
+                            .getSelfFieldValue("==", context)
                             .invoke(
                                 [
                                     { name: SemanticFieldNames.SELF, value: new ExecutableConstExpression(first) },
                                     { value: new ExecutableConstExpression(second) }
                                 ],
-                                context
+                                context,
+                                undefined,
+                                undefined
                             );
                     }
                 },
@@ -100,25 +104,27 @@ export const operatorModule = InterpreterModule.create(
             "+",
             jsFun(
                 (args, context) => {
-                    let first = args.getField(0, context);
-                    let second = args.getField(1, context);
+                    let first = args.getSelfField(0, context);
+                    let second = args.getSelfField(1, context);
                     if (isString(first.value) && !isString(second.value)) {
                         second = context
                             .getGlobalField("toStr")
-                            .invoke([{ value: new ExecutableConstExpression(second) }], context);
+                            .invoke([{ value: new ExecutableConstExpression(second) }], context, undefined, undefined);
                     } else if (isString(second.value) && !isString(first.value)) {
                         first = context
                             .getGlobalField("toStr")
-                            .invoke([{ value: new ExecutableConstExpression(first) }], context);
+                            .invoke([{ value: new ExecutableConstExpression(first) }], context, undefined, undefined);
                     }
                     return first.value
-                        .getFieldValue("+", context)
+                        .getSelfFieldValue("+", context)
                         .invoke(
                             [
                                 { name: SemanticFieldNames.SELF, value: new ExecutableConstExpression(first) },
                                 { value: new ExecutableConstExpression(second) }
                             ],
-                            context
+                            context,
+                            undefined,
+                            undefined
                         );
                 },
                 {
@@ -176,13 +182,15 @@ export const operatorModule = InterpreterModule.create(
                     const target = args[0].value.evaluateWithSource(context);
                     if (args.length == 2) {
                         return target.value
-                            .getFieldValue("-", context)
+                            .getSelfFieldValue("-", context)
                             .invoke(
                                 [
                                     args[1],
                                     { name: SemanticFieldNames.SELF, value: new ExecutableConstExpression(target) }
                                 ],
-                                context
+                                context,
+                                undefined,
+                                undefined
                             );
                     } else {
                         const value = assertNumber(target.value, "first and only argument of -");

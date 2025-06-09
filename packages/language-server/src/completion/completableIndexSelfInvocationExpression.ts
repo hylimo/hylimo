@@ -33,7 +33,7 @@ export class CompletableIndexSelfInvocationExpression extends ExecutableAbstract
     override evaluateInternal(context: InterpreterContext): LabeledValue {
         const targetValue = this.target.evaluateWithSource(context);
         const indexValue = this.index.evaluate(context).value;
-        const fieldValue = targetValue.value.getFieldValue(assertIndex(indexValue), context);
+        const fieldValue = targetValue.value.getSelfFieldValue(assertIndex(indexValue), context);
 
         return supplyNamedArguments(fieldValue, targetValue, context, this.argumentExpressions, this.expression!);
     }

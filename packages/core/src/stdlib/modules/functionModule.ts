@@ -26,15 +26,15 @@ export const functionModule = InterpreterModule.create(
                 "callWithScope",
                 jsFun(
                     (args, context) => {
-                        const self = args.getFieldValue(SemanticFieldNames.SELF, context);
-                        const scope = args.getFieldValue(0, context);
+                        const self = args.getSelfFieldValue(SemanticFieldNames.SELF, context);
+                        const scope = args.getSelfFieldValue(0, context);
                         assertFunction(self);
                         assertObject(scope);
-                        scope.setLocalField(SemanticFieldNames.PROTO, { value: self.parentScope }, context);
-                        const res = self.invoke([], context, scope);
-                        scope.setLocalField(SemanticFieldNames.ARGS, { value: context.null }, context);
-                        scope.setLocalField(SemanticFieldNames.IT, { value: context.null }, context);
-                        scope.setLocalField(SemanticFieldNames.THIS, { value: context.null }, context);
+                        scope.setSelfLocalField(SemanticFieldNames.PROTO, { value: self.parentScope }, context);
+                        const res = self.invoke([], context, scope, undefined);
+                        scope.setSelfLocalField(SemanticFieldNames.ARGS, { value: context.null }, context);
+                        scope.setSelfLocalField(SemanticFieldNames.IT, { value: context.null }, context);
+                        scope.setSelfLocalField(SemanticFieldNames.THIS, { value: context.null }, context);
                         return res;
                     },
                     {
@@ -52,7 +52,7 @@ export const functionModule = InterpreterModule.create(
             "isFunction",
             jsFun(
                 (args, context) => {
-                    return context.newBoolean(isFunction(args.getFieldValue(0, context)));
+                    return context.newBoolean(isFunction(args.getSelfFieldValue(0, context)));
                 },
                 {
                     docs: "Checks if the provided value is a function.",

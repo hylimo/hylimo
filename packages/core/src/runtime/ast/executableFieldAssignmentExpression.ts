@@ -27,7 +27,7 @@ export class ExecutableFieldAssignmentExpression extends ExecutableExpression<Fi
     override evaluateInternal(context: InterpreterContext): LabeledValue {
         const targetValue = this.target.evaluate(context).value;
         const valueValue = this.value.evaluateWithSource(context);
-        targetValue.setLocalField(this.name, valueValue, context);
+        targetValue.setSelfLocalField(this.name, valueValue, context);
         return valueValue;
     }
 }

@@ -59,7 +59,7 @@ export function validateObject(
 ): void {
     assertObject(object);
     for (const property of properties) {
-        const propertyValue = object.getLocalField(property.name, context).value;
+        const propertyValue = object.getSelfFieldValue(property.name, context);
         validate(property.type, `Invalid value for ${property.name}`, propertyValue, context);
     }
 }

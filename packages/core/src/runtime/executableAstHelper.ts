@@ -226,9 +226,9 @@ export function enumObject(entries: Record<string, string | number>): Executable
         const object = context.newObject();
         for (const [key, value] of Object.entries(entries)) {
             if (typeof value === "string") {
-                object.setLocalField(key, { value: context.newString(value) }, context);
+                object.setSelfLocalField(key, { value: context.newString(value) }, context);
             } else {
-                object.setLocalField(key, { value: context.newNumber(value) }, context);
+                object.setSelfLocalField(key, { value: context.newNumber(value) }, context);
             }
         }
         return { value: object };

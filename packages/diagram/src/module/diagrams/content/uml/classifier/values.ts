@@ -56,7 +56,9 @@ export const valuesModule = ContentModule.create(
                                         value: num(0)
                                     }
                                 ],
-                                context
+                                context,
+                                undefined,
+                                undefined
                             );
                         }
 

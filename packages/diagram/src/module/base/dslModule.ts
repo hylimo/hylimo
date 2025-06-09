@@ -261,7 +261,7 @@ const scopeExpressions: ParseableExpressions = [
     assign(
         "_validateCanvasConnectionWithScope",
         jsFun((args, context) => {
-            const value = args.getFieldValue(0, context);
+            const value = args.getSelfFieldValue(0, context);
             validateObject(value, context, canvasConnectionWithScopeProperties);
             return context.null;
         })
@@ -436,7 +436,7 @@ const scopeExpressions: ParseableExpressions = [
     assign(
         "_validateLayoutScope",
         jsFun((args, context) => {
-            const value = args.getFieldValue(0, context);
+            const value = args.getSelfFieldValue(0, context);
             validateObject(value, context, layoutScopeProperties);
             return context.null;
         })
@@ -650,8 +650,8 @@ const scopeExpressions: ParseableExpressions = [
             "createConnectionEdit",
             jsFun(
                 (args, context) => {
-                    const operator = assertString(args.getFieldValue(0, context));
-                    const createLine = args.getFieldValue("lineType", context).toNative() == "line";
+                    const operator = assertString(args.getSelfFieldValue(0, context));
+                    const createLine = args.getSelfFieldValue("lineType", context).toNative() == "line";
                     const escapedOperator = jsonataStringLiteral(` ${operator} `);
                     const start = connectionEditFragments("start");
                     const end = connectionEditFragments("end");
@@ -659,9 +659,9 @@ const scopeExpressions: ParseableExpressions = [
                     const edit = `'\n' & ${start.startExpression} & ${escapedOperator} & ${end.startExpression} & ' with {\n    over = start(' & ${start.posExpression} & ').${segment}end(' & ${end.posExpression} & '))\n}' & ${PREDICTION_STYLE_CLASS_ASSIGNMENT_EXPRESSION}`;
                     context
                         .getField(SCOPE)
-                        .getFieldValue("internal", context)
-                        .getFieldValue("canvasAddEdits", context)
-                        .setLocalField(`connection/${operator}`, { value: context.newString(edit) }, context);
+                        .getSelfFieldValue("internal", context)
+                        .getSelfFieldValue("canvasAddEdits", context)
+                        .setSelfLocalField(`connection/${operator}`, { value: context.newString(edit) }, context);
                     return context.null;
                 },
                 {

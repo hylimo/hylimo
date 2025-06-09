@@ -31,7 +31,12 @@ export class Property {
      * @returns the value of the property
      */
     get(self: BaseObject, context: InterpreterContext): LabeledValue {
-        return this.getter.invoke([{ value: new ExecutableConstExpression({ value: self }), name: "self" }], context);
+        return this.getter.invoke(
+            [{ value: new ExecutableConstExpression({ value: self }), name: "self" }],
+            context,
+            undefined,
+            undefined
+        );
     }
 
     /**
@@ -48,7 +53,9 @@ export class Property {
                 { value: new ExecutableConstExpression({ value: self }), name: "self" },
                 { value: new ExecutableConstExpression(value) }
             ],
-            context
+            context,
+            undefined,
+            undefined
         );
     }
 }

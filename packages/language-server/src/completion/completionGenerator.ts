@@ -62,7 +62,7 @@ function getNamedArgs(
         return [];
     }
 
-    const params = func.docs.getFieldValue("params", context);
+    const params = func.docs.getSelfFieldValue("params", context);
     if (!(params instanceof FullObject)) {
         return [];
     }

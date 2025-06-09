@@ -121,12 +121,12 @@ function createElementFunction(element: LayoutConfig): ExecutableExpression {
         jsFun(
             (args, context) => {
                 const newElement = context.newObject();
-                newElement.setLocalField("type", { value: context.newString(element.type) }, context);
-                newElement.setLocalField("proto", { value: context.getField("elementProto") }, context);
-                newElement.setLocalField("edits", { value: context.newObject() }, context);
+                newElement.setSelfLocalField("type", { value: context.newString(element.type) }, context);
+                newElement.setSelfLocalField("proto", { value: context.getField("elementProto") }, context);
+                newElement.setSelfLocalField("edits", { value: context.newObject() }, context);
                 for (const [key, value] of args.fields.entries()) {
                     if (key !== "self" && key !== "proto") {
-                        newElement.setField(key, value, context);
+                        newElement.setField(key, value, context, newElement);
                     }
                 }
                 context.getField("_evaluateElement").invoke(
@@ -141,7 +141,9 @@ function createElementFunction(element: LayoutConfig): ExecutableExpression {
                             value: bool(canHaveChildren)
                         }
                     ],
-                    context
+                    context,
+                    undefined,
+                    undefined
                 );
                 return newElement;
             },
@@ -293,7 +295,7 @@ export class DiagramModule implements InterpreterModule {
                 assign(
                     "validateSelector",
                     jsFun((args, context) => {
-                        const value = args.getFieldValue(0, context);
+                        const value = args.getSelfFieldValue(0, context);
                         validateObject(value, context, allStyleAttributes);
                         return context.null;
                     })
@@ -375,22 +377,22 @@ export class DiagramModule implements InterpreterModule {
                                 operator,
                                 jsFun(
                                     (args, context) => {
-                                        const left = args.getField(0, context);
-                                        const right = args.getField(1, context);
+                                        const left = args.getSelfField(0, context);
+                                        const right = args.getSelfField(1, context);
                                         const executableOperator = context
                                             .getField("stylesArgs")
-                                            .getFieldValue("self", context)
-                                            .getField(operator, context);
+                                            .getSelfFieldValue("self", context)
+                                            .getSelfField(operator, context);
                                         if (isVarOrCalc(left.value) || isVarOrCalc(right.value)) {
                                             const result = context.newObject();
-                                            result.setLocalField(
+                                            result.setSelfLocalField(
                                                 "_type",
                                                 { value: context.newString("calc") },
                                                 context
                                             );
-                                            result.setLocalField("left", left, context);
-                                            result.setLocalField("right", right, context);
-                                            result.setLocalField("operator", executableOperator, context);
+                                            result.setSelfLocalField("left", left, context);
+                                            result.setSelfLocalField("right", right, context);
+                                            result.setSelfLocalField("operator", executableOperator, context);
                                             return result;
                                         }
                                         return executableOperator.value.invoke(
@@ -398,7 +400,9 @@ export class DiagramModule implements InterpreterModule {
                                                 { value: new ExecutableConstExpression(left) },
                                                 { value: new ExecutableConstExpression(right) }
                                             ],
-                                            context
+                                            context,
+                                            undefined,
+                                            undefined
                                         );
                                     },
                                     {
@@ -519,9 +523,9 @@ export class DiagramModule implements InterpreterModule {
             jsFun(
                 (args, context) => {
                     const layoutWithRoot = this.layoutEngine.createLayout(
-                        args.getField(0, context).value as FullObject,
-                        args.getField(1, context).value as FullObject,
-                        args.getField(2, context).value as FullObject,
+                        args.getSelfField(0, context).value as FullObject,
+                        args.getSelfField(1, context).value as FullObject,
+                        args.getSelfField(2, context).value as FullObject,
                         context
                     );
                     return context.newWrapperObject(layoutWithRoot, new Map());

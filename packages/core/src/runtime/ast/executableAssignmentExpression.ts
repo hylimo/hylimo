@@ -25,7 +25,7 @@ export class ExecutableAssignmentExpression extends ExecutableExpression<Assignm
     override evaluateInternal(context: InterpreterContext): LabeledValue {
         const targetValue = context.currentScope;
         const valueValue = this.value.evaluateWithSource(context);
-        targetValue.setField(this.name, valueValue, context);
+        targetValue.setField(this.name, valueValue, context, targetValue);
         return valueValue;
     }
 }

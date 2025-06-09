@@ -24,7 +24,7 @@ export abstract class BaseObject {
      * @param self the object to get the field from
      * @returns the field entry
      */
-    abstract getField(key: string | number, context: InterpreterContext, self?: BaseObject): LabeledValue;
+    abstract getField(key: string | number, context: InterpreterContext, self: BaseObject): LabeledValue;
 
     /**
      * Gets all field entries
@@ -33,18 +33,25 @@ export abstract class BaseObject {
      * @param self the object to get the fields from
      * @returns all field entries
      */
-    abstract getFields(context: InterpreterContext, self?: BaseObject): Map<string | number, LabeledValue>;
+    abstract getFields(context: InterpreterContext, self: BaseObject): Map<string | number, LabeledValue>;
 
     /**
      * Wrapper for getField which only returns the value
      *
      * @param key the identifier of the field
      * @param context context in which this is performed
-     * @param self the object to get the field from
      * @returns the value of the field
      */
-    getFieldValue(key: string | number, context: InterpreterContext, self?: BaseObject): BaseObject {
-        return this.getField(key, context, self).value;
+    getSelfFieldValue(key: string | number, context: InterpreterContext): BaseObject {
+        return this.getField(key, context, this).value;
+    }
+
+    getSelfField(key: string | number, context: InterpreterContext): LabeledValue {
+        return this.getField(key, context, this);
+    }
+
+    setSelfLocalField(key: string | number, value: LabeledValue, context: InterpreterContext): void {
+        this.setLocalField(key, value, context, this);
     }
 
     /**
@@ -56,7 +63,7 @@ export abstract class BaseObject {
      * @param context context in which this is performed
      * @param self the object to set the field on
      */
-    abstract setField(key: string | number, value: LabeledValue, context: InterpreterContext, self?: BaseObject): void;
+    abstract setField(key: string | number, value: LabeledValue, context: InterpreterContext, self: BaseObject): void;
 
     /**
      * Sets a field locally
@@ -70,7 +77,7 @@ export abstract class BaseObject {
         key: string | number,
         value: LabeledValue,
         context: InterpreterContext,
-        self?: BaseObject
+        self: BaseObject
     ): void;
 
     /**
@@ -95,8 +102,8 @@ export abstract class BaseObject {
     abstract invoke(
         args: ExecutableListEntry[],
         context: InterpreterContext,
-        scope?: FullObject,
-        callExpression?: AbstractInvocationExpression | OperatorExpression
+        scope: FullObject | undefined,
+        callExpression: AbstractInvocationExpression | OperatorExpression | undefined
     ): LabeledValue;
 
     /**
@@ -141,7 +148,7 @@ export abstract class SimpleObject extends BaseObject {
      */
     abstract getProto(context: InterpreterContext): FullObject;
 
-    override getField(key: string | number, context: InterpreterContext, self?: BaseObject): LabeledValue {
+    override getField(key: string | number, context: InterpreterContext, self: BaseObject): LabeledValue {
         if (key === SemanticFieldNames.PROTO) {
             return {
                 value: this.getProto(context)
@@ -151,11 +158,11 @@ export abstract class SimpleObject extends BaseObject {
         }
     }
 
-    override getFields(context: InterpreterContext, self?: BaseObject): Map<string | number, LabeledValue> {
+    override getFields(context: InterpreterContext, self: BaseObject): Map<string | number, LabeledValue> {
         return this.getProto(context).getFields(context, self ?? this);
     }
 
-    override setField(key: string | number, value: LabeledValue, context: InterpreterContext, self?: BaseObject): void {
+    override setField(key: string | number, value: LabeledValue, context: InterpreterContext, self: BaseObject): void {
         if (key === SemanticFieldNames.PROTO) {
             throw new RuntimeError("Cannot set field proto of a non-Object");
         } else {
@@ -167,7 +174,7 @@ export abstract class SimpleObject extends BaseObject {
         _key: string | number,
         _value: LabeledValue,
         _context: InterpreterContext,
-        _self?: BaseObject
+        _self: BaseObject
     ) {
         throw new RuntimeError("Cannot set field directly of a non-Object");
     }
@@ -179,8 +186,8 @@ export abstract class SimpleObject extends BaseObject {
     override invoke(
         _args: ExecutableListEntry[],
         _context: InterpreterContext,
-        _scope?: FullObject,
-        _callExpression?: AbstractInvocationExpression | OperatorExpression
+        _scope: FullObject | undefined,
+        _callExpression: AbstractInvocationExpression | OperatorExpression | undefined
     ): LabeledValue {
         throw new RuntimeError("Invoke not supported");
     }
