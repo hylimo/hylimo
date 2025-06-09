@@ -54,16 +54,28 @@ export abstract class ExecutableAbstractFunctionExpression<
             return context.null;
         }
         const result = context.newObject();
-        result.setSelfLocalField("docs", { value: context.newString(dedent(this.documentation.docs)) }, context);
-        result.setSelfLocalField("returns", { value: context.newString(this.documentation.returns) }, context);
+        result.setSelfLocalField(
+            "docs",
+            { value: context.newString(dedent(this.documentation.docs)), source: undefined },
+            context
+        );
+        result.setSelfLocalField(
+            "returns",
+            { value: context.newString(this.documentation.returns), source: undefined },
+            context
+        );
         if (this.documentation.snippet !== undefined) {
-            result.setSelfLocalField("snippet", { value: context.newString(this.documentation.snippet) }, context);
+            result.setSelfLocalField(
+                "snippet",
+                { value: context.newString(this.documentation.snippet), source: undefined },
+                context
+            );
         }
         const params = context.newObject();
         for (const param of this.documentation.params) {
-            params.setSelfLocalField(param[0], { value: context.newString(param[1]) }, context);
+            params.setSelfLocalField(param[0], { value: context.newString(param[1]), source: undefined }, context);
         }
-        result.setSelfLocalField("params", { value: params }, context);
+        result.setSelfLocalField("params", { value: params, source: undefined }, context);
         return result;
     }
 }

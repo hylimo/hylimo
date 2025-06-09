@@ -121,9 +121,17 @@ function createElementFunction(element: LayoutConfig): ExecutableExpression {
         jsFun(
             (args, context) => {
                 const newElement = context.newObject();
-                newElement.setSelfLocalField("type", { value: context.newString(element.type) }, context);
-                newElement.setSelfLocalField("proto", { value: context.getField("elementProto") }, context);
-                newElement.setSelfLocalField("edits", { value: context.newObject() }, context);
+                newElement.setSelfLocalField(
+                    "type",
+                    { value: context.newString(element.type), source: undefined },
+                    context
+                );
+                newElement.setSelfLocalField(
+                    "proto",
+                    { value: context.getField("elementProto"), source: undefined },
+                    context
+                );
+                newElement.setSelfLocalField("edits", { value: context.newObject(), source: undefined }, context);
                 for (const [key, value] of args.fields.entries()) {
                     if (key !== "self" && key !== "proto") {
                         newElement.setField(key, value, context, newElement);
@@ -132,10 +140,10 @@ function createElementFunction(element: LayoutConfig): ExecutableExpression {
                 context.getField("_evaluateElement").invoke(
                     [
                         {
-                            value: new ExecutableConstExpression({ value: newElement })
+                            value: new ExecutableConstExpression({ value: newElement, source: undefined })
                         },
                         {
-                            value: new ExecutableConstExpression({ value: args })
+                            value: new ExecutableConstExpression({ value: args, source: undefined })
                         },
                         {
                             value: bool(canHaveChildren)
@@ -387,7 +395,7 @@ export class DiagramModule implements InterpreterModule {
                                             const result = context.newObject();
                                             result.setSelfLocalField(
                                                 "_type",
-                                                { value: context.newString("calc") },
+                                                { value: context.newString("calc"), source: undefined },
                                                 context
                                             );
                                             result.setSelfLocalField("left", left, context);

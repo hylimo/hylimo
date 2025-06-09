@@ -551,7 +551,7 @@ class StyleValueParser {
             return labeledValue;
         }
         if (type === "unset") {
-            return { value: this.context.null };
+            return { value: this.context.null, source: undefined };
         } else if (type === "var") {
             const variableName = value.getLocalFieldOrUndefined("name")?.value?.toNative();
             return this.getVariableValue(variableName);
@@ -595,6 +595,6 @@ class StyleValueParser {
                 return value;
             }
         }
-        return { value: this.context.null };
+        return { value: this.context.null, source: undefined };
     }
 }

@@ -21,7 +21,10 @@ export const functionModule = InterpreterModule.create(
     [DefaultModuleNames.COMMON],
     [
         fun([
-            assign(functionProto, new ExecutableNativeExpression((context) => ({ value: context.functionPrototype }))),
+            assign(
+                functionProto,
+                new ExecutableNativeExpression((context) => ({ value: context.functionPrototype, source: undefined }))
+            ),
             id(functionProto).assignField(
                 "callWithScope",
                 jsFun(
@@ -30,11 +33,27 @@ export const functionModule = InterpreterModule.create(
                         const scope = args.getSelfFieldValue(0, context);
                         assertFunction(self);
                         assertObject(scope);
-                        scope.setSelfLocalField(SemanticFieldNames.PROTO, { value: self.parentScope }, context);
+                        scope.setSelfLocalField(
+                            SemanticFieldNames.PROTO,
+                            { value: self.parentScope, source: undefined },
+                            context
+                        );
                         const res = self.invoke([], context, scope, undefined);
-                        scope.setSelfLocalField(SemanticFieldNames.ARGS, { value: context.null }, context);
-                        scope.setSelfLocalField(SemanticFieldNames.IT, { value: context.null }, context);
-                        scope.setSelfLocalField(SemanticFieldNames.THIS, { value: context.null }, context);
+                        scope.setSelfLocalField(
+                            SemanticFieldNames.ARGS,
+                            { value: context.null, source: undefined },
+                            context
+                        );
+                        scope.setSelfLocalField(
+                            SemanticFieldNames.IT,
+                            { value: context.null, source: undefined },
+                            context
+                        );
+                        scope.setSelfLocalField(
+                            SemanticFieldNames.THIS,
+                            { value: context.null, source: undefined },
+                            context
+                        );
                         return res;
                     },
                     {

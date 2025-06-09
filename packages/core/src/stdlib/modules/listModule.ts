@@ -43,7 +43,11 @@ export const listModule = InterpreterModule.create(
                         const self = args.getSelfFieldValue(SemanticFieldNames.SELF, context);
                         const length = assertNumber(self.getSelfFieldValue(lengthField, context));
                         self.setSelfLocalField(length, args.getSelfField(0, context), context);
-                        self.setSelfLocalField(lengthField, { value: context.newNumber(length + 1) }, context);
+                        self.setSelfLocalField(
+                            lengthField,
+                            { value: context.newNumber(length + 1), source: undefined },
+                            context
+                        );
                         return context.null;
                     },
                     {
@@ -105,8 +109,12 @@ export const listModule = InterpreterModule.create(
                         const length = assertNumber(self.getSelfFieldValue(lengthField, context));
                         if (length > 0) {
                             const value = self.getSelfField(length - 1, context);
-                            self.setSelfLocalField(length - 1, { value: context.null }, context);
-                            self.setSelfLocalField(lengthField, { value: context.newNumber(length - 1) }, context);
+                            self.setSelfLocalField(length - 1, { value: context.null, source: undefined }, context);
+                            self.setSelfLocalField(
+                                lengthField,
+                                { value: context.newNumber(length - 1), source: undefined },
+                                context
+                            );
                             return value;
                         } else {
                             throw new RuntimeError("List empty, nothing to remove");
@@ -132,7 +140,7 @@ export const listModule = InterpreterModule.create(
                             self.getSelfFieldValue(lengthField, context),
                             "length field of a list"
                         );
-                        let lastValue: LabeledValue = { value: context.null };
+                        let lastValue: LabeledValue = { value: context.null, source: undefined };
                         for (let i = 0; i < length; i++) {
                             lastValue = callback.invoke(
                                 [
@@ -260,10 +268,10 @@ export const listModule = InterpreterModule.create(
                         );
                         list.setSelfLocalField(
                             lengthField,
-                            { value: context.newNumber(indexOnlyArgs.length) },
+                            { value: context.newNumber(indexOnlyArgs.length), source: undefined },
                             context
                         );
-                        return { value: list };
+                        return { value: list, source: undefined };
                     },
                     {
                         docs: "Creates a new list with the defined elements",
@@ -311,7 +319,11 @@ export const listModule = InterpreterModule.create(
                                 -1,
                                 ...([...object.fields.keys()].filter((key) => typeof key === "number") as number[])
                             ) + 1;
-                        object.setSelfLocalField(lengthField, { value: context.newNumber(maxKey) }, context);
+                        object.setSelfLocalField(
+                            lengthField,
+                            { value: context.newNumber(maxKey), source: undefined },
+                            context
+                        );
                         return objectEntry;
                     },
                     {
@@ -352,7 +364,8 @@ export const listModule = InterpreterModule.create(
                                             {
                                                 name: "maxDepth",
                                                 value: new ExecutableConstExpression({
-                                                    value: context.newNumber(maxDepth - 1)
+                                                    value: context.newNumber(maxDepth - 1),
+                                                    source: undefined
                                                 })
                                             }
                                         ],

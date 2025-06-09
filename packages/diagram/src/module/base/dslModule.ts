@@ -661,7 +661,11 @@ const scopeExpressions: ParseableExpressions = [
                         .getField(SCOPE)
                         .getSelfFieldValue("internal", context)
                         .getSelfFieldValue("canvasAddEdits", context)
-                        .setSelfLocalField(`connection/${operator}`, { value: context.newString(edit) }, context);
+                        .setSelfLocalField(
+                            `connection/${operator}`,
+                            { value: context.newString(edit), source: undefined },
+                            context
+                        );
                     return context.null;
                 },
                 {

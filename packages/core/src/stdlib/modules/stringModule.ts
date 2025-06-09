@@ -20,7 +20,10 @@ export const stringModule = InterpreterModule.create(
     [DefaultModuleNames.COMMON],
     [
         fun([
-            assign(stringProto, new ExecutableNativeExpression((context) => ({ value: context.stringPrototype }))),
+            assign(
+                stringProto,
+                new ExecutableNativeExpression((context) => ({ value: context.stringPrototype, source: undefined }))
+            ),
             id(stringProto).assignField(
                 "<",
                 jsFun(

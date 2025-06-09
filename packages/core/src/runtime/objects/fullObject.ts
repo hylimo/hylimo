@@ -88,7 +88,7 @@ export class FullObject extends BaseObject {
      * @returns the default value
      */
     protected getDefaultValue(key: string | number, context: InterpreterContext): LabeledValue {
-        return { value: context.null };
+        return { value: context.null, source: undefined };
     }
 
     /**

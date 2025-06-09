@@ -29,7 +29,10 @@ export const objectModule = InterpreterModule.create(
     [DefaultModuleNames.COMMON],
     [
         fun([
-            assign(objectProto, new ExecutableNativeExpression((context) => ({ value: context.objectPrototype }))),
+            assign(
+                objectProto,
+                new ExecutableNativeExpression((context) => ({ value: context.objectPrototype, source: undefined }))
+            ),
             id(objectProto).assignField(
                 "toString",
                 jsFun(
@@ -178,7 +181,7 @@ export const objectModule = InterpreterModule.create(
                         const callback = args.getSelfFieldValue(0, context);
                         assertFunction(callback, "first positional argument of forEach");
                         assertObject(self, "self argument of forEach");
-                        let lastValue: LabeledValue = { value: context.null };
+                        let lastValue: LabeledValue = { value: context.null, source: undefined };
                         self.fields.forEach((value, key) => {
                             const keyExpression = typeof key === "string" ? str(key) : num(key);
                             lastValue = callback.invoke(
@@ -225,7 +228,7 @@ export const objectModule = InterpreterModule.create(
                 (args, context, _staticScope, callExpression) => {
                     args.shift();
                     const evaluatedArgs = generateArgs(args, context, undefined, callExpression);
-                    return { value: evaluatedArgs };
+                    return { value: evaluatedArgs, source: undefined };
                 },
                 {
                     docs: "Function which returns its arguments. Can be used to construct an object",

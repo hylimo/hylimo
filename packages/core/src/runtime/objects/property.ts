@@ -32,7 +32,7 @@ export class Property {
      */
     get(self: BaseObject, context: InterpreterContext): LabeledValue {
         return this.getter.invoke(
-            [{ value: new ExecutableConstExpression({ value: self }), name: "self" }],
+            [{ value: new ExecutableConstExpression({ value: self, source: undefined }), name: "self" }],
             context,
             undefined,
             undefined
@@ -50,7 +50,7 @@ export class Property {
     set(self: BaseObject, value: LabeledValue, context: InterpreterContext): LabeledValue {
         return this.setter.invoke(
             [
-                { value: new ExecutableConstExpression({ value: self }), name: "self" },
+                { value: new ExecutableConstExpression({ value: self, source: undefined }), name: "self" },
                 { value: new ExecutableConstExpression(value) }
             ],
             context,

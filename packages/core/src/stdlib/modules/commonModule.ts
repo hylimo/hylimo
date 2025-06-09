@@ -69,7 +69,7 @@ export const commonModule = InterpreterModule.create(
                     const body = args.getSelfFieldValue(1, context);
                     assertFunction(condition);
                     assertFunction(body);
-                    let lastValue: LabeledValue = { value: context.null };
+                    let lastValue: LabeledValue = { value: context.null, source: undefined };
 
                     while (true) {
                         const conditionRes = condition.invoke([], context, undefined, undefined).value;

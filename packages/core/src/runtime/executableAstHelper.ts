@@ -41,7 +41,7 @@ export function id(identifier: string): ExecutableIdentifierExpression {
  * @returns the created literal expression
  */
 export function str(value: string): ExecutableConstExpression {
-    return new ExecutableConstExpression({ value: new StringObject(value) });
+    return new ExecutableConstExpression({ value: new StringObject(value), source: undefined });
 }
 
 /**
@@ -51,7 +51,7 @@ export function str(value: string): ExecutableConstExpression {
  * @returns the created literal expression
  */
 export function num(value: number): ExecutableConstExpression {
-    return new ExecutableConstExpression({ value: new NumberObject(value) });
+    return new ExecutableConstExpression({ value: new NumberObject(value), source: undefined });
 }
 
 /**
@@ -61,7 +61,7 @@ export function num(value: number): ExecutableConstExpression {
  * @returns the created literal expression
  */
 export function bool(value: boolean): ExecutableConstExpression {
-    return new ExecutableConstExpression({ value: new BooleanObject(value) });
+    return new ExecutableConstExpression({ value: new BooleanObject(value), source: undefined });
 }
 
 /**
@@ -193,7 +193,7 @@ export function jsFun(
         const res = callback(evaluatedArgs, context, callExpression);
         context.currentScope = oldScope;
         if (res instanceof BaseObject) {
-            return { value: res };
+            return { value: res, source: undefined };
         } else {
             return res;
         }
@@ -226,12 +226,12 @@ export function enumObject(entries: Record<string, string | number>): Executable
         const object = context.newObject();
         for (const [key, value] of Object.entries(entries)) {
             if (typeof value === "string") {
-                object.setSelfLocalField(key, { value: context.newString(value) }, context);
+                object.setSelfLocalField(key, { value: context.newString(value), source: undefined }, context);
             } else {
-                object.setSelfLocalField(key, { value: context.newNumber(value) }, context);
+                object.setSelfLocalField(key, { value: context.newNumber(value), source: undefined }, context);
             }
         }
-        return { value: object };
+        return { value: object, source: undefined };
     });
 }
 

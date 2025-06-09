@@ -48,7 +48,8 @@ export const valuesModule = ContentModule.create(
                                 [
                                     ...values.map((entry) => ({
                                         value: new ExecutableConstExpression({
-                                            value: context.newString(entry)
+                                            value: context.newString(entry),
+                                            source: undefined
                                         })
                                     })),
                                     {

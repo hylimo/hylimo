@@ -35,9 +35,9 @@ function generateEdit(
     context: InterpreterContext
 ): BaseObject {
     const edit = context.newObject();
-    edit.setSelfLocalField("type", { value: context.newString(type) }, context);
-    edit.setSelfLocalField("target", { value: target.toWrapperObject(context) }, context);
-    edit.setSelfLocalField("template", { value: template.value }, context);
+    edit.setSelfLocalField("type", { value: context.newString(type), source: undefined }, context);
+    edit.setSelfLocalField("target", { value: target.toWrapperObject(context), source: undefined }, context);
+    edit.setSelfLocalField("template", { value: template.value, source: undefined }, context);
     return edit;
 }
 
@@ -58,7 +58,10 @@ function generateReplaceOrAddArgEdit(
         return generateAddArgEdit(
             target.expression,
             template,
-            { value: typeof target.key === "number" ? context.newNumber(target.key) : context.newString(target.key) },
+            {
+                value: typeof target.key === "number" ? context.newNumber(target.key) : context.newString(target.key),
+                source: undefined
+            },
             context
         );
     } else {
@@ -80,11 +83,15 @@ function generateReplaceEdit(
     context: InterpreterContext
 ): BaseObject {
     const templateObject = context.newObject();
-    templateObject.setSelfLocalField("length", { value: context.newNumber(template.length) }, context);
+    templateObject.setSelfLocalField(
+        "length",
+        { value: context.newNumber(template.length), source: undefined },
+        context
+    );
     template.forEach((field, index) => {
-        templateObject.setSelfLocalField(index, { value: field }, context);
+        templateObject.setSelfLocalField(index, { value: field, source: undefined }, context);
     });
-    return generateReplaceOrAddArgEdit(target, { value: templateObject }, context);
+    return generateReplaceOrAddArgEdit(target, { value: templateObject, source: undefined }, context);
 }
 
 /**
@@ -212,11 +219,20 @@ export const editModule = InterpreterModule.create(
                     const deltaExp = (args.getSelfFieldValue(1, context) as StringObject).value;
                     if (target instanceof NumberLiteralExpression) {
                         const expression = `$string(${target.value} + ${deltaExp})`;
-                        return generateEdit(target, { value: context.newString(expression) }, "replace", context);
+                        return generateEdit(
+                            target,
+                            { value: context.newString(expression), source: undefined },
+                            "replace",
+                            context
+                        );
                     }
                     if (target instanceof MissingArgumentSource) {
                         const expression = `$string(${deltaExp})`;
-                        return generateReplaceOrAddArgEdit(target, { value: context.newString(expression) }, context);
+                        return generateReplaceOrAddArgEdit(
+                            target,
+                            { value: context.newString(expression), source: undefined },
+                            context
+                        );
                     }
 
                     if (target instanceof OperatorExpression) {
@@ -268,7 +284,8 @@ export const editModule = InterpreterModule.create(
                         {
                             value: context.newString(
                                 `' ${assertString(scope)} {\n    ' & $replace(${assertString(expression)}, '\n', '\n    ') & '\n}'`
-                            )
+                            ),
+                            source: undefined
                         },
                         "append",
                         context

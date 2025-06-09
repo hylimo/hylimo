@@ -22,7 +22,10 @@ export const booleanModule = InterpreterModule.create(
     [DefaultModuleNames.COMMON],
     [
         fun([
-            assign(booleanProto, new ExecutableNativeExpression((context) => ({ value: context.booleanPrototype }))),
+            assign(
+                booleanProto,
+                new ExecutableNativeExpression((context) => ({ value: context.booleanPrototype, source: undefined }))
+            ),
             id(SemanticFieldNames.PROTO).assignField("true", jsFun(() => new BooleanObject(true)).call()),
             id(SemanticFieldNames.PROTO).assignField("false", jsFun(() => new BooleanObject(false)).call()),
             id(booleanProto).assignField(
@@ -34,7 +37,8 @@ export const booleanModule = InterpreterModule.create(
                             value: context.newBoolean(
                                 assertBoolean(first.evaluate(context).value, "left side of &&") &&
                                     assertBoolean(second.evaluate(context).value, "right side of &&")
-                            )
+                            ),
+                            source: undefined
                         };
                     },
                     {
@@ -64,7 +68,8 @@ export const booleanModule = InterpreterModule.create(
                             value: context.newBoolean(
                                 assertBoolean(first.evaluate(context).value, "left side of ||") ||
                                     assertBoolean(second.evaluate(context).value, "right side of ||")
-                            )
+                            ),
+                            source: undefined
                         };
                     },
                     {

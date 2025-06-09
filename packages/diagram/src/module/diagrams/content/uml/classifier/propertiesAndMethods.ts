@@ -67,7 +67,7 @@ export const propertiesAndMethodsModule = ContentModule.create(
                         const conversionFunction = context.getField("_convertEntry");
                         const visibility = context.currentScope.getSelfField("visibility", context);
                         const visibilityArg = { value: new ExecutableConstExpression(visibility) };
-                        const parentArg = { value: new ExecutableConstExpression({ value: args }) };
+                        const parentArg = { value: new ExecutableConstExpression({ value: args, source: undefined }) };
 
                         function addEntriesToScope(entries: string[], index: number): void {
                             if (entries.length > 0) {

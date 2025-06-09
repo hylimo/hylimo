@@ -35,7 +35,8 @@ export const entriesModule = ContentModule.create(
                                 [
                                     ...enumLiterals.map((entry) => ({
                                         value: new ExecutableConstExpression({
-                                            value: context.newString(entry)
+                                            value: context.newString(entry),
+                                            source: undefined
                                         })
                                     })),
                                     {

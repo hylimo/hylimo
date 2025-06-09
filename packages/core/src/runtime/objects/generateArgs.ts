@@ -29,7 +29,11 @@ export function generateArgs(
     let argsObject: FullObject;
     if (expression != undefined && expression instanceof AbstractInvocationExpression) {
         argsObject = new ArgsFullObject(expression);
-        argsObject.setSelfLocalField(SemanticFieldNames.PROTO, { value: context.objectPrototype }, context);
+        argsObject.setSelfLocalField(
+            SemanticFieldNames.PROTO,
+            { value: context.objectPrototype, source: undefined },
+            context
+        );
     } else {
         argsObject = context.newObject();
     }

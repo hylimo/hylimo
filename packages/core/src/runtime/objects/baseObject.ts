@@ -46,10 +46,24 @@ export abstract class BaseObject {
         return this.getField(key, context, this).value;
     }
 
+    /**
+     * Wrapper for getField which uses this as self
+     * 
+     * @param key the identifier of the field
+     * @param context context in which this is performed
+     * @returns the field entry
+     */
     getSelfField(key: string | number, context: InterpreterContext): LabeledValue {
         return this.getField(key, context, this);
     }
 
+    /**
+     * Wrapper for getFields which uses this as self
+     * 
+     * @param key the identifier of the field
+     * @param value the new value of the field
+     * @param context context in which this is performed
+     */
     setSelfLocalField(key: string | number, value: LabeledValue, context: InterpreterContext): void {
         this.setLocalField(key, value, context, this);
     }
@@ -151,7 +165,8 @@ export abstract class SimpleObject extends BaseObject {
     override getField(key: string | number, context: InterpreterContext, self: BaseObject): LabeledValue {
         if (key === SemanticFieldNames.PROTO) {
             return {
-                value: this.getProto(context)
+                value: this.getProto(context),
+                source: undefined
             };
         } else {
             return this.getProto(context).getField(key, context, self ?? this);

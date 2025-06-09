@@ -38,7 +38,8 @@ export abstract class AbstractFunctionObject<T extends ExecutableAbstractFunctio
     override getField(key: string | number, context: InterpreterContext, self: BaseObject): LabeledValue {
         if (key === SemanticFieldNames.DOCS) {
             return {
-                value: this.docs
+                value: this.docs,
+                source: undefined
             };
         } else {
             return super.getField(key, context, self);
@@ -49,7 +50,8 @@ export abstract class AbstractFunctionObject<T extends ExecutableAbstractFunctio
         const result = super.getFields(context, self);
         if (this.docs !== undefined) {
             result.set(SemanticFieldNames.DOCS, {
-                value: this.docs
+                value: this.docs,
+                source: undefined
             });
         }
         return result;
@@ -113,9 +115,9 @@ export class FunctionObject extends AbstractFunctionObject<ExecutableFunctionExp
         const oldScope = context.currentScope;
         if (scope == undefined) {
             scope = new FullObject();
-            scope.setSelfLocalField(SemanticFieldNames.PROTO, { value: this.parentScope }, context);
+            scope.setSelfLocalField(SemanticFieldNames.PROTO, { value: this.parentScope, source: undefined }, context);
         }
-        scope.setSelfLocalField(SemanticFieldNames.THIS, { value: scope }, context);
+        scope.setSelfLocalField(SemanticFieldNames.THIS, { value: scope, source: undefined }, context);
         const generatedArgs = generateArgs(args, context, this.definition.documentation, callExpression);
         scope.setSelfLocalField(SemanticFieldNames.ARGS, { value: generatedArgs, source: callExpression }, context);
         scope.setSelfLocalField(SemanticFieldNames.IT, generatedArgs.getSelfField(0, context), context);
@@ -125,7 +127,7 @@ export class FunctionObject extends AbstractFunctionObject<ExecutableFunctionExp
             lastValue = expression.evaluate(context).value;
         }
         context.currentScope = oldScope;
-        return { value: lastValue };
+        return { value: lastValue, source: undefined };
     }
 
     override toString(): string {

@@ -194,7 +194,7 @@ export const operatorModule = InterpreterModule.create(
                             );
                     } else {
                         const value = assertNumber(target.value, "first and only argument of -");
-                        return { value: context.newNumber(-value) };
+                        return { value: context.newNumber(-value), source: undefined };
                     }
                 },
                 {

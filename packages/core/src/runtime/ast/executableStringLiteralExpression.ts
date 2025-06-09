@@ -49,7 +49,7 @@ export class ExecutableStringLiteralExpression extends ExecutableExpression<Stri
                 value += evaluationResultValue.toString(context, Infinity);
             }
         }
-        return { value: new StringObject(value) };
+        return { value: new StringObject(value), source: undefined };
     }
 }
 

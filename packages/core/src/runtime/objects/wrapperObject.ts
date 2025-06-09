@@ -35,11 +35,11 @@ export class WrapperObject<T> extends BaseObject {
 
     override getField(key: string | number, context: InterpreterContext, self?: BaseObject): LabeledValue {
         if (key === SemanticFieldNames.PROTO) {
-            return { value: this.proto };
+            return { value: this.proto, source: undefined };
         }
         const value = this.entries.get(key);
         if (value != undefined) {
-            return { value: value(this.wrapped, context) };
+            return { value: value(this.wrapped, context), source: undefined };
         }
         return this.proto.getField(key, context, self ?? this);
     }
@@ -47,7 +47,7 @@ export class WrapperObject<T> extends BaseObject {
     override getFields(context: InterpreterContext, self?: BaseObject): Map<string | number, LabeledValue> {
         const entries = this.proto.getFields(context, self ?? this);
         for (const [key, value] of this.entries) {
-            entries.set(key, { value: value(this.wrapped, context) });
+            entries.set(key, { value: value(this.wrapped, context), source: undefined });
         }
         return entries;
     }
