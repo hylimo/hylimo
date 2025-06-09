@@ -19,6 +19,7 @@ import type { LayoutEngine } from "./layoutEngine.js";
 import type { Element } from "@hylimo/diagram-common";
 import { applyEdits } from "./edits.js";
 import { CanvasLayoutEngine } from "./canvasLayoutEngine.js";
+import { StyleEvaluator, StyleValueParser } from "./styles.js";
 
 /**
  * Performs the layout, uses a layout engine to do so
@@ -52,6 +53,11 @@ export class Layout {
     readonly layoutEngine = new CanvasLayoutEngine(this);
 
     /**
+     * Style evaluator handling style matching and parsing
+     */
+    private readonly styleEvaluator: StyleEvaluator;
+
+    /**
      * Creates a new layout
      *
      * @param engine the engine which provides fonts
@@ -62,51 +68,12 @@ export class Layout {
      */
     constructor(
         readonly engine: LayoutEngine,
-        readonly styles: StyleList,
+        readonly styles: FullObject,
         readonly fonts: FontCollection,
         readonly defaultFontFamily: string,
         readonly context: InterpreterContext
-    ) {}
-
-    /**
-     * Checks if an element matches a selector
-     * @param element the element to check
-     * @param selector the selector to check
-     * @returns true if the element matches the selector, otherwise false
-     */
-    private matchesSelector(element: LayoutElement, selector: Selector): boolean {
-        if (selector.type === SelectorType.CLASS) {
-            return element.class.has(selector.value);
-        } else if (selector.type === SelectorType.TYPE) {
-            return element.layoutConfig.type === selector.value;
-        }
-        return selector.type === SelectorType.ANY;
-    }
-
-    /**
-     * Checks if a style should be applied to an element
-     *
-     * @param element the element to which the style may be applied
-     * @param style the style to check
-     * @returns true if the style should be applied
-     */
-    private matchesStyle(element: LayoutElement, style: Style): boolean {
-        let currentElement: LayoutElement | undefined = element;
-        const initialElementIndex = style.selectorChain.length - 1;
-        let i = initialElementIndex;
-
-        while (currentElement) {
-            if (this.matchesSelector(currentElement, style.selectorChain[i])) {
-                i--;
-                if (i < 0) {
-                    return true;
-                }
-            } else if (i == initialElementIndex) {
-                return false;
-            }
-            currentElement = currentElement.parent;
-        }
-        return false;
+    ) {
+        this.styleEvaluator = new StyleEvaluator(styles);
     }
 
     /**
@@ -116,13 +83,7 @@ export class Layout {
      */
     private applyStyles(layoutElement: LayoutElement): void {
         const styleAttributes = layoutElement.layoutConfig.styleAttributes;
-        const matchingStyles: FullObject[] = [];
-        for (const style of this.styles.styles) {
-            if (this.matchesStyle(layoutElement, style)) {
-                matchingStyles.push(style.fields);
-            }
-        }
-        matchingStyles.reverse();
+        const matchingStyles = this.styleEvaluator.matchStyles(layoutElement);
         const styleValueParser = new StyleValueParser(matchingStyles, this.context);
         const styles: Record<string, any> = {};
         for (const attributeConfig of styleAttributes) {
@@ -486,115 +447,5 @@ export class Layout {
             currentElement = currentElement.parent;
         }
         return false;
-    }
-}
-
-/**
- * Helper class to get style values from a set of matching style objects
- */
-class StyleValueParser {
-    /**
-     * Cached variable values
-     * During computation, a variable value is set to null to detect circular dependencies
-     */
-    private readonly variableValues = new Map<string, LabeledValue | null>();
-
-    /**
-     * All variable objects from the matching styles
-     */
-    private readonly variables: FullObject[];
-
-    /**
-     * Creates a new style value parser
-     *
-     * @param matchingStyles all matching styles
-     * @param context the context to use for variable resolution
-     */
-    constructor(
-        readonly matchingStyles: FullObject[],
-        readonly context: InterpreterContext
-    ) {
-        this.variables = matchingStyles
-            .map((style) => style.getLocalFieldOrUndefined("variables")?.value)
-            .filter((variables) => variables instanceof FullObject);
-    }
-
-    /**
-     * Gets the value of a style attribute
-     *
-     * @param name the name of the attribute
-     * @returns the value of the attribute, undefined if none of the matching styles provides the attribute
-     */
-    getValue(name: string): LabeledValue | undefined {
-        for (const style of this.matchingStyles) {
-            const value = style.getLocalFieldOrUndefined(name);
-            if (value != undefined) {
-                return this.parse(value);
-            }
-        }
-        return undefined;
-    }
-
-    /**
-     * Parses a labeled value, resolving calc, var and unset special values
-     *
-     * @param labeledValue the labeled value to parse
-     * @returns the parsed labeled value
-     */
-    private parse(labeledValue: LabeledValue): LabeledValue {
-        const value = labeledValue.value;
-        if (!isObject(value)) {
-            return labeledValue;
-        }
-        const type = value.getLocalFieldOrUndefined("_type")?.value?.toNative();
-        if (type == undefined) {
-            return labeledValue;
-        }
-        if (type === "unset") {
-            return { value: this.context.null, source: undefined };
-        } else if (type === "var") {
-            const variableName = value.getLocalFieldOrUndefined("name")?.value?.toNative();
-            return this.getVariableValue(variableName);
-        } else if (type === "calc") {
-            const operator = value.getSelfField("operator", this.context).value;
-            const result = operator.invoke(
-                [
-                    { value: new ExecutableConstExpression(this.parse(value.getSelfField("left", this.context))) },
-                    { value: new ExecutableConstExpression(this.parse(value.getSelfField("right", this.context))) }
-                ],
-                this.context,
-                undefined,
-                undefined
-            );
-            return { value: result.value, source: labeledValue.source };
-        } else {
-            throw new Error(`Unknown style value type: ${type}`);
-        }
-    }
-
-    /**
-     * Gets the value of a variable
-     *
-     * @param name the name of the variable
-     * @returns the value of the variable
-     */
-    private getVariableValue(name: string): LabeledValue {
-        const variableValue = this.variableValues.get(name);
-        if (variableValue != undefined) {
-            return variableValue;
-        }
-        if (variableValue === null) {
-            throw new Error(`Circular dependency detected! Variable ${name} depends on itself with itself`);
-        }
-        this.variableValues.set(name, null);
-        for (const variables of this.variables) {
-            const entry = variables.getLocalFieldOrUndefined(name);
-            if (entry != undefined) {
-                const value = this.parse(entry);
-                this.variableValues.set(name, value);
-                return value;
-            }
-        }
-        return { value: this.context.null, source: undefined };
     }
 }
