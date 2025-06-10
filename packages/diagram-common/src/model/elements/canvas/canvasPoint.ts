@@ -143,3 +143,19 @@ export namespace LinePoint {
         return [element.lineProvider];
     }
 }
+
+export namespace CanvasPoint {
+    /**
+     * Checks if an element is a CanvasPoint
+     *
+     * @param value the element to check
+     * @returns true if the element is a CanvasPoint
+     */
+    export function isCanvasPoint(value: Element): value is CanvasPoint {
+        return (
+            AbsolutePoint.isAbsolutePoint(value) ||
+            RelativePoint.isRelativePoint(value) ||
+            LinePoint.isLinePoint(value)
+        );
+    }
+}

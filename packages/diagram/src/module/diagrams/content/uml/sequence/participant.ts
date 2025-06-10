@@ -132,10 +132,6 @@ export const participantModule = ContentModule.create(
                             )
                         ),
                         `
-                            //scope.internal.canvasAddEdits["toolbox/Activate instance or actor/\${name}"] = "'activate(' & \${nameToJsonataStringLiteral(name)} & ')'"
-                            //scope.internal.canvasAddEdits["toolbox/Deactive instance or actor/\${name}"] = "'deactivate(' & \${nameToJsonataStringLiteral(name)} & ')'"
-                            //scope.internal.canvasAddEdits["toolbox/Destroy instance or actor/\${name}"] = "'destroy(' & \${nameToJsonataStringLiteral(name)} & ')'"
-
                             participantElement
                         `
                     ],

@@ -9,7 +9,8 @@ import {
     CanvasAxisAlignedSegment,
     CanvasBezierSegment,
     Bounds,
-    Point
+    Point,
+    CanvasPoint
 } from "@hylimo/diagram-common";
 import { applyToPoint, compose, rotateDEG, type Matrix } from "transformation-matrix";
 import type { SCanvas } from "../../model/canvas/sCanvas.js";
@@ -59,14 +60,7 @@ function groupElementsByContext(elements: SElement[]): Map<string, SElement[]> {
     const elementsByContext = new Map<string, SElement[]>();
 
     for (const element of elements) {
-        if (
-            !(
-                CanvasElement.isCanvasElement(element) ||
-                AbsolutePoint.isAbsolutePoint(element) ||
-                RelativePoint.isRelativePoint(element) ||
-                LinePoint.isLinePoint(element)
-            )
-        ) {
+        if (!(CanvasPoint.isCanvasPoint(element) || LinePoint.isLinePoint(element))) {
             continue;
         }
 

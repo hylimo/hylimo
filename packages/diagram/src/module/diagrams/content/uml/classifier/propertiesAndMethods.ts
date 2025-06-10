@@ -126,10 +126,10 @@ export const propertiesAndMethodsModule = ContentModule.create(
             scope.internal.propertiesAndMethodsContentHandler = [
                 {
                     this.callScope = args.callScope
-                    callScope.public = _classifierEntryScopeGenerator("+ ", callScope.section)
-                    callScope.protected = _classifierEntryScopeGenerator("# ", callScope.section)
-                    callScope.private = _classifierEntryScopeGenerator("- ", callScope.section)
-                    callScope.package = _classifierEntryScopeGenerator("~ ", callScope.section)
+                    callScope.public = _classifierEntryScopeGenerator("+ ", callScope.section, callScope.element)
+                    callScope.protected = _classifierEntryScopeGenerator("# ", callScope.section, callScope.element)
+                    callScope.private = _classifierEntryScopeGenerator("- ", callScope.section, callScope.element)
+                    callScope.package = _classifierEntryScopeGenerator("~ ", callScope.section, callScope.element)
                     callScope.default = _classifierEntryScopeGenerator("", callScope.section)
                 },
                 { }
