@@ -274,10 +274,7 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler, Conn
      */
     update(): void {
         if (this.currentRoot != undefined) {
-            this.currentVNode = this.patcherProvider.patcher(
-                this.currentVNode!,
-                generateToolbox(this, this.currentRoot)
-            );
+            this.currentVNode = this.patcherProvider.patcher(this.currentVNode!, generateToolbox(this));
         }
     }
 
@@ -527,7 +524,7 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler, Conn
      * Gets the index of all elements in the current root.
      * The index is a map that allows quick lookup of elements by their ID.
      * If the index doesn't exist yet, it will be built by traversing the entire element tree.
-     * 
+     *
      * @returns A map containing all elements indexed by their ID, or an empty map if no root exists
      */
     private getIndex(): Map<string, Element> {
@@ -545,7 +542,7 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler, Conn
      * Recursively builds the element index by traversing the element tree.
      * This method adds the current element to the index and then recursively
      * processes all of its children.
-     * 
+     *
      * @param element The element to add to the index and whose children to process recursively
      */
     private buildIndexRecursive(element: Element) {

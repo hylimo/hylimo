@@ -1,8 +1,6 @@
 import type { CanvasLayoutEngine } from "@hylimo/diagram-common";
 import {
     CanvasElement,
-    AbsolutePoint,
-    RelativePoint,
     LinePoint,
     CanvasConnection,
     CanvasLineSegment,

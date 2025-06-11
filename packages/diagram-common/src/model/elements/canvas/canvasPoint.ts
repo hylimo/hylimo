@@ -153,9 +153,7 @@ export namespace CanvasPoint {
      */
     export function isCanvasPoint(value: Element): value is CanvasPoint {
         return (
-            AbsolutePoint.isAbsolutePoint(value) ||
-            RelativePoint.isRelativePoint(value) ||
-            LinePoint.isLinePoint(value)
+            AbsolutePoint.isAbsolutePoint(value) || RelativePoint.isRelativePoint(value) || LinePoint.isLinePoint(value)
         );
     }
 }

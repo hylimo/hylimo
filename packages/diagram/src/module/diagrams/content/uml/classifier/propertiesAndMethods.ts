@@ -1,16 +1,19 @@
-import type { Expression } from "@hylimo/core";
+import type {
+    BaseObject,
+    ExecutableListEntry,
+    Expression,
+    FunctionDocumentation,
+    InterpreterContext,
+    LabeledValue
+} from "@hylimo/core";
 import {
-    assign,
+    assertBoolean,
     booleanType,
     ExecutableConstExpression,
-    fun,
-    FunctionObject,
     functionType,
     IdentifierExpression,
     IndexExpression,
     InvocationExpression,
-    jsFun,
-    num,
     NumberLiteralExpression,
     OperatorExpression,
     optional,
@@ -18,125 +21,171 @@ import {
     str,
     StringLiteralExpression
 } from "@hylimo/core";
-import { ContentModule } from "../../contentModule.js";
+import { createClassifierScopeContentModule, type ClassifierScopeSpecification } from "./classifierScope.js";
+
+/**
+ * Context used for parsing the properties and methods content.
+ */
+interface ParseContext {
+    /**
+     * Indicates if the scope is marked as static.
+     */
+    static: boolean;
+    /**
+     * Indicates if the scope is marked as abstract.
+     */
+    abstract: boolean;
+    /**
+     * Function to create a list object.
+     */
+    list: (values: LabeledValue[], context: InterpreterContext) => LabeledValue;
+    /**
+     * Function to create a span object with the given text and optional class.
+     */
+    span: (text: string, cls: string[] | undefined, context: InterpreterContext) => LabeledValue;
+}
+
+/**
+ * Documentation for the scope functions (public, protected, private, package, default)
+ */
+const scopeDocs: FunctionDocumentation = {
+    docs: `
+        Takes a function as paramater that declares fields and functions though its expressions.
+        The content of the function is not executed, but analyzed on the AST level.
+        Identifiers can be provided both as identifiers and as strings.
+        A field is defined by an identifier, and optionally a colon and a type identifier.
+        Example: \`x : int\`
+        A function is defined by an identifier, an opening and closing bracket with optional parameters,
+        and optionally a colon and a return type identifier (e.g. test() : int).
+        Parameters are defined like fields, and separated by commas.
+        Example: \`point(x : int, y : int) : Point\`.
+        Use newlines to separate fields and functions.
+    `,
+    params: [
+        [0, "the function which defines the fields and functions", functionType],
+        ["abstract", "if true, the entry is marked as abstract", optional(booleanType)],
+        ["static", "if true, the entry is marked as static", optional(booleanType)]
+    ],
+    returns: "null"
+};
+
+/**
+ * Specifications for the classifier scope content handler for properties and methods.
+ */
+const scopeSpecifications: ClassifierScopeSpecification<ParseContext>[] = [
+    ["public", "+ "],
+    ["protected", "# "],
+    ["private", "- "],
+    ["package", "~ "],
+    ["default", ""]
+].map(([name, visibility]) => {
+    const edits: ClassifierScopeSpecification<any>["edits"] = [];
+    if (name !== "default") {
+        edits.push(
+            {
+                value: "example : string",
+                name: `Property/Add ${name} property`
+            },
+            {
+                value: "example(param: string) : int",
+                name: `Function/Add ${name} function`
+            }
+        );
+    }
+    return {
+        name,
+        docs: scopeDocs,
+        edits,
+        extractContext: (context, args) => {
+            const isAbstractRaw = args.getLocalFieldOrUndefined("abstract");
+            const isStaticRaw = args.getLocalFieldOrUndefined("static");
+            const isAbstract = isAbstractRaw != undefined ? assertBoolean(isAbstractRaw.value) : false;
+            const isStatic = isStaticRaw != undefined ? assertBoolean(isStaticRaw.value) : false;
+            let listFunction: BaseObject | undefined;
+            let spanFunction: BaseObject | undefined;
+            if (isAbstract || isStatic) {
+                listFunction = context.getField("list");
+                spanFunction = context.getField("span");
+            }
+
+            return {
+                static: isStatic,
+                abstract: isAbstract,
+                list: (values, context) =>
+                    listFunction!.invoke(
+                        values.map((value) => ({
+                            value: new ExecutableConstExpression(value)
+                        })),
+                        context,
+                        undefined,
+                        undefined
+                    ),
+                span: (text, cls, context) => {
+                    const args: ExecutableListEntry[] = [{ value: str(text), name: "text" }];
+                    if (cls != undefined) {
+                        args.push({
+                            value: new ExecutableConstExpression(
+                                listFunction!.invoke(
+                                    cls.map((c) => ({ value: str(c) })),
+                                    context,
+                                    undefined,
+                                    undefined
+                                )
+                            ),
+                            name: "class"
+                        });
+                    }
+                    return spanFunction!.invoke(args, context, undefined, undefined);
+                }
+            };
+        },
+        parseEntries: (parseContext, expressions, context) => {
+            const [fields, functions] = convertFieldsAndFunctions(expressions);
+            function modifyEntry(entry: string): LabeledValue {
+                if (parseContext.static || parseContext.abstract) {
+                    const cls: string[] = [];
+                    if (parseContext.abstract) {
+                        cls.push("entry-abstract");
+                    }
+                    if (parseContext.static) {
+                        cls.push("entry-static");
+                    }
+                    return parseContext.list(
+                        [parseContext.span(visibility, undefined, context), parseContext.span(entry, cls, context)],
+                        context
+                    );
+                }
+                return {
+                    value: context.newString(entry),
+                    source: undefined
+                };
+            }
+
+            return [
+                {
+                    values: fields.map((field) => modifyEntry(field)),
+                    index: 0
+                },
+                {
+                    values: functions.map((func) => modifyEntry(func)),
+                    index: 1
+                }
+            ];
+        }
+    };
+});
 
 /**
  * Module providing the properties and methods content handler
  * Requires the sections content handler
  */
-export const propertiesAndMethodsModule = ContentModule.create(
+export const propertiesAndMethodsModule = createClassifierScopeContentModule<ParseContext>(
     "uml/classifier/propertiesAndMethods",
-    [],
-    [],
+    "propertiesAndMethodsContentHandler",
+    scopeSpecifications,
     [
         `
-            _convertEntry = {
-                (visibility, entry, originalArgs) = args
-                if(originalArgs.abstract == true) {
-                    if(originalArgs.static == true) {
-                        list(span(text = visibility), span(text = entry, class = list("entry-abstract", "entry-static")))
-                    } {
-                        list(span(text = visibility), span(text = entry, class = list("entry-abstract")))
-                    }
-                } {
-                    if(originalArgs.static == true) {
-                        list(span(text = visibility), span(text = entry, class = list("entry-static")))
-                    } {
-                        visibility + entry
-                    }
-                }
-            }
-        `,
-        assign(
-            "_classifierEntryScopeGenerator",
-            fun([
-                `
-                    (visibility, scope) = args
-                `,
-                jsFun(
-                    (args, context) => {
-                        const scopeFunction = args.getLocalFieldOrUndefined(0)!.value;
-                        if (!(scopeFunction instanceof FunctionObject)) {
-                            throw new Error("scope is not a function");
-                        }
-                        const expressions = scopeFunction.definition.expressions.map(
-                            (expression) => expression.expression
-                        );
-                        const scope = context.getField("scope");
-                        const [fields, functions] = convertFieldsAndFunctions(expressions);
-                        const conversionFunction = context.getField("_convertEntry");
-                        const visibility = context.currentScope.getSelfField("visibility", context);
-                        const visibilityArg = { value: new ExecutableConstExpression(visibility) };
-                        const parentArg = { value: new ExecutableConstExpression({ value: args, source: undefined }) };
-
-                        function addEntriesToScope(entries: string[], index: number): void {
-                            if (entries.length > 0) {
-                                const convertedEntries = entries.map((entry) => {
-                                    const convertedEntry = conversionFunction.invoke(
-                                        [visibilityArg, { value: str(entry) }, parentArg],
-                                        context,
-                                        undefined,
-                                        undefined
-                                    );
-                                    return { value: new ExecutableConstExpression(convertedEntry) };
-                                });
-                                scope.invoke(
-                                    [
-                                        ...convertedEntries,
-                                        {
-                                            name: "section",
-                                            value: num(index)
-                                        }
-                                    ],
-                                    context,
-                                    undefined,
-                                    undefined
-                                );
-                            }
-                        }
-                        addEntriesToScope(fields, 0);
-                        addEntriesToScope(functions, 1);
-
-                        return context.null;
-                    },
-                    {
-                        docs: `
-                            Takes a function as paramater that declares fields and functions though its expressions.
-                            The content of the function is not executed, but analyzed on the AST level.
-                            Identifiers can be provided both as identifiers and as strings.
-                            A field is defined by an identifier, and optionally a colon and a type identifier.
-                            Example: \`x : int\`
-                            A function is defined by an identifier, an opening and closing bracket with optional parameters,
-                            and optionally a colon and a return type identifier (e.g. test() : int).
-                            Parameters are defined like fields, and separated by commas.
-                            Example: \`point(x : int, y : int) : Point\`.
-                            Use newlines to separate fields and functions.
-                        `,
-                        params: [
-                            [0, "the function which defines the fields and functions", functionType],
-                            ["abstract", "if true, the entry is marked as abstract", optional(booleanType)],
-                            ["static", "if true, the entry is marked as static", optional(booleanType)]
-                        ],
-                        returns: "null"
-                    }
-                )
-            ])
-        ),
-        `
-            scope.internal.propertiesAndMethodsContentHandler = [
-                {
-                    this.callScope = args.callScope
-                    callScope.public = _classifierEntryScopeGenerator("+ ", callScope.section, callScope.element)
-                    callScope.protected = _classifierEntryScopeGenerator("# ", callScope.section, callScope.element)
-                    callScope.private = _classifierEntryScopeGenerator("- ", callScope.section, callScope.element)
-                    callScope.package = _classifierEntryScopeGenerator("~ ", callScope.section, callScope.element)
-                    callScope.default = _classifierEntryScopeGenerator("", callScope.section)
-                },
-                { }
-            ]
-
-            
-            scope.styles {
+        scope.styles {
                 type("text") {
                     cls("entry-abstract") {
                         fontStyle = "italic"

@@ -1,4 +1,3 @@
-import type { Root } from "@hylimo/diagram-common";
 import type { VNode } from "snabbdom";
 import { h } from "snabbdom";
 import type { Toolbox, ToolboxEditEntry } from "../toolbox.js";
@@ -14,17 +13,16 @@ import { ToolboxToolType } from "../toolType.js";
  * Generates the UI for the toolbox items.
  *
  * @param context The toolbox context
- * @param root The root element providing the toolbox edits
  * @returns The UI for the toolbox items
  */
-export function generateToolboxAddElementDetails(context: Toolbox, root: Root): VNode[] {
+export function generateToolboxAddElementDetails(context: Toolbox): VNode[] {
     return [
         generateSearchBox(context),
         h(
             "div.items",
             context.searchString.length > 0
                 ? generateFilteredToolboxItems(context, context.searchString)
-                : generateGroupedToolboxItems(context, root)
+                : generateGroupedToolboxItems(context)
         )
     ];
 }
@@ -34,12 +32,11 @@ export function generateToolboxAddElementDetails(context: Toolbox, root: Root): 
  * Used if no search is active.
  *
  * @param context The toolbox context
- * @param root The root element providing the toolbox edits
  * @returns The UI for the toolbox items
  */
-function generateGroupedToolboxItems(context: Toolbox, root: Root): VNode[] {
+function generateGroupedToolboxItems(context: Toolbox): VNode[] {
     const aggregatedEdits = new Map<string, ToolboxEditEntry[]>();
-    for (const toolboxEdit of context.getToolboxEdits(root)) {
+    for (const toolboxEdit of context.getToolboxEdits()) {
         const key = toolboxEdit.group;
         if (!aggregatedEdits.has(key)) {
             aggregatedEdits.set(key, []);

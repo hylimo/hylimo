@@ -54,6 +54,7 @@ export * from "./module/diagrams/content/common/defaultMarkers.js";
 export * from "./module/diagrams/content/common/defaultStyles.js";
 export * from "./module/diagrams/content/common/element.js";
 export * from "./module/diagrams/content/uml/classifier/classifier.js";
+export * from "./module/diagrams/content/uml/classifier/classifierScope.js";
 export * from "./module/diagrams/content/uml/classifier/componentTitle.js";
 export * from "./module/diagrams/content/uml/classifier/content.js";
 export * from "./module/diagrams/content/uml/classifier/defaultTitle.js";

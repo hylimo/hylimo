@@ -213,7 +213,7 @@ export namespace EditSpecification {
 /**
  * Modification specification entry with an index
  *
- * @param T the type of the specification
+ * @template T the type of the specification
  */
 export interface IndexedModificationSpecificationEntry<T extends EditSpecificationEntry = EditSpecificationEntry> {
     /**

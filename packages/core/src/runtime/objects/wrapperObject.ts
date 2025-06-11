@@ -11,7 +11,7 @@ import type { FullObject } from "./fullObject.js";
 /**
  * Wrapper for a js object.
  *
- * @param T the type of the wrapped object
+ * @template T the type of the wrapped object
  */
 export class WrapperObject<T> extends BaseObject {
     override get isNull(): boolean {
@@ -110,7 +110,7 @@ export class WrapperObject<T> extends BaseObject {
 /**
  * Function to retrieve a field of a wrapped object
  *
- * @param T the type of the wrapped object
+ * @template T the type of the wrapped object
  * @param wrapped the wrapped object
  * @param context the interpreter context
  */
