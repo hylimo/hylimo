@@ -1,7 +1,7 @@
 import { assign, fun, id, str, stringType } from "@hylimo/core";
 import {
     connectionEditFragments,
-    createToolboxEdit,
+    createToolboxEditExpression,
     PREDICTION_STYLE_CLASS_ASSIGNMENT_EXPRESSION,
     SCOPE
 } from "../../../base/dslModule.js";
@@ -100,7 +100,7 @@ export const commentModule = ContentModule.create(
                 }
             }
         `,
-        createToolboxEdit("Comment/Comment", 'comment("Example comment")'),
+        createToolboxEditExpression("Comment/Comment", 'comment("Example comment")'),
         id(SCOPE)
             .field("internal")
             .field("canvasAddEdits")

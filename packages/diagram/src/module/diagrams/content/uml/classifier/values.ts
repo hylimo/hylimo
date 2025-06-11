@@ -15,7 +15,7 @@ import { createClassifierScopeContentModule } from "./classifierScope.js";
  * Requires the sections content handler
  */
 export const valuesModule = createClassifierScopeContentModule<undefined>(
-    "uml/classifier(values",
+    "uml/classifier/values",
     "valuesContentHandler",
     [
         {

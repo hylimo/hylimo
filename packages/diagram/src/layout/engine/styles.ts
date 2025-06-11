@@ -236,8 +236,9 @@ export class StyleEvaluator {
      */
     endMatchStyles(): void {
         const count = this.activeStyleCountStack.pop()!;
-        if (count > 0) {
-            this.activeStyleStack.length -= count;
+        for (let i = 0; i < count; i++) {
+            const context = this.activeStyleStack.pop();
+            context!.isActive = false;
         }
     }
 

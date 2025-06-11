@@ -1,5 +1,5 @@
-import { booleanType, fun, functionType, id, listType, optional, stringType } from "@hylimo/core";
-import { createToolboxEdit, SCOPE } from "../../../base/dslModule.js";
+import { booleanType, fun, functionType, id, listType, object, optional, str, stringType } from "@hylimo/core";
+import { SCOPE } from "../../../base/dslModule.js";
 import { ContentModule } from "../contentModule.js";
 
 /**
@@ -29,62 +29,79 @@ export const classModule = ContentModule.create(
                 )
             )
         `,
-        id(SCOPE).assignField(
-            "class",
-            fun(
-                `
-                    (name, callback) = args
-                    _class(name, callback, title = name, keywords = args.keywords, abstract = args.abstract, args = args)
-                `,
-                {
-                    docs: "Creates a class.",
-                    params: [
-                        [0, "the name of the class", stringType],
-                        [1, "the callback function for the class", optional(functionType)],
-                        ["keywords", "the keywords of the class", optional(listType(stringType))],
-                        ["abstract", "whether the class is abstract", optional(booleanType)]
-                    ],
-                    snippet: `("$1") {\n    $2\n}`,
-                    returns: "The created class"
-                }
-            )
-        ),
-        createToolboxEdit("Class/Class", 'class("Example")'),
-        createToolboxEdit("Class/Abstract class", 'class("Example", abstract = true)'),
-        createToolboxEdit(
-            "Class/Class with properties",
-            `
-                class("Example") {
-                    public {
-                        name : string
+        id(SCOPE)
+            .field("internal")
+            .callField(
+                "registerClassifier",
+                str("class"),
+                fun(
+                    `
+                        (name, callback) = args
+                        _class(name, callback, title = name, keywords = args.keywords, abstract = args.abstract, args = args)
+                    `,
+                    {
+                        docs: "Creates a class.",
+                        params: [
+                            [0, "the name of the class", stringType],
+                            [1, "the callback function for the class", optional(functionType)],
+                            ["keywords", "the keywords of the class", optional(listType(stringType))],
+                            ["abstract", "whether the class is abstract", optional(booleanType)]
+                        ],
+                        snippet: `("$1") {\n    $2\n}`,
+                        returns: "The created class"
                     }
-                    private {
-                        test() : void
-                    }
-                }
-            `
-        ),
-        createToolboxEdit(
-            "Class/Nested class",
-            `
-                class("Example") {
-                    class("Inner")
-                }
-            `
-        ),
-        createToolboxEdit(
-            "Class/Nested class with properties",
-            `
-                class("Example") {
+                ),
+                object([
+                    {
+                        name: "Class/Class",
+                        value: str('class("Example")')
+                    },
+                    {
+                        name: "Class/Abstract class",
+                        value: str('class("Example", abstract = true)')
+                    },
+                    {
+                        name: "Class/Class with properties",
+                        value: str(
+                            `
+                                class("Example") {
+                                    public {
+                                        name : string
+                                    }
+                                    private {
+                                        test() : void
+                                    }
+                                }
+                            `
+                        )
+                    },
+                    {
+                        name: "Class/Nested class",
+                        value: str(
+                            `
+                                class("Example") {
+                                    class("Inner")
+                                }
+                            `
+                        )
+                    },
+                    {
+                        name: "Class/Nested class with properties",
+                        value: str(
+                            `
+                                class("Example") {
 
-                    public {
-                        name : string
-                        test() : void
+                                    public {
+                                        name : string
+                                        test() : void
+                                    }
+                                    
+                                    class("Inner")
+                                }
+                            `
+                        )
                     }
-                    
-                    class("Inner")
-                }
-            `
-        )
+                ])
+            )
     ]
 );

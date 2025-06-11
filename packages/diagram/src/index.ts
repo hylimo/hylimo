@@ -71,6 +71,7 @@ export * from "./module/diagrams/content/uml/sequence/frame.js";
 export * from "./module/diagrams/content/uml/sequence/importedParticipants.js";
 export * from "./module/diagrams/content/uml/sequence/lostFoundMessage.js";
 export * from "./module/diagrams/content/uml/sequence/participant.js";
+export * from "./module/diagrams/content/uml/sequence/registerClassifier.js";
 export * from "./module/diagrams/content/uml/sequence/sequenceDiagramAssociations.js";
 export * from "./module/diagrams/content/uml/sequence/sequenceDiagramCreateConnectionOperator.js";
 export * from "./module/diagrams/content/uml/sequence/types.js";

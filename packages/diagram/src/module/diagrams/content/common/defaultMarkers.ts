@@ -78,7 +78,7 @@ export const defaultMarkersModule = ContentModule.create(
         ]
 
         scope.styles {
-            type("connection") {
+            type("canvasConnection") {
                 cls("arrow-marker") {
                     lineStart = 1
                 }

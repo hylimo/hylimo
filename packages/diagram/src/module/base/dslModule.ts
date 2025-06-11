@@ -96,6 +96,23 @@ const canvasConnectionWithScopeProperties = [
 export const PREDICTION_STYLE_CLASS_ASSIGNMENT_EXPRESSION = `(prediction ? ' styles { class += "${LayoutEngine.PREDICTION_CLASS}" }' : '')`;
 
 /**
+ * Creates a toolbox edit based on the provided createElementCode.
+ * Depending on the `enableDragging` parameter, it will add a layout function to the edit.
+ *
+ * @param createElementCode the code which creates the element, expected to return a CanvasElement, i.e. `class("Example")`. Dedented, NOT escaped
+ * @param enableDragging whether the element should be draggable
+ * @returns the text for the toolbox edit
+ */
+export function createToolboxEdit(createElementCode: string, enableDragging: boolean = true): string {
+    let modifiedEdit = `'\n${dedent(createElementCode)}'`;
+    if (enableDragging) {
+        modifiedEdit += "& ' layout {\n    pos = apos(' & x & ', ' & y & ')\n}'";
+    }
+    modifiedEdit += `& ${PREDICTION_STYLE_CLASS_ASSIGNMENT_EXPRESSION}`;
+    return modifiedEdit;
+}
+
+/**
  * Creates a toolbox edit which is registered in `scope.internal.canvasAddEdits`
  *
  * @param edit the name of the edit, implicitly prefixed with `toolbox/`. To be added correctly to the toolbox, follow the format `Group/Name`, so i.e. `Class/Class with nested class`.
@@ -103,16 +120,12 @@ export const PREDICTION_STYLE_CLASS_ASSIGNMENT_EXPRESSION = `(prediction ? ' sty
  * @param enableDragging whether the element should be draggable
  * @returns the executable expression which creates the toolbox edit
  */
-export function createToolboxEdit(
+export function createToolboxEditExpression(
     edit: string,
     createElementCode: string,
     enableDragging: boolean = true
 ): ExecutableExpression {
-    let modifiedEdit = `'\n${dedent(createElementCode)}'`;
-    if (enableDragging) {
-        modifiedEdit += "& ' layout {\n    pos = apos(' & x & ', ' & y & ')\n}'";
-    }
-    modifiedEdit += `& ${PREDICTION_STYLE_CLASS_ASSIGNMENT_EXPRESSION}`;
+    const modifiedEdit = createToolboxEdit(createElementCode, enableDragging);
     return id(SCOPE).field("internal").field("canvasAddEdits").assignField(`toolbox/${edit}`, str(modifiedEdit));
 }
 

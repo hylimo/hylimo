@@ -1,5 +1,5 @@
-import { assign, fun, functionType, id, listType, optional, stringType } from "@hylimo/core";
-import { createToolboxEdit, SCOPE } from "../../../base/dslModule.js";
+import { assign, fun, functionType, id, listType, object, optional, str, stringType } from "@hylimo/core";
+import { SCOPE } from "../../../base/dslModule.js";
 import { ContentModule } from "../contentModule.js";
 
 /**
@@ -43,29 +43,38 @@ export const packageModule = ContentModule.create(
                 `
             )
         ),
-        id(SCOPE).assignField(
-            "package",
-            fun(
-                `
-                    (name, callback) = args
-                    scope.internal.registerCanvasElement(
-                        _package(name, callback, args.keywords, self = args.self),
-                        args,
-                        args.self
-                    )
-                `,
-                {
-                    docs: "Creates a package.",
-                    params: [
-                        [0, "the name of the package", stringType],
-                        [1, "function that initializes the package content", optional(functionType)],
-                        ["keywords", "the keywords of the package", optional(listType(stringType))]
-                    ],
-                    snippet: `("$1") {\n    $2\n}`,
-                    returns: "The created package"
-                }
-            )
-        ),
+        id(SCOPE)
+            .field("internal")
+            .callField(
+                "registerClassifier",
+                str("package"),
+                fun(
+                    `
+                        (name, callback) = args
+                        scope.internal.registerCanvasElement(
+                            _package(name, callback, args.keywords, self = args.self),
+                            args,
+                            args.self
+                        )
+                    `,
+                    {
+                        docs: "Creates a package.",
+                        params: [
+                            [0, "the name of the package", stringType],
+                            [1, "function that initializes the package content", optional(functionType)],
+                            ["keywords", "the keywords of the package", optional(listType(stringType))]
+                        ],
+                        snippet: `("$1") {\n    $2\n}`,
+                        returns: "The created package"
+                    }
+                ),
+                object([
+                    {
+                        name: "Package/Package",
+                        value: str('package("Example")')
+                    }
+                ])
+            ),
         `
             scope.styles {
                 cls("package-element") {
@@ -99,7 +108,6 @@ export const packageModule = ContentModule.create(
                     }
                 }
             }
-        `,
-        createToolboxEdit("Package/Package", 'package("Example")')
+        `
     ]
 );

@@ -1,5 +1,6 @@
-import { fun, id } from "@hylimo/core";
-import { SCOPE } from "../../../../base/dslModule.js";
+import type { BaseObject, InterpreterContext } from "@hylimo/core";
+import { assertObject, assertString, fun, id, jsFun, SemanticFieldNames } from "@hylimo/core";
+import { createToolboxEdit, SCOPE } from "../../../../base/dslModule.js";
 import { ContentModule } from "../../contentModule.js";
 
 /**
@@ -89,6 +90,31 @@ export const classifierModule = ContentModule.create(
                     }
                 )
             ),
+        id(SCOPE)
+            .field("internal")
+            .assignField(
+                "registerClassifier",
+                jsFun(
+                    (args, context) => {
+                        const name = args.getLocalFieldOrUndefined(0)?.value;
+                        const classifierFunction = args.getLocalFieldOrUndefined(1);
+                        const toolboxEdits = args.getLocalFieldOrUndefined(2)?.value;
+                        const scope = context.getField(SCOPE);
+                        scope.setSelfLocalField(assertString(name!), classifierFunction!, context);
+                        registerClassifierToolboxEdits(scope, toolboxEdits!, true, context);
+                        return context.null;
+                    },
+                    {
+                        docs: "Registers a classifier function",
+                        params: [
+                            [0, "The name of the classifier function"],
+                            [1, "The classifier function itself"],
+                            [2, "The toolbox edits to register"]
+                        ],
+                        returns: "null"
+                    }
+                )
+            ),
         `
             scope.styles {
                 cls("classifier-element") {
@@ -132,3 +158,37 @@ export const classifierModule = ContentModule.create(
         `
     ]
 );
+
+/**
+ * Registers toolbox edits for a classifier by iterating through the provided toolbox edits
+ * and adding them to the canvas add edits under the 'toolbox/' namespace.
+ *
+ * @param scope - The base object scope that contains the internal canvas add edits
+ * @param toolboxEdits - An object containing toolbox edit definitions where keys are edit names and values contain the edit content
+ * @param draggable - Whether the toolbox edits should be draggable (currently unused in implementation)
+ * @param context - The interpreter context used for creating new string values and field operations
+ */
+export function registerClassifierToolboxEdits(
+    scope: BaseObject,
+    toolboxEdits: BaseObject,
+    draggable: boolean,
+    context: InterpreterContext
+): void {
+    assertObject(toolboxEdits!);
+    for (const [key, value] of toolboxEdits!.fields.entries()) {
+        if (typeof key !== "string" || key === SemanticFieldNames.PROTO) {
+            continue;
+        }
+        scope
+            .getSelfFieldValue("internal", context)
+            .getSelfFieldValue("canvasAddEdits", context)
+            .setSelfLocalField(
+                `toolbox/${key}`,
+                {
+                    value: context.newString(createToolboxEdit(assertString(value.value), true)),
+                    source: undefined
+                },
+                context
+            );
+    }
+}

@@ -15,6 +15,7 @@ import { sequenceDiagramCreateConnectionOperatorModule } from "./content/uml/seq
 import { nonNavigableAssociationsModule } from "./content/uml/nonNavigableAssociations.js";
 import { associationsModule } from "./content/uml/associations.js";
 import { importedParticipantsModule } from "./content/uml/sequence/importedParticipants.js";
+import { registerClassifierModule } from "./content/uml/sequence/registerClassifier.js";
 
 /**
  * Module for UML sequence diagrams.
@@ -25,6 +26,7 @@ export const sequenceDiagramModule = InterpreterModule.create(
     [],
     createDiagramModule("sequenceDiagram", "Creates a UML sequence diagram", [
         defaultStylesModule,
+        registerClassifierModule,
         sequenceDiagramCreateConnectionOperatorModule,
         associationsModule,
         sequenceDiagramAssociationsModule,

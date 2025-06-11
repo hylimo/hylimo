@@ -1,6 +1,5 @@
-import type { ParseableExpressions } from "@hylimo/core";
-import { fun, functionType, id, listType, optional, or, stringType } from "@hylimo/core";
-import { createToolboxEdit, SCOPE } from "../../../base/dslModule.js";
+import { fun, functionType, id, listType, object, optional, or, str, stringType } from "@hylimo/core";
+import { SCOPE } from "../../../base/dslModule.js";
 import { ContentModule } from "../contentModule.js";
 
 /**
@@ -43,44 +42,53 @@ export const actorModule = ContentModule.create(
                 scope.internal.registerCanvasElement(actorElement, args.args, args.args.self)
             }
         `,
-        id(SCOPE).assignField(
-            "actor",
-            fun(
-                `
-                    (name, title, callback) = scope.internal.parseInstanceArgs(args)
-                    actorArgs = args
-                    
-                    if(callback != null) {
-                        this.actor = scope.internal.createInstance(name, callback, title = title, keywords = actorArgs.keywords, args = actorArgs)
-                        actor.class += "actor-element"
-                        this.elements = list(
-                            path(path = "${stickmanIconPath}", stretch = "uniform", class = list("actor-icon")),
-                            actor.contents[0]
-                        )
-                        actor.contents = list(
-                            container(
-                                contents = elements,
-                                class = list("actor")
+        id(SCOPE)
+            .field("internal")
+            .callField(
+                "registerClassifier",
+                str("actor"),
+                fun(
+                    `
+                        (name, title, callback) = scope.internal.parseInstanceArgs(args)
+                        actorArgs = args
+                        
+                        if(callback != null) {
+                            this.actor = scope.internal.createInstance(name, callback, title = title, keywords = actorArgs.keywords, args = actorArgs)
+                            actor.class += "actor-element"
+                            this.elements = list(
+                                path(path = "${stickmanIconPath}", stretch = "uniform", class = list("actor-icon")),
+                                actor.contents[0]
                             )
-                        )
-                        actor
-                    } {
-                        scope.internal.createActor(title, args = actorArgs)
+                            actor.contents = list(
+                                container(
+                                    contents = elements,
+                                    class = list("actor")
+                                )
+                            )
+                            actor
+                        } {
+                            scope.internal.createActor(title, args = actorArgs)
+                        }
+                    `,
+                    {
+                        docs: "Creates an actor.",
+                        params: [
+                            [0, "the name of the actor", stringType],
+                            [1, "the optional class name of this actor", optional(or(stringType, functionType))],
+                            [2, "the callback function of this actor", optional(functionType)],
+                            ["keywords", "the keywords of the actor", optional(listType(stringType))]
+                        ],
+                        snippet: `("$1")`,
+                        returns: "The created actor"
                     }
-                `,
-                {
-                    docs: "Creates an actor.",
-                    params: [
-                        [0, "the name of the actor", stringType],
-                        [1, "the optional class name of this actor", optional(or(stringType, functionType))],
-                        [2, "the callback function of this actor", optional(functionType)],
-                        ["keywords", "the keywords of the actor", optional(listType(stringType))]
-                    ],
-                    snippet: `("$1")`,
-                    returns: "The created actor"
-                }
-            )
-        ),
+                ),
+                object([
+                    {
+                        name: "Actor/Actor",
+                        value: str('actor("Example")')
+                    }
+                ])
+            ),
         `
             scope.styles {
                 cls("actor-element") {
@@ -107,17 +115,6 @@ export const actorModule = ContentModule.create(
                     }
                 }
             }
-        `,
-        ...actorToolboxEdits(true)
+        `
     ]
 );
-
-/**
- * Creates toolbox edits for the actor function
- *
- * @param enableDragging whether dragging should be enabled
- * @returns the toolbox edits
- */
-export function actorToolboxEdits(enableDragging: boolean): ParseableExpressions {
-    return [createToolboxEdit("Actor/Actor", 'actor("Example")', enableDragging)];
-}

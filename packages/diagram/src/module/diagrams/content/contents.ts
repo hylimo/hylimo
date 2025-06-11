@@ -31,6 +31,8 @@ import { lostFoundMessageModule } from "./uml/sequence/lostFoundMessage.js";
 import { valuesModule } from "./uml/classifier/values.js";
 import { sequenceDiagramCreateConnectionOperatorModule } from "./uml/sequence/sequenceDiagramCreateConnectionOperator.js";
 import type { ContentModule } from "./contentModule.js";
+import { importedParticipantsModule } from "./uml/sequence/importedParticipants.js";
+import { registerClassifierModule } from "./uml/sequence/registerClassifier.js";
 
 /**
  * All content modules
@@ -54,6 +56,7 @@ export const contents: ContentModule[] = [
     enumModule,
     eventModule,
     extendsAndImplementsModule,
+    importedParticipantsModule,
     instanceModule,
     interfaceModule,
     lostFoundMessageModule,
@@ -64,6 +67,7 @@ export const contents: ContentModule[] = [
     propertiesAndMethodsModule,
     providesAndRequiresModule,
     readingDirectionModule,
+    registerClassifierModule,
     sectionsModule,
     sequenceDiagramAssociationsModule,
     sequenceDiagramCreateConnectionOperatorModule,

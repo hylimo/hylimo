@@ -1,5 +1,5 @@
-import { booleanType, fun, functionType, id, listType, optional, stringType } from "@hylimo/core";
-import { createToolboxEdit, SCOPE } from "../../../base/dslModule.js";
+import { booleanType, fun, functionType, id, listType, object, optional, str, stringType } from "@hylimo/core";
+import { SCOPE } from "../../../base/dslModule.js";
 import { ContentModule } from "../contentModule.js";
 
 /**
@@ -27,42 +27,53 @@ export const enumModule = ContentModule.create(
                 )
             )
         `,
-        id(SCOPE).assignField(
-            "enum",
-            fun(
-                `
-                    (name, callback) = args
-                    keywords = list("enumeration")
-                    otherKeywords = args.keywords
-                    if(otherKeywords != null) {
-                        keywords.addAll(otherKeywords)
+        id(SCOPE)
+            .field("internal")
+            .callField(
+                "registerClassifier",
+                str("enum"),
+                fun(
+                    `
+                        (name, callback) = args
+                        keywords = list("enumeration")
+                        otherKeywords = args.keywords
+                        if(otherKeywords != null) {
+                            keywords.addAll(otherKeywords)
+                        }
+                        _enum(name, callback, title = name, keywords = keywords, abstract = args.abstract, args = args, hasEntries = true)
+                    `,
+                    {
+                        docs: "Creates an enum.",
+                        params: [
+                            [0, "the name of the enum", stringType],
+                            [1, "the function declaring the enum constants", optional(functionType)],
+                            ["keywords", "the keywords of the enum", optional(listType(stringType))],
+                            ["abstract", "whether the enum is abstract", optional(booleanType)]
+                        ],
+                        snippet: `("$1") {\n    entries {\n        $2\n    }\n}`,
+                        returns: "The created enum"
                     }
-                    _enum(name, callback, title = name, keywords = keywords, abstract = args.abstract, args = args, hasEntries = true)
-                `,
-                {
-                    docs: "Creates an enum.",
-                    params: [
-                        [0, "the name of the enum", stringType],
-                        [1, "the function declaring the enum constants", optional(functionType)],
-                        ["keywords", "the keywords of the enum", optional(listType(stringType))],
-                        ["abstract", "whether the enum is abstract", optional(booleanType)]
-                    ],
-                    snippet: `("$1") {\n    entries {\n        $2\n    }\n}`,
-                    returns: "The created enum"
-                }
+                ),
+                object([
+                    {
+                        name: "Enum/Enum",
+                        value: str('enum("Example")')
+                    },
+                    {
+                        name: "Enum/Enum with entries",
+                        value: str(
+                            `
+                                enum("Example") {
+                                    entries {
+                                        A
+                                        B
+                                    }
+                                    }
+                                }
+                            `
+                        )
+                    }
+                ])
             )
-        ),
-        createToolboxEdit("Enum/Enum", 'enum("Example")'),
-        createToolboxEdit(
-            "Enum/Enum with entries",
-            `
-                enum("Example") {
-                    entries {
-                        A
-                        B
-                    }
-                }
-            `
-        )
     ]
 );
