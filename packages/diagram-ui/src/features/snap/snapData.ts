@@ -1,7 +1,6 @@
 import type { CanvasLayoutEngine } from "@hylimo/diagram-common";
 import {
     CanvasElement,
-    LinePoint,
     CanvasConnection,
     CanvasLineSegment,
     CanvasAxisAlignedSegment,
@@ -58,7 +57,7 @@ function groupElementsByContext(elements: SElement[]): Map<string, SElement[]> {
     const elementsByContext = new Map<string, SElement[]>();
 
     for (const element of elements) {
-        if (!(CanvasPoint.isCanvasPoint(element) || LinePoint.isLinePoint(element))) {
+        if (!(CanvasPoint.isCanvasPoint(element) || CanvasElement.isCanvasElement(element))) {
             continue;
         }
 
