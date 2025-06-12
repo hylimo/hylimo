@@ -60,11 +60,7 @@ export class WrapperObject<T> extends BaseObject {
         }
     }
 
-    override setLocalField(
-        _key: string | number,
-        _value: LabeledValue,
-        _context: InterpreterContext,
-    ): void {
+    override setLocalField(_key: string | number, _value: LabeledValue, _context: InterpreterContext): void {
         throw new RuntimeError("Cannot set field directly of a wrapped Object");
     }
 

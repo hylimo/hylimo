@@ -61,11 +61,7 @@ export abstract class BaseObject {
      * @param value the new value of the field
      * @param context context in which this is performed
      */
-    abstract setLocalField(
-        key: string | number,
-        value: LabeledValue,
-        context: InterpreterContext,
-    ): void;
+    abstract setLocalField(key: string | number, value: LabeledValue, context: InterpreterContext): void;
 
     /**
      * Deletes a field.
@@ -158,11 +154,7 @@ export abstract class SimpleObject extends BaseObject {
         }
     }
 
-    override setLocalField(
-        _key: string | number,
-        _value: LabeledValue,
-        _context: InterpreterContext,
-    ) {
+    override setLocalField(_key: string | number, _value: LabeledValue, _context: InterpreterContext) {
         throw new RuntimeError("Cannot set field directly of a non-Object");
     }
 

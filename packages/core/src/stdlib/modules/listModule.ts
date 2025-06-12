@@ -136,10 +136,7 @@ export const listModule = InterpreterModule.create(
                         const self = args.getFieldValue(SemanticFieldNames.SELF, context);
                         const callback = args.getFieldValue(0, context);
                         assertFunction(callback, "first positional argument of forEach");
-                        const length = assertNumber(
-                            self.getFieldValue(lengthField, context),
-                            "length field of a list"
-                        );
+                        const length = assertNumber(self.getFieldValue(lengthField, context), "length field of a list");
                         let lastValue: LabeledValue = { value: context.null, source: undefined };
                         for (let i = 0; i < length; i++) {
                             lastValue = callback.invoke(
@@ -221,10 +218,7 @@ export const listModule = InterpreterModule.create(
                         const self = args.getFieldValue(SemanticFieldNames.SELF, context);
                         const callback = args.getFieldValue(0, context);
                         assertFunction(callback, "first positional argument of some");
-                        const length = assertNumber(
-                            self.getFieldValue(lengthField, context),
-                            "length field of a list"
-                        );
+                        const length = assertNumber(self.getFieldValue(lengthField, context), "length field of a list");
                         for (let i = 0; i < length; i++) {
                             const res = callback.invoke(
                                 [
@@ -261,11 +255,7 @@ export const listModule = InterpreterModule.create(
                     (args, context, staticScope, callExpression) => {
                         const indexOnlyArgs = args.filter((value) => !value.name);
                         const list = generateArgs(indexOnlyArgs, context, undefined, callExpression);
-                        list.setLocalField(
-                            SemanticFieldNames.PROTO,
-                            staticScope.getField(listProto, context),
-                            context
-                        );
+                        list.setLocalField(SemanticFieldNames.PROTO, staticScope.getField(listProto, context), context);
                         list.setLocalField(
                             lengthField,
                             { value: context.newNumber(indexOnlyArgs.length), source: undefined },
@@ -338,10 +328,7 @@ export const listModule = InterpreterModule.create(
                 jsFun(
                     (args, context) => {
                         const self = args.getFieldValue(SemanticFieldNames.SELF, context);
-                        const length = assertNumber(
-                            self.getFieldValue(lengthField, context),
-                            "length field of a list"
-                        );
+                        const length = assertNumber(self.getFieldValue(lengthField, context), "length field of a list");
                         const maxDepthObject = args.getField("maxDepth", context).value;
                         const maxDepth = maxDepthObject.isNull ? 4 : assertNumber(maxDepthObject);
                         const fields: string[] = [];

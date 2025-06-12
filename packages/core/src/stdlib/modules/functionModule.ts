@@ -44,11 +44,7 @@ export const functionModule = InterpreterModule.create(
                             { value: context.null, source: undefined },
                             context
                         );
-                        scope.setLocalField(
-                            SemanticFieldNames.IT,
-                            { value: context.null, source: undefined },
-                            context
-                        );
+                        scope.setLocalField(SemanticFieldNames.IT, { value: context.null, source: undefined }, context);
                         scope.setLocalField(
                             SemanticFieldNames.THIS,
                             { value: context.null, source: undefined },

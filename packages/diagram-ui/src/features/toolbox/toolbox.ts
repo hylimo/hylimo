@@ -19,7 +19,6 @@ import {
     CanvasPoint,
     EditSpecification,
     Root,
-    type EditSpecificationEntry,
     type Element
 } from "@hylimo/diagram-common";
 import type { ConnectionEdit, ToolboxEdit } from "@hylimo/diagram-protocol";
@@ -39,7 +38,8 @@ import { UpdateCursorAction } from "../cursor/cursor.js";
 import { ToolState } from "./toolState.js";
 import { SetToolAction } from "./setToolAction.js";
 import type { SettingsProvider } from "../settings/settingsProvider.js";
-import type { SElement } from "../../model/sElement.js";
+import jsonata, { type ExprNode } from "jsonata";
+import type { TransactionIdProvider } from "../transaction/transactionIdProvider.js";
 
 /**
  * UI Extension which displays the graphical toolbox.
@@ -109,6 +109,16 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler, Conn
     private connectionSearchIndex?: MiniSearch<ConnectionEditEntry>;
 
     /**
+     * Cached toolbox edits
+     */
+    private toolboxEdits?: ToolboxEditEntry[];
+
+    /**
+     * Cached connection edits
+     */
+    private connectionEdits?: ConnectionEditEntry[];
+
+    /**
      * Cached rendered element previews.
      */
     elementPreviews: Map<string, VNode | undefined> = new Map();
@@ -154,6 +164,11 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler, Conn
     @inject(TYPES.SettingsProvider) readonly settingsProvider!: SettingsProvider;
 
     /**
+     * The transaction id provider
+     */
+    @inject(TYPES.TransactionIdProvider) transactionIdProvider!: TransactionIdProvider;
+
+    /**
      * Creates a new toolbox.
      *
      * @param configManager The config manager
@@ -178,13 +193,21 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler, Conn
             this.update();
         } else if (SetToolAction.is(action)) {
             this.updateTool(action.tool, false);
-        } else if (action.kind === SelectAction.KIND) {
-            (action as SelectAction).selectedElementsIDs.forEach((id) => this.selectedElements.add(id));
-            (action as SelectAction).deselectedElementsIDs.forEach((id) => this.selectedElements.delete(id));
-            this.update();
-        } else if (action.kind === SelectAllAction.KIND) {
-            this.handleSelectAllAction(action as SelectAllAction);
+        } else if (action.kind === SelectAction.KIND || action.kind === SelectAllAction.KIND) {
+            this.handleSelectAction(action as SelectAction | SelectAllAction);
         }
+    }
+
+    /**
+     * Clears all cached data
+     */
+    private resetCache(): void {
+        this.elementPreviews.clear();
+        this.searchIndex = undefined;
+        this.connectionSearchIndex = undefined;
+        this.index = undefined;
+        this.toolboxEdits = undefined;
+        this.connectionEdits = undefined;
     }
 
     /**
@@ -192,7 +215,7 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler, Conn
      * This method:
      *
      * @param action The UpdateModelAction or SetModelAction containing the new model root
-     * @returns void - Returns early if the new root is not of type Root.TYPE
+     * @returns returns early if the new root is not of type Root.TYPE
      */
     private handleUpdateModelAction(action: UpdateModelAction | SetModelAction): void {
         if (action.newRoot?.type !== Root.TYPE) {
@@ -201,10 +224,7 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler, Conn
         const root = action.newRoot as Root;
         this.currentRoot = root;
         this.initializeToolbox();
-        this.elementPreviews.clear();
-        this.searchIndex = undefined;
-        this.connectionSearchIndex = undefined;
-        this.index = undefined;
+        this.resetCache();
         for (const selected of this.selectedElements) {
             if (this.getIndex().get(selected) == undefined) {
                 this.selectedElements.delete(selected);
@@ -236,26 +256,37 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler, Conn
     }
 
     /**
-     * Handles a SelectAllAction by either selecting all selectable elements or clearing the selection.
+     * Handles a Select(All)Action and resets the cache if necessary.
      *
-     * @param action The SelectAllAction to handle
+     * @param action The Select(All)Action to handle
      */
-    private handleSelectAllAction(action: SelectAllAction): void {
-        if (action.select) {
-            if (this.currentRoot != undefined) {
-                this.selectedElements.clear();
-                for (const element of this.getIndex().values()) {
-                    if (
-                        CanvasElement.isCanvasElement(element) ||
-                        CanvasConnection.isCanvasConnection(element) ||
-                        CanvasPoint.isCanvasPoint(element)
-                    ) {
-                        this.selectedElements.add(element.id);
+    private handleSelectAction(action: SelectAction | SelectAllAction): void {
+        const oldSelected = this.selectedElements.size === 1 ? this.selectedElements.values().next().value : undefined;
+        if (action.kind === SelectAction.KIND) {
+            (action as SelectAction).selectedElementsIDs.forEach((id) => this.selectedElements.add(id));
+            (action as SelectAction).deselectedElementsIDs.forEach((id) => this.selectedElements.delete(id));
+        } else {
+            if (action.select) {
+                if (this.currentRoot != undefined) {
+                    this.selectedElements.clear();
+                    for (const element of this.getIndex().values()) {
+                        if (
+                            CanvasElement.isCanvasElement(element) ||
+                            CanvasConnection.isCanvasConnection(element) ||
+                            CanvasPoint.isCanvasPoint(element)
+                        ) {
+                            this.selectedElements.add(element.id);
+                        }
                     }
                 }
+            } else {
+                this.selectedElements.clear();
             }
-        } else {
-            this.selectedElements.clear();
+        }
+        const newSelected = this.selectedElements.size === 1 ? this.selectedElements.values().next().value : undefined;
+        if (oldSelected !== newSelected) {
+            this.resetCache();
+            this.update();
         }
     }
 
@@ -373,24 +404,71 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler, Conn
      * @returns The toolbox edits
      */
     getToolboxEdits(): ToolboxEditEntry[] {
-        let entries: [string, EditSpecificationEntry][] = [];
-        let targetId: string;
-        if (this.selectedElements.size === 1) {
-            const selectedElement = this.getIndex().get(this.selectedElements.values().next().value!) as SElement;
-            entries = Object.entries(selectedElement.edits).filter(
+        if (this.toolboxEdits == undefined) {
+            const target =
+                this.selectedElements.size === 1
+                    ? this.getIndex().get(this.selectedElements.values().next().value!)!
+                    : this.currentRoot!;
+            const entries = Object.entries(target.edits).filter(
                 ([key, edit]) => key.startsWith("toolbox/") && EditSpecification.isConsistent([[edit]])
             );
-            targetId = selectedElement.id;
-        } else {
-            entries = Object.entries(this.currentRoot!.edits).filter(
-                ([key, edit]) => key.startsWith("toolbox/") && EditSpecification.isConsistent([[edit]])
-            );
-            targetId = this.currentRoot!.id;
+            this.toolboxEdits = entries
+                .map(([key, entry]) => {
+                    const [group, name] = key.substring("toolbox/".length).split("/");
+                    const info = { canMove: false, requiresExpression: false };
+                    for (const template of entry.template) {
+                        if (typeof template === "string") {
+                            this.extractTemplateInformationRecursive(jsonata(template).ast(), info);
+                        }
+                    }
+                    return {
+                        group,
+                        name,
+                        edit: key as `toolbox/${string}`,
+                        target: { id: target.id, editExpression: (target as CanvasElement).editExpression },
+                        ...info
+                    };
+                })
+                .filter((entry) => !entry.requiresExpression || entry.target.editExpression != undefined);
         }
-        return entries.map(([key]) => {
-            const [group, name] = key.substring("toolbox/".length).split("/");
-            return { group, name, edit: key as `toolbox/${string}`, targetId };
-        });
+        return this.toolboxEdits;
+    }
+
+    /**
+     * Extracts template information from the given node recursively.
+     * Updates the provided info object with the extracted information.
+     *
+     * @param node The node to extract information from
+     * @param info The info object to update
+     */
+    private extractTemplateInformationRecursive(
+        node: ExprNode | ExprNode[] | undefined,
+        info: Pick<ToolboxEditEntry, "canMove" | "requiresExpression">
+    ): void {
+        if (node == undefined) {
+            return;
+        }
+        if (Array.isArray(node)) {
+            for (const child of node) {
+                this.extractTemplateInformationRecursive(child, info);
+            }
+        } else {
+            if (node.type === "name") {
+                if (node.value === "x" || node.value === "y") {
+                    info.canMove = true;
+                } else if (node.value === "expression") {
+                    info.requiresExpression = true;
+                }
+            } else {
+                this.extractTemplateInformationRecursive(node.arguments, info);
+                this.extractTemplateInformationRecursive(node.lhs, info);
+                this.extractTemplateInformationRecursive(node.rhs, info);
+                this.extractTemplateInformationRecursive(node.steps, info);
+                this.extractTemplateInformationRecursive(node.expressions, info);
+                this.extractTemplateInformationRecursive(node.procedure, info);
+                this.extractTemplateInformationRecursive(node.stages, info);
+            }
+        }
     }
 
     /**
@@ -400,9 +478,12 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler, Conn
      * @returns The connection edits
      */
     getConnectionEdits(): ConnectionEditEntry[] {
-        return Object.entries(this.currentRoot!.edits)
-            .filter(([key, edit]) => key.startsWith("connection/") && EditSpecification.isConsistent([[edit]]))
-            .map(([key]) => ({ name: key.substring("connection/".length), edit: key as `connection/${string}` }));
+        if (this.connectionEdits == undefined) {
+            this.connectionEdits = Object.entries(this.currentRoot!.edits)
+                .filter(([key, edit]) => key.startsWith("connection/") && EditSpecification.isConsistent([[edit]]))
+                .map(([key]) => ({ name: key.substring("connection/".length), edit: key as `connection/${string}` }));
+        }
+        return this.connectionEdits;
     }
 
     /**
@@ -434,9 +515,10 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler, Conn
                 values: {
                     x: 0,
                     y: 0,
-                    prediction: true
+                    prediction: true,
+                    expression: (edit as ToolboxEditEntry).target.editExpression
                 },
-                elements: [(edit as ToolboxEditEntry).targetId]
+                elements: [(edit as ToolboxEditEntry).target.id]
             };
         } else {
             return {
@@ -591,9 +673,17 @@ export interface ToolboxEditEntry {
      */
     edit: `toolbox/${string}`;
     /**
-     * The id of the target element
+     * The id & optional edit expression of the target element
      */
-    targetId: string;
+    target: Pick<CanvasElement, "id" | "editExpression">;
+    /**
+     * If true, dragging this item is allowed
+     */
+    canMove: boolean;
+    /**
+     * If true, the item requires an expression for the element to be set
+     */
+    requiresExpression: boolean;
 }
 
 /**

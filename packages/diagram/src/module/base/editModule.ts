@@ -83,11 +83,7 @@ function generateReplaceEdit(
     context: InterpreterContext
 ): BaseObject {
     const templateObject = context.newObject();
-    templateObject.setLocalField(
-        "length",
-        { value: context.newNumber(template.length), source: undefined },
-        context
-    );
+    templateObject.setLocalField("length", { value: context.newNumber(template.length), source: undefined }, context);
     template.forEach((field, index) => {
         templateObject.setLocalField(index, { value: field, source: undefined }, context);
     });

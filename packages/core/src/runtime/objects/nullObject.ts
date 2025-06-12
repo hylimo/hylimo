@@ -24,19 +24,11 @@ export class NullObject extends BaseObject {
         return new Map();
     }
 
-    override setField(
-        key: string | number,
-        _value: LabeledValue,
-        _context: InterpreterContext,
-    ): void {
+    override setField(key: string | number, _value: LabeledValue, _context: InterpreterContext): void {
         throw new RuntimeError(`Cannot set '${key}' as the parent object is null`);
     }
 
-    override setLocalField(
-        key: string | number,
-        _value: LabeledValue,
-        _context: InterpreterContext,
-    ): void {
+    override setLocalField(key: string | number, _value: LabeledValue, _context: InterpreterContext): void {
         throw new RuntimeError(`Cannot set '${key}' as the parent object is null`);
     }
 

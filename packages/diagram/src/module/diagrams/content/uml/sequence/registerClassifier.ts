@@ -49,9 +49,7 @@ export const registerClassifierModule = ContentModule.create(
                                 if (entry.name != undefined) {
                                     newArgs.push({
                                         name: entry.name,
-                                        value: new ExecutableConstExpression(
-                                            argsObject.getField(entry.name, context)
-                                        )
+                                        value: new ExecutableConstExpression(argsObject.getField(entry.name, context))
                                     });
                                 } else {
                                     newArgs.push({

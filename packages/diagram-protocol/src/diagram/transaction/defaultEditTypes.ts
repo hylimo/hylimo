@@ -56,7 +56,10 @@ export type SplitCanvasBezierSegmentEdit = Edit<
 /**
  * Toolbox edit
  */
-export type ToolboxEdit = Edit<{ x: number; y: number; prediction?: boolean }, `toolbox/${string}`>;
+export type ToolboxEdit = Edit<
+    { x: number; y: number; prediction?: boolean; expression?: string },
+    `toolbox/${string}`
+>;
 
 /**
  * Start/end for a connection created by a connection edit.

@@ -6,7 +6,7 @@ import type { Action } from "sprotty-protocol";
 import { filterValidSnaps, getSnapLines, getSnaps } from "../snap/snapping.js";
 import { type SnapLine } from "../snap/model.js";
 import { findViewportZoom } from "../../base/findViewportZoom.js";
-import type { Point } from "@hylimo/diagram-common";
+import type { CanvasElement, Point } from "@hylimo/diagram-common";
 import { translate, type Matrix } from "transformation-matrix";
 import { SnapHandler } from "../snap/snapHandler.js";
 import { getSnapReferenceData } from "../snap/snapData.js";
@@ -30,7 +30,7 @@ export class CreateElementMoveHandler extends SnapMoveHandler<CreateElementSnapH
     constructor(
         private readonly edit: `toolbox/${string}`,
         private readonly root: SRoot,
-        private readonly editTarget: string,
+        private readonly editTarget: Pick<CanvasElement, "id" | "editExpression">,
         private readonly pointerId: number,
         settings: SharedSettings | undefined,
         snappingEnabled: boolean
@@ -53,7 +53,7 @@ export class CreateElementMoveHandler extends SnapMoveHandler<CreateElementSnapH
     }
 
     override handleMove(x: number, y: number, event: MouseEvent, target: SModelElementImpl): HandleMoveResult {
-        let values: { x: number; y: number };
+        let values: { x: number; y: number; expression?: string };
         let snapLines: Map<string, SnapLine[]> | undefined = undefined;
         if (this.hasMoved) {
             values = { x, y };
@@ -71,11 +71,12 @@ export class CreateElementMoveHandler extends SnapMoveHandler<CreateElementSnapH
                 y: this.root.scroll.y + this.root.canvasBounds.height / this.root.zoom / 2
             };
         }
+        values.expression = this.editTarget.editExpression;
         const edits = [
             {
                 types: [this.edit],
                 values,
-                elements: [this.editTarget]
+                elements: [this.editTarget.id]
             } satisfies ToolboxEdit
         ];
         return { edits, snapLines };

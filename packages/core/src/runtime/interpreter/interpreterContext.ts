@@ -85,11 +85,7 @@ export class InterpreterContext {
         this.functionPrototype = this.newObject();
         this.wrapperPrototype = this.newObject();
         this.currentScope = this.newObject();
-        this.currentScope.setLocalField(
-            SemanticFieldNames.THIS,
-            { value: this.currentScope, source: undefined },
-            this
-        );
+        this.currentScope.setLocalField(SemanticFieldNames.THIS, { value: this.currentScope, source: undefined }, this);
         this.globalScope = this.currentScope;
         for (const module of modules) {
             this.moduleValues.set(module, new Map());
