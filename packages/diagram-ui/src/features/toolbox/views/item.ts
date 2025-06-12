@@ -97,6 +97,7 @@ function generateToolboxItem(context: Toolbox, toolboxEdit: ToolboxEditEntry): V
                             new CreateElementMoveHandler(
                                 toolboxEdit.edit,
                                 root,
+                                toolboxEdit.targetId,
                                 event.pointerId,
                                 context.settingsProvider.settings,
                                 context.configManager.config?.snappingEnabled ?? true

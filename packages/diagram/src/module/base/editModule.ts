@@ -278,12 +278,13 @@ export const editModule = InterpreterModule.create(
                         return context.null;
                     }
                     const scope = args.getSelfField(1, context).value;
+                    const parsedScope = scope.isNull ? "" : ` ${assertString(scope)}`;
                     const expression = args.getSelfField(2, context).value;
                     return generateEdit(
                         target as Expression<any>,
                         {
                             value: context.newString(
-                                `' ${assertString(scope)} {\n    ' & $replace(${assertString(expression)}, '\n', '\n    ') & '\n}'`
+                                `'${parsedScope} {\n    ' & $replace(${assertString(expression)}, '\n', '\n    ') & '\n}'`
                             ),
                             source: undefined
                         },
@@ -295,7 +296,7 @@ export const editModule = InterpreterModule.create(
                     docs: "Creates an append scope edit",
                     params: [
                         [0, "the target to replace / append to"],
-                        [1, "the name of the scope"],
+                        [1, "the name of the scope, or null if a trailing lambda should be appended"],
                         [2, "the expression to append"]
                     ],
                     returns: "the created edit or null if the target is not editable"

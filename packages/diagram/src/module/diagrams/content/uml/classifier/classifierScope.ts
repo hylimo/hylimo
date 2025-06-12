@@ -6,12 +6,14 @@ import type {
     InterpreterContext
 } from "@hylimo/core";
 import {
+    assertObject,
     ExecutableConstExpression,
     FunctionObject,
     id,
     jsFun,
     num,
     object,
+    str,
     type FunctionDocumentation,
     type LabeledValue,
     type ParseableExpressions
@@ -93,8 +95,18 @@ export function createClassifierScopeContentModule<T>(
                         {
                             value: jsFun((args, context) => {
                                 const callScope = args.getLocalFieldOrUndefined("callScope")!.value;
+                                const createAddEdit = context.getField("createAddEdit");
+                                const element = args.getLocalFieldOrUndefined("element")!.value;
+                                assertObject(element);
+                                const elementEdits = element.getLocalFieldOrUndefined("edits")!.value;
+                                assertObject(elementEdits);
                                 for (const spec of specifications) {
-                                    const classifierScope = createClassifierScopeFunction(spec, callScope);
+                                    const classifierScope = createClassifierScopeFunction(
+                                        spec,
+                                        callScope,
+                                        createAddEdit,
+                                        elementEdits
+                                    );
                                     callScope.setSelfLocalField(spec.name, classifierScope.evaluate(context), context);
                                 }
                                 return context.null;
@@ -102,6 +114,19 @@ export function createClassifierScopeContentModule<T>(
                         },
                         {
                             value: jsFun((args, context) => {
+                                const element = args.getLocalFieldOrUndefined("element")!.value;
+                                assertObject(element);
+                                const elementEdits = element.getLocalFieldOrUndefined("edits")!.value;
+                                assertObject(elementEdits);
+                                const classifierArgs = args.getLocalFieldOrUndefined("args")!;
+                                assertObject(classifierArgs.value);
+                                const optionalCallback = classifierArgs.value.getLocalFieldOrUndefined(1);
+                                if (optionalCallback == undefined) {
+                                    const originalArgs = classifierArgs.value.getLocalFieldOrUndefined("args")!;
+                                    handleAppendScopeEdits(specifications, elementEdits, originalArgs, context);
+                                } else {
+                                    handleAddEdits(specifications, elementEdits, optionalCallback, context);
+                                }
                                 return context.null;
                             })
                         }
@@ -116,22 +141,27 @@ export function createClassifierScopeContentModule<T>(
  * Creates a classifier scope function from a specification and call scope.
  * This function processes scope functions, extracts expressions, parses them according to the specification,
  * and adds the resulting entries to the appropriate sections.
+ * It also handles edits defined in the specification by invoking the `createAddEdit` function
  *
  * @template T The type of context used by the specification
  * @param spec The classifier scope specification defining parsing behavior
  * @param callScope The base object representing the call scope
+ * @param createAddEdit the function to create an add edit
+ * @param elementEdits the objects containing edits for the element
  * @returns An executable native function expression for the classifier scope
  */
 function createClassifierScopeFunction<T>(
     spec: ClassifierScopeSpecification<T>,
-    callScope: BaseObject
+    callScope: BaseObject,
+    createAddEdit: BaseObject,
+    elementEdits: FullObject
 ): ExecutableNativeFunctionExpression {
     return jsFun((args, context) => {
-        const scopeFunction = args.getLocalFieldOrUndefined(0)!.value;
-        if (!(scopeFunction instanceof FunctionObject)) {
+        const scopeFunction = args.getLocalFieldOrUndefined(0)!;
+        if (!(scopeFunction.value instanceof FunctionObject)) {
             throw new Error("scope is not a function");
         }
-        const expressions = scopeFunction.definition.expressions.map(
+        const expressions = scopeFunction.value.definition.expressions.map(
             (expression) => expression.expression as Expression
         );
         const parseContext = spec.extractContext(context, args);
@@ -139,6 +169,22 @@ function createClassifierScopeFunction<T>(
         const section = callScope.getSelfFieldValue("section", context);
         for (const parsed of parsedExpressions) {
             addEntriesToScope(parsed.values, parsed.index, section, context);
+        }
+        for (const edit of spec.edits) {
+            const editValue = createAddEdit.invoke(
+                [
+                    {
+                        value: new ExecutableConstExpression(scopeFunction)
+                    },
+                    {
+                        value: str(`'${edit.value}'`)
+                    }
+                ],
+                context,
+                undefined,
+                undefined
+            );
+            elementEdits.setSelfLocalField(`toolbox/${edit.name}`, editValue, context);
         }
         return context.null;
     }, spec.docs);
@@ -172,5 +218,92 @@ function addEntriesToScope(
             undefined,
             undefined
         );
+    }
+}
+
+/**
+ * Handles the creation of append scope edits when no optional callback is provided.
+ * This generates edits that append new scope content to existing classifier element.
+ *
+ * @template T The type of context used by the classifier specifications
+ * @param specifications Array of classifier scope specifications
+ * @param elementEdits The object containing edits for the element
+ * @param originalArgs The original arguments from the classifier
+ * @param context The interpreter context
+ */
+function handleAppendScopeEdits<T>(
+    specifications: ClassifierScopeSpecification<T>[],
+    elementEdits: FullObject,
+    originalArgs: LabeledValue,
+    context: InterpreterContext
+): void {
+    const createAppendScopeEdit = context.getField("createAppendScopeEdit");
+    for (const spec of specifications) {
+        for (const edit of spec.edits) {
+            const generatedEdit = createAppendScopeEdit.invoke(
+                [
+                    {
+                        value: new ExecutableConstExpression(originalArgs)
+                    },
+                    {
+                        value: new ExecutableConstExpression({
+                            value: context.null,
+                            source: undefined
+                        })
+                    },
+                    {
+                        value: str(`'${spec.name} {\n    ${edit.value}\n}'`)
+                    }
+                ],
+                context,
+                undefined,
+                undefined
+            );
+            elementEdits.setSelfLocalField(`toolbox/${edit.name}`, generatedEdit, context);
+        }
+    }
+}
+
+/**
+ * Handles the creation of add edits when an optional callback is provided.
+ * This generates edits that add new scopes to the existing callback,
+ * however, only if the edits are not already present.
+ *
+ * @template T The type of context used by the classifier specifications
+ * @param specifications Array of classifier scope specifications
+ * @param elementEdits The object containing edits for the element
+ * @param optionalCallback The callback to use for the add edits
+ * @param context The interpreter context
+ */
+function handleAddEdits<T>(
+    specifications: ClassifierScopeSpecification<T>[],
+    elementEdits: FullObject,
+    optionalCallback: LabeledValue,
+    context: InterpreterContext
+): void {
+    const createAddEdit = context.getField("createAddEdit");
+    for (const spec of specifications) {
+        if (
+            spec.edits.length === 0 ||
+            elementEdits.getLocalFieldOrUndefined(`toolbox/${spec.edits[0].name}`) != undefined
+        ) {
+            continue;
+        }
+        for (const edit of spec.edits) {
+            const generatedEdit = createAddEdit.invoke(
+                [
+                    {
+                        value: new ExecutableConstExpression(optionalCallback)
+                    },
+                    {
+                        value: str(`'${spec.name} {\n    ${edit.value}\n}'`)
+                    }
+                ],
+                context,
+                undefined,
+                undefined
+            );
+            elementEdits.setSelfLocalField(`toolbox/${edit.name}`, generatedEdit, context);
+        }
     }
 }

@@ -374,19 +374,22 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler, Conn
      */
     getToolboxEdits(): ToolboxEditEntry[] {
         let entries: [string, EditSpecificationEntry][] = [];
+        let targetId: string;
         if (this.selectedElements.size === 1) {
             const selectedElement = this.getIndex().get(this.selectedElements.values().next().value!) as SElement;
             entries = Object.entries(selectedElement.edits).filter(
                 ([key, edit]) => key.startsWith("toolbox/") && EditSpecification.isConsistent([[edit]])
             );
+            targetId = selectedElement.id;
         } else {
             entries = Object.entries(this.currentRoot!.edits).filter(
                 ([key, edit]) => key.startsWith("toolbox/") && EditSpecification.isConsistent([[edit]])
             );
+            targetId = this.currentRoot!.id;
         }
         return entries.map(([key]) => {
             const [group, name] = key.substring("toolbox/".length).split("/");
-            return { group, name, edit: key as `toolbox/${string}` };
+            return { group, name, edit: key as `toolbox/${string}`, targetId };
         });
     }
 
@@ -407,6 +410,7 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler, Conn
      * If no preview is available, a prediction is requested.
      *
      * @param edit The toolbox edit to show a preview for
+     * @param targetId The id of the element to edit
      */
     showPreview(edit: ToolboxEditEntry | ConnectionEditEntry): void {
         this.showPreviewFor = edit.edit;
@@ -432,7 +436,7 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler, Conn
                     y: 0,
                     prediction: true
                 },
-                elements: [this.currentRoot!.id]
+                elements: [(edit as ToolboxEditEntry).targetId]
             };
         } else {
             return {
@@ -586,6 +590,10 @@ export interface ToolboxEditEntry {
      * The full key of the edit
      */
     edit: `toolbox/${string}`;
+    /**
+     * The id of the target element
+     */
+    targetId: string;
 }
 
 /**

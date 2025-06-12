@@ -21,6 +21,7 @@ export class CreateElementMoveHandler extends SnapMoveHandler<CreateElementSnapH
      *
      * @param edit the edit to perform
      * @param root the root element
+     * @param editTarget the id of the target element to edit
      * @param pointerId the pointer id, used to set pointer capture
      * @param snapHandler the snap handler to use for snapping, if enabled
      * @param settings the shared settings
@@ -29,6 +30,7 @@ export class CreateElementMoveHandler extends SnapMoveHandler<CreateElementSnapH
     constructor(
         private readonly edit: `toolbox/${string}`,
         private readonly root: SRoot,
+        private readonly editTarget: string,
         private readonly pointerId: number,
         settings: SharedSettings | undefined,
         snappingEnabled: boolean
@@ -73,7 +75,7 @@ export class CreateElementMoveHandler extends SnapMoveHandler<CreateElementSnapH
             {
                 types: [this.edit],
                 values,
-                elements: [this.root.id]
+                elements: [this.editTarget]
             } satisfies ToolboxEdit
         ];
         return { edits, snapLines };
