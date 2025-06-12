@@ -118,6 +118,7 @@ export class StyleContext {
         if (variables instanceof FullObject) {
             this.variables = variables;
         }
+        this.isInitialized = true;
     }
 
     /**
