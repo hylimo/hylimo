@@ -148,6 +148,28 @@ export function connectionEditFragments(variable: "start" | "end"): {
 }
 
 /**
+ * Enum for the connection toolbox edits.
+ */
+enum ConnectionToolboxEdit {
+    /**
+     * Change the connection to a line path
+     */
+    CHANGE_TO_LINE = "toolbox/Type/Change to line path",
+    /**
+     * Change the connection to an axis aligned path
+     */
+    CHANGE_TO_AXIS_ALIGNED = "toolbox/Type/Change to axis aligned path",
+    /**
+     * Change the connection to a bezier path
+     */
+    CHANGE_TO_BEZIER = "toolbox/Type/Change to bezier path",
+    /**
+     * Add a label to the connection
+     */
+    ADD_LABEL = "toolbox/Label/Add label"
+}
+
+/**
  * Expressions which create the initial scope which is passed to the callback of all diagram DSL functions
  */
 const scopeExpressions: ParseableExpressions = [
@@ -372,11 +394,17 @@ const scopeExpressions: ParseableExpressions = [
         _canvasConnectionWith = {
             (self, callback) = args
             this.contents = self.canvasScope.contents
+            this.lastStartValue = 0
+            this.lastEndValue = 0.5
             result = [
                 over = null,
-                end = self.endProvider,
+                end = {
+                    lastEndValue = it ?? ""
+                    self.endProvider(it)
+                },
                 start = {
                     pos = self.startProvider(it)
+                    lastStartValue = it ?? ""
                     [proto = lineBuilderProto, segments = list(), start = pos]
                 },
                 label = {
@@ -392,9 +420,7 @@ const scopeExpressions: ParseableExpressions = [
                     scope.internal.registerCanvasElement(labelCanvasElement, args, self.canvasScope)
                     labelCanvasElement.rotation = rotation
                     labelCanvasElement
-                },
-                originalStart = self.originalStart,
-                originalEnd = self.originalEnd
+                }
             ]
             callback.callWithScope(result)
             _validateCanvasConnectionWithScope(result, args)
@@ -405,6 +431,18 @@ const scopeExpressions: ParseableExpressions = [
                 }
                 self.start = result.over.start
                 self.contents = result.over.segments
+                self.edits["${ConnectionToolboxEdit.CHANGE_TO_LINE}"] = createReplaceEdit(
+                    result.over,
+                    "'start(\${lastStartValue}).line(end(\${lastEndValue}))'"
+                )
+                self.edits["${ConnectionToolboxEdit.CHANGE_TO_AXIS_ALIGNED}"] = createReplaceEdit(
+                    result.over,
+                    "'start(\${lastStartValue}).axisAligned(0.5, end(\${lastEndValue}))'"
+                )
+                self.edits["${ConnectionToolboxEdit.CHANGE_TO_BEZIER}"] = createReplaceEdit(
+                    result.over,
+                    "'start(\${lastStartValue}).bezier(50, 50, end(\${lastEndValue}), -50, -50)'"
+                )
             } {
                 if (self.contents.length == 1) {
                     segment = self.contents.get(0)
@@ -421,7 +459,23 @@ const scopeExpressions: ParseableExpressions = [
                         "${DefaultEditTypes.SPLIT_CANVAS_AXIS_ALIGNED_SEGMENT}"
                     ] = createAddEdit(callback, "'over = start(0).axisAligned(' & pos & ', apos(' & x & ', ' & y & '), ' & nextPos & ', end(0.5))'")
                 }
+                self.edits["${ConnectionToolboxEdit.CHANGE_TO_LINE}"] = createAddEdit(
+                    callback,
+                    "'over = start(0).line(end(0.5))'"
+                )
+                self.edits["${ConnectionToolboxEdit.CHANGE_TO_AXIS_ALIGNED}"] = createAddEdit(
+                    callback,
+                    "'over = start(0).axisAligned(0.5, end(0.5))'"
+                )
+                self.edits["${ConnectionToolboxEdit.CHANGE_TO_BEZIER}"] = createAddEdit(
+                    callback,
+                    "'over = start(0).bezier(50, 50, end(0.5), -50, -50)'"
+                )
             }
+            self.edits["${ConnectionToolboxEdit.ADD_LABEL}"] = createAddEdit(
+                callback,
+                "'label(\\"example\\")'"
+            )
         }
 
         _canvasPointOrElementWith = {
@@ -563,32 +617,49 @@ const scopeExpressions: ParseableExpressions = [
                 } {
                     { end }
                 }
-                this.segment = null
+                this.connection = canvasConnection(
+                    start = startPoint,
+                    contents = list(),
+                    startMarker = if(args.startMarkerFactory != null) { startMarkerFactory() },
+                    endMarker = if(args.endMarkerFactory != null) { endMarkerFactory() },
+                    class = class
+                )
                 if(lineType == "axisAligned") {
-                    segment = canvasAxisAlignedSegment(end = endPoint, verticalPos = 0.5)
+                    this.segment = canvasAxisAlignedSegment(end = endPoint, verticalPos = 0.5)
                     segment.edits[
                         "${DefaultEditTypes.AXIS_ALIGNED_SEGMENT_POS}"
                     ] = createAppendScopeEdit(target, "with", "'over = start(0).axisAligned(' & pos & ', end(0.5))'")
                     segment.edits[
                         "${DefaultEditTypes.SPLIT_CANVAS_AXIS_ALIGNED_SEGMENT}"
                     ] = createAppendScopeEdit(target, "with", "'over = start(0).axisAligned(' & pos & ', apos(' & x & ', ' & y & '), ' & nextPos & ', end(0.5))'")
+                    connection.contents.add(segment)
+                    connection.edits["${ConnectionToolboxEdit.CHANGE_TO_LINE}"] = createAppendScopeEdit(
+                        target,
+                        "with",
+                        "'over = start(0).line(end(0.5))'"
+                    )
                 } {
-                    segment = canvasLineSegment(end = endPoint)
+                    this.segment = canvasLineSegment(end = endPoint)
                     segment.edits["${DefaultEditTypes.SPLIT_CANVAS_LINE_SEGMENT}"] = createAppendScopeEdit(target, "with", "'over = start(0).line(apos(' & x & ', ' & y & '), end(0.5))'")
+                    connection.contents.add(segment)
+                    connection.edits["${ConnectionToolboxEdit.CHANGE_TO_AXIS_ALIGNED}"] = createAppendScopeEdit(
+                        target,
+                        "with",
+                        "'over = start(0).axisAligned(0.5, end(0.5))'"
+                    )
                 }
-                connection = canvasConnection(
-                    start = startPoint,
-                    contents = list(
-                        this.segment
-                    ),
-                    startMarker = if(args.startMarkerFactory != null) { startMarkerFactory() },
-                    endMarker = if(args.endMarkerFactory != null) { endMarkerFactory() },
-                    class = class
+                connection.edits["${ConnectionToolboxEdit.ADD_LABEL}"] = createAppendScopeEdit(
+                    target,
+                    "with",
+                    "'label(\\"example\\")'"
+                )
+                connection.edits["${ConnectionToolboxEdit.CHANGE_TO_BEZIER}"] = createAppendScopeEdit(
+                    target,
+                    "with",
+                    "'over = start(0).bezier(50, 50, end(0.5), -50, -50)'"
                 )
                 connection.startProvider = startProvider
                 connection.endProvider = endProvider
-                connection.originalStart = start
-                connection.originalEnd = end
                 scope.internal.registerCanvasElement(connection, target, canvasScope)
 
                 connection

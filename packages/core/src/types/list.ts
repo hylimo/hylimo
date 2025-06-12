@@ -14,7 +14,12 @@ export function listType(type?: Type): Type {
     return {
         name: () => {
             if (type != undefined) {
-                return `${type?.name()}[]`;
+                const name = type.name();
+                if (name.includes(" ")) {
+                    return `(${name})[]`;
+                } else {
+                    return `${name}[]`;
+                }
             } else {
                 return "list";
             }
