@@ -100,7 +100,7 @@ export const classifierModule = ContentModule.create(
                         const classifierFunction = args.getLocalFieldOrUndefined(1);
                         const toolboxEdits = args.getLocalFieldOrUndefined(2)?.value;
                         const scope = context.getField(SCOPE);
-                        scope.setSelfLocalField(assertString(name!), classifierFunction!, context);
+                        scope.setLocalField(assertString(name!), classifierFunction!, context);
                         registerClassifierToolboxEdits(scope, toolboxEdits!, true, context);
                         return context.null;
                     },
@@ -180,9 +180,9 @@ export function registerClassifierToolboxEdits(
             continue;
         }
         scope
-            .getSelfFieldValue("internal", context)
-            .getSelfFieldValue("canvasAddEdits", context)
-            .setSelfLocalField(
+            .getFieldValue("internal", context)
+            .getFieldValue("canvasAddEdits", context)
+            .setLocalField(
                 `toolbox/${key}`,
                 {
                     value: context.newString(createToolboxEdit(assertString(value.value), true)),

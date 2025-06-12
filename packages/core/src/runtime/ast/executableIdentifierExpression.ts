@@ -21,6 +21,6 @@ export class ExecutableIdentifierExpression extends ExecutableExpression<Identif
     }
 
     override evaluateInternal(context: InterpreterContext): LabeledValue {
-        return context.currentScope.getSelfField(this.identifier, context);
+        return context.currentScope.getField(this.identifier, context);
     }
 }

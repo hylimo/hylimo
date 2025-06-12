@@ -32,12 +32,12 @@ export const commonModule = InterpreterModule.create(
             "if",
             jsFun(
                 (args, context) => {
-                    if (assertBoolean(args.getSelfFieldValue(0, context))) {
-                        const ifBranch = args.getSelfFieldValue(1, context);
+                    if (assertBoolean(args.getFieldValue(0, context))) {
+                        const ifBranch = args.getFieldValue(1, context);
                         assertFunction(ifBranch);
                         return ifBranch.invoke([], context, undefined, undefined);
                     } else {
-                        const elseBranch = args.getSelfFieldValue(2, context);
+                        const elseBranch = args.getFieldValue(2, context);
                         if (elseBranch.isNull) {
                             return context.null;
                         } else {
@@ -65,8 +65,8 @@ export const commonModule = InterpreterModule.create(
             "while",
             jsFun(
                 (args, context) => {
-                    const condition = args.getSelfFieldValue(0, context);
-                    const body = args.getSelfFieldValue(1, context);
+                    const condition = args.getFieldValue(0, context);
+                    const body = args.getFieldValue(1, context);
                     assertFunction(condition);
                     assertFunction(body);
                     let lastValue: LabeledValue = { value: context.null, source: undefined };
@@ -95,11 +95,11 @@ export const commonModule = InterpreterModule.create(
             "toStr",
             jsFun(
                 (args, context) => {
-                    const value = args.getSelfField(0, context);
+                    const value = args.getField(0, context);
                     if (value.value.isNull) {
                         return context.newString("null");
                     } else {
-                        const toString = value.value.getSelfFieldValue("toString", context);
+                        const toString = value.value.getFieldValue("toString", context);
                         return toString.invoke(
                             [
                                 {
@@ -124,7 +124,7 @@ export const commonModule = InterpreterModule.create(
             "error",
             jsFun(
                 (args, context) => {
-                    throw new RuntimeError(assertString(args.getSelfFieldValue(0, context)));
+                    throw new RuntimeError(assertString(args.getFieldValue(0, context)));
                 },
                 {
                     docs: "Throws an error with the specified message.",

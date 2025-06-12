@@ -27,6 +27,6 @@ export class ExecutableIndexExpression extends ExecutableExpression<IndexExpress
     override evaluateInternal(context: InterpreterContext): LabeledValue {
         const targetValue = this.target.evaluate(context).value;
         const indexValue = this.index.evaluate(context).value;
-        return targetValue.getSelfField(assertIndex(indexValue), context);
+        return targetValue.getField(assertIndex(indexValue), context);
     }
 }

@@ -31,7 +31,7 @@ export class ExecutableFieldSelfInvocationExpression extends ExecutableAbstractI
 
     override evaluateInternal(context: InterpreterContext): LabeledValue {
         const targetValue = this.target.evaluateWithSource(context);
-        const fieldValue = targetValue.value.getSelfFieldValue(this.name, context);
+        const fieldValue = targetValue.value.getFieldValue(this.name, context);
         return fieldValue.invoke(
             [
                 { value: new ExecutableConstExpression(targetValue), name: SemanticFieldNames.SELF },

@@ -18,7 +18,7 @@ export const debugModule = InterpreterModule.create(
             "rawPrintln",
             jsFun(
                 (args, context) => {
-                    const value = args.getSelfFieldValue(0, context);
+                    const value = args.getFieldValue(0, context);
                     const stringValue = assertString(value);
                     // eslint-disable-next-line no-console
                     console.log(stringValue);

@@ -21,19 +21,17 @@ export abstract class BaseObject {
      *
      * @param key the identifier of the field
      * @param context context in which this is performed
-     * @param self the object to get the field from
      * @returns the field entry
      */
-    abstract getField(key: string | number, context: InterpreterContext, self: BaseObject): LabeledValue;
+    abstract getField(key: string | number, context: InterpreterContext): LabeledValue;
 
     /**
      * Gets all field entries
      *
      * @param context context in which this is performed
-     * @param self the object to get the fields from
      * @returns all field entries
      */
-    abstract getFields(context: InterpreterContext, self: BaseObject): Map<string | number, LabeledValue>;
+    abstract getFields(context: InterpreterContext): Map<string | number, LabeledValue>;
 
     /**
      * Wrapper for getField which only returns the value
@@ -42,30 +40,8 @@ export abstract class BaseObject {
      * @param context context in which this is performed
      * @returns the value of the field
      */
-    getSelfFieldValue(key: string | number, context: InterpreterContext): BaseObject {
-        return this.getField(key, context, this).value;
-    }
-
-    /**
-     * Wrapper for getField which uses this as self
-     *
-     * @param key the identifier of the field
-     * @param context context in which this is performed
-     * @returns the field entry
-     */
-    getSelfField(key: string | number, context: InterpreterContext): LabeledValue {
-        return this.getField(key, context, this);
-    }
-
-    /**
-     * Wrapper for getFields which uses this as self
-     *
-     * @param key the identifier of the field
-     * @param value the new value of the field
-     * @param context context in which this is performed
-     */
-    setSelfLocalField(key: string | number, value: LabeledValue, context: InterpreterContext): void {
-        this.setLocalField(key, value, context, this);
+    getFieldValue(key: string | number, context: InterpreterContext): BaseObject {
+        return this.getField(key, context).value;
     }
 
     /**
@@ -75,9 +51,8 @@ export abstract class BaseObject {
      * @param key the identifier of the field
      * @param value the new field entry
      * @param context context in which this is performed
-     * @param self the object to set the field on
      */
-    abstract setField(key: string | number, value: LabeledValue, context: InterpreterContext, self: BaseObject): void;
+    abstract setField(key: string | number, value: LabeledValue, context: InterpreterContext): void;
 
     /**
      * Sets a field locally
@@ -85,13 +60,11 @@ export abstract class BaseObject {
      * @param key the identifier of the field
      * @param value the new value of the field
      * @param context context in which this is performed
-     * @param self the object to set the field on
      */
     abstract setLocalField(
         key: string | number,
         value: LabeledValue,
         context: InterpreterContext,
-        self: BaseObject
     ): void;
 
     /**
@@ -162,26 +135,26 @@ export abstract class SimpleObject extends BaseObject {
      */
     abstract getProto(context: InterpreterContext): FullObject;
 
-    override getField(key: string | number, context: InterpreterContext, self: BaseObject): LabeledValue {
+    override getField(key: string | number, context: InterpreterContext): LabeledValue {
         if (key === SemanticFieldNames.PROTO) {
             return {
                 value: this.getProto(context),
                 source: undefined
             };
         } else {
-            return this.getProto(context).getField(key, context, self ?? this);
+            return this.getProto(context).getFieldInternal(key, context, this);
         }
     }
 
-    override getFields(context: InterpreterContext, self: BaseObject): Map<string | number, LabeledValue> {
-        return this.getProto(context).getFields(context, self ?? this);
+    override getFields(context: InterpreterContext): Map<string | number, LabeledValue> {
+        return this.getProto(context).getFieldsInternal(context, this);
     }
 
-    override setField(key: string | number, value: LabeledValue, context: InterpreterContext, self: BaseObject): void {
+    override setField(key: string | number, value: LabeledValue, context: InterpreterContext): void {
         if (key === SemanticFieldNames.PROTO) {
             throw new RuntimeError("Cannot set field proto of a non-Object");
         } else {
-            this.getProto(context).setField(key, value, context, self ?? this);
+            this.getProto(context).setFieldInternal(key, value, context, this);
         }
     }
 
@@ -189,7 +162,6 @@ export abstract class SimpleObject extends BaseObject {
         _key: string | number,
         _value: LabeledValue,
         _context: InterpreterContext,
-        _self: BaseObject
     ) {
         throw new RuntimeError("Cannot set field directly of a non-Object");
     }

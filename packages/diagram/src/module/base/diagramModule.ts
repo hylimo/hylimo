@@ -121,20 +121,20 @@ function createElementFunction(element: LayoutConfig): ExecutableExpression {
         jsFun(
             (args, context) => {
                 const newElement = context.newObject();
-                newElement.setSelfLocalField(
+                newElement.setLocalField(
                     "type",
                     { value: context.newString(element.type), source: undefined },
                     context
                 );
-                newElement.setSelfLocalField(
+                newElement.setLocalField(
                     "proto",
                     { value: context.getField("elementProto"), source: undefined },
                     context
                 );
-                newElement.setSelfLocalField("edits", { value: context.newObject(), source: undefined }, context);
+                newElement.setLocalField("edits", { value: context.newObject(), source: undefined }, context);
                 for (const [key, value] of args.fields.entries()) {
                     if (key !== "self" && key !== "proto") {
-                        newElement.setField(key, value, context, newElement);
+                        newElement.setField(key, value, context);
                     }
                 }
                 context.getField("_evaluateElement").invoke(
@@ -303,7 +303,7 @@ export class DiagramModule implements InterpreterModule {
                 assign(
                     "validateSelector",
                     jsFun((args, context) => {
-                        const value = args.getSelfFieldValue(0, context);
+                        const value = args.getFieldValue(0, context);
                         validateObject(value, context, allStyleAttributes);
                         return context.null;
                     })
@@ -385,22 +385,22 @@ export class DiagramModule implements InterpreterModule {
                                 operator,
                                 jsFun(
                                     (args, context) => {
-                                        const left = args.getSelfField(0, context);
-                                        const right = args.getSelfField(1, context);
+                                        const left = args.getField(0, context);
+                                        const right = args.getField(1, context);
                                         const executableOperator = context
                                             .getField("stylesArgs")
-                                            .getSelfFieldValue("self", context)
-                                            .getSelfField(operator, context);
+                                            .getFieldValue("self", context)
+                                            .getField(operator, context);
                                         if (isVarOrCalc(left.value) || isVarOrCalc(right.value)) {
                                             const result = context.newObject();
-                                            result.setSelfLocalField(
+                                            result.setLocalField(
                                                 "_type",
                                                 { value: context.newString("calc"), source: undefined },
                                                 context
                                             );
-                                            result.setSelfLocalField("left", left, context);
-                                            result.setSelfLocalField("right", right, context);
-                                            result.setSelfLocalField("operator", executableOperator, context);
+                                            result.setLocalField("left", left, context);
+                                            result.setLocalField("right", right, context);
+                                            result.setLocalField("operator", executableOperator, context);
                                             return result;
                                         }
                                         return executableOperator.value.invoke(
@@ -531,9 +531,9 @@ export class DiagramModule implements InterpreterModule {
             jsFun(
                 (args, context) => {
                     const layoutWithRoot = this.layoutEngine.createLayout(
-                        args.getSelfField(0, context).value as FullObject,
-                        args.getSelfField(1, context).value as FullObject,
-                        args.getSelfField(2, context).value as FullObject,
+                        args.getField(0, context).value as FullObject,
+                        args.getField(1, context).value as FullObject,
+                        args.getField(2, context).value as FullObject,
                         context
                     );
                     return context.newWrapperObject(layoutWithRoot, new Map());

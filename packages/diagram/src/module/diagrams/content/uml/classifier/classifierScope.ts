@@ -107,7 +107,7 @@ export function createClassifierScopeContentModule<T>(
                                         createAddEdit,
                                         elementEdits
                                     );
-                                    callScope.setSelfLocalField(spec.name, classifierScope.evaluate(context), context);
+                                    callScope.setLocalField(spec.name, classifierScope.evaluate(context), context);
                                 }
                                 return context.null;
                             })
@@ -166,7 +166,7 @@ function createClassifierScopeFunction<T>(
         );
         const parseContext = spec.extractContext(context, args);
         const parsedExpressions = spec.parseEntries(parseContext, expressions, context);
-        const section = callScope.getSelfFieldValue("section", context);
+        const section = callScope.getFieldValue("section", context);
         for (const parsed of parsedExpressions) {
             addEntriesToScope(parsed.values, parsed.index, section, context);
         }
@@ -184,7 +184,7 @@ function createClassifierScopeFunction<T>(
                 undefined,
                 undefined
             );
-            elementEdits.setSelfLocalField(`toolbox/${edit.name}`, editValue, context);
+            elementEdits.setLocalField(`toolbox/${edit.name}`, editValue, context);
         }
         return context.null;
     }, spec.docs);
@@ -259,7 +259,7 @@ function handleAppendScopeEdits<T>(
                 undefined,
                 undefined
             );
-            elementEdits.setSelfLocalField(`toolbox/${edit.name}`, generatedEdit, context);
+            elementEdits.setLocalField(`toolbox/${edit.name}`, generatedEdit, context);
         }
     }
 }
@@ -303,7 +303,7 @@ function handleAddEdits<T>(
                 undefined,
                 undefined
             );
-            elementEdits.setSelfLocalField(`toolbox/${edit.name}`, generatedEdit, context);
+            elementEdits.setLocalField(`toolbox/${edit.name}`, generatedEdit, context);
         }
     }
 }

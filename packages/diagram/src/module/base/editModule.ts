@@ -35,9 +35,9 @@ function generateEdit(
     context: InterpreterContext
 ): BaseObject {
     const edit = context.newObject();
-    edit.setSelfLocalField("type", { value: context.newString(type), source: undefined }, context);
-    edit.setSelfLocalField("target", { value: target.toWrapperObject(context), source: undefined }, context);
-    edit.setSelfLocalField("template", { value: template.value, source: undefined }, context);
+    edit.setLocalField("type", { value: context.newString(type), source: undefined }, context);
+    edit.setLocalField("target", { value: target.toWrapperObject(context), source: undefined }, context);
+    edit.setLocalField("template", { value: template.value, source: undefined }, context);
     return edit;
 }
 
@@ -83,13 +83,13 @@ function generateReplaceEdit(
     context: InterpreterContext
 ): BaseObject {
     const templateObject = context.newObject();
-    templateObject.setSelfLocalField(
+    templateObject.setLocalField(
         "length",
         { value: context.newNumber(template.length), source: undefined },
         context
     );
     template.forEach((field, index) => {
-        templateObject.setSelfLocalField(index, { value: field, source: undefined }, context);
+        templateObject.setLocalField(index, { value: field, source: undefined }, context);
     });
     return generateReplaceOrAddArgEdit(target, { value: templateObject, source: undefined }, context);
 }
@@ -117,7 +117,7 @@ function generateAddArgEdit(
         }
     }
     const edit = generateEdit(target, template, "add-arg", context);
-    edit.setSelfLocalField("key", key, context);
+    edit.setLocalField("key", key, context);
     return edit;
 }
 
@@ -143,11 +143,11 @@ export const editModule = InterpreterModule.create(
             "createReplaceEdit",
             jsFun(
                 (args, context) => {
-                    const target = args.getSelfField(0, context).source;
+                    const target = args.getField(0, context).source;
                     if (!target?.metadata?.isEditable) {
                         return context.null;
                     }
-                    const template = args.getSelfField(1, context);
+                    const template = args.getField(1, context);
                     return generateReplaceOrAddArgEdit(target, template, context);
                 },
                 {
@@ -164,14 +164,14 @@ export const editModule = InterpreterModule.create(
             "createAddEdit",
             jsFun(
                 (args, context) => {
-                    const target = args.getSelfField(0, context).source;
+                    const target = args.getField(0, context).source;
                     if (!target?.metadata?.isEditable) {
                         return context.null;
                     }
                     if (!(target instanceof FunctionExpression)) {
                         throw new RuntimeError("Target must be a function expression");
                     }
-                    const template = args.getSelfField(1, context);
+                    const template = args.getField(1, context);
                     return generateEdit(target, template, "add", context);
                 },
                 {
@@ -188,12 +188,12 @@ export const editModule = InterpreterModule.create(
             "createAddArgEdit",
             jsFun(
                 (args, context) => {
-                    const target = args.getSelfField(0, context).source;
+                    const target = args.getField(0, context).source;
                     if (!(target instanceof AbstractInvocationExpression) || !target.metadata.isEditable) {
                         return context.null;
                     }
-                    const template = args.getSelfField(2, context);
-                    const key = args.getSelfField(1, context);
+                    const template = args.getField(2, context);
+                    const key = args.getField(1, context);
                     return generateAddArgEdit(target, template, key, context);
                 },
                 {
@@ -211,12 +211,12 @@ export const editModule = InterpreterModule.create(
             "createAdditiveEdit",
             jsFun(
                 (args, context) => {
-                    const value = args.getSelfField(0, context);
+                    const value = args.getField(0, context);
                     const target = value.source;
                     if (!target?.metadata?.isEditable) {
                         return context.null;
                     }
-                    const deltaExp = (args.getSelfFieldValue(1, context) as StringObject).value;
+                    const deltaExp = (args.getFieldValue(1, context) as StringObject).value;
                     if (target instanceof NumberLiteralExpression) {
                         const expression = `$string(${target.value} + ${deltaExp})`;
                         return generateEdit(
@@ -272,14 +272,14 @@ export const editModule = InterpreterModule.create(
             "createAppendScopeEdit",
             jsFun(
                 (args, context) => {
-                    const value = args.getSelfField(0, context);
+                    const value = args.getField(0, context);
                     const target = value.source;
                     if (!target?.metadata?.isEditable) {
                         return context.null;
                     }
-                    const scope = args.getSelfField(1, context).value;
+                    const scope = args.getField(1, context).value;
                     const parsedScope = scope.isNull ? "" : ` ${assertString(scope)}`;
-                    const expression = args.getSelfField(2, context).value;
+                    const expression = args.getField(2, context).value;
                     return generateEdit(
                         target as Expression<any>,
                         {
@@ -307,7 +307,7 @@ export const editModule = InterpreterModule.create(
             "nameToExpression",
             jsFun(
                 (args, context) => {
-                    const name = args.getSelfFieldValue(0, context).toNative();
+                    const name = args.getFieldValue(0, context).toNative();
                     const expression = nameToExpression(name);
                     return context.newString(expression);
                 },
@@ -322,7 +322,7 @@ export const editModule = InterpreterModule.create(
             "nameToJsonataStringLiteral",
             jsFun(
                 (args, context) => {
-                    const name = args.getSelfFieldValue(0, context).toNative();
+                    const name = args.getFieldValue(0, context).toNative();
                     const expression = nameToExpression(name);
                     const escapedExpression = jsonataStringLiteral(expression);
                     return context.newString(escapedExpression);

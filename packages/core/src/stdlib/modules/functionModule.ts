@@ -29,27 +29,27 @@ export const functionModule = InterpreterModule.create(
                 "callWithScope",
                 jsFun(
                     (args, context) => {
-                        const self = args.getSelfFieldValue(SemanticFieldNames.SELF, context);
-                        const scope = args.getSelfFieldValue(0, context);
+                        const self = args.getFieldValue(SemanticFieldNames.SELF, context);
+                        const scope = args.getFieldValue(0, context);
                         assertFunction(self);
                         assertObject(scope);
-                        scope.setSelfLocalField(
+                        scope.setLocalField(
                             SemanticFieldNames.PROTO,
                             { value: self.parentScope, source: undefined },
                             context
                         );
                         const res = self.invoke([], context, scope, undefined);
-                        scope.setSelfLocalField(
+                        scope.setLocalField(
                             SemanticFieldNames.ARGS,
                             { value: context.null, source: undefined },
                             context
                         );
-                        scope.setSelfLocalField(
+                        scope.setLocalField(
                             SemanticFieldNames.IT,
                             { value: context.null, source: undefined },
                             context
                         );
-                        scope.setSelfLocalField(
+                        scope.setLocalField(
                             SemanticFieldNames.THIS,
                             { value: context.null, source: undefined },
                             context
@@ -71,7 +71,7 @@ export const functionModule = InterpreterModule.create(
             "isFunction",
             jsFun(
                 (args, context) => {
-                    return context.newBoolean(isFunction(args.getSelfFieldValue(0, context)));
+                    return context.newBoolean(isFunction(args.getFieldValue(0, context)));
                 },
                 {
                     docs: "Checks if the provided value is a function.",

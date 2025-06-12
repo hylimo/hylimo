@@ -16,11 +16,11 @@ export class NullObject extends BaseObject {
         return true;
     }
 
-    override getField(key: string | number, _context: InterpreterContext, _self: BaseObject): LabeledValue {
+    override getField(key: string | number, _context: InterpreterContext): LabeledValue {
         throw new RuntimeError(`Cannot get '${key}' as the parent object is null`);
     }
 
-    override getFields(_context: InterpreterContext, _self: BaseObject): Map<string | number, LabeledValue> {
+    override getFields(_context: InterpreterContext): Map<string | number, LabeledValue> {
         return new Map();
     }
 
@@ -28,7 +28,6 @@ export class NullObject extends BaseObject {
         key: string | number,
         _value: LabeledValue,
         _context: InterpreterContext,
-        _self: BaseObject
     ): void {
         throw new RuntimeError(`Cannot set '${key}' as the parent object is null`);
     }
@@ -37,7 +36,6 @@ export class NullObject extends BaseObject {
         key: string | number,
         _value: LabeledValue,
         _context: InterpreterContext,
-        _self: BaseObject
     ): void {
         throw new RuntimeError(`Cannot set '${key}' as the parent object is null`);
     }

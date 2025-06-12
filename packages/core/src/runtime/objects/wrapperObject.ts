@@ -33,7 +33,7 @@ export class WrapperObject<T> extends BaseObject {
         super();
     }
 
-    override getField(key: string | number, context: InterpreterContext, self?: BaseObject): LabeledValue {
+    override getField(key: string | number, context: InterpreterContext): LabeledValue {
         if (key === SemanticFieldNames.PROTO) {
             return { value: this.proto, source: undefined };
         }
@@ -41,22 +41,22 @@ export class WrapperObject<T> extends BaseObject {
         if (value != undefined) {
             return { value: value(this.wrapped, context), source: undefined };
         }
-        return this.proto.getField(key, context, self ?? this);
+        return this.proto.getFieldInternal(key, context, this);
     }
 
-    override getFields(context: InterpreterContext, self?: BaseObject): Map<string | number, LabeledValue> {
-        const entries = this.proto.getFields(context, self ?? this);
+    override getFields(context: InterpreterContext): Map<string | number, LabeledValue> {
+        const entries = this.proto.getFieldsInternal(context, this);
         for (const [key, value] of this.entries) {
             entries.set(key, { value: value(this.wrapped, context), source: undefined });
         }
         return entries;
     }
 
-    override setField(key: string | number, value: LabeledValue, context: InterpreterContext, self?: BaseObject): void {
+    override setField(key: string | number, value: LabeledValue, context: InterpreterContext): void {
         if (key === SemanticFieldNames.PROTO) {
             throw new RuntimeError("Cannot set field proto of a wrapped Object");
         } else {
-            this.proto.setField(key, value, context, self ?? this);
+            this.proto.setFieldInternal(key, value, context, this);
         }
     }
 
@@ -64,7 +64,6 @@ export class WrapperObject<T> extends BaseObject {
         _key: string | number,
         _value: LabeledValue,
         _context: InterpreterContext,
-        _self?: BaseObject
     ): void {
         throw new RuntimeError("Cannot set field directly of a wrapped Object");
     }

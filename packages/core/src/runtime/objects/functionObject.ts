@@ -35,19 +35,19 @@ export abstract class AbstractFunctionObject<T extends ExecutableAbstractFunctio
         return context.functionPrototype;
     }
 
-    override getField(key: string | number, context: InterpreterContext, self: BaseObject): LabeledValue {
+    override getField(key: string | number, context: InterpreterContext): LabeledValue {
         if (key === SemanticFieldNames.DOCS) {
             return {
                 value: this.docs,
                 source: undefined
             };
         } else {
-            return super.getField(key, context, self);
+            return super.getField(key, context);
         }
     }
 
-    override getFields(context: InterpreterContext, self: BaseObject): Map<string | number, LabeledValue> {
-        const result = super.getFields(context, self);
+    override getFields(context: InterpreterContext): Map<string | number, LabeledValue> {
+        const result = super.getFields(context);
         if (this.docs !== undefined) {
             result.set(SemanticFieldNames.DOCS, {
                 value: this.docs,
@@ -61,7 +61,7 @@ export abstract class AbstractFunctionObject<T extends ExecutableAbstractFunctio
         if (key === SemanticFieldNames.DOCS) {
             this.docs = value.value;
         } else {
-            super.setField(key, value, context, this);
+            super.setField(key, value, context);
         }
     }
 
@@ -69,7 +69,7 @@ export abstract class AbstractFunctionObject<T extends ExecutableAbstractFunctio
         if (key === SemanticFieldNames.DOCS) {
             this.docs = value.value;
         } else {
-            super.setLocalField(key, value, context, this);
+            super.setLocalField(key, value, context);
         }
     }
 
@@ -115,12 +115,12 @@ export class FunctionObject extends AbstractFunctionObject<ExecutableFunctionExp
         const oldScope = context.currentScope;
         if (scope == undefined) {
             scope = new FullObject();
-            scope.setSelfLocalField(SemanticFieldNames.PROTO, { value: this.parentScope, source: undefined }, context);
+            scope.setLocalField(SemanticFieldNames.PROTO, { value: this.parentScope, source: undefined }, context);
         }
-        scope.setSelfLocalField(SemanticFieldNames.THIS, { value: scope, source: undefined }, context);
+        scope.setLocalField(SemanticFieldNames.THIS, { value: scope, source: undefined }, context);
         const generatedArgs = generateArgs(args, context, this.definition.documentation, callExpression);
-        scope.setSelfLocalField(SemanticFieldNames.ARGS, { value: generatedArgs, source: callExpression }, context);
-        scope.setSelfLocalField(SemanticFieldNames.IT, generatedArgs.getSelfField(0, context), context);
+        scope.setLocalField(SemanticFieldNames.ARGS, { value: generatedArgs, source: callExpression }, context);
+        scope.setLocalField(SemanticFieldNames.IT, generatedArgs.getField(0, context), context);
         context.currentScope = scope;
         let lastValue: BaseObject = context.null;
         for (const expression of this.definition.expressions) {

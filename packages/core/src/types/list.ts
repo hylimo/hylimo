@@ -26,7 +26,7 @@ export function listType(type?: Type): Type {
                     path: []
                 };
             }
-            const lengthValue = value.getSelfFieldValue("length", context);
+            const lengthValue = value.getFieldValue("length", context);
             const lengthRes = numberType.matches(lengthValue, context);
             if (lengthRes !== true) {
                 lengthRes.path.unshift("length");
@@ -37,7 +37,7 @@ export function listType(type?: Type): Type {
             }
             const length = assertNumber(lengthValue);
             for (let i = 0; i < length; i++) {
-                const posValue = value.getSelfFieldValue(i, context);
+                const posValue = value.getFieldValue(i, context);
                 const posRes = type.matches(posValue, context);
                 if (posRes !== true) {
                     posRes.path.unshift(i.toString());

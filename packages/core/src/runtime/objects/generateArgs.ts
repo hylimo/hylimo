@@ -29,7 +29,7 @@ export function generateArgs(
     let argsObject: FullObject;
     if (expression != undefined && expression instanceof AbstractInvocationExpression) {
         argsObject = new ArgsFullObject(expression);
-        argsObject.setSelfLocalField(
+        argsObject.setLocalField(
             SemanticFieldNames.PROTO,
             { value: context.objectPrototype, source: undefined },
             context
@@ -40,12 +40,12 @@ export function generateArgs(
     let indexCounter = 0;
     for (const argumentExpression of args) {
         const value = argumentExpression.value.evaluateWithSource(context);
-        argsObject.setSelfLocalField(argumentExpression.name ?? indexCounter++, value, context);
+        argsObject.setLocalField(argumentExpression.name ?? indexCounter++, value, context);
     }
     for (const entry of documentation?.params ?? []) {
         const [key, description, type] = entry;
         if (type != undefined) {
-            const argValue = argsObject.getSelfFieldValue(key, context);
+            const argValue = argsObject.getFieldValue(key, context);
             validate(type, `Invalid value for parameter ${key}: ${description}`, argValue, context, () => {
                 if (typeof key === "number") {
                     const indexArguments = args.filter((arg) => arg.name == undefined);

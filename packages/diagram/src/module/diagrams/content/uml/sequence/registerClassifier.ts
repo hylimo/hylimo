@@ -34,8 +34,8 @@ export const registerClassifierModule = ContentModule.create(
                     const docs = participantFunction.definition.documentation;
                     const createParticipant = context
                         .getField(SCOPE)
-                        .getSelfFieldValue("internal", context)
-                        .getSelfFieldValue("createSequenceDiagramParticipant", context);
+                        .getFieldValue("internal", context)
+                        .getFieldValue("createSequenceDiagramParticipant", context);
                     assertFunction(createParticipant);
                     const wrappedParticipantFunction = native(
                         (args, context, _scope, callExpression) => {
@@ -50,12 +50,12 @@ export const registerClassifierModule = ContentModule.create(
                                     newArgs.push({
                                         name: entry.name,
                                         value: new ExecutableConstExpression(
-                                            argsObject.getSelfField(entry.name, context)
+                                            argsObject.getField(entry.name, context)
                                         )
                                     });
                                 } else {
                                     newArgs.push({
-                                        value: new ExecutableConstExpression(argsObject.getSelfField(i, context))
+                                        value: new ExecutableConstExpression(argsObject.getField(i, context))
                                     });
                                     i++;
                                 }
@@ -66,7 +66,7 @@ export const registerClassifierModule = ContentModule.create(
                                     { value: new ExecutableConstExpression(result) },
                                     {
                                         name: "below",
-                                        value: new ExecutableConstExpression(argsObject.getSelfField("below", context))
+                                        value: new ExecutableConstExpression(argsObject.getField("below", context))
                                     }
                                 ],
                                 context,
@@ -88,7 +88,7 @@ export const registerClassifierModule = ContentModule.create(
                         }
                     ).evaluate(context);
                     const scope = context.getField(SCOPE);
-                    scope.setSelfLocalField(assertString(name!), wrappedParticipantFunction, context);
+                    scope.setLocalField(assertString(name!), wrappedParticipantFunction, context);
                     registerClassifierToolboxEdits(scope, toolboxEdits!, false, context);
                     return context.null;
                 })

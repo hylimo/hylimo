@@ -332,11 +332,11 @@ export class StyleValueParser {
             const variableName = value.getLocalFieldOrUndefined("name")?.value?.toNative();
             return this.getVariableValue(variableName);
         } else if (type === "calc") {
-            const operator = value.getSelfField("operator", this.context).value;
+            const operator = value.getField("operator", this.context).value;
             const result = operator.invoke(
                 [
-                    { value: new ExecutableConstExpression(this.parse(value.getSelfField("left", this.context))) },
-                    { value: new ExecutableConstExpression(this.parse(value.getSelfField("right", this.context))) }
+                    { value: new ExecutableConstExpression(this.parse(value.getField("left", this.context))) },
+                    { value: new ExecutableConstExpression(this.parse(value.getField("right", this.context))) }
                 ],
                 this.context,
                 undefined,
