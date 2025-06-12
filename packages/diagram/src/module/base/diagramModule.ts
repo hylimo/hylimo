@@ -268,7 +268,7 @@ export class DiagramModule implements InterpreterModule {
                                 callback.callWithScope(scopeObject)
                             }
                         }
-                        if((scope != null) && (scope.addContent != null)) {
+                        if((null != scope) && (null != scope.addContent)) {
                             scope.addContent(element)
                         }
                     `
