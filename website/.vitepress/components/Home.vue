@@ -11,8 +11,20 @@
             class="main-content"
         />
         <ClientOnly>
+            <Teleport to="#filename-header">
+                <span
+                    v-if="isEmbedded"
+                    class="filename-header-label">
+                    {{ diagramSource ? (diagramSource.baseName ?? "Unnamed Diagram")  : "" }}
+                </span>
+                <span class="filename-save-status"
+                    v-if="isEmbedded">
+                    {{ diagramSource?.canSave.value ? "(Unsaved Changes)" : "" }}
+                </span>
+            </Teleport>
             <Teleport to="#diagram-select">
-                <DiagramChooser
+                <DiagramChooser 
+                    v-if="!isEmbedded"
                     :diagram-source="diagramSource"
                     :all-diagrams="allDiagrams"
                     @open-diagram="openDiagram($event).then((diagram) => (diagramSource = diagram))"
@@ -20,6 +32,7 @@
                     @create-diagram="createDiagram($event, diagramSource?.code.value ?? defaultDiagram)"
                     @delete-diagram="deleteDiagram"
                 ></DiagramChooser>
+                
             </Teleport>
             <Teleport to="#copy-diagram-link">
                 <IconButton label="Copy diagram link" icon="vpi-link" @click="copyLink" />
@@ -51,6 +64,15 @@
                     <button class="menu-button" @click="downloadSource">Source</button>
                 </VPFlyout>
             </Teleport>
+            <Teleport to=".VPNavBar .VPNavBarSocialLinks">
+                <IconButton
+                    v-if="isEmbedded"
+                    label="Exit HyLiMo"
+                    icon="vpi-close-x"
+                    iconColor="indianred"
+                    @click="sendExitRequest"
+                />
+            </Teleport>
         </ClientOnly>
     </div>
 </template>
@@ -71,7 +93,11 @@ import { openDiagramFromFile, openDiagramFromLaunchQueue } from "../util/diagram
 import { languageServerConfigKey } from "../theme/injectionKeys";
 import DiagramChooser from "./DiagramChooser.vue";
 import { useDiagramStorage } from "../util/diagramStorageSource";
+import { DiagramEmbeddedSource } from "../util/diagramEmbeddedSource";
 import type { DiagramSource } from "../util/diagramSource";
+
+const urlParams = new URLSearchParams(window.location.search);
+const isEmbedded: boolean = urlParams.get("embedded") ? true : false;
 
 const HylimoEditor = defineClientComponent(() => import("./HylimoEditor.vue"));
 
@@ -93,6 +119,18 @@ const allDiagrams = computed(() => {
 
 const defaultDiagram =
     'classDiagram {\n    class("HelloWorld") {\n        public {\n            hello : string\n        }\n    }\n}';
+
+if(isEmbedded) {
+    window.addEventListener("message", (event) => {
+        if (event.data.type === "openDiagram") {
+            diagramSource.value = new DiagramEmbeddedSource(event.data.name, event.data.name, event.data.code);
+        } else if (event.data.type === "saveDiagramResult") {
+            if (event.data.success && diagramSource.value && diagramSource.value instanceof DiagramEmbeddedSource) {
+                diagramSource.value.savedCode.value = event.data.savedCode;
+            }
+        }
+    });
+}
 
 async function createDiagram(name: string, code: string) {
     await addDiagram(name, code);
@@ -171,6 +209,15 @@ function downloadSVG(textAsPath: boolean) {
     fileSaver.saveAs(svgBlob, fileBaseName.value + ".svg");
 }
 
+function sendExitRequest() {
+    if (!isEmbedded)
+        return;
+
+    window.parent.postMessage({
+        type: "requestExit"
+    }, "*");
+}
+
 async function downloadPDF() {
     const source = diagramSource.value;
     if (source == undefined) {
@@ -230,7 +277,9 @@ async function openDiagramBeforeMount(): Promise<void> {
 }
 
 onBeforeMount(() => {
-    openDiagramBeforeMount();
+    if(!isEmbedded) {
+        openDiagramBeforeMount();
+    }
     useEventListener(window, "beforeunload", (event) => {
         if (diagramSource.value?.canSave.value) {
             event.preventDefault();
@@ -305,6 +354,16 @@ onBeforeMount(() => {
 
 .download-flyout {
     margin-right: -4px;
+}
+
+.filename-header-label {
+    display: flex;
+}
+
+.filename-save-status {
+    color: var(--vp-c-text-3); 
+    flex-grow: 1; 
+    margin-left: 8px;
 }
 </style>
 <style>

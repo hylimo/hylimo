@@ -112,7 +112,11 @@
         flex-grow: 1;
     }
 
-    .VPNavBarMenu.menu:has(.diagram-select) {
+    .nav-teleport-target#filename-header {
+        flex-grow: 1;
+    }
+
+    .VPNavBarMenu.menu:has(.diagram-select), .VPNavBarMenu.menu:has(.filename-header-label) {
         flex-grow: 1;
     }
 }
