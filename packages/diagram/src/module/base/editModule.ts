@@ -313,22 +313,6 @@ export const editModule = InterpreterModule.create(
                     returns: "the expression"
                 }
             )
-        ),
-        assign(
-            "nameToJsonataStringLiteral",
-            jsFun(
-                (args, context) => {
-                    const name = args.getFieldValue(0, context).toNative();
-                    const expression = nameToExpression(name);
-                    const escapedExpression = jsonataStringLiteral(expression);
-                    return context.newString(escapedExpression);
-                },
-                {
-                    docs: "Converts a name to a jsonata expression",
-                    params: [[0, "the name of the identifier to convert", or(stringType, numberType)]],
-                    returns: "the jsonata expression"
-                }
-            )
         )
     ]
 );

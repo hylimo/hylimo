@@ -16,6 +16,7 @@ import { nonNavigableAssociationsModule } from "./content/uml/nonNavigableAssoci
 import { associationsModule } from "./content/uml/associations.js";
 import { importedParticipantsModule } from "./content/uml/sequence/importedParticipants.js";
 import { registerClassifierModule } from "./content/uml/sequence/registerClassifier.js";
+import { participantModule } from "./content/uml/sequence/participant.js";
 
 /**
  * Module for UML sequence diagrams.
@@ -39,6 +40,7 @@ export const sequenceDiagramModule = InterpreterModule.create(
         sequenceDiagramFrameModule,
         importedParticipantsModule,
         lostFoundMessageModule,
+        participantModule,
         readingDirectionModule
     ])
 );

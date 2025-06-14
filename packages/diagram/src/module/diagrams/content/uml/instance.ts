@@ -93,6 +93,15 @@ export const instanceModule = ContentModule.create(
                         )
                     }
                 ])
-            )
+            ),
+        `
+            scope.styles {
+                cls("instance-element") {
+                    cls("title") {
+                        underline = true
+                    }
+                }
+            }
+        `
     ]
 );

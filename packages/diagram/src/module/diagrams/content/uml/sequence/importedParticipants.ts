@@ -5,7 +5,7 @@ import { ContentModule } from "../../contentModule.js";
  */
 export const importedParticipantsModule = ContentModule.create(
     "uml/sequence/importedParticipants",
-    ["uml/component", "uml/instance", "uml/actor", "uml/sequence/participant"],
+    ["uml/component", "uml/instance", "uml/actor", "uml/sequence/createParticipant"],
     [],
     [
         `

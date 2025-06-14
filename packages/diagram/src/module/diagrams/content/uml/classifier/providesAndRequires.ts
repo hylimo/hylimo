@@ -203,7 +203,34 @@ export const providesAndRequiresModule = ContentModule.create(
                         ])
                     },
                     {
-                        value: fun([])
+                        value: fun(
+                            `
+                                this.classifierArgs = args.args
+                                this.optionalCallback = classifierArgs[1]
+                                this.element = args.element
+                                if(optionalCallback == null) {
+                                    element.edits["toolbox/Interface/Add required interface"] = createAppendScopeEdit(
+                                        classifierArgs.args,
+                                        null,
+                                        "'requires()'"
+                                    )
+                                    element.edits["toolbox/Interface/Add provided interface"] = createAppendScopeEdit(
+                                        classifierArgs.args,
+                                        null,
+                                        "'provides()'"
+                                    )
+                                } {
+                                    element.edits["toolbox/Interface/Add required interface"] = createAddEdit(
+                                        optionalCallback,
+                                        "'requires()'"
+                                    )
+                                    element.edits["toolbox/Interface/Add provided interface"] = createAddEdit(
+                                        optionalCallback,
+                                        "'provides()'"
+                                    )
+                                }
+                            `
+                        )
                     }
                 ])
             ),

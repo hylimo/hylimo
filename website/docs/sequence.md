@@ -20,9 +20,17 @@ In a sequence diagram, we have the following concepts:
 
 - Participant: A component that "participates" in the diagram, so something/someone whose behavior should be modeled.\
   It can be one of the following:
-  - an `instance` without a name (`User`)
-  - an `instance` with a name (`Bob: User`)
-  - an `actor` (a stickman symbolizing a user), optionally with a name
+  - `participant`
+    - general participant, without a name (`User`) or with a name (`Bob:User`)
+    - name is not underlined
+  - `instance`
+    - instance, similar to participant, but with support for values
+    - name is underlined
+  - `actor`
+    - stickman symbolizing a user, without a nanme (`User`) or with a name (`Bob:User`)
+    - can have values like `instance`, in this case the stickman is shown above the instance
+  - `component`
+    - see [component](./component.md#component)
 - Lifeline: the entire duration a participant is alive, symbolized by the dotted line downwards
 - Event: an x/y coordinate linking a point in time to a participant, accessed by using the syntax `event.participant`, so i.e. `startPayment.User`.\
 - Message: arrow between two `event`s with a semantic meaning
@@ -34,13 +42,14 @@ In a sequence diagram, we have the following concepts:
 Below, you'll find the order in which you should declare things so that they work as expected.\
 Hylimo walks through the diagram from left to right, and then from top to bottom.
 
-First, declare all participants (`instance`, `actor`) in the order you want to display them as they will be positioned on the x axis in this order:
+First, declare all participants (`participant`, `instance`, `actor`, `component`) in the order you want to display them as they will be positioned on the x axis in this order:
 
 ```hylimo
 sequenceDiagram {
-    instance("Bob")
+    participant("Bob")
     instance("Shop")
     actor("Admin")
+    component("Shop-Frontend")
 }
 ```
 
@@ -57,7 +66,7 @@ Of course, once you want to finish your diagram, we recommend to turn it off aga
 
 ```hylimo
 sequenceDiagram(enableDebugging = true) {
-    instance("Bob")
+    participant("Bob")
     event("startPayment")
     event("stopPayment")
 }
@@ -71,7 +80,7 @@ Nevertheless, in cases where you want an explicit distance to the predecessor, y
 
 ```hylimo
 sequenceDiagram(enableDebugging = true) {
-    instance("Bob")
+    participant("Bob")
     event("startPayment")
     event("stopPayment", 100)
 }
@@ -88,8 +97,8 @@ If their name is already used by something else, you can assign the result of th
 ```hylimo
 sequenceDiagram {
     Bob = true
-    user = instance("Bob")
-    instance("Charlie")
+    user = participant("Bob")
+    participant("Charlie")
     event("buy")
     user --> Charlie
 }
@@ -101,7 +110,7 @@ To achieve the time delta in spite of these inherent limitations, use the notati
 
 ```hylimo
 sequenceDiagram(enableDebugging = true) {
-    instance("Bob")
+    participant("Bob")
     event("buy")
     event("stop")
     Bob.on(buy) --> Bob.on(stop) with {
@@ -120,9 +129,9 @@ There is a bunch of things you can do with participants, depending on if there i
 
 ```hylimo
 sequenceDiagram(enableDebugging = true) {
-    instance("A")
+    participant("A")
     event("smth")
-    instance("B")
+    participant("B")
 }
 ```
 
@@ -130,8 +139,8 @@ sequenceDiagram(enableDebugging = true) {
 
 ```hylimo
 sequenceDiagram(enableDebugging = true) {
-    instance("A")
-    instance("B")
+    participant("A")
+    participant("B")
     event("E1")
     destroy(A)
     event("E2")
@@ -142,13 +151,13 @@ sequenceDiagram(enableDebugging = true) {
 
 ```hylimo
 sequenceDiagram {
-    instance("A")
-    instance("B")
+    participant("A")
+    participant("B")
     event("E1")
     destroy(A)
     event("E2")
     event("E3")
-    instance("A²", below = A)
+    participant("A²", below = A)
 }
 ```
 
@@ -156,8 +165,8 @@ sequenceDiagram {
 
 ```hylimo
 sequenceDiagram(enableDebugging = true) {
-    instance("A")
-    instance("B")
+    participant("A")
+    participant("B")
     event("E1")
     activate(A)
     event("E2")
@@ -173,8 +182,8 @@ The third point, the `center` shows where the event would have been located orig
 
 ```hylimo
 sequenceDiagram {
-    instance("A")
-    instance("B")
+    participant("A")
+    participant("B")
     event("E1")
     activate(A)
     event("E1margin", 5)
@@ -198,8 +207,8 @@ The following messages are available within sequence diagrams (in both direction
 
 ```hylimo
 sequenceDiagram {
-    instance("A")
-    instance("B")
+    participant("A")
+    participant("B")
     event("E1")
     A -- B // asynchronous undirected message
     event("E2")
@@ -224,8 +233,8 @@ To do this in Hylimo you can use the following construct (not exclusive to seque
 
 ```hylimo
 sequenceDiagram {
-    instance("A")
-    instance("B")
+    participant("A")
+    participant("B")
     event("E1")
     A --> B with {
         label("text") // positioned at the beginning - 0% of the length
@@ -288,7 +297,7 @@ An instanced actor is an actor that has a stickman on top and an `instance` belo
   To access the created instance, use `<return value>.instance`
 - `below`: the optional participant below which this actor should be placed. If set, this actor will have the same x coordinate as the given value and the y coordinate of the current event
 
-**returns**: the created stickman. If this actor is instanced, you can access the instance using `<return value>.instance`
+**returns**: the created stickman
 
 ### deactivate
 
@@ -327,7 +336,7 @@ Should always be used inline as a message from something else:
 
 ```hylimo
 sequenceDiagram {
-    instance("Bob")
+    participant("Bob")
     event("E")
     foundMessage() -->> Bob
 }
@@ -392,7 +401,7 @@ Creates an instance which is an abstract concept of someone who participates in 
 - 2: A function determining the content of the instance
 - `below`: the optional participant below which this instance should be placed. If set, this instance will have the same x coordinate as the given value and the y coordinate of the current event
 
-**returns**: the created actor
+**returns**: the created instance
 
 ### lostMessage
 
@@ -401,7 +410,7 @@ Should always be used inline as a message to something else:
 
 ```hylimo
 sequenceDiagram {
-    instance("Bob")
+    participant("Bob")
     event("E")
     Bob -->> lostMessage()
 }
@@ -415,6 +424,19 @@ Is exactly the same as `foundMessage`, the meaning comes from the direction in w
 - `diameter`: the optional diameter of the dot. Defaults to `externalMessageDiameter`
 
 **returns**: the created dot
+
+### participant
+
+Creates an participant which is an abstract concept of someone who participates in the diagram.
+
+**params**:
+
+- 0: the optional name of the participant. If the next argument is missing, this will be treated as the class name of the participant
+- 1: the optional class name of the participant
+- 2: A function determining the content of the participant
+- `below`: the optional participant below which this participant should be placed. If set, this participant will have the same x coordinate as the given value and the y coordinate of the current event
+
+**returns**: the created participant
 
 ## Available class names
 
@@ -437,11 +459,11 @@ The following class names are available for styling/layout purposes within seque
 - `frame` to style frames
 - `instance-element` to layout instances
 - `instance` to style instances
-- `instanced-actor-element` to layout the stickman of instanced actors
-- `instanced-actor` to style the stickman of instanced actors
 - `lost-message-element` to layout lost message elements
 - `lost-message` to style lost messages
 - `non-top-level-participant-element` to style any participant after an event was declared, so its `y` is not `0`
+- `participant-element` to layout participants
+- `participant` to style participants
 - `top-level-participant-element` to style any participant before any event was declared, so its `y` is `0`
 
 ## Advanced functionality
@@ -470,9 +492,9 @@ Here's an example frame:
 
 ```hylimo
 sequenceDiagram {
-    instance("Alice")
-    instance("Bob")
-    instance("Charlie")
+    participant("Alice")
+    participant("Bob")
+    participant("Charlie")
 
     event("start")
     event("communicate")
@@ -496,18 +518,18 @@ Simply declare a frame containing a subset of events/participants after the firs
 
 ```hylimo
 sequenceDiagram {
-    y = instance("alice")
-    a = instance("bob")
+    y = participant("alice")
+    a = participant("bob")
     actor("Dave")
 
     event("hi")
     event("hi2")
-    instance("last")
+    participant("last")
 
     destroy(bob)
     event("hi3", 120)
     activate(last)
-    z = instance("Cat", below = bob)
+    z = participant("Cat", below = bob)
     alice --> z
     event("hi4")
     event("hi5")
@@ -531,18 +553,18 @@ To declare a fragment, pass a function behind the frame where you can use the `f
 
 ```hylimo
 sequenceDiagram {
-    y = instance("alice")
-    a = instance("bob")
+    y = participant("alice")
+    a = participant("bob")
     actor("Dave")
 
     event("hi")
     event("hi2")
-    instance("last")
+    participant("last")
 
     destroy(bob)
     event("hi3", 120)
     activate(last)
-    z = instance("Cat", below = bob)
+    z = participant("Cat", below = bob)
     alice --> z
     event("hi4")
     event("hi5")
@@ -598,18 +620,18 @@ It can be used for example as follows:
 
 ```hylimo
 sequenceDiagram {
-    y = instance("alice")
-    a = instance("bob")
+    y = participant("alice")
+    a = participant("bob")
     actor("Dave")
 
     event("hi")
     event("hi2")
-    instance("last")
+    participant("last")
 
     destroy(bob)
     event("hi3", 120)
     activate(last)
-    z = instance("Cat", below = bob)
+    z = participant("Cat", below = bob)
     alice --> z
     event("hi4")
     event("hi5")
@@ -634,18 +656,18 @@ It can be used for example as follows:
 
 ```hylimo
 sequenceDiagram {
-    y = instance("alice")
-    a = instance("bob")
+    y = participant("alice")
+    a = participant("bob")
     actor("Dave")
 
     event("hi")
     event("hi2")
-    instance("last")
+    participant("last")
 
     destroy(bob)
     event("hi3", 120)
     activate(last)
-    z = instance("Cat", below = bob)
+    z = participant("Cat", below = bob)
     alice --> z
     event("hi4")
     event("hi5")
@@ -673,9 +695,9 @@ It can be used for example as follows:
 
 ```hylimo
 sequenceDiagram {
-    instance("Alice")
-    instance("Bob")
-    instance("Charlie")
+    participant("Alice")
+    participant("Bob")
+    participant("Charlie")
 
     event("start")
     event("communicate")
@@ -703,9 +725,9 @@ It can be used for example as follows:
 
 ```hylimo
 sequenceDiagram {
-    instance("Alice")
-    instance("Bob")
-    instance("Charlie")
+    participant("Alice")
+    participant("Bob")
+    participant("Charlie")
 
     event("start")
     event("communicateA")
@@ -735,9 +757,9 @@ It can be used for example as follows:
 
 ```hylimo
 sequenceDiagram {
-    instance("Alice")
-    instance("Bob")
-    instance("Charlie")
+    participant("Alice")
+    participant("Bob")
+    participant("Charlie")
 
     event("start")
     event("communicate")
@@ -758,10 +780,10 @@ Here is an example for a webshop order:
 
 ```hylimo
 sequenceDiagram(enableDebugging = true) {
-    bob = instance("user")
-    instance("ourShop", "Shop")
-    instance("Cart")
-    instance("Payment")
+    bob = participant("user")
+    participant("ourShop", "Shop")
+    participant("Cart")
+    participant("Payment")
 
     event("initialRequest")
     activate(bob)

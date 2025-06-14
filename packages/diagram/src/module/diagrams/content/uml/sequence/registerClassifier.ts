@@ -19,7 +19,7 @@ import { registerClassifierToolboxEdits } from "../classifier/classifier.js";
  */
 export const registerClassifierModule = ContentModule.create(
     "uml/sequence/registerClassifier",
-    ["uml/classifier/classifier", "uml/sequence/participant"],
+    ["uml/classifier/classifier", "uml/sequence/createParticipant"],
     [],
     [
         id(SCOPE)

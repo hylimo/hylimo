@@ -26,13 +26,14 @@ import { actorModule } from "./uml/actor.js";
 import { eventModule } from "./uml/sequence/event.js";
 import { activityIndicatorModule } from "./uml/sequence/activityIndicator.js";
 import { sequenceDiagramAssociationsModule } from "./uml/sequence/sequenceDiagramAssociations.js";
-import { participantModule } from "./uml/sequence/participant.js";
+import { createParticipantMoule } from "./uml/sequence/createParticipant.js";
 import { lostFoundMessageModule } from "./uml/sequence/lostFoundMessage.js";
 import { valuesModule } from "./uml/classifier/values.js";
 import { sequenceDiagramCreateConnectionOperatorModule } from "./uml/sequence/sequenceDiagramCreateConnectionOperator.js";
 import type { ContentModule } from "./contentModule.js";
 import { importedParticipantsModule } from "./uml/sequence/importedParticipants.js";
 import { registerClassifierModule } from "./uml/sequence/registerClassifier.js";
+import { participantModule } from "./uml/sequence/participant.js";
 
 /**
  * All content modules
@@ -41,6 +42,7 @@ export const contents: ContentModule[] = [
     activityIndicatorModule,
     actorModule,
     associationsModule,
+    createParticipantMoule,
     classModule,
     classifierModule,
     commentModule,

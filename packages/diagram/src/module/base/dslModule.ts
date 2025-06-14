@@ -184,7 +184,8 @@ const scopeExpressions: ParseableExpressions = [
                 classCounter = 0,
                 styles = [styles = list()],
                 canvasAddEdits = [],
-                config = config
+                config = config,
+                callback = callback
             ]
         ]
     `,

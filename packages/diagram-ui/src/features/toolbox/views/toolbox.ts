@@ -104,7 +104,10 @@ function generateToolboxToolButton(context: Toolbox, tool: ToolboxTool): VNode {
                 active
             }
         },
-        [generateIcon(tool.icon), active && context.toolState.isLocked ? generateIcon(Lock, ["locked"]) : undefined]
+        [
+            generateIcon(tool.icon(context)),
+            active && context.toolState.isLocked ? generateIcon(Lock, ["locked"]) : undefined
+        ]
     );
 }
 

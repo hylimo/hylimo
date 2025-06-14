@@ -65,6 +65,7 @@ export * from "./module/diagrams/content/uml/classifier/providesAndRequires.js";
 export * from "./module/diagrams/content/uml/classifier/sections.js";
 export * from "./module/diagrams/content/uml/classifier/values.js";
 export * from "./module/diagrams/content/uml/sequence/activityIndicator.js";
+export * from "./module/diagrams/content/uml/sequence/createParticipant.js";
 export * from "./module/diagrams/content/uml/sequence/defaultValues.js";
 export * from "./module/diagrams/content/uml/sequence/event.js";
 export * from "./module/diagrams/content/uml/sequence/frame.js";

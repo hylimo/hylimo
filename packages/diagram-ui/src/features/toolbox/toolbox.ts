@@ -654,6 +654,14 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler, Conn
         }
         return true;
     }
+
+    /**
+     * Checks if the toolbox is in selected element mode.
+     * This is true if exactly one element is selected.
+     */
+    get selectedElementMode(): boolean {
+        return this.selectedElements.size === 1;
+    }
 }
 
 /**
