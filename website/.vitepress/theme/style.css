@@ -34,7 +34,8 @@
         position: relative !important;
         padding-left: 24px !important;
         width: var(--vp-sidebar-width) !important;
-        flex-shrink: 1;
+        flex-shrink: 100;
+        min-width: fit-content;
     }
 
     .container {
@@ -43,6 +44,11 @@
 
     .content {
         padding-left: 0 !important;
+    }
+
+    .content-body {
+        margin-right: 8px;
+        column-gap: 0 !important;
     }
 
     .divider {
@@ -60,10 +66,6 @@
 
         .wrapper {
             padding: 0 !important;
-        }
-
-        .VPNavBarHamburger {
-            margin-right: 8px;
         }
     }
 }
@@ -107,23 +109,19 @@
             padding-left: 32px !important;
         }
     }
+}
 
-    .nav-teleport-target#diagram-select {
-        flex-grow: 1;
-    }
+.nav-teleport-target#diagram-select {
+    flex-grow: 1;
+}
 
-    .nav-teleport-target#filename-header {
-        flex-grow: 1;
-    }
-
-    .VPNavBarMenu.menu:has(.diagram-select), .VPNavBarMenu.menu:has(.filename-header-label) {
-        flex-grow: 1;
-    }
+.VPNavBarMenu.menu:has(.diagram-select) {
+    flex-grow: 1;
 }
 
 .VPSocialLinks,
 .VPNavBarExtra {
-    margin-right: 8px !important;
+    margin-right: 0px !important;
 }
 
 .VPImage.logo {

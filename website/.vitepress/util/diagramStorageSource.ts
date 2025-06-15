@@ -187,7 +187,7 @@ export function useDiagramStorage(): DiagramStorage {
         }
 
         async save(): Promise<void> {
-            throw new Error("Method not implemented.");
+            throw new Error("Method not implemented 2.");
         }
     }
 

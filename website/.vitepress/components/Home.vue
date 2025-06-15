@@ -11,20 +11,8 @@
             class="main-content"
         />
         <ClientOnly>
-            <Teleport to="#filename-header">
-                <span
-                    v-if="isEmbedded"
-                    class="filename-header-label">
-                    {{ diagramSource ? (diagramSource.baseName ?? "Unnamed Diagram")  : "" }}
-                </span>
-                <span class="filename-save-status"
-                    v-if="isEmbedded">
-                    {{ diagramSource?.canSave.value ? "(Unsaved Changes)" : "" }}
-                </span>
-            </Teleport>
             <Teleport to="#diagram-select">
-                <DiagramChooser 
-                    v-if="!isEmbedded"
+                <DiagramChooser
                     :diagram-source="diagramSource"
                     :all-diagrams="allDiagrams"
                     @open-diagram="openDiagram($event).then((diagram) => (diagramSource = diagram))"
@@ -32,7 +20,6 @@
                     @create-diagram="createDiagram($event, diagramSource?.code.value ?? defaultDiagram)"
                     @delete-diagram="deleteDiagram"
                 ></DiagramChooser>
-                
             </Teleport>
             <Teleport to="#copy-diagram-link">
                 <IconButton label="Copy diagram link" icon="vpi-link" @click="copyLink" />
@@ -64,21 +51,22 @@
                     <button class="menu-button" @click="downloadSource">Source</button>
                 </VPFlyout>
             </Teleport>
-            <Teleport to=".VPNavBar .VPNavBarSocialLinks">
-                <IconButton
-                    v-if="isEmbedded"
-                    label="Exit HyLiMo"
-                    icon="vpi-close-x"
-                    iconColor="indianred"
-                    @click="sendExitRequest"
-                />
+            <Teleport to=".VPNavBar .content-body">
+                <div class="close-button" v-if="isEmbedded">
+                    <IconButton
+                        label="Exit HyLiMo"
+                        icon="vpi-close-x"
+                        iconColor="var(--vp-c-danger-1)"
+                        @click="sendExitRequest"
+                    />
+                </div>
             </Teleport>
         </ClientOnly>
     </div>
 </template>
 <script setup lang="ts">
 import VPNav from "vitepress/dist/client/theme-default/components/VPNav.vue";
-import { onKeyStroke, useEventListener, useWindowSize } from "@vueuse/core";
+import { onKeyStroke, useEventListener, useUrlSearchParams, useWindowSize } from "@vueuse/core";
 import { defineClientComponent, useData } from "vitepress";
 import IconButton from "./IconButton.vue";
 import VPFlyout from "vitepress/dist/client/theme-default/components/VPFlyout.vue";
@@ -96,8 +84,8 @@ import { useDiagramStorage } from "../util/diagramStorageSource";
 import { DiagramEmbeddedSource } from "../util/diagramEmbeddedSource";
 import type { DiagramSource } from "../util/diagramSource";
 
-const urlParams = new URLSearchParams(window.location.search);
-const isEmbedded: boolean = urlParams.get("embedded") ? true : false;
+const urlParams = useUrlSearchParams();
+const isEmbedded = computed(() => urlParams.embedded != undefined);
 
 const HylimoEditor = defineClientComponent(() => import("./HylimoEditor.vue"));
 
@@ -119,18 +107,6 @@ const allDiagrams = computed(() => {
 
 const defaultDiagram =
     'classDiagram {\n    class("HelloWorld") {\n        public {\n            hello : string\n        }\n    }\n}';
-
-if(isEmbedded) {
-    window.addEventListener("message", (event) => {
-        if (event.data.type === "openDiagram") {
-            diagramSource.value = new DiagramEmbeddedSource(event.data.name, event.data.name, event.data.code);
-        } else if (event.data.type === "saveDiagramResult") {
-            if (event.data.success && diagramSource.value && diagramSource.value instanceof DiagramEmbeddedSource) {
-                diagramSource.value.savedCode.value = event.data.savedCode;
-            }
-        }
-    });
-}
 
 async function createDiagram(name: string, code: string) {
     await addDiagram(name, code);
@@ -210,12 +186,16 @@ function downloadSVG(textAsPath: boolean) {
 }
 
 function sendExitRequest() {
-    if (!isEmbedded)
+    if (!isEmbedded.value) {
         return;
+    }
 
-    window.parent.postMessage({
-        type: "requestExit"
-    }, "*");
+    window.parent.postMessage(
+        {
+            type: "requestExit"
+        },
+        "*"
+    );
 }
 
 async function downloadPDF() {
@@ -277,8 +257,24 @@ async function openDiagramBeforeMount(): Promise<void> {
 }
 
 onBeforeMount(() => {
-    if(!isEmbedded) {
+    if (!isEmbedded.value) {
         openDiagramBeforeMount();
+    } else {
+        useEventListener(window, "message", (event) => {
+            if (event.data.type === "openDiagram") {
+                diagramSource.value = new DiagramEmbeddedSource(event.data.name, event.data.name, event.data.code);
+            } else if (event.data.type === "saveDiagramResult") {
+                if (event.data.success && diagramSource.value && diagramSource.value instanceof DiagramEmbeddedSource) {
+                    diagramSource.value.savedCode.value = event.data.savedCode;
+                }
+            }
+        });
+        window.parent.postMessage(
+            {
+                type: "requestDiagram"
+            },
+            "*"
+        );
     }
     useEventListener(window, "beforeunload", (event) => {
         if (diagramSource.value?.canSave.value) {
@@ -356,14 +352,18 @@ onBeforeMount(() => {
     margin-right: -4px;
 }
 
-.filename-header-label {
+.close-button {
     display: flex;
+    justify-content: center;
+    align-items: center;
 }
-
-.filename-save-status {
-    color: var(--vp-c-text-3); 
-    flex-grow: 1; 
+.close-button::before {
+    margin-right: 8px;
     margin-left: 8px;
+    width: 1px;
+    height: 24px;
+    background-color: var(--vp-c-divider);
+    content: "";
 }
 </style>
 <style>
