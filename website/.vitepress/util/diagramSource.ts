@@ -29,5 +29,5 @@ export interface DiagramSource {
     /**
      * The type of the source
      */
-    type: "browser" | "file";
+    type: "browser" | "file" | "embedded";
 }

@@ -67,7 +67,7 @@ export async function openDiagramFromFile(): Promise<DiagramSource | undefined> 
 class DiagramFileSource implements DiagramSource {
     readonly code: Ref<string>;
     private readonly savedCode: Ref<string>;
-    readonly canSave: Ref<boolean | undefined>;
+    readonly canSave: Ref<boolean>;
     readonly type = "file";
 
     constructor(

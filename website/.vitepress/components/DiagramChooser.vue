@@ -6,8 +6,12 @@
             class="diagram-select"
             :class="{ untitled: !showDialog && !inputFilename }"
             :placeholder="diagramSource != undefined ? 'Search or create diagram' : undefined"
+            :readonly="readonly"
+            :title="diagramSource?.canSave?.value ? 'Unsaved changes' : undefined"
             @focus="
-                ($event.target as HTMLInputElement).select();
+                if (!readonly) {
+                    ($event.target as HTMLInputElement).select();
+                }
                 openDialog();
             "
             @click="openDialog"
@@ -16,8 +20,11 @@
         <span
             class="select-icon"
             :class="{
-                'vpi-file-stack-light': diagramSource?.type !== 'file',
-                'vpi-file-light': diagramSource?.type === 'file'
+                'vpi-file-stack-light': diagramSource?.type === 'browser',
+                'vpi-file-check-light': diagramSource?.type === 'file' && !diagramSource?.canSave?.value,
+                'vpi-file-warning-light': diagramSource?.type === 'file' && diagramSource?.canSave?.value,
+                'vpi-cloud-check-light': diagramSource?.type === 'embedded' && !diagramSource?.canSave?.value,
+                'vpi-cloud-warning-light': diagramSource?.type === 'embedded' && diagramSource?.canSave?.value
             }"
         />
         <Transition name="dialog">
@@ -117,6 +124,8 @@ const diagramChooser = ref<HTMLElement | null>(null);
 const diagramSelect = ref<HTMLInputElement | null>(null);
 const diagramEntries = ref<DiagramEntry[]>([]);
 
+const readonly = computed(() => props.diagramSource?.type === "embedded");
+
 const inputFilenameOrPlaceholder = computed({
     get: () => {
         if (props.diagramSource == undefined) {
@@ -192,7 +201,7 @@ watch([inputFilename, () => props.allDiagrams], () => {
 });
 
 function openDialog(): void {
-    if (showDialog.value) {
+    if (showDialog.value || readonly.value) {
         return;
     }
     updateDiagramEntries();
@@ -313,9 +322,10 @@ function onMouseMove(e: MouseEvent) {
 .diagram-chooser {
     margin-left: 10px;
     position: relative;
+    flex: 0 1 30ch;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 500px) {
     .diagram-chooser:not(.screen-menu) {
         display: none;
     }
@@ -325,7 +335,7 @@ function onMouseMove(e: MouseEvent) {
     border-radius: 6px;
     padding: 2px 12px 2px 28px;
     height: 40px;
-    width: 30ch;
+    width: 100%;
     flex-shrink: 1;
     box-sizing: border-box;
     background-color: var(--vp-c-bg-alt);
