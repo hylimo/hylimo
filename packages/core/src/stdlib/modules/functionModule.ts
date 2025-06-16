@@ -21,7 +21,10 @@ export const functionModule = InterpreterModule.create(
     [DefaultModuleNames.COMMON],
     [
         fun([
-            assign(functionProto, new ExecutableNativeExpression((context) => ({ value: context.functionPrototype }))),
+            assign(
+                functionProto,
+                new ExecutableNativeExpression((context) => ({ value: context.functionPrototype, source: undefined }))
+            ),
             id(functionProto).assignField(
                 "callWithScope",
                 jsFun(
@@ -30,11 +33,23 @@ export const functionModule = InterpreterModule.create(
                         const scope = args.getFieldValue(0, context);
                         assertFunction(self);
                         assertObject(scope);
-                        scope.setLocalField(SemanticFieldNames.PROTO, { value: self.parentScope }, context);
-                        const res = self.invoke([], context, scope);
-                        scope.setLocalField(SemanticFieldNames.ARGS, { value: context.null }, context);
-                        scope.setLocalField(SemanticFieldNames.IT, { value: context.null }, context);
-                        scope.setLocalField(SemanticFieldNames.THIS, { value: context.null }, context);
+                        scope.setLocalField(
+                            SemanticFieldNames.PROTO,
+                            { value: self.parentScope, source: undefined },
+                            context
+                        );
+                        const res = self.invoke([], context, scope, undefined);
+                        scope.setLocalField(
+                            SemanticFieldNames.ARGS,
+                            { value: context.null, source: undefined },
+                            context
+                        );
+                        scope.setLocalField(SemanticFieldNames.IT, { value: context.null, source: undefined }, context);
+                        scope.setLocalField(
+                            SemanticFieldNames.THIS,
+                            { value: context.null, source: undefined },
+                            context
+                        );
                         return res;
                     },
                     {

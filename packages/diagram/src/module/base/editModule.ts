@@ -31,13 +31,13 @@ import { DiagramModuleNames } from "../diagramModuleNames.js";
 function generateEdit(
     target: Expression<any>,
     template: LabeledValue,
-    type: "replace" | "add" | "add-arg",
+    type: "replace" | "add" | "add-arg" | "append",
     context: InterpreterContext
 ): BaseObject {
     const edit = context.newObject();
-    edit.setLocalField("type", { value: context.newString(type) }, context);
-    edit.setLocalField("target", { value: target.toWrapperObject(context) }, context);
-    edit.setLocalField("template", { value: template.value }, context);
+    edit.setLocalField("type", { value: context.newString(type), source: undefined }, context);
+    edit.setLocalField("target", { value: target.toWrapperObject(context), source: undefined }, context);
+    edit.setLocalField("template", { value: template.value, source: undefined }, context);
     return edit;
 }
 
@@ -58,7 +58,10 @@ function generateReplaceOrAddArgEdit(
         return generateAddArgEdit(
             target.expression,
             template,
-            { value: typeof target.key === "number" ? context.newNumber(target.key) : context.newString(target.key) },
+            {
+                value: typeof target.key === "number" ? context.newNumber(target.key) : context.newString(target.key),
+                source: undefined
+            },
             context
         );
     } else {
@@ -80,11 +83,11 @@ function generateReplaceEdit(
     context: InterpreterContext
 ): BaseObject {
     const templateObject = context.newObject();
-    templateObject.setLocalField("length", { value: context.newNumber(template.length) }, context);
+    templateObject.setLocalField("length", { value: context.newNumber(template.length), source: undefined }, context);
     template.forEach((field, index) => {
-        templateObject.setLocalField(index, { value: field }, context);
+        templateObject.setLocalField(index, { value: field, source: undefined }, context);
     });
-    return generateReplaceOrAddArgEdit(target, { value: templateObject }, context);
+    return generateReplaceOrAddArgEdit(target, { value: templateObject, source: undefined }, context);
 }
 
 /**
@@ -212,11 +215,20 @@ export const editModule = InterpreterModule.create(
                     const deltaExp = (args.getFieldValue(1, context) as StringObject).value;
                     if (target instanceof NumberLiteralExpression) {
                         const expression = `$string(${target.value} + ${deltaExp})`;
-                        return generateEdit(target, { value: context.newString(expression) }, "replace", context);
+                        return generateEdit(
+                            target,
+                            { value: context.newString(expression), source: undefined },
+                            "replace",
+                            context
+                        );
                     }
                     if (target instanceof MissingArgumentSource) {
                         const expression = `$string(${deltaExp})`;
-                        return generateReplaceOrAddArgEdit(target, { value: context.newString(expression) }, context);
+                        return generateReplaceOrAddArgEdit(
+                            target,
+                            { value: context.newString(expression), source: undefined },
+                            context
+                        );
                     }
 
                     if (target instanceof OperatorExpression) {
@@ -262,15 +274,17 @@ export const editModule = InterpreterModule.create(
                         return context.null;
                     }
                     const scope = args.getField(1, context).value;
+                    const parsedScope = scope.isNull ? "" : ` ${assertString(scope)}`;
                     const expression = args.getField(2, context).value;
-                    return generateReplaceEdit(
-                        target,
-                        [
-                            target.toWrapperObject(context),
-                            context.newString(
-                                `' ${assertString(scope)} {\n    ' & $replace(${assertString(expression)}, '\n', '\n    ') & '\n}'`
-                            )
-                        ],
+                    return generateEdit(
+                        target as Expression<any>,
+                        {
+                            value: context.newString(
+                                `'${parsedScope} {\n    ' & $replace(${assertString(expression)}, '\n', '\n    ') & '\n}'`
+                            ),
+                            source: undefined
+                        },
+                        "append",
                         context
                     );
                 },
@@ -278,7 +292,7 @@ export const editModule = InterpreterModule.create(
                     docs: "Creates an append scope edit",
                     params: [
                         [0, "the target to replace / append to"],
-                        [1, "the name of the scope"],
+                        [1, "the name of the scope, or null if a trailing lambda should be appended"],
                         [2, "the expression to append"]
                     ],
                     returns: "the created edit or null if the target is not editable"
@@ -297,22 +311,6 @@ export const editModule = InterpreterModule.create(
                     docs: "Converts a name to an expression",
                     params: [[0, "the name of the identifier to convert", or(stringType, numberType)]],
                     returns: "the expression"
-                }
-            )
-        ),
-        assign(
-            "nameToJsonataStringLiteral",
-            jsFun(
-                (args, context) => {
-                    const name = args.getFieldValue(0, context).toNative();
-                    const expression = nameToExpression(name);
-                    const escapedExpression = jsonataStringLiteral(expression);
-                    return context.newString(escapedExpression);
-                },
-                {
-                    docs: "Converts a name to a jsonata expression",
-                    params: [[0, "the name of the identifier to convert", or(stringType, numberType)]],
-                    returns: "the jsonata expression"
                 }
             )
         )

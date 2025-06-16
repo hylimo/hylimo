@@ -10,10 +10,17 @@ import type {
 } from "sprotty";
 import { AbstractUIExtension } from "sprotty";
 import type { Action } from "sprotty-protocol";
-import { generateRequestId, SelectAllAction, SetModelAction, UpdateModelAction } from "sprotty-protocol";
+import { generateRequestId, SelectAction, SelectAllAction, SetModelAction, UpdateModelAction } from "sprotty-protocol";
 import type { VNode } from "snabbdom";
 import { h } from "snabbdom";
-import { EditSpecification, Root } from "@hylimo/diagram-common";
+import {
+    CanvasConnection,
+    CanvasElement,
+    CanvasPoint,
+    EditSpecification,
+    Root,
+    type Element
+} from "@hylimo/diagram-common";
 import type { ConnectionEdit, ToolboxEdit } from "@hylimo/diagram-protocol";
 import {
     EditorConfigUpdatedAction,
@@ -31,6 +38,8 @@ import { UpdateCursorAction } from "../cursor/cursor.js";
 import { ToolState } from "./toolState.js";
 import { SetToolAction } from "./setToolAction.js";
 import type { SettingsProvider } from "../settings/settingsProvider.js";
+import jsonata, { type ExprNode } from "jsonata";
+import type { TransactionIdProvider } from "../transaction/transactionIdProvider.js";
 
 /**
  * UI Extension which displays the graphical toolbox.
@@ -100,6 +109,16 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler, Conn
     private connectionSearchIndex?: MiniSearch<ConnectionEditEntry>;
 
     /**
+     * Cached toolbox edits
+     */
+    private toolboxEdits?: ToolboxEditEntry[];
+
+    /**
+     * Cached connection edits
+     */
+    private connectionEdits?: ConnectionEditEntry[];
+
+    /**
      * Cached rendered element previews.
      */
     elementPreviews: Map<string, VNode | undefined> = new Map();
@@ -108,6 +127,16 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler, Conn
      * The model renderer.
      */
     private readonly renderer: ModelRenderer;
+
+    /**
+     * The ids of the currently selected elements.
+     */
+    private readonly selectedElements = new Set<string>();
+
+    /**
+     * The index of elements, used to quickly access elements by id.
+     */
+    private index: Map<string, Element> | undefined = undefined;
 
     /**
      * The patcher provider.
@@ -135,6 +164,11 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler, Conn
     @inject(TYPES.SettingsProvider) readonly settingsProvider!: SettingsProvider;
 
     /**
+     * The transaction id provider
+     */
+    @inject(TYPES.TransactionIdProvider) transactionIdProvider!: TransactionIdProvider;
+
+    /**
      * Creates a new toolbox.
      *
      * @param configManager The config manager
@@ -151,14 +185,7 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler, Conn
 
     handle(action: Action): ICommand | Action | void {
         if (action.kind === UpdateModelAction.KIND || action.kind === SetModelAction.KIND) {
-            if ((action as UpdateModelAction | SetModelAction).newRoot?.type === Root.TYPE) {
-                const root = (action as UpdateModelAction | SetModelAction).newRoot as Root;
-                this.currentRoot = root;
-                this.initializeToolbox();
-                this.elementPreviews.clear();
-                this.searchIndex = undefined;
-                this.connectionSearchIndex = undefined;
-            }
+            this.handleUpdateModelAction(action as UpdateModelAction | SetModelAction);
         } else if (TransactionalAction.isTransactionalAction(action)) {
             this.handleTransactionalAction(action);
         } else if (EditorConfigUpdatedAction.is(action)) {
@@ -166,7 +193,44 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler, Conn
             this.update();
         } else if (SetToolAction.is(action)) {
             this.updateTool(action.tool, false);
+        } else if (action.kind === SelectAction.KIND || action.kind === SelectAllAction.KIND) {
+            this.handleSelectAction(action as SelectAction | SelectAllAction);
         }
+    }
+
+    /**
+     * Clears all cached data
+     */
+    private resetCache(): void {
+        this.elementPreviews.clear();
+        this.searchIndex = undefined;
+        this.connectionSearchIndex = undefined;
+        this.index = undefined;
+        this.toolboxEdits = undefined;
+        this.connectionEdits = undefined;
+    }
+
+    /**
+     * Handles UpdateModelAction and SetModelAction to update the toolbox state when the model changes.
+     * This method:
+     *
+     * @param action The UpdateModelAction or SetModelAction containing the new model root
+     * @returns returns early if the new root is not of type Root.TYPE
+     */
+    private handleUpdateModelAction(action: UpdateModelAction | SetModelAction): void {
+        if (action.newRoot?.type !== Root.TYPE) {
+            return;
+        }
+        const root = action.newRoot as Root;
+        this.currentRoot = root;
+        this.initializeToolbox();
+        this.resetCache();
+        for (const selected of this.selectedElements) {
+            if (this.getIndex().get(selected) == undefined) {
+                this.selectedElements.delete(selected);
+            }
+        }
+        this.update();
     }
 
     /**
@@ -192,6 +256,41 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler, Conn
     }
 
     /**
+     * Handles a Select(All)Action and resets the cache if necessary.
+     *
+     * @param action The Select(All)Action to handle
+     */
+    private handleSelectAction(action: SelectAction | SelectAllAction): void {
+        const oldSelected = this.selectedElements.size === 1 ? this.selectedElements.values().next().value : undefined;
+        if (action.kind === SelectAction.KIND) {
+            (action as SelectAction).selectedElementsIDs.forEach((id) => this.selectedElements.add(id));
+            (action as SelectAction).deselectedElementsIDs.forEach((id) => this.selectedElements.delete(id));
+        } else {
+            if (action.select) {
+                if (this.currentRoot != undefined) {
+                    this.selectedElements.clear();
+                    for (const element of this.getIndex().values()) {
+                        if (
+                            CanvasElement.isCanvasElement(element) ||
+                            CanvasConnection.isCanvasConnection(element) ||
+                            CanvasPoint.isCanvasPoint(element)
+                        ) {
+                            this.selectedElements.add(element.id);
+                        }
+                    }
+                }
+            } else {
+                this.selectedElements.clear();
+            }
+        }
+        const newSelected = this.selectedElements.size === 1 ? this.selectedElements.values().next().value : undefined;
+        if (oldSelected !== newSelected) {
+            this.resetCache();
+            this.update();
+        }
+    }
+
+    /**
      * Initializes the toolbox.
      */
     private initializeToolbox(): void {
@@ -206,10 +305,7 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler, Conn
      */
     update(): void {
         if (this.currentRoot != undefined) {
-            this.currentVNode = this.patcherProvider.patcher(
-                this.currentVNode!,
-                generateToolbox(this, this.currentRoot)
-            );
+            this.currentVNode = this.patcherProvider.patcher(this.currentVNode!, generateToolbox(this));
         }
     }
 
@@ -278,7 +374,7 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler, Conn
         if (this.currentRoot == undefined) {
             return undefined;
         }
-        const connections = this.getConnectionEdits(this.currentRoot);
+        const connections = this.getConnectionEdits();
         if (connections.length === 0) {
             return undefined;
         }
@@ -305,16 +401,74 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler, Conn
     /**
      * Extracts the toolbox edits from the root element.
      *
-     * @param root The root element
      * @returns The toolbox edits
      */
-    getToolboxEdits(root: Root): ToolboxEditEntry[] {
-        return Object.entries(root.edits)
-            .filter(([key, edit]) => key.startsWith("toolbox/") && EditSpecification.isConsistent([[edit]]))
-            .map(([key]) => {
-                const [group, name] = key.substring("toolbox/".length).split("/");
-                return { group, name, edit: key as `toolbox/${string}` };
-            });
+    getToolboxEdits(): ToolboxEditEntry[] {
+        if (this.toolboxEdits == undefined) {
+            const target =
+                this.selectedElements.size === 1
+                    ? this.getIndex().get(this.selectedElements.values().next().value!)!
+                    : this.currentRoot!;
+            const entries = Object.entries(target.edits).filter(
+                ([key, edit]) => key.startsWith("toolbox/") && EditSpecification.isConsistent([[edit]])
+            );
+            this.toolboxEdits = entries
+                .map(([key, entry]) => {
+                    const [group, name] = key.substring("toolbox/".length).split("/");
+                    const info = { canMove: false, requiresExpression: false };
+                    for (const template of entry.template) {
+                        if (typeof template === "string") {
+                            this.extractTemplateInformationRecursive(jsonata(template).ast(), info);
+                        }
+                    }
+                    return {
+                        group,
+                        name,
+                        edit: key as `toolbox/${string}`,
+                        target: { id: target.id, editExpression: (target as CanvasElement).editExpression },
+                        ...info
+                    };
+                })
+                .filter((entry) => !entry.requiresExpression || entry.target.editExpression != undefined);
+        }
+        return this.toolboxEdits;
+    }
+
+    /**
+     * Extracts template information from the given node recursively.
+     * Updates the provided info object with the extracted information.
+     *
+     * @param node The node to extract information from
+     * @param info The info object to update
+     */
+    private extractTemplateInformationRecursive(
+        node: ExprNode | ExprNode[] | undefined,
+        info: Pick<ToolboxEditEntry, "canMove" | "requiresExpression">
+    ): void {
+        if (node == undefined) {
+            return;
+        }
+        if (Array.isArray(node)) {
+            for (const child of node) {
+                this.extractTemplateInformationRecursive(child, info);
+            }
+        } else {
+            if (node.type === "name") {
+                if (node.value === "x" || node.value === "y") {
+                    info.canMove = true;
+                } else if (node.value === "expression") {
+                    info.requiresExpression = true;
+                }
+            } else {
+                this.extractTemplateInformationRecursive(node.arguments, info);
+                this.extractTemplateInformationRecursive(node.lhs, info);
+                this.extractTemplateInformationRecursive(node.rhs, info);
+                this.extractTemplateInformationRecursive(node.steps, info);
+                this.extractTemplateInformationRecursive(node.expressions, info);
+                this.extractTemplateInformationRecursive(node.procedure, info);
+                this.extractTemplateInformationRecursive(node.stages, info);
+            }
+        }
     }
 
     /**
@@ -323,10 +477,13 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler, Conn
      * @param root The root element
      * @returns The connection edits
      */
-    getConnectionEdits(root: Root): ConnectionEditEntry[] {
-        return Object.entries(root.edits)
-            .filter(([key, edit]) => key.startsWith("connection/") && EditSpecification.isConsistent([[edit]]))
-            .map(([key]) => ({ name: key.substring("connection/".length), edit: key as `connection/${string}` }));
+    getConnectionEdits(): ConnectionEditEntry[] {
+        if (this.connectionEdits == undefined) {
+            this.connectionEdits = Object.entries(this.currentRoot!.edits)
+                .filter(([key, edit]) => key.startsWith("connection/") && EditSpecification.isConsistent([[edit]]))
+                .map(([key]) => ({ name: key.substring("connection/".length), edit: key as `connection/${string}` }));
+        }
+        return this.connectionEdits;
     }
 
     /**
@@ -334,6 +491,7 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler, Conn
      * If no preview is available, a prediction is requested.
      *
      * @param edit The toolbox edit to show a preview for
+     * @param targetId The id of the element to edit
      */
     showPreview(edit: ToolboxEditEntry | ConnectionEditEntry): void {
         this.showPreviewFor = edit.edit;
@@ -357,9 +515,10 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler, Conn
                 values: {
                     x: 0,
                     y: 0,
-                    prediction: true
+                    prediction: true,
+                    expression: (edit as ToolboxEditEntry).target.editExpression
                 },
-                elements: [this.currentRoot!.id]
+                elements: [(edit as ToolboxEditEntry).target.id]
             };
         } else {
             return {
@@ -420,9 +579,7 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler, Conn
                     boost: { name: 2 }
                 }
             });
-            this.searchIndex.addAll(
-                this.getToolboxEdits(this.currentRoot!).map((edit) => ({ ...edit, id: edit.edit }))
-            );
+            this.searchIndex.addAll(this.getToolboxEdits().map((edit) => ({ ...edit, id: edit.edit })));
         }
         return this.searchIndex;
     }
@@ -444,11 +601,41 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler, Conn
                 },
                 tokenize: (string) => string.split(" ")
             });
-            this.connectionSearchIndex.addAll(
-                this.getConnectionEdits(this.currentRoot!).map((edit) => ({ ...edit, id: edit }))
-            );
+            this.connectionSearchIndex.addAll(this.getConnectionEdits().map((edit) => ({ ...edit, id: edit })));
         }
         return this.connectionSearchIndex;
+    }
+
+    /**
+     * Gets the index of all elements in the current root.
+     * The index is a map that allows quick lookup of elements by their ID.
+     * If the index doesn't exist yet, it will be built by traversing the entire element tree.
+     *
+     * @returns A map containing all elements indexed by their ID, or an empty map if no root exists
+     */
+    private getIndex(): Map<string, Element> {
+        if (this.currentRoot == undefined) {
+            return new Map();
+        }
+        if (this.index == undefined) {
+            this.index = new Map();
+            this.buildIndexRecursive(this.currentRoot);
+        }
+        return this.index;
+    }
+
+    /**
+     * Recursively builds the element index by traversing the element tree.
+     * This method adds the current element to the index and then recursively
+     * processes all of its children.
+     *
+     * @param element The element to add to the index and whose children to process recursively
+     */
+    private buildIndexRecursive(element: Element) {
+        this.index!.set(element.id, element);
+        for (const child of element.children) {
+            this.buildIndexRecursive(child);
+        }
     }
 
     /**
@@ -459,13 +646,21 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler, Conn
      */
     isToolEnabled(tool: ToolboxToolType): boolean {
         if (tool === ToolboxToolType.ADD_ELEMENT) {
-            return this.getToolboxEdits(this.currentRoot!).length > 0;
+            return this.getToolboxEdits().length > 0;
         } else if (tool === ToolboxToolType.CONNECT) {
-            return this.getCurrentConnection(this.getConnectionEdits(this.currentRoot!)) != undefined;
+            return this.getCurrentConnection(this.getConnectionEdits()) != undefined;
         } else if (tool === ToolboxToolType.AUTOLAYOUT) {
             return false;
         }
         return true;
+    }
+
+    /**
+     * Checks if the toolbox is in selected element mode.
+     * This is true if exactly one element is selected.
+     */
+    get selectedElementMode(): boolean {
+        return this.selectedElements.size === 1;
     }
 }
 
@@ -485,6 +680,18 @@ export interface ToolboxEditEntry {
      * The full key of the edit
      */
     edit: `toolbox/${string}`;
+    /**
+     * The id & optional edit expression of the target element
+     */
+    target: Pick<CanvasElement, "id" | "editExpression">;
+    /**
+     * If true, dragging this item is allowed
+     */
+    canMove: boolean;
+    /**
+     * If true, the item requires an expression for the element to be set
+     */
+    requiresExpression: boolean;
 }
 
 /**

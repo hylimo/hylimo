@@ -121,9 +121,17 @@ function createElementFunction(element: LayoutConfig): ExecutableExpression {
         jsFun(
             (args, context) => {
                 const newElement = context.newObject();
-                newElement.setLocalField("type", { value: context.newString(element.type) }, context);
-                newElement.setLocalField("proto", { value: context.getField("elementProto") }, context);
-                newElement.setLocalField("edits", { value: context.newObject() }, context);
+                newElement.setLocalField(
+                    "type",
+                    { value: context.newString(element.type), source: undefined },
+                    context
+                );
+                newElement.setLocalField(
+                    "proto",
+                    { value: context.getField("elementProto"), source: undefined },
+                    context
+                );
+                newElement.setLocalField("edits", { value: context.newObject(), source: undefined }, context);
                 for (const [key, value] of args.fields.entries()) {
                     if (key !== "self" && key !== "proto") {
                         newElement.setField(key, value, context);
@@ -132,16 +140,18 @@ function createElementFunction(element: LayoutConfig): ExecutableExpression {
                 context.getField("_evaluateElement").invoke(
                     [
                         {
-                            value: new ExecutableConstExpression({ value: newElement })
+                            value: new ExecutableConstExpression({ value: newElement, source: undefined })
                         },
                         {
-                            value: new ExecutableConstExpression({ value: args })
+                            value: new ExecutableConstExpression({ value: args, source: undefined })
                         },
                         {
                             value: bool(canHaveChildren)
                         }
                     ],
-                    context
+                    context,
+                    undefined,
+                    undefined
                 );
                 return newElement;
             },
@@ -258,7 +268,7 @@ export class DiagramModule implements InterpreterModule {
                                 callback.callWithScope(scopeObject)
                             }
                         }
-                        if(scope.addContent != null) {
+                        if((null != scope) && (null != scope.addContent)) {
                             scope.addContent(element)
                         }
                     `
@@ -385,7 +395,7 @@ export class DiagramModule implements InterpreterModule {
                                             const result = context.newObject();
                                             result.setLocalField(
                                                 "_type",
-                                                { value: context.newString("calc") },
+                                                { value: context.newString("calc"), source: undefined },
                                                 context
                                             );
                                             result.setLocalField("left", left, context);
@@ -398,7 +408,9 @@ export class DiagramModule implements InterpreterModule {
                                                 { value: new ExecutableConstExpression(left) },
                                                 { value: new ExecutableConstExpression(right) }
                                             ],
-                                            context
+                                            context,
+                                            undefined,
+                                            undefined
                                         );
                                     },
                                     {

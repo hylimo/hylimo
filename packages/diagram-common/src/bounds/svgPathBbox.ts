@@ -518,7 +518,7 @@ class PathBBoxCalculator {
      * Start and end points have to be handled separately.
      * Modified version of https://github.com/kpym/SVGPathy/blob/acd1a50c626b36d81969f6e98e8602e128ba4302/lib/box.js#L89
      *
-     * @param A the quadratic bezier curve
+     * @template A the quadratic bezier curve
      * @returns the min and max of the curve
      */
     minmaxQ(A: [number, number, number]): MinMax {
@@ -544,7 +544,7 @@ class PathBBoxCalculator {
      * Start and end points have to be handled separately.
      * Modified version of https://github.com/kpym/SVGPathy/blob/acd1a50c626b36d81969f6e98e8602e128ba4302/lib/box.js#L127
      *
-     * @param A defines the cubic bezier curve as [A0, A1, A2, A3]
+     * @template A defines the cubic bezier curve as [A0, A1, A2, A3]
      * @returns the min and max of the curve
      */
     minmaxC(A: [number, number, number, number]): MinMax {

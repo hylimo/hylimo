@@ -1,76 +1,49 @@
 import type { Expression } from "@hylimo/core";
-import { assign, ExecutableConstExpression, fun, FunctionObject, functionType, jsFun, num } from "@hylimo/core";
+import { functionType } from "@hylimo/core";
 import { convertStringOrIdentifier } from "./propertiesAndMethods.js";
-import { ContentModule } from "../../contentModule.js";
+import { createClassifierScopeContentModule } from "./classifierScope.js";
 
 /**
  * Module providing the entries content handler
  * Requires the sections content handler
  */
-export const entriesModule = ContentModule.create(
+export const entriesModule = createClassifierScopeContentModule<undefined>(
     "uml/classifier/entries",
-    [],
-    [],
+    "entriesContentHandler",
     [
-        assign(
-            "_literalsScopeGenerator",
-            fun([
-                `
-                    (scope) = args
+        {
+            name: "entries",
+            docs: {
+                docs: `
+                    Takes a function as parameter that declares enum literals through its expressions.
+                    The content of the function is not executed, but analyzed on the AST level.
+                    Enum literals can be provided both as identifiers and as strings.
+                    Example: \`ENUM_ENTRY\`
                 `,
-                jsFun(
-                    (args, context) => {
-                        const scopeFunction = args.getLocalFieldOrUndefined(0)!.value;
-                        if (!(scopeFunction instanceof FunctionObject)) {
-                            throw new Error("scope is not a function");
-                        }
-                        const expressions = scopeFunction.definition.expressions.map(
-                            (expression) => expression.expression
-                        );
-                        const scope = context.getField("scope");
-                        const enumLiterals = convertEnumLiterals(expressions);
-
-                        if (enumLiterals.length > 0) {
-                            scope.invoke(
-                                [
-                                    ...enumLiterals.map((entry) => ({
-                                        value: new ExecutableConstExpression({
-                                            value: context.newString(entry)
-                                        })
-                                    })),
-                                    {
-                                        name: "section",
-                                        value: num(2)
-                                    }
-                                ],
-                                context
-                            );
-                        }
-
-                        return context.null;
-                    },
-                    {
-                        docs: `
-                            Takes a function as parameter that declares enum literals through its expressions.
-                            The content of the function is not executed, but analyzed on the AST level.
-                            Enum literals can be provided both as identifiers and as strings.
-                            Example: \`ENUM_ENTRY\`
-                        `,
-                        params: [[0, "the function whose expressions will be used as enum literals", functionType]],
-                        returns: "null"
-                    }
-                )
-            ])
-        ),
-        `
-            scope.internal.entriesContentHandler = [
+                params: [[0, "the function whose expressions will be used as enum literals", functionType]],
+                returns: "null"
+            },
+            edits: [
                 {
-                    args.callScope.entries = _literalsScopeGenerator(args.callScope.section)
-                },
-                { }
-            ]
-        `
-    ]
+                    value: "EXAMPLE",
+                    name: "Entry/Add entry"
+                }
+            ],
+            extractContext: () => undefined,
+            parseEntries: (parseContext, expressions, context) => {
+                return [
+                    {
+                        values: convertEnumLiterals(expressions).map((entry) => ({
+                            value: context.newString(entry),
+                            source: undefined
+                        })),
+                        index: 2
+                    }
+                ];
+            }
+        }
+    ],
+    []
 );
 
 /**

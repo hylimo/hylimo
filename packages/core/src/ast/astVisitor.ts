@@ -21,8 +21,8 @@ import { IndexAssignmentExpression } from "./indexAssignmentExpression.js";
  * Visitor to transform an AST.
  * Override the visit methods to transform the AST.
  *
- * @param C the type of the context
- * @param O the type of the result
+ * @template C the type of the context
+ * @template O the type of the result
  */
 export abstract class ASTVisitor<C, O> {
     /**

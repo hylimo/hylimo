@@ -38,7 +38,8 @@ export abstract class AbstractFunctionObject<T extends ExecutableAbstractFunctio
     override getField(key: string | number, context: InterpreterContext): LabeledValue {
         if (key === SemanticFieldNames.DOCS) {
             return {
-                value: this.docs
+                value: this.docs,
+                source: undefined
             };
         } else {
             return super.getField(key, context);
@@ -49,7 +50,8 @@ export abstract class AbstractFunctionObject<T extends ExecutableAbstractFunctio
         const result = super.getFields(context);
         if (this.docs !== undefined) {
             result.set(SemanticFieldNames.DOCS, {
-                value: this.docs
+                value: this.docs,
+                source: undefined
             });
         }
         return result;
@@ -59,7 +61,7 @@ export abstract class AbstractFunctionObject<T extends ExecutableAbstractFunctio
         if (key === SemanticFieldNames.DOCS) {
             this.docs = value.value;
         } else {
-            super.setField(key, value, context, this);
+            super.setField(key, value, context);
         }
     }
 
@@ -67,7 +69,7 @@ export abstract class AbstractFunctionObject<T extends ExecutableAbstractFunctio
         if (key === SemanticFieldNames.DOCS) {
             this.docs = value.value;
         } else {
-            super.setLocalField(key, value, context, this);
+            super.setLocalField(key, value, context);
         }
     }
 
@@ -106,16 +108,16 @@ export class FunctionObject extends AbstractFunctionObject<ExecutableFunctionExp
     override invoke(
         args: ExecutableListEntry[],
         context: InterpreterContext,
-        scope?: FullObject,
-        callExpression?: AbstractInvocationExpression | OperatorExpression
+        scope: FullObject | undefined,
+        callExpression: AbstractInvocationExpression | OperatorExpression | undefined
     ): LabeledValue {
         context.nextStep();
         const oldScope = context.currentScope;
-        if (!scope) {
+        if (scope == undefined) {
             scope = new FullObject();
-            scope.setLocalField(SemanticFieldNames.PROTO, { value: this.parentScope }, context);
+            scope.setLocalField(SemanticFieldNames.PROTO, { value: this.parentScope, source: undefined }, context);
         }
-        scope.setLocalField(SemanticFieldNames.THIS, { value: scope }, context);
+        scope.setLocalField(SemanticFieldNames.THIS, { value: scope, source: undefined }, context);
         const generatedArgs = generateArgs(args, context, this.definition.documentation, callExpression);
         scope.setLocalField(SemanticFieldNames.ARGS, { value: generatedArgs, source: callExpression }, context);
         scope.setLocalField(SemanticFieldNames.IT, generatedArgs.getField(0, context), context);
@@ -125,7 +127,7 @@ export class FunctionObject extends AbstractFunctionObject<ExecutableFunctionExp
             lastValue = expression.evaluate(context).value;
         }
         context.currentScope = oldScope;
-        return { value: lastValue };
+        return { value: lastValue, source: undefined };
     }
 
     override toString(): string {
@@ -152,8 +154,8 @@ export class NativeFunctionObject extends AbstractFunctionObject<ExecutableNativ
     override invoke(
         args: ExecutableListEntry[],
         context: InterpreterContext,
-        _scope?: FullObject,
-        callExpression?: AbstractInvocationExpression | OperatorExpression
+        _scope: FullObject,
+        callExpression: AbstractInvocationExpression | OperatorExpression | undefined
     ): LabeledValue {
         context.nextStep();
         const res = this.definition.callback(args, context, this.parentScope, callExpression);

@@ -1,6 +1,5 @@
-import type { ParseableExpressions } from "@hylimo/core";
-import { fun, functionType, id, listType, optional, or, stringType } from "@hylimo/core";
-import { createToolboxEdit, SCOPE } from "../../../base/dslModule.js";
+import { fun, functionType, id, listType, object, optional, or, str, stringType } from "@hylimo/core";
+import { SCOPE } from "../../../base/dslModule.js";
 import { ContentModule } from "../contentModule.js";
 
 /**
@@ -45,55 +44,64 @@ export const instanceModule = ContentModule.create(
                 [name, title, callback]
             }
         `,
-        id(SCOPE).assignField(
-            "instance",
-            fun(
-                `
-                    (name, title, callback) = scope.internal.parseInstanceArgs(args)
-                    scope.internal.createInstance(name, callback, title = title, keywords = args.keywords, args = args)
-                `,
-                {
-                    docs: "Creates an instance.",
-                    params: [
-                        [
-                            0,
-                            "the optional name of the instance, if not given, the second parameter must be provided",
-                            optional(stringType)
+        id(SCOPE)
+            .field("internal")
+            .callField(
+                "registerClassifier",
+                str("instance"),
+                fun(
+                    `
+                        (name, title, callback) = scope.internal.parseInstanceArgs(args)
+                        scope.internal.createInstance(name, callback, title = title, keywords = args.keywords, args = args)
+                    `,
+                    {
+                        docs: "Creates an instance.",
+                        params: [
+                            [
+                                0,
+                                "the optional name of the instance, if not given, the second parameter must be provided",
+                                optional(stringType)
+                            ],
+                            [1, "the optional class name of this instance", optional(or(stringType, functionType))],
+                            [2, "the callback function of this instance", optional(functionType)],
+                            ["keywords", "the keywords of the instance", optional(listType(stringType))]
                         ],
-                        [1, "the optional class name of this instance", optional(or(stringType, functionType))],
-                        [2, "the callback function of this instance", optional(functionType)],
-                        ["keywords", "the keywords of the instance", optional(listType(stringType))]
-                    ],
-                    snippet: `("$1") {\n    $2\n}`,
-                    returns: "The created instance"
-                }
-            )
-        ),
-        ...instanceToolboxEdits(true)
-    ]
-);
-
-/**
- * Creates toolbox edits for the instance function
- *
- * @param enableDragging Whether dragging is enabled
- * @returns The toolbox edits
- */
-export function instanceToolboxEdits(enableDragging: boolean): ParseableExpressions {
-    return [
-        createToolboxEdit("Instance/Instance", 'instance("Example")', enableDragging),
-        createToolboxEdit("Instance/Instance with name", 'instance("example", "Example")', enableDragging),
-        createToolboxEdit(
-            "Instance/Instance with values",
-            `
-                instance("example", "Example") {
-                    values {
-                        hello = "World"
-                        number = 42
+                        snippet: `("$1") {\n    $2\n}`,
+                        returns: "The created instance"
+                    }
+                ),
+                object([
+                    {
+                        name: "Instance/Instance",
+                        value: str('instance("Example")')
+                    },
+                    {
+                        name: "Instance/Instance with name",
+                        value: str('instance("example", "Example")')
+                    },
+                    {
+                        name: "Instance/Instance with values",
+                        value: str(
+                            `
+                                instance("example", "Example") {
+                                    values {
+                                        hello = "World"
+                                        number = 42
+                                    }
+                                }
+                            `
+                        )
+                    }
+                ])
+            ),
+        `
+            scope.styles {
+                cls("instance-element") {
+                    cls("title") {
+                        underline = true
                     }
                 }
-            `,
-            enableDragging
-        )
-    ];
-}
+            }
+        `
+    ]
+);

@@ -1,4 +1,4 @@
-import { createToolboxEdit } from "../../../base/dslModule.js";
+import { createToolboxEditExpression } from "../../../base/dslModule.js";
 import { ContentModule } from "../contentModule.js";
 
 /**
@@ -9,7 +9,7 @@ export const componentDiagramToolboxEditsModule = ContentModule.create(
     [],
     [],
     [
-        createToolboxEdit(
+        createToolboxEditExpression(
             "Package/Package with component",
             `
                 package("Example") {

@@ -43,7 +43,11 @@ export const listModule = InterpreterModule.create(
                         const self = args.getFieldValue(SemanticFieldNames.SELF, context);
                         const length = assertNumber(self.getFieldValue(lengthField, context));
                         self.setLocalField(length, args.getField(0, context), context);
-                        self.setField(lengthField, { value: context.newNumber(length + 1) }, context);
+                        self.setLocalField(
+                            lengthField,
+                            { value: context.newNumber(length + 1), source: undefined },
+                            context
+                        );
                         return context.null;
                     },
                     {
@@ -105,8 +109,12 @@ export const listModule = InterpreterModule.create(
                         const length = assertNumber(self.getFieldValue(lengthField, context));
                         if (length > 0) {
                             const value = self.getField(length - 1, context);
-                            self.setField(length - 1, { value: context.null }, context);
-                            self.setField(lengthField, { value: context.newNumber(length - 1) }, context);
+                            self.setLocalField(length - 1, { value: context.null, source: undefined }, context);
+                            self.setLocalField(
+                                lengthField,
+                                { value: context.newNumber(length - 1), source: undefined },
+                                context
+                            );
                             return value;
                         } else {
                             throw new RuntimeError("List empty, nothing to remove");
@@ -129,14 +137,16 @@ export const listModule = InterpreterModule.create(
                         const callback = args.getFieldValue(0, context);
                         assertFunction(callback, "first positional argument of forEach");
                         const length = assertNumber(self.getFieldValue(lengthField, context), "length field of a list");
-                        let lastValue: LabeledValue = { value: context.null };
+                        let lastValue: LabeledValue = { value: context.null, source: undefined };
                         for (let i = 0; i < length; i++) {
                             lastValue = callback.invoke(
                                 [
                                     { value: new ExecutableConstExpression(self.getField(i, context)) },
                                     { value: num(i) }
                                 ],
-                                context
+                                context,
+                                undefined,
+                                undefined
                             );
                         }
                         return lastValue;
@@ -215,7 +225,9 @@ export const listModule = InterpreterModule.create(
                                     { value: new ExecutableConstExpression(self.getField(i, context)) },
                                     { value: num(i) }
                                 ],
-                                context
+                                context,
+                                undefined,
+                                undefined
                             );
                             if (isBoolean(res.value) && assertBoolean(res.value)) {
                                 return context.newBoolean(true);
@@ -244,8 +256,12 @@ export const listModule = InterpreterModule.create(
                         const indexOnlyArgs = args.filter((value) => !value.name);
                         const list = generateArgs(indexOnlyArgs, context, undefined, callExpression);
                         list.setLocalField(SemanticFieldNames.PROTO, staticScope.getField(listProto, context), context);
-                        list.setLocalField(lengthField, { value: context.newNumber(indexOnlyArgs.length) }, context);
-                        return { value: list };
+                        list.setLocalField(
+                            lengthField,
+                            { value: context.newNumber(indexOnlyArgs.length), source: undefined },
+                            context
+                        );
+                        return { value: list, source: undefined };
                     },
                     {
                         docs: "Creates a new list with the defined elements",
@@ -261,7 +277,7 @@ export const listModule = InterpreterModule.create(
                         id(SemanticFieldNames.THIS).assignField("callback", id(SemanticFieldNames.IT)),
                         native((args, context, staticScope, callExpression) => {
                             const listFunction = staticScope.getFieldValue("list", context);
-                            const list = listFunction.invoke(args, context);
+                            const list = listFunction.invoke(args, context, undefined, undefined);
                             const callback = staticScope.getFieldValue("callback", context);
                             const invokeArguments: ExecutableListEntry[] = [
                                 { value: new ExecutableConstExpression(list) }
@@ -293,7 +309,11 @@ export const listModule = InterpreterModule.create(
                                 -1,
                                 ...([...object.fields.keys()].filter((key) => typeof key === "number") as number[])
                             ) + 1;
-                        object.setLocalField(lengthField, { value: context.newNumber(maxKey) }, context);
+                        object.setLocalField(
+                            lengthField,
+                            { value: context.newNumber(maxKey), source: undefined },
+                            context
+                        );
                         return objectEntry;
                     },
                     {
@@ -331,11 +351,14 @@ export const listModule = InterpreterModule.create(
                                             {
                                                 name: "maxDepth",
                                                 value: new ExecutableConstExpression({
-                                                    value: context.newNumber(maxDepth - 1)
+                                                    value: context.newNumber(maxDepth - 1),
+                                                    source: undefined
                                                 })
                                             }
                                         ],
-                                        context
+                                        context,
+                                        undefined,
+                                        undefined
                                     );
                                     fields.push(
                                         assertString(

@@ -31,27 +31,24 @@ export class FullObject extends BaseObject {
         return false;
     }
 
-    override getField(key: string | number, context: InterpreterContext, self?: BaseObject): LabeledValue {
-        this.checkValidKey(key);
-        return this.getFieldInternal(key, context, self ?? this);
+    override getField(key: string | number, context: InterpreterContext): LabeledValue {
+        return this.getFieldInternal(key, context, this);
     }
 
-    override getFields(context: InterpreterContext, self?: BaseObject): Map<string | number, LabeledValue> {
-        const proto = this.proto;
-        const entries: Map<string | number, LabeledValue> = proto?.getFields(context, self ?? this) ?? new Map();
-        for (const [key, value] of this.fields) {
-            entries.set(key, value);
-        }
-        if (this.properties == undefined) {
-            return entries;
-        }
-        for (const [key, value] of this.properties) {
-            entries.set(key, value.get(self ?? this, context));
-        }
-        return entries;
+    override getFields(context: InterpreterContext): Map<string | number, LabeledValue> {
+        return this.getFieldsInternal(context, this);
+    }
+
+    override setField(key: string | number, value: LabeledValue, context: InterpreterContext): void {
+        this.setFieldInternal(key, value, context, this);
+    }
+
+    override setLocalField(key: string | number, value: LabeledValue, context: InterpreterContext): void {
+        this.setLocalFieldInternal(key, value, context, this);
     }
 
     /**
+     * Internal version of {@link getField} which takes an additional `self` parameter for the object to get the field from.
      * Gets the value of a field without performing any checks.
      * If the field is not found on this, returns it from the proto field.
      * If it is not found on any parent, returns null from the provided context.
@@ -60,9 +57,10 @@ export class FullObject extends BaseObject {
      * @param key the identifier of the field
      * @param context context in which this is performed
      * @param self the object to get the field from
-     * @returns the value of the field
+     * @returns the field entry
      */
-    private getFieldInternal(key: string | number, context: InterpreterContext, self: BaseObject): LabeledValue {
+    getFieldInternal(key: string | number, context: InterpreterContext, self: BaseObject): LabeledValue {
+        this.checkValidKey(key);
         // eslint-disable-next-line @typescript-eslint/no-this-alias
         let target: FullObject | undefined = this;
         do {
@@ -80,6 +78,75 @@ export class FullObject extends BaseObject {
     }
 
     /**
+     * Internal version of {@link getFields} which takes an additional `self` parameter for the object to get the fields from.
+     *
+     * @param context context in which this is performed
+     * @param self the object to get the fields from
+     * @returns all field entries
+     */
+    getFieldsInternal(context: InterpreterContext, self: BaseObject): Map<string | number, LabeledValue> {
+        const proto = this.proto;
+        const entries: Map<string | number, LabeledValue> = proto?.getFieldsInternal(context, self) ?? new Map();
+        for (const [key, value] of this.fields) {
+            entries.set(key, value);
+        }
+        if (this.properties == undefined) {
+            return entries;
+        }
+        for (const [key, value] of this.properties) {
+            entries.set(key, value.get(self, context));
+        }
+        return entries;
+    }
+
+    /**
+     * Internal version of {@link setField} which takes an additional `self` parameter for the object to set the field on.
+     *
+     * @param key the identifier of the field
+     * @param value the new field entry
+     * @param context context in which this is performed
+     * @param self the object to set the field on
+     */
+    setFieldInternal(key: string | number, value: LabeledValue, context: InterpreterContext, self: BaseObject): void {
+        this.checkValidKey(key);
+        if (!this.setExistingField(key, value, context, self)) {
+            this.setLocalFieldInternal(key, value, context, self);
+        }
+    }
+
+    /**
+     * Internal version of {@link setLocalField} which takes an additional `self` parameter for the object to set the field on.
+     *
+     * @param key the identifier of the field
+     * @param value the new value of the field
+     * @param context context in which this is performed
+     * @param self the object to set the field on
+     */
+    setLocalFieldInternal(
+        key: string | number,
+        value: LabeledValue,
+        context: InterpreterContext,
+        self: BaseObject
+    ): void {
+        const isProto = key === SemanticFieldNames.PROTO;
+        if (isProto) {
+            if (!value.value.isNull && !(value.value instanceof FullObject)) {
+                throw new RuntimeError('"proto" must be set to an object or null');
+            }
+            this.proto = value.value as FullObject;
+            this.fields.set(key, value);
+            this.validateProto();
+        } else {
+            const property = this.getProperty(key);
+            if (property !== undefined) {
+                property.set(self, value, context);
+            } else {
+                this.fields.set(key, value);
+            }
+        }
+    }
+
+    /**
      * Gets the default value for a field
      * By default, null with no source is returned
      *
@@ -88,7 +155,7 @@ export class FullObject extends BaseObject {
      * @returns the default value
      */
     protected getDefaultValue(key: string | number, context: InterpreterContext): LabeledValue {
-        return { value: context.null };
+        return { value: context.null, source: undefined };
     }
 
     /**
@@ -119,10 +186,10 @@ export class FullObject extends BaseObject {
      * @param self the object to get the field from
      * @returns the value of the field
      */
-    getLocalField(key: string | number, context: InterpreterContext, self?: BaseObject): LabeledValue {
+    getLocalField(key: string | number, context: InterpreterContext, self: BaseObject): LabeledValue {
         const property = this.getProperty(key);
         if (property !== undefined) {
-            return property.get(self ?? this, context);
+            return property.get(self, context);
         }
         const value = this.fields.get(key);
         if (value !== undefined) {
@@ -148,13 +215,6 @@ export class FullObject extends BaseObject {
         }
     }
 
-    override setField(key: string | number, value: LabeledValue, context: InterpreterContext, self?: BaseObject): void {
-        this.checkValidKey(key);
-        if (!this.setExistingField(key, value, context, self ?? this)) {
-            this.setLocalField(key, value, context, self);
-        }
-    }
-
     /**
      * Sets an already existing field
      *
@@ -171,38 +231,14 @@ export class FullObject extends BaseObject {
         self: BaseObject
     ): boolean {
         if (this.fields.has(key) || this.properties?.has(key)) {
-            this.setLocalField(key, value, context, self);
+            this.setLocalFieldInternal(key, value, context, self);
             return true;
         } else {
             const proto = this.proto;
-            if (proto) {
+            if (proto != undefined) {
                 return proto.setExistingField(key, value, context, self);
             } else {
                 return false;
-            }
-        }
-    }
-
-    override setLocalField(
-        key: string | number,
-        value: LabeledValue,
-        context: InterpreterContext,
-        self?: BaseObject
-    ): void {
-        const isProto = key === SemanticFieldNames.PROTO;
-        if (isProto) {
-            if (!value.value.isNull && !(value.value instanceof FullObject)) {
-                throw new RuntimeError('"proto" must be set to an object or null');
-            }
-            this.proto = value.value as FullObject;
-            this.fields.set(key, value);
-            this.validateProto();
-        } else {
-            const property = this.getProperty(key);
-            if (property !== undefined) {
-                property.set(self ?? this, value, context);
-            } else {
-                this.fields.set(key, value);
             }
         }
     }
@@ -317,8 +353,8 @@ export class FullObject extends BaseObject {
     override invoke(
         _args: ExecutableListEntry[],
         _context: InterpreterContext,
-        _scope?: FullObject,
-        _callExpression?: AbstractInvocationExpression | OperatorExpression
+        _scope: FullObject,
+        _callExpression: AbstractInvocationExpression | OperatorExpression | undefined
     ): LabeledValue {
         throw new RuntimeError("Invoke not supported");
     }

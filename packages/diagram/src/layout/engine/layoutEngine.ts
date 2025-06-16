@@ -6,7 +6,6 @@ import type { SubsetFontKey } from "../font/fontManager.js";
 import { FontManager } from "../font/fontManager.js";
 import type { TextLayoutResult } from "../font/textLayouter.js";
 import { TextLayouter } from "../font/textLayouter.js";
-import { generateStyles } from "../../styles.js";
 import type { LayoutedDiagram } from "../diagramLayoutResult.js";
 import type { LayoutConfig, LayoutElement, SizeConstraints } from "../layoutElement.js";
 import { layouts } from "../layouts.js";
@@ -154,13 +153,7 @@ export class LayoutEngine {
         context: InterpreterContext
     ): LayoutWithRoot {
         const nativeFonts = nativeToList(fonts.toNative());
-        const layout = new Layout(
-            this,
-            generateStyles(styles),
-            new FontCollection(),
-            nativeFonts[0].fontFamily,
-            context
-        );
+        const layout = new Layout(this, styles, new FontCollection(), nativeFonts[0].fontFamily, context);
         const layoutElement = layout.create(element, undefined);
         return new LayoutWithRoot(layoutElement, layout, nativeFonts);
     }

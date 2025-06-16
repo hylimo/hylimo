@@ -15,7 +15,7 @@ import {
 /**
  * Base class for all executable expressions.
  *
- * @param T the type of expression this represents
+ * @template T the type of expression this represents
  */
 export abstract class ExecutableExpression<T extends Expression = Expression> {
     /**

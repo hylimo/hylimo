@@ -26,6 +26,11 @@ export abstract class ElementLayoutConfig extends BaseLayoutConfig implements La
     readonly styleAttributes: AttributeConfig[];
 
     /**
+     * The names of the style attributes which are supported
+     */
+    readonly styleAttributeNames: Set<string>;
+
+    /**
      * The content or contents attribute if present, otherwise an empty array
      */
     readonly contentAttributes: AttributeConfig[];
@@ -62,6 +67,7 @@ export abstract class ElementLayoutConfig extends BaseLayoutConfig implements La
             description: attribute.description,
             type: optional(attribute.type)
         }));
+        this.styleAttributeNames = new Set(this.styleAttributes.map((attribute) => attribute.name));
         this.contentAttributes = this.computeContentAttributes();
     }
 

@@ -34,7 +34,9 @@ export const operatorModule = InterpreterModule.create(
                                     args[1],
                                     { name: SemanticFieldNames.SELF, value: new ExecutableConstExpression(target) }
                                 ],
-                                context
+                                context,
+                                undefined,
+                                undefined
                             );
                     },
                     {
@@ -64,7 +66,9 @@ export const operatorModule = InterpreterModule.create(
                                     { name: SemanticFieldNames.SELF, value: new ExecutableConstExpression(first) },
                                     { value: new ExecutableConstExpression(second) }
                                 ],
-                                context
+                                context,
+                                undefined,
+                                undefined
                             );
                     }
                 },
@@ -105,11 +109,11 @@ export const operatorModule = InterpreterModule.create(
                     if (isString(first.value) && !isString(second.value)) {
                         second = context
                             .getGlobalField("toStr")
-                            .invoke([{ value: new ExecutableConstExpression(second) }], context);
+                            .invoke([{ value: new ExecutableConstExpression(second) }], context, undefined, undefined);
                     } else if (isString(second.value) && !isString(first.value)) {
                         first = context
                             .getGlobalField("toStr")
-                            .invoke([{ value: new ExecutableConstExpression(first) }], context);
+                            .invoke([{ value: new ExecutableConstExpression(first) }], context, undefined, undefined);
                     }
                     return first.value
                         .getFieldValue("+", context)
@@ -118,7 +122,9 @@ export const operatorModule = InterpreterModule.create(
                                 { name: SemanticFieldNames.SELF, value: new ExecutableConstExpression(first) },
                                 { value: new ExecutableConstExpression(second) }
                             ],
-                            context
+                            context,
+                            undefined,
+                            undefined
                         );
                 },
                 {
@@ -182,11 +188,13 @@ export const operatorModule = InterpreterModule.create(
                                     args[1],
                                     { name: SemanticFieldNames.SELF, value: new ExecutableConstExpression(target) }
                                 ],
-                                context
+                                context,
+                                undefined,
+                                undefined
                             );
                     } else {
                         const value = assertNumber(target.value, "first and only argument of -");
-                        return { value: context.newNumber(-value) };
+                        return { value: context.newNumber(-value), source: undefined };
                     }
                 },
                 {

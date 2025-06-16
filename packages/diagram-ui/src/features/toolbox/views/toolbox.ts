@@ -1,4 +1,3 @@
-import type { Root } from "@hylimo/diagram-common";
 import type { Toolbox } from "../toolbox.js";
 import type { VNode } from "snabbdom";
 import { h } from "snabbdom";
@@ -15,10 +14,9 @@ import { generateUpdateKeyStateActions } from "../../key-state/keyStateKeyListen
  * Generates the toolbox UI.
  *
  * @param context The toolbox context
- * @param root The current root element
  * @returns The toolbox UI
  */
-export function generateToolbox(context: Toolbox, root: Root): VNode {
+export function generateToolbox(context: Toolbox): VNode {
     return h(
         "div.toolbox",
         {
@@ -35,7 +33,7 @@ export function generateToolbox(context: Toolbox, root: Root): VNode {
                 }
             }
         },
-        [generateToolboxTools(context), generateToolboxDetails(context, root)]
+        [generateToolboxTools(context), generateToolboxDetails(context)]
     );
 }
 
@@ -68,16 +66,15 @@ function generateToolboxTools(context: Toolbox): VNode {
  * Might be empty.
  *
  * @param context The toolbox context
- * @param root The current root element
  * @returns The toolbox details UI
  */
-function generateToolboxDetails(context: Toolbox, root: Root): VNode {
+function generateToolboxDetails(context: Toolbox): VNode {
     const tool = context.toolState.toolType;
     let details: VNode[] | undefined = undefined;
     if (tool === ToolboxToolType.ADD_ELEMENT) {
-        details = generateToolboxAddElementDetails(context, root);
+        details = generateToolboxAddElementDetails(context);
     } else if (tool === ToolboxToolType.CONNECT) {
-        details = generateToolboxConnectDetails(context, root);
+        details = generateToolboxConnectDetails(context);
     } else if (tool === ToolboxToolType.AUTOLAYOUT) {
         // TODO
     }
@@ -107,7 +104,10 @@ function generateToolboxToolButton(context: Toolbox, tool: ToolboxTool): VNode {
                 active
             }
         },
-        [generateIcon(tool.icon), active && context.toolState.isLocked ? generateIcon(Lock, ["locked"]) : undefined]
+        [
+            generateIcon(tool.icon(context)),
+            active && context.toolState.isLocked ? generateIcon(Lock, ["locked"]) : undefined
+        ]
     );
 }
 

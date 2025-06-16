@@ -18,7 +18,7 @@ export interface LabeledValue {
      * If available: either the expression which evaluated to this value,
      * or a MissingArgumentSource if the value originated from a missing argument
      */
-    source?: Expression | MissingArgumentSource;
+    source: Expression | MissingArgumentSource | undefined;
 }
 
 /**

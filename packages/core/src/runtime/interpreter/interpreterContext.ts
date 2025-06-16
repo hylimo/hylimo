@@ -85,7 +85,7 @@ export class InterpreterContext {
         this.functionPrototype = this.newObject();
         this.wrapperPrototype = this.newObject();
         this.currentScope = this.newObject();
-        this.currentScope.setField(SemanticFieldNames.THIS, { value: this.currentScope }, this);
+        this.currentScope.setLocalField(SemanticFieldNames.THIS, { value: this.currentScope, source: undefined }, this);
         this.globalScope = this.currentScope;
         for (const module of modules) {
             this.moduleValues.set(module, new Map());
@@ -165,7 +165,7 @@ export class InterpreterContext {
      */
     newObject(): FullObject {
         const instance = new FullObject();
-        instance.setLocalField(SemanticFieldNames.PROTO, { value: this.objectPrototype }, this);
+        instance.setLocalField(SemanticFieldNames.PROTO, { value: this.objectPrototype, source: undefined }, this);
         return instance;
     }
 
@@ -214,7 +214,7 @@ export class InterpreterContext {
             (args) => {
                 const indexArg = args.getFieldValue(0, this);
                 const index = assertNumber(indexArg, "0");
-                return { value: converter(wrapped[index], this) };
+                return { value: converter(wrapped[index], this), source: undefined };
             },
             {
                 docs: "Gets the element at the specified index",

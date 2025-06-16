@@ -11,7 +11,7 @@ import type { FullObject } from "./fullObject.js";
 /**
  * Wrapper for a js object.
  *
- * @param T the type of the wrapped object
+ * @template T the type of the wrapped object
  */
 export class WrapperObject<T> extends BaseObject {
     override get isNull(): boolean {
@@ -33,39 +33,34 @@ export class WrapperObject<T> extends BaseObject {
         super();
     }
 
-    override getField(key: string | number, context: InterpreterContext, self?: BaseObject): LabeledValue {
+    override getField(key: string | number, context: InterpreterContext): LabeledValue {
         if (key === SemanticFieldNames.PROTO) {
-            return { value: this.proto };
+            return { value: this.proto, source: undefined };
         }
         const value = this.entries.get(key);
         if (value != undefined) {
-            return { value: value(this.wrapped, context) };
+            return { value: value(this.wrapped, context), source: undefined };
         }
-        return this.proto.getField(key, context, self ?? this);
+        return this.proto.getFieldInternal(key, context, this);
     }
 
-    override getFields(context: InterpreterContext, self?: BaseObject): Map<string | number, LabeledValue> {
-        const entries = this.proto.getFields(context, self ?? this);
+    override getFields(context: InterpreterContext): Map<string | number, LabeledValue> {
+        const entries = this.proto.getFieldsInternal(context, this);
         for (const [key, value] of this.entries) {
-            entries.set(key, { value: value(this.wrapped, context) });
+            entries.set(key, { value: value(this.wrapped, context), source: undefined });
         }
         return entries;
     }
 
-    override setField(key: string | number, value: LabeledValue, context: InterpreterContext, self?: BaseObject): void {
+    override setField(key: string | number, value: LabeledValue, context: InterpreterContext): void {
         if (key === SemanticFieldNames.PROTO) {
             throw new RuntimeError("Cannot set field proto of a wrapped Object");
         } else {
-            this.proto.setField(key, value, context, self ?? this);
+            this.proto.setFieldInternal(key, value, context, this);
         }
     }
 
-    override setLocalField(
-        _key: string | number,
-        _value: LabeledValue,
-        _context: InterpreterContext,
-        _self?: BaseObject
-    ): void {
+    override setLocalField(_key: string | number, _value: LabeledValue, _context: InterpreterContext): void {
         throw new RuntimeError("Cannot set field directly of a wrapped Object");
     }
 
@@ -110,7 +105,7 @@ export class WrapperObject<T> extends BaseObject {
 /**
  * Function to retrieve a field of a wrapped object
  *
- * @param T the type of the wrapped object
+ * @template T the type of the wrapped object
  * @param wrapped the wrapped object
  * @param context the interpreter context
  */

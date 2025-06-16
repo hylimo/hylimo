@@ -1,4 +1,3 @@
-import type { Root } from "@hylimo/diagram-common";
 import type { VNode } from "snabbdom";
 import { h } from "snabbdom";
 import type { Toolbox, ToolboxEditEntry } from "../toolbox.js";
@@ -9,22 +8,25 @@ import { generatePreviewIfAvailable } from "./preview.js";
 import { generateIcon } from "./icon.js";
 import { Search } from "lucide";
 import { ToolboxToolType } from "../toolType.js";
+import { TransactionalAction, type ToolboxEdit } from "@hylimo/diagram-protocol";
 
 /**
  * Generates the UI for the toolbox items.
  *
  * @param context The toolbox context
- * @param root The root element providing the toolbox edits
  * @returns The UI for the toolbox items
  */
-export function generateToolboxAddElementDetails(context: Toolbox, root: Root): VNode[] {
+export function generateToolboxAddElementDetails(context: Toolbox): VNode[] {
+    if (context.getToolboxEdits().length === 0) {
+        return [];
+    }
     return [
         generateSearchBox(context),
         h(
             "div.items",
             context.searchString.length > 0
                 ? generateFilteredToolboxItems(context, context.searchString)
-                : generateGroupedToolboxItems(context, root)
+                : generateGroupedToolboxItems(context)
         )
     ];
 }
@@ -34,12 +36,11 @@ export function generateToolboxAddElementDetails(context: Toolbox, root: Root): 
  * Used if no search is active.
  *
  * @param context The toolbox context
- * @param root The root element providing the toolbox edits
  * @returns The UI for the toolbox items
  */
-function generateGroupedToolboxItems(context: Toolbox, root: Root): VNode[] {
+function generateGroupedToolboxItems(context: Toolbox): VNode[] {
     const aggregatedEdits = new Map<string, ToolboxEditEntry[]>();
-    for (const toolboxEdit of context.getToolboxEdits(root)) {
+    for (const toolboxEdit of context.getToolboxEdits()) {
         const key = toolboxEdit.group;
         if (!aggregatedEdits.has(key)) {
             aggregatedEdits.set(key, []);
@@ -94,24 +95,16 @@ function generateToolboxItem(context: Toolbox, toolboxEdit: ToolboxEditEntry): V
         {
             on: {
                 pointerdown: (event) => {
-                    const action: TransactionalMoveAction = {
-                        kind: TransactionalMoveAction.KIND,
-                        handlerProvider: (root) =>
-                            new CreateElementMoveHandler(
-                                toolboxEdit.edit,
-                                root,
-                                event.pointerId,
-                                context.settingsProvider.settings,
-                                context.configManager.config?.snappingEnabled ?? true
-                            ),
-                        maxUpdatesPerRevision: 1
-                    };
-                    if (!context.toolState.isLocked) {
+                    if (toolboxEdit.canMove) {
+                        handleMoveAction(context, toolboxEdit, event);
+                    } else {
+                        handleCreateAction(context, toolboxEdit, event);
+                    }
+                },
+                pointerup: () => {
+                    if (!toolboxEdit.canMove && !context.toolState.isLocked) {
                         context.updateTool(ToolboxToolType.CURSOR, false);
                     }
-                    context.pointerEventsDisabled = true;
-                    context.update();
-                    context.actionDispatcher.dispatch(action);
                 },
                 mouseenter: () => {
                     context.showPreview(toolboxEdit);
@@ -171,4 +164,63 @@ function generateSearchInput(context: Toolbox): VNode {
             }
         }
     });
+}
+
+/**
+ * Handles the move action when a toolbox item is clicked and can be moved.
+ *
+ * @param context The toolbox context
+ * @param toolboxEdit The toolbox edit entry
+ * @param event The pointer event
+ */
+function handleMoveAction(context: Toolbox, toolboxEdit: ToolboxEditEntry, event: PointerEvent): void {
+    const action: TransactionalMoveAction = {
+        kind: TransactionalMoveAction.KIND,
+        handlerProvider: (root) =>
+            new CreateElementMoveHandler(
+                toolboxEdit.edit,
+                root,
+                toolboxEdit.target,
+                event.pointerId,
+                context.settingsProvider.settings,
+                context.configManager.config?.snappingEnabled ?? true
+            ),
+        maxUpdatesPerRevision: 1
+    };
+    if (!context.toolState.isLocked) {
+        context.updateTool(ToolboxToolType.CURSOR, false);
+    }
+    context.pointerEventsDisabled = true;
+    context.update();
+    context.actionDispatcher.dispatch(action);
+}
+
+/**
+ * Handles the create action when a toolbox item is clicked and cannot be moved.
+ *
+ * @param context The toolbox context
+ * @param toolboxEdit The toolbox edit entry
+ * @param event The pointer event
+ */
+function handleCreateAction(context: Toolbox, toolboxEdit: ToolboxEditEntry, event: PointerEvent): void {
+    const edit: ToolboxEdit = {
+        types: [toolboxEdit.edit],
+        values: {
+            x: 0,
+            y: 0,
+            expression: toolboxEdit.target.editExpression
+        },
+        elements: [toolboxEdit.target.id]
+    };
+    const action: TransactionalAction = {
+        kind: TransactionalAction.KIND,
+        sequenceNumber: 0,
+        committed: true,
+        transactionId: context.transactionIdProvider.generateId(),
+        edits: [edit]
+    };
+    if (!context.toolState.isLocked) {
+        (event.target as HTMLElement | undefined)?.setPointerCapture(event.pointerId);
+    }
+    context.actionDispatcher.dispatch(action);
 }

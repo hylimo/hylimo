@@ -31,7 +31,7 @@ export class ExecutableOperatorExpression extends ExecutableExpression<OperatorE
         return targetValue.invoke(
             [
                 {
-                    value: new ExecutableConstExpression({ value: context.currentScope }),
+                    value: new ExecutableConstExpression({ value: context.currentScope, source: undefined }),
                     name: SemanticFieldNames.SELF
                 },
                 {

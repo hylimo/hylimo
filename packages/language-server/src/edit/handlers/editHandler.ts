@@ -5,7 +5,7 @@ import type { Config } from "../../config.js";
 /**
  * Handles transactional edits to a TextDocument
  *
- * @param E the type of edit handled
+ * @template E the type of edit handled
  */
 export interface EditHandler<E extends Edit> {
     /**

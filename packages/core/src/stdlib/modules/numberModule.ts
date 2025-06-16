@@ -25,7 +25,10 @@ export const numberModule = InterpreterModule.create(
     [DefaultModuleNames.COMMON],
     [
         fun([
-            assign(numberProto, new ExecutableNativeExpression((context) => ({ value: context.numberPrototype }))),
+            assign(
+                numberProto,
+                new ExecutableNativeExpression((context) => ({ value: context.numberPrototype, source: undefined }))
+            ),
             id(numberProto).assignField(
                 "+",
                 jsFun(

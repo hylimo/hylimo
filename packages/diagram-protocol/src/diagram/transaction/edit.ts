@@ -1,8 +1,8 @@
 /**
  * Edit entry in a transaction
  *
- * @param V the variables type
- * @param T the types type
+ * @template V the variables type
+ * @template T the types type
  */
 export interface Edit<V extends Record<string, any> = Record<string, any>, T extends string = string> {
     /**

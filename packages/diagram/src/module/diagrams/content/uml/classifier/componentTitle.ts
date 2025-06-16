@@ -28,10 +28,10 @@ export const componentTitleModule = ContentModule.create(
         ]
 
         scope.styles {
-            vars {
-                componentIconSize = 25
-            }
             cls("component-title-container") {
+                vars {
+                    componentIconSize = 25
+                }
                 cls("title-container") {
                     marginLeft = var("componentIconSize")
                     marginRight = var("componentIconSize")

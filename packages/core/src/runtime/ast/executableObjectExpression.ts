@@ -29,7 +29,8 @@ export class ExecutableObjectExpression extends ExecutableExpression<ObjectExpre
             result.setLocalField(fieldExpression.name ?? indexCounter++, value, context);
         }
         return {
-            value: result
+            value: result,
+            source: undefined
         };
     }
 }

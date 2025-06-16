@@ -1,4 +1,4 @@
-import { fun, functionType, id, object, optional } from "@hylimo/core";
+import { fun, functionType, id, object, optional, or } from "@hylimo/core";
 import { SCOPE } from "../../../../base/dslModule.js";
 import { LinePointLayoutConfig } from "../../../../../layout/elements/canvas/linePointLayoutConfig.js";
 import { ContentModule } from "../../contentModule.js";
@@ -29,6 +29,10 @@ export const portsModule = ContentModule.create(
                                 fun(
                                     `
                                         (pos, optionalCallback) = args
+                                        if (isFunction(pos)) {
+                                            optionalCallback = pos
+                                            pos = null
+                                        }
                                         callback = optionalCallback ?? {}
                                         portElement = canvasElement(
                                             class = list("port-element"),
@@ -38,13 +42,20 @@ export const portsModule = ContentModule.create(
                                         portElement.pos.class = list("port-pos")
                                         
                                         result = []
+                                        classifierArgs = [null, optionalCallback, args = args]
                                         scope.internal.providesRequiresContentHandler[0](
                                             callScope = result,
-                                            args = args,
+                                            args = classifierArgs,
                                             element = portElement,
                                             canvasScope = canvasScope
                                         )
                                         callback.callWithScope(result)
+                                        scope.internal.providesRequiresContentHandler[1](
+                                            callScope = result,
+                                            args = classifierArgs,
+                                            element = portElement,
+                                            canvasScope = canvasScope
+                                        )
                                         
                                         scope.internal.registerCanvasElement(portElement, args, canvasScope)
                                     `,
@@ -53,8 +64,8 @@ export const portsModule = ContentModule.create(
                                         params: [
                                             [
                                                 0,
-                                                "Relative position on the outline",
-                                                optional(LinePointLayoutConfig.POS_TYPE)
+                                                "Optional relative position on the outline",
+                                                optional(or(LinePointLayoutConfig.POS_TYPE, functionType))
                                             ],
                                             [
                                                 1,
@@ -72,20 +83,38 @@ export const portsModule = ContentModule.create(
                         ])
                     },
                     {
-                        value: fun([])
+                        value: fun(
+                            `
+                                this.classifierArgs = args.args
+                                this.optionalCallback = classifierArgs.args[1]
+                                this.element = args.element
+                                if(optionalCallback == null) {
+                                    element.edits["toolbox/Port/Add port"] = createAppendScopeEdit(
+                                        classifierArgs.args,
+                                        null,
+                                        "'port()'"
+                                    )
+                                } {
+                                    element.edits["toolbox/Port/Add port"] = createAddEdit(
+                                        optionalCallback,
+                                        "'port()'"
+                                    )
+                                }
+                            `
+                        )
                     }
                 ])
             ),
         `
             scope.styles {
-                vars {
-                    portSize = 20
-                }
                 cls("port-element") {
+                    variables.portSize = 20
+
                     vAlign = "center"
                     hAlign = "center"
                     width = var("portSize")
                     height = var("portSize")
+
                     cls("port") {
                         fill = var("background")
                     }

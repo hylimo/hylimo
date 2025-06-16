@@ -1,6 +1,14 @@
 import type { Toolbox } from "./toolbox.js";
 import type { IconNode } from "lucide";
-import { ArrowUpRight, FolderPlus, Hand, MousePointer, SquareDashedMousePointer, WandSparkles } from "lucide";
+import {
+    ArrowUpRight,
+    FolderEdit,
+    FolderPlus,
+    Hand,
+    MousePointer,
+    SquareDashedMousePointer,
+    WandSparkles
+} from "lucide";
 import { ToolboxToolType } from "./toolType.js";
 
 /**
@@ -14,7 +22,7 @@ export interface ToolboxTool {
     /**
      * The icon to show
      */
-    icon: IconNode;
+    icon: (context: Toolbox) => IconNode;
     /**
      * An alternative text for the icon
      */
@@ -31,37 +39,37 @@ export interface ToolboxTool {
 export const toolboxTools: ToolboxTool[] = [
     {
         id: ToolboxToolType.HAND,
-        icon: Hand,
+        icon: () => Hand,
         title: "Hand (panning)",
         action: (context) => enableTool(context, ToolboxToolType.HAND)
     },
     {
         id: ToolboxToolType.CURSOR,
-        icon: MousePointer,
+        icon: () => MousePointer,
         title: "Default (selection)",
         action: (context) => enableTool(context, ToolboxToolType.CURSOR)
     },
     {
         id: ToolboxToolType.ADD_ELEMENT,
-        icon: FolderPlus,
+        icon: (context) => (context.selectedElementMode ? FolderEdit : FolderPlus),
         title: "Add Element",
         action: (context) => enableOrLockTool(context, ToolboxToolType.ADD_ELEMENT)
     },
     {
         id: ToolboxToolType.CONNECT,
-        icon: ArrowUpRight,
+        icon: () => ArrowUpRight,
         title: "Connect",
         action: (context) => enableOrLockTool(context, ToolboxToolType.CONNECT)
     },
     {
         id: ToolboxToolType.BOX_SELECT,
-        icon: SquareDashedMousePointer,
+        icon: () => SquareDashedMousePointer,
         title: "Box Select",
         action: (context) => enableTool(context, ToolboxToolType.BOX_SELECT)
     },
     {
         id: ToolboxToolType.AUTOLAYOUT,
-        icon: WandSparkles,
+        icon: () => WandSparkles,
         title: "Auto Layout",
         action: (context) => enableTool(context, ToolboxToolType.AUTOLAYOUT)
     }

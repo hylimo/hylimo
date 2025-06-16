@@ -2,8 +2,8 @@
  * TTL cache with discrete iterations
  * Keys are stringified using JSON.stringify
  *
- * @param K the key type
- * @param T the value type
+ * @template K the key type
+ * @template T the value type
  */
 export class LayoutCache<K, T> {
     /**
@@ -62,7 +62,7 @@ export class LayoutCache<K, T> {
 /**
  * Item with age
  *
- * @param T the item type
+ * @template T the item type
  */
 interface ItemWithAge<T> {
     /**

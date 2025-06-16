@@ -4,7 +4,7 @@ import { Expression } from "./expression.js";
 /**
  * Base class for all literal expressions
  *
- * @param T the type of the literal
+ * @template T the type of the literal
  */
 
 export abstract class LiteralExpression<T> extends Expression {

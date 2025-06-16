@@ -2,7 +2,6 @@ import type { ConnectionEditEntry, Toolbox } from "../toolbox.js";
 import type { VNode } from "snabbdom";
 import { h } from "snabbdom";
 import { generatePreviewIfAvailable } from "./preview.js";
-import type { Root } from "@hylimo/diagram-common";
 import { generateIcon } from "./icon.js";
 import { ArrowUpRight } from "lucide";
 
@@ -10,13 +9,12 @@ import { ArrowUpRight } from "lucide";
  * Generates the toolbox UI for the connection operator.
  *
  * @param context The toolbox context
- * @param root The current root element
  * @returns The toolbox UI for the connection operator
  */
-export function generateToolboxConnectDetails(context: Toolbox, root: Root): VNode[] {
+export function generateToolboxConnectDetails(context: Toolbox): VNode[] {
     const res = [generateSearchBox(context)];
     if (context.connectionSearchString != undefined) {
-        res.push(h("div.items", generateConnectionToolboxItems(context, root)));
+        res.push(h("div.items", generateConnectionToolboxItems(context)));
     }
     return res;
 }
@@ -25,11 +23,10 @@ export function generateToolboxConnectDetails(context: Toolbox, root: Root): VNo
  * Generates the UI for the connection operator toolbox items.
  *
  * @param context The toolbox context
- * @param root The root element providing the connection operator edits
  * @returns The UI for the connection operator toolbox items
  */
-function generateConnectionToolboxItems(context: Toolbox, root: Root): VNode {
-    const connections = context.getConnectionEdits(root);
+function generateConnectionToolboxItems(context: Toolbox): VNode {
+    const connections = context.getConnectionEdits();
     const filteredConnections = getFilteredConnections(context, connections);
     const selectedConnection = context.getCurrentConnection(connections);
     return h("div.group", [
@@ -110,7 +107,7 @@ export function generateConnectionToolboxItem(
  * @returns The UI for the connection operator search box
  */
 function generateSearchBox(context: Toolbox): VNode {
-    const connections = context.getConnectionEdits(context.currentRoot!);
+    const connections = context.getConnectionEdits();
     const currentConnection = context.getCurrentConnection(connections) ?? "";
     const input = h(
         "div.selectable-input",

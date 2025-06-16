@@ -77,6 +77,8 @@ export class Interpreter {
             if (Array.isArray(e.interpretationStack)) {
                 return { error: e };
             } else {
+                // eslint-disable-next-line no-console
+                console.error(e);
                 throw e;
             }
         }

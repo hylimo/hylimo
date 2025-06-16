@@ -14,7 +14,12 @@ export function listType(type?: Type): Type {
     return {
         name: () => {
             if (type != undefined) {
-                return `${type?.name()}[]`;
+                const name = type.name();
+                if (name.includes(" ")) {
+                    return `(${name})[]`;
+                } else {
+                    return `${name}[]`;
+                }
             } else {
                 return "list";
             }
@@ -26,7 +31,7 @@ export function listType(type?: Type): Type {
                     path: []
                 };
             }
-            const lengthValue = value.getLocalField("length", context).value;
+            const lengthValue = value.getFieldValue("length", context);
             const lengthRes = numberType.matches(lengthValue, context);
             if (lengthRes !== true) {
                 lengthRes.path.unshift("length");
@@ -37,7 +42,7 @@ export function listType(type?: Type): Type {
             }
             const length = assertNumber(lengthValue);
             for (let i = 0; i < length; i++) {
-                const posValue = value.getLocalField(i, context).value;
+                const posValue = value.getFieldValue(i, context);
                 const posRes = type.matches(posValue, context);
                 if (posRes !== true) {
                     posRes.path.unshift(i.toString());

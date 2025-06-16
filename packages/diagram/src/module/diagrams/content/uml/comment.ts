@@ -1,11 +1,11 @@
 import { assign, fun, id, str, stringType } from "@hylimo/core";
 import {
-    connectionEditFragments,
-    createToolboxEdit,
+    createToolboxEditExpression,
     PREDICTION_STYLE_CLASS_ASSIGNMENT_EXPRESSION,
     SCOPE
 } from "../../../base/dslModule.js";
 import { ContentModule } from "../contentModule.js";
+import { connectionEditFragments } from "../base/canvasConnection.js";
 
 /**
  * Module providing the comment element
@@ -65,14 +65,15 @@ export const commentModule = ContentModule.create(
         ),
         `
             scope.styles {
-                vars {
-                    commentTriangleSize = 20
-                }
                 cls("comment-element") {
                     vAlign = "center"
                     hAlign = "center"
                     minWidth = 80
                     maxWidth = 300
+
+                    vars {
+                        commentTriangleSize = 20
+                    }
 
                     cls("comment") {
                         marginRight = 5
@@ -99,7 +100,7 @@ export const commentModule = ContentModule.create(
                 }
             }
         `,
-        createToolboxEdit("Comment/Comment", 'comment("Example comment")'),
+        createToolboxEditExpression("Comment/Comment", 'comment("Example comment")'),
         id(SCOPE)
             .field("internal")
             .field("canvasAddEdits")

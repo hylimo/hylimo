@@ -3,6 +3,26 @@ import { assign, fun, functionType, id, InterpreterModule, object, optional, Sem
 import { contents } from "./content/contents.js";
 import { SCOPE } from "../base/dslModule.js";
 import type { ContentModule } from "./content/contentModule.js";
+import { canvasConnectionModule } from "./content/base/canvasConnection.js";
+import { canvasContentModule } from "./content/base/canvasContent.js";
+import { layoutModule } from "./content/base/layout.js";
+import { positionModule } from "./content/base/position.js";
+import { styleModule } from "./content/base/style.js";
+import { withModule } from "./content/base/with.js";
+import { enumsModule } from "./content/base/enums.js";
+
+/**
+ * Base DSL modules which should be applied to every diagram
+ */
+const baseModules: ContentModule[] = [
+    canvasConnectionModule,
+    canvasContentModule,
+    enumsModule,
+    layoutModule,
+    positionModule,
+    styleModule,
+    withModule
+];
 
 /**
  * Creates the executable expressions for a diagram module
@@ -19,7 +39,10 @@ export function createDiagramModule(
     requiredContents: ContentModule[],
     allContents: ContentModule[] = contents
 ): ExecutableExpression[] {
-    const modules = InterpreterModule.computeModules(requiredContents, allContents);
+    const modules = InterpreterModule.computeModules(
+        [...baseModules, ...requiredContents],
+        [...baseModules, ...allContents]
+    );
     const configProperties = modules.flatMap((module) => module.config);
     const configParams = configProperties.map(
         ([name, description, type]) => [name, description, optional(type)] as const
@@ -48,6 +71,7 @@ export function createDiagramModule(
         )
     ];
 }
+
 /**
  * Creates and registers a withConfig function which allows to temporarily change the configuration
  *

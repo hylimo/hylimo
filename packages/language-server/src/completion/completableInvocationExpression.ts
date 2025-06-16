@@ -33,7 +33,7 @@ export class CompletableInvocationExpression extends ExecutableAbstractInvocatio
 
         return supplyNamedArguments(
             targetValue,
-            { value: targetValue },
+            { value: targetValue, source: undefined },
             context,
             this.argumentExpressions,
             this.expression!
