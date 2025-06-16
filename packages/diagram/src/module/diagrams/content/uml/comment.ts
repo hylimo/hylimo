@@ -1,11 +1,11 @@
 import { assign, fun, id, str, stringType } from "@hylimo/core";
 import {
-    connectionEditFragments,
     createToolboxEditExpression,
     PREDICTION_STYLE_CLASS_ASSIGNMENT_EXPRESSION,
     SCOPE
 } from "../../../base/dslModule.js";
 import { ContentModule } from "../contentModule.js";
+import { connectionEditFragments } from "../base/canvasConnection.js";
 
 /**
  * Module providing the comment element
