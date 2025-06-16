@@ -17,6 +17,9 @@ import { TransactionalAction, type ToolboxEdit } from "@hylimo/diagram-protocol"
  * @returns The UI for the toolbox items
  */
 export function generateToolboxAddElementDetails(context: Toolbox): VNode[] {
+    if (context.getToolboxEdits().length === 0) {
+        return [];
+    }
     return [
         generateSearchBox(context),
         h(
