@@ -14,7 +14,7 @@ export default withPwa(
             },
             nav: [
                 { component: "NavTeleportTarget", props: { "target-id": "diagram-select" } },
-                { text: "Docs", link: "/docs/docs" },
+                { component: "CustomNavBarMenuLink", props: { item: { text: "Docs", link: "/docs/docs" } } },
                 { component: "NavTeleportTarget", props: { "target-id": "copy-diagram-link" } },
                 { component: "NavTeleportTarget", props: { "target-id": "save-diagram" } },
                 { component: "NavTeleportTarget", props: { "target-id": "export-diagram" } },

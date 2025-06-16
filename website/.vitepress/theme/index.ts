@@ -10,12 +10,14 @@ import Settings from "../components/settings/Settings.vue";
 import { h } from "vue";
 import RegisterSW from "../components/RegisterSW.vue";
 import { themeColorPlugin } from "./themeColorPlugin";
+import CustomNavBarMenuLink from "../components/CustomNavBarMenuLink.vue";
 
 export default {
     extends: DefaultTheme,
     async enhanceApp({ app }) {
         app.component("EmbeddedHylimoEditor", EmbeddedHylimoEditor);
         app.component("NavTeleportTarget", NavTeleportTarget);
+        app.component("CustomNavBarMenuLink", CustomNavBarMenuLink);
         app.component("Settings", Settings);
         if (!import.meta.env.SSR) {
             app.use(themeColorPlugin);

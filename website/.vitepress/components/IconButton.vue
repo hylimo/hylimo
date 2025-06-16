@@ -6,6 +6,7 @@
             'screen-menu': screenMenu
         }"
         :title="screenMenu ? undefined : label"
+        :style="{ '--icon-color': iconColor }"
     >
         <template v-if="screenMenu">
             <span class="screen-menu-label">{{ label }}</span>
@@ -28,6 +29,10 @@ defineProps({
     screenMenu: {
         type: Boolean,
         default: false
+    },
+    iconColor: {
+        type: String,
+        default: undefined
     }
 });
 </script>
@@ -36,7 +41,7 @@ defineProps({
     display: flex;
     justify-content: center;
     align-items: center;
-    color: var(--vp-c-text-1);
+    color: var(--icon-color, var(--vp-c-text-1));
     transition: color 0.5s;
 }
 

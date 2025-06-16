@@ -15,6 +15,7 @@
                 <DiagramChooser
                     :diagram-source="diagramSource"
                     :all-diagrams="allDiagrams"
+                    :readonly="isEmbedded"
                     @open-diagram="openDiagram($event).then((diagram) => (diagramSource = diagram))"
                     @open-file="openFile()"
                     @create-diagram="createDiagram($event, diagramSource?.code.value ?? defaultDiagram)"
@@ -51,12 +52,22 @@
                     <button class="menu-button" @click="downloadSource">Source</button>
                 </VPFlyout>
             </Teleport>
+            <Teleport to=".VPNavBar .content-body">
+                <div class="close-button" v-if="isEmbedded">
+                    <IconButton
+                        label="Exit HyLiMo"
+                        icon="vpi-close-x"
+                        iconColor="var(--vp-c-danger-1)"
+                        @click="sendExitRequest"
+                    />
+                </div>
+            </Teleport>
         </ClientOnly>
     </div>
 </template>
 <script setup lang="ts">
 import VPNav from "vitepress/dist/client/theme-default/components/VPNav.vue";
-import { onKeyStroke, useEventListener, useWindowSize } from "@vueuse/core";
+import { onKeyStroke, useEventListener, useUrlSearchParams, useWindowSize } from "@vueuse/core";
 import { defineClientComponent, useData } from "vitepress";
 import IconButton from "./IconButton.vue";
 import VPFlyout from "vitepress/dist/client/theme-default/components/VPFlyout.vue";
@@ -71,7 +82,11 @@ import { openDiagramFromFile, openDiagramFromLaunchQueue } from "../util/diagram
 import { languageServerConfigKey } from "../theme/injectionKeys";
 import DiagramChooser from "./DiagramChooser.vue";
 import { useDiagramStorage } from "../util/diagramStorageSource";
+import { DiagramEmbeddedSource } from "../util/diagramEmbeddedSource";
 import type { DiagramSource } from "../util/diagramSource";
+
+const urlParams = useUrlSearchParams();
+const isEmbedded = computed(() => urlParams.embedded != undefined);
 
 const HylimoEditor = defineClientComponent(() => import("./HylimoEditor.vue"));
 
@@ -171,6 +186,19 @@ function downloadSVG(textAsPath: boolean) {
     fileSaver.saveAs(svgBlob, fileBaseName.value + ".svg");
 }
 
+function sendExitRequest() {
+    if (!isEmbedded.value) {
+        return;
+    }
+
+    window.parent.postMessage(
+        {
+            type: "requestExit"
+        },
+        "*"
+    );
+}
+
 async function downloadPDF() {
     const source = diagramSource.value;
     if (source == undefined) {
@@ -230,7 +258,25 @@ async function openDiagramBeforeMount(): Promise<void> {
 }
 
 onBeforeMount(() => {
-    openDiagramBeforeMount();
+    if (!isEmbedded.value) {
+        openDiagramBeforeMount();
+    } else {
+        useEventListener(window, "message", (event) => {
+            if (event.data.type === "openDiagram") {
+                diagramSource.value = new DiagramEmbeddedSource(event.data.name, event.data.name, event.data.code);
+            } else if (event.data.type === "saveDiagramResult") {
+                if (event.data.success && diagramSource.value && diagramSource.value instanceof DiagramEmbeddedSource) {
+                    diagramSource.value.savedCode.value = event.data.savedCode;
+                }
+            }
+        });
+        window.parent.postMessage(
+            {
+                type: "requestDiagram"
+            },
+            "*"
+        );
+    }
     useEventListener(window, "beforeunload", (event) => {
         if (diagramSource.value?.canSave.value) {
             event.preventDefault();
@@ -305,6 +351,20 @@ onBeforeMount(() => {
 
 .download-flyout {
     margin-right: -4px;
+}
+
+.close-button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.close-button::before {
+    margin-right: 8px;
+    margin-left: 8px;
+    width: 1px;
+    height: 24px;
+    background-color: var(--vp-c-divider);
+    content: "";
 }
 </style>
 <style>
