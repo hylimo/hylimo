@@ -15,6 +15,7 @@
                 <DiagramChooser
                     :diagram-source="diagramSource"
                     :all-diagrams="allDiagrams"
+                    :readonly="isEmbedded"
                     @open-diagram="openDiagram($event).then((diagram) => (diagramSource = diagram))"
                     @open-file="openFile()"
                     @create-diagram="createDiagram($event, diagramSource?.code.value ?? defaultDiagram)"

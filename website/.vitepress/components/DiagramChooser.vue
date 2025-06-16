@@ -97,6 +97,10 @@ const props = defineProps({
     allDiagrams: {
         type: Array as PropType<DiagramMetadata[]>,
         required: true
+    },
+    readonly: {
+        type: Boolean,
+        required: true
     }
 });
 
@@ -123,8 +127,6 @@ const selectedIndex = ref(-1);
 const diagramChooser = ref<HTMLElement | null>(null);
 const diagramSelect = ref<HTMLInputElement | null>(null);
 const diagramEntries = ref<DiagramEntry[]>([]);
-
-const readonly = computed(() => props.diagramSource?.type === "embedded");
 
 const inputFilenameOrPlaceholder = computed({
     get: () => {
@@ -201,7 +203,7 @@ watch([inputFilename, () => props.allDiagrams], () => {
 });
 
 function openDialog(): void {
-    if (showDialog.value || readonly.value) {
+    if (showDialog.value || props.readonly) {
         return;
     }
     updateDiagramEntries();
