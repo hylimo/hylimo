@@ -1,6 +1,18 @@
 import { DefaultEditTypes } from "@hylimo/diagram-common";
 import { ContentModule } from "../contentModule.js";
-import { assertString, fun, functionType, id, jsFun, listType, literal, optional, or, stringType } from "@hylimo/core";
+import {
+    assertString,
+    fun,
+    functionType,
+    id,
+    jsFun,
+    listType,
+    literal,
+    optional,
+    or,
+    str,
+    stringType
+} from "@hylimo/core";
 import { PREDICTION_STYLE_CLASS_ASSIGNMENT_EXPRESSION, SCOPE } from "../../../base/dslModule.js";
 import { canvasContentType } from "../../../base/types.js";
 import { jsonataStringLiteral } from "../../../base/editModule.js";
@@ -62,13 +74,17 @@ export const canvasConnectionModule = ContentModule.create(
                         (start, end, class, target, canvasScope) = args
                         startMarkerFactory = args.startMarkerFactory
                         endMarkerFactory = args.endMarkerFactory
-                        lineType = args.lineType ?? "axisAligned"
+                        lineType = args.lineType ?? scope.internal.config.defaultLineType
                         startPoint = start
                         startProvider = if((start.type == "canvasElement") || (start.type == "canvasConnection")) {
                             startPoint = canvasScope.lpos(start, 0)
                             startPoint.edits[
                                 "${DefaultEditTypes.MOVE_LPOS_POS}"
-                            ] = createAppendScopeEdit(target, "with", "'over = start(' & pos & ').axisAligned(0.5, end(0.5))'")
+                            ] = createAppendScopeEdit(
+                                target,
+                                "with",
+                                if(lineType == "axisAligned") { "'over = start(' & pos & ').axisAligned(0.5, end(0.5))'" } { "'over = start(' & pos & ').line(end(0.5))'" }
+                            )
                             { 
                                 startPoint.pos = it
                                 startPoint
@@ -81,7 +97,11 @@ export const canvasConnectionModule = ContentModule.create(
                             endPoint = canvasScope.lpos(end, 0.5)
                             endPoint.edits[
                                 "${DefaultEditTypes.MOVE_LPOS_POS}"
-                            ] = createAppendScopeEdit(target, "with", "'over = start(0).axisAligned(0.5, end(' & pos & '))'")
+                            ] = createAppendScopeEdit(
+                                target,
+                                "with",
+                                if(lineType == "axisAligned") { "'over = start(0).axisAligned(0.5, end(' & pos & '))'" } { "'over = start(0).line(end(' & pos & '))'" }
+                            )
                             {
                                 endPoint.pos = it
                                 endPoint
@@ -254,5 +274,13 @@ export const canvasConnectionModule = ContentModule.create(
                     }
                 )
             )
+    ],
+    [
+        [
+            "defaultLineType",
+            "The default line type used for connections, when the path is not manually set. Note: there are some exceptions where this is not used.",
+            or(literal("axisAligned"), literal("line")),
+            str("axisAligned")
+        ]
     ]
 );

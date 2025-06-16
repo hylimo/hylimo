@@ -210,18 +210,27 @@ export const withModule = ContentModule.create(
                 } {
                     if (self.contents.length == 1) {
                         segment = self.contents.get(0)
+                        if (segment.type == "canvasAxisAlignedSegment") {
+                            self.start.edits[
+                                "${DefaultEditTypes.MOVE_LPOS_POS}"
+                            ] = createAddEdit(callback, "'over = start(' & pos & ').axisAligned(0.5, end(0.5))'")
+                            segment.end.edits[
+                                "${DefaultEditTypes.MOVE_LPOS_POS}"
+                            ] = createAddEdit(callback, "'over = start(0).axisAligned(0.5, end(' & pos & '))'")
+                            segment.edits[
+                                "${DefaultEditTypes.AXIS_ALIGNED_SEGMENT_POS}"
+                            ] = createAddEdit(callback, "'over = start(0).axisAligned(' & pos & ', end(0.5))'")
+                            segment.edits[
+                                "${DefaultEditTypes.SPLIT_CANVAS_AXIS_ALIGNED_SEGMENT}"
+                            ] = createAddEdit(callback, "'over = start(0).axisAligned(' & pos & ', apos(' & x & ', ' & y & '), ' & nextPos & ', end(0.5))'")
+                        }
+                    } {
                         self.start.edits[
                             "${DefaultEditTypes.MOVE_LPOS_POS}"
-                        ] = createAddEdit(callback, "'over = start(' & pos & ').axisAligned(0.5, end(0.5))'")
-                        segment.end.edits[
+                        ] = createAddEdit(callback, "'over = start(' & pos & ').line(end(0.5))'")
+                        self.contents.get(0).end.edits[
                             "${DefaultEditTypes.MOVE_LPOS_POS}"
-                        ] = createAddEdit(callback, "'over = start(0).axisAligned(0.5, end(' & pos & '))'")
-                        segment.edits[
-                            "${DefaultEditTypes.AXIS_ALIGNED_SEGMENT_POS}"
-                        ] = createAddEdit(callback, "'over = start(0).axisAligned(' & pos & ', end(0.5))'")
-                        segment.edits[
-                            "${DefaultEditTypes.SPLIT_CANVAS_AXIS_ALIGNED_SEGMENT}"
-                        ] = createAddEdit(callback, "'over = start(0).axisAligned(' & pos & ', apos(' & x & ', ' & y & '), ' & nextPos & ', end(0.5))'")
+                        ] = createAddEdit(callback, "'over = start(0).line(end(' & pos & '))'")
                     }
                     self.edits["${ConnectionToolboxEdit.CHANGE_TO_LINE}"] = createAddEdit(
                         callback,
