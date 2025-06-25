@@ -25,7 +25,7 @@
         "bezier-js": "^6.1.4",
         "inversify": "^6.2.2",
         "jsonata": "^2.0.6",
-        "lucide": "^0.515.0",
+        "lucide": "^0.522.0",
         "minisearch": "^7.1.2",
         "snabbdom": "^3.6.2",
         "sprotty": "^1.4.0",
