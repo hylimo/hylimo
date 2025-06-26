@@ -37,13 +37,14 @@ export const positionModule = ContentModule.create(
             fun(
                 `
                     (targetX, targetY, offsetX, offsetY) = args
-                    if (isNumber(targetY)) {
-                        point = relativePoint(targetX = targetX, targetY = targetX, offsetX = targetY, offsetY = offsetX)
-                        scope.internal.registerCanvasContent(point, args, args.self)
+                    this.rposArgs = args
+                    if (isNumber(targetY) || (targetY == null)) {
+                        this.point = relativePoint(targetX = targetX, targetY = targetX, offsetX = targetY, offsetY = offsetX)
+                        scope.internal.registerCanvasContent(point, rposArgs, rposArgs.self)
                         point
                     } {
-                        point = relativePoint(targetX = targetX, targetY = targetY, offsetX = offsetX, offsetY = offsetY)
-                        scope.internal.registerCanvasContent(point, args, args.self)
+                        this.point = relativePoint(targetX = targetX, targetY = targetY, offsetX = offsetX, offsetY = offsetY)
+                        scope.internal.registerCanvasContent(point, rposArgs, rposArgs.self)
                         point
                     }
                 `,
