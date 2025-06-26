@@ -45,9 +45,13 @@ export namespace AbsolutePoint {
 export interface RelativePoint extends CanvasPoint {
     type: typeof RelativePoint.TYPE;
     /**
-     * The id of the point this is relative of
+     * The id of the point/element the x-coordinate is relative to
      */
-    target: string;
+    targetX: string;
+    /**
+     * The id of the point the y-coordinate is relative to
+     */
+    targetY: string;
     /**
      * The offset in x direction
      */
@@ -80,7 +84,7 @@ export namespace RelativePoint {
      * @returns the list of dependencies, may contain duplicates
      */
     export function getDependencies(element: RelativePoint): string[] {
-        return [element.target];
+        return [element.targetX, element.targetY];
     }
 }
 

@@ -10,7 +10,7 @@ import { SCanvasPoint } from "../../model/canvas/sCanvasPoint.js";
 import { SLinePoint } from "../../model/canvas/sLinePoint.js";
 import type { SRelativePoint } from "../../model/canvas/sRelativePoint.js";
 import type { MoveHandler } from "../move/moveHandler.js";
-import { TranslationMoveHandler } from "./handler/translationMoveHandler.js";
+import { TranslationMoveHandler, type ElementsGroupedByTransformation } from "./handler/translationMoveHandler.js";
 import { LineMoveHandler } from "./handler/lineMoveHandler.js";
 import { CanvasElementView, ResizePosition } from "../../views/canvas/canvasElementView.js";
 import { RotationMoveHandler } from "./handler/rotationMoveHandler.js";
@@ -374,28 +374,109 @@ export class MoveEditCanvasContentMouseListener extends MouseListener {
         if (selected.length === 0) {
             return undefined;
         }
-        const movedElementsSelector = new MovedElementsSelector(selected, target.index);
-        const { movedElements, hasConflict } = movedElementsSelector;
-        if (hasConflict) {
+        const moveSelection = this.computeMovedSelection(selected, target.root);
+        if (moveSelection == undefined) {
             return undefined;
         }
-        const linePoints: SLinePoint[] = [];
-        const translateableElements: (SCanvasElement | SRelativePoint | SAbsolutePoint)[] = [];
-        for (const element of movedElements) {
+        if ("linePoint" in moveSelection) {
+            return this.createLineMoveHandler(moveSelection.linePoint, moveSelection.selector, event);
+        }
+        return this.createTranslationMoveHandler(moveSelection.entries, moveSelection.selector, event, target.root);
+    }
+
+    /**
+     * Computes the move selection for the given selected elements.
+     * Attempts to find a valid move selection by trying different combinations of x and y movement.
+     * First tries both x and y movement, then only x movement, then only y movement.
+     *
+     * @param selected the selected elements that should be moved (points, canvas elements, or markers)
+     * @param root the root element of the model
+     * @returns the computed move selection (either translation or line move) if valid, otherwise undefined
+     */
+    private computeMovedSelection(
+        selected: (SCanvasPoint | SCanvasElement | SMarker)[],
+        root: SRoot
+    ): TranslationMoveSelection | LineMoveSelection | undefined {
+        const selector = new MovedElementsSelector(selected, root.index);
+        const bothResult = this.tryComputeMovedSelection(root, selector, true, true);
+        if (bothResult != undefined) {
+            return bothResult;
+        }
+        const xResult = this.tryComputeMovedSelection(root, selector, true, false);
+        if (xResult != undefined && "entries" in xResult) {
+            return xResult;
+        }
+        const yResult = this.tryComputeMovedSelection(root, selector, false, true);
+        if (yResult != undefined && "entries" in yResult) {
+            return yResult;
+        }
+        return undefined;
+    }
+
+    /**
+     * Attempts to compute a move selection with the given movement constraints.
+     * Initializes the selector with the movement parameters and validates that elements can be moved.
+     * Separates line points from translatable elements and ensures compatibility.
+     *
+     * @param root the root element of the model
+     * @param selector the moved elements selector to use for determining affected elements
+     * @param moveX whether movement in x direction is allowed
+     * @param moveY whether movement in y direction is allowed
+     * @returns a move selection (translation or line move) if valid, otherwise undefined
+     */
+    private tryComputeMovedSelection(
+        root: SRoot,
+        selector: MovedElementsSelector,
+        moveX: boolean,
+        moveY: boolean
+    ): TranslationMoveSelection | LineMoveSelection | undefined {
+        selector.initialize(moveX, moveY);
+        if (selector.hasConflict) {
+            return undefined;
+        }
+        const linePoints: Set<SLinePoint> = new Set();
+        const translateableElementsX: Set<SCanvasElement | SRelativePoint | SAbsolutePoint> = new Set();
+        const translateableElementsY: Set<SCanvasElement | SRelativePoint | SAbsolutePoint> = new Set();
+        for (const element of selector.movedElementsX) {
             if (element instanceof SLinePoint) {
-                linePoints.push(element);
+                linePoints.add(element);
             } else {
-                translateableElements.push(element as SCanvasElement | SRelativePoint | SAbsolutePoint);
+                translateableElementsX.add(element as SCanvasElement | SRelativePoint | SAbsolutePoint);
             }
         }
-        if (linePoints.length > 0) {
-            if (linePoints.length > 1 || translateableElements.length > 0) {
+        for (const element of selector.movedElementsY) {
+            if (element instanceof SLinePoint) {
+                linePoints.add(element);
+            } else {
+                translateableElementsY.add(element as SCanvasElement | SRelativePoint | SAbsolutePoint);
+            }
+        }
+        if (linePoints.size > 0) {
+            if (linePoints.size > 1 || translateableElementsX.size > 0 || translateableElementsY.size > 0) {
                 return undefined;
             }
-            return this.createLineMoveHandler(linePoints[0], movedElementsSelector, event);
+            return {
+                linePoint: linePoints.values().next().value!,
+                selector
+            };
         }
-        const root = target.root;
-        return this.createTranslationMoveHandler(translateableElements, movedElementsSelector, event, root);
+        if (translateableElementsX.size === 0 && translateableElementsY.size === 0) {
+            return undefined;
+        }
+        for (const element of translateableElementsX) {
+            if (element.edits[DefaultEditTypes.MOVE_X] == undefined) {
+                return undefined;
+            }
+        }
+        for (const element of translateableElementsY) {
+            if (element.edits[DefaultEditTypes.MOVE_Y] == undefined) {
+                return undefined;
+            }
+        }
+        return {
+            entries: this.computeTranslationMoveEntries(root, translateableElementsX, translateableElementsY),
+            selector
+        };
     }
 
     /**
@@ -444,7 +525,7 @@ export class MoveEditCanvasContentMouseListener extends MouseListener {
             linePoint.segment == undefined ? linePoint.pos : [linePoint.segment, linePoint.pos],
             linePoint.distance,
             movedElementsSelector.selected,
-            movedElementsSelector.movedOrImplicitlyMovedElementIds,
+            movedElementsSelector.affectedElementIds,
             root,
             initialPointPosition,
             this.configManager.config?.snappingEnabled ?? true,
@@ -462,33 +543,20 @@ export class MoveEditCanvasContentMouseListener extends MouseListener {
      * @returns the created move handler or undefined if no handler could be created
      */
     private createTranslationMoveHandler(
-        elements: (SCanvasElement | SAbsolutePoint | SRelativePoint)[],
+        entries: TranslationMoveEntry[],
         movedElementsSelector: MovedElementsSelector,
         event: MouseEvent,
         root: SRoot
     ): MoveHandler | undefined {
-        if (elements.length == 0) {
-            return undefined;
-        }
-        const entries = this.computeTranslationMoveEntries(elements);
-        const moveX = entries.every((entry) =>
-            entry.elements.every((element) => element.edits[DefaultEditTypes.MOVE_X] != undefined)
-        );
-        const moveY = entries.every((entry) =>
-            entry.elements.every((element) => element.edits[DefaultEditTypes.MOVE_Y] != undefined)
-        );
-        if (!moveX && !moveY) {
-            return undefined;
-        }
-        if (!(moveX && moveY) && entries.length > 1) {
+        if (entries.length == 0) {
             return undefined;
         }
         const editSpecifications = entries.map((entry) => {
             const res: (EditSpecificationEntry | undefined)[] = [];
-            if (moveX) {
+            if (entry.moveX) {
                 entry.elements.forEach((element) => res.push(element.edits[DefaultEditTypes.MOVE_X]));
             }
-            if (moveY) {
+            if (entry.moveY) {
                 entry.elements.forEach((element) => res.push(element.edits[DefaultEditTypes.MOVE_Y]));
             }
             return res;
@@ -498,14 +566,11 @@ export class MoveEditCanvasContentMouseListener extends MouseListener {
         }
         return new TranslationMoveHandler(
             entries.map((entry) => ({
-                transformation: entry.transformation,
-                globalRotation: entry.globalRotation,
+                ...entry,
                 elements: entry.elements.map((element) => element.id)
             })),
-            moveX,
-            moveY,
             movedElementsSelector.selected,
-            movedElementsSelector.movedOrImplicitlyMovedElementIds,
+            movedElementsSelector.affectedElementIds,
             root,
             this.settingsProvider.settings,
             this.configManager.config?.snappingEnabled ?? true,
@@ -517,14 +582,55 @@ export class MoveEditCanvasContentMouseListener extends MouseListener {
      * Computes the translation move entries for the given elements.
      * Groups the elements by their transformation matrix (ignoring translation).
      *
-     * @param elements the elements to move
+     * @param root the root element containing the diagram
+     * @param xElements the elements to move in their x direction
+     * @param yElements the elements to move in their y direction
      * @returns the translation move entries
      */
     private computeTranslationMoveEntries(
-        elements: (SCanvasElement | SRelativePoint | SAbsolutePoint)[]
+        root: SRoot,
+        xElements: Set<SCanvasElement | SRelativePoint | SAbsolutePoint>,
+        yElements: Set<SCanvasElement | SRelativePoint | SAbsolutePoint>
+    ): TranslationMoveEntry[] {
+        const xyElements = new Set<SCanvasElement | SRelativePoint | SAbsolutePoint>();
+        const onlyXElements = new Set<SCanvasElement | SRelativePoint | SAbsolutePoint>();
+        const onlyYElements = new Set<SCanvasElement | SRelativePoint | SAbsolutePoint>();
+        for (const element of xElements) {
+            if (yElements.has(element)) {
+                xyElements.add(element);
+            } else {
+                onlyXElements.add(element);
+            }
+        }
+        for (const element of yElements) {
+            if (!xyElements.has(element)) {
+                onlyYElements.add(element);
+            }
+        }
+        return [
+            ...this.computeTranslationMoveEntriesInternal(root, xyElements, true, true),
+            ...this.computeTranslationMoveEntriesInternal(root, onlyXElements, true, false),
+            ...this.computeTranslationMoveEntriesInternal(root, onlyYElements, false, true)
+        ];
+    }
+
+    /**
+     * Computes the translation move entries for the given elements.
+     * Groups the elements by their transformation matrix (ignoring translation).
+     *
+     * @param root the root element containing the diagram
+     * @param elements the elements to move
+     * @param moveX whether to move the elements in x direction
+     * @param moveY whether to move the elements in y direction
+     * @returns the translation move entries
+     */
+    private computeTranslationMoveEntriesInternal(
+        root: SRoot,
+        elements: Set<SCanvasElement | SRelativePoint | SAbsolutePoint>,
+        moveX: boolean,
+        moveY: boolean
     ): TranslationMoveEntry[] {
         const entries = new Map<string, TranslationMoveEntry>();
-        const root = elements[0].root as SRoot;
         const transformationLookup = new Map<string, string>();
         for (const element of elements) {
             const parentCanvas = findParentByFeature(element, isCanvasLike)!;
@@ -538,7 +644,9 @@ export class MoveEditCanvasContentMouseListener extends MouseListener {
                     entries.set(key, {
                         transformation: compose(scale(tsrScale.sx, tsrScale.sy), rotate(tsrRotation.angle)),
                         globalRotation: parentCanvas.globalRotation,
-                        elements: []
+                        elements: [],
+                        moveX,
+                        moveY
                     });
                 }
             }
@@ -561,19 +669,42 @@ export class MoveEditCanvasContentMouseListener extends MouseListener {
 }
 
 /**
- * Entry for a translation move operation
+ * Represents a group of elements that can be moved together with the same transformation.
+ * Extends ElementsGroupedByTransformation but narrows the element types to canvas elements and points.
  */
-export interface TranslationMoveEntry {
+interface TranslationMoveEntry extends Omit<ElementsGroupedByTransformation, "elements"> {
     /**
-     * The transformation applied to the dx and dy values
-     */
-    transformation: Matrix;
-    /**
-     * The global rotation of the context
-     */
-    globalRotation: number;
-    /**
-     * The elements to move
+     * The canvas elements and points that will be moved together
      */
     elements: (SCanvasElement | SRelativePoint | SAbsolutePoint)[];
+}
+
+/**
+ * Represents a selection of elements for translation move operations.
+ * Contains grouped entries and a selector to manage the moved elements.
+ */
+interface TranslationMoveSelection {
+    /**
+     * The grouped entries containing elements that can be moved with translation
+     */
+    entries: TranslationMoveEntry[];
+    /**
+     * Selector used to determine which elements are affected by the move operation
+     */
+    selector: MovedElementsSelector;
+}
+
+/**
+ * Represents a selection for line point move operations.
+ * Used when moving a specific point along a line.
+ */
+interface LineMoveSelection {
+    /**
+     * The line point that will be moved
+     */
+    linePoint: SLinePoint;
+    /**
+     * Selector used to determine which elements are affected by the move operation
+     */
+    selector: MovedElementsSelector;
 }

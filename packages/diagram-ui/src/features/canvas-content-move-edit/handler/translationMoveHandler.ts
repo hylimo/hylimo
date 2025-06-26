@@ -30,6 +30,14 @@ export interface ElementsGroupedByTransformation {
      * The elements to move
      */
     elements: string[];
+    /**
+     * If the x coordinate should be modified
+     */
+    moveX: boolean;
+    /**
+     * If the y coordinate should be modified
+     */
+    moveY: boolean;
 }
 
 /**
@@ -50,8 +58,6 @@ export class TranslationMoveHandler extends SnapMoveHandler<TranslationSnapHandl
      * Creates a new TranslationMoveHandler
      *
      * @param elementsByTransformation the ids of the points to move grouped by transformation
-     * @param moveX if true, the x coordinate can be modified
-     * @param moveY if true, the y coordinate can be modified
      * @param elements the elements to consider for snapping
      * @param ignoredElements the elements to ignore for snapping
      * @param root the root element containing the diagram
@@ -61,8 +67,6 @@ export class TranslationMoveHandler extends SnapMoveHandler<TranslationSnapHandl
      */
     constructor(
         private readonly elementsByTransformation: ElementsGroupedByTransformation[],
-        private readonly moveX: boolean,
-        private readonly moveY: boolean,
         elements: SElement[],
         ignoredElements: Set<string>,
         root: SRoot,
@@ -72,15 +76,28 @@ export class TranslationMoveHandler extends SnapMoveHandler<TranslationSnapHandl
     ) {
         const snapHandler = new TranslationSnapHandler(elements, ignoredElements, root, settings);
         super(snapHandler, snappingEnabled, transformationMatrix, "cursor-move");
-        if (moveX && moveY) {
+
+        if (elementsByTransformation.some(({ moveX, moveY }) => moveX && moveY)) {
             this.snapX = true;
             this.snapY = true;
         } else {
-            const effectiveRotations = elementsByTransformation.map(({ globalRotation }) => globalRotation / 90);
-            const regular = effectiveRotations.every((rotation) => rotation % 2 === 0);
-            const rotated = effectiveRotations.every((rotation) => rotation % 2 === 1);
-            this.snapX = (moveX && regular) || (moveY && rotated);
-            this.snapY = (moveY && regular) || (moveX && rotated);
+            const effectiveRotations = new Set<number>();
+            for (const { globalRotation, moveX, moveY } of elementsByTransformation) {
+                if (moveX) {
+                    effectiveRotations.add(globalRotation % 360);
+                }
+                if (moveY) {
+                    effectiveRotations.add((globalRotation + 90) % 360);
+                }
+            }
+            if (effectiveRotations.size === 1) {
+                const rotation = effectiveRotations.values().next().value;
+                this.snapX = rotation === 0 || rotation === 180;
+                this.snapY = rotation === 90 || rotation === 270;
+            } else {
+                this.snapX = true;
+                this.snapY = true;
+            }
         }
     }
 
@@ -88,7 +105,7 @@ export class TranslationMoveHandler extends SnapMoveHandler<TranslationSnapHandl
         let snapX: boolean;
         let snapY: boolean;
         let dragVector: Vector;
-        if (this.moveX && this.moveY) {
+        if (this.snapX && this.snapY) {
             snapX = !(event.shiftKey && Math.abs(x) < Math.abs(y));
             snapY = !(event.shiftKey && Math.abs(x) >= Math.abs(y));
             dragVector = {
@@ -117,13 +134,13 @@ export class TranslationMoveHandler extends SnapMoveHandler<TranslationSnapHandl
             dragVector = snappedDragVector;
             snapLines = newSnapLines;
         }
-        const edits = this.elementsByTransformation.map(({ elements, transformation }) => {
+        const edits = this.elementsByTransformation.map(({ elements, transformation, moveX, moveY }) => {
             const transformed = applyToPoint(transformation, dragVector);
             const types: MoveEdit["types"] = [];
-            if (this.moveX) {
+            if (moveX) {
                 types.push(DefaultEditTypes.MOVE_X);
             }
-            if (this.moveY) {
+            if (moveY) {
                 types.push(DefaultEditTypes.MOVE_Y);
             }
             return {

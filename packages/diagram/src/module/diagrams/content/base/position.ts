@@ -1,4 +1,4 @@
-import { fun, id, numberType, optional } from "@hylimo/core";
+import { fun, id, numberType, optional, or } from "@hylimo/core";
 import { ContentModule } from "../contentModule.js";
 import { SCOPE } from "../../../base/dslModule.js";
 import { canvasContentType, elementType } from "../../../base/types.js";
@@ -36,17 +36,29 @@ export const positionModule = ContentModule.create(
             "rpos",
             fun(
                 `
-                    (target, offsetX, offsetY) = args
-                    point = relativePoint(target = target, offsetX = offsetX, offsetY = offsetY)
-                    scope.internal.registerCanvasContent(point, args, args.self)
-                    point
+                    (targetX, targetY, offsetX, offsetY) = args
+                    this.rposArgs = args
+                    if (isNumber(targetY) || (targetY == null)) {
+                        this.point = relativePoint(targetX = targetX, targetY = targetX, offsetX = targetY, offsetY = offsetX)
+                        scope.internal.registerCanvasContent(point, rposArgs, rposArgs.self)
+                        point
+                    } {
+                        this.point = relativePoint(targetX = targetX, targetY = targetY, offsetX = offsetX, offsetY = offsetY)
+                        scope.internal.registerCanvasContent(point, rposArgs, rposArgs.self)
+                        point
+                    }
                 `,
                 {
                     docs: "Create a relative point",
                     params: [
-                        [0, "the target to which the point is relative", canvasContentType],
-                        [1, "the x coordinate", optional(numberType)],
-                        [2, "the y coordinate", optional(numberType)]
+                        [0, "the target to which x-coordinate of the point is relative", canvasContentType],
+                        [
+                            1,
+                            "optional target to which the y-coordinate of the point is relative, if not given, defaults to the same as x",
+                            optional(or(canvasContentType, numberType))
+                        ],
+                        [2, "the x coordinate", optional(numberType)],
+                        [3, "the y coordinate", optional(numberType)]
                     ],
                     returns: "The created relative point"
                 }

@@ -360,8 +360,9 @@ export abstract class CanvasLayoutEngine {
         if (AbsolutePoint.isAbsolutePoint(element)) {
             point = { x: element.x, y: element.y };
         } else if (RelativePoint.isRelativePoint(element)) {
-            const target = this.getPoint(element.target, context);
-            point = { x: target.x + element.offsetX, y: target.y + element.offsetY };
+            const targetX = this.getPoint(element.targetX, context);
+            const targetY = this.getPoint(element.targetY, context);
+            point = { x: targetX.x + element.offsetX, y: targetY.y + element.offsetY };
         } else if (LinePoint.isLinePoint(element)) {
             const lineProvider = this.getElement(element.lineProvider);
             const line = this.layoutLine(lineProvider as CanvasConnection | CanvasElement, context);

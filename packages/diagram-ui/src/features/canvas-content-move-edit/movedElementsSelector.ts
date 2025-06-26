@@ -1,9 +1,9 @@
 import { DefaultEditTypes, LinePoint } from "@hylimo/diagram-common";
-import type { ModelIndexImpl } from "sprotty";
+import type { ModelIndexImpl, SParentElementImpl } from "sprotty";
 import { findParentByFeature } from "sprotty";
 import { SAbsolutePoint } from "../../model/canvas/sAbsolutePoint.js";
 import { SCanvasConnection } from "../../model/canvas/sCanvasConnection.js";
-import type { SCanvasContent } from "../../model/canvas/sCanvasContent.js";
+import { SCanvasContent } from "../../model/canvas/sCanvasContent.js";
 import { SCanvasElement } from "../../model/canvas/sCanvasElement.js";
 import { SCanvasPoint } from "../../model/canvas/sCanvasPoint.js";
 import { SLinePoint } from "../../model/canvas/sLinePoint.js";
@@ -23,14 +23,27 @@ import type { SElement } from "../../model/sElement.js";
  */
 export class MovedElementsSelector {
     /**
-     * Elements (canvas elements and points) which are moved.
+     * The actually selected elements after processing markers and filtering to canvas content.
      */
-    movedElements: Set<SCanvasElement | SCanvasPoint> = new Set();
+    private readonly actualSelected: Set<SCanvasContent> = new Set();
 
     /**
-     * Elements which are implicitely moved.
+     * Elements (canvas elements and points) which are moved in the X direction.
      */
-    implicitlyMovedElements: Set<SCanvasElement | SCanvasPoint> = new Set();
+    movedElementsX: Set<SCanvasElement | SCanvasPoint> = new Set();
+    /**
+     * Elements (canvas elements and points) which are moved in the Y direction.
+     */
+    movedElementsY: Set<SCanvasElement | SCanvasPoint> = new Set();
+
+    /**
+     * Elements which are implicitly moved in the X direction.
+     */
+    private readonly implicitlyMovedElementsX: Set<SCanvasElement | SCanvasPoint> = new Set();
+    /**
+     * Elements which are implicitly moved in the Y direction.
+     */
+    private readonly implicitlyMovedElementsY: Set<SCanvasElement | SCanvasPoint> = new Set();
 
     /**
      * True if there is any conflict that prevents the move
@@ -38,22 +51,92 @@ export class MovedElementsSelector {
     hasConflict = false;
 
     /**
-     * True if the element is moved
+     * Lookup cache for X-axis movement status to avoid recomputation.
      */
-    private readonly isMovedLookup: Map<string, boolean> = new Map();
+    private readonly isMovedXLookup: Map<SCanvasContent, boolean> = new Map();
+
+    /**
+     * Lookup cache for Y-axis movement status to avoid recomputation.
+     */
+    private readonly isMovedYLookup: Map<SCanvasContent, boolean> = new Map();
+
+    /**
+     * Map of elements to their dependencies in the X direction (elements that depend on this element).
+     */
+    private readonly dependedOnX: Map<SCanvasContent, DependencyEntry> = new Map();
+    /**
+     * Map of elements to their dependencies in the Y direction (elements that depend on this element).
+     */
+    private readonly dependedOnY: Map<SCanvasContent, DependencyEntry> = new Map();
+    /**
+     * Map of elements to what they depend on in the X direction.
+     */
+    private readonly dependsOnX: Map<SCanvasContent, DependencyEntry> = new Map();
+    /**
+     * Map of elements to what they depend on in the Y direction.
+     */
+    private readonly dependsOnY: Map<SCanvasContent, DependencyEntry> = new Map();
 
     /**
      * Returns the (implicitely) moved element ids
      */
-    get movedOrImplicitlyMovedElementIds(): Set<string> {
-        const movedOrImplicitlyMovedElementIds = new Set<string>();
-        for (const element of this.movedElements) {
-            movedOrImplicitlyMovedElementIds.add(element.id);
+    get affectedElementIds(): Set<string> {
+        const result = new Set<string>();
+        const movedX = new Set<SCanvasContent>();
+        const movedY = new Set<SCanvasContent>();
+        let currentElementsX: Set<SCanvasContent> = new Set();
+        let currentElementsY: Set<SCanvasContent> = new Set();
+        for (const element of this.movedElementsX) {
+            currentElementsX.add(element);
         }
-        for (const element of this.implicitlyMovedElements) {
-            movedOrImplicitlyMovedElementIds.add(element.id);
+        for (const element of this.movedElementsY) {
+            currentElementsY.add(element);
         }
-        return movedOrImplicitlyMovedElementIds;
+        for (const element of this.implicitlyMovedElementsX) {
+            currentElementsX.add(element);
+        }
+        for (const element of this.implicitlyMovedElementsY) {
+            currentElementsY.add(element);
+        }
+        while (currentElementsX.size > 0 || currentElementsY.size > 0) {
+            const newElementsX = new Set<SCanvasContent>();
+            const newElementsY = new Set<SCanvasContent>();
+            for (const element of currentElementsX) {
+                if (movedX.has(element)) {
+                    continue;
+                }
+                movedX.add(element);
+                result.add(element.id);
+                const dependencies = this.dependsOnX.get(element);
+                if (dependencies != undefined) {
+                    for (const dep of dependencies.x) {
+                        newElementsX.add(dep);
+                    }
+                    for (const dep of dependencies.y) {
+                        newElementsY.add(dep);
+                    }
+                }
+            }
+            for (const element of currentElementsY) {
+                if (movedY.has(element)) {
+                    continue;
+                }
+                movedY.add(element);
+                result.add(element.id);
+                const dependencies = this.dependsOnY.get(element);
+                if (dependencies != undefined) {
+                    for (const dep of dependencies.x) {
+                        newElementsX.add(dep);
+                    }
+                    for (const dep of dependencies.y) {
+                        newElementsY.add(dep);
+                    }
+                }
+            }
+            currentElementsX = newElementsX;
+            currentElementsY = newElementsY;
+        }
+        return result;
     }
 
     /**
@@ -67,164 +150,280 @@ export class MovedElementsSelector {
         readonly selected: (SCanvasElement | SCanvasPoint | SMarker)[],
         private readonly index: ModelIndexImpl
     ) {
-        this.registerElements(new Set(selected));
+        for (const element of selected) {
+            if (element instanceof SCanvasElement || element instanceof SCanvasPoint) {
+                this.actualSelected.add(element);
+            } else if (element instanceof SMarker) {
+                const posElement = this.index.getById(element.posId) as SCanvasContent;
+                this.actualSelected.add(posElement);
+            }
+        }
+        this.registerDependencies();
+    }
+
+    /**
+     * Initializes the selector for a specific move operation.
+     * Clears previous state and registers elements that need to be moved.
+     *
+     * @param moveX whether to move elements in the X direction
+     * @param moveY whether to move elements in the Y direction
+     */
+    initialize(moveX: boolean, moveY: boolean): void {
+        this.isMovedXLookup.clear();
+        this.isMovedYLookup.clear();
+        this.hasConflict = false;
+
+        this.registerElements(this.actualSelected, moveX, moveY);
+        this.fixPartiallyMovedElements();
         this.pruneMovedElements();
-        this.registerAdditionalImplicitlyMovedElements();
     }
 
     /**
      * Registers the points and elements which are required to move so that elements are moved as a whole.
      * Does not perform pruning of implicitly moved elements
      *
-     * @param points the points to move
+     * @param elements the elements to move
+     * @param moveX whether to move elements in the X direction
+     * @param moveY whether to move elements in the Y direction
      */
-    private registerElements(elements: Set<SCanvasPoint | SCanvasElement | SMarker>) {
-        let currentElements: Set<SCanvasContent | SMarker> = elements;
-        while (currentElements.size > 0) {
-            const newElements = new Set<SCanvasContent>();
-            for (const element of currentElements) {
+    private registerElements(elements: Set<SCanvasContent>, moveX: boolean, moveY: boolean) {
+        let currentElementsX: Set<SCanvasContent> = moveX ? elements : new Set();
+        let currentElementsY: Set<SCanvasContent> = moveY ? elements : new Set();
+        while (currentElementsX.size > 0 || currentElementsY.size > 0) {
+            const newElementsX = new Set<SCanvasContent>();
+            const newElementsY = new Set<SCanvasContent>();
+            for (const element of currentElementsX) {
+                let elementToAdd: SCanvasContent | undefined;
                 if (element instanceof SCanvasConnection) {
-                    newElements.add(this.index.getById(element.segments.at(-1)!.end) as SCanvasContent);
-                } else if (element instanceof SMarker) {
-                    newElements.add(this.index.getById(element.posId) as SCanvasContent);
+                    elementToAdd = this.index.getById(element.segments.at(-1)!.end) as SCanvasContent;
                 } else {
-                    this.movedElements.add(element as SCanvasPoint | SCanvasElement);
-                }
-                if (element instanceof SCanvasElement) {
-                    if (element.pos != undefined) {
-                        newElements.add(this.index.getById(element.pos) as SCanvasContent);
+                    this.movedElementsX.add(element as SCanvasPoint | SCanvasElement);
+                    if (element instanceof SCanvasElement) {
+                        if (element.pos != undefined) {
+                            elementToAdd = this.index.getById(element.pos) as SCanvasContent;
+                        }
+                    } else if (element instanceof SRelativePoint) {
+                        if (!(DefaultEditTypes.MOVE_X in element.edits)) {
+                            elementToAdd = this.index.getById(element.targetX) as SCanvasContent;
+                        }
                     }
-                } else if (element instanceof SRelativePoint) {
-                    const editable =
-                        DefaultEditTypes.MOVE_X in element.edits || DefaultEditTypes.MOVE_Y in element.edits;
-                    if (!editable) {
-                        newElements.add(this.index.getById(element.target) as SCanvasContent);
+                }
+                if (elementToAdd != undefined) {
+                    const rotationDelta = this.getRotationDelta(element.parent, elementToAdd.parent);
+                    if (rotationDelta % 180 !== 90) {
+                        newElementsX.add(elementToAdd);
+                    }
+                    if (rotationDelta % 180 !== 0) {
+                        newElementsY.add(elementToAdd);
                     }
                 }
             }
-            currentElements = newElements;
+            for (const element of currentElementsY) {
+                let elementToAdd: SCanvasContent | undefined;
+                if (element instanceof SCanvasConnection) {
+                    elementToAdd = this.index.getById(element.segments.at(-1)!.end) as SCanvasContent;
+                } else {
+                    this.movedElementsY.add(element as SCanvasPoint | SCanvasElement);
+                    if (element instanceof SCanvasElement) {
+                        if (element.pos != undefined) {
+                            elementToAdd = this.index.getById(element.pos) as SCanvasContent;
+                        }
+                    } else if (element instanceof SRelativePoint) {
+                        if (!(DefaultEditTypes.MOVE_Y in element.edits)) {
+                            elementToAdd = this.index.getById(element.targetY) as SCanvasContent;
+                        }
+                    }
+                }
+                if (elementToAdd != undefined) {
+                    const rotationDelta = this.getRotationDelta(element.parent, elementToAdd.parent);
+                    if (rotationDelta % 180 !== 90) {
+                        newElementsY.add(elementToAdd);
+                    }
+                    if (rotationDelta % 180 !== 0) {
+                        newElementsX.add(elementToAdd);
+                    }
+                }
+            }
+            currentElementsX = newElementsX;
+            currentElementsY = newElementsY;
         }
     }
 
     /**
-     * Registers all elements which are implicitly moved.
-     * This is done by checking if the element is moved and if it is not already in the moved elements set.
+     * Calculates the rotation difference between two canvas elements.
+     *
+     * @param canvas1 the first canvas element
+     * @param canvas2 the second canvas element
+     * @returns the rotation delta in degrees (0-359)
      */
-    private registerAdditionalImplicitlyMovedElements(): void {
+    private getRotationDelta(
+        canvas1: SParentElementImpl & CanvasLike,
+        canvas2: SParentElementImpl & CanvasLike
+    ): number {
+        const delta = canvas1.globalRotation - canvas2.globalRotation;
+        return ((delta % 360) + 360) % 360;
+    }
+
+    /**
+     * Registers all dependency relationships between canvas elements.
+     * This includes position dependencies, line provider dependencies, etc.
+     */
+    private registerDependencies(): void {
+        const elements: Set<SCanvasContent> = new Set();
         for (const element of this.index.all()) {
-            if (element instanceof SCanvasElement || element instanceof SCanvasPoint) {
-                if (!this.movedElements.has(element) && this.isElementImplicitlyMoved(element, false)) {
-                    this.implicitlyMovedElements.add(element);
+            if (element instanceof SCanvasContent) {
+                elements.add(element);
+            }
+        }
+        for (const element of elements) {
+            const dependsOnX: SCanvasContent[] = [];
+            const dependsOnY: SCanvasContent[] = [];
+            if (element instanceof SCanvasConnection) {
+                const end = this.index.getById(element.segments.at(-1)!.end) as SCanvasContent;
+                dependsOnX.push(end);
+                dependsOnY.push(end);
+            } else if (element instanceof SCanvasElement) {
+                if (element.pos == undefined) {
+                    const dependencies = this.getCanvasDependencies(element.parent);
+                    dependsOnX.push(...dependencies);
+                    dependsOnY.push(...dependencies);
+                } else {
+                    const target = this.index.getById(element.pos) as SCanvasContent;
+                    dependsOnX.push(target);
+                    dependsOnY.push(target);
+                }
+            } else if (element instanceof SAbsolutePoint) {
+                const dependencies = this.getCanvasDependencies(element.parent);
+                dependsOnX.push(...dependencies);
+                dependsOnY.push(...dependencies);
+            } else if (element instanceof SRelativePoint) {
+                dependsOnX.push(this.index.getById(element.targetX) as SCanvasContent);
+                dependsOnY.push(this.index.getById(element.targetY) as SCanvasContent);
+            } else if (element instanceof SLinePoint) {
+                const lineProvider = this.index.getById(element.lineProvider) as SCanvasContent;
+                if (lineProvider instanceof SCanvasElement) {
+                    dependsOnX.push(lineProvider);
+                    dependsOnY.push(lineProvider);
+                } else if (lineProvider instanceof SCanvasConnection) {
+                    const affectedSegment = LinePoint.calcSegmentIndex(element.pos, lineProvider.segments.length);
+                    const segmentDependencies = this.getCanvasConnectionSegmentDependencies(
+                        lineProvider,
+                        affectedSegment
+                    );
+                    dependsOnX.push(...segmentDependencies);
+                    dependsOnY.push(...segmentDependencies);
+                }
+            }
+            for (const depX of dependsOnX) {
+                const rotationDelta = this.getRotationDelta(element.parent, depX.parent);
+                if (rotationDelta % 180 !== 90) {
+                    this.addDependency(element, depX, true, true);
+                }
+                if (rotationDelta % 180 !== 0) {
+                    this.addDependency(element, depX, true, false);
+                }
+            }
+            for (const depY of dependsOnY) {
+                const rotationDelta = this.getRotationDelta(element.parent, depY.parent);
+                if (rotationDelta % 180 !== 90) {
+                    this.addDependency(element, depY, false, false);
+                }
+                if (rotationDelta % 180 !== 0) {
+                    this.addDependency(element, depY, false, true);
                 }
             }
         }
     }
 
     /**
-     * Prunes the moved elements and points to remove implicitly moved elements.
-     */
-    private pruneMovedElements() {
-        for (const element of this.movedElements) {
-            if (this.isElementImplicitlyMoved(element, true)) {
-                this.implicitlyMovedElements.add(element);
-            }
-        }
-        for (const element of this.implicitlyMovedElements) {
-            this.movedElements.delete(element);
-        }
-    }
-
-    /**
-     * Checks if an element is moved.
+     * Adds a dependency relationship between two canvas elements.
      *
-     * @param elementId the id of the element to check
-     * @param consistencyChecks if false, consistency checks are skipped
-     * @returns true if the element is moved, otherwise false
+     * @param source the element that depends on another element
+     * @param dependency the element that the source depends on
+     * @param isXSource whether the source dependency is in the X direction
+     * @param isXTarget whether the target dependency is in the X direction
      */
-    private isMoved(elementId: string, consistencyChecks: boolean): boolean {
-        const fromLookup = this.isMovedLookup.get(elementId);
-        if (fromLookup != undefined) {
-            return fromLookup;
-        }
-        const element = this.index.getById(elementId);
-        if (element instanceof SCanvasElement || element instanceof SCanvasPoint) {
-            const isMoved = this.isElementMoved(element, consistencyChecks);
-            this.isMovedLookup.set(elementId, isMoved);
-            return isMoved;
+    private addDependency(
+        source: SCanvasContent,
+        dependency: SCanvasContent,
+        isXSource: boolean,
+        isXTarget: boolean
+    ): void {
+        let entry: DependencyEntry | undefined;
+        if (isXSource) {
+            entry = this.dependsOnX.get(source);
+            if (entry == undefined) {
+                entry = { x: new Set(), y: new Set() };
+                this.dependsOnX.set(source, entry);
+            }
         } else {
-            throw new Error("Invalid element (should not be reachable)");
+            entry = this.dependsOnY.get(source);
+            if (entry == undefined) {
+                entry = { x: new Set(), y: new Set() };
+                this.dependsOnY.set(source, entry);
+            }
+        }
+        if (isXTarget) {
+            entry.x.add(dependency);
+        } else {
+            entry.y.add(dependency);
+        }
+        let inverseEntry: DependencyEntry | undefined;
+        if (isXTarget) {
+            inverseEntry = this.dependedOnX.get(dependency);
+            if (inverseEntry == undefined) {
+                inverseEntry = { x: new Set(), y: new Set() };
+                this.dependedOnX.set(dependency, inverseEntry);
+            }
+        } else {
+            inverseEntry = this.dependedOnY.get(dependency);
+            if (inverseEntry == undefined) {
+                inverseEntry = { x: new Set(), y: new Set() };
+                this.dependedOnY.set(dependency, inverseEntry);
+            }
+        }
+        if (isXSource) {
+            inverseEntry.x.add(source);
+        } else {
+            inverseEntry.y.add(source);
         }
     }
 
     /**
-     * Checks if an element is moved.
+     * Gets the canvas dependencies for a given canvas element.
+     * Returns elements that this canvas depends on for positioning.
      *
-     * @param element the element to check
-     * @param consistencyChecks if false, consistency checks are skipped
-     * @returns true if the element is moved, otherwise false
+     * @param canvas the canvas to get dependencies for
+     * @returns array of canvas content elements that this canvas depends on
      */
-    private isElementMoved(element: SCanvasElement | SCanvasPoint, consistencyChecks: boolean): boolean {
-        if (this.movedElements.has(element)) {
-            return true;
+    private getCanvasDependencies(canvas: SParentElementImpl & CanvasLike): SCanvasContent[] {
+        const parentCanvasContent = findParentByFeature(
+            canvas,
+            (parent) => parent instanceof SMarker || parent instanceof SCanvasElement
+        ) as SMarker | SCanvasElement | undefined;
+        if (parentCanvasContent instanceof SCanvasElement) {
+            return [parentCanvasContent];
+        } else if (parentCanvasContent instanceof SMarker) {
+            const connection = parentCanvasContent.parent as SCanvasConnection;
+            const segmentIndex = parentCanvasContent.pos == "start" ? 0 : connection.segments.length - 1;
+            return this.getCanvasConnectionSegmentDependencies(connection, segmentIndex);
+        } else {
+            return [];
         }
-        return this.isElementImplicitlyMoved(element, consistencyChecks);
     }
 
     /**
-     * Checks if an element is implicitly moved.
-     * - A canvas element is moved if its position is moved, if it is moved explicitly, or if the parent canvas is moved.
-     * - A relative point is moved if the target is moved.
-     * - A line point is moved if the (relevant segment of the) line provider is moved.
-     * - An absolute point is moved if the parent canvas is moved.
+     * Gets the dependencies for a specific segment of a canvas connection.
+     * Returns all points that affect the position of the specified segment.
      *
-     * @param element the element to check
-     * @param consistencyChecks if false, consistency checks are skipped
-     * @returns true if the element is implicitly moved, otherwise false
+     * @param connection the canvas connection
+     * @param segmentIndex the index of the segment to get dependencies for
+     * @returns array of canvas content elements that this segment depends on
      */
-    private isElementImplicitlyMoved(element: SCanvasElement | SCanvasPoint, consistencyChecks: boolean): boolean {
-        if (element instanceof SCanvasElement) {
-            if (element.pos != undefined) {
-                return this.isMoved(element.pos, consistencyChecks);
-            }
-            return this.isParentCanvasImplicitlyMoved(element, consistencyChecks);
-        } else if (element instanceof SRelativePoint) {
-            const target = this.index.getById(element.target) as SCanvasPoint | SCanvasElement | SCanvasConnection;
-            if (target instanceof SCanvasConnection) {
-                return this.isMoved(target.segments.at(-1)!.end, consistencyChecks);
-            } else {
-                return this.isMoved(element.target, consistencyChecks);
-            }
-        } else if (element instanceof SLinePoint) {
-            const lineProviderId = element.lineProvider;
-            const lineProvider = this.index.getById(lineProviderId) as SCanvasContent;
-            if (lineProvider instanceof SCanvasElement) {
-                return this.isMoved(lineProviderId, consistencyChecks);
-            }
-            if (lineProvider instanceof SCanvasConnection) {
-                const affectedSegment = LinePoint.calcSegmentIndex(element.pos, lineProvider.segments.length);
-                return this.isCanvasConnectionSegmentMoved(lineProvider, affectedSegment, consistencyChecks);
-            }
-        } else if (element instanceof SAbsolutePoint) {
-            return this.isParentCanvasImplicitlyMoved(element, consistencyChecks);
-        }
-        return false;
-    }
-
-    /**
-     * Checks if a canvas connection segment is moved
-     * It is moved if all relevant points (start, end, control points) are moved.
-     * If only some points are moved, it is considered a conflict, for which the hasConflict flag is set.
-     *
-     * @param connection the connection to check
-     * @param segmentIndex the index of the segment to check
-     * @param consistencyChecks if false, consistency checks are skipped
-     * @returns true if the segment is moved, otherwise false
-     */
-    private isCanvasConnectionSegmentMoved(
+    private getCanvasConnectionSegmentDependencies(
         connection: SCanvasConnection,
-        segmentIndex: number,
-        consistencyChecks: boolean
-    ): boolean {
+        segmentIndex: number
+    ): SCanvasContent[] {
         const relevantPoints: string[] = [];
         if (segmentIndex === 0) {
             relevantPoints.push(connection.start);
@@ -236,43 +435,233 @@ export class MovedElementsSelector {
         if (segment instanceof SCanvasBezierSegment) {
             relevantPoints.push(segment.startControlPoint, segment.endControlPoint);
         }
-        const isMoved = relevantPoints.map((point) => this.isMoved(point, consistencyChecks));
-        const result = isMoved.some((moved) => moved);
-        if (consistencyChecks && result && isMoved.some((moved) => !moved)) {
-            this.hasConflict = true;
-        }
-        return result;
+        return relevantPoints.map((pointId) => this.index.getById(pointId) as SCanvasContent);
     }
 
     /**
-     * Checks if an element is moved implicitly by a parent canvas (which is located inside another SCanvasElement or SMarker).
+     * Fixes elements that are partially moved by ensuring they are moved in both directions
+     * when their dependencies require it. Continues until no more changes are needed.
+     */
+    private fixPartiallyMovedElements(): void {
+        let hasChanges = true;
+        while (hasChanges) {
+            hasChanges = false;
+            const elementsToMoveY = new Set<SCanvasElement | SCanvasPoint>();
+            const elementsToMoveX = new Set<SCanvasElement | SCanvasPoint>();
+            for (const element of this.movedElementsX) {
+                if (this.movedElementsY.has(element)) {
+                    continue;
+                }
+                if (this.isInconsitentlyMoved(element)) {
+                    elementsToMoveY.add(element);
+                }
+            }
+            for (const element of this.movedElementsY) {
+                if (this.movedElementsX.has(element)) {
+                    continue;
+                }
+                if (this.isInconsitentlyMoved(element)) {
+                    elementsToMoveX.add(element);
+                }
+            }
+            if (elementsToMoveY.size > 0) {
+                hasChanges = true;
+                this.registerElements(elementsToMoveY, false, true);
+            }
+            if (elementsToMoveX.size > 0) {
+                hasChanges = true;
+                this.registerElements(elementsToMoveX, true, false);
+            }
+        }
+    }
+
+    /**
+     * Checks if an element is inconsistently moved (has dependencies that conflict).
+     * An element is inconsistently moved if some of its dependencies are moved while others are not.
+     *
+     * @param element the element to check for inconsistent movement
+     * @returns true if the element is inconsistently moved, false otherwise
+     */
+    private isInconsitentlyMoved(element: SCanvasContent): boolean {
+        const dependedOnX = this.dependedOnX.get(element);
+        const dependedOnY = this.dependedOnY.get(element);
+        if (dependedOnX == undefined || dependedOnY == undefined) {
+            return false;
+        }
+        let toCheckX = intersection(dependedOnX.x, dependedOnY.x);
+        let toCheckY = intersection(dependedOnX.y, dependedOnY.y);
+        const checkedX: Set<SElement> = new Set();
+        const checkedY: Set<SElement> = new Set();
+        while (toCheckX.size > 0 || toCheckY.size > 0) {
+            const newToCheckX: Set<SCanvasContent> = new Set();
+            const newToCheckY: Set<SCanvasContent> = new Set();
+            for (const toCheck of toCheckX) {
+                if (checkedX.has(toCheck)) {
+                    continue;
+                }
+                checkedX.add(toCheck);
+                if (this.movedElementsX.has(toCheck as any)) {
+                    return true;
+                }
+                const dependedOn = this.dependsOnX.get(toCheck);
+                if (dependedOn == undefined) {
+                    continue;
+                }
+                for (const dep of dependedOn.x) {
+                    newToCheckX.add(dep);
+                }
+                for (const dep of dependedOn.y) {
+                    newToCheckY.add(dep);
+                }
+            }
+            for (const toCheck of toCheckY) {
+                if (checkedY.has(toCheck)) {
+                    continue;
+                }
+                checkedY.add(toCheck);
+                if (this.movedElementsY.has(toCheck as any)) {
+                    return true;
+                }
+                const dependedOn = this.dependsOnY.get(toCheck);
+                if (dependedOn == undefined) {
+                    continue;
+                }
+                for (const dep of dependedOn.x) {
+                    newToCheckX.add(dep);
+                }
+                for (const dep of dependedOn.y) {
+                    newToCheckY.add(dep);
+                }
+            }
+            toCheckX = newToCheckX;
+            toCheckY = newToCheckY;
+        }
+        return false;
+    }
+
+    /**
+     * Prunes the moved elements and points to remove implicitly moved elements.
+     */
+    private pruneMovedElements() {
+        for (const element of this.movedElementsX) {
+            if (this.isElementImplicitlyMoved(this.dependsOnX.get(element))) {
+                this.implicitlyMovedElementsX.add(element);
+            }
+        }
+        for (const element of this.movedElementsY) {
+            if (this.isElementImplicitlyMoved(this.dependsOnY.get(element))) {
+                this.implicitlyMovedElementsY.add(element);
+            }
+        }
+        for (const element of this.implicitlyMovedElementsX) {
+            this.movedElementsX.delete(element);
+        }
+        for (const element of this.implicitlyMovedElementsY) {
+            this.movedElementsY.delete(element);
+        }
+    }
+
+    /**
+     * Checks if an element is moved in the X direction.
+     * Uses caching to avoid recomputation.
      *
      * @param element the element to check
-     * @param consistencyChecks if false, consistency checks are skipped
-     * @returns true if the element is moved implicitly by a parent canvas, otherwise false
+     * @returns true if the element is moved in the X direction, otherwise false
      */
-    private isParentCanvasImplicitlyMoved(
-        element: SCanvasElement | SAbsolutePoint,
-        consistencyChecks: boolean
-    ): boolean {
-        const canvas = element.parent as CanvasLike & SElement;
-        const isCanvasMoved = this.isMovedLookup.get(canvas.id);
-        if (isCanvasMoved != undefined) {
-            return isCanvasMoved;
+    private isMovedX(element: SCanvasContent): boolean {
+        const fromLookup = this.isMovedXLookup.get(element);
+        if (fromLookup != undefined) {
+            return fromLookup;
         }
-        const parentCanvasContent = findParentByFeature(
-            canvas,
-            (parent) => parent instanceof SMarker || parent instanceof SCanvasElement
-        ) as SMarker | SCanvasElement | undefined;
-        let isParentCanvasMoved = false;
-        if (parentCanvasContent instanceof SCanvasElement) {
-            isParentCanvasMoved = this.isMoved(parentCanvasContent.id, consistencyChecks);
-        } else if (parentCanvasContent instanceof SMarker) {
-            const connection = parentCanvasContent.parent as SCanvasConnection;
-            const segmentIndex = parentCanvasContent.pos == "start" ? 0 : connection.segments.length - 1;
-            isParentCanvasMoved = this.isCanvasConnectionSegmentMoved(connection, segmentIndex, consistencyChecks);
-        }
-        this.isMovedLookup.set(canvas.id, isParentCanvasMoved);
-        return isParentCanvasMoved;
+        const isMoved =
+            this.movedElementsX.has(element as any) || this.isElementImplicitlyMoved(this.dependsOnX.get(element));
+        this.isMovedXLookup.set(element, isMoved);
+        return isMoved;
     }
+
+    /**
+     * Checks if an element is moved in the Y direction.
+     * Uses caching to avoid recomputation.
+     *
+     * @param element the element to check
+     * @returns true if the element is moved in the Y direction, otherwise false
+     */
+    private isMovedY(element: SCanvasContent): boolean {
+        const fromLookup = this.isMovedYLookup.get(element);
+        if (fromLookup != undefined) {
+            return fromLookup;
+        }
+        const isMoved =
+            this.movedElementsY.has(element as any) || this.isElementImplicitlyMoved(this.dependsOnY.get(element));
+        this.isMovedYLookup.set(element, isMoved);
+        return isMoved;
+    }
+
+    /**
+     * Checks if an element is implicitly moved.
+     * - A canvas element is moved if its position is moved, if it is moved explicitly, or if the parent canvas is moved.
+     * - A relative point is moved if the target is moved.
+     * - A line point is moved if the (relevant segment of the) line provider is moved.
+     * - An absolute point is moved if the parent canvas is moved.
+     *
+     * @param dependencies the dependency entry containing the elements this element depends on
+     * @returns true if the element is implicitly moved, otherwise false
+     */
+    private isElementImplicitlyMoved(dependencies: DependencyEntry | undefined): boolean {
+        if (dependencies == undefined) {
+            return false;
+        }
+        let isAllMoved = true;
+        let isSomeMoved = false;
+        for (const element of dependencies.x) {
+            if (this.isMovedX(element)) {
+                isSomeMoved = true;
+            } else {
+                isAllMoved = false;
+            }
+        }
+        for (const element of dependencies.y) {
+            if (this.isMovedY(element)) {
+                isSomeMoved = true;
+            } else {
+                isAllMoved = false;
+            }
+        }
+        if (!isAllMoved && isSomeMoved) {
+            this.hasConflict = true;
+        }
+        return isAllMoved && isSomeMoved;
+    }
+}
+
+/**
+ * Represents dependency relationships for an element in both X and Y directions.
+ */
+interface DependencyEntry {
+    /**
+     * Elements that this element depends on in the X direction
+     */
+    x: Set<SCanvasContent>;
+    /**
+     * Elements that this element depends on in the Y direction
+     */
+    y: Set<SCanvasContent>;
+}
+
+/**
+ * Computes the intersection of two sets.
+ *
+ * @template T the type of elements in the sets
+ * @param set1 the first set
+ * @param set2 the second set
+ * @returns a new set containing elements present in both input sets
+ */
+function intersection<T>(set1: Set<T>, set2: Set<T>): Set<T> {
+    const result = new Set<T>();
+    for (const item of set1) {
+        if (set2.has(item)) {
+            result.add(item);
+        }
+    }
+    return result;
 }

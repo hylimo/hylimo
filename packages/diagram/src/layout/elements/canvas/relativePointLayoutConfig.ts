@@ -18,8 +18,13 @@ export class RelativePointLayoutConfig extends CanvasPointLayoutConfig {
         super(
             [
                 {
-                    name: "target",
-                    description: "the target point or canvas element of which the relative point is based",
+                    name: "targetX",
+                    description: "the target point or canvas element of which the relative x-coordinate is based",
+                    type: canvasContentType
+                },
+                {
+                    name: "targetY",
+                    description: "the target point or canvas element of which the relative y-coordinate is based",
                     type: canvasContentType
                 }
             ],
@@ -41,16 +46,21 @@ export class RelativePointLayoutConfig extends CanvasPointLayoutConfig {
     override layout(layout: Layout, element: LayoutElement, position: Point, size: Size, id: string): Element[] {
         const offsetXValue = element.element.getLocalFieldOrUndefined("_offsetX");
         const offsetYValue = element.element.getLocalFieldOrUndefined("_offsetY");
-        const target = layout.getElementId(element.element.getLocalFieldOrUndefined("target")!.value as FullObject);
-        if (!layout.isChildElement(element.parent!, layout.layoutElementLookup.get(target)!)) {
-            throw new Error("The target of a relative point must be part of the same canvas or a sub-canvas");
+        const targetX = layout.getElementId(element.element.getLocalFieldOrUndefined("targetX")!.value as FullObject);
+        const targetY = layout.getElementId(element.element.getLocalFieldOrUndefined("targetY")!.value as FullObject);
+        if (!layout.isChildElement(element.parent!, layout.layoutElementLookup.get(targetX)!)) {
+            throw new Error("The x-target of a relative point must be part of the same canvas or a sub-canvas");
+        }
+        if (!layout.isChildElement(element.parent!, layout.layoutElementLookup.get(targetY)!)) {
+            throw new Error("The y-target of a relative point must be part of the same canvas or a sub-canvas");
         }
         const result: RelativePoint = {
             type: RelativePoint.TYPE,
             id,
             offsetX: offsetXValue?.value?.toNative() ?? 0,
             offsetY: offsetYValue?.value?.toNative() ?? 0,
-            target,
+            targetX,
+            targetY,
             children: [],
             edits: element.edits
         };
