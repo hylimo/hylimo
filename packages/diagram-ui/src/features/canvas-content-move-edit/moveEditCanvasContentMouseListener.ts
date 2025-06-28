@@ -430,7 +430,6 @@ export class MoveEditCanvasContentMouseListener extends MouseListener {
         moveX: boolean,
         moveY: boolean
     ): TranslationMoveSelection | LineMoveSelection | undefined {
-        console.log(`Trying to compute moved selection with moveX: ${moveX}, moveY: ${moveY}`);
         selector.initialize(moveX, moveY);
         if (selector.hasConflict) {
             return undefined;

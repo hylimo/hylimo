@@ -558,7 +558,7 @@ export class MovedElementsSelector {
                 if (this.movedElementsX.has(toCheck as any)) {
                     return true;
                 }
-                const dependedOn = this.dependsOnX.get(toCheck);
+                const dependedOn = this.dependedOnX.get(toCheck);
                 if (dependedOn == undefined) {
                     continue;
                 }
@@ -577,7 +577,7 @@ export class MovedElementsSelector {
                 if (this.movedElementsY.has(toCheck as any)) {
                     return true;
                 }
-                const dependedOn = this.dependsOnY.get(toCheck);
+                const dependedOn = this.dependedOnY.get(toCheck);
                 if (dependedOn == undefined) {
                     continue;
                 }
