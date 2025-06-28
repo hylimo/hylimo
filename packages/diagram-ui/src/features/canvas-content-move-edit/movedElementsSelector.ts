@@ -171,11 +171,49 @@ export class MovedElementsSelector {
     initialize(moveX: boolean, moveY: boolean): void {
         this.isMovedXLookup.clear();
         this.isMovedYLookup.clear();
+        this.movedElementsX.clear();
+        this.movedElementsY.clear();
+        this.implicitlyMovedElementsX.clear();
+        this.implicitlyMovedElementsY.clear();
         this.hasConflict = false;
 
+        this.validateConsistency(moveX, moveY);
+        if (this.hasConflict) {
+            return;
+        }
         this.registerElements(this.actualSelected, moveX, moveY);
         this.fixPartiallyMovedElements();
         this.pruneMovedElements();
+    }
+
+    /**
+     * Validates the consistency of the selected elements based on their global rotations.
+     * If there are inconsistencies, sets hasConflict to true.
+     * Conflicts can only occur if not both moveX and moveY are enabled.
+     *
+     * @param moveX whether to move elements in the X direction
+     * @param moveY whether to move elements in the Y direction
+     */
+    private validateConsistency(moveX: boolean, moveY: boolean): void {
+        if (moveX && moveY) {
+            return;
+        }
+        const globalRotations: Set<number> = new Set();
+        for (const element of this.actualSelected) {
+            globalRotations.add(((element.parent.globalRotation % 360) + 360) % 180);
+        }
+        if (globalRotations.size > 2) {
+            this.hasConflict = true;
+            return;
+        }
+        if (globalRotations.size < 2) {
+            return;
+        }
+        const [rotation1, rotation2] = Array.from(globalRotations);
+        if (Math.abs(rotation1 - rotation2) % 180 !== 90) {
+            this.hasConflict = true;
+            return;
+        }
     }
 
     /**
@@ -187,8 +225,25 @@ export class MovedElementsSelector {
      * @param moveY whether to move elements in the Y direction
      */
     private registerElements(elements: Set<SCanvasContent>, moveX: boolean, moveY: boolean) {
-        let currentElementsX: Set<SCanvasContent> = moveX ? elements : new Set();
-        let currentElementsY: Set<SCanvasContent> = moveY ? elements : new Set();
+        let currentElementsX: Set<SCanvasContent> = new Set();
+        let currentElementsY: Set<SCanvasContent> = new Set();
+        for (const element of elements) {
+            const firstRotationCategory = ((element.parent.globalRotation % 360) + 360) % 180 < 90;
+            if (moveX) {
+                if (firstRotationCategory) {
+                    currentElementsX.add(element);
+                } else {
+                    currentElementsY.add(element);
+                }
+            }
+            if (moveY) {
+                if (firstRotationCategory) {
+                    currentElementsY.add(element);
+                } else {
+                    currentElementsX.add(element);
+                }
+            }
+        }
         while (currentElementsX.size > 0 || currentElementsY.size > 0) {
             const newElementsX = new Set<SCanvasContent>();
             const newElementsY = new Set<SCanvasContent>();
