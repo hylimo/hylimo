@@ -133,29 +133,6 @@ export default withPwa(
                         type: "image/svg+xml"
                     }
                 ],
-                screenshots: [
-                    {
-                        src: "/screenshots/editor.png",
-                        sizes: "2000x1000",
-                        type: "image/png",
-                        form_factor: "wide",
-                        label: "Editing an example diagram"
-                    },
-                    {
-                        src: "/screenshots/docs.png",
-                        sizes: "2000x1000",
-                        type: "image/png",
-                        form_factor: "wide",
-                        label: "Viewing the documentation"
-                    },
-                    {
-                        src: "/screenshots/search.png",
-                        sizes: "2000x1000",
-                        type: "image/png",
-                        form_factor: "wide",
-                        label: "Searching in the documentation"
-                    }
-                ],
                 file_handlers: [{ action: "./", accept: { "text/*": [".hyl"] } }]
             },
             workbox: {
