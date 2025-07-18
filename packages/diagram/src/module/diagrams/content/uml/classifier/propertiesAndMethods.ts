@@ -156,7 +156,7 @@ const scopeSpecifications: ClassifierScopeSpecification<ParseContext>[] = [
                     );
                 }
                 return {
-                    value: context.newString(entry),
+                    value: context.newString(visibility + entry),
                     source: undefined
                 };
             }
