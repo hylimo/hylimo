@@ -24,12 +24,12 @@
         "@mapbox/unitbezier": "^0.0.1",
         "bezier-js": "^6.1.4",
         "inversify": "^6.2.2",
-        "jsonata": "^2.0.6",
-        "lucide": "^0.525.0",
+        "jsonata": "^2.1.0",
+        "lucide": "^0.540.0",
         "minisearch": "^7.1.2",
         "snabbdom": "^3.6.2",
         "sprotty": "^1.4.0",
         "sprotty-protocol": "^1.4.0",
-        "transformation-matrix": "^3.0.0"
+        "transformation-matrix": "^3.1.0"
     }
 }

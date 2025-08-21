@@ -26,9 +26,9 @@
         "dedent": "^1.6.0",
         "fontkit": "^2.0.4",
         "linebreak": "^1.1.0",
-        "p-limit": "^6.2.0",
+        "p-limit": "^7.1.0",
         "svgpath": "^2.6.0",
-        "transformation-matrix": "^3.0.0",
+        "transformation-matrix": "^3.1.0",
         "uuid": "^11.1.0"
     },
     "devDependencies": {

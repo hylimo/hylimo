@@ -23,7 +23,7 @@
         "@hylimo/diagram-common": "^2.0.0",
         "@hylimo/diagram-protocol": "^2.0.0",
         "chevrotain": "^11.0.3",
-        "jsonata": "^2.0.6",
+        "jsonata": "^2.1.0",
         "prettier": "^3.6.2",
         "sprotty-protocol": "^1.4.0",
         "vscode-languageserver": "9.0.1",
