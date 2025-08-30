@@ -8,12 +8,19 @@
         >
             <input v-model="cachedModel" type="color" class="color-picker" />
         </div>
-        <BaseInput v-model="cachedModel" :is-valid="isValid" class="color-input" />
+        <BaseInput v-model="cachedModel" :is-valid="isValid" :default-value="defaultValue" />
     </div>
 </template>
 <script setup lang="ts">
 import { ref, watch } from "vue";
 import BaseInput from "./BaseInput.vue";
+
+defineProps({
+    defaultValue: {
+        type: String,
+        required: true
+    }
+})
 
 const model = defineModel({
     type: String,
@@ -45,14 +52,11 @@ watch(
 );
 </script>
 <style scoped>
-.color-input {
-    font-family: var(--vp-font-family-mono);
-}
-
 .color-input-wrapper {
     display: flex;
     flex: 1 1 0;
     min-width: 0;
+    font-family: var(--vp-font-family-mono);
 }
 
 .color-picker-wrapper {

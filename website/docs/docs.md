@@ -38,52 +38,50 @@ classDiagram {
 
 ```hylimo
 classDiagram {
-    package("Automotive") layout {
+    package("Automotive") {
+        class("Car") {
+            private {
+                weight : Double
+            }
+            public {
+                startEngine() : void
+            }
+        } layout {
+            pos = apos(-42, 96)
+        }
+
+        interface("CarPart") {
+
+        } layout {
+            pos = rpos(Car, 450, 0)
+        }
+
+        class("CarDoor") {
+            private {
+                color : Color
+            }
+        } layout {
+            pos = rpos(CarPart, 0, 150)
+        }
+
+        Car *-- CarPart with {
+            over = start(Position.Right).line(end(Position.Left))
+            label("1..*", 0.827, 24.1)
+            label("+parts", 0.749, -4.7)
+        }
+
+        CarDoor implements CarPart with {
+            over = start(Position.Top).line(end(Position.Bottom))
+        }
+
+        comment("Drives on roads, and sometimes not on roads") layout {
+            width = 177.0234375
+            pos = apos(33, 243)
+        } .. Car with {
+            over = start(0.8015633964429145).line(end(0.19))
+        }
+    } layout {
         pos = apos(-213, -11)
-        width = 799.7542853820115
-        height = 323.71734670143684
-    }
-
-    class("Car") {
-        private {
-            weight : Double
-        }
-        public {
-            startEngine() : void
-        }
-    } layout {
-        pos = apos(-42, 96)
-    }
-
-    interface("CarPart") {
-
-    } layout {
-        pos = rpos(Car, 450, 0)
-    }
-
-    class("CarDoor") {
-        private {
-            color : Color
-        }
-    } layout {
-        pos = rpos(CarPart, 0, 150)
-    }
-
-    Car *-- CarPart with {
-        over = start(Position.Right).line(end(Position.Left))
-        label("1..*", 0.7424916682518469, 4.651791220118298)
-        label("+parts", 0.7167590181143503, -23.239473042820165)
-    }
-
-    CarDoor implements CarPart with {
-        over = start(Position.Top).line(end(Position.Bottom))
-    }
-
-    comment("Drives on roads, and sometimes not on roads") layout {
-        width = 177.0234375
-        pos = apos(33, 243)
-    } .. Car with {
-        over = start(0.8015633964429145).line(end(0.19))
     }
 }
 ```

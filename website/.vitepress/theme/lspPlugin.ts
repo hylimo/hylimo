@@ -82,6 +82,39 @@ export interface LanguageServerConfig {
 export const language = "syncscript";
 
 /**
+ * Default shared settings
+ */
+export const defaultSharedSettings = {
+    translationPrecision: 1,
+    resizePrecision: 1,
+    linePointPosPrecision: 0.001,
+    linePointDistancePrecision: 0.1,
+    axisAlignedPosPrecision: 0.001,
+    rotationPrecision: 1
+};
+
+/**
+ * Default diagram configuration
+ */
+export const defaultDiagramConfig = {
+    lightPrimaryColor: "#000000",
+    lightBackgroundColor: "#ffffff",
+    darkPrimaryColor: "#ffffff",
+    darkBackgroundColor: "#1e1e1e",
+    enableFontSubsetting: true,
+    enableExternalFonts: false
+};
+
+/**
+ * Default editor configuration
+ */
+export const defaultEditorConfig = {
+    toolboxEnabled: true,
+    snappingEnabled: true,
+    gridEnabled: true
+};
+
+/**
  * A plugin that provides a language client for the SyncScript language.
  * In particular, it configures the monaco editor (globally) and sets up the language client.
  * The language client is provided under the `languageClientKey` injection key.
@@ -90,35 +123,17 @@ export const lspPlugin: Plugin = {
     install(app) {
         const sharedSettings = useLocalStorage<SharedSettings>(
             "sharedSettings",
-            {
-                translationPrecision: 1,
-                resizePrecision: 1,
-                linePointPosPrecision: 0.001,
-                linePointDistancePrecision: 0.1,
-                axisAlignedPosPrecision: 0.001,
-                rotationPrecision: 1
-            },
+            defaultSharedSettings,
             { mergeDefaults: true }
         );
         const diagramConfig = useLocalStorage<DiagramConfig>(
             "diagramConfig",
-            {
-                lightPrimaryColor: "#000000",
-                lightBackgroundColor: "#ffffff",
-                darkPrimaryColor: "#ffffff",
-                darkBackgroundColor: "#1e1e1e",
-                enableFontSubsetting: true,
-                enableExternalFonts: false
-            },
+            defaultDiagramConfig,
             { mergeDefaults: true }
         );
         const editorConfig = useLocalStorage<EditorConfig>(
             "editorConfig",
-            {
-                toolboxEnabled: true,
-                snappingEnabled: true,
-                gridEnabled: true
-            },
+            defaultEditorConfig,
             { mergeDefaults: true }
         );
         app.provide(languageServerConfigKey, {

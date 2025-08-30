@@ -1,6 +1,6 @@
 <template>
     <SettingsItem :subtitle="subtitle">
-        <ColorInput v-model="model" />
+        <ColorInput v-model="model" :default-value="defaultValue" />
     </SettingsItem>
 </template>
 <script setup lang="ts">
@@ -9,6 +9,10 @@ import SettingsItem from "./SettingsItem.vue";
 
 defineProps({
     subtitle: {
+        type: String,
+        required: true
+    },
+    defaultValue: {
         type: String,
         required: true
     }

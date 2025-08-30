@@ -1,9 +1,16 @@
 <template>
-    <BaseInput v-model="cachedModel" :is-valid="isValid" />
+    <BaseInput v-model="cachedModel" :is-valid="isValid" :default-value="defaultValue.toString()" />
 </template>
 <script setup lang="ts">
 import { ref, watch } from "vue";
 import BaseInput from "./BaseInput.vue";
+
+defineProps({
+    defaultValue: {
+        type: Number,
+        required: true
+    }
+})
 
 const model = defineModel({
     type: Number,

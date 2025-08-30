@@ -6,23 +6,57 @@
                 <NumberInputItem
                     subtitle="Absolute/relative point translation precision"
                     v-model="settings.translationPrecision"
+                    :default-value="defaultSharedSettings.translationPrecision"
                 />
-                <NumberInputItem subtitle="Resize precision" v-model="settings.resizePrecision" />
-                <NumberInputItem subtitle="Line point pos precision" v-model="settings.linePointPosPrecision" />
+                <NumberInputItem
+                    subtitle="Resize precision"
+                    v-model="settings.resizePrecision"
+                    :default-value="defaultSharedSettings.resizePrecision"
+                />
+                <NumberInputItem
+                    subtitle="Line point pos precision"
+                    v-model="settings.linePointPosPrecision"
+                    :default-value="defaultSharedSettings.linePointPosPrecision"
+                />
                 <NumberInputItem
                     subtitle="Line point distance precision"
                     v-model="settings.linePointDistancePrecision"
+                    :default-value="defaultSharedSettings.linePointDistancePrecision"
                 />
-                <NumberInputItem subtitle="Axis aligned pos precision" v-model="settings.axisAlignedPosPrecision" />
-                <NumberInputItem subtitle="Rotation precision" v-model="settings.rotationPrecision" />
+                <NumberInputItem
+                    subtitle="Axis aligned pos precision"
+                    v-model="settings.axisAlignedPosPrecision"
+                    :default-value="defaultSharedSettings.axisAlignedPosPrecision"
+                />
+                <NumberInputItem
+                    subtitle="Rotation precision"
+                    v-model="settings.rotationPrecision"
+                    :default-value="defaultSharedSettings.rotationPrecision"
+                />
                 <BooleanInputItem subtitle="Grid" v-model="editorConfig.gridEnabled" />
                 <BooleanInputItem subtitle="Snap to elements/points" v-model="editorConfig.snappingEnabled" />
             </template>
             <template v-else-if="tab == 'theme'">
-                <ColorInputItem subtitle="Light mode primary color" v-model="diagramConfig.lightPrimaryColor" />
-                <ColorInputItem subtitle="Light mode background color" v-model="diagramConfig.lightBackgroundColor" />
-                <ColorInputItem subtitle="Dark mode primary color" v-model="diagramConfig.darkPrimaryColor" />
-                <ColorInputItem subtitle="Dark mode background color" v-model="diagramConfig.darkBackgroundColor" />
+                <ColorInputItem
+                    subtitle="Light mode primary color"
+                    v-model="diagramConfig.lightPrimaryColor"
+                    :default-value="defaultDiagramConfig.lightPrimaryColor"
+                />
+                <ColorInputItem
+                    subtitle="Light mode background color"
+                    v-model="diagramConfig.lightBackgroundColor"
+                    :default-value="defaultDiagramConfig.lightBackgroundColor"
+                />
+                <ColorInputItem
+                    subtitle="Dark mode primary color"
+                    v-model="diagramConfig.darkPrimaryColor"
+                    :default-value="defaultDiagramConfig.darkPrimaryColor"
+                />
+                <ColorInputItem
+                    subtitle="Dark mode background color"
+                    v-model="diagramConfig.darkBackgroundColor"
+                    :default-value="defaultDiagramConfig.darkBackgroundColor"
+                />
             </template>
             <template v-else-if="tab == 'diagram'">
                 <BooleanInputItem subtitle="Font subsetting" v-model="diagramConfig.enableFontSubsetting" />
@@ -38,6 +72,7 @@ import { languageServerConfigKey } from "../../theme/injectionKeys";
 import NumberInputItem from "./NumberInputItem.vue";
 import ColorInputItem from "./ColorInputItem.vue";
 import BooleanInputItem from "./BooleanInputItem.vue";
+import { defaultDiagramConfig, defaultSharedSettings } from "../../theme/lspPlugin";
 
 const languageServerConfig = inject(languageServerConfigKey)!;
 const settings = languageServerConfig.settings;
