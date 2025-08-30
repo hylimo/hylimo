@@ -3,7 +3,7 @@
     <IconButton icon="vpi-rotate-cw" label="Reset" class="reset-button" @click="reset" />
 </template>
 <script setup lang="ts">
-import IconButton from '../IconButton.vue';
+import IconButton from "../IconButton.vue";
 
 const props = defineProps({
     isValid: {
@@ -23,7 +23,7 @@ const model = defineModel({
 
 function reset() {
     model.value = props.defaultValue;
-};
+}
 </script>
 <style scoped>
 .text-field {

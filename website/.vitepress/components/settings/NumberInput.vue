@@ -10,7 +10,7 @@ defineProps({
         type: Number,
         required: true
     }
-})
+});
 
 const model = defineModel({
     type: Number,

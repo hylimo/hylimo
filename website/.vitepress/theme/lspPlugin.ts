@@ -121,21 +121,15 @@ export const defaultEditorConfig = {
  */
 export const lspPlugin: Plugin = {
     install(app) {
-        const sharedSettings = useLocalStorage<SharedSettings>(
-            "sharedSettings",
-            defaultSharedSettings,
-            { mergeDefaults: true }
-        );
-        const diagramConfig = useLocalStorage<DiagramConfig>(
-            "diagramConfig",
-            defaultDiagramConfig,
-            { mergeDefaults: true }
-        );
-        const editorConfig = useLocalStorage<EditorConfig>(
-            "editorConfig",
-            defaultEditorConfig,
-            { mergeDefaults: true }
-        );
+        const sharedSettings = useLocalStorage<SharedSettings>("sharedSettings", defaultSharedSettings, {
+            mergeDefaults: true
+        });
+        const diagramConfig = useLocalStorage<DiagramConfig>("diagramConfig", defaultDiagramConfig, {
+            mergeDefaults: true
+        });
+        const editorConfig = useLocalStorage<EditorConfig>("editorConfig", defaultEditorConfig, {
+            mergeDefaults: true
+        });
         app.provide(languageServerConfigKey, {
             settings: sharedSettings,
             diagramConfig,
