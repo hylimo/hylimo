@@ -72,7 +72,7 @@ import { languageServerConfigKey } from "../../theme/injectionKeys";
 import NumberInputItem from "./NumberInputItem.vue";
 import ColorInputItem from "./ColorInputItem.vue";
 import BooleanInputItem from "./BooleanInputItem.vue";
-import { defaultDiagramConfig, defaultSharedSettings } from "../../theme/lspPlugin";
+import { defaultDiagramConfig, defaultSharedSettings } from "../../theme/defaultSettings";
 
 const languageServerConfig = inject(languageServerConfigKey)!;
 const settings = languageServerConfig.settings;

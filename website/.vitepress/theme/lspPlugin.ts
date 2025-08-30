@@ -27,6 +27,7 @@ import { augmentVscodeApiConfig, checkServiceConsistency } from "monaco-editor-w
 import { useWorkerFactory } from "monaco-languageclient/workerFactory";
 import { LogLevel } from "@codingame/monaco-vscode-api";
 import { initServices } from "monaco-languageclient/vscode/services";
+import { defaultDiagramConfig, defaultEditorConfig, defaultSharedSettings } from "./defaultSettings";
 
 /**
  * Config for the diagram
@@ -80,39 +81,6 @@ export interface LanguageServerConfig {
  * The language identifier for the SyncScript language.
  */
 export const language = "syncscript";
-
-/**
- * Default shared settings
- */
-export const defaultSharedSettings = {
-    translationPrecision: 1,
-    resizePrecision: 1,
-    linePointPosPrecision: 0.001,
-    linePointDistancePrecision: 0.1,
-    axisAlignedPosPrecision: 0.001,
-    rotationPrecision: 1
-};
-
-/**
- * Default diagram configuration
- */
-export const defaultDiagramConfig = {
-    lightPrimaryColor: "#000000",
-    lightBackgroundColor: "#ffffff",
-    darkPrimaryColor: "#ffffff",
-    darkBackgroundColor: "#1e1e1e",
-    enableFontSubsetting: true,
-    enableExternalFonts: false
-};
-
-/**
- * Default editor configuration
- */
-export const defaultEditorConfig = {
-    toolboxEnabled: true,
-    snappingEnabled: true,
-    gridEnabled: true
-};
 
 /**
  * A plugin that provides a language client for the SyncScript language.
