@@ -28,7 +28,7 @@ import {
 import { createContainer, DiagramServerProxy, ResetCanvasBoundsAction, TYPES } from "@hylimo/diagram-ui";
 import { Root } from "@hylimo/diagram-common";
 import { onMounted } from "vue";
-import { type EditorAppConfig, MonacoEditorLanguageClientWrapper } from "monaco-editor-wrapper";
+import { EditorApp, type EditorAppConfig } from "monaco-languageclient/editorApp";
 import { shallowRef } from "vue";
 import { inject } from "vue";
 import { language } from "../theme/lspPlugin";
@@ -120,8 +120,6 @@ onKeyDown(
 
 onMounted(async () => {
     const currentLanguageClient = await languageClient.value;
-    const wrapper = new MonacoEditorLanguageClientWrapper();
-    disposables.value.push(wrapper);
     const editorAppConfig: EditorAppConfig = {
         editorOptions: {
             language,
@@ -148,32 +146,28 @@ onMounted(async () => {
         },
         overrideAutomaticLayout: false
     };
-    await wrapper.initAndStart({
-        $type: "classic",
-        htmlContainer: editorElement.value!,
-        editorAppConfig,
-        vscodeApiConfig: {
-            vscodeApiInitPerformExternally: true
-        }
-    });
 
-    const monacoEditor = wrapper.getEditor()!;
+    const editorApp = new EditorApp(editorAppConfig);
+    disposables.value.push(editorApp);
+    await editorApp.start(editorElement.value!);
+
+    const monacoEditor = editorApp.getEditor()!;
     monacoEditor.layout();
     editor.value = monacoEditor;
     hideMainContent.value = false;
 
-    wrapper.updateCodeResources;
-    editorModel.value = monacoEditor.getModel()!;
-    const pushStackElement = editorModel.value.pushStackElement.bind(editorModel.value);
+    const editorModelValue = monacoEditor.getModel()!;
+    editorModel.value = editorModelValue;
+    const pushStackElement = editorModelValue.pushStackElement.bind(editorModel.value);
 
     // override pushStackElement to ignore undo stops during transactions
-    editorModel.value.pushStackElement = () => {
+    editorModelValue.pushStackElement = () => {
         if (transactionState.value == TransactionState.None) {
             pushStackElement();
         }
     };
 
-    editorModel.value.onDidChangeContent(() => {
+    editorModelValue.onDidChangeContent(() => {
         model.value = monacoEditor.getValue();
         if (transactionState.value == TransactionState.Committed) {
             // it's important to do this here, as by this, the undo stop before applying the last update is still ignored,

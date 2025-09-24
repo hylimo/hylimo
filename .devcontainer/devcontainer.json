@@ -1,0 +1,14 @@
+{
+    "name": "Node.js",
+    "image": "mcr.microsoft.com/devcontainers/javascript-node:22-bookworm",
+    "forwardPorts": [5173],
+    "postCreateCommand": "npm ci && npm run build",
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "esbenp.prettier-vscode",
+                "Vue.volar"
+            ]
+        }
+    }
+}

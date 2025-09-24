@@ -22,11 +22,9 @@ import { useData } from "vitepress";
 import { useLocalStorage, throttledWatch } from "@vueuse/core";
 import monacoEditorWorker from "monaco-editor/esm/vs/editor/editor.worker?worker";
 import { languageServerConfigKey, languageClientKey, diagramIdProviderKey } from "./injectionKeys";
-import { ConsoleLogger } from "monaco-languageclient/tools";
-import { augmentVscodeApiConfig, checkServiceConsistency } from "monaco-editor-wrapper/vscode/services";
 import { useWorkerFactory } from "monaco-languageclient/workerFactory";
 import { LogLevel } from "@codingame/monaco-vscode-api";
-import { initServices } from "monaco-languageclient/vscode/services";
+import { MonacoVscodeApiWrapper, type MonacoVscodeApiConfig } from "monaco-languageclient/vscodeApiWrapper";
 import { defaultDiagramConfig, defaultEditorConfig, defaultSharedSettings } from "./defaultSettings";
 
 /**
@@ -174,6 +172,25 @@ async function setupLanguageClient(isDark: boolean) {
     const reader = new BrowserMessageReader(worker);
     const writer = new BrowserMessageWriter(worker);
 
+    const vscodeApiConfig: MonacoVscodeApiConfig = {
+        $type: "classic",
+        viewsConfig: {
+            $type: "EditorService",
+            htmlContainer: undefined as any
+        },
+        logLevel: LogLevel.Warning,
+        monacoWorkerFactory: () => {
+            useWorkerFactory({
+                workerLoaders: {
+                    TextEditorWorker: () => new monacoEditorWorker()
+                }
+            })
+        }
+    };
+    const vscodeApi = new MonacoVscodeApiWrapper(vscodeApiConfig);
+    await vscodeApi.start();
+
+    /*
     const vscodeApiConfig = await augmentVscodeApiConfig("classic", {
         vscodeApiConfig: {},
         logLevel: LogLevel.Warning
@@ -181,15 +198,11 @@ async function setupLanguageClient(isDark: boolean) {
     await initServices(vscodeApiConfig, {
         caller: "website",
         performServiceConsistencyChecks: checkServiceConsistency,
-        monacoWorkerFactory: () => {
-            useWorkerFactory({
-                workerLoaders: {
-                    TextEditorWorker: () => new monacoEditorWorker()
-                }
-            });
+        monacoWorkerFactory: );
         },
         logger: new ConsoleLogger(LogLevel.Warning)
     });
+    */
 
     monaco.languages.register({ id: language });
     monaco.languages.setLanguageConfiguration(language, languageConfiguration);
