@@ -176,7 +176,7 @@ async function setupLanguageClient(isDark: boolean) {
         $type: "classic",
         viewsConfig: {
             $type: "EditorService",
-            htmlContainer: undefined as any
+            htmlContainer: undefined as any // necessary, as we don't have this here yet (and is not used as we use classic mode)
         },
         logLevel: LogLevel.Warning,
         monacoWorkerFactory: () => {
@@ -184,25 +184,11 @@ async function setupLanguageClient(isDark: boolean) {
                 workerLoaders: {
                     TextEditorWorker: () => new monacoEditorWorker()
                 }
-            })
+            });
         }
     };
     const vscodeApi = new MonacoVscodeApiWrapper(vscodeApiConfig);
     await vscodeApi.start();
-
-    /*
-    const vscodeApiConfig = await augmentVscodeApiConfig("classic", {
-        vscodeApiConfig: {},
-        logLevel: LogLevel.Warning
-    });
-    await initServices(vscodeApiConfig, {
-        caller: "website",
-        performServiceConsistencyChecks: checkServiceConsistency,
-        monacoWorkerFactory: );
-        },
-        logger: new ConsoleLogger(LogLevel.Warning)
-    });
-    */
 
     monaco.languages.register({ id: language });
     monaco.languages.setLanguageConfiguration(language, languageConfiguration);

@@ -5,10 +5,7 @@
     "postCreateCommand": "npm ci && npm run build",
     "customizations": {
         "vscode": {
-            "extensions": [
-                "esbenp.prettier-vscode",
-                "Vue.volar"
-            ]
+            "extensions": ["esbenp.prettier-vscode", "Vue.volar"]
         }
     }
 }
