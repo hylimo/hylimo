@@ -15,6 +15,7 @@ import { assertBoolean, assertFunction, assertNumber, assertString, isBoolean } 
 import { numberType } from "../../types/number.js";
 import { optional } from "../../types/null.js";
 import type { ExecutableListEntry } from "../../runtime/ast/executableListEntry.js";
+import { stringType } from "../../types/string.js";
 
 /**
  * Name of the temporary field where the list prototype is assigned
@@ -249,6 +250,31 @@ export const listModule = InterpreterModule.create(
                     }
                 )
             ),
+            id(listProto).assignField(
+                "join",
+                fun(
+                    `
+                        this.res = ""
+                        this.sep = it ?? ","
+                        args.self.forEach {
+                            (value, index) = args
+                            if(index > 0) {
+                                res = res + sep
+                            }
+                            res = res + value
+                        }
+                        this.res
+                    `,
+                    {
+                        docs: "Joins the entries of a list into a string.",
+                        params: [
+                            [SemanticFieldNames.SELF, "the list of which the entries are joined", listType()],
+                            [0, "the optional separator to use, defaults to ','", optional(stringType)]
+                        ],
+                        returns: "A string with all entries joined"
+                    }
+                )
+            ),
             id(SemanticFieldNames.IT).assignField(
                 "list",
                 native(
@@ -333,10 +359,11 @@ export const listModule = InterpreterModule.create(
                         const maxDepth = maxDepthObject.isNull ? 4 : assertNumber(maxDepthObject);
                         const fields: string[] = [];
                         for (let i = 0; i < length; i++) {
-                            const next = self.getField(i, context).value;
-                            const nextCall = next.getFieldValue("toString", context);
+                            const next = self.getField(i, context);
+                            const nextValue = next.value;
+                            const nextCall = nextValue.getFieldValue("toString", context);
                             if (nextCall.isNull) {
-                                fields.push(next.toString(context, maxDepth - 1));
+                                fields.push(nextValue.toString(context, maxDepth - 1));
                             } else {
                                 if (maxDepth < 0) {
                                     fields.push("<too deeply nested element>");
@@ -344,10 +371,14 @@ export const listModule = InterpreterModule.create(
                                     assertFunction(
                                         nextCall,
                                         () =>
-                                            `'toString()' is expected to be a function for ${next.toString(context, maxDepth - 1)}`
+                                            `'toString()' is expected to be a function for ${nextValue.toString(context, maxDepth - 1)}`
                                     );
                                     const resultingString = nextCall.invoke(
                                         [
+                                            {
+                                                name: SemanticFieldNames.SELF,
+                                                value: new ExecutableConstExpression(next)
+                                            },
                                             {
                                                 name: "maxDepth",
                                                 value: new ExecutableConstExpression({
@@ -364,7 +395,7 @@ export const listModule = InterpreterModule.create(
                                         assertString(
                                             resultingString.value,
                                             () =>
-                                                `Output of 'toString()' for ${next.toString(context, maxDepth - 1)} is not a string`
+                                                `Output of 'toString()' for ${nextValue.toString(context, maxDepth - 1)} is not a string`
                                         )
                                     );
                                 }
