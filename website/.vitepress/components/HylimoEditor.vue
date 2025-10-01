@@ -134,8 +134,7 @@ onMounted(async () => {
                 alwaysConsumeMouseWheel: false
             },
             glyphMargin: false,
-            // @ts-expect-error (outdated types due to @codingame/monaco-vscode-api) disable to prevent / to open the search bar
-            experimentalEditContextEnabled: false
+            editContext: false
         },
         codeResources: {
             modified: {

@@ -173,6 +173,7 @@ html {
     --diagram-layout-color-selected: var(--vp-c-brand-1);
     --diagram-layout-color-snap: var(--vp-c-green-2);
     --diagram-grid: #bbb;
+    --editor-background: #ffffff;
     --toolbox-background: var(--vp-c-bg);
     --toolbox-primary: var(--vp-c-brand-1);
     --toolbox-box-shadow: var(--vp-shadow-4);
@@ -186,6 +187,7 @@ html {
     --diagram-layout-color: #dadde1;
     --diagram-layout-color-snap: var(--vp-c-warning-2);
     --diagram-grid: #444;
+    --editor-background: #1e1e1e;
     --toolbox-background: var(--vp-c-bg-alt);
 }
 

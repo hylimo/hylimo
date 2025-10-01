@@ -28,5 +28,6 @@ defineProps({
     border: 1px solid var(--vp-c-border);
     overflow: hidden;
     padding-top: 12px;
+    background: var(--editor-background);
 }
 </style>
