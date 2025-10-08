@@ -176,7 +176,6 @@ async function setupLanguageClient(isDark: boolean) {
         $type: "classic",
         viewsConfig: {
             $type: "EditorService",
-            htmlContainer: undefined as any // necessary, as we don't have this here yet (and is not used as we use classic mode)
         },
         logLevel: LogLevel.Warning,
         monacoWorkerFactory: () => {
