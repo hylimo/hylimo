@@ -175,7 +175,7 @@ async function setupLanguageClient(isDark: boolean) {
     const vscodeApiConfig: MonacoVscodeApiConfig = {
         $type: "classic",
         viewsConfig: {
-            $type: "EditorService",
+            $type: "EditorService"
         },
         logLevel: LogLevel.Warning,
         monacoWorkerFactory: () => {
