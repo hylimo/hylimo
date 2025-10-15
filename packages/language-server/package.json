@@ -1,6 +1,6 @@
 {
     "name": "@hylimo/language-server",
-    "version": "2.0.0",
+    "version": "2.1.0",
     "license": "MIT",
     "type": "module",
     "repository": {
@@ -18,10 +18,10 @@
         "build": "tsc"
     },
     "dependencies": {
-        "@hylimo/core": "^2.0.0",
-        "@hylimo/diagram": "^2.0.0",
-        "@hylimo/diagram-common": "^2.0.0",
-        "@hylimo/diagram-protocol": "^2.0.0",
+        "@hylimo/core": "^2.1.0",
+        "@hylimo/diagram": "^2.1.0",
+        "@hylimo/diagram-common": "^2.1.0",
+        "@hylimo/diagram-protocol": "^2.1.0",
         "chevrotain": "^11.0.3",
         "jsonata": "^2.1.0",
         "prettier": "^3.6.2",
