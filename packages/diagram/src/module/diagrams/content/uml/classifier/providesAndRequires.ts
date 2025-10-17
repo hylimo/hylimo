@@ -1,4 +1,4 @@
-import { fun, id, numberType, object, objectType, optional, or, stringType } from "@hylimo/core";
+import { fun, id, num, numberType, object, objectType, optional, or, stringType } from "@hylimo/core";
 import { LinePointLayoutConfig } from "../../../../../layout/elements/canvas/linePointLayoutConfig.js";
 import { SCOPE } from "../../../../base/dslModule.js";
 import { canvasContentType } from "../../../../base/types.js";
@@ -53,7 +53,7 @@ export const providesAndRequiresModule = ContentModule.create(
                                         if(target == null) {
                                             target = canvasScope.lpos(element, pos, interfaceArgs.dist)
                                             if(interfaceArgs.dist == null) {
-                                                target._distance = 100
+                                                target._distance = scope.internal.config.providesDistance
                                             }
                                         } {
                                             target = canvasScope.rpos(target)
@@ -133,7 +133,7 @@ export const providesAndRequiresModule = ContentModule.create(
                                         if(target == null) {
                                             target = canvasScope.lpos(element, pos, interfaceArgs.dist)
                                             if(interfaceArgs.dist == null) {
-                                                target._distance = 100
+                                                target._distance = scope.internal.config.requiresDistance
                                             }
                                         } {
                                             target = canvasScope.rpos(target)
@@ -282,5 +282,9 @@ export const providesAndRequiresModule = ContentModule.create(
                 }
             }
         `
+    ],
+    [
+        ["providesDistance", "Default distance of provided interfaces to the classifier outline", numberType, num(100)],
+        ["requiresDistance", "Default distance of required interfaces to the classifier outline", numberType, num(100)]
     ]
 );

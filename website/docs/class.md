@@ -283,3 +283,10 @@ The following operators are supported:
 - `--!` for an association not-navigatable in one direction
 - `-->` for an association navigatable in one direction
 - ... and several combinations of the above, e.g, `!--!`, `*-->`, ...
+
+## Config properties
+
+The following config properties are available for class diagrams:
+|Variable|Meaning|Default value (in pixels)|Comment|
+|--------|-------|-------------------------|-------|
+|`abstractAsProperty`| Whether to show { abstract } after the name of abstract classes | false |-|
