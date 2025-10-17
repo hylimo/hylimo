@@ -38,6 +38,10 @@ export class SText extends SLayoutedElement implements Text, LinearAnimatable {
      */
     fontStyle!: FontStyle;
     /**
+     * The font feature settings to use, if any
+     */
+    fontFeatureSettings?: string[];
+    /**
      * The underline to apply to the text, if any
      */
     underline?: TextLine;

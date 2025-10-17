@@ -141,7 +141,8 @@ export class PDFDiagramVisitor extends SimplifiedDiagramVisitor<PDFKit.PDFDocume
         context.fillOpacity(fillAttributes["fill-opacity"] ?? 1);
         context.text(element.text, element.x, element.y, {
             lineBreak: false,
-            baseline: "alphabetic"
+            baseline: "alphabetic",
+            features: element.fontFeatureSettings as any[] | undefined
         });
         this.visitChildren(element, context);
     }

@@ -1,5 +1,5 @@
 import type { FullObject } from "@hylimo/core";
-import { booleanType, enumType, nullType, numberType, or, stringType } from "@hylimo/core";
+import { booleanType, enumType, listType, nullType, numberType, or, stringType } from "@hylimo/core";
 import type { Element, Point, Size } from "@hylimo/diagram-common";
 import { FontStyle, FontWeight } from "@hylimo/diagram-common";
 import type { LayoutElement, SizeConstraints } from "../layoutElement.js";
@@ -37,6 +37,11 @@ export class SpanLayoutConfig extends ElementLayoutConfig {
                     name: "fontStyle",
                     description: 'optional font style, if given must be either "normal" or "italic"',
                     type: enumType(FontStyle)
+                },
+                {
+                    name: "fontFeatureSettings",
+                    description: "optional font feature settings, must be a list of strings",
+                    type: listType(stringType)
                 },
                 {
                     name: "underline",

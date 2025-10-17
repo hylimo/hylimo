@@ -221,7 +221,7 @@ class SVGDiagramVisitor extends SimplifiedDiagramVisitor<SVGRendererContext, SVG
      */
     private renderTextAsPath(context: SVGRendererContext, element: SimplifiedText): SVGNode {
         const font = context.getFont(element.fontFamily);
-        const glyphRun = font.layout(element.text);
+        const glyphRun = font.layout(element.text, element.fontFeatureSettings);
         let offset = 0;
         const paths: string[] = [];
         for (const glyph of glyphRun.glyphs) {
@@ -247,13 +247,15 @@ class SVGDiagramVisitor extends SimplifiedDiagramVisitor<SVGRendererContext, SVG
      * @returns the svg node representing the text
      */
     private renderTextAsText(element: SimplifiedText): SVGNode {
+        const fontFeatureSettings = element.fontFeatureSettings?.map((feature) => `"${feature}"`).join(", ");
         return {
             type: "text",
             children: [element.text],
             ...extractLayoutAttributes(element),
             ...extractFillAttributes(element),
             "font-family": element.fontFamily,
-            "font-size": element.fontSize
+            "font-size": element.fontSize,
+            style: fontFeatureSettings != undefined ? `font-feature-settings: ${fontFeatureSettings}` : ""
         };
     }
 

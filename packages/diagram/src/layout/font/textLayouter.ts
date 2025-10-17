@@ -6,6 +6,7 @@ import { Text, FontWeight, FontStyle } from "@hylimo/diagram-common";
 import type { FontCollection } from "./fontCollection.js";
 import { extractFillStyleAttributes } from "../elements/attributes.js";
 import type { Font } from "fontkit";
+import { nativeToList } from "@hylimo/core";
 
 /**
  * Result of a text layout process
@@ -60,6 +61,10 @@ interface TextContext {
      * The scaling factor applied to font design units
      */
     scalingFactor: number;
+    /**
+     * Parsed font feature settings, if any
+     */
+    fontFeatureSettings: string[] | undefined;
 }
 
 /**
@@ -163,10 +168,12 @@ class TextLayoutInstance {
             styles.fontStyle ?? FontStyle.Normal
         );
         const scalingFactor = styles.fontSize / font.unitsPerEm;
-        this.currentTextContext = { styles, fontFamily, font, scalingFactor };
+        const fontFeatureSettings =
+            styles.fontFeatureSettings != undefined ? nativeToList(styles.fontFeatureSettings) : undefined;
+        this.currentTextContext = { styles, fontFamily, font, scalingFactor, fontFeatureSettings };
         this.fontAscent = scalingFactor * (font.ascent + font.lineGap / 2);
         this.fontDescent = scalingFactor * (-font.descent + font.lineGap / 2);
-        const glyphRun = font.layout(textContent);
+        const glyphRun = font.layout(textContent, fontFeatureSettings);
         let textContentStart = 0;
         let textContentOffset = 0;
         let lastBreakOpportunityTextContentOffset = 0;
@@ -246,7 +253,7 @@ class TextLayoutInstance {
      * @param width the width of the text element
      */
     private addTextElement(text: string) {
-        const { styles, fontFamily } = this.currentTextContext!;
+        const { styles, fontFamily, fontFeatureSettings } = this.currentTextContext!;
         this.usedWidth = Math.max(this.usedWidth, this.offsetX);
         this.currentAscent = Math.max(this.currentAscent, this.fontAscent);
         this.currentDescent = Math.max(this.currentDescent, this.fontDescent);
@@ -257,6 +264,7 @@ class TextLayoutInstance {
             ...extractFillStyleAttributes(styles),
             fontFamily,
             fontSize: styles.fontSize,
+            fontFeatureSettings,
             underline: width > 0 ? this.extractUnderline() : undefined,
             strikethrough: width > 0 ? this.extractStrikethrough() : undefined,
             id: "",

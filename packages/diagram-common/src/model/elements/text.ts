@@ -29,6 +29,10 @@ export interface Text extends LayoutedElement, FilledElement {
      * The strikethrough to apply to the text, if any
      */
     strikethrough?: TextLine;
+    /**
+     * The font feature settings to use, if any
+     */
+    fontFeatureSettings?: string[];
 }
 
 /**
