@@ -7,20 +7,19 @@ import { ContentModule } from "../../contentModule.js";
 export const defaultTitleModule = ContentModule.create(
     "uml/classifier/defaultTitle",
     [],
-    [],
+    ["uml/keywords"],
     `
         scope.internal.defaultTitle = {
             (name, keywords, abstract) = args
             this.contents = list()
             if(keywords != null) {
-                keywords.forEach {
-                    contents += text(
-                        contents = list(span(text = "\\u00AB" + it + "\\u00BB")),
-                        class = list("keyword")
-                    )
-                }
+                scope.internal.renderKeywords(keywords, contents)
             }
-            this.title = list(span(text = name, class = list("title")))
+            this.title = if(isString(name)) {
+                name = list(span(text = name, class = list("title")))
+            } {
+                name
+            }
             if ((abstract == true) && scope.internal.config.abstractAsProperty) {
                 title += span(text = " {abstract}")
             }

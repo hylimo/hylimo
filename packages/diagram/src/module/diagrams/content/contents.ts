@@ -34,6 +34,7 @@ import type { ContentModule } from "./contentModule.js";
 import { importedParticipantsModule } from "./uml/sequence/importedParticipants.js";
 import { registerClassifierModule } from "./uml/sequence/registerClassifier.js";
 import { participantModule } from "./uml/sequence/participant.js";
+import { keywordsModule } from "./uml/keywords.js";
 
 /**
  * All content modules
@@ -61,6 +62,7 @@ export const contents: ContentModule[] = [
     importedParticipantsModule,
     instanceModule,
     interfaceModule,
+    keywordsModule,
     lostFoundMessageModule,
     nonNavigableAssociationsModule,
     packageModule,

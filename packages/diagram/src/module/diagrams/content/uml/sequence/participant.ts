@@ -1,6 +1,7 @@
-import { fun, functionType, id, listType, object, optional, or, str, stringType } from "@hylimo/core";
+import { fun, functionType, id, listType, object, optional, or, str } from "@hylimo/core";
 import { SCOPE } from "../../../../base/dslModule.js";
 import { ContentModule } from "../../contentModule.js";
+import { stringOrSpanListType } from "../../../../base/types.js";
 
 /**
  * Module providing the participant for UML sequence diagrams.
@@ -36,11 +37,15 @@ export const participantModule = ContentModule.create(
                             [
                                 0,
                                 "the optional name of the participant, if not given, the second parameter must be provided",
-                                optional(stringType)
+                                optional(stringOrSpanListType)
                             ],
-                            [1, "the optional class name of this participant", optional(or(stringType, functionType))],
+                            [
+                                1,
+                                "the optional class name of this participant",
+                                optional(or(stringOrSpanListType, functionType))
+                            ],
                             [2, "the callback function of this participant", optional(functionType)],
-                            ["keywords", "the keywords of the participant", optional(listType(stringType))]
+                            ["keywords", "the keywords of the participant", optional(listType(stringOrSpanListType))]
                         ],
                         snippet: `("$1") {\n    $2\n}`,
                         returns: "The created participant"

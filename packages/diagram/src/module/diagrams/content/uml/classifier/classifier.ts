@@ -52,7 +52,9 @@ export const classifierModule = ContentModule.create(
                                 classifierArgs.args,
                                 canvasScope
                             )
-                            scope.internal.registerInDiagramScope(name, classifierElement)
+                            if(isString(name)) {
+                                scope.internal.registerInDiagramScope(name, classifierElement)
+                            }
 
                             callback.callWithScope(result)
 

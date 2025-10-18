@@ -1,4 +1,4 @@
-import { assign, fun, id, str, stringType } from "@hylimo/core";
+import { assign, fun, id, str } from "@hylimo/core";
 import {
     createToolboxEditExpression,
     PREDICTION_STYLE_CLASS_ASSIGNMENT_EXPRESSION,
@@ -6,6 +6,7 @@ import {
 } from "../../../base/dslModule.js";
 import { ContentModule } from "../contentModule.js";
 import { connectionEditFragments } from "../base/canvasConnection.js";
+import { stringOrSpanListType } from "../../../base/types.js";
 
 /**
  * Module providing the comment element
@@ -19,7 +20,10 @@ export const commentModule = ContentModule.create(
             "_comment",
             fun(
                 `
-                    textContent = it
+                    this.textContent = it
+                    if(isString(textContent)) {
+                        textContent = list(span(text = textContent))
+                    }
                     commentElement = canvasElement(
                         contents = list(
                             path(path = "M0 0 H 1", vAlign = "top", class = list("comment-top")),
@@ -34,7 +38,7 @@ export const commentModule = ContentModule.create(
                                         vAlign = "top",
                                         class = list("comment-triangle")
                                     ),
-                                    text(contents = list(span(text = textContent)), class = list("comment"))
+                                    text(contents = textContent, class = list("comment"))
                                 )
                             )
                         ),
@@ -57,7 +61,7 @@ export const commentModule = ContentModule.create(
                 `,
                 {
                     docs: "Creates a comment.",
-                    params: [[0, "the content of the comment", stringType]],
+                    params: [[0, "the content of the comment", stringOrSpanListType]],
                     snippet: `("$1")`,
                     returns: "The created comment"
                 }

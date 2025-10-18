@@ -1,6 +1,7 @@
-import { booleanType, fun, functionType, id, listType, object, optional, str, stringType } from "@hylimo/core";
+import { booleanType, fun, functionType, id, listType, object, optional, str } from "@hylimo/core";
 import { PREDICTION_STYLE_CLASS_ASSIGNMENT_EXPRESSION, SCOPE } from "../../../base/dslModule.js";
 import { ContentModule } from "../contentModule.js";
+import { stringOrSpanListType } from "../../../base/types.js";
 
 /**
  * Module providing the component element
@@ -49,9 +50,9 @@ export const componentModule = ContentModule.create(
                     {
                         docs: "Creates a component.",
                         params: [
-                            [0, "the name of the component", stringType],
+                            [0, "the name of the component", stringOrSpanListType],
                             [1, "the function defining the component content", optional(functionType)],
-                            ["keywords", "the keywords of the component", optional(listType(stringType))],
+                            ["keywords", "the keywords of the component", optional(listType(stringOrSpanListType))],
                             ["abstract", "whether the component is abstract", optional(booleanType)]
                         ],
                         snippet: `("$1") {\n    $2\n}`,

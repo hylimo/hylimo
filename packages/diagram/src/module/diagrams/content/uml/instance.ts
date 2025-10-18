@@ -1,6 +1,7 @@
-import { fun, functionType, id, listType, object, optional, or, str, stringType } from "@hylimo/core";
+import { fun, functionType, id, listType, object, optional, or, str } from "@hylimo/core";
 import { SCOPE } from "../../../base/dslModule.js";
 import { ContentModule } from "../contentModule.js";
+import { stringOrSpanListType } from "../../../base/types.js";
 
 /**
  * Module providing the UML 'instance' function for object/sequence diagrams
@@ -32,8 +33,24 @@ export const instanceModule = ContentModule.create(
                 this.title = name ?? ""
                 name = name ?? class
                 if(class != null) {
-                    if(isString(class)) {
-                        title = title + ":" + class
+                    if(isString(class) || isObject(class)) {
+                        title = if(isString(title) && isString(class)) {
+                            title + ":" + class
+                        } {
+                            this.contents = list()
+                            if(isString(title)) {
+                                contents += span(text = title, class = list("title"))
+                            } {
+                                contents.addAll(title)
+                            }
+                            contents += span(text = ":", class = list("title"))
+                            if(isString(class)) {
+                                contents += span(text = class, class = list("title"))
+                            } {
+                                contents.addAll(class)
+                            }
+                            contents
+                        }
                     } {
                         if(callback != null) {
                             error("Both the class name and body of instance '\${name}' are set to functions which is not allowed. Either provide a class name string as second argument, or pass at most two arguments")
@@ -60,11 +77,15 @@ export const instanceModule = ContentModule.create(
                             [
                                 0,
                                 "the optional name of the instance, if not given, the second parameter must be provided",
-                                optional(stringType)
+                                optional(stringOrSpanListType)
                             ],
-                            [1, "the optional class name of this instance", optional(or(stringType, functionType))],
+                            [
+                                1,
+                                "the optional class name of this instance",
+                                optional(or(stringOrSpanListType, functionType))
+                            ],
                             [2, "the callback function of this instance", optional(functionType)],
-                            ["keywords", "the keywords of the instance", optional(listType(stringType))]
+                            ["keywords", "the keywords of the instance", optional(listType(stringOrSpanListType))]
                         ],
                         snippet: `("$1") {\n    $2\n}`,
                         returns: "The created instance"

@@ -1,6 +1,7 @@
-import { booleanType, fun, functionType, id, listType, object, optional, str, stringType } from "@hylimo/core";
+import { booleanType, fun, functionType, id, listType, object, optional, str } from "@hylimo/core";
 import { SCOPE } from "../../../base/dslModule.js";
 import { ContentModule } from "../contentModule.js";
+import { stringOrSpanListType } from "../../../base/types.js";
 
 /**
  * Module providing the interface element
@@ -43,9 +44,9 @@ export const interfaceModule = ContentModule.create(
                     {
                         docs: "Creates an interface.",
                         params: [
-                            [0, "the name of the interface", stringType],
+                            [0, "the name of the interface", stringOrSpanListType],
                             [1, "the callback function for the interface", optional(functionType)],
-                            ["keywords", "the keywords of the interface", optional(listType(stringType))],
+                            ["keywords", "the keywords of the interface", optional(listType(stringOrSpanListType))],
                             ["abstract", "whether the interface is abstract", optional(booleanType)]
                         ],
                         snippet: `("$1") {\n    $2\n}`,

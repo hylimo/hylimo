@@ -1,6 +1,7 @@
-import { fun, functionType, id, listType, object, optional, or, str, stringType } from "@hylimo/core";
+import { fun, functionType, id, listType, object, optional, or, str } from "@hylimo/core";
 import { SCOPE } from "../../../base/dslModule.js";
 import { ContentModule } from "../contentModule.js";
+import { stringOrSpanListType } from "../../../base/types.js";
 
 /**
  * SVG path to draw a stickman with a head, two arms, and two legs.<br>
@@ -15,14 +16,21 @@ const stickmanIconPath =
 export const actorModule = ContentModule.create(
     "uml/actor",
     ["uml/instance"],
-    [],
+    ["uml/keywords"],
     [
         `
             scope.internal.createActor = {
-                (name) = args
+                (name, keywords) = args
                 elements = list(path(path = "${stickmanIconPath}", stretch = "uniform", class = list("actor-icon")))
+                if(keywords != null) {
+                    scope.internal.renderKeywords(keywords, elements)
+                }
                 if(name != null) {
-                    elements += text(contents = list(span(text = name)))
+                    elements += text(contents = if(isString(name)) {
+                        list(span(text = name))
+                    } {
+                        name
+                    })
                 }
 
                 actorElement = canvasElement(
@@ -35,7 +43,7 @@ export const actorModule = ContentModule.create(
                     class = list("actor-element")
                 )
 
-                if(name != null) {
+                if(isString(name)) {
                     scope.internal.registerInDiagramScope(name, actorElement)
                 }
 
@@ -67,16 +75,20 @@ export const actorModule = ContentModule.create(
                             )
                             actor
                         } {
-                            scope.internal.createActor(title, args = actorArgs)
+                            scope.internal.createActor(title, actorArgs.keywords, args = actorArgs)
                         }
                     `,
                     {
                         docs: "Creates an actor.",
                         params: [
-                            [0, "the name of the actor", stringType],
-                            [1, "the optional class name of this actor", optional(or(stringType, functionType))],
+                            [0, "the name of the actor", stringOrSpanListType],
+                            [
+                                1,
+                                "the optional class name of this actor",
+                                optional(or(stringOrSpanListType, functionType))
+                            ],
                             [2, "the callback function of this actor", optional(functionType)],
-                            ["keywords", "the keywords of the actor", optional(listType(stringType))]
+                            ["keywords", "the keywords of the actor", optional(listType(stringOrSpanListType))]
                         ],
                         snippet: `("$1")`,
                         returns: "The created actor"

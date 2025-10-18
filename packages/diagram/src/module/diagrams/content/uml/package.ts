@@ -1,6 +1,7 @@
-import { assign, fun, functionType, id, listType, object, optional, str, stringType } from "@hylimo/core";
+import { assign, fun, functionType, id, listType, object, optional, str } from "@hylimo/core";
 import { SCOPE } from "../../../base/dslModule.js";
 import { ContentModule } from "../contentModule.js";
+import { stringOrSpanListType } from "../../../base/types.js";
 
 /**
  * Module providing the package element
@@ -60,9 +61,9 @@ export const packageModule = ContentModule.create(
                     {
                         docs: "Creates a package.",
                         params: [
-                            [0, "the name of the package", stringType],
+                            [0, "the name of the package", stringOrSpanListType],
                             [1, "function that initializes the package content", optional(functionType)],
-                            ["keywords", "the keywords of the package", optional(listType(stringType))]
+                            ["keywords", "the keywords of the package", optional(listType(stringOrSpanListType))]
                         ],
                         snippet: `("$1") {\n    $2\n}`,
                         returns: "The created package"

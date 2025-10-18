@@ -1,6 +1,7 @@
-import { booleanType, fun, functionType, id, listType, object, optional, str, stringType } from "@hylimo/core";
+import { booleanType, fun, functionType, id, listType, object, optional, str } from "@hylimo/core";
 import { SCOPE } from "../../../base/dslModule.js";
 import { ContentModule } from "../contentModule.js";
+import { stringOrSpanListType } from "../../../base/types.js";
 
 /**
  * Module providing the enum element
@@ -45,9 +46,9 @@ export const enumModule = ContentModule.create(
                     {
                         docs: "Creates an enum.",
                         params: [
-                            [0, "the name of the enum", stringType],
+                            [0, "the name of the enum", stringOrSpanListType],
                             [1, "the function declaring the enum constants", optional(functionType)],
-                            ["keywords", "the keywords of the enum", optional(listType(stringType))],
+                            ["keywords", "the keywords of the enum", optional(listType(stringOrSpanListType))],
                             ["abstract", "whether the enum is abstract", optional(booleanType)]
                         ],
                         snippet: `("$1") {\n    entries {\n        $2\n    }\n}`,

@@ -1,5 +1,5 @@
 import type { Type } from "@hylimo/core";
-import { literal, namedType, objectType, or } from "@hylimo/core";
+import { listType, literal, namedType, objectType, or, stringType } from "@hylimo/core";
 import {
     AbsolutePoint,
     Canvas,
@@ -48,3 +48,8 @@ export const canvasContentType = elementType(
  * Type for any simple element which can e.g. be used inside a rect or container
  */
 export const simpleElementType = elementType(Canvas.TYPE, Text.TYPE, Rect.TYPE, Ellipse.TYPE, Path.TYPE, "container");
+
+/**
+ * Type for either a string or a list of span elements
+ */
+export const stringOrSpanListType = or(stringType, listType(elementType("span")));

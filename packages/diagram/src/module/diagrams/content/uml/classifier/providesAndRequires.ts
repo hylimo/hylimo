@@ -1,7 +1,7 @@
-import { fun, id, num, numberType, object, objectType, optional, or, stringType } from "@hylimo/core";
+import { fun, id, num, numberType, object, objectType, optional, or } from "@hylimo/core";
 import { LinePointLayoutConfig } from "../../../../../layout/elements/canvas/linePointLayoutConfig.js";
 import { SCOPE } from "../../../../base/dslModule.js";
-import { canvasContentType } from "../../../../base/types.js";
+import { canvasContentType, stringOrSpanListType } from "../../../../base/types.js";
 import { ContentModule } from "../../contentModule.js";
 
 /**
@@ -44,7 +44,7 @@ export const providesAndRequiresModule = ContentModule.create(
                                 fun(
                                     `
                                         (name, pos, target) = args
-                                        if(!(isString(name))) {
+                                        if(!(isString(name) || isObject(name))) {
                                             target = pos
                                             pos = name
                                             name = null
@@ -77,12 +77,16 @@ export const providesAndRequiresModule = ContentModule.create(
                                         )
                                         interfaceConnection.contents[0]._verticalPos = 1
                                         if(name != null) {
-                                            scope.internal.registerInDiagramScope(name, interfaceConnection)
+                                            if(isString(name)) {
+                                                scope.internal.registerInDiagramScope(name, interfaceConnection)
+                                                name = list(span(text = name))
+                                            }
+                                            
                                             (xLabelOffset, yLabelOffset) = interfaceArgs.namePos ?? [null, null]
                                             nameLabelPos = canvasScope.rpos(interfaceConnection, xLabelOffset, yLabelOffset)
                                             nameLabelPos.class = list("provided-interface-label-pos")
                                             nameLabel = canvasElement(
-                                                contents = list(text(contents = list(span(text = name)), class = list("label"))),
+                                                contents = list(text(contents = name, class = list("label"))),
                                                 class = list("label-element"),
                                                 pos = nameLabelPos
                                             )
@@ -96,7 +100,7 @@ export const providesAndRequiresModule = ContentModule.create(
                                             [
                                                 0,
                                                 "Name of the provided interface (optional, can be omitted)",
-                                                optional(or(stringType, LinePointLayoutConfig.POS_TYPE))
+                                                optional(or(stringOrSpanListType, LinePointLayoutConfig.POS_TYPE))
                                             ],
                                             [
                                                 1,
@@ -124,7 +128,7 @@ export const providesAndRequiresModule = ContentModule.create(
                                 fun(
                                     `
                                         (name, pos, target) = args
-                                        if(!(isString(name))) {
+                                        if(!(isString(name) || isObject(name))) {
                                             target = pos
                                             pos = name
                                             name = null
@@ -158,12 +162,16 @@ export const providesAndRequiresModule = ContentModule.create(
                                         )
                                         interfaceConnection.contents[0]._verticalPos = 1
                                         if(name != null) {
-                                            scope.internal.registerInDiagramScope(name, interfaceConnection)
+                                            if(isString(name)) {
+                                                scope.internal.registerInDiagramScope(name, interfaceConnection)
+                                                name = list(span(text = name))
+                                            }
+                                            
                                             (xLabelOffset, yLabelOffset) = interfaceArgs.namePos ?? [null, null]
                                             nameLabelPos = canvasScope.rpos(interfaceConnection, xLabelOffset, yLabelOffset)
                                             nameLabelPos.class = list("required-interface-label-pos")
                                             nameLabel = canvasElement(
-                                                contents = list(text(contents = list(span(text = name)), class = list("label"))),
+                                                contents = list(text(contents = name, class = list("label"))),
                                                 class = list("label-element"),
                                                 pos = nameLabelPos
                                             )
@@ -177,7 +185,7 @@ export const providesAndRequiresModule = ContentModule.create(
                                             [
                                                 0,
                                                 "Name of the required interface (optional, can be omitted)",
-                                                optional(or(stringType, LinePointLayoutConfig.POS_TYPE))
+                                                optional(or(stringOrSpanListType, LinePointLayoutConfig.POS_TYPE))
                                             ],
                                             [
                                                 1,
