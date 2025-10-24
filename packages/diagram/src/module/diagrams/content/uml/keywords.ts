@@ -2,6 +2,9 @@ import { fun, id } from "@hylimo/core";
 import { SCOPE } from "../../../base/dslModule.js";
 import { ContentModule } from "../contentModule.js";
 
+/**
+ * Module that provides UML keyword rendering functionality.
+ */
 export const keywordsModule = ContentModule.create(
     "uml/keywords",
     [],

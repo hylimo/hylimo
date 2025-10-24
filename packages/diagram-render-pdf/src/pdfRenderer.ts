@@ -37,13 +37,13 @@ export class PDFRenderer {
      * @param background the background color
      * @returns the svg string
      */
-    async render(root: Root, background: string): Promise<Uint8Array[]> {
+    async render(root: Root, background: string): Promise<Uint8Array<ArrayBuffer>[]> {
         return new Promise(async (resolve, reject) => {
             try {
-                const parts: Uint8Array[] = [];
+                const parts: Uint8Array<ArrayBuffer>[] = [];
                 const document = new PDFDocument({ autoFirstPage: false });
                 const visitor = new PDFDiagramVisitor(this.margin, background);
-                document.on("data", (data: Uint8Array) => parts.push(data));
+                document.on("data", (data: Uint8Array<ArrayBuffer>) => parts.push(data));
                 document.on("end", () => resolve(parts));
                 visitor.visit(root, document);
                 document.end();
