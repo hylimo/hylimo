@@ -20,7 +20,7 @@
     "dependencies": {
         "@hylimo/diagram": "^2.1.0",
         "@hylimo/diagram-common": "^2.1.0",
-        "xmlbuilder2": "^3.1.1"
+        "fast-xml-parser": "^5.3.2"
     },
     "devDependencies": {
         "fontkit": "^2.0.4"

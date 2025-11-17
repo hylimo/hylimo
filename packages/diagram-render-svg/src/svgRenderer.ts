@@ -1,6 +1,7 @@
 import type { Root, Rect, Path, Canvas, Element, Ellipse, SimplifiedText, FontData } from "@hylimo/diagram-common";
 import { convertFontsToCssStyle } from "@hylimo/diagram-common";
 import { SimplifiedDiagramVisitor } from "@hylimo/diagram-common";
+import { XMLBuilder } from "fast-xml-parser";
 import {
     extractFillAttributes,
     extractLayoutAttributes,
@@ -8,8 +9,6 @@ import {
     extractShapeStyleAttributes
 } from "./attributeHelpers.js";
 import type { SimplifiedCanvasElement } from "@hylimo/diagram-common";
-import { create } from "xmlbuilder2";
-import type { XMLBuilder } from "xmlbuilder2/lib/interfaces.js";
 import type { Font } from "fontkit";
 import { createFont } from "@hylimo/diagram";
 
@@ -34,36 +33,70 @@ export class SVGRenderer {
     render(root: Root, textAsPath: boolean): string {
         const visitor = new SVGDiagramVisitor(this.margin, textAsPath);
         const svg = visitor.visit(root, new SVGRendererContext(root))[0];
-        const builder = create();
-        this.toXml(svg, builder);
-        return builder.doc().end({ prettyPrint: true });
+        const xmlObj = this.svgNodeToXmlObject(svg);
+        const builder = new XMLBuilder({
+            ignoreAttributes: false,
+            format: true,
+            suppressEmptyNode: true
+        });
+        return builder.build(xmlObj);
     }
 
     /**
-     * Converts the provided node to xml using the builder
+     * Converts an SVGNode to the object format expected by fast-xml-parser
      *
      * @param node the node to convert
-     * @param builder the builder to use
+     * @returns the xml object
      */
-    private toXml(node: SVGNode, builder: XMLBuilder): void {
+    private svgNodeToXmlObject(node: SVGNode): any {
         if (typeof node === "string") {
-            builder.txt(node);
-        } else {
-            const element = builder.ele(node.type);
-            for (const [key, value] of Object.entries(node)) {
-                if (key === "type" || key === "children") {
-                    continue;
-                }
-                if (typeof value === "string") {
-                    element.att(key, value);
-                } else if (typeof value === "number") {
-                    element.att(key, value.toString());
-                }
+            return node;
+        }
+
+        const result: any = {};
+        const element: any = {};
+
+        const attributes: any = {};
+        for (const [key, value] of Object.entries(node)) {
+            if (key === "type" || key === "children") {
+                continue;
             }
-            for (const child of node.children) {
-                this.toXml(child, element);
+            if (typeof value === "string") {
+                attributes["@_" + key] = value;
+            } else if (typeof value === "number") {
+                attributes["@_" + key] = value.toString();
             }
         }
+
+        if (node.children.length > 0) {
+            const children = node.children.map((child) => this.svgNodeToXmlObject(child));
+            if (children.every((child) => typeof child === "string")) {
+                element["#text"] = children.join("");
+            } else {
+                for (const child of children) {
+                    if (typeof child === "string") {
+                        if (!element["#text"]) {
+                            element["#text"] = "";
+                        }
+                        element["#text"] += child;
+                    } else {
+                        for (const [childType, childValue] of Object.entries(child)) {
+                            if (!element[childType]) {
+                                element[childType] = [];
+                            }
+                            if (Array.isArray(element[childType])) {
+                                element[childType].push(childValue);
+                            } else {
+                                element[childType] = [element[childType], childValue];
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        result[node.type] = { ...attributes, ...element };
+        return result;
     }
 }
 
