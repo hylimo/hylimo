@@ -1,6 +1,6 @@
 {
     "name": "@hylimo/diagram-protocol",
-    "version": "2.1.0",
+    "version": "2.1.1",
     "license": "MIT",
     "repository": {
         "type": "git",
@@ -18,7 +18,7 @@
         "build": "tsc"
     },
     "dependencies": {
-        "@hylimo/diagram-common": "^2.1.0",
+        "@hylimo/diagram-common": "^2.1.1",
         "sprotty-protocol": "^1.4.0",
         "vscode-languageserver-protocol": "^3.17.5"
     }

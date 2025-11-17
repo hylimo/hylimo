@@ -1,6 +1,6 @@
 {
     "name": "@hylimo/cli",
-    "version": "2.1.0",
+    "version": "2.1.1",
     "license": "MIT",
     "type": "module",
     "repository": {
@@ -18,10 +18,10 @@
         "build": "tsc"
     },
     "dependencies": {
-        "@hylimo/diagram": "^2.1.0",
-        "@hylimo/diagram-common": "^2.1.0",
-        "@hylimo/diagram-render-pdf": "^2.1.0",
-        "@hylimo/diagram-render-svg": "^2.1.0",
+        "@hylimo/diagram": "^2.1.1",
+        "@hylimo/diagram-common": "^2.1.1",
+        "@hylimo/diagram-render-pdf": "^2.1.1",
+        "@hylimo/diagram-render-svg": "^2.1.1",
         "commander": "^14.0.2"
     },
     "bin": {
