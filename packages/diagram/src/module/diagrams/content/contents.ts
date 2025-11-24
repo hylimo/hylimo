@@ -23,7 +23,6 @@ import { contentModule } from "./uml/classifier/content.js";
 import { componentTitleModule } from "./uml/classifier/componentTitle.js";
 import { instanceModule } from "./uml/instance.js";
 import { actorModule } from "./uml/actor.js";
-import { eventModule } from "./uml/sequence/event.js";
 import { activityIndicatorModule } from "./uml/sequence/activityIndicator.js";
 import { sequenceDiagramAssociationsModule } from "./uml/sequence/sequenceDiagramAssociations.js";
 import { createParticipantMoule } from "./uml/sequence/createParticipant.js";
@@ -35,6 +34,8 @@ import { importedParticipantsModule } from "./uml/sequence/importedParticipants.
 import { registerClassifierModule } from "./uml/sequence/registerClassifier.js";
 import { participantModule } from "./uml/sequence/participant.js";
 import { keywordsModule } from "./uml/keywords.js";
+import { sequenceDiagramStateModule } from "./uml/sequence/sequenceDiagramState.js";
+import { timeControlModule } from "./uml/sequence/timeControl.js";
 
 /**
  * All content modules
@@ -57,7 +58,6 @@ export const contents: ContentModule[] = [
     elementModule,
     entriesModule,
     enumModule,
-    eventModule,
     extendsAndImplementsModule,
     importedParticipantsModule,
     instanceModule,
@@ -75,5 +75,7 @@ export const contents: ContentModule[] = [
     sectionsModule,
     sequenceDiagramAssociationsModule,
     sequenceDiagramCreateConnectionOperatorModule,
+    sequenceDiagramStateModule,
+    timeControlModule,
     valuesModule
 ];

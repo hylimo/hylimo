@@ -18,7 +18,7 @@ The sequence diagram always knows only the currently available information and n
 
 In a sequence diagram, we have the following concepts:
 
-- Participant: A component that "participates" in the diagram, so something/someone whose behavior should be modeled.\
+- Participant: A component that "participates" in the diagram, so something/someone whose behavior should be modeled.
   It can be one of the following:
   - `participant`
     - general participant, without a name (`User`) or with a name (`Bob:User`)
@@ -29,15 +29,12 @@ In a sequence diagram, we have the following concepts:
   - `actor`
     - stickman symbolizing a user, without a nanme (`User`) or with a name (`Bob:User`)
     - can have values like `instance`, in this case the stickman is shown above the instance
-  - `component`
+  - `component`diagram.
     - see [component](./component.md#component)
 - Lifeline: the entire duration a participant is alive, symbolized by the dotted line downwards
-- Event: an x/y coordinate linking a point in time to a participant, accessed by using the syntax `event.participant`, so i.e. `startPayment.User`.\
-- Message: arrow between two `event`s with a semantic meaning
-- Activity: the time a participant is active
-- Frame: A box around some events. Can optionally contain a name (i.e. `if`, `while`), and sub compartments
-
-## Order matters
+- Message: arrow between two participants at specific y positions with a semantic meaning
+- Activity: the time a participant is active, visualized by a white rectangle on the lifeline
+- Frame: A box around a section of the diagram. Can optionally contain a name (i.e. `if`, `while`), and sub compartments (fragments)## Order matters
 
 Below, you'll find the order in which you should declare things so that they work as expected.\
 Hylimo walks through the diagram from left to right, and then from top to bottom.
@@ -57,8 +54,12 @@ This example creates three participants, reading from left to right as `Bob`, `S
 
 Now that we've populated our `x` axis, let's move on with the `y` axis.
 
-The main way to move forward on the `y` axis in a sequence diagram is through `events`.\
-An `event` needs a name to refer to it later on and automatically moves downward on the y axis.\
+The `y` axis is managed automatically by Hylimo as you add interactions to your diagram.\
+Each interaction (like `activate`, message sending, or frame creation) can specify its position using either:
+- `at` - an absolute y position
+- `after` - a relative offset from the current position
+- If neither is specified, a default margin is used
+
 To illustrate this, we've enabled the debugging mode here and below that visualizes exactly where Hylimo places the given coordinates.\
 You can enable the debugging mode yourself by setting `enableDebugging = true`, or disabling it by omitting it/setting it to `false`.\
 This is the precise purpose of it: It should help you understand what action will lead to what outcome.\
@@ -67,30 +68,12 @@ Of course, once you want to finish your diagram, we recommend to turn it off aga
 ```hylimo
 sequenceDiagram(enableDebugging = true) {
     participant("Bob")
-    event("startPayment")
-    event("stopPayment")
+    participant("Alice")
+    Bob --> Alice
 }
 ```
 
-As you can see above, the name should be understandable for you to know exactly which action is symbolized by this event.
-This name will never be shown anywhere.
-
-For most cases, the default value for how far away the next event will be good-enough.
-Nevertheless, in cases where you want an explicit distance to the predecessor, you are free to do so:
-
-```hylimo
-sequenceDiagram(enableDebugging = true) {
-    participant("Bob")
-    event("startPayment")
-    event("stopPayment", 100)
-}
-```
-
-This positions the event `50` pixels below its predecessor.
-Note that while negative values are allowed here, they won't make any sense:
-Instead, you can also move the previous event up by that amount and invert their meanings.
-
-Both `event` and `participant` names will be registered as variables if they didn't exist already.
+Participant names will be registered as variables if they didn't exist already.
 In case they existed already, the existing name takes precedence.
 If their name is already used by something else, you can assign the result of these functions to a variable of your own choosing:
 
@@ -99,39 +82,37 @@ sequenceDiagram {
     Bob = true
     user = participant("Bob")
     participant("Charlie")
-    event("buy")
     user --> Charlie
 }
 ```
 
-Sometimes, you want to send messages where some time delta happens in between.\
-However, the normal Hylimo behavior for `A --> B` is to use the most recent event as y coordinate, not any y coordinate.\
-To achieve the time delta in spite of these inherent limitations, use the notation `participant.on(event)` which forces Hylimo to use the participant at the specified point in time:
+Sometimes, you want to send messages at specific positions or with time delays.\
+You can use the `participant.at(position)` function to position a participant at an absolute y coordinate, or `participant.after(offset)` to position it relative to the current position:
 
 ```hylimo
 sequenceDiagram(enableDebugging = true) {
     participant("Bob")
-    event("buy")
-    event("stop")
-    Bob.on(buy) --> Bob.on(stop) with {
-        over = start(0).axisAligned(1, apos(0, 25), 1, apos(25, 25), 0, end(0.5))
+    Bob --> Bob.after(50) with {
+        over = start().axisAligned(-1, apos(46, 36), 0, end(0.5))
     }
 }
 ```
 
-Now, we have the basic knowledge to go on with the remaining features that are all relative to the latest event.
+- `participant.at(position)` - Creates a virtual participant at an absolute y position. If no position is provided, uses the participant at its declaring position.
+- `participant.after(offset)` - Creates a virtual participant at a relative offset from the current position.
 
-## Interacting with participants
+Now, we have the basic knowledge to go on with the remaining features.## Interacting with participants
 
-There is a bunch of things you can do with participants, depending on if there is a latest defined event:
+There is a bunch of things you can do with participants:
 
-- you can postpone the creation of a participant by defining it after an event:
+- you can postpone the creation of a participant by first activating another participant:
 
 ```hylimo
 sequenceDiagram(enableDebugging = true) {
     participant("A")
-    event("smth")
+    activate(A, after = 25)
     participant("B")
+    deactivate(A)
 }
 ```
 
@@ -141,9 +122,7 @@ sequenceDiagram(enableDebugging = true) {
 sequenceDiagram(enableDebugging = true) {
     participant("A")
     participant("B")
-    event("E1")
     destroy(A)
-    event("E2")
 }
 ```
 
@@ -153,11 +132,8 @@ sequenceDiagram(enableDebugging = true) {
 sequenceDiagram {
     participant("A")
     participant("B")
-    event("E1")
     destroy(A)
-    event("E2")
-    event("E3")
-    participant("A²", below = A)
+    participant("A²", below = A, after = 40)
 }
 ```
 
@@ -167,39 +143,42 @@ sequenceDiagram {
 sequenceDiagram(enableDebugging = true) {
     participant("A")
     participant("B")
-    event("E1")
     activate(A)
-    event("E2")
-    deactivate(A)
+    deactivate(A, after = 25)
 }
 ```
 
-Note as well that there are three dots when an event meets an activity indicator, except for the initial event. This has the following reason:\
-Hylimo automatically infers where to place the arrow between participants sending/receiving a message: In general, a sent message is sent on the right and a received message is received on the left side of the indicator (this is a simplified, slightly incorrect explanation for the sake of brevity). These `left` and `right` coordinates show exactly the points where a message will be send/received from.\
-The third point, the `center` shows where the event would have been located originally. It is "missing" when creating a new indicator as it is located behind the indicator (remember: Hylimo only knows what is currently available, and the indicator does not yet exist when it creates the points)
+Hylimo automatically infers where to place the arrow between participants sending/receiving a message: In general, a sent message is sent on the right and a received message is received on the left side of the activity indicator.
 
-- Even multiple times simultaneously:
+- You can activate multiple indicators simultaneously:
 
 ```hylimo
 sequenceDiagram {
     participant("A")
     participant("B")
-    event("E1")
     activate(A)
-    event("E1margin", 5)
-    activate(A)
-    deactivate(A)
-    event("E2")
-    deactivate(A)
+    activate(A, after = 5)
+    deactivate(A, after = 10)
+    deactivate(A, after = 20)
 }
 ```
 
-As you can see in this example, you can also use events to simulate margins, as we explicitly defined a pseudo-event whose only purpose is to add 5 pixels on the y-axis between the first indicator and the second one.
+As you can see in this example, you can use the `after` parameter to add spacing between activations.
 
-**important**: Since Hylimo only has access to the currently known state, we recommend the following order of execution:\
-`activate` operations are the first operations after defining an event.\
-Messages are sent after `activate` operations.\
-`deactivate` operations are the last operations for this event.
+- You can also use a callback function with `activate` that automatically deactivates when done:
+
+```hylimo
+sequenceDiagram {
+    participant("A")
+    participant("B")
+    activate(A, after = 25) {
+        activate(B)
+        A --> B
+        B --> A
+        deactivate(B)
+    }
+}
+```
 
 ## Messages
 
@@ -209,19 +188,18 @@ The following messages are available within sequence diagrams (in both direction
 sequenceDiagram {
     participant("A")
     participant("B")
-    event("E1")
     A -- B // asynchronous undirected message
-    event("E2")
+    delay(25)
     A --> B // asynchronous directed message, object creation message
-    event("E3")
+    delay(25)
     A -->> B // synchronous directed message
-    event("E4")
+    delay(25)
     A <.. B // asynchronous return message
-    event("E5")
+    delay(25)
     A <<.. B // synchronous return message
-    event("E6")
+    delay(25)
     A --! B // destroy message
-    event("E7")
+    delay(25)
     A ..! B // destroy return message
 }
 ```
@@ -235,15 +213,12 @@ To do this in Hylimo you can use the following construct (not exclusive to seque
 sequenceDiagram {
     participant("A")
     participant("B")
-    event("E1")
     A --> B with {
         label("text") // positioned at the beginning - 0% of the length
     }
-    event("E2")
     A --> B with {
         label("text", 0.5) // positioned in the middle - 50% of the length
     }
-    event("E3")
     A --> B with {
         label("text", 0.75, 10) // positioned near the end - 75% of the length, 10 pixels upwards, negative values are possible to shift downward
     }
@@ -255,32 +230,40 @@ sequenceDiagram {
 The following config properties are available for sequence diagrams:
 |Variable|Meaning|Default value (in pixels)|Comment|
 |--------|-------|-------------------------|-------|
+|`activateDistance`| Default distance to move downward on the y axis when activating a participant | -1 |Negative value moves backward, typically used to align activation with message arrival|
 |`activityShift`| How far on the x axis subsequent simultaneously active activity indicators on the same participant are shifted | 3 |-|
 |`activityWidth`| How wide an activity indicator should be | 10|-|
+|`connectionDistance`| Default distance to move downward on the y axis when creating a connection between participants | 20 |Used when both start and end are plain participants without explicit positioning|
+|`deactivateDistance`| Default distance to move downward on the y axis when deactivating a participant | 1 |Small positive value to add spacing after deactivation|
 |`destroyingCrossSize`| The width and height of a participant-destruction cross | 20 |-|
 |`enableDebugging`| Toggles the debugging mode for sequence diagrams printing additional info | false |Rarely useful|
-|`eventDistance`| How far to move downward on the y axis with the next event | 25 |Do not use a multiple of 10 for your own sake|
 |`externalMessageDiameter`| Width and height of the circle of lost and found messages | 20 |-|
 |`externalMessageDistance`| How far away on the x axis a lost or found message should be drawn | 95 | 100-(0.5\*activityWidth), chosen so that it aligns on the grid when sending a message against one activity indicator |
+|`frameDistance`| Default distance to move downward on the y axis when creating a frame | 20 |Used when topAt/topAfter are not specified|
 |`frameMarginX`| Default margin to apply on the left and right side of frames | 20 |-|
-|`frameMarginY`| Default margin to apply on the top and bottom of frames | 5 | `margin`, we recommend keeping them in sync |
+|`frameMarginY`| Default margin to apply on the top and bottom of frames | 5 | Visual margin around frame content |
 |`margin`| Margin to add to almost any interaction, i.e. to activity indicator endings |5| A non-`0` value makes the diagram slightly inaccurate but more visually appealing |
 |`participantDistance`| How far apart subsequent participants should be | 200 | Multiple of `100` to align participants on the grid |
+|`subframeDistance`| Default distance to move downward on the y axis when creating a subframe/fragment | 20 |Used when at/after are not specified for fragments|
 
 ## Precise method documentation
 
 ### activate
 
-Activates a participant at the y coordinate (minus `margin`) of the most recent event.
+Activates a participant at a calculated y position.
 The same participant can be activated multiple times simultaneously.
+If a callback function is provided as the second parameter, it will be executed and the participant will be automatically deactivated afterwards.
 
 **params**:
 
 - 0: the participant (instance or actor) to activate
+- 1: optional callback function to execute within this activation. After execution, deactivate is called automatically
+- `at`: the absolute y position where to activate. If set, takes priority over 'after'
+- `after`: the relative y offset from the current position. Only used if 'at' is not set
+- `defaultMargin`: the default margin to use if neither 'at' nor 'after' is set. Defaults to config.activateDistance
 - `xShift`: an optional shift on the x-axis when using multiple activity indicators simultaneously on the same instance. Defaults to `activityShift`
-- `yOffset`: an optional offset on the y-axis where to start being active. Defaults to `margin`
 
-**returms**: the created indicator
+**returns**: the created indicator
 
 ### actor
 
@@ -295,7 +278,7 @@ An instanced actor is an actor that has a stickman on top and an `instance` belo
   If this function is set, the stickman will be placed on top of a newly created `instance`\
   The stickman specifically can then be styled/layouted using `instanced-actor(-element)`.\
   To access the created instance, use `<return value>.instance`
-- `below`: the optional participant below which this actor should be placed. If set, this actor will have the same x coordinate as the given value and the y coordinate of the current event
+- `below`: the optional participant below which this actor should be placed. If set, this actor will have the same x coordinate as the given value and the y coordinate of the current position
 
 **returns**: the created stickman
 
@@ -306,6 +289,9 @@ Deactivates the most recent indicator of the given participant
 **params**:
 
 - 0: the participant to deactivate
+- `at`: the absolute y position where to deactivate. If set, takes priority over 'after'
+- `after`: the relative y offset from the current position. Only used if 'at' is not set
+- `defaultMargin`: the default margin to use if neither 'at' nor 'after' is set. Defaults to config.deactivateDistance
 
 ### destroy
 
@@ -318,16 +304,7 @@ Destroys the given participant.
 
 **returns**: the created cross
 
-### event
 
-Creates a new event.
-
-**params**:
-
-- 0: the name of the event. Can be used as variable afterward if not already declared
-- 1: an optional distance on the y-axis to the previous event. Defaults to `eventDistance`
-
-**returns**: the created event
 
 ### foundMessage
 
@@ -337,7 +314,6 @@ Should always be used inline as a message from something else:
 ```hylimo
 sequenceDiagram {
     participant("Bob")
-    event("E")
     foundMessage() -->> Bob
 }
 ```
@@ -364,29 +340,35 @@ A fragment is the following:
 
 **params**:
 
-- 0: the event or y axis coordinate to use for the top line, so the uppermost y coordinate of this frame
-- `text`: The optional name of this fragment
+- 0: The name of this fragment
+- `at`: the absolute y position where to start the fragment. If set, takes priority over 'after'
+- `after`: the relative y offset from the current position. Only used if 'at' is not set
+- `defaultMargin`: the default margin to use if neither 'at' nor 'after' is set. Defaults to config.margin
 - `subtext`: The optional subtext of this fragment
 - `hasLine`: Whether to draw the line on top. Defaults to `true`
-- `hasIcon`: Whether to draw the border around the name. Defaults to `text != null`
 
 **returns**: A data object containing all this data plus the newly created elements
 
 ### frame
 
-Creates a new frame around the given coordinates.
+Creates a new frame. If a callback function is provided, it will be executed and the frame's bottom will be set to the current position after execution.
 
 **params**:
 
-- `topLeft`: The top left coordinate (event) to draw the frame around. The border will be extended by `frameMarginX` to the left and `frameMarginY` to the top by default
-- `bottomRight`: The bottom right coordinate (event) to draw the frame around. The border will be extended by `frameMarginX` to the right and `frameMarginY` at the bottom by default
-- `text`: The optional name of this frame, i.e. `if` or `while`
+- 0: The name of this frame, i.e. `if` or `while`
+- 1: A function generating all fragments (additional compartments within the frame)
 - `subtext`: The optional subtext of this fragment, i.e. a condition
-- `hasIcon`: Whether to draw the border around the name. Defaults to `text != null`
-- `marginRight`: An optional margin to use on the right side
-- `marginBelow`: An optional margin to use on the bottom
-- `marginLeft`: An optional margin to use on the left side
-- `marginTop`: An optional margin to use on the top
+- `topAt`: The absolute y position marking the upper border of the frame. If set, takes priority over 'topAfter'
+- `topAfter`: The relative y offset from the current position for the top border. Only used if 'topAt' is not set
+- `topDefaultMargin`: The default margin to use for the top if neither 'topAt' nor 'topAfter' is set. Defaults to frameMarginY
+- `right`: The participant marking the right border of the frame. The border will be extended by 'frameMarginX' to the right
+- `left`: The participant marking the left border of the frame. The border will be extended by 'frameMarginX' to the left
+- `marginX`: How much margin to use both left and right. Defaults to 'frameMarginX'
+- `marginY`: How much margin to use both on the top and bottom. Defaults to 'frameMarginY'
+- `marginLeft`: How much margin to use on the left. Defaults to 'marginX'
+- `marginTop`: How much margin to use on the top. Defaults to 'marginY'
+- `marginRight`: How much margin to use on the right. Defaults to 'marginX'
+- `marginBottom`: How much margin to use on the bottom. Defaults to 'marginY'
 
 **returns**: The created frame
 
@@ -399,7 +381,7 @@ Creates an instance which is an abstract concept of someone who participates in 
 - 0: the optional name of the instance. If the next argument is missing, this will be treated as the class name of the instance
 - 1: the optional class name of the instance
 - 2: A function determining the content of the instance
-- `below`: the optional participant below which this instance should be placed. If set, this instance will have the same x coordinate as the given value and the y coordinate of the current event
+- `below`: the optional participant below which this instance should be placed. If set, this instance will have the same x coordinate as the given value and the y coordinate of the current position
 
 **returns**: the created instance
 
@@ -411,7 +393,6 @@ Should always be used inline as a message to something else:
 ```hylimo
 sequenceDiagram {
     participant("Bob")
-    event("E")
     Bob -->> lostMessage()
 }
 ```
@@ -434,7 +415,7 @@ Creates an participant which is an abstract concept of someone who participates 
 - 0: the optional name of the participant. If the next argument is missing, this will be treated as the class name of the participant
 - 1: the optional class name of the participant
 - 2: A function determining the content of the participant
-- `below`: the optional participant below which this participant should be placed. If set, this participant will have the same x coordinate as the given value and the y coordinate of the current event
+- `below`: the optional participant below which this participant should be placed. If set, this participant will have the same x coordinate as the given value and the y coordinate of the current position
 
 **returns**: the created participant
 
@@ -461,10 +442,10 @@ The following class names are available for styling/layout purposes within seque
 - `instance` to style instances
 - `lost-message-element` to layout lost message elements
 - `lost-message` to style lost messages
-- `non-top-level-participant-element` to style any participant after an event was declared, so its `y` is not `0`
+- `non-top-level-participant-element` to style any participant created after the position has moved, so its `y` is not `0`
 - `participant-element` to layout participants
 - `participant` to style participants
-- `top-level-participant-element` to style any participant before any event was declared, so its `y` is `0`
+- `top-level-participant-element` to style any participant created at the initial position, so its `y` is `0`
 
 ## Advanced functionality
 
@@ -472,20 +453,19 @@ Sequence diagrams offer many features that are rather intended for experienced u
 
 ### Frames
 
-A `frame` is a rectangle containing a bunch of events, optionally with a text naming it and a subtext for further explanation.\
-To declare a frame, you have to supply four mandatory attributes:\
-Its top, left, bottom, and right side.\
-The top and bottom side should be `event`s as their main purpose is being a y-coordinate.\
-The left and right side should be participants such as `actor`s or `instance`s, as those have the x-coordinate information.\
-Due to having to know these coordinates, you can only declare the frame after both events have been declared.
+A `frame` is a rectangle containing a section of the diagram, optionally with a text naming it and a subtext for further explanation.\
+To declare a frame, you provide a callback function that contains the interactions within the frame.\
+The frame automatically determines its height based on the current position after the callback executes.\
+You must also specify the left and right participants to determine the frame's width.
 
 Additionally, there are a couple of optional attributes:
 
 - `text`: the small text in the upper-left corner of the frame describing the type of frame, i.e. `if`, `loop`, or whatever else you want
 - `subtext`: Additional text next to the categorisation, i.e. a condition for the conditional or loop
 - `hasIcon`: Overrides if the border on the upper-left is shown. By default, it is `false` if `text` hasn't been set, and `true` if it is set
+- `topAt`/`topAfter`: Control the starting y position of the frame
 - `margin`: Sets the margin in pixels to all sides
-- `margin(X,Y)`: Sets the margin in pixels on both sides of this axis. Overrides `margin`.\
+- `margin(X,Y)`: Sets the margin in pixels on both sides of this axis. Overrides `margin`. 
 - `margin(Top,Left,Bottom,Right)`: Sets the margin in pixels individually on this side. Overrides all other margins
 
 Here's an example frame:
@@ -496,90 +476,80 @@ sequenceDiagram {
     participant("Bob")
     participant("Charlie")
 
-    event("start")
-    event("communicate")
-    Alice --> Bob with {
-        label("Ping", 0.25, -5)
+    frame("while", left = Alice, right = Charlie, subtext = "[condition]") {
+        activate(Alice, after = 25)
+        Alice --> Bob with {
+            label("Ping", 0.25, -5)
+        }
+        deactivate(Alice)
     }
-    event("end")
-
-    frame(top = start, left = Alice, bottom = end, right = Charlie, text = "while", subtext = "[condition]")
 }
 ```
 
-Unfortunately, as the frame must be declared last, frames will always need to be the most recent component and thus hide any underlying element from being selected in the UI.\
-We haven't found a way around that yet.\
-If you want to graphically edit i.e. a message inside a frame, please comment out the frame and then edit the message for the time being.
-
 ### Nested Frames
 
-You can nest frames arbitrarily if you have enough events and participants.\
-Simply declare a frame containing a subset of events/participants after the first one, and your subframe:
+You can nest frames by simply placing one frame inside another's callback function:
 
 ```hylimo
 sequenceDiagram {
-    y = participant("alice")
-    a = participant("bob")
-    actor("Dave")
+    alice = participant("alice")
+    bob = participant("bob")
+    Dave = actor("Dave")
+    last = participant("last")
 
-    event("hi")
-    event("hi2")
-    participant("last")
-
-    destroy(bob)
-    event("hi3", 120)
-    activate(last)
-    z = participant("Cat", below = bob)
-    alice --> z
-    event("hi4")
-    event("hi5")
-    Dave <<-- last with {
-        label("notify", 0.5)
+    frame("outer", left = alice, right = last, marginRight = 40, marginTop = 25) {
+        activate(alice, after = 25)
+        activate(last, after = 25)
+        destroy(bob)
+        Cat = participant("Cat", below = bob)
+        alice --> Cat
+        
+        frame("if", left = Dave, right = last, marginRight = 10, marginY = 12.4, subtext = "[finished]") {
+            activate(Dave, after = 25)
+            Dave <<-- last with {
+                label("notify", 0.5)
+            }
+            deactivate(Dave)
+        }
+        
+        deactivate(alice)
+        deactivate(last)
     }
-    event("hi6")
-    event("hi7")
-
-    frame(top = hi2, left = alice, bottom = hi7, right = last, text = "outer", marginRight = 40, marginTop = 25)
-    frame(top = hi4, left = Dave, bottom = hi6, right = last, marginRight = 10, marginY = 12.4, text = "if", subtext = "[finished]")
 }
 ```
 
 ### Frames with fragments
 
-A frame can receive a number of fragments.\
-A fragment is a separate section inside the frame, i.e. a `else if` for an `if`.\
-In other words, a frame can have an optional line on the top to separate it from its predecessor, and text/subtext just like the frame.\
-To declare a fragment, pass a function behind the frame where you can use the `fragment` function:
+A frame can contain multiple fragments.\
+A fragment is a separate section inside the frame, i.e. an `else if` for an `if`.\
+Fragments are created by calling the `fragment` function within the frame's callback:
 
 ```hylimo
 sequenceDiagram {
-    y = participant("alice")
-    a = participant("bob")
-    actor("Dave")
+    alice = participant("alice")
+    bob = participant("bob")
+    Dave = actor("Dave")
+    last = participant("last")
 
-    event("hi")
-    event("hi2")
-    participant("last")
-
-    destroy(bob)
-    event("hi3", 120)
-    activate(last)
-    z = participant("Cat", below = bob)
-    alice --> z
-    event("hi4")
-    event("hi5")
-    Dave <<-- last with {
-        label("notify", 0.5)
-    }
-    event("hi6")
-    event("hi7")
-
-    frame(top = hi2, left = alice, bottom = hi7, right = last, text = "if", subtext = "[work to do]", marginRight = 40, marginTop = 25) {
-        fragment(hi3, text = "else if", subtext = "[environment variable set]")
-        fragment(hi5, text = "else")
+    frame("if", left = alice, right = last, subtext = "[work to do]", marginRight = 40, marginTop = 25) {
+        activate(alice, after = 25)
+        activate(last, after = 25)
+        destroy(bob)
+        Cat = participant("Cat", below = bob)
+        alice --> Cat
+        
+        fragment("else if", after = 50, subtext = "[environment variable set]")
+        activate(Dave, after = 25)
+        Dave <<-- last with {
+            label("notify", 0.5)
+        }
+        deactivate(Dave)
+        
+        fragment("else", after = 25)
+        deactivate(alice)
+        deactivate(last)
     }
 }
-
 ```
 
 ### Instanced actors
@@ -590,21 +560,19 @@ To build an instanced actor, pass the second parameter to `actor`, the function 
 
 ```hylimo
 sequenceDiagram {
-    actor("user") {
+    user = actor("user") {
         values {
             age = 30
             isGrownUp = true
         }
     }
 
-    instance("other")
-    event("start")
-    activate(user)
+    other = instance("other")
+    activate(user, after = 25)
     activate(other)
     user -->> other
     deactivate(user)
     deactivate(other)
-    event("end")
 }
 ```
 
@@ -620,30 +588,28 @@ It can be used for example as follows:
 
 ```hylimo
 sequenceDiagram {
-    y = participant("alice")
-    a = participant("bob")
-    actor("Dave")
+    alice = participant("alice")
+    bob = participant("bob")
+    Dave = actor("Dave")
+    last = participant("last")
 
-    event("hi")
-    event("hi2")
-    participant("last")
-
-    destroy(bob)
-    event("hi3", 120)
-    activate(last)
-    z = participant("Cat", below = bob)
-    alice --> z
-    event("hi4")
-    event("hi5")
-    Dave <<-- last with {
-        label("notify", 0.5)
-    }
-    event("hi6")
-    event("hi7")
-
-    frame(top = hi2, left = alice, bottom = hi7, right = last, text = "alt", subtext = "[work to do]", marginRight = 40, marginTop = 25) {
-        fragment(hi3, subtext = "[environment variable set]")
-        fragment(hi5, subtext = "[else]")
+    frame("alt", left = alice, right = last, subtext = "[work to do]", marginRight = 40, marginTop = 25) {
+        activate(alice, after = 25)
+        activate(last, after = 25)
+        destroy(bob)
+        Cat = participant("Cat", below = bob)
+        alice --> Cat
+        
+        fragment("[alt]", after = 50, subtext = "[environment variable set]")
+        activate(Dave, after = 25)
+        Dave <<-- last with {
+            label("notify", 0.5)
+        }
+        deactivate(Dave)
+        
+        fragment("[alt]", after = 25, subtext = "[else]")
+        deactivate(alice)
+        deactivate(last)
     }
 }
 ```
@@ -656,30 +622,28 @@ It can be used for example as follows:
 
 ```hylimo
 sequenceDiagram {
-    y = participant("alice")
-    a = participant("bob")
-    actor("Dave")
+    alice = participant("alice")
+    bob = participant("bob")
+    Dave = actor("Dave")
+    last = participant("last")
 
-    event("hi")
-    event("hi2")
-    participant("last")
-
-    destroy(bob)
-    event("hi3", 120)
-    activate(last)
-    z = participant("Cat", below = bob)
-    alice --> z
-    event("hi4")
-    event("hi5")
-    Dave <<-- last with {
-        label("notify", 0.5)
-    }
-    event("hi6")
-    event("hi7")
-
-    frame(top = hi2, left = alice, bottom = hi7, right = last, text = "opt", subtext = "[status == pending]", marginRight = 40, marginTop = 25) {
-        fragment(hi3, subtext = "[status == executing]")
-        fragment(hi5, subtext = "[status == terminated]")
+    frame("opt", left = alice, right = last, subtext = "[status == pending]", marginRight = 40, marginTop = 25) {
+        activate(alice, after = 25)
+        activate(last, after = 25)
+        destroy(bob)
+        Cat = participant("Cat", below = bob)
+        alice --> Cat
+        
+        fragment("[opt]", after = 50, subtext = "[status == executing]")
+        activate(Dave, after = 25)
+        Dave <<-- last with {
+            label("notify", 0.5)
+        }
+        deactivate(Dave)
+        
+        fragment("[opt]", after = 25, subtext = "[status == terminated]")
+        deactivate(alice)
+        deactivate(last)
     }
 }
 ```
@@ -687,7 +651,7 @@ sequenceDiagram {
 #### loop-frame
 
 A `loop` frame executes the code within the frame as long as the condition is true.\
-It represents a `switch` in the code.\
+It represents a loop in the code.\
 You can optionally stop executing early using a nested `break` frame.
 When the `break` frame is encountered and its condition (the subtext) is true, the loop is exited.
 
@@ -699,21 +663,24 @@ sequenceDiagram {
     participant("Bob")
     participant("Charlie")
 
-    event("start")
-    event("communicate")
-    Alice --> Bob with {
-        label("Ping", 0.25, -5)
+    frame("loop", left = Alice, right = Charlie, subtext = "[message in messages]") {
+        activate(Alice, after = 25)
+        Alice --> Bob with {
+            label("Ping", 0.25, -5)
+        }
+        
+        frame("break", left = Alice, right = Charlie, subtext = "[all messages have been sent]", marginX = 5) {
+            activate(Alice, after = 15)
+            deactivate(Alice)
+        }
+        
+        activate(Alice, after = 25)
+        Alice -->> Charlie with {
+            label("sendMessage", 0.25)
+        }
+        deactivate(Alice)
+        deactivate(Alice)
     }
-    event("breakStart", 40)
-    event("breakEnd")
-    event("sendMessage")
-    Alice -->> Charlie with {
-        label("sendMessage", 0.25)
-    }
-    event("end")
-
-    frame(top = start, left = Alice, bottom = end, right = Charlie, text = "loop", subtext = "[message in messages]")
-    frame(top = breakStart, left = Alice, bottom = breakEnd, right = Charlie, text = "break", subtext = "[all messages have been sent]", marginX = 5)
 }
 ```
 
@@ -729,22 +696,20 @@ sequenceDiagram {
     participant("Bob")
     participant("Charlie")
 
-    event("start")
-    event("communicateA")
-    Alice --> Bob with {
-        label("Ping", 0.25, -5)
-    }
-    event("communicateB", 50)
-    Alice <-- Bob with {
-        label("Ping", 0.25, -5)
-    }
-    event("communicateC", 50)
-    Bob --> Charlie
-    event("end")
-
-    frame(top = start, left = Alice, bottom = end, right = Charlie, text = "par") {
-        fragment(communicateB)
-        fragment(communicateC)
+    frame("par", left = Alice, right = Charlie) {
+        activate(Alice, after = 25)
+        Alice --> Bob with {
+            label("Ping", 0.25, -5)
+        }
+        
+        fragment("[par]", after = 25)
+        Alice <-- Bob with {
+            label("Ping", 0.25, -5)
+        }
+        
+        fragment("[par]", after = 25)
+        Bob --> Charlie
+        deactivate(Alice)
     }
 }
 ```
@@ -761,16 +726,16 @@ sequenceDiagram {
     participant("Bob")
     participant("Charlie")
 
-    event("start")
-    event("communicate")
+    activate(Alice, after = 25)
     Alice --> Bob with {
         label("Ping", 0.25, -5)
     }
-    event("handleErrorsStart", 50)
-    event("handleErrorsEnd")
-    event("end")
-
-    frame(top = handleErrorsStart, left = Alice, bottom = handleErrorsEnd, right = Bob, text = "ref", subtext = "handle errors")
+    
+    frame("ref", left = Alice, right = Bob, subtext = "handle errors") {
+        activate(Alice, after = 25)
+        deactivate(Alice)
+    }
+    deactivate(Alice)
 }
 ```
 
@@ -780,36 +745,35 @@ Here is an example for a webshop order:
 
 ```hylimo
 sequenceDiagram(enableDebugging = true) {
-    bob = participant("user")
-    participant("ourShop", "Shop")
-    participant("Cart")
-    participant("Payment")
+    user = participant("user")
+    ourShop = participant("ourShop", "Shop")
+    Cart = participant("Cart")
+    Payment = participant("Payment")
 
-    event("initialRequest")
-    activate(bob)
+    activate(user, after = 25)
     activate(ourShop)
     user --> ourShop
-    deactivate(bob)
+    deactivate(user)
 
-    activate(Cart)
-    event("cartRequest")
+    activate(Cart, after = 25)
     ourShop --> Cart
 
-    event("cartResponse")
+    activate(ourShop, after = 25)
     ourShop <.. Cart
     deactivate(Cart)
 
-    activate(Payment)
-    event("startPayment", 140)
-    ourShop ..> Payment
-    deactivate(Payment)
+    frame("if", left = user, right = ourShop, subtext = "[response successful]", margin=30) {
+        activate(Payment, after = 50)
+        ourShop ..> Payment
+        deactivate(Payment)
+        
+        fragment("else", after = 40, subtext = "[nothing was done]")
+    }
 
-    event("notifyUser", 70)
+    activate(user, after = 30)
     user <.. ourShop
     deactivate(ourShop)
-
-    frame(top = cartResponse, left = user, bottom = notifyUser, right = ourShop, text = "if", subtext = "[response successful]", margin=30) {
-        fragment(startPayment, text = "else", subtext = "[nothing was done]")
-    }
+    deactivate(ourShop)
+    deactivate(user)
 }
 ```
