@@ -7,10 +7,9 @@ import {
     numberType,
     objectType,
     optional,
-    or,
+    or
 } from "@hylimo/core";
 import { canvasContentType, canvasPointType } from "../../../../base/types.js";
-
 
 /**
  * Stores the data for an activity indicator
