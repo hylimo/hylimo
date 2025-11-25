@@ -8,11 +8,9 @@ import {
     objectType,
     optional,
     or,
-    stringType
 } from "@hylimo/core";
 import { canvasContentType, canvasPointType } from "../../../../base/types.js";
 
-// Contains all Types used within sequence diagrams
 
 /**
  * Stores the data for an activity indicator
@@ -78,47 +76,4 @@ export const externalMessageType = namedType(
         ])
     ),
     "Lost or Found message"
-);
-
-/**
- * Stores the data for a single fragment of one frame.
- *
- * param explanations:
- * - `topY`: the absolute `y` coordinate where the line separating this fragment from its predecessor should be drawn
- */
-export const fragmentType = namedType(
-    objectType(
-        new Map([
-            ["text", optional(stringType)],
-            ["subtext", optional(stringType)],
-            ["hasNameBorder", booleanType],
-            ["hasLine", booleanType],
-            ["nameElement", optional(canvasContentType)],
-            ["subtextElement", optional(canvasContentType)],
-            ["line", optional(canvasContentType)],
-            ["topY", numberType]
-        ])
-    ),
-    "UML sequence diagram frame fragment"
-);
-
-/**
- * Stores the data for a frame.
- *
- * param explanations:
- * - `topLeft`/`bottomRight`: The corners of this rectangle (except for some margin)
- */
-export const frameType = namedType(
-    objectType(
-        new Map([
-            ["top", numberType],
-            ["right", participantType],
-            ["bottom", numberType],
-            ["left", participantType],
-            ["x", numberType],
-            ["width", numberType],
-            ["fragments", listType(fragmentType)]
-        ])
-    ),
-    "UML sequence diagram frame"
 );

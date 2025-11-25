@@ -22,7 +22,6 @@ export const sequenceDiagramFrameModule = ContentModule.create(
                 (fragmentOffset) = args
                 this.parent = args.parent
                 this.parentArgs = args.parentArgs
-                this.fragmentText = args.text
                 this.fragmentSubtext = args.subtext
                 this.hasLine = args.hasLine
                 this.labelMargin = args.labelMargin
@@ -44,20 +43,6 @@ export const sequenceDiagramFrameModule = ContentModule.create(
                         lineType = "line"
                     )
                     fragment.line = separatingLine
-                }
-
-                if(fragmentText != null) {
-                    borderElement = path(path = "M 20 0 V 5 L 16 9 H 0", class = list("fragment-name-border"))
-                    backgroundElement = path(path = "M 0 0 H 20 V 5 L 16 9 H 0 Z", class = list("fragment-name-background"))
-                    nameElement = text(contents = list(span(text = fragmentText)), class = list("fragment-name"))
-
-                    name = canvasElement(
-                        contents = list(container(contents = list(backgroundElement, borderElement, nameElement))),
-                        class = list("fragment-name-element")
-                    )
-                    name.pos = parent.topLeftPos
-                    scope.internal.registerCanvasElement(name, parentArgs, parentArgs.self)
-                    fragment.nameElement = name
                 }
 
                 if(fragmentSubtext != null) {
@@ -120,11 +105,22 @@ export const sequenceDiagramFrameModule = ContentModule.create(
                         this.frameElement = []
                         frameElement.position = position
                         this.dummyPos = scope.apos()
-                        frameElement.topMiddlePos = scope.rpos(dummyPos)
-                        frameElement.topLeftPos = scope.rpos(frameElement.topMiddlePos, 0, 0)
-                        frameElement.topRightPos = scope.rpos(dummyPos)
+                        this.topLeftPos = scope.rpos(dummyPos)
+                        this.topRightPos = scope.rpos(dummyPos)
                         this.fragments = list()
-                        this.text = frameText
+
+                        this.nameElement = canvasElement(
+                            contents = list(container(contents = list(
+                                path(path = "M 0 0 H 20 V 5 L 16 9 H 0 Z", class = list("fragment-name-background")),
+                                path(path = "M 20 0 V 5 L 16 9 H 0", class = list("fragment-name-border")),
+                                text(contents = list(span(text = frameText)), class = list("fragment-name"))
+                            ))),
+                            class = list("fragment-name-element")
+                        )
+                        nameElement.pos = topLeftPos
+                        scope.internal.registerCanvasElement(nameElement, args, args.self)
+
+                        this.topMiddlePos = scope.rpos(scope.lpos(nameElement, 0.875), topLeftPos)
 
                         this.leftOffset = 0
                         this.rightOffset = 0
@@ -154,6 +150,9 @@ export const sequenceDiagramFrameModule = ContentModule.create(
                             scope.internal.registerTargetPosition(scope.internal.config.frameMarginTop, 0)
                             scope.internal.activeFrames += frameElement
                         }
+
+                        frameElement.topLeftPos = topLeftPos
+                        frameElement.topRightPos = topRightPos
                     `,
                     id("this").assignField(
                         "sequenceDiagramFragmentFunction",
@@ -176,7 +175,7 @@ export const sequenceDiagramFrameModule = ContentModule.create(
                                     hasLine = true,
                                     subtext = subtext,
                                     labelMargin = subtextMargin,
-                                    labelReferencePos = frameElement.topMiddlePos
+                                    labelReferencePos = topMiddlePos
                                 )
                                 fragment.line.start.edits["${DefaultEditTypes.MOVE_Y}"] = createAdditiveEdit(at ?? after, "dy")
                                 fragment
@@ -227,9 +226,6 @@ export const sequenceDiagramFrameModule = ContentModule.create(
                         
                         bottomPosition = scope.internal.calculatePosition(priority = 3) + (marginBottom ?? scope.internal.config.frameMarginBottom)
                         
-                        this.topLeftPos = frameElement.topLeftPos
-                        this.topMiddlePos = frameElement.topMiddlePos
-                        this.topRightPos = frameElement.topRightPos
                         this.bottomLeftPos = scope.rpos(topLeftPos, 0, bottomPosition - position)
                         this.bottomRightPos = scope.rpos(topRightPos, bottomLeftPos)
 
@@ -241,10 +237,10 @@ export const sequenceDiagramFrameModule = ContentModule.create(
                         scope.internal.registerFrameInclusion(left, leftDistance, 0)
                         scope.internal.registerFrameInclusion(right, 0, rightDistance)
 
-                        topMiddlePos.targetX = left.referencePos
-                        topMiddlePos.targetY = left.referencePos
+                        topLeftPos.targetX = left.referencePos
+                        topLeftPos.targetY = left.referencePos
                         topLeftPos.offsetX = -(leftDistance)
-                        topMiddlePos.offsetY = position
+                        topLeftPos.offsetY = position
                         
                         topRightPos.targetX = right.referencePos
                         topRightPos.targetY = topLeftPos
