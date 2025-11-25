@@ -225,7 +225,7 @@ export const sequenceDiagramFrameModule = ContentModule.create(
                             }
                         }
                         
-                        bottomPosition = scope.internal.currentSequenceDiagramPosition + (marginBottom ?? scope.internal.config.frameMarginBottom)
+                        bottomPosition = scope.internal.calculatePosition(priority = 3) + (marginBottom ?? scope.internal.config.frameMarginBottom)
                         
                         this.topLeftPos = frameElement.topLeftPos
                         this.topMiddlePos = frameElement.topMiddlePos

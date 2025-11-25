@@ -102,10 +102,12 @@ export const createParticipantMoule = ContentModule.create(
                             }
 
                             this.bottomcenter = scope.lpos(participantElement, 0.25)
-                            lifelineEnd = scope.rpos(bottomcenter, 0, scope.internal.config.lifelineInitialMargin)
+                            if(scope.internal.lifelineTargetPos == null) {
+                                scope.internal.lifelineTargetPos = scope.rpos(participantElement.referencePos, 0, 0)
+                            }
                             participantElement.lifeline = scope.internal.createConnection(
                                 bottomcenter,
-                                lifelineEnd,
+                                scope.rpos(bottomcenter, scope.internal.lifelineTargetPos),
                                 list("lifeline-connection"),
                                 null,
                                 scope,

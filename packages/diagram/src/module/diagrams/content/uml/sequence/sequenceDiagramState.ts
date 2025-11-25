@@ -13,6 +13,19 @@ export const sequenceDiagramStateModule = ContentModule.create(
         scope.internal.currentSequenceDiagramPosition = 0
         scope.internal.activeFrames = list()
         scope.internal.targetPositions = list(null, null, null)
+        scope.internal.lifelineTargetPos = null
+
+        this.currentLifelinePosition = 0
+
+        this.updateLifelineTargetPos = {
+            (newPos) = args
+            if(scope.internal.lifelineTargetPos != null) {
+                if(currentLifelinePosition < newPos) {
+                    scope.internal.lifelineTargetPos.offsetY = newPos
+                    currentLifelinePosition = newPos
+                }
+            }
+        }
         
         scope.internal.registerFrameInclusion = {
             (participant, left, right) = args
@@ -26,22 +39,14 @@ export const sequenceDiagramStateModule = ContentModule.create(
             previousPosition = scope.internal.currentSequenceDiagramPosition
             deltaY = newPosition - previousPosition
             scope.internal.currentSequenceDiagramPosition = newPosition
-            
-            scope.internal.sequenceDiagramParticipants.forEach {
-                participant = it
-                
-                endpos = scope.rpos(participant.referencePos, 0, newPosition + (3 * scope.internal.config.lifelineExtensionMargin))
-                participant.lifeline.contents.get(participant.lifeline.contents.length - 1).end = endpos
-                
-                participant.activeActivityIndicators.forEach {
-                    it.height = it.height + deltaY
-                }
-            }
+            updateLifelineTargetPos(newPosition)
         }
         
         scope.internal.registerTargetPosition = {
             (position, priority) = args
-            scope.internal.targetPositions.set(priority, position + scope.internal.currentSequenceDiagramPosition)
+            this.newTarget = position + scope.internal.currentSequenceDiagramPosition
+            scope.internal.targetPositions.set(priority, newTarget)
+            updateLifelineTargetPos(newTarget)
         }
         
         scope.internal.calculatePosition = {

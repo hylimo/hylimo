@@ -17,8 +17,10 @@ export const defaultValuesModule = ContentModule.create(
             num(3)
         ],
         ["activityWidth", "How wide an activity indicator should be", numberType, num(10)],
+        ["minActivityHeight", "Minimum height of an activity indicator", numberType, num(10)],
         ["strokeMargin", "Margin for strokes", numberType, num(1)],
         ["connectionMargin", "Default distance required after a connection between participants", numberType, num(20)],
+        ["deactivateMargin", "Default distance required after a deactivation", numberType, num(10)],
         ["destroyingCrossSize", "The width and height of a participant-destruction cross", numberType, num(20)],
         ["externalMessageDiameter", "Width and height of the circle of lost and found messages", numberType, num(20)],
         ["frameMargin", "Default distance required after a frame", numberType, num(20)],
@@ -34,8 +36,6 @@ export const defaultValuesModule = ContentModule.create(
         ["frameMarginTop", "Default margin to apply on the top of frames", numberType, num(30)],
         ["frameMarginBottom", "Default margin to apply on the bottom of frames", numberType, num(5)],
         ["frameSubtextMargin", "Default horizontal margin for frame subtexts", numberType, num(10)],
-        ["lifelineExtensionMargin", "Margin to extend the lifeline beyond activity indicators", numberType, num(5)],
-        ["lifelineInitialMargin", "Initial margin below participant header for lifeline start", numberType, num(5)],
         [
             "eventDefaultMargin",
             "Default margin for events on a participant when no other margin is specified",
@@ -43,6 +43,6 @@ export const defaultValuesModule = ContentModule.create(
             num(5)
         ],
         ["participantMargin", "How far apart subsequent participants should be", numberType, num(200)],
-        ["initialMargin", "Initial distance from the top of the diagram to the first element", numberType, num(20)]
+        ["initialMargin", "Default distance required after a new participant", numberType, num(20)]
     ]
 );

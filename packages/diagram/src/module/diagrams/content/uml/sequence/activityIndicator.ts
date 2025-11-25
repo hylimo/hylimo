@@ -56,7 +56,7 @@ export const activityIndicatorModule = ContentModule.create(
                         activityIndicators.get(activityIndicators.length - 1).xShift + xShift
                     }
 
-                    height = 0
+                    height = scope.internal.config.minActivityHeight
                     width = scope.internal.config.activityWidth
 
                     activityIndicatorElement = canvasElement(
@@ -144,12 +144,14 @@ export const activityIndicatorModule = ContentModule.create(
 
                     at = args.at
                     after = args.after
-                    
-                    position = scope.internal.calculatePosition(at = at, after = after, priority = 2)
-                    scope.internal.updateSequenceDiagramPosition(position)
-                    scope.internal.registerTargetPosition(scope.internal.config.strokeMargin * -1, 1)
 
                     activityIndicator = participant.activeActivityIndicators.remove()
+                    
+                    calculatedHeight = scope.internal.calculatePosition(at = at, after = after, priority = 2) - activityIndicator.startY
+                    position = activityIndicator.startY + Math.max(calculatedHeight, scope.internal.config.minActivityHeight)
+                    scope.internal.updateSequenceDiagramPosition(position)
+                    scope.internal.registerTargetPosition(scope.internal.config.deactivateMargin, 2)
+
                     activityIndicator.height = position - activityIndicator.startY
                     activityIndicator.edits["${DefaultEditTypes.RESIZE_HEIGHT}"] = createAdditiveEdit(at ?? after, "dh")
                     

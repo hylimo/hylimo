@@ -56,6 +56,7 @@ Now that we've populated our `x` axis, let's move on with the `y` axis.
 
 The `y` axis is managed automatically by Hylimo as you add interactions to your diagram.\
 Each interaction (like `activate`, message sending, or frame creation) can specify its position using either:
+
 - `at` - an absolute y position
 - `after` - a relative offset from the current position
 - If neither is specified, a default margin is used
@@ -101,18 +102,19 @@ sequenceDiagram(enableDebugging = true) {
 - `participant.at(position)` - Creates a virtual participant at an absolute y position. If no position is provided, uses the participant at its declaring position.
 - `participant.after(offset)` - Creates a virtual participant at a relative offset from the current position.
 
-Now, we have the basic knowledge to go on with the remaining features.## Interacting with participants
+Now, we have the basic knowledge to go on with the remaining features.
+
+## Interacting with participants
 
 There is a bunch of things you can do with participants:
 
-- you can postpone the creation of a participant by first activating another participant:
+- you can postpone the creation of a participant:
 
 ```hylimo
 sequenceDiagram(enableDebugging = true) {
     participant("A")
-    activate(A, after = 25)
-    participant("B")
-    deactivate(A)
+    participant("B", after = 20)
+    delay(20)
 }
 ```
 
@@ -134,6 +136,7 @@ sequenceDiagram {
     participant("B")
     destroy(A)
     participant("A²", below = A, after = 40)
+    delay(20)
 }
 ```
 
@@ -230,29 +233,30 @@ sequenceDiagram {
 The following config properties are available for sequence diagrams:
 |Variable|Meaning|Default value (in pixels)|Comment|
 |--------|-------|-------------------------|-------|
-|`activateDistance`| Default distance to move downward on the y axis when activating a participant | -1 |Negative value moves backward, typically used to align activation with message arrival|
 |`activityShift`| How far on the x axis subsequent simultaneously active activity indicators on the same participant are shifted | 3 |-|
 |`activityWidth`| How wide an activity indicator should be | 10|-|
-|`connectionDistance`| Default distance to move downward on the y axis when creating a connection between participants | 20 |Used when both start and end are plain participants without explicit positioning|
-|`deactivateDistance`| Default distance to move downward on the y axis when deactivating a participant | 1 |Small positive value to add spacing after deactivation|
+|`minActivityHeight`| Minimum height of an activity indicator | 10 |-|
+|`strokeMargin`| Margin for strokes | 1 |-|
+|`connectionMargin`| Default distance required after a connection between participants | 20 |-|
+|`deactivateMargin`| Default distance required after a deactivation | 10 |-|
 |`destroyingCrossSize`| The width and height of a participant-destruction cross | 20 |-|
-|`enableDebugging`| Toggles the debugging mode for sequence diagrams printing additional info | false |Rarely useful|
 |`externalMessageDiameter`| Width and height of the circle of lost and found messages | 20 |-|
-|`externalMessageDistance`| How far away on the x axis a lost or found message should be drawn | 95 | 100-(0.5\*activityWidth), chosen so that it aligns on the grid when sending a message against one activity indicator |
-|`frameDistance`| Default distance to move downward on the y axis when creating a frame | 20 |Used when topAt/topAfter are not specified|
-|`frameMarginX`| Default margin to apply on the left and right side of frames | 20 |-|
-|`frameMarginY`| Default margin to apply on the top and bottom of frames | 5 | Visual margin around frame content |
-|`margin`| Margin to add to almost any interaction, i.e. to activity indicator endings |5| A non-`0` value makes the diagram slightly inaccurate but more visually appealing |
-|`participantDistance`| How far apart subsequent participants should be | 200 | Multiple of `100` to align participants on the grid |
-|`subframeDistance`| Default distance to move downward on the y axis when creating a subframe/fragment | 20 |Used when at/after are not specified for fragments|
+|`frameMargin`| Default distance required after a frame | 10 |-|
+|`fragmentMargin`| Default distance required after a fragment | 20 |-|
+|`externalMessageMargin`| How far away on the x axis a lost or found message should be drawn | 95 | 100-(0.5\*activityWidth), chosen so that it aligns on the grid when sending a message against one activity indicator |
+|`frameMarginX`| Default margin to apply on the left and right side of frames | 15 |-|
+|`frameMarginTop`| Default margin to apply on the top of frames | 30 |-|
+|`frameMarginBottom`| Default margin to apply on the bottom of frames | 5 |-|
+|`frameSubtextMargin`| Default horizontal margin for frame subtexts | 10 |-|
+|`eventDefaultMargin`| Default margin for events on a participant when no other margin is specified | 5 |-|
+|`participantMargin`| How far apart subsequent participants should be | 200 | Multiple of `100` to align participants on the grid |
+|`initialMargin`| Default distance required after a new participant | 20 |-|
 
 ## Precise method documentation
 
 ### activate
 
-Activates a participant at a calculated y position.
-The same participant can be activated multiple times simultaneously.
-If a callback function is provided as the second parameter, it will be executed and the participant will be automatically deactivated afterwards.
+Activates an activity indicator at a calculated position. Activity indicators are ranges of time during which a participant is active. You can activate an activity indicator multiple times simultaneously for the same participant. If a callback is provided, it will be executed and the indicator will be automatically deactivated afterwards.
 
 **params**:
 
@@ -260,10 +264,9 @@ If a callback function is provided as the second parameter, it will be executed 
 - 1: optional callback function to execute within this activation. After execution, deactivate is called automatically
 - `at`: the absolute y position where to activate. If set, takes priority over 'after'
 - `after`: the relative y offset from the current position. Only used if 'at' is not set
-- `defaultMargin`: the default margin to use if neither 'at' nor 'after' is set. Defaults to config.activateDistance
-- `xShift`: an optional shift on the x-axis when using multiple activity indicators simultaneously on the same instance. Defaults to `activityShift`
+- `xShift`: an optional shift on the x-axis when using multiple activity indicators simultaneously on the same participant. Defaults to `activityShift`
 
-**returns**: the created indicator
+**returns**: The created activity indicator
 
 ### actor
 
@@ -284,31 +287,52 @@ An instanced actor is an actor that has a stickman on top and an `instance` belo
 
 ### deactivate
 
-Deactivates the most recent indicator of the given participant
+Deactivates the most recent activity indicator at a calculated position.
 
 **params**:
 
 - 0: the participant to deactivate
 - `at`: the absolute y position where to deactivate. If set, takes priority over 'after'
 - `after`: the relative y offset from the current position. Only used if 'at' is not set
-- `defaultMargin`: the default margin to use if neither 'at' nor 'after' is set. Defaults to config.deactivateDistance
+
+**returns**: nothing
+
+### delay
+
+Delays the current position by a relative offset.
+
+**params**:
+
+- 0: the relative y offset from the current position
+
+**returns**: void
+
+### moveTo
+
+Moves to an absolute y position.
+
+**params**:
+
+- 0: the absolute y position to move to
+
+**returns**: void
 
 ### destroy
 
-Destroys the given participant.
+Destroys a participant at a calculated position.
 
 **params**:
 
 - 0: the participant to destroy
-- `crossSize`: The width and height of the cross to draw. Defaults to `destroyingCrossSize`
+- `at`: the absolute y position where to destroy. If set, takes priority over 'after'
+- `after`: the relative y offset from the current position. Only used if 'at' is not set
+- `crossSize`: the size of the cross to draw. Defaults to `destroyingCrossSize`
 
 **returns**: the created cross
 
-
-
 ### foundMessage
 
-Creates the dot signaling a message from an external source.
+Creates a found message. A found message is one you received from an external participant not included within the diagram.
 Should always be used inline as a message from something else:
 
 ```hylimo
@@ -318,57 +342,45 @@ sequenceDiagram {
 }
 ```
 
-Is exactly the same as `lostMessage`, the meaning comes from the direction in which you declare the message
+Is exactly the same as `lostMessage`, the meaning comes from the direction in which you declare the message.
 
 **params**:
 
-- `distance`: the optional distance of the message on the x axis. Defaults to `externalMessageDistance`
-- `diameter`: the optional diameter of the dot. Defaults to `externalMessageDiameter`
+- `distance`: the optional distance of the message on the x axis. Defaults to `externalMessageMargin`
 
-**returns**: the created dot
+**returns**: The created found message to be used with a message operator
 
 ### fragment
 
 Only available within the function of a `frame`.
-Adds a new fragment to this frame.
-A fragment is the following:
-
-- An optional line on top separating the previous fragment,
-- An optional name of this fragment (i.e. `if`, `else`, `while`, …)
-- An optional border around the name
-- An optional subtext, i.e. a condition
+Creates a new fragment inside this frame. A fragment is a separate section within the frame, optionally with name and subtext.
 
 **params**:
 
-- 0: The name of this fragment
+- 0: The text to display right of the main text, i.e. a condition for an else if
 - `at`: the absolute y position where to start the fragment. If set, takes priority over 'after'
 - `after`: the relative y offset from the current position. Only used if 'at' is not set
-- `defaultMargin`: the default margin to use if neither 'at' nor 'after' is set. Defaults to config.margin
-- `subtext`: The optional subtext of this fragment
-- `hasLine`: Whether to draw the line on top. Defaults to `true`
+- `subtextMargin`: the horizontal margin for the subtext label. Defaults to the config `frameSubtextMargin`
 
-**returns**: A data object containing all this data plus the newly created elements
+**returns**: The created fragment
 
 ### frame
 
-Creates a new frame. If a callback function is provided, it will be executed and the frame's bottom will be set to the current position after execution.
+Creates a frame. If a callback function is provided, it will be executed and the frame's bottom will be set to the current position after execution. Otherwise, you must specify bottomAt or bottomAfter.
 
 **params**:
 
-- 0: The name of this frame, i.e. `if` or `while`
+- 0: The text to display in the upper-left corner
 - 1: A function generating all fragments (additional compartments within the frame)
-- `subtext`: The optional subtext of this fragment, i.e. a condition
-- `topAt`: The absolute y position marking the upper border of the frame. If set, takes priority over 'topAfter'
-- `topAfter`: The relative y offset from the current position for the top border. Only used if 'topAt' is not set
-- `topDefaultMargin`: The default margin to use for the top if neither 'topAt' nor 'topAfter' is set. Defaults to frameMarginY
-- `right`: The participant marking the right border of the frame. The border will be extended by 'frameMarginX' to the right
-- `left`: The participant marking the left border of the frame. The border will be extended by 'frameMarginX' to the left
-- `marginX`: How much margin to use both left and right. Defaults to 'frameMarginX'
-- `marginY`: How much margin to use both on the top and bottom. Defaults to 'frameMarginY'
-- `marginLeft`: How much margin to use on the left. Defaults to 'marginX'
-- `marginTop`: How much margin to use on the top. Defaults to 'marginY'
-- `marginRight`: How much margin to use on the right. Defaults to 'marginX'
-- `marginBottom`: How much margin to use on the bottom. Defaults to 'marginY'
+- `subtext`: The text to display right of the main text, i.e. a condition for an if or while
+- `at`: The absolute y position marking the upper border of the frame. If set, takes priority over 'after'
+- `after`: The relative y offset from the current position for the top border. Only used if 'at' is not set
+- `right`: The participant marking the right border of the frame. The border will be extended by 'marginRight' to the right. Optional if a callback is provided
+- `left`: The participant marking the left border of the frame. The border will be extended by 'marginLeft' to the left. Optional if a callback is provided
+- `marginLeft`: How much margin to use on the left. Defaults to the config `frameMarginX`
+- `marginRight`: How much margin to use on the right. Defaults to the config `frameMarginX`
+- `marginBottom`: How much margin to use on the bottom. Defaults to the config `frameMarginBottom`
+- `subtextMargin`: the horizontal margin for the subtext label. Defaults to the config `frameSubtextMargin`
 
 **returns**: The created frame
 
@@ -378,16 +390,20 @@ Creates an instance which is an abstract concept of someone who participates in 
 
 **params**:
 
-- 0: the optional name of the instance. If the next argument is missing, this will be treated as the class name of the instance
-- 1: the optional class name of the instance
-- 2: A function determining the content of the instance
+- 0: the optional name of the instance, if not given, the second parameter must be provided
+- 1: the optional class name of this instance
+- 2: the callback function of this instance
+- `keywords`: the keywords of the instance
 - `below`: the optional participant below which this instance should be placed. If set, this instance will have the same x coordinate as the given value and the y coordinate of the current position
+- `at`: the absolute y position where to create the instance. If set, takes priority over 'after'
+- `after`: the relative y offset from the current position. Only used if 'at' is not set
+- `margin`: horizontal margin between this and the previous instance. Defaults to `participantMargin`
 
 **returns**: the created instance
 
 ### lostMessage
 
-Creates the dot signaling a message to an external source.
+Creates a lost message. A lost message is one you sent to an external participant not included within the diagram.
 Should always be used inline as a message to something else:
 
 ```hylimo
@@ -397,27 +413,50 @@ sequenceDiagram {
 }
 ```
 
-Is exactly the same as `foundMessage`, the meaning comes from the direction in which you declare the message
+Is exactly the same as `foundMessage`, the meaning comes from the direction in which you declare the message.
 
 **params**:
 
-- `distance`: the optional distance of the message on the x axis. Defaults to `externalMessageDistance`
-- `diameter`: the optional diameter of the dot. Defaults to `externalMessageDiameter`
+- `distance`: the optional distance of the message on the x axis. Defaults to `externalMessageMargin`
 
-**returns**: the created dot
+**returns**: The created lost message to be used with a message operator
 
 ### participant
 
-Creates an participant which is an abstract concept of someone who participates in the diagram.
+Creates a participant which is an abstract concept of someone who participates in the diagram.
 
 **params**:
 
-- 0: the optional name of the participant. If the next argument is missing, this will be treated as the class name of the participant
-- 1: the optional class name of the participant
-- 2: A function determining the content of the participant
+- 0: the optional name of the participant, if not given, the second parameter must be provided
+- 1: the optional class name of this participant
+- 2: the callback function of this participant
+- `keywords`: the keywords of the participant
 - `below`: the optional participant below which this participant should be placed. If set, this participant will have the same x coordinate as the given value and the y coordinate of the current position
+- `at`: the absolute y position where to create the participant. If set, takes priority over 'after'
+- `after`: the relative y offset from the current position. Only used if 'at' is not set
+- `margin`: horizontal margin between this and the previous participant. Defaults to `participantMargin`
 
-**returns**: the created participant
+**returns**: The created participant
+
+### participant.at
+
+Creates a virtual participant positioned at a specific position. If no position is provided, the participant itself will be used (positioned at its declaring position). Can be used to create messages to arbitrary points in time.
+
+**params**:
+
+- 0: the absolute y position where to pinpoint the participant. If not provided, uses the participant itself
+
+**returns**: the new virtual participant to use for i.e. messages
+
+### participant.after
+
+Creates a virtual participant positioned at an offset from the current position. Can be used to create messages to arbitrary points in time.
+
+**params**:
+
+- 0: the offset from the current position where to pinpoint the participant
+
+**returns**: the new virtual participant to use for i.e. messages
 
 ## Available class names
 
@@ -455,20 +494,25 @@ Sequence diagrams offer many features that are rather intended for experienced u
 
 A `frame` is a rectangle containing a section of the diagram, optionally with a text naming it and a subtext for further explanation.\
 To declare a frame, you provide a callback function that contains the interactions within the frame.\
-The frame automatically determines its height based on the current position after the callback executes.\
-You must also specify the left and right participants to determine the frame's width.
+The frame automatically determines its height based on the current position after the callback executes.
 
-Additionally, there are a couple of optional attributes:
+The frame also **automatically determines its width** by detecting which participants are used within it (through activations, messages, subframes, etc.).\
+You can optionally override this by explicitly specifying `left` and `right` participants.
 
-- `text`: the small text in the upper-left corner of the frame describing the type of frame, i.e. `if`, `loop`, or whatever else you want
-- `subtext`: Additional text next to the categorisation, i.e. a condition for the conditional or loop
-- `hasIcon`: Overrides if the border on the upper-left is shown. By default, it is `false` if `text` hasn't been set, and `true` if it is set
-- `topAt`/`topAfter`: Control the starting y position of the frame
-- `margin`: Sets the margin in pixels to all sides
-- `margin(X,Y)`: Sets the margin in pixels on both sides of this axis. Overrides `margin`. 
-- `margin(Top,Left,Bottom,Right)`: Sets the margin in pixels individually on this side. Overrides all other margins
+The first parameter is the text to display in the upper-left corner (e.g., `if`, `loop`, `while`).\
+The second parameter is a callback function containing the frame's content.
 
-Here's an example frame:
+Additionally, there are several optional parameters:
+
+- `subtext`: Additional text next to the main text, i.e. a condition for an if or while
+- `at`/`after`: Control the starting y position of the frame
+- `left`/`right`: Manually specify the participants marking the left and right borders. If omitted, the frame automatically detects the leftmost and rightmost participants used within it
+- `marginLeft`: Left margin in pixels. Defaults to `frameMarginX`
+- `marginRight`: Right margin in pixels. Defaults to `frameMarginX`
+- `marginBottom`: Bottom margin in pixels. Defaults to `frameMarginBottom`
+- `subtextMargin`: Horizontal margin for the subtext label. Defaults to `frameSubtextMargin`
+
+Here's an example frame that automatically detects which participants to include:
 
 ```hylimo
 sequenceDiagram {
@@ -476,19 +520,18 @@ sequenceDiagram {
     participant("Bob")
     participant("Charlie")
 
-    frame("while", left = Alice, right = Charlie, subtext = "[condition]") {
-        activate(Alice, after = 25)
-        Alice --> Bob with {
-            label("Ping", 0.25, -5)
-        }
-        deactivate(Alice)
+    frame("while", subtext = "condition") {
+        Alice --> Bob
     }
 }
 ```
 
+The frame automatically includes Alice and Bob based on the interactions within it.
+
 ### Nested Frames
 
-You can nest frames by simply placing one frame inside another's callback function:
+You can nest frames by simply placing one frame inside another's callback function.\
+Both frames will automatically detect their width based on the participants used:
 
 ```hylimo
 sequenceDiagram {
@@ -497,23 +540,41 @@ sequenceDiagram {
     Dave = actor("Dave")
     last = participant("last")
 
-    frame("outer", left = alice, right = last, marginRight = 40, marginTop = 25) {
+    frame("outer", marginRight = 40) {
         activate(alice, after = 25)
         activate(last, after = 25)
         destroy(bob)
-        Cat = participant("Cat", below = bob)
+        Cat = participant("Cat", below = bob, after = 40)
         alice --> Cat
-        
-        frame("if", left = Dave, right = last, marginRight = 10, marginY = 12.4, subtext = "[finished]") {
-            activate(Dave, after = 25)
+
+        frame("if", marginRight = 10, marginBottom = 12.4, subtext = "finished") {
             Dave <<-- last with {
                 label("notify", 0.5)
             }
-            deactivate(Dave)
         }
-        
+
         deactivate(alice)
         deactivate(last)
+    }
+}
+```
+
+### Manual Frame Width Specification
+
+If you need precise control over which participants are included in a frame, you can manually specify `left` and `right`.\
+This is useful when you want to include participants that aren't directly interacted with:
+
+```hylimo
+sequenceDiagram {
+    participant("Alice")
+    participant("Bob")
+    participant("Charlie")
+    participant("Dave")
+
+    // Frame will span from Alice to Dave, even though only Bob is used
+    frame("note", left = Alice, right = Dave, subtext = "Manual width control") {
+        activate(Bob)
+        deactivate(Bob, after = 25)
     }
 }
 ```
@@ -521,8 +582,13 @@ sequenceDiagram {
 ### Frames with fragments
 
 A frame can contain multiple fragments.\
-A fragment is a separate section inside the frame, i.e. an `else if` for an `if`.\
-Fragments are created by calling the `fragment` function within the frame's callback:
+A fragment is a separate section inside the frame, i.e. an `else` for an `if` or different parallel branches.\
+Fragments are created by calling the `fragment` function within the frame's callback.
+
+The `fragment` function takes the subtext as its first parameter (e.g., a condition for an `else if`), and supports optional parameters:
+
+- `at`/`after`: Control the y position where the fragment starts
+- `subtextMargin`: Horizontal margin for the subtext label
 
 ```hylimo
 sequenceDiagram {
@@ -531,20 +597,18 @@ sequenceDiagram {
     Dave = actor("Dave")
     last = participant("last")
 
-    frame("if", left = alice, right = last, subtext = "[work to do]", marginRight = 40, marginTop = 25) {
+    frame("if", subtext = "work to do", marginRight = 40) {
         activate(alice, after = 25)
         activate(last, after = 25)
         destroy(bob)
-        Cat = participant("Cat", below = bob)
+        Cat = participant("Cat", below = bob, after = 40)
         alice --> Cat
-        
-        fragment("else if", after = 50, subtext = "[environment variable set]")
-        activate(Dave, after = 25)
+
+        fragment("environment variable set", after = 50)
         Dave <<-- last with {
             label("notify", 0.5)
         }
-        deactivate(Dave)
-        
+
         fragment("else", after = 25)
         deactivate(alice)
         deactivate(last)
@@ -568,10 +632,10 @@ sequenceDiagram {
     }
 
     other = instance("other")
-    activate(user, after = 25)
+    activate(user)
     activate(other)
-    user -->> other
-    deactivate(user)
+    user.after(10) -->> other
+    deactivate(user, after = 10)
     deactivate(other)
 }
 ```
@@ -593,21 +657,19 @@ sequenceDiagram {
     Dave = actor("Dave")
     last = participant("last")
 
-    frame("alt", left = alice, right = last, subtext = "[work to do]", marginRight = 40, marginTop = 25) {
+    frame("alt", subtext = "work to do", marginRight = 40) {
         activate(alice, after = 25)
         activate(last, after = 25)
         destroy(bob)
-        Cat = participant("Cat", below = bob)
+        Cat = participant("Cat", below = bob, after = 40)
         alice --> Cat
-        
-        fragment("[alt]", after = 50, subtext = "[environment variable set]")
-        activate(Dave, after = 25)
+
+        fragment("environment variable set", after = 50)
         Dave <<-- last with {
             label("notify", 0.5)
         }
-        deactivate(Dave)
-        
-        fragment("[alt]", after = 25, subtext = "[else]")
+
+        fragment("else", after = 25)
         deactivate(alice)
         deactivate(last)
     }
@@ -627,21 +689,19 @@ sequenceDiagram {
     Dave = actor("Dave")
     last = participant("last")
 
-    frame("opt", left = alice, right = last, subtext = "[status == pending]", marginRight = 40, marginTop = 25) {
+    frame("opt", subtext = "status == pending", marginRight = 40) {
         activate(alice, after = 25)
         activate(last, after = 25)
         destroy(bob)
-        Cat = participant("Cat", below = bob)
+        Cat = participant("Cat", below = bob, after = 40)
         alice --> Cat
-        
-        fragment("[opt]", after = 50, subtext = "[status == executing]")
-        activate(Dave, after = 25)
+
+        fragment("status == executing", after = 50)
         Dave <<-- last with {
             label("notify", 0.5)
         }
-        deactivate(Dave)
-        
-        fragment("[opt]", after = 25, subtext = "[status == terminated]")
+
+        fragment("status == terminated", after = 25)
         deactivate(alice)
         deactivate(last)
     }
@@ -663,23 +723,16 @@ sequenceDiagram {
     participant("Bob")
     participant("Charlie")
 
-    frame("loop", left = Alice, right = Charlie, subtext = "[message in messages]") {
-        activate(Alice, after = 25)
+    frame("loop", subtext = "message in messages") {
         Alice --> Bob with {
             label("Ping", 0.25, -5)
         }
-        
-        frame("break", left = Alice, right = Charlie, subtext = "[all messages have been sent]", marginX = 5) {
-            activate(Alice, after = 15)
-            deactivate(Alice)
-        }
-        
-        activate(Alice, after = 25)
+
+        frame("break", subtext = "all messages have been sent", left = Alice, right = Charlie, after = 15)
+
         Alice -->> Charlie with {
             label("sendMessage", 0.25)
         }
-        deactivate(Alice)
-        deactivate(Alice)
     }
 }
 ```
@@ -696,18 +749,18 @@ sequenceDiagram {
     participant("Bob")
     participant("Charlie")
 
-    frame("par", left = Alice, right = Charlie) {
+    frame("par") {
         activate(Alice, after = 25)
         Alice --> Bob with {
             label("Ping", 0.25, -5)
         }
-        
-        fragment("[par]", after = 25)
+
+        fragment(after = 25)
         Alice <-- Bob with {
             label("Ping", 0.25, -5)
         }
-        
-        fragment("[par]", after = 25)
+
+        fragment(after = 25)
         Bob --> Charlie
         deactivate(Alice)
     }
@@ -730,8 +783,8 @@ sequenceDiagram {
     Alice --> Bob with {
         label("Ping", 0.25, -5)
     }
-    
-    frame("ref", left = Alice, right = Bob, subtext = "handle errors") {
+
+    frame("ref", subtext = "handle errors", right = Bob, after = 10) {
         activate(Alice, after = 25)
         deactivate(Alice)
     }
@@ -753,7 +806,6 @@ sequenceDiagram(enableDebugging = true) {
     activate(user, after = 25)
     activate(ourShop)
     user --> ourShop
-    deactivate(user)
 
     activate(Cart, after = 25)
     ourShop --> Cart
@@ -762,15 +814,14 @@ sequenceDiagram(enableDebugging = true) {
     ourShop <.. Cart
     deactivate(Cart)
 
-    frame("if", left = user, right = ourShop, subtext = "[response successful]", margin=30) {
+    frame("if", subtext = "response successful") {
         activate(Payment, after = 50)
         ourShop ..> Payment
         deactivate(Payment)
-        
-        fragment("else", after = 40, subtext = "[nothing was done]")
+
+        fragment("nothing was done", after = 40)
     }
 
-    activate(user, after = 30)
     user <.. ourShop
     deactivate(ourShop)
     deactivate(ourShop)
