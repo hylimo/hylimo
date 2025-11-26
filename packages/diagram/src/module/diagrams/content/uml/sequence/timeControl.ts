@@ -15,7 +15,7 @@ export const timeControlModule = ContentModule.create(
             fun(
                 `
                     (offset) = args
-                    position = scope.internal.calculatePosition(after = offset, priority = 3)
+                    this.position = scope.internal.calculatePosition(after = offset, priority = 3)
                     scope.internal.updateSequenceDiagramPosition(position)
                 `,
                 {
@@ -31,7 +31,7 @@ export const timeControlModule = ContentModule.create(
             fun(
                 `
                     (position) = args
-                    calculatedPosition = scope.internal.calculatePosition(at = position)
+                    this.calculatedPosition = scope.internal.calculatePosition(at = position)
                     scope.internal.updateSequenceDiagramPosition(calculatedPosition)
                 `,
                 {

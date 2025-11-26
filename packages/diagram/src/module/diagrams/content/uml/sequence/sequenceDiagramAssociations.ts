@@ -14,7 +14,6 @@ export const sequenceDiagramAssociationsModule = ContentModule.create(
         `
             this.create = scope.internal.createConnectionOperator
 
-            // synchronous message
             scope.-->> = create(
                 "-->>",
                 endMarkerFactory = scope.defaultMarkers.filledTriangle
@@ -24,7 +23,6 @@ export const sequenceDiagramAssociationsModule = ContentModule.create(
                 startMarkerFactory = scope.defaultMarkers.filledTriangle,
             )
 
-            // synchronous return message
             scope["..>>"] = create(
                 "..>>",
                 endMarkerFactory = scope.defaultMarkers.filledTriangle,
@@ -36,7 +34,6 @@ export const sequenceDiagramAssociationsModule = ContentModule.create(
                 class = list("dashed-connection")
             )
 
-            // destruction message
             scope["!.."] = create(
                 "!..",
                 startMarkerFactory = scope.defaultMarkers.cross,

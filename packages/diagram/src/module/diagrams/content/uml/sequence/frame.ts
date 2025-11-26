@@ -28,7 +28,7 @@ export const sequenceDiagramFrameModule = ContentModule.create(
                 this.labelMarginWithDefault = labelMargin ?? scope.internal.config.frameSubtextMargin
                 this.labelReferencePos = args.labelReferencePos
 
-                fragment = [text = fragmentText, subtext = fragmentSubtext, hasLine = hasLine]
+                this.fragment = [subtext = fragmentSubtext, hasLine = hasLine]
 
                 if(args.hasLine) {
                     this.lineStartPos = scope.rpos(parent.topLeftPos, 0, fragmentOffset)
@@ -72,15 +72,15 @@ export const sequenceDiagramFrameModule = ContentModule.create(
             fun(
                 [
                     `
-                        argsCopy = args
-
                         (frameText, fragmentFunction) = args
-                        fragmentFunction = fragmentFunction ?? {}
 
-                        subtext = args.subtext
+                        this.argsCopy = args
+                        this.fragmentFunction = fragmentFunction ?? {}
 
-                        at = args.at
-                        after = args.after
+                        this.subtext = args.subtext
+
+                        this.at = args.at
+                        this.after = args.after
                         
                         this.position = scope.internal.calculatePosition(at = at, after = after, priority = 3)
                         scope.internal.updateSequenceDiagramPosition(position)
@@ -95,7 +95,7 @@ export const sequenceDiagramFrameModule = ContentModule.create(
 
                         if ((left != null) && (right != null)) {
                             if(left.x > right.x) {
-                                temp = left
+                                this.temp = left
                                 left = right
                                 right = temp
                             }
@@ -212,7 +212,6 @@ export const sequenceDiagramFrameModule = ContentModule.create(
                     `
                         if (fragmentFunction != null) {
                             fragmentFunction.callWithScope([fragment = sequenceDiagramFragmentFunction, parentArgs = argsCopy, parent = frameElement])
-                        
                             scope.internal.activeFrames = scope.internal.activeFrames.filter { it != frameElement }
                         }
 
@@ -224,7 +223,7 @@ export const sequenceDiagramFrameModule = ContentModule.create(
                             }
                         }
                         
-                        bottomPosition = scope.internal.calculatePosition(priority = 3) + (marginBottom ?? scope.internal.config.frameMarginBottom)
+                        this.bottomPosition = scope.internal.calculatePosition(priority = 3) + (marginBottom ?? scope.internal.config.frameMarginBottom)
                         
                         this.bottomLeftPos = scope.rpos(topLeftPos, 0, bottomPosition - position)
                         this.bottomRightPos = scope.rpos(topRightPos, bottomLeftPos)
@@ -259,7 +258,7 @@ export const sequenceDiagramFrameModule = ContentModule.create(
                             if (marginBottom != null) { "dy" } { "(dy + \${scope.internal.config.frameMarginBottom})" }
                         )
                         
-                        frameBorder = scope.internal.createConnection(
+                        this.frameBorder = scope.internal.createConnection(
                             topMiddlePos,
                             topMiddlePos,
                             list("frame-border"),

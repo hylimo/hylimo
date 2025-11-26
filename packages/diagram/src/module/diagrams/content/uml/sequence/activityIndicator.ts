@@ -18,30 +18,33 @@ export const activityIndicatorModule = ContentModule.create(
             "activate",
             fun(
                 `
-                    originalArgs = args
                     (participant, callback) = args
+                    this.originalArgs = args
 
-                    at = args.at
-                    after = args.after
+                    this.at = args.at
+                    this.after = args.after
                     
-                    position = scope.internal.calculatePosition(at = at, after = after, priority = 1)
+                    this.position = scope.internal.calculatePosition(at = at, after = after, priority = 1)
                     scope.internal.updateSequenceDiagramPosition(position)
                     scope.internal.registerTargetPosition(scope.internal.config.strokeMargin, 1)
 
                     if(participant.alive != true) {
                         error("participant has already been destroyed and thus cannot be activated anymore")
                     }
+
+                    this.lastLeftRight = if(participant.leftRightPositions.length > 0) {
+                        participant.leftRightPositions.get(participant.leftRightPositions.length - 1)
+                    } {
+                        [left = 0, right = 0, position = 0]
+                    }
                     
-                    if((participant.leftRightPositions != null) && (participant.leftRightPositions.length > 0)) {
-                        lastLeftRight = participant.leftRightPositions.get(participant.leftRightPositions.length - 1)
-                        if(position < lastLeftRight.position) {
-                            error("Cannot activate participant before the last recorded position")
-                        }
+                    if(position < lastLeftRight.position) {
+                        error("Cannot activate participant before the last recorded position")
                     }
 
-                    activityIndicators = participant.activeActivityIndicators
-                    defaultLineshift = scope.internal.config.activityShift
-                    xShift = args.xShift
+                    this.activityIndicators = participant.activeActivityIndicators
+                    this.defaultLineshift = scope.internal.config.activityShift
+                    this.xShift = args.xShift
 
                     xShift = if(xShift == null) {
                         if(activityIndicators.length == 0) {
@@ -56,14 +59,13 @@ export const activityIndicatorModule = ContentModule.create(
                         activityIndicators.get(activityIndicators.length - 1).xShift + xShift
                     }
 
-                    height = scope.internal.config.minActivityHeight
-                    width = scope.internal.config.activityWidth
+                    this.width = scope.internal.config.activityWidth
 
                     activityIndicatorElement = canvasElement(
                         contents = list(rect(class = list("activity-indicator"))),
                         class = list("activity-indicator-element"),
                         width = width,
-                        height = height,
+                        height = scope.internal.config.minActivityHeight,
                         class = list("activity-indicator-element")
                     )
 
@@ -79,12 +81,6 @@ export const activityIndicatorModule = ContentModule.create(
 
                     scope.internal.registerCanvasElement(activityIndicatorElement, args, args.self)
                     participant.activeActivityIndicators += activityIndicatorElement
-                    
-                    lastLeftRight = if(participant.leftRightPositions.length > 0) {
-                        participant.leftRightPositions.get(participant.leftRightPositions.length - 1)
-                    } {
-                        [left = 0, right = 0]
-                    }
                     
                     participant.leftRightPositions += [
                         position = position,
@@ -134,21 +130,18 @@ export const activityIndicatorModule = ContentModule.create(
             fun(
                 `
                     (participant) = args
-                    if(participant == null) {
-                        error("Cannot deactivate a non-existing participant")
-                    }
 
                     if(participant.activeActivityIndicators.length == 0) {
                         error("Cannot deactivate participant as it has not been activated")
                     }
 
-                    at = args.at
-                    after = args.after
+                    this.at = args.at
+                    this.after = args.after
 
-                    activityIndicator = participant.activeActivityIndicators.remove()
+                    this.activityIndicator = participant.activeActivityIndicators.remove()
                     
-                    calculatedHeight = scope.internal.calculatePosition(at = at, after = after, priority = 2) - activityIndicator.startY
-                    position = activityIndicator.startY + Math.max(calculatedHeight, scope.internal.config.minActivityHeight)
+                    this.calculatedHeight = scope.internal.calculatePosition(at = at, after = after, priority = 2) - activityIndicator.startY
+                    this.position = activityIndicator.startY + Math.max(calculatedHeight, scope.internal.config.minActivityHeight)
                     scope.internal.updateSequenceDiagramPosition(position)
                     scope.internal.registerTargetPosition(scope.internal.config.deactivateMargin, 2)
 

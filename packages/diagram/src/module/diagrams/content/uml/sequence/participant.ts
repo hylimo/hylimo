@@ -14,7 +14,7 @@ export const participantModule = ContentModule.create(
     [],
     [
         `
-            _participant = scope.internal.createClassifier(
+            this._participant = scope.internal.createClassifier(
                 "participant",
                 list(
                     scope.internal.defaultTitleContentHandler

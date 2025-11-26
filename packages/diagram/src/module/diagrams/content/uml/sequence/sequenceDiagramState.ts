@@ -36,8 +36,8 @@ export const sequenceDiagramStateModule = ContentModule.create(
         
         scope.internal.updateSequenceDiagramPosition = {
             (newPosition) = args
-            previousPosition = scope.internal.currentSequenceDiagramPosition
-            deltaY = newPosition - previousPosition
+            this.previousPosition = scope.internal.currentSequenceDiagramPosition
+            this.deltaY = newPosition - previousPosition
             scope.internal.currentSequenceDiagramPosition = newPosition
             updateLifelineTargetPos(newPosition)
         }
@@ -50,17 +50,17 @@ export const sequenceDiagramStateModule = ContentModule.create(
         }
         
         scope.internal.calculatePosition = {
-            at = args.at
-            after = args.after
-            priority = args.priority
+            this.at = args.at
+            this.after = args.after
+            this.priority = args.priority
             
-            calculatedPosition = if(at != null) {
+            this.calculatedPosition = if(at != null) {
                 scope.internal.targetPositions = list(null, null, null)
                 at
             } {
                 maxTargetPosition = null
                 maxPriority = if(priority != null) { priority } { scope.internal.targetPositions.length }
-                i = 0
+                this.i = 0
                 while { i < maxPriority } {
                     targetPos = scope.internal.targetPositions.get(i)
                     if((targetPos != null) && ((maxTargetPosition == null) || (targetPos > maxTargetPosition))) {

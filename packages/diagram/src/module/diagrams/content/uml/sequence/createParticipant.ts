@@ -17,10 +17,10 @@ export const createParticipantMoule = ContentModule.create(
         `
             scope.internal.findParticipantLeftRightPosition = {
                 (participant, position, field) = args
-                offset = 0
-                i = participant.leftRightPositions.length - 1
+                this.offset = 0
+                this.i = participant.leftRightPositions.length - 1
                 while {i >= 0} {
-                    entry = participant.leftRightPositions.get(i)
+                    this.entry = participant.leftRightPositions.get(i)
                     if(entry.position <= position) {
                         offset = entry.get(field)
                         i = -1
@@ -121,21 +121,23 @@ export const createParticipantMoule = ContentModule.create(
                             // To calculate a position specific coordinate, we must first know how much space the active activity indicators take up
                             // Calculate the left coordinate of this participant at a given position - especially for when there are currently activity indicators
                             participantElement.left = {
-                                position = scope.internal.currentSequenceDiagramPosition
+                                this.position = scope.internal.calculatePosition(priority = 3)
+                                scope.internal.updateSequenceDiagramPosition(position)
                                 if(position == participantElement.declaringPos) {
                                     scope.lpos(participantElement, 0.5)
                                 } {
-                                    leftOffset = scope.internal.findParticipantLeftRightPosition(participantElement, position, "left")
+                                    this.leftOffset = scope.internal.findParticipantLeftRightPosition(participantElement, position, "left")
                                     scope.rpos(participantElement.referencePos, leftOffset, position)
                                 }
                             }
                             
                             participantElement.right = {
-                                position = scope.internal.currentSequenceDiagramPosition
+                                this.position = scope.internal.calculatePosition(priority = 3)
+                                scope.internal.updateSequenceDiagramPosition(position)
                                 if(position == participantElement.declaringPos) {
                                     scope.lpos(participantElement, 0)
                                 } {
-                                    rightOffset = scope.internal.findParticipantLeftRightPosition(participantElement, position, "right")
+                                    this.rightOffset = scope.internal.findParticipantLeftRightPosition(participantElement, position, "right")
                                     scope.rpos(participantElement.referencePos, rightOffset, position)
                                 }
                             }
@@ -166,35 +168,35 @@ export const createParticipantMoule = ContentModule.create(
                             "at",
                             fun(
                                 `
-                                    position = args.at ?? args[0]
+                                    (position) = args
                                     
-                                    participant = participantElement
+                                    this.participant = participantElement
                                     
-                                    left = {
+                                    this.left = {
                                         if(position == null) {
                                             scope.lpos(participant, 0.5)
                                         } {
-                                            calculatedPosition = scope.internal.calculatePosition(at = position)
+                                            calculatedPosition = scope.internal.calculatePosition(at = position, priority = 3)
                                             scope.internal.updateSequenceDiagramPosition(calculatedPosition)
-                                            leftOffset = scope.internal.findParticipantLeftRightPosition(participant, calculatedPosition, "left")
+                                            this.leftOffset = scope.internal.findParticipantLeftRightPosition(participant, calculatedPosition, "left")
                                             this.pos = scope.rpos(participant.referencePos, leftOffset, calculatedPosition)
                                             pos.edits["${DefaultEditTypes.MOVE_Y}"] = createAdditiveEdit(calculatedPosition, "dy")
                                             pos
                                         }
                                     }
-                                    right = {
+                                    this.right = {
                                         if(position == null) {
                                             scope.lpos(participant, 0)
                                         } {
-                                            calculatedPosition = scope.internal.calculatePosition(at = position)
+                                            calculatedPosition = scope.internal.calculatePosition(at = position, priority = 3)
                                             scope.internal.updateSequenceDiagramPosition(calculatedPosition)
-                                            rightOffset = scope.internal.findParticipantLeftRightPosition(participant, calculatedPosition, "right")
+                                            this.rightOffset = scope.internal.findParticipantLeftRightPosition(participant, calculatedPosition, "right")
                                             this.pos = scope.rpos(participant.referencePos, rightOffset, calculatedPosition)
                                             pos.edits["${DefaultEditTypes.MOVE_Y}"] = createAdditiveEdit(calculatedPosition, "dy")
                                             pos
                                         }
                                     }
-                                    scope.virtualParticipant(left = left, right = right, x = participant.x, referencePos = participant.referencePos)
+                                    scope.virtualParticipant(left = left, right = right, x = participant.x)
                                 `,
                                 {
                                     docs: "Creates a virtual participant positioned at a specific position. If no position is provided, the participant itself will be used (positioned at its declaring position). Can be used to create messages to arbitrary points in time",
@@ -216,25 +218,25 @@ export const createParticipantMoule = ContentModule.create(
                                 `
                                     (offset) = args
                                     
-                                    participant = participantElement
+                                    this.participant = participantElement
                                     
-                                    left = {
-                                        calculatedPosition = scope.internal.calculatePosition(after = offset)
+                                    this.left = {
+                                        calculatedPosition = scope.internal.calculatePosition(after = offset, priority = 3)
                                         scope.internal.updateSequenceDiagramPosition(calculatedPosition)
                                         leftOffset = scope.internal.findParticipantLeftRightPosition(participant, calculatedPosition, "left")
                                         this.pos = scope.rpos(participant.referencePos, leftOffset, calculatedPosition)
                                         pos.edits["${DefaultEditTypes.MOVE_Y}"] = createAdditiveEdit(calculatedPosition, "dy")
                                         pos
                                     }
-                                    right = {
-                                        calculatedPosition = scope.internal.calculatePosition(after = offset)
+                                    this.right = {
+                                        calculatedPosition = scope.internal.calculatePosition(after = offset, priority = 3)
                                         scope.internal.updateSequenceDiagramPosition(calculatedPosition)
                                         rightOffset = scope.internal.findParticipantLeftRightPosition(participant, calculatedPosition, "right")
                                         this.pos = scope.rpos(participant.referencePos, rightOffset, calculatedPosition)
                                         pos.edits["${DefaultEditTypes.MOVE_Y}"] = createAdditiveEdit(calculatedPosition, "dy")
                                         pos
                                     }
-                                    scope.virtualParticipant(left = left, right = right, x = participant.x, referencePos = participant.referencePos)
+                                    scope.virtualParticipant(left = left, right = right, x = participant.x)
                                 `,
                                 {
                                     docs: "Creates a virtual participant positioned at an offset from the current position. Can be used to create messages to arbitrary points in time",
@@ -287,24 +289,14 @@ export const createParticipantMoule = ContentModule.create(
             "virtualParticipant",
             fun(
                 `
-                    lifeline = canvasElement()
-                    left = args.left
-                    right = args.right
-                    x = args.x ?? 0
-                    referencePos = args.referencePos
-                    [name = "artificially created participant", lifeline = lifeline, activeActivityIndicators = list(), declaringPos = null, alive = false, x = x, referencePos = referencePos, left = left, right = right, participantType = "virtualParticipant"]
+                    [x = args.x, left = args.left, right = args.right, participantType = "virtualParticipant"]
                 `,
                 {
                     docs: "Creates a virtual participant that is not visible in the diagram but can be used for things that need to differentiate between a 'left' and a 'right' position",
                     params: [
                         ["left", "a function producing the left point of this participant", functionType],
                         ["right", "a function producing the right point of this participant", functionType],
-                        [
-                            "x",
-                            "the index of this participant, if present. Should be set if you want the detection if a message has been sent by the same participant to work correctly",
-                            optional(numberType)
-                        ],
-                        ["referencePos", "the reference position for this participant", optional(canvasContentType)]
+                        ["x", "the index of this participant", numberType]
                     ],
                     returns: "The created virtual participant",
                     snippet: "(left = $1, right = $2)"

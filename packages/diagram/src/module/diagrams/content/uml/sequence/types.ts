@@ -54,7 +54,7 @@ export const participantType = namedType(
             ["left", functionType],
             ["right", functionType],
             ["alive", booleanType],
-            ["participantType", or(literal("participant"), literal("virtualParticipant"))]
+            ["participantType", literal("participant")]
         ])
     ),
     "UML sequence diagram participant (instance or actor)"
