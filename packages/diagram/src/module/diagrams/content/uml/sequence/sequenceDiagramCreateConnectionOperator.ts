@@ -1,3 +1,4 @@
+import { DefaultEditTypes } from "@hylimo/diagram-common";
 import { ContentModule } from "../../contentModule.js";
 
 /**
@@ -30,8 +31,8 @@ export const sequenceDiagramCreateConnectionOperatorModule = ContentModule.creat
                     // This case occurs the moment the user moves 'instruction(a);' from the original code 'instruction(a); instruction(b); a --> b' one line down, so can happen frequently
                     this.switchSides = (a.x != null) && (b.x != null) && (b.x < a.x)
 
-                    this.aIsParticipant = a.participantType == "participant"
-                    this.bIsParticipant = b.participantType == "participant"
+                    this.aIsParticipant = a.participantType != null
+                    this.bIsParticipant = b.participantType != null
                     if (a.participantType != null) {
                         scope.internal.registerFrameInclusion(a, 0, 0)
                     }
@@ -71,11 +72,19 @@ export const sequenceDiagramCreateConnectionOperatorModule = ContentModule.creat
                     if((a.externalMessageType != null) && (b.externalMessageType != null)) {
                         scope.error("Both left and right side of the relation calculate their position based on the counterpart. Thus, no position can be calculated for \${a.externalMessageType} message on the left and \${b.externalMessageType} on the right")
                     } 
-                    if((a.externalMessageType != null) && (a.distance != null)) {
-                        a.pos = scope.rpos(end, a.distance * -1 /* Go left */, 0)
+                    if((a.externalMessageType != null)) {
+                        a.pos = scope.rpos(end, (a.distance ?? scope.internal.config.externalMessageMargin) * -1, 0)
+                        a.pos.edits["${DefaultEditTypes.MOVE_X}"] = createAdditiveEdit(
+                            a.distance,
+                            if(a.distance != null) { "-dx" } { "(\${scope.internal.config.externalMessageMargin} - dx)" }
+                        )
                     }
-                    if((b.externalMessageType != null) && (b.distance != null)) {
-                        b.pos = scope.rpos(start, b.distance, 0)
+                    if((b.externalMessageType != null)) {
+                        b.pos = scope.rpos(start, b.distance ?? scope.internal.config.externalMessageMargin, 0)
+                        b.pos.edits["${DefaultEditTypes.MOVE_X}"] = createAdditiveEdit(
+                            b.distance,
+                            if(b.distance != null) { "dx" } { "(\${scope.internal.config.externalMessageMargin} + dx)" }
+                        )
                     }
 
                     if(aIsParticipant || bIsParticipant) {

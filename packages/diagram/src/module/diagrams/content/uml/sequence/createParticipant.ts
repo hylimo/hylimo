@@ -123,22 +123,28 @@ export const createParticipantMoule = ContentModule.create(
                             participantElement.left = {
                                 this.position = scope.internal.calculatePosition(priority = 3)
                                 scope.internal.updateSequenceDiagramPosition(position)
+                                this.self = args.self
                                 if(position == participantElement.declaringPos) {
                                     scope.lpos(participantElement, 0.5)
                                 } {
                                     this.leftOffset = scope.internal.findParticipantLeftRightPosition(participantElement, position, "left")
-                                    scope.rpos(participantElement.referencePos, leftOffset, position)
+                                    this.newPos = scope.rpos(participantElement.referencePos, leftOffset, position)
+                                    newPos.edits["${DefaultEditTypes.MOVE_Y}"] = createAppendEdit(self, "'.after(' & dy & ')'")
+                                    newPos
                                 }
                             }
                             
                             participantElement.right = {
                                 this.position = scope.internal.calculatePosition(priority = 3)
                                 scope.internal.updateSequenceDiagramPosition(position)
+                                this.self = args.self
                                 if(position == participantElement.declaringPos) {
                                     scope.lpos(participantElement, 0)
                                 } {
                                     this.rightOffset = scope.internal.findParticipantLeftRightPosition(participantElement, position, "right")
-                                    scope.rpos(participantElement.referencePos, rightOffset, position)
+                                    this.newPos = scope.rpos(participantElement.referencePos, rightOffset, position)
+                                    newPos.edits["${DefaultEditTypes.MOVE_Y}"] = createAppendEdit(self, "'.after(' & dy & ')'")
+                                    newPos
                                 }
                             }
 
@@ -225,7 +231,7 @@ export const createParticipantMoule = ContentModule.create(
                                         scope.internal.updateSequenceDiagramPosition(calculatedPosition)
                                         leftOffset = scope.internal.findParticipantLeftRightPosition(participant, calculatedPosition, "left")
                                         this.pos = scope.rpos(participant.referencePos, leftOffset, calculatedPosition)
-                                        pos.edits["${DefaultEditTypes.MOVE_Y}"] = createAdditiveEdit(calculatedPosition, "dy")
+                                        pos.edits["${DefaultEditTypes.MOVE_Y}"] = createAdditiveEdit(offset, "dy")
                                         pos
                                     }
                                     this.right = {
@@ -233,7 +239,7 @@ export const createParticipantMoule = ContentModule.create(
                                         scope.internal.updateSequenceDiagramPosition(calculatedPosition)
                                         rightOffset = scope.internal.findParticipantLeftRightPosition(participant, calculatedPosition, "right")
                                         this.pos = scope.rpos(participant.referencePos, rightOffset, calculatedPosition)
-                                        pos.edits["${DefaultEditTypes.MOVE_Y}"] = createAdditiveEdit(calculatedPosition, "dy")
+                                        pos.edits["${DefaultEditTypes.MOVE_Y}"] = createAdditiveEdit(offset, "dy")
                                         pos
                                     }
                                     scope.virtualParticipant(left = left, right = right, x = participant.x)

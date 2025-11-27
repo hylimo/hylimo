@@ -11,21 +11,20 @@ import { ContentModule } from "../../contentModule.js";
  */
 function message(type: string): string {
     return `
-            distance = args.distance ?? scope.internal.config.externalMessageMargin
-            diameter = scope.internal.config.externalMessageDiameter
-            dot = canvasElement(
-                contents = list(ellipse(class = list("${type}-message"))),
-                width = diameter,
-                height = diameter,
-                class = list("${type}-message-element")
-            )
+        diameter = scope.internal.config.externalMessageDiameter
+        dot = canvasElement(
+            contents = list(ellipse(class = list("${type}-message"))),
+            width = diameter,
+            height = diameter,
+            class = list("${type}-message-element")
+        )
 
-            // We need to change the properties of the canvasElement directly and return it as a connection requires a point or element as parameter
-            dot.distance = distance
-            dot.externalMessageType = "${type}"
-            scope.internal.registerCanvasElement(dot, args, args.self)
-            dot
-        `;
+        // We need to change the properties of the canvasElement directly and return it as a connection requires a point or element as parameter
+        dot.distance = args.distance
+        dot.externalMessageType = "${type}"
+        scope.internal.registerCanvasElement(dot, args, args.self)
+        dot
+    `;
 }
 
 /**
@@ -43,11 +42,11 @@ export const lostFoundMessageModule = ContentModule.create(
             scope.styles {
                 cls("found-message") {
                     fill = var("primary")
-                    stroke = "unset"
+                    stroke = unset
                 }
                 cls("lost-message") {
                     fill = var("primary")
-                    stroke = "unset"
+                    stroke = unset
                 }
                 cls("found-message-element") {
                     vAlign = "center"

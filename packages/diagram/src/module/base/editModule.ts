@@ -300,6 +300,33 @@ export const editModule = InterpreterModule.create(
             )
         ),
         assign(
+            "createAppendEdit",
+            jsFun(
+                (args, context) => {
+                    const value = args.getField(0, context);
+                    const target = value.source;
+                    if (!target?.metadata?.isEditable) {
+                        return context.null;
+                    }
+                    const expression = args.getField(1, context).value;
+                    return generateEdit(
+                        target as Expression<any>,
+                        { value: context.newString(assertString(expression)), source: undefined },
+                        "append",
+                        context
+                    );
+                },
+                {
+                    docs: "Creates an append edit",
+                    params: [
+                        [0, "the target to append to"],
+                        [1, "the expression to append"]
+                    ],
+                    returns: "the created edit or null if the target is not editable"
+                }
+            )
+        ),
+        assign(
             "nameToExpression",
             jsFun(
                 (args, context) => {
