@@ -57,7 +57,7 @@ Now that we`ve populated our `x` axis, let`s move on with the `y` axis.
 The `y` axis is managed automatically by Hylimo as you add interactions to your diagram.\
 Each interaction (like `activate`, message sending, or frame creation) has a margin that determines its vertical spacing:
 
-- By default, each element uses a **configurable margin** that is applied *after* the element (see [Config properties](#config-properties) for available margin settings)
+- By default, each element uses a **configurable margin** that is applied _after_ the element (see [Config properties](#config-properties) for available margin settings)
 - The actual margin depends on the next declared element - different elements cause different margins to be used
 - Use `at` to specify an **absolute y position**, completely overriding the automatic margin calculation
 - Use `after` to specify a **relative offset** that is **added to** the default margin
