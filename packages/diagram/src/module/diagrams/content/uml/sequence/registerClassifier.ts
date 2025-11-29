@@ -6,6 +6,7 @@ import {
     id,
     jsFun,
     native,
+    numberType,
     optional,
     type ExecutableListEntry
 } from "@hylimo/core";
@@ -43,7 +44,12 @@ export const registerClassifierModule = ContentModule.create(
                             const newArgs: ExecutableListEntry[] = [];
                             let i = 0;
                             for (const entry of args) {
-                                if (entry.name === "below") {
+                                if (
+                                    entry.name === "below" ||
+                                    entry.name === "at" ||
+                                    entry.name === "after" ||
+                                    entry.name === "margin"
+                                ) {
                                     continue;
                                 }
                                 if (entry.name != undefined) {
@@ -65,6 +71,18 @@ export const registerClassifierModule = ContentModule.create(
                                     {
                                         name: "below",
                                         value: new ExecutableConstExpression(argsObject.getField("below", context))
+                                    },
+                                    {
+                                        name: "margin",
+                                        value: new ExecutableConstExpression(argsObject.getField("margin", context))
+                                    },
+                                    {
+                                        name: "at",
+                                        value: new ExecutableConstExpression(argsObject.getField("at", context))
+                                    },
+                                    {
+                                        name: "after",
+                                        value: new ExecutableConstExpression(argsObject.getField("after", context))
                                     }
                                 ],
                                 context,
@@ -77,9 +95,24 @@ export const registerClassifierModule = ContentModule.create(
                             params: [
                                 ...(docs?.params ?? []),
                                 [
+                                    "at",
+                                    "the absolute y position where to create the participant. If set, takes priority over 'after'",
+                                    optional(numberType)
+                                ],
+                                [
+                                    "after",
+                                    "the relative y offset from the current position. Only used if 'at' is not set",
+                                    optional(numberType)
+                                ],
+                                [
                                     "below",
-                                    "the optional participant below which the participant should be placed. If set, this participant will have the same x coordinate as the given value and the y coordinate of the current event",
+                                    "the optional participant below which the participant should be placed. If set, this participant will have the same x coordinate as the given value and the y coordinate of the current position",
                                     optional(participantType)
+                                ],
+                                [
+                                    "margin",
+                                    "horizontal margin between this and the previous participant. Defaults to 'participantMargin'",
+                                    optional(numberType)
                                 ]
                             ],
                             returns: "the created participant"

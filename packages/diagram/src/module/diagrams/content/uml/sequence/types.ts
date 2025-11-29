@@ -3,35 +3,13 @@ import {
     functionType,
     listType,
     literal,
-    mapType,
     namedType,
     numberType,
     objectType,
     optional,
-    or,
-    stringType
+    or
 } from "@hylimo/core";
 import { canvasContentType, canvasPointType } from "../../../../base/types.js";
-
-// Contains all Types used within sequence diagrams
-
-/**
- * Stores an event, i.e. `event("startShopping")`.
- *
- * param explanations:
- * - `deltaY`: y coordinate relative to the previous event
- * - `y`: absolute y coordinate
- */
-export const eventType = namedType(
-    objectType(
-        new Map([
-            ["name", stringType],
-            ["deltaY", numberType],
-            ["y", numberType]
-        ])
-    ),
-    "UML sequence diagram event"
-);
 
 /**
  * Stores the data for an activity indicator
@@ -46,40 +24,37 @@ export const activityIndicatorType = namedType(
             ["xShift", numberType],
             ["leftX", numberType],
             ["rightX", numberType],
-            ["pos", canvasPointType]
+            ["pos", canvasPointType],
+            ["startY", numberType]
         ])
     ),
     "UML sequence diagram activity indicator"
-);
-
-const participantEventDetails = namedType(
-    objectType(new Map([["activityIndicators", listType(activityIndicatorType)]])),
-    "activity indicators at one event for one participant"
 );
 
 /**
  * Stores the data of a single participant.
  *
  * param explanations:
- * - `declaringEvent`: The event below which this participant was declared, if present
- * - `x`: absolute to the root of the diagram
- * - `y`: absolute to the root of the diagram
- * - `left`: function taking no parameter and producing the left position of the participant at the current event (differs from `x` if there are activity indicators)
- * - `right`: function taking no parameter and producing the right position of the participant at the current event (differs from `x` if there are activity indicators)
- * - `events`: Each event name where the participant was active mapped to the data of this participant at this event (i.e. which activity indicators were active)
+ * - `declaringPos`: The y position where this participant was declared (if any)
+ * - `x`: index of the participant (0th, 1st, 2nd, ...)
+ * - `referencePos`: A CanvasContent used as reference point for relative positioning
+ * - `left`: function taking a position parameter and producing the left position of the participant at that position (differs from `x` if there are activity indicators)
+ * - `right`: function taking a position parameter and producing the right position of the participant at that position (differs from `x` if there are activity indicators)
+ * - `leftRightPositions`: List of {position, left, right} objects defining left/right offsets at each position. Before the first entry, 0/0 is used. The last entry remains active afterwards.
  */
 export const participantType = namedType(
     objectType(
         new Map([
             ["lifeline", canvasContentType],
-            ["events", mapType(participantEventDetails)],
             ["activeActivityIndicators", listType(activityIndicatorType)],
-            ["declaringEvent", optional(eventType)],
+            ["leftRightPositions", listType(objectType(new Map()))],
+            ["declaringPos", optional(numberType)],
             ["x", numberType],
-            ["y", numberType],
+            ["referencePos", canvasContentType],
             ["left", functionType],
             ["right", functionType],
-            ["alive", booleanType]
+            ["alive", booleanType],
+            ["participantType", literal("participant")]
         ])
     ),
     "UML sequence diagram participant (instance or actor)"
@@ -96,52 +71,8 @@ export const externalMessageType = namedType(
     objectType(
         new Map([
             ["distance", numberType],
-            ["diameter", numberType],
             ["externalMessageType", or(literal("lost"), literal("found"))]
         ])
     ),
     "Lost or Found message"
-);
-
-/**
- * Stores the data for a single fragment of one frame.
- *
- * param explanations:
- * - `topY`: the absolute `y` coordinate where the line separating this fragment from its predecessor should be drawn
- */
-export const fragmentType = namedType(
-    objectType(
-        new Map([
-            ["text", optional(stringType)],
-            ["subtext", optional(stringType)],
-            ["hasNameBorder", booleanType],
-            ["hasLine", booleanType],
-            ["nameElement", optional(canvasContentType)],
-            ["subtextElement", optional(canvasContentType)],
-            ["line", optional(canvasContentType)],
-            ["topY", numberType]
-        ])
-    ),
-    "UML sequence diagram frame fragment"
-);
-
-/**
- * Stores the data for a frame.
- *
- * param explanations:
- * - `topLeft`/`bottomRight`: The corners of this rectangle (except for some margin)
- */
-export const frameType = namedType(
-    objectType(
-        new Map([
-            ["top", eventType],
-            ["right", participantType],
-            ["bottom", eventType],
-            ["left", participantType],
-            ["x", numberType],
-            ["width", numberType],
-            ["fragments", listType(fragmentType)]
-        ])
-    ),
-    "UML sequence diagram frame"
 );

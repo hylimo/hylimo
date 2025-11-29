@@ -1,12 +1,12 @@
-import { booleanType, fun, functionType, id, numberType, optional, or, stringType } from "@hylimo/core";
+import { fun, functionType, id, numberType, optional, stringType } from "@hylimo/core";
 import { SCOPE } from "../../../../base/dslModule.js";
-import { eventType, participantType } from "./types.js";
+import { participantType } from "./types.js";
 import { ContentModule } from "../../contentModule.js";
-
-const fragmentNameBorderSVG = "M 0 0 H 20 V 5 L 16 9 H 0 V 0";
+import { DefaultEditTypes } from "@hylimo/diagram-common";
 
 /**
- * Defines a frame.<br>
+ * Defines a frame.
+ *
  * A frame is
  * - a rectangle delimiting it
  * - optional text (i.e. `if`) (optionally inside a small icon) in the top-left corner
@@ -14,315 +14,363 @@ const fragmentNameBorderSVG = "M 0 0 H 20 V 5 L 16 9 H 0 V 0";
  */
 export const sequenceDiagramFrameModule = ContentModule.create(
     "uml/sequence/frame",
-    ["uml/sequence/defaultValues"],
+    ["uml/sequence/defaultValues", "uml/sequence/diagramState"],
     [],
     [
         `
             this.createSequenceDiagramFragment = {
-                parentArgs = parentArgs ?? args.parentArgs
-                (topLineEvent) = args
-                if(topLineEvent == null) {
-                    scope.error("No event/y coordinate was passed to 'fragment'")
-                }
+                (fragmentOffset) = args
+                this.parent = args.parent
+                this.parentArgs = args.parentArgs
+                this.fragmentSubtext = args.subtext
+                this.hasLine = args.hasLine
+                this.labelMargin = args.labelMargin
+                this.labelMarginWithDefault = labelMargin ?? scope.internal.config.frameSubtextMargin
+                this.labelReferencePos = args.labelReferencePos
 
-                parent = parent ?? args.parent
-                parentLeftX = parent.x
-                parentRightX = parentLeftX + parent.width
-                width = parentRightX - parentLeftX
-                x = parentLeftX
-                y = if(isNumber(topLineEvent)) { topLineEvent } { topLineEvent.y }
+                this.fragment = [subtext = fragmentSubtext, hasLine = hasLine]
 
-                // The frame is offset by 'margin' from the event, but we want to connect the name to the frame border/fragment line
-                marginTop = marginTop ?? args.marginTop
-                y = y - marginTop
-
-                fragmentText = args.text
-                fragmentSubtext = args.subtext
-                hasLine = args.hasLine
-                hasIcon = args.hasIcon ?? (fragmentText != null)
-
-                fragment = [text = fragmentText, subtext = fragmentSubtext, hasIcon = hasIcon, hasLine = hasLine, topY = y]
-
-                // Draw the line on top of the fragment
                 if(args.hasLine) {
-                    separatingLine = scope[".."](scope.apos(x, y), scope.apos(x + width, y))
+                    this.lineStartPos = scope.rpos(parent.topLeftPos, 0, fragmentOffset)
+                    this.lineEndPos = scope.rpos(parent.topRightPos, lineStartPos)
+                    
+                    separatingLine = scope.internal.createConnection(
+                        lineStartPos,
+                        lineEndPos,
+                        list("fragment-line"),
+                        null,
+                        scope,
+                        lineType = "line"
+                    )
                     fragment.line = separatingLine
                 }
 
-                // Calculate the auxilliary parts of the fragment - first the 'name' and its border in the upper left corner
-                borderElement = null
-                nameElement = null
-
-                if(hasIcon) {
-                    borderElement = path(path = "${fragmentNameBorderSVG}", class = list("fragment-name-border"))
-                }
-
-                if(fragmentText != null) {
-                    nameElement = text(contents = list(span(text = fragmentText)), class = list("fragment-name"))
-                }
-
-                // Case 1: Both name and border are present
-                if((borderElement != null) && (nameElement != null)) {
-                    name = canvasElement(
-                        contents = list(container(contents = list(borderElement, nameElement))),
-                        class = list("fragment-name-element")
-                    )
-                    name.pos = scope.apos(x, y)
-                    scope.internal.registerCanvasElement(name, parentArgs, parentArgs.self)
-                    fragment.nameElement = name
-                } {
-
-                    // Case 2: Only border is present
-                    if(borderElement != null) {
-                        border = canvasElement(
-                            contents = list(borderElement),
-                            class = list("fragment-name-element")
-                        )
-                        border.pos = scope.apos(x, y)
-                        border.width = 20
-                        border.height = 10
-                        scope.internal.registerCanvasElement(border, parentArgs, parentArgs.self)
-                        fragment.nameElement = border
-                    }
-
-                    // Case 3: Only name is present
-                    if(nameElement != null) {
-                        name = canvasElement(
-                            contents = list(nameElement),
-                            class = list("fragment-name-element")
-                        )
-                        name.pos = scope.apos(x, y)
-                        scope.internal.registerCanvasElement(name, parentArgs, parentArgs.self)
-                        fragment.nameElement = name
-                    }
-                }
-
-                // And lastly, the subtext if present
                 if(fragmentSubtext != null) {
                     label = canvasElement(
                         contents = list(text(contents = list(span(text = fragmentSubtext)), class = list("fragment-subtext"))),
                         class = list("fragment-subtext-element")
                     )
                     if(fragment.nameElement != null) {
-                        // For some reason, the rpos without lpos means relative to the left instead of the right side  
-                        label.pos = scope.rpos(scope.lpos(fragment.nameElement, 0.90), 20, 0)
+                        label.pos = scope.rpos(scope.lpos(fragment.nameElement, 0), labelMarginWithDefault, 0)
+                        label.vAlign = "center"
                     } {
-                        // Hardcode the position a little bit below to the right of the top-left corner if no text is present
-                        // Don't interfere with the default left frame margin (20) for visually better results
-                        label.pos = scope.apos(x + 25, y + 5)
+                        label.pos = scope.rpos(labelReferencePos, labelMarginWithDefault, fragmentOffset)
                     }
+                    label.pos.edits["${DefaultEditTypes.MOVE_X}"] = createAdditiveEdit(
+                        labelMargin,
+                        if (labelMargin != null) { "dx" } { "(\${scope.internal.config.frameSubtextMargin} + dx)" }
+                    )
                     fragment.subtextElement = label
                     scope.internal.registerCanvasElement(label, parentArgs, parentArgs.self)
                 }
 
-                parent.fragments += fragment
-
-                scope.styles {
-                    cls("fragment-name") {
-                        marginLeft = 5
-                        marginRight = 7
-                        marginTop = 2
-                        marginBottom = 2
-                    }
-                    cls("fragment-name-border") {
-                        fill = var("background")
-                    }
-                    cls("fragment-subtext") {
-                        marginTop = 2
-                        marginBottom = 2
-                    }
-                }
-
                 fragment
-              }
-            `,
+            }
+        `,
         id(SCOPE).assignField(
             "frame",
             fun(
                 [
                     `
-                        argsCopy = args
+                        (frameText, fragmentFunction) = args
 
-                        (fragmentFunction) = args
-                        fragmentFunction = fragmentFunction ?? {}
+                        this.argsCopy = args
+                        this.fragmentFunction = fragmentFunction ?? {}
 
-                        frameText = args.text
-                        hasIcon = args.hasIcon ?? (frameText != null)
-                        subtext = args.subtext
+                        this.subtext = args.subtext
 
-                        // We must differentiate the following approaches to set margin:
-                        // 1. No margin set -> use scope.internal.config.frameMarginX/Y
-                        // 2. Everything has an individual margin
-                        defaultMarginX = args.marginX
-                        if(defaultMarginX == null) {
-                            defaultMarginX = scope.internal.config.frameMarginX
+                        this.at = args.at
+                        this.after = args.after
+                        
+                        this.position = scope.internal.calculatePosition(at = at, after = after, priority = 3)
+                        scope.internal.updateSequenceDiagramPosition(position)
+
+                        this.marginRight = args.marginRight
+                        this.marginLeft = args.marginLeft
+                        this.marginBottom = args.marginBottom
+                        this.subtextMargin = args.subtextMargin
+
+                        this.right = args.right
+                        this.left = args.left
+
+                        if ((left != null) && (right != null)) {
+                            if(left.x > right.x) {
+                                this.temp = left
+                                left = right
+                                right = temp
+                            }
                         }
-                        defaultMarginY = args.marginY
-                        if(defaultMarginY == null) {
-                            defaultMarginY = scope.internal.config.frameMarginY
-                        }
+                        
+                        // Create a placeholder frame element to pass to fragments
+                        this.frameElement = []
+                        frameElement.position = position
+                        this.dummyPos = scope.apos()
+                        this.topLeftPos = scope.rpos(dummyPos)
+                        this.topRightPos = scope.rpos(dummyPos)
+                        this.fragments = list()
 
-                        marginRight = args.marginRight ?? defaultMarginX
-                        marginBottom = args.marginBottom ?? defaultMarginY
-                        marginLeft = args.marginLeft ?? defaultMarginX
-                        marginTop = args.marginTop ?? defaultMarginY
-
-                        top = args.top
-                        right = args.right
-                        bottom = args.bottom
-                        left = args.left
-
-                        // We must swap around the coordinates if necessary - this case can happen when the user moves a participant and is otherwise only fixable by manually adjusting the bounds
-                        if(left.x > right.x) {
-                            temp = left
-                            left = right
-                            right = temp
-                        }
-                        // We do NOT switch around 'top' and 'bottom': The case "user moves participants around" is common, the case "top and bottom events are switched" is really uncommon. In that case, the user will already have to fix everything
-
-                        // Calculate the rectangle position
-                        x = left.x - marginLeft
-                        y = top.y - marginTop
-                        width = right.x - left.x + marginLeft + marginRight
-                        height = bottom.y - top.y + marginTop + marginBottom
-
-
-                        // Add the frame
-                        frameElement = canvasElement(
-                            contents = list(rect(class = list("frame"))),
-                            class = list("frame-element"),
-                            width = width,
-                            height = height
+                        this.nameElement = canvasElement(
+                            contents = list(container(contents = list(
+                                path(path = "M 0 0 H 20 V 5 L 16 9 H 0 Z", class = list("fragment-name-background")),
+                                path(path = "M 20 0 V 5 L 16 9 H 0", class = list("fragment-name-border")),
+                                text(contents = list(span(text = frameText)), class = list("fragment-name"))
+                            ))),
+                            class = list("fragment-name-element")
                         )
-                        frameElement.top = top
-                        frameElement.right = right
-                        frameElement.bottom = bottom
-                        frameElement.left = left
-                        frameElement.fragments = list()
-                        frameElement.text = text
-                        frameElement.hasIcon = icon
-                        frameElement.subtext = subtext
+                        nameElement.pos = topLeftPos
+                        scope.internal.registerCanvasElement(nameElement, args, args.self)
 
-                        frameElement.pos = scope.apos(x, y)
-                        frameElement.x = x
-                        frameElement.y = y
-                        frameElement.width = width
-                        frameElement.height = height
+                        this.topMiddlePos = scope.rpos(scope.lpos(nameElement, 0.875), topLeftPos)
 
-                        scope.internal.registerCanvasElement(frameElement, args, args.self)
+                        this.leftOffset = 0
+                        this.rightOffset = 0
+                        this.leftLocked = args.left != null
+                        this.rightLocked = args.right != null
+                        
+                        frameElement.registerIncluded = {
+                            (participant, leftOff, rightOff) = args
 
-                        // Lastly, generate all fragments for the given frame, including the implicit top fragment
-                        createSequenceDiagramFragment(top, marginTop = marginTop, parentArgs = args, parent = frameElement, hasIcon = hasIcon, hasLine = false, text = frameText, subtext = subtext)
+                            if(!(leftLocked) && ((left == null) || (participant.x < left.x))) {
+                                left = participant
+                                leftOffset = leftOff 
+                            }
+                            if(!(rightLocked) && ((right == null) || (participant.x > right.x))) {
+                                right = participant
+                                rightOffset = rightOff
+                            }
+                            if ((participant.x == left.x) && (leftOff > leftOffset)) {
+                                leftOffset = leftOff
+                            }
+                            if ((participant.x == right.x) && (rightOff > rightOffset)) {
+                                rightOffset = rightOff
+                            }
+                        }
+
+                        if(fragmentFunction != null) {
+                            scope.internal.registerTargetPosition(scope.internal.config.frameMarginTop, 0)
+                            scope.internal.activeFrames += frameElement
+                        }
+
+                        frameElement.topLeftPos = topLeftPos
+                        frameElement.topRightPos = topRightPos
                     `,
                     id("this").assignField(
                         "sequenceDiagramFragmentFunction",
                         fun(
-                            `createSequenceDiagramFragment(it, marginTop = marginTop, parentArgs = argsCopy, parent = frameElement, hasIcon = args.hasIcon, hasLine = args.hasLine ?? true, text = args.text, subtext = args.subtext)`,
+                            `
+                                (subtext) = args
+                                
+                                this.at = args.at
+                                this.after = args.after
+                                this.subtextMargin = args.subtextMargin
+                                
+                                this.fragmentPosition = scope.internal.calculatePosition(at = at, after = after, priority = 3)
+                                scope.internal.updateSequenceDiagramPosition(fragmentPosition)
+                                scope.internal.registerTargetPosition(scope.internal.config.fragmentMargin, 0)
+                                
+                                this.fragment = createSequenceDiagramFragment(
+                                    fragmentPosition - position,
+                                    parentArgs = argsCopy,
+                                    parent = frameElement,
+                                    hasLine = true,
+                                    subtext = subtext,
+                                    labelMargin = subtextMargin,
+                                    labelReferencePos = topMiddlePos
+                                )
+                                fragment.line.start.edits["${DefaultEditTypes.MOVE_Y}"] = createAdditiveEdit(at ?? after, "dy")
+                                fragment
+                            `,
                             {
                                 docs: "Creates a new fragment inside this frame. A fragment is a separate section within the frame, optionally with name and subtext",
                                 params: [
                                     [
                                         0,
-                                        "The y coordinate where to start the the fragment. Either an event, or a number",
-                                        or(eventType, numberType)
-                                    ],
-                                    ["text", "The text to display in the upper-left corner", optional(stringType)],
-                                    [
-                                        "subtext",
                                         "The text to display right of the main text, i.e. a condition for an else if",
                                         optional(stringType)
                                     ],
                                     [
-                                        "hasIcon",
-                                        "Whether to draw the border around the text. If false, only the outer boundary will be drawn. Will be shown by default when the frame should have text",
-                                        optional(booleanType)
+                                        "at",
+                                        "the absolute y position where to start the fragment. If set, takes priority over 'after'",
+                                        optional(numberType)
                                     ],
                                     [
-                                        "hasLine",
-                                        "Whether to draw the line on top of the fragment. 'true' by default",
-                                        optional(booleanType)
+                                        "after",
+                                        "the relative y offset from the current position. Only used if 'at' is not set",
+                                        optional(numberType)
+                                    ],
+                                    [
+                                        "subtextMargin",
+                                        "the horizontal margin for the subtext label. Defaults to the config 'frameSubtextMargin'",
+                                        optional(numberType)
                                     ]
                                 ],
-                                snippet: `($1, text = "$2", subtext = "$3")`,
+                                snippet: `("$1")`,
                                 returns: "The created fragment"
                             }
                         )
                     ),
                     `
-                        fragmentFunction.callWithScope([fragment = sequenceDiagramFragmentFunction, parentArgs = argsCopy, parent = frameElement])
+                        if (fragmentFunction != null) {
+                            fragmentFunction.callWithScope([fragment = sequenceDiagramFragmentFunction, parentArgs = argsCopy, parent = frameElement])
+                            scope.internal.activeFrames = scope.internal.activeFrames.filter { it != frameElement }
+                        }
+
+                        if((left == null) || (right == null)) {
+                            if(fragmentFunction == null) {
+                                scope.error("left and right must be provided if no callback is given")
+                            } {
+                                scope.error("Could not determine left and/or right participant for frame. Please specify them manually.")
+                            }
+                        }
+                        
+                        this.bottomPosition = scope.internal.calculatePosition(priority = 3) + (marginBottom ?? scope.internal.config.frameMarginBottom)
+                        
+                        this.bottomLeftPos = scope.rpos(topLeftPos, 0, bottomPosition - position)
+                        this.bottomRightPos = scope.rpos(topRightPos, bottomLeftPos)
+
+                        leftOffset = Math.max(-(scope.internal.findParticipantLeftRightPosition(left, position, "left")), leftOffset)
+                        rightOffset = Math.max(scope.internal.findParticipantLeftRightPosition(right, position, "right"), rightOffset)
+
+                        this.leftDistance = (marginLeft ?? scope.internal.config.frameMarginX) + leftOffset
+                        this.rightDistance = (marginRight ?? scope.internal.config.frameMarginX) + rightOffset
+                        scope.internal.registerFrameInclusion(left, leftDistance, 0)
+                        scope.internal.registerFrameInclusion(right, 0, rightDistance)
+
+                        topLeftPos.targetX = left.referencePos
+                        topLeftPos.targetY = left.referencePos
+                        topLeftPos.offsetX = -(leftDistance)
+                        topLeftPos.offsetY = position
+                        
+                        topRightPos.targetX = right.referencePos
+                        topRightPos.targetY = topLeftPos
+                        topRightPos.offsetX = rightDistance
+
+                        topLeftPos.edits["${DefaultEditTypes.MOVE_X}"] = createAdditiveEdit(
+                            marginLeft,
+                            if (marginLeft != null) { "-dx" } { "(\${scope.internal.config.frameMarginX} - dx)" }
+                        )
+                        topRightPos.edits["${DefaultEditTypes.MOVE_X}"] = createAdditiveEdit(
+                            marginRight,
+                            if (marginRight != null) { "dx" } { "(dx + \${scope.internal.config.frameMarginX})" }
+                        )
+                        bottomLeftPos.edits["${DefaultEditTypes.MOVE_Y}"] = createAdditiveEdit(
+                            marginBottom,
+                            if (marginBottom != null) { "dy" } { "(dy + \${scope.internal.config.frameMarginBottom})" }
+                        )
+                        
+                        this.frameBorder = scope.internal.createConnection(
+                            topMiddlePos,
+                            topMiddlePos,
+                            list("frame-border"),
+                            args,
+                            args.self,
+                            lineType = "line"
+                        )
+                        frameBorder.contents = list()
+                        frameBorder.contents.add(canvasLineSegment(end = topRightPos))
+                        frameBorder.contents.add(canvasLineSegment(end = bottomRightPos))
+                        frameBorder.contents.add(canvasLineSegment(end = bottomLeftPos))
+                        frameBorder.contents.add(canvasLineSegment(end = topLeftPos))
+                        frameBorder.contents.add(canvasLineSegment(end = topMiddlePos))
+
+                        this.defaultFragment = createSequenceDiagramFragment(
+                            position,
+                            parentArgs = args,
+                            parent = frameElement,
+                            hasLine = false,
+                            text = frameText,
+                            subtext = subtext,
+                            labelMargin = subtextMargin,
+                            labelReferencePos = topMiddlePos
+                        )
+                        
+                        scope.internal.updateSequenceDiagramPosition(bottomPosition)
+                        scope.internal.registerTargetPosition(scope.internal.config.frameMargin, 0)
+                        
                         frameElement
                     `
                 ],
                 {
-                    docs: "Creates a frame around two endpoints",
+                    docs: "Creates a frame. If a callback function is provided, it will be executed and the frame's bottom will be set to the current position after execution. Otherwise, you must specify bottomAt or bottomAfter.",
                     params: [
+                        [0, "The text to display in the upper-left corner", stringType],
                         [
-                            0,
+                            1,
                             "A function generating all fragments (additional compartments within the frame)",
                             optional(functionType)
                         ],
-                        ["text", "The text to display in the upper-left corner", optional(stringType)],
                         [
                             "subtext",
                             "The text to display right of the main text, i.e. a condition for an if or while",
                             optional(stringType)
                         ],
                         [
-                            "hasIcon",
-                            "Whether to draw the UML border around the text. If false, only the outer boundary will be drawn. Will be shown by default when the frame should have text",
-                            optional(booleanType)
+                            "at",
+                            "The absolute y position marking the upper border of the frame. If set, takes priority over 'after'",
+                            optional(numberType)
                         ],
                         [
-                            "top",
-                            "The event marking the upper border of the frame. The border will be extended by 'frameMarginY' to the top",
-                            eventType
+                            "after",
+                            "The relative y offset from the current position for the top border. Only used if 'at' is not set",
+                            optional(numberType)
                         ],
                         [
                             "right",
-                            "The participant marking the left border of the frame. The border will be extended by 'frameMarginX' to the right",
-                            participantType
-                        ],
-                        [
-                            "bottom",
-                            "The event marking the bottom border of the frame. The border will be extended by 'frameMarginY' to the bottom",
-                            eventType
+                            "The participant marking the right border of the frame. The border will be extended by 'marginRight' to the right. Optional if a callback is provided",
+                            optional(participantType)
                         ],
                         [
                             "left",
-                            "The participant marking the left border of the frame. The border will be extended by 'frameMarginX' to the left",
-                            participantType
-                        ],
-                        [
-                            "marginX",
-                            "How much margin to use both left and right. Defaults to 'frameMarginX'",
-                            optional(numberType)
-                        ],
-                        [
-                            "marginY",
-                            "How much margin to use both on the top and bottom. Defaults to 'frameMarginX'",
-                            optional(numberType)
+                            "The participant marking the left border of the frame. The border will be extended by 'marginLeft' to the left. Optional if a callback is provided",
+                            optional(participantType)
                         ],
                         [
                             "marginLeft",
-                            "How much margin to use on the left. Defaults to 'marginX'",
+                            "How much margin to use on the left. Defaults to the config 'frameMarginX'",
                             optional(numberType)
                         ],
-                        ["marginTop", "How much margin to use on the top. Defaults to 'marginY'", optional(numberType)],
                         [
                             "marginRight",
-                            "How much margin to use on the right. Defaults to 'marginX'",
+                            "How much margin to use on the right. Defaults to the config 'frameMarginX'",
                             optional(numberType)
                         ],
                         [
                             "marginBottom",
-                            "How much margin to use on the bottom. Defaults to 'marginY'",
+                            "How much margin to use on the bottom. Defaults to the config 'frameMarginBottom'",
+                            optional(numberType)
+                        ],
+                        [
+                            "subtextMargin",
+                            "the horizontal margin for the subtext label. Defaults to the config 'frameSubtextMargin'",
                             optional(numberType)
                         ]
                     ],
-                    snippet: `(top = $1, right = $2, bottom = $3, left = $4, text = "$5", subtext = "$6")`,
+                    snippet: `("$1", right = $2, left = $3) {\n    $4\n}`,
                     returns: "The created frame"
                 }
             )
-        )
+        ),
+        `
+            scope.styles {
+                cls("fragment-name") {
+                    marginLeft = 5
+                    marginRight = 7
+                    marginTop = 2
+                    marginBottom = 2
+                }
+                cls("fragment-name-background") {
+                    fill = var("background")
+                    strokeOpacity = 0
+                }
+                cls("fragment-subtext") {
+                    marginTop = 2
+                    marginBottom = 2
+                }
+                cls("fragment-line") {
+                    strokeDash = 6
+                    strokeDashSpace = 2
+                }
+            }
+        `
     ]
 );

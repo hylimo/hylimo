@@ -127,13 +127,13 @@ export namespace EditSpecification {
                 if (lastSpec.type != spec.type) {
                     return false;
                 }
+                if (spec.type !== "replace") {
+                    continue;
+                }
                 if (lastIndex != index) {
                     return false;
                 }
-                if (
-                    spec.type === "replace" &&
-                    (spec.range[1] !== lastSpec.range[1] || !isTemplateEqual(spec.template, lastSpec.template))
-                ) {
+                if (spec.range[1] !== lastSpec.range[1] || !isTemplateEqual(spec.template, lastSpec.template)) {
                     return false;
                 }
             } else if (currentStart < lastSpec.range[1]) {
