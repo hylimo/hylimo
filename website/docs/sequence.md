@@ -36,7 +36,7 @@ In a sequence diagram, we have the following concepts:
 - Activity: the time a participant is active, visualized by a white rectangle on the lifeline
 - Frame: A box around a section of the diagram. Can optionally contain a name (i.e. `if`, `while`), and sub compartments (fragments)## Order matters
 
-Below, you'll find the order in which you should declare things so that they work as expected.\
+Below, you`ll find the order in which you should declare things so that they work as expected.\
 Hylimo walks through the diagram from left to right, and then from top to bottom.
 
 First, declare all participants (`participant`, `instance`, `actor`, `component`) in the order you want to display them as they will be positioned on the x axis in this order:
@@ -52,29 +52,27 @@ sequenceDiagram {
 
 This example creates three participants, reading from left to right as `Bob`, `Shop` and lastly a user called `Admin`.
 
-Now that we've populated our `x` axis, let's move on with the `y` axis.
+Now that we`ve populated our `x` axis, let`s move on with the `y` axis.
 
 The `y` axis is managed automatically by Hylimo as you add interactions to your diagram.\
-Each interaction (like `activate`, message sending, or frame creation) can specify its position using either:
+Each interaction (like `activate`, message sending, or frame creation) has a margin that determines its vertical spacing:
 
-- `at` - an absolute y position
-- `after` - a relative offset from the current position
-- If neither is specified, a default margin is used
+- By default, each element uses a **configurable margin** that is applied *after* the element (see [Config properties](#config-properties) for available margin settings)
+- The actual margin depends on the next declared element - different elements cause different margins to be used
+- Use `at` to specify an **absolute y position**, completely overriding the automatic margin calculation
+- Use `after` to specify a **relative offset** that is **added to** the default margin
 
-To illustrate this, we've enabled the debugging mode here and below that visualizes exactly where Hylimo places the given coordinates.\
-You can enable the debugging mode yourself by setting `enableDebugging = true`, or disabling it by omitting it/setting it to `false`.\
-This is the precise purpose of it: It should help you understand what action will lead to what outcome.\
-Of course, once you want to finish your diagram, we recommend to turn it off again to not confuse your diagram readers.
+For example:
 
 ```hylimo
-sequenceDiagram(enableDebugging = true) {
+sequenceDiagram {
     participant("Bob")
     participant("Alice")
     Bob --> Alice
 }
 ```
 
-Participant names will be registered as variables if they didn't exist already.
+Participant names will be registered as variables if they didn`t exist already.
 In case they existed already, the existing name takes precedence.
 If their name is already used by something else, you can assign the result of these functions to a variable of your own choosing:
 
@@ -91,7 +89,7 @@ Sometimes, you want to send messages at specific positions or with time delays.\
 You can use the `participant.at(position)` function to position a participant at an absolute y coordinate, or `participant.after(offset)` to position it relative to the current position:
 
 ```hylimo
-sequenceDiagram(enableDebugging = true) {
+sequenceDiagram {
     participant("Bob")
     Bob --> Bob.after(50) with {
         over = start().axisAligned(-1, apos(46, 36), 0, end(0.5))
@@ -111,7 +109,7 @@ There is a bunch of things you can do with participants:
 - you can postpone the creation of a participant:
 
 ```hylimo
-sequenceDiagram(enableDebugging = true) {
+sequenceDiagram {
     participant("A")
     participant("B", after = 20)
     delay(20)
@@ -121,7 +119,7 @@ sequenceDiagram(enableDebugging = true) {
 - You can destroy a participant:
 
 ```hylimo
-sequenceDiagram(enableDebugging = true) {
+sequenceDiagram {
     participant("A")
     participant("B")
     destroy(A)
@@ -143,7 +141,7 @@ sequenceDiagram {
 - You can activate and deactivate a participant, meaning that it is actively working on something:
 
 ```hylimo
-sequenceDiagram(enableDebugging = true) {
+sequenceDiagram {
     participant("A")
     participant("B")
     activate(A)
@@ -241,7 +239,7 @@ The following config properties are available for sequence diagrams:
 |`deactivateMargin`| Default distance required after a deactivation | 10 |-|
 |`destroyingCrossSize`| The width and height of a participant-destruction cross | 20 |-|
 |`externalMessageDiameter`| Width and height of the circle of lost and found messages | 20 |-|
-|`frameMargin`| Default distance required after a frame | 10 |-|
+|`frameMargin`| Default distance required after a frame | 20 |-|
 |`fragmentMargin`| Default distance required after a fragment | 20 |-|
 |`externalMessageMargin`| How far away on the x axis a lost or found message should be drawn | 95 | 100-(0.5\*activityWidth), chosen so that it aligns on the grid when sending a message against one activity indicator |
 |`frameMarginX`| Default margin to apply on the left and right side of frames | 15 |-|
@@ -262,8 +260,8 @@ Activates an activity indicator at a calculated position. Activity indicators ar
 
 - 0: the participant (instance or actor) to activate
 - 1: optional callback function to execute within this activation. After execution, deactivate is called automatically
-- `at`: the absolute y position where to activate. If set, takes priority over 'after'
-- `after`: the relative y offset from the current position. Only used if 'at' is not set
+- `at`: the absolute y position where to activate. If set, takes priority over `after`
+- `after`: the relative y offset from the current position. Only used if `at` is not set
 - `xShift`: an optional shift on the x-axis when using multiple activity indicators simultaneously on the same participant. Defaults to `activityShift`
 
 **returns**: The created activity indicator
@@ -276,14 +274,17 @@ An instanced actor is an actor that has a stickman on top and an `instance` belo
 
 **params**:
 
-- 0: the optional name of the user. Defaults to `User`
-- 1: A function that sets the instance values of this actor, making this actor instanced.\
-  If this function is set, the stickman will be placed on top of a newly created `instance`\
-  The stickman specifically can then be styled/layouted using `instanced-actor(-element)`.\
-  To access the created instance, use `<return value>.instance`
+- 0: the name of the actor
+- 1: the optional class name of this actor, or a function that sets the instance values of this actor, making this actor instanced.
+- `keywords`: the keywords of the actor
 - `below`: the optional participant below which this actor should be placed. If set, this actor will have the same x coordinate as the given value and the y coordinate of the current position
+- `at`: the absolute y position where to create the actor. If set, takes priority over `after`
+- `after`: the relative y offset from the current position. Only used if `at` is not set
+- `margin`: horizontal margin between this and the previous actor. Defaults to `participantMargin`
 
-**returns**: the created stickman
+**returns**: The created actor
+
+**Note**: When parameter 1 is a function (callback), the actor becomes instanced - the stickman will be placed on top of a newly created `instance`. The stickman can then be styled/layouted using `actor-element`. To access the created instance, use `<return value>.instance`
 
 ### deactivate
 
@@ -292,8 +293,8 @@ Deactivates the most recent activity indicator at a calculated position.
 **params**:
 
 - 0: the participant to deactivate
-- `at`: the absolute y position where to deactivate. If set, takes priority over 'after'
-- `after`: the relative y offset from the current position. Only used if 'at' is not set
+- `at`: the absolute y position where to deactivate. If set, takes priority over `after`
+- `after`: the relative y offset from the current position. Only used if `at` is not set
 
 **returns**: nothing
 
@@ -324,8 +325,8 @@ Destroys a participant at a calculated position.
 **params**:
 
 - 0: the participant to destroy
-- `at`: the absolute y position where to destroy. If set, takes priority over 'after'
-- `after`: the relative y offset from the current position. Only used if 'at' is not set
+- `at`: the absolute y position where to destroy. If set, takes priority over `after`
+- `after`: the relative y offset from the current position. Only used if `at` is not set
 - `crossSize`: the size of the cross to draw. Defaults to `destroyingCrossSize`
 
 **returns**: the created cross
@@ -358,25 +359,25 @@ Creates a new fragment inside this frame. A fragment is a separate section withi
 **params**:
 
 - 0: The text to display right of the main text, i.e. a condition for an else if
-- `at`: the absolute y position where to start the fragment. If set, takes priority over 'after'
-- `after`: the relative y offset from the current position. Only used if 'at' is not set
+- `at`: the absolute y position where to start the fragment. If set, takes priority over `after`
+- `after`: the relative y offset from the current position. Only used if `at` is not set
 - `subtextMargin`: the horizontal margin for the subtext label. Defaults to the config `frameSubtextMargin`
 
 **returns**: The created fragment
 
 ### frame
 
-Creates a frame. If a callback function is provided, it will be executed and the frame's bottom will be set to the current position after execution. Otherwise, you must specify bottomAt or bottomAfter.
+Creates a frame. If a callback function is provided, it will be executed and the frame`s bottom will be set to the current position after execution. Otherwise, you must specify bottomAt or bottomAfter.
 
 **params**:
 
 - 0: The text to display in the upper-left corner
 - 1: A function generating all fragments (additional compartments within the frame)
 - `subtext`: The text to display right of the main text, i.e. a condition for an if or while
-- `at`: The absolute y position marking the upper border of the frame. If set, takes priority over 'after'
-- `after`: The relative y offset from the current position for the top border. Only used if 'at' is not set
-- `right`: The participant marking the right border of the frame. The border will be extended by 'marginRight' to the right. Optional if a callback is provided
-- `left`: The participant marking the left border of the frame. The border will be extended by 'marginLeft' to the left. Optional if a callback is provided
+- `at`: The absolute y position marking the upper border of the frame. If set, takes priority over `after`
+- `after`: The relative y offset from the current position for the top border. Only used if `at` is not set
+- `right`: The participant marking the right border of the frame. The border will be extended by `marginRight` to the right. Optional if a callback is provided
+- `left`: The participant marking the left border of the frame. The border will be extended by `marginLeft` to the left. Optional if a callback is provided
 - `marginLeft`: How much margin to use on the left. Defaults to the config `frameMarginX`
 - `marginRight`: How much margin to use on the right. Defaults to the config `frameMarginX`
 - `marginBottom`: How much margin to use on the bottom. Defaults to the config `frameMarginBottom`
@@ -395,11 +396,11 @@ Creates an instance which is an abstract concept of someone who participates in 
 - 2: the callback function of this instance
 - `keywords`: the keywords of the instance
 - `below`: the optional participant below which this instance should be placed. If set, this instance will have the same x coordinate as the given value and the y coordinate of the current position
-- `at`: the absolute y position where to create the instance. If set, takes priority over 'after'
-- `after`: the relative y offset from the current position. Only used if 'at' is not set
+- `at`: the absolute y position where to create the instance. If set, takes priority over `after`
+- `after`: the relative y offset from the current position. Only used if `at` is not set
 - `margin`: horizontal margin between this and the previous instance. Defaults to `participantMargin`
 
-**returns**: the created instance
+**returns**: The created instance
 
 ### lostMessage
 
@@ -432,8 +433,8 @@ Creates a participant which is an abstract concept of someone who participates i
 - 2: the callback function of this participant
 - `keywords`: the keywords of the participant
 - `below`: the optional participant below which this participant should be placed. If set, this participant will have the same x coordinate as the given value and the y coordinate of the current position
-- `at`: the absolute y position where to create the participant. If set, takes priority over 'after'
-- `after`: the relative y offset from the current position. Only used if 'at' is not set
+- `at`: the absolute y position where to create the participant. If set, takes priority over `after`
+- `after`: the relative y offset from the current position. Only used if `at` is not set
 - `margin`: horizontal margin between this and the previous participant. Defaults to `participantMargin`
 
 **returns**: The created participant
@@ -500,7 +501,7 @@ The frame also **automatically determines its width** by detecting which partici
 You can optionally override this by explicitly specifying `left` and `right` participants.
 
 The first parameter is the text to display in the upper-left corner (e.g., `if`, `loop`, `while`).\
-The second parameter is a callback function containing the frame's content.
+The second parameter is a callback function containing the frame`s content.
 
 Additionally, there are several optional parameters:
 
@@ -512,7 +513,7 @@ Additionally, there are several optional parameters:
 - `marginBottom`: Bottom margin in pixels. Defaults to `frameMarginBottom`
 - `subtextMargin`: Horizontal margin for the subtext label. Defaults to `frameSubtextMargin`
 
-Here's an example frame that automatically detects which participants to include:
+Here`s an example frame that automatically detects which participants to include:
 
 ```hylimo
 sequenceDiagram {
@@ -530,7 +531,7 @@ The frame automatically includes Alice and Bob based on the interactions within 
 
 ### Nested Frames
 
-You can nest frames by simply placing one frame inside another's callback function.\
+You can nest frames by simply placing one frame inside another`s callback function.\
 Both frames will automatically detect their width based on the participants used:
 
 ```hylimo
@@ -562,7 +563,7 @@ sequenceDiagram {
 ### Manual Frame Width Specification
 
 If you need precise control over which participants are included in a frame, you can manually specify `left` and `right`.\
-This is useful when you want to include participants that aren't directly interacted with:
+This is useful when you want to include participants that aren`t directly interacted with:
 
 ```hylimo
 sequenceDiagram {
@@ -583,7 +584,7 @@ sequenceDiagram {
 
 A frame can contain multiple fragments.\
 A fragment is a separate section inside the frame, i.e. an `else` for an `if` or different parallel branches.\
-Fragments are created by calling the `fragment` function within the frame's callback.
+Fragments are created by calling the `fragment` function within the frame`s callback.
 
 The `fragment` function takes the subtext as its first parameter (e.g., a condition for an `else if`), and supports optional parameters:
 
@@ -797,7 +798,7 @@ sequenceDiagram {
 Here is an example for a webshop order:
 
 ```hylimo
-sequenceDiagram(enableDebugging = true) {
+sequenceDiagram {
     user = participant("user")
     ourShop = participant("ourShop", "Shop")
     Cart = participant("Cart")
