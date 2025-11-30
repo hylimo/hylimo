@@ -34,7 +34,9 @@ In a sequence diagram, we have the following concepts:
 - Lifeline: the entire duration a participant is alive, symbolized by the dotted line downwards
 - Message: arrow between two participants at specific y positions with a semantic meaning
 - Activity: the time a participant is active, visualized by a white rectangle on the lifeline
-- Frame: A box around a section of the diagram. Can optionally contain a name (i.e. `if`, `while`), and sub compartments (fragments)## Order matters
+- Frame: A box around a section of the diagram. Can optionally contain a name (i.e. `if`, `while`), and sub compartments (fragments)
+
+## Order matters
 
 Below, you`ll find the order in which you should declare things so that they work as expected.\
 Hylimo walks through the diagram from left to right, and then from top to bottom.
@@ -536,10 +538,10 @@ Both frames will automatically detect their width based on the participants used
 
 ```hylimo
 sequenceDiagram {
-    alice = participant("alice")
-    bob = participant("bob")
-    Dave = actor("Dave")
-    last = participant("last")
+    participant("alice")
+    participant("bob")
+    actor("Dave")
+    participant("last")
 
     frame("outer", marginRight = 40) {
         activate(alice, after = 25)
@@ -593,10 +595,10 @@ The `fragment` function takes the subtext as its first parameter (e.g., a condit
 
 ```hylimo
 sequenceDiagram {
-    alice = participant("alice")
-    bob = participant("bob")
-    Dave = actor("Dave")
-    last = participant("last")
+    participant("alice")
+    participant("bob")
+    actor("Dave")
+    participant("last")
 
     frame("if", subtext = "work to do", marginRight = 40) {
         activate(alice, after = 25)
@@ -632,7 +634,7 @@ sequenceDiagram {
         }
     }
 
-    other = instance("other")
+    instance("other")
     activate(user)
     activate(other)
     user.after(10) -->> other
@@ -653,10 +655,10 @@ It can be used for example as follows:
 
 ```hylimo
 sequenceDiagram {
-    alice = participant("alice")
-    bob = participant("bob")
-    Dave = actor("Dave")
-    last = participant("last")
+    participant("alice")
+    participant("bob")
+    actor("Dave")
+    participant("last")
 
     frame("alt", subtext = "work to do", marginRight = 40) {
         activate(alice, after = 25)
@@ -685,10 +687,10 @@ It can be used for example as follows:
 
 ```hylimo
 sequenceDiagram {
-    alice = participant("alice")
-    bob = participant("bob")
-    Dave = actor("Dave")
-    last = participant("last")
+    participant("alice")
+    participant("bob")
+    actor("Dave")
+    participant("last")
 
     frame("opt", subtext = "status == pending", marginRight = 40) {
         activate(alice, after = 25)
@@ -799,10 +801,10 @@ Here is an example for a webshop order:
 
 ```hylimo
 sequenceDiagram {
-    user = participant("user")
-    ourShop = participant("ourShop", "Shop")
-    Cart = participant("Cart")
-    Payment = participant("Payment")
+    participant("user")
+    participant("ourShop", "Shop")
+    participant("Cart")
+    participant("Payment")
 
     activate(user, after = 25)
     activate(ourShop)

@@ -92,13 +92,12 @@ classDiagram {
 
 ```hylimo
 classDiagram {
-
     vdist = 190
     hdist = 450
 
     class("LanguageServer") layout {
-        height = 92.21163812100386
-        pos = apos(-315.26241546483385, -172.49258673881076)
+        height = 92.2
+        pos = apos(-315.3, -172.5)
     }
     class("DiagramImplementationManager", abstract = true) layout {
         pos = rpos(LanguageServer, 0, vdist * 1.2)
@@ -140,7 +139,6 @@ classDiagram {
         pos = rpos(TextDocument, 0, vdist)
     }
 
-
     class("DiagramEngine") layout {
         pos = rpos(LanguageServer, -(hdist), vdist / 2)
     }
@@ -151,91 +149,102 @@ classDiagram {
 
     LanguageServer *--> Diagram with {
         over = start(Position.BottomRight).line(end(Position.Left))
-        label("0..*", 0.7396783354052208, 3.3928302631897584, 39.132215797767685)
+        label("0..*", 0.75, -9.9, 39.1)
     }
 
     LanguageServer *--> TextDocument with {
         over = start(Position.Right).line(end(Position.Left))
-        label("0..*", 0.6195860121844069, 2.0927187962815594)
+        label("0..*", 0.7, -3.2)
     }
 
     LanguageServer *--> DiagramImplementationManager with {
         over = start(Position.Bottom).line(end(Position.Top))
-        label("1", 0.6151205681523787, -9.593093876933835)
+        label("1", 0.6, -9.6)
     }
 
     LocalDiagramImplementationManager extends DiagramImplementationManager with {
-        over = start(Position.Top).axisAligned(-0.3, end(Position.BottomLeft - 0.05))
+        over = start(Position.Top).axisAligned(
+            -0.3,
+            end(Position.BottomLeft - 0.05)
+        )
     }
 
     RemoteDiagramImplementationManager extends DiagramImplementationManager with {
-        over = start(Position.Top).axisAligned(-0.3, end(Position.BottomRight + 0.05))
+        over = start(Position.Top).axisAligned(
+            -0.3,
+            end(Position.BottomRight + 0.05)
+        )
     }
 
     LocalDiagramImplementation extends DiagramImplementation with {
-        over = start(Position.Bottom).axisAligned(-0.3, end(Position.TopLeft + 0.05))
+        over = start(Position.Bottom).axisAligned(
+            -0.3,
+            end(Position.TopLeft + 0.05)
+        )
     }
 
     RemoteDiagramImplementation extends DiagramImplementation with {
-        over = start(Position.Bottom).axisAligned(-0.3, end(Position.TopRight - 0.05))
+        over = start(Position.Bottom).axisAligned(
+            -0.3,
+            end(Position.TopRight - 0.05)
+        )
     }
 
     DiagramServerManager *--> DiagramServer with {
         over = start(Position.Right).line(end(Position.Left))
-        label("0..*", 0.6281601945428326, 7.252088001319976)
+        label("0..*", 0.7, -6.3)
     }
 
     LanguageServer *--> DiagramEngine with {
         over = start(0.375).line(end(0))
-        label("1", 0.6996412414832724, -3.326981380696332)
+        label("1", 0.761, 8.2)
     }
 
     LanguageServer *--> CompletionEngine with {
         over = start(0.625).line(end(0))
-        label("1", 0.748341501858057, -2.879024374403271)
+        label("1", 0.8, 5.2)
     }
 
     LanguageServer *--> DiagramServerManager with {
         over = start(0.875).line(end(Position.Left))
-        label("1", 0.8538828359555786, 7.03902668189471)
+        label("1", 0.882, -5.8)
     }
 
     DiagramServer !--> Diagram with {
         over = start(Position.Bottom).axisAligned(0, end(Position.Right))
-        label("1", 0.9632605936444701, 19.754772181747512)
-        label("0..*", 0.36257150352053047, -16.761476983249963)
+        label("1", 1.0, 19.8)
+        label("0..*", 0.363, -23.1)
     }
 
     LocalDiagramImplementationManager *--> LocalDiagramImplementation with {
         over = start(Position.Bottom).line(end(Position.Top))
-        label("{subsets implementations}\n+implementations", 0.39706318188121414, -100.58134608753261)
-        label("0..*", 0.562982175871534, 16.33695405927233)
+        label("{subsets implementations}\n+implementations", 0.56, -109)
+        label("0..*", 0.705, 22.6)
     }
 
     RemoteDiagramImplementationManager *--> RemoteDiagramImplementation with {
         over = start(Position.Bottom).line(end(Position.Top))
-        label("{subsets implementations}\n+implementations", 0.4027445627139059, -101.54023513002394)
-        label("0..*", 0.5770974319286689, 15.969074618100933)
+        label("{subsets implementations}\n+implementations", 0.56, -107.8)
+        label("0..*", 0.705, 23.9)
     }
 
     Diagram -- DiagramImplementation with {
-        over = start(0.16262482083387972).axisAligned(0, end(Position.Right))
-        label("1", 0.33513676966510486, 11.602768327718366)
-        label("0..1", 0.9836919560546376, 22.135140605198103)
+        over = start(0.2).axisAligned(0, end(Position.Right))
+        label("1", 0.3, 11.6)
+        label("0..1", 0.976, -25.7)
     }
 
     DiagramImplementationManager *--> DiagramImplementation with {
         over = start(Position.Bottom).line(end(Position.Top))
-        label("+implementations", 0.8187474665442491, -8.243606353500638, -90)
-        label("0..*", 0.9147624004410975, 25.166060647386985, -90)
+        label("+implementations", 0.797, -28.3, -90)
+        label("0..*", 0.9, 12.3, -90)
     }
 
     TextDocument <--! Diagram with {
         over = start(Position.Bottom).line(end(Position.Top))
-        label("1", 0.1851708018039814, -10.540206060919928)
-        label("1", 0.7006360486994234, -10.14199564953438)
+        label("1", 0.16, -10.1)
+        label("1", 0.7, -10.1)
     }
-
 }
 ```
 

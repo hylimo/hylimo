@@ -24,6 +24,6 @@
         "pdfkit": "^0.17.2"
     },
     "devDependencies": {
-        "@types/pdfkit": "^0.17.3"
+        "@types/pdfkit": "^0.17.4"
     }
 }
