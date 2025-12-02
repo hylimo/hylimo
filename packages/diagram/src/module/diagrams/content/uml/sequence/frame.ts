@@ -50,12 +50,9 @@ export const sequenceDiagramFrameModule = ContentModule.create(
                         contents = list(text(contents = list(span(text = fragmentSubtext)), class = list("fragment-subtext"))),
                         class = list("fragment-subtext-element")
                     )
-                    if(fragment.nameElement != null) {
-                        label.pos = scope.rpos(scope.lpos(fragment.nameElement, 0), labelMarginWithDefault, 0)
-                        label.vAlign = "center"
-                    } {
-                        label.pos = scope.rpos(labelReferencePos, labelMarginWithDefault, fragmentOffset)
-                    }
+                    
+                    label.pos = scope.rpos(labelReferencePos, labelMarginWithDefault, fragmentOffset)
+                    
                     label.pos.edits["${DefaultEditTypes.MOVE_X}"] = createAdditiveEdit(
                         labelMargin,
                         if (labelMargin != null) { "dx" } { "(\${scope.internal.config.frameSubtextMargin} + dx)" }
@@ -210,6 +207,17 @@ export const sequenceDiagramFrameModule = ContentModule.create(
                         )
                     ),
                     `
+                        createSequenceDiagramFragment(
+                            0,
+                            parentArgs = args,
+                            parent = frameElement,
+                            hasLine = false,
+                            text = frameText,
+                            subtext = subtext,
+                            labelMargin = subtextMargin,
+                            labelReferencePos = topMiddlePos
+                        )
+                        
                         if (fragmentFunction != null) {
                             fragmentFunction.callWithScope([fragment = sequenceDiagramFragmentFunction, parentArgs = argsCopy, parent = frameElement])
                             scope.internal.activeFrames = scope.internal.activeFrames.filter { it != frameElement }
@@ -249,6 +257,7 @@ export const sequenceDiagramFrameModule = ContentModule.create(
                             marginLeft,
                             if (marginLeft != null) { "-dx" } { "(\${scope.internal.config.frameMarginX} - dx)" }
                         )
+                        topLeftPos.edits["${DefaultEditTypes.MOVE_Y}"] = createAdditiveEdit(at ?? after, "dy")
                         topRightPos.edits["${DefaultEditTypes.MOVE_X}"] = createAdditiveEdit(
                             marginRight,
                             if (marginRight != null) { "dx" } { "(dx + \${scope.internal.config.frameMarginX})" }
@@ -272,17 +281,6 @@ export const sequenceDiagramFrameModule = ContentModule.create(
                         frameBorder.contents.add(canvasLineSegment(end = bottomLeftPos))
                         frameBorder.contents.add(canvasLineSegment(end = topLeftPos))
                         frameBorder.contents.add(canvasLineSegment(end = topMiddlePos))
-
-                        this.defaultFragment = createSequenceDiagramFragment(
-                            position,
-                            parentArgs = args,
-                            parent = frameElement,
-                            hasLine = false,
-                            text = frameText,
-                            subtext = subtext,
-                            labelMargin = subtextMargin,
-                            labelReferencePos = topMiddlePos
-                        )
                         
                         scope.internal.updateSequenceDiagramPosition(bottomPosition)
                         scope.internal.registerTargetPosition(scope.internal.config.frameMargin, 0)
