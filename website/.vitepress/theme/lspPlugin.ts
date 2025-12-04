@@ -17,7 +17,12 @@ import {
     SetLanguageServerIdNotification
 } from "@hylimo/diagram-protocol";
 import * as monaco from "monaco-editor";
-import { customDarkTheme, customLightTheme, languageConfiguration, monarchTokenProvider } from "../util/language";
+import {
+    customDarkTheme,
+    customLightTheme,
+    languageConfiguration,
+    monarchTokenProvider
+} from "@hylimo/monaco-editor-support";
 import { useData } from "vitepress";
 import { useLocalStorage, throttledWatch } from "@vueuse/core";
 import monacoEditorWorker from "monaco-editor/esm/vs/editor/editor.worker?worker";

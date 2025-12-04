@@ -1,0 +1,23 @@
+{
+    "name": "@hylimo/monaco-editor-support",
+    "version": "2.1.1",
+    "license": "MIT",
+    "type": "module",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/hylimo/hylimo.git",
+        "directory": "packages/monaco-editor-support"
+    },
+    "main": "lib/index.js",
+    "types": "lib/index.d.ts",
+    "files": [
+        "lib",
+        "src"
+    ],
+    "scripts": {
+        "build": "tsc"
+    },
+    "devDependencies": {
+        "monaco-editor": "^0.55.1"
+    }
+}
