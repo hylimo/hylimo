@@ -255,7 +255,9 @@ export class DiagramModule implements InterpreterModule {
                         if(hasChildren) {
                             this.callback = elementArgs.get(0)
                             if(callback != null) {
-                                element.contents = list()
+                                if (element.contents == null) {
+                                    element.contents = list()
+                                }
                                 scopeObject = [contents = element.contents]
                                 scopeObject.addContent = {
                                     scopeObject.contents.add(it)
