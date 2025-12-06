@@ -255,15 +255,10 @@ export class DiagramModule implements InterpreterModule {
                         if(hasChildren) {
                             this.callback = elementArgs.get(0)
                             if(callback != null) {
-                                scopeObject = []
+                                element.contents = list()
+                                scopeObject = [contents = element.contents]
                                 scopeObject.addContent = {
-                                    this.content = it
-                                    this.element = element
-                                    if(element.contents == null) {
-                                        element.contents = list(content)
-                                    } {
-                                        element.contents.add(content)
-                                    }
+                                    scopeObject.contents.add(it)
                                 }
                                 callback.callWithScope(scopeObject)
                             }
