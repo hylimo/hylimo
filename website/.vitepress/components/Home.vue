@@ -182,7 +182,9 @@ async function downloadSVG(textAsPath: boolean) {
     if (source == undefined) {
         return;
     }
-    const svgBlob = new Blob([await svgRenderer.render(diagram.value!, textAsPath)], { type: "image/svg+xml;charset=utf-8" });
+    const svgBlob = new Blob([await svgRenderer.render(diagram.value!, textAsPath)], {
+        type: "image/svg+xml;charset=utf-8"
+    });
     fileSaver.saveAs(svgBlob, fileBaseName.value + ".svg");
 }
 
