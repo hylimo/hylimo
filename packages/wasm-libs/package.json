@@ -18,7 +18,8 @@
         "build": "rollup -c"
     },
     "dependencies": {
-        "harfbuzzjs": "^0.4.13"
+        "harfbuzzjs": "^0.4.13",
+        "simplify-svg-path": "^1.0.1"
     },
     "devDependencies": {
         "@rollup/plugin-node-resolve": "^16.0.3",

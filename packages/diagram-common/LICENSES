@@ -1,7 +1,7 @@
 ============================== mondeja/svg-path-bbox ==============================
 https://github.com/mondeja/svg-path-bbox
 files:
- - src/path/svgPathBBox.ts
+  - src/path/svgPathBBox.ts
 
 BSD 3-Clause License
 

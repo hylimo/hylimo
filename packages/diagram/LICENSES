@@ -1,7 +1,7 @@
 ============================== papandreou/subset-font ==============================
 https://github.com/papandreou/subset-font
 files:
- - src/font/subsetFont.ts
+  - src/font/subsetFont.ts
 
 Copyright (c) 2012, Andreas Lind Petersen
 All rights reserved.

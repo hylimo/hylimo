@@ -81,7 +81,7 @@ const config: DiagramConfig = {
         fs.writeFileSync(outputFile, Buffer.from(renderedPdf.flatMap((part) => [...part])));
     } else if (outputExtension === ".svg") {
         const renderer = new SVGRenderer();
-        const svg = renderer.render(rootElement, options.textAsPath);
+        const svg = await renderer.render(rootElement, options.textAsPath);
         fs.writeFileSync(outputFile, svg);
     }
 })();

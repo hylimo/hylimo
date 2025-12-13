@@ -11,6 +11,9 @@ import {
 import type { SimplifiedCanvasElement } from "@hylimo/diagram-common";
 import type { Font } from "fontkit";
 import { createFont } from "@hylimo/diagram";
+import type { SimplifySvgPathModule } from "simplify-svg-path";
+import SimplifySvgPathInit from "simplify-svg-path";
+import { simplifySvgPath } from "@hylimo/wasm-libs";
 
 /**
  * Renderer which renders a diagram to svg
@@ -30,9 +33,19 @@ export class SVGRenderer {
      * @param textAsPath whether to render text as path
      * @returns the svg string
      */
-    render(root: Root, textAsPath: boolean): string {
+    async render(root: Root, textAsPath: boolean): Promise<string> {
         const visitor = new SVGDiagramVisitor(this.margin, textAsPath);
-        const svg = visitor.visit(root, new SVGRendererContext(root))[0];
+        const simplifySvgPathModule: SimplifySvgPathModule | undefined = textAsPath
+            ? await SimplifySvgPathInit({
+                  instantiateWasm: (imports, successCallback) => {
+                      simplifySvgPath(imports).then((source) => {
+                          successCallback(source.instance);
+                      });
+                      return undefined;
+                  }
+              })
+            : undefined;
+        const svg = visitor.visit(root, new SVGRendererContext(root, simplifySvgPathModule))[0];
         const xmlObj = this.svgNodeToXmlObject(svg);
         const builder = new XMLBuilder({
             ignoreAttributes: false,
@@ -136,7 +149,10 @@ class SVGRendererContext {
      *
      * @param root the root element of the diagram, provides the fonts
      */
-    constructor(root: Root) {
+    constructor(
+        root: Root,
+        private readonly simplifySvgPath?: SimplifySvgPathModule
+    ) {
         this.fontDatas = new Map(root.fonts.map((fontData) => [fontData.fontFamily, fontData]));
     }
 
@@ -156,6 +172,22 @@ class SVGRendererContext {
             this.fonts.set(fontFamily, createFont(fontData.data));
         }
         return this.fonts.get(fontFamily)!;
+    }
+
+    /**
+     * Method to simplify a glyph path using the simplifySvgPath module
+     * The resulting path should be rendered with evenodd fill rule to match the original glyph
+     * May return null if simplification is not possible
+     *
+     * @param path the path to simplify
+     * @returns the simplified path or null
+     * @throws if the simplifySvgPath module is not provided
+     */
+    simplifyGlyphPath(path: string): string | null {
+        if (this.simplifySvgPath == null) {
+            throw new Error("SimplifySvgPath module not provided");
+        }
+        return this.simplifySvgPath.simplifySvgPath(path);
     }
 }
 
@@ -240,7 +272,7 @@ class SVGDiagramVisitor extends SimplifiedDiagramVisitor<SVGRendererContext, SVG
 
     override visitText(element: SimplifiedText, context: SVGRendererContext): SVGNode[] {
         return [
-            this.textAsPath ? this.renderTextAsPath(context, element) : this.renderTextAsText(element),
+            ...(this.textAsPath ? this.renderTextAsPath(context, element) : [this.renderTextAsText(element)]),
             ...this.visitChildren(element, context)
         ];
     }
@@ -250,27 +282,91 @@ class SVGDiagramVisitor extends SimplifiedDiagramVisitor<SVGRendererContext, SVG
      *
      * @param context the context to use
      * @param element the text element to render
-     * @returns the svg node representing the text
+     * @returns the svg nodes representing the text
      */
-    private renderTextAsPath(context: SVGRendererContext, element: SimplifiedText): SVGNode {
+    private renderTextAsPath(context: SVGRendererContext, element: SimplifiedText): SVGNode[] {
         const font = context.getFont(element.fontFamily);
         const glyphRun = font.layout(element.text, element.fontFeatureSettings);
         let offset = 0;
-        const paths: string[] = [];
+        const glyphs: Array<{ path: string }> = [];
+
         for (const glyph of glyphRun.glyphs) {
             if (element.fill != undefined) {
-                paths.push(glyph.path.translate(offset, 0).toSVG());
+                glyphs.push({
+                    path: glyph.path.translate(offset, 0).toSVG()
+                });
             }
             offset += glyph.advanceWidth;
         }
+
         const scalingFactor = element.fontSize / font.unitsPerEm;
-        return {
-            type: "path",
-            children: [],
+        const baseAttributes = {
             ...extractFillAttributes(element),
-            d: paths.join(" "),
             transform: `translate(${element.x}, ${element.y}) scale(${scalingFactor}, ${-scalingFactor})`
         };
+
+        return this.simplifyGlyphs(glyphs, baseAttributes, context, element.text);
+    }
+
+    /**
+     * Recursively simplifies glyph paths with fallback splitting.
+     * First attempts to simplify all glyphs together. If that fails, splits them in half
+     * and recursively simplifies each half. If a single glyph fails, logs a warning
+     * and returns the original path.
+     *
+     * @param glyphs the glyphs to simplify
+     * @param baseAttributes the base SVG attributes to apply to each path
+     * @param context the renderer context for simplification
+     * @param text the original text for warning messages
+     * @returns an array of SVG path nodes
+     */
+    private simplifyGlyphs(
+        glyphs: Array<{ path: string }>,
+        baseAttributes: Record<string, any>,
+        context: SVGRendererContext,
+        text: string
+    ): SVGNode[] {
+        if (glyphs.length === 0) {
+            return [];
+        }
+
+        const joinedPath = glyphs.map((g) => g.path).join(" ");
+        const simplified = context.simplifyGlyphPath(joinedPath);
+
+        if (simplified != null) {
+            return [
+                {
+                    type: "path",
+                    children: [],
+                    ...baseAttributes,
+                    d: simplified,
+                    "fill-rule": "evenodd"
+                }
+            ];
+        }
+
+        if (glyphs.length === 1) {
+            // eslint-disable-next-line no-console
+            console.warn(`Failed to simplify glyph path for text "${text}"`);
+            return [
+                {
+                    type: "path",
+                    children: [],
+                    ...baseAttributes,
+                    d: glyphs[0].path,
+                    "fill-rule": "nonzero"
+                }
+            ];
+        }
+
+        const mid = Math.floor(glyphs.length / 2);
+        const left = glyphs.slice(0, mid);
+        const right = glyphs.slice(mid);
+
+        return [
+            ...this.simplifyGlyphs(left, baseAttributes, context, text),
+            ...this.simplifyGlyphs(right, baseAttributes, context, text)
+        ];
     }
 
     /**
