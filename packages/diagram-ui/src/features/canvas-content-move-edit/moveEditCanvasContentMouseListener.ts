@@ -306,6 +306,9 @@ export class MoveEditCanvasContentMouseListener extends MouseListener {
         if (!resizedElements.every((element) => DefaultEditTypes.RESIZE_WIDTH in element.edits)) {
             return undefined;
         }
+        if (target.width === 0) {
+            return undefined;
+        }
         let scaleX: number | undefined = undefined;
         if (classList.contains(ResizePosition.LEFT)) {
             scaleX = target.width / target.dx;
@@ -335,6 +338,9 @@ export class MoveEditCanvasContentMouseListener extends MouseListener {
         target: SCanvasElement
     ): number | undefined {
         if (!resizedElements.every((element) => DefaultEditTypes.RESIZE_HEIGHT in element.edits)) {
+            return undefined;
+        }
+        if (target.height === 0) {
             return undefined;
         }
         let scaleY: number | undefined = undefined;

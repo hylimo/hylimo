@@ -12,7 +12,7 @@ export const resizeHeight: EditHandler<ResizeEdit> = {
     predictActionDiff(lastApplied, newest, elements) {
         const updates: IncrementalUpdate[] = [];
         for (const element of elements) {
-            if (CanvasElement.isCanvasElement(element)) {
+            if (CanvasElement.isCanvasElement(element) && element.height !== 0) {
                 updates.push({
                     target: element.id,
                     changes: {
