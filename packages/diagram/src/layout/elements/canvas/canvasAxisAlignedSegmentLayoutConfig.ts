@@ -1,5 +1,5 @@
 import type { ExecutableAbstractFunctionExpression } from "@hylimo/core";
-import { fun, numberType } from "@hylimo/core";
+import { fun, finiteNumberType } from "@hylimo/core";
 import type { Point, Size, Element } from "@hylimo/diagram-common";
 import { CanvasAxisAlignedSegment, DefaultEditTypes } from "@hylimo/diagram-common";
 import type { LayoutElement } from "../../layoutElement.js";
@@ -19,7 +19,7 @@ export class CanvasAxisAlignedSegmentLayoutConfig extends CanvasConnectionSegmen
                 {
                     name: "verticalPos",
                     description: "The position on the x-axis where the vertical segment starts",
-                    type: numberType
+                    type: finiteNumberType
                 }
             ],
             []

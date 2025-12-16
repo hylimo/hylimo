@@ -1,4 +1,4 @@
-import { fun, id, numberType, optional } from "@hylimo/core";
+import { fun, id, finiteNumberType, optional } from "@hylimo/core";
 import { SCOPE } from "../../../../base/dslModule.js";
 import { ContentModule } from "../../contentModule.js";
 
@@ -66,7 +66,7 @@ export const lostFoundMessageModule = ContentModule.create(
                     [
                         "distance",
                         "the optional distance of the message on the x axis. Defaults to 'externalMessageMargin'",
-                        optional(numberType)
+                        optional(finiteNumberType)
                     ]
                 ],
                 snippet: `($1) -- $2`,
@@ -81,7 +81,7 @@ export const lostFoundMessageModule = ContentModule.create(
                     [
                         "distance",
                         "the optional distance of the message on the x axis. Defaults to 'externalMessageMargin'",
-                        optional(numberType)
+                        optional(finiteNumberType)
                     ]
                 ],
                 snippet: `($1)`,

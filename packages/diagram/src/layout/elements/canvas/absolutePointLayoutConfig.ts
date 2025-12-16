@@ -1,5 +1,5 @@
 import type { ExecutableAbstractFunctionExpression } from "@hylimo/core";
-import { fun, numberType } from "@hylimo/core";
+import { fun, finiteNumberType } from "@hylimo/core";
 import type { Size, Element, Point } from "@hylimo/diagram-common";
 import { AbsolutePoint, DefaultEditTypes } from "@hylimo/diagram-common";
 import type { LayoutElement } from "../../layoutElement.js";
@@ -20,12 +20,12 @@ export class AbsolutePointLayoutConfig extends CanvasPointLayoutConfig {
                 {
                     name: "x",
                     description: "the x coordinate",
-                    type: numberType
+                    type: finiteNumberType
                 },
                 {
                     name: "y",
                     description: "the y coordinate",
-                    type: numberType
+                    type: finiteNumberType
                 }
             ]
         );

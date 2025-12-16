@@ -1,4 +1,4 @@
-import { fun, id, numberType } from "@hylimo/core";
+import { fun, id, finiteNumberType } from "@hylimo/core";
 import { SCOPE } from "../../../../base/dslModule.js";
 import { ContentModule } from "../../contentModule.js";
 
@@ -20,7 +20,7 @@ export const timeControlModule = ContentModule.create(
                 `,
                 {
                     docs: "Delays the current position by a relative offset",
-                    params: [[0, "the relative y offset from the current position", numberType]],
+                    params: [[0, "the relative y offset from the current position", finiteNumberType]],
                     returns: "void",
                     snippet: "($1)"
                 }
@@ -36,7 +36,7 @@ export const timeControlModule = ContentModule.create(
                 `,
                 {
                     docs: "Moves to an absolute y position",
-                    params: [[0, "the absolute y position to move to", numberType]],
+                    params: [[0, "the absolute y position to move to", finiteNumberType]],
                     returns: "void",
                     snippet: "($1)"
                 }

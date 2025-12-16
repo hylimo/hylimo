@@ -1,5 +1,5 @@
 import type { FullObject } from "@hylimo/core";
-import { numberType, objectToList } from "@hylimo/core";
+import { finiteNumberType, objectToList } from "@hylimo/core";
 import type { Size, Point, Element } from "@hylimo/diagram-common";
 import { Marker } from "@hylimo/diagram-common";
 import type { LayoutElement, SizeConstraints } from "../../layoutElement.js";
@@ -23,17 +23,17 @@ export class MarkerLayoutConfig extends StyledElementLayoutConfig {
                 {
                     name: "lineStart",
                     description: "The relative (0..1) offset where the line starts in the marker",
-                    type: numberType
+                    type: finiteNumberType
                 },
                 {
                     name: "refX",
                     description: "The x coordinate of the reference point",
-                    type: numberType
+                    type: finiteNumberType
                 },
                 {
                     name: "refY",
                     description: "The y coordinate of the reference point",
-                    type: numberType
+                    type: finiteNumberType
                 },
                 ...containerStyleAttributes
             ],

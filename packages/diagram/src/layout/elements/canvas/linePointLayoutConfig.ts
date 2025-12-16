@@ -1,5 +1,5 @@
 import type { ExecutableAbstractFunctionExpression, FullObject } from "@hylimo/core";
-import { assertNumber, assertObject, fun, isNumber, numberType, objectType, or } from "@hylimo/core";
+import { assertNumber, assertObject, fun, isNumber, finiteNumberType, objectType, or } from "@hylimo/core";
 import type { Size, Element, Point } from "@hylimo/diagram-common";
 import { LinePoint, CanvasConnection, CanvasElement, DefaultEditTypes } from "@hylimo/diagram-common";
 import type { LayoutElement } from "../../layoutElement.js";
@@ -15,11 +15,11 @@ export class LinePointLayoutConfig extends CanvasPointLayoutConfig {
      * The type of the pos field
      */
     static POS_TYPE = or(
-        numberType,
+        finiteNumberType,
         objectType(
             new Map([
-                [0, numberType],
-                [1, numberType]
+                [0, finiteNumberType],
+                [1, finiteNumberType]
             ])
         )
     );
@@ -45,7 +45,7 @@ export class LinePointLayoutConfig extends CanvasPointLayoutConfig {
                 {
                     name: "distance",
                     description: "the distance of the point to the line, defaults to 0",
-                    type: numberType
+                    type: finiteNumberType
                 }
             ]
         );

@@ -1,4 +1,4 @@
-import { fun, functionType, id, numberType, optional } from "@hylimo/core";
+import { fun, functionType, id, finiteNumberType, optional } from "@hylimo/core";
 import { SCOPE } from "../../../../base/dslModule.js";
 import { participantType } from "./types.js";
 import { ContentModule } from "../../contentModule.js";
@@ -107,17 +107,17 @@ export const activityIndicatorModule = ContentModule.create(
                         [
                             "at",
                             "the absolute y position where to activate. If set, takes priority over 'after'",
-                            optional(numberType)
+                            optional(finiteNumberType)
                         ],
                         [
                             "after",
                             "the relative y offset from the current position. Only used if 'at' is not set",
-                            optional(numberType)
+                            optional(finiteNumberType)
                         ],
                         [
                             "xShift",
                             "an optional shift on the x-axis when using multiple activity indicators simultaneously on the same participant. Defaults to 'activityShift'",
-                            optional(numberType)
+                            optional(finiteNumberType)
                         ]
                     ],
                     snippet: `($1) {\n    $2\n}`,
@@ -162,12 +162,12 @@ export const activityIndicatorModule = ContentModule.create(
                         [
                             "at",
                             "the absolute y position where to deactivate. If set, takes priority over 'after'",
-                            optional(numberType)
+                            optional(finiteNumberType)
                         ],
                         [
                             "after",
                             "the relative y offset from the current position. Only used if 'at' is not set",
-                            optional(numberType)
+                            optional(finiteNumberType)
                         ]
                     ],
                     snippet: `($1)`,

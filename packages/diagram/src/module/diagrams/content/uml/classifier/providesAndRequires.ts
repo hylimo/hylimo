@@ -1,4 +1,4 @@
-import { fun, id, num, numberType, object, objectType, optional, or } from "@hylimo/core";
+import { fun, id, num, finiteNumberType, object, objectType, optional, or } from "@hylimo/core";
 import { LinePointLayoutConfig } from "../../../../../layout/elements/canvas/linePointLayoutConfig.js";
 import { SCOPE } from "../../../../base/dslModule.js";
 import { canvasContentType, stringOrSpanListType } from "../../../../base/types.js";
@@ -12,8 +12,8 @@ import { ContentModule } from "../../contentModule.js";
 const nameLabelPosType = optional(
     objectType(
         new Map([
-            [0, optional(numberType)],
-            [1, optional(numberType)]
+            [0, optional(finiteNumberType)],
+            [1, optional(finiteNumberType)]
         ])
     )
 );
@@ -115,7 +115,7 @@ export const providesAndRequiresModule = ContentModule.create(
                                             [
                                                 "dist",
                                                 "Distance of the provided interface to the classifier",
-                                                optional(numberType)
+                                                optional(finiteNumberType)
                                             ],
                                             ["namePos", "X and Y offset for the name label", nameLabelPosType]
                                         ],
@@ -196,7 +196,7 @@ export const providesAndRequiresModule = ContentModule.create(
                                             [
                                                 "dist",
                                                 "Distance of the required interface to the classifier",
-                                                optional(numberType)
+                                                optional(finiteNumberType)
                                             ],
                                             ["namePos", "X and Y offset for the name label", nameLabelPosType]
                                         ],
@@ -292,7 +292,17 @@ export const providesAndRequiresModule = ContentModule.create(
         `
     ],
     [
-        ["providesDistance", "Default distance of provided interfaces to the classifier outline", numberType, num(100)],
-        ["requiresDistance", "Default distance of required interfaces to the classifier outline", numberType, num(100)]
+        [
+            "providesDistance",
+            "Default distance of provided interfaces to the classifier outline",
+            finiteNumberType,
+            num(100)
+        ],
+        [
+            "requiresDistance",
+            "Default distance of required interfaces to the classifier outline",
+            finiteNumberType,
+            num(100)
+        ]
     ]
 );

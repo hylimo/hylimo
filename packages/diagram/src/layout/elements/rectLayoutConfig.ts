@@ -1,4 +1,4 @@
-import { numberType } from "@hylimo/core";
+import { finiteNumberType } from "@hylimo/core";
 import type { Element, Size, Point, Line, ArcSegment, LineSegment } from "@hylimo/diagram-common";
 import { Rect } from "@hylimo/diagram-common";
 import type { LayoutElement, SizeConstraints } from "../layoutElement.js";
@@ -20,7 +20,7 @@ export class RectLayoutConfig extends ContentShapeLayoutConfig {
                 {
                     name: "cornerRadius",
                     description: "optional corner radius for all for corner in both x and y direction",
-                    type: numberType
+                    type: finiteNumberType
                 }
             ]
         );

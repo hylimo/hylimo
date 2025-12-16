@@ -1,4 +1,4 @@
-import { assign, fun, functionType, id, jsFun, numberType, optional, validateObject } from "@hylimo/core";
+import { assign, fun, functionType, id, jsFun, finiteNumberType, optional, validateObject } from "@hylimo/core";
 import { ContentModule } from "../contentModule.js";
 import { canvasPointType, elementType } from "../../../base/types.js";
 import { SCOPE } from "../../../base/dslModule.js";
@@ -10,11 +10,11 @@ import { CanvasElement, DefaultEditTypes } from "@hylimo/diagram-common";
 const layoutScopeProperties = [
     {
         name: "width",
-        type: optional(numberType)
+        type: optional(finiteNumberType)
     },
     {
         name: "height",
-        type: optional(numberType)
+        type: optional(finiteNumberType)
     },
     {
         name: "pos",
@@ -22,7 +22,7 @@ const layoutScopeProperties = [
     },
     {
         name: "rotation",
-        type: optional(numberType)
+        type: optional(finiteNumberType)
     }
 ];
 

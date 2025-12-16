@@ -1,4 +1,4 @@
-import { fun, functionType, id, numberType, optional, stringType } from "@hylimo/core";
+import { fun, functionType, id, finiteNumberType, optional, stringType } from "@hylimo/core";
 import { SCOPE } from "../../../../base/dslModule.js";
 import { participantType } from "./types.js";
 import { ContentModule } from "../../contentModule.js";
@@ -188,17 +188,17 @@ export const sequenceDiagramFrameModule = ContentModule.create(
                                     [
                                         "at",
                                         "the absolute y position where to start the fragment. If set, takes priority over 'after'",
-                                        optional(numberType)
+                                        optional(finiteNumberType)
                                     ],
                                     [
                                         "after",
                                         "the relative y offset from the current position. Only used if 'at' is not set",
-                                        optional(numberType)
+                                        optional(finiteNumberType)
                                     ],
                                     [
                                         "subtextMargin",
                                         "the horizontal margin for the subtext label. Defaults to the config 'frameSubtextMargin'",
-                                        optional(numberType)
+                                        optional(finiteNumberType)
                                     ]
                                 ],
                                 snippet: `("$1")`,
@@ -305,12 +305,12 @@ export const sequenceDiagramFrameModule = ContentModule.create(
                         [
                             "at",
                             "The absolute y position marking the upper border of the frame. If set, takes priority over 'after'",
-                            optional(numberType)
+                            optional(finiteNumberType)
                         ],
                         [
                             "after",
                             "The relative y offset from the current position for the top border. Only used if 'at' is not set",
-                            optional(numberType)
+                            optional(finiteNumberType)
                         ],
                         [
                             "right",
@@ -325,22 +325,22 @@ export const sequenceDiagramFrameModule = ContentModule.create(
                         [
                             "marginLeft",
                             "How much margin to use on the left. Defaults to the config 'frameMarginX'",
-                            optional(numberType)
+                            optional(finiteNumberType)
                         ],
                         [
                             "marginRight",
                             "How much margin to use on the right. Defaults to the config 'frameMarginX'",
-                            optional(numberType)
+                            optional(finiteNumberType)
                         ],
                         [
                             "marginBottom",
                             "How much margin to use on the bottom. Defaults to the config 'frameMarginBottom'",
-                            optional(numberType)
+                            optional(finiteNumberType)
                         ],
                         [
                             "subtextMargin",
                             "the horizontal margin for the subtext label. Defaults to the config 'frameSubtextMargin'",
-                            optional(numberType)
+                            optional(finiteNumberType)
                         ]
                     ],
                     snippet: `("$1", right = $2, left = $3) {\n    $4\n}`,

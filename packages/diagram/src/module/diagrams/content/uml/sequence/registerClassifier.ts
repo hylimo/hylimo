@@ -6,7 +6,7 @@ import {
     id,
     jsFun,
     native,
-    numberType,
+    finiteNumberType,
     optional,
     type ExecutableListEntry
 } from "@hylimo/core";
@@ -97,12 +97,12 @@ export const registerClassifierModule = ContentModule.create(
                                 [
                                     "at",
                                     "the absolute y position where to create the participant. If set, takes priority over 'after'",
-                                    optional(numberType)
+                                    optional(finiteNumberType)
                                 ],
                                 [
                                     "after",
                                     "the relative y offset from the current position. Only used if 'at' is not set",
-                                    optional(numberType)
+                                    optional(finiteNumberType)
                                 ],
                                 [
                                     "below",
@@ -112,7 +112,7 @@ export const registerClassifierModule = ContentModule.create(
                                 [
                                     "margin",
                                     "horizontal margin between this and the previous participant. Defaults to 'participantMargin'",
-                                    optional(numberType)
+                                    optional(finiteNumberType)
                                 ]
                             ],
                             returns: "the created participant"

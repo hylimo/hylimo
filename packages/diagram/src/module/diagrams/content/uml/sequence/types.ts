@@ -4,7 +4,7 @@ import {
     listType,
     literal,
     namedType,
-    numberType,
+    finiteNumberType,
     objectType,
     optional,
     or
@@ -21,11 +21,11 @@ import { canvasContentType, canvasPointType } from "../../../../base/types.js";
 export const activityIndicatorType = namedType(
     objectType(
         new Map([
-            ["xShift", numberType],
-            ["leftX", numberType],
-            ["rightX", numberType],
+            ["xShift", finiteNumberType],
+            ["leftX", finiteNumberType],
+            ["rightX", finiteNumberType],
             ["pos", canvasPointType],
-            ["startY", numberType]
+            ["startY", finiteNumberType]
         ])
     ),
     "UML sequence diagram activity indicator"
@@ -48,8 +48,8 @@ export const participantType = namedType(
             ["lifeline", canvasContentType],
             ["activeActivityIndicators", listType(activityIndicatorType)],
             ["leftRightPositions", listType(objectType(new Map()))],
-            ["declaringPos", optional(numberType)],
-            ["x", numberType],
+            ["declaringPos", optional(finiteNumberType)],
+            ["x", finiteNumberType],
             ["referencePos", canvasContentType],
             ["left", functionType],
             ["right", functionType],
@@ -70,7 +70,7 @@ export const participantType = namedType(
 export const externalMessageType = namedType(
     objectType(
         new Map([
-            ["distance", numberType],
+            ["distance", finiteNumberType],
             ["externalMessageType", or(literal("lost"), literal("found"))]
         ])
     ),

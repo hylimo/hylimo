@@ -17,3 +17,20 @@ export const numberType: Type = {
         }
     }
 };
+
+/**
+ * Number type matching only finite numbers (no Infinity or NaN)
+ */
+export const finiteNumberType: Type = {
+    name: () => "number",
+    matches(value, _context) {
+        if (value instanceof NumberObject && Number.isFinite(value.value)) {
+            return true;
+        } else {
+            return {
+                expected: this,
+                path: []
+            };
+        }
+    }
+};

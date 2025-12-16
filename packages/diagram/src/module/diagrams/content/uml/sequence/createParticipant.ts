@@ -1,4 +1,4 @@
-import { fun, functionType, id, numberType, optional } from "@hylimo/core";
+import { fun, functionType, id, finiteNumberType, optional } from "@hylimo/core";
 import { SCOPE } from "../../../../base/dslModule.js";
 import { participantType } from "./types.js";
 import { canvasContentType } from "../../../../base/types.js";
@@ -210,7 +210,7 @@ export const createParticipantMoule = ContentModule.create(
                                         [
                                             0,
                                             "the absolute y position where to pinpoint the participant. If not provided, uses the participant itself",
-                                            optional(numberType)
+                                            optional(finiteNumberType)
                                         ]
                                     ],
                                     returns: "the new virtual participant to use for i.e. messages",
@@ -250,7 +250,7 @@ export const createParticipantMoule = ContentModule.create(
                                         [
                                             0,
                                             "the offset from the current position where to pinpoint the participant",
-                                            numberType
+                                            finiteNumberType
                                         ]
                                     ],
                                     returns: "the new virtual participant to use for i.e. messages",
@@ -269,12 +269,12 @@ export const createParticipantMoule = ContentModule.create(
                             [
                                 "at",
                                 "the absolute y position where to create the participant. If set, takes priority over 'after'",
-                                optional(numberType)
+                                optional(finiteNumberType)
                             ],
                             [
                                 "after",
                                 "the relative y offset from the current position. Only used if 'at' is not set",
-                                optional(numberType)
+                                optional(finiteNumberType)
                             ],
                             [
                                 "below",
@@ -284,7 +284,7 @@ export const createParticipantMoule = ContentModule.create(
                             [
                                 "margin",
                                 "horizontal margin between this and the previous participant. Defaults to 'participantMargin'",
-                                optional(numberType)
+                                optional(finiteNumberType)
                             ]
                         ],
                         returns: "the participant"
@@ -302,7 +302,7 @@ export const createParticipantMoule = ContentModule.create(
                     params: [
                         ["left", "a function producing the left point of this participant", functionType],
                         ["right", "a function producing the right point of this participant", functionType],
-                        ["x", "the index of this participant", numberType]
+                        ["x", "the index of this participant", finiteNumberType]
                     ],
                     returns: "The created virtual participant",
                     snippet: "(left = $1, right = $2)"
@@ -369,17 +369,17 @@ export const createParticipantMoule = ContentModule.create(
                         [
                             "at",
                             "the absolute y position where to destroy. If set, takes priority over 'after'",
-                            optional(numberType)
+                            optional(finiteNumberType)
                         ],
                         [
                             "after",
                             "the relative y offset from the current position. Only used if 'at' is not set",
-                            optional(numberType)
+                            optional(finiteNumberType)
                         ],
                         [
                             "crossSize",
                             "the size of the cross to draw. Defaults to 'destroyingCrossSize'",
-                            optional(numberType)
+                            optional(finiteNumberType)
                         ]
                     ],
                     snippet: "($1)",

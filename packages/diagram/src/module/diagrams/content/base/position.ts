@@ -1,4 +1,4 @@
-import { fun, id, numberType, optional, or } from "@hylimo/core";
+import { fun, id, finiteNumberType, optional, or } from "@hylimo/core";
 import { ContentModule } from "../contentModule.js";
 import { SCOPE } from "../../../base/dslModule.js";
 import { canvasContentType, elementType } from "../../../base/types.js";
@@ -25,8 +25,8 @@ export const positionModule = ContentModule.create(
                 {
                     docs: "Create a absolute point",
                     params: [
-                        [0, "the x coordinate", optional(numberType)],
-                        [1, "the y coordinate", optional(numberType)]
+                        [0, "the x coordinate", optional(finiteNumberType)],
+                        [1, "the y coordinate", optional(finiteNumberType)]
                     ],
                     returns: "The created absolute point"
                 }
@@ -55,10 +55,10 @@ export const positionModule = ContentModule.create(
                         [
                             1,
                             "optional target to which the y-coordinate of the point is relative, if not given, defaults to the same as x",
-                            optional(or(canvasContentType, numberType))
+                            optional(or(canvasContentType, finiteNumberType))
                         ],
-                        [2, "the x coordinate", optional(numberType)],
-                        [3, "the y coordinate", optional(numberType)]
+                        [2, "the x coordinate", optional(finiteNumberType)],
+                        [3, "the y coordinate", optional(finiteNumberType)]
                     ],
                     returns: "The created relative point"
                 }
@@ -82,7 +82,7 @@ export const positionModule = ContentModule.create(
                             "the relative position on the line, number between 0 and 1, or a tuple of the segment and the relative position on the segment",
                             optional(LinePointLayoutConfig.POS_TYPE)
                         ],
-                        [2, "the distance from the line", optional(numberType)]
+                        [2, "the distance from the line", optional(finiteNumberType)]
                     ],
                     returns: "The created line point"
                 }

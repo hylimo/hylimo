@@ -1,5 +1,5 @@
 import type { FullObject, ExecutableAbstractFunctionExpression } from "@hylimo/core";
-import { numberType, optional, fun, objectToList } from "@hylimo/core";
+import { finiteNumberType, optional, fun, objectToList } from "@hylimo/core";
 import type { Size, Point, Element } from "@hylimo/diagram-common";
 import { CanvasElement, DefaultEditTypes } from "@hylimo/diagram-common";
 import { canvasPointType, simpleElementType } from "../../../module/base/types.js";
@@ -37,7 +37,7 @@ export class CanvasElementLayoutConfig extends EditableCanvasContentLayoutConfig
                 {
                     name: "rotation",
                     description: "the rotation in degrees",
-                    type: numberType
+                    type: finiteNumberType
                 },
                 ...sizeStyleAttributes,
                 ...visibilityStyleAttributes,

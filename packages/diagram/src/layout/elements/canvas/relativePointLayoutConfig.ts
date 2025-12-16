@@ -1,5 +1,5 @@
 import type { ExecutableAbstractFunctionExpression, FullObject } from "@hylimo/core";
-import { fun, numberType } from "@hylimo/core";
+import { fun, finiteNumberType } from "@hylimo/core";
 import type { Size, Element, Point } from "@hylimo/diagram-common";
 import { RelativePoint, DefaultEditTypes } from "@hylimo/diagram-common";
 import { canvasContentType } from "../../../module/base/types.js";
@@ -32,12 +32,12 @@ export class RelativePointLayoutConfig extends CanvasPointLayoutConfig {
                 {
                     name: "offsetX",
                     description: "the x offset",
-                    type: numberType
+                    type: finiteNumberType
                 },
                 {
                     name: "offsetY",
                     description: "the y offset",
-                    type: numberType
+                    type: finiteNumberType
                 }
             ]
         );

@@ -1,5 +1,5 @@
 import type { FullObject } from "@hylimo/core";
-import { booleanType, enumType, listType, nullType, numberType, or, stringType } from "@hylimo/core";
+import { booleanType, enumType, listType, nullType, finiteNumberType, or, stringType } from "@hylimo/core";
 import type { Element, Point, Size } from "@hylimo/diagram-common";
 import { FontStyle, FontWeight } from "@hylimo/diagram-common";
 import type { LayoutElement, SizeConstraints } from "../layoutElement.js";
@@ -27,7 +27,7 @@ export class SpanLayoutConfig extends ElementLayoutConfig {
                     description: "optional font family to use, must be registered font family name string",
                     type: stringType
                 },
-                { name: "fontSize", description: "optional font size to use", type: numberType },
+                { name: "fontSize", description: "optional font size to use", type: finiteNumberType },
                 {
                     name: "fontWeight",
                     description: 'optional font weight, if given must be either "normal" or "bold"',
@@ -51,18 +51,18 @@ export class SpanLayoutConfig extends ElementLayoutConfig {
                 {
                     name: "underlineOpacity",
                     description: "optional underline opacity, must be a number between 0 and 1",
-                    type: numberType
+                    type: finiteNumberType
                 },
-                { name: "underlineWidth", description: "optional width of the underline", type: numberType },
+                { name: "underlineWidth", description: "optional width of the underline", type: finiteNumberType },
                 {
                     name: "underlineDash",
                     description: "optional dash length. If not set, underline is solid.",
-                    type: numberType
+                    type: finiteNumberType
                 },
                 {
                     name: "underlineDashSpace",
                     description: "space between dashes, only used if underlineDash is set, defaults to underlineDash",
-                    type: numberType
+                    type: finiteNumberType
                 },
                 {
                     name: "strikethrough",
@@ -72,19 +72,23 @@ export class SpanLayoutConfig extends ElementLayoutConfig {
                 {
                     name: "strikethroughOpacity",
                     description: "optional strikethrough opacity, must be a number between 0 and 1",
-                    type: numberType
+                    type: finiteNumberType
                 },
-                { name: "strikethroughWidth", description: "optional width of the strikethrough", type: numberType },
+                {
+                    name: "strikethroughWidth",
+                    description: "optional width of the strikethrough",
+                    type: finiteNumberType
+                },
                 {
                     name: "strikethroughDash",
                     description: "optional dash length. If not set, strikethrough is solid.",
-                    type: numberType
+                    type: finiteNumberType
                 },
                 {
                     name: "strikethroughDashSpace",
                     description:
                         "space between dashes, only used if strikethroughDash is set, defaults to strikethroughDash",
-                    type: numberType
+                    type: finiteNumberType
                 }
             ],
             nullType,
