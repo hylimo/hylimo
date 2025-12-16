@@ -28,7 +28,6 @@ import {
     ToolboxEditPredictionRequestAction,
     TransactionalAction
 } from "@hylimo/diagram-protocol";
-import type { Diagnostic } from "@hylimo/diagram-protocol";
 import { TYPES } from "../types.js";
 import type { ConfigManager } from "../config/configManager.js";
 import MiniSearch from "minisearch";
@@ -42,6 +41,7 @@ import { SetToolAction } from "./setToolAction.js";
 import type { SettingsProvider } from "../settings/settingsProvider.js";
 import jsonata, { type ExprNode } from "jsonata";
 import type { TransactionIdProvider } from "../transaction/transactionIdProvider.js";
+import type { ErrorState } from "../diagram-state/diagramStateProvider.js";
 
 /**
  * UI Extension which displays the graphical toolbox.
@@ -743,14 +743,4 @@ export interface ConnectionEditEntry {
      * The full key of the edit
      */
     edit: `connection/${string}`;
-}
-
-/**
- * The error state of the diagram
- */
-export interface ErrorState {
-    /**
-     * The diagnostics of the error state
-     */
-    diagnostics: Diagnostic[];
 }
