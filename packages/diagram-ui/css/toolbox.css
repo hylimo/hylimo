@@ -16,6 +16,7 @@
     --toolbox-border-radius: 12px;
     --tool-button-margin: 5px;
     --tool-button-size: calc((var(--toolbox-width) - 9 * var(--tool-button-margin) - 1px) / 7);
+    --toolbox-details-shift: -10px;
 
     .toolbox {
         display: flex;
@@ -43,23 +44,8 @@
         }
 
         .toolbox-tool-button {
-            width: var(--tool-button-size);
-            height: var(--tool-button-size);
-            border-radius: 6px;
             border: 1px solid transparent;
-            min-width: 0;
-            min-height: 0;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            outline: none;
             position: relative;
-
-            .icon {
-                --size: calc(min(18px, 100% - 8px));
-                width: var(--size);
-                height: var(--size);
-            }
 
             .icon.locked {
                 --size: calc(min(18px, 100% - 8px) * 0.7);
@@ -95,6 +81,24 @@
             width: 1px;
             height: calc(var(--tool-button-size) * 0.8);
             background: var(--toolbox-background-1);
+        }
+    }
+
+    .toolbox-icon-button {
+        width: var(--tool-button-size);
+        height: var(--tool-button-size);
+        border-radius: 6px;
+        min-width: 0;
+        min-height: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        outline: none;
+
+        .icon {
+            --size: calc(min(18px, 100% - 8px));
+            width: var(--size);
+            height: var(--size);
         }
     }
 
@@ -174,9 +178,13 @@
         }
 
         .item.selected,
-        .item:hover,
+        .item:hover:not(:disabled),
         .item:focus-within {
             background: var(--toolbox-background-3);
+        }
+
+        .item:disabled {
+            opacity: 0.7;
         }
 
         .item:hover {
@@ -229,8 +237,97 @@
 
     .toolbox-details:empty {
         opacity: 0;
-        transform: translateY(-10px);
+        transform: translateY(var(--toolbox-details-shift));
+        margin-top: 0;
     }
+
+    .toolbox-errors {
+        position: absolute;
+        top: 100%;
+        right: 0;
+        margin-top: var(--toolbox-margin);
+        border-radius: var(--toolbox-border-radius);
+        box-shadow: var(--toolbox-box-shadow);
+        width: calc(var(--tool-button-size) + 2 * var(--tool-button-margin));
+        max-height: calc(var(--tool-button-size) + 2 * var(--tool-button-margin));
+        box-sizing: border-box;
+        overflow: hidden;
+        transition:
+            width 0.3s ease,
+            max-height 0.3s ease,
+            transform 0.3s ease;
+        display: flex;
+        flex-direction: column;
+
+        background: var(--toolbox-background);
+
+        .toolbox-errors-container {
+            background: var(--toolbox-error-background);
+            padding: var(--tool-button-margin);
+        }
+
+        .toolbox-error-button {
+            position: absolute;
+            top: var(--tool-button-margin);
+            right: var(--tool-button-margin);
+            transition: opacity 0.2s ease;
+            color: var(--toolbox-error-color);
+        }
+
+        .error-list {
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+            width: calc(var(--toolbox-width) - 2 * var(--tool-button-margin));
+
+            .error-item {
+                padding: 5px;
+                user-select: text;
+                overflow-wrap: break-word;
+                word-break: normal;
+            }
+
+            .error-item:not(:last-child):after {
+                content: "";
+                display: block;
+                height: 1px;
+                background: currentColor;
+                margin-top: var(--toolbox-margin);
+            }
+        }
+    }
+
+    .toolbox-errors:hover {
+        width: var(--toolbox-width);
+        max-height: 300px;
+
+        .toolbox-error-button {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .error-list {
+            opacity: 1;
+
+            .error-item {
+                white-space: normal;
+            }
+        }
+    }
+}
+
+.hylimo.toolbox-wrapper:has(.toolbox-details:empty) .toolbox-errors {
+    transform: translateY(var(--toolbox-details-shift));
+    top: calc(100% - var(--toolbox-details-shift));
+    transition:
+        width 0.3s ease,
+        max-height 0.3s ease;
+}
+
+.toolbox-root {
+    display: contents;
 }
 
 .hylimo.toolbox-wrapper:has(.pointer-events-disabled) {

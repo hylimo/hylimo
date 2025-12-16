@@ -35,6 +35,8 @@ export * from "./features/create-connection/updateCreateConnectionHoverData.js";
 export * from "./features/cursor/cursor.js";
 export * from "./features/cursor/di.config.js";
 export * from "./features/cursor/resizeIcon.js";
+export * from "./features/diagram-state/di.config.js";
+export * from "./features/diagram-state/diagramStateProvider.js";
 export * from "./features/key-state/di.config.js";
 export * from "./features/key-state/keyState.js";
 export * from "./features/key-state/keyStateKeyListener.js";

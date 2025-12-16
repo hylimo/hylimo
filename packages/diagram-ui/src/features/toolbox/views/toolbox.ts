@@ -9,6 +9,7 @@ import { ToolboxToolType } from "../toolType.js";
 import { generateToolboxConnectDetails } from "./connection.js";
 import { Lock, PencilRuler, X } from "lucide";
 import { generateUpdateKeyStateActions } from "../../key-state/keyStateKeyListener.js";
+import { generateErrorDisplay } from "./error.js";
 
 /**
  * Generates the toolbox UI.
@@ -18,10 +19,27 @@ import { generateUpdateKeyStateActions } from "../../key-state/keyStateKeyListen
  */
 export function generateToolbox(context: Toolbox): VNode {
     return h(
+        "div.toolbox-root",
+        {
+            class: {
+                "pointer-events-disabled": context.pointerEventsDisabled
+            }
+        },
+        [generateToolboxInternal(context), generateErrorDisplay(context)]
+    );
+}
+
+/**
+ * Generates the internal toolbox UI.
+ *
+ * @param context The toolbox context
+ * @returns The internal toolbox UI
+ */
+function generateToolboxInternal(context: Toolbox): VNode {
+    return h(
         "div.toolbox",
         {
             class: {
-                "pointer-events-disabled": context.pointerEventsDisabled,
                 closed: !context.isOpen
             },
             on: {
@@ -91,7 +109,7 @@ function generateToolboxDetails(context: Toolbox): VNode {
 function generateToolboxToolButton(context: Toolbox, tool: ToolboxTool): VNode {
     const active = context.toolState.toolType === tool.id;
     return h(
-        "button.toolbox-tool-button",
+        "button.toolbox-tool-button.toolbox-icon-button",
         {
             on: {
                 click: () => tool.action(context)
@@ -119,7 +137,7 @@ function generateToolboxToolButton(context: Toolbox, tool: ToolboxTool): VNode {
  */
 function generateToggleToolboxButton(context: Toolbox): VNode {
     return h(
-        "button.toolbox-tool-button",
+        "button.toolbox-tool-button.toolbox-icon-button",
         {
             on: {
                 click: () => context.toggleToolbox()

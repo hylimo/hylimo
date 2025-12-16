@@ -93,8 +93,14 @@ function generateToolboxItem(context: Toolbox, toolboxEdit: ToolboxEditEntry): V
     return h(
         "button.item",
         {
+            attrs: {
+                disabled: !context.isValid
+            },
             on: {
                 pointerdown: (event) => {
+                    if (!context.isValid) {
+                        return;
+                    }
                     if (toolboxEdit.canMove) {
                         handleMoveAction(context, toolboxEdit, event);
                     } else {
@@ -102,11 +108,17 @@ function generateToolboxItem(context: Toolbox, toolboxEdit: ToolboxEditEntry): V
                     }
                 },
                 pointerup: () => {
+                    if (!context.isValid) {
+                        return;
+                    }
                     if (!toolboxEdit.canMove && !context.toolState.isLocked) {
                         context.updateTool(ToolboxToolType.CURSOR, false);
                     }
                 },
                 mouseenter: () => {
+                    if (!context.isValid) {
+                        return;
+                    }
                     context.showPreview(toolboxEdit);
                 },
                 mouseleave: () => {

@@ -3,6 +3,7 @@ import type { ActionMessage, GeneratorArguments, SModelRoot } from "sprotty-prot
 import type { Connection } from "vscode-languageserver";
 import type { Diagram } from "./diagram/diagram.js";
 import { DiagramServer } from "./edit/diagramServer.js";
+import type { DiagramErrorAction } from "@hylimo/diagram-protocol";
 import {
     type IncrementalUpdate,
     type DynamicLanguageServerConfig,
@@ -114,6 +115,20 @@ export class DiagramServerManager {
             .map((clientId) => this.diagramServers.get(clientId)!)
             .forEach((diagramServer) => {
                 diagramServer.dispatch(action);
+            });
+    }
+
+    /**
+     * Sends an error action to all DiagramServers associated with the diagram
+     *
+     * @param id the id of the diagram
+     * @param errorAction the error action to send
+     */
+    sendErrorToDiagram(id: string, errorAction: DiagramErrorAction): void {
+        (this.diagramServersByDocument.get(id) ?? [])
+            .map((clientId) => this.diagramServers.get(clientId)!)
+            .forEach((diagramServer) => {
+                diagramServer.dispatch(errorAction);
             });
     }
 

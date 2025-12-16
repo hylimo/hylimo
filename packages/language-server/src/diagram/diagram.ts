@@ -1,7 +1,13 @@
 import type { TextDocumentContentChangeEvent } from "vscode-languageserver-textdocument";
 import { TextDocument } from "vscode-languageserver-textdocument";
 import type { SharedDiagramUtils } from "../sharedDiagramUtils.js";
-import type { CompletionItem, Diagnostic, Position, TextDocumentEdit } from "vscode-languageserver";
+import {
+    DiagnosticSeverity,
+    type CompletionItem,
+    type Diagnostic,
+    type Position,
+    type TextDocumentEdit
+} from "vscode-languageserver";
 import { TransactionManager } from "../edit/transactionManager.js";
 import type {
     NavigateToSourceAction,
@@ -9,6 +15,7 @@ import type {
     ToolboxEditPredictionRequestAction
 } from "@hylimo/diagram-protocol";
 import {
+    DiagramErrorAction,
     UpdateEditorConfigNotification,
     PublishDocumentRevealNotification,
     TransactionalAction,
@@ -68,6 +75,16 @@ export class Diagram {
                 uri: this.document.uri,
                 diagnostics: diagnostics
             });
+            const errorDiagnostics = diagnostics.filter(
+                (diagnostic) => diagnostic.severity === DiagnosticSeverity.Error
+            );
+            if (errorDiagnostics.length > 0) {
+                const errorAction: DiagramErrorAction = {
+                    kind: DiagramErrorAction.KIND,
+                    diagnostics: errorDiagnostics
+                };
+                this.utils.diagramServerManager.sendErrorToDiagram(this.document.uri, errorAction);
+            }
         }
     }
 

@@ -24,6 +24,7 @@ import { TransactionalMoveAction } from "../move/transactionalMoveAction.js";
 import { MoveEditCanvasContentMouseListener } from "../canvas-content-move-edit/moveEditCanvasContentMouseListener.js";
 import { projectPointOnLine } from "../../base/projectPointOnLine.js";
 import type { SettingsProvider } from "../settings/settingsProvider.js";
+import type { DiagramStateProvider } from "../diagram-state/diagramStateProvider.js";
 
 /**
  * Listener for splitting canvas connection segments by shift-clicking on them
@@ -40,8 +41,13 @@ export class SplitCanvasSegmentMouseListener extends MouseListener {
      */
     @inject(TYPES.SettingsProvider) protected settingsProvider!: SettingsProvider;
 
+    /**
+     * The diagram state provider
+     */
+    @inject(TYPES.DiagramStateProvider) protected diagramStateProvider!: DiagramStateProvider;
+
     override mouseDown(target: SModelElementImpl, event: MouseEvent): Action[] {
-        if (!this.canSplit(target, event)) {
+        if (!this.diagramStateProvider.valid || !this.canSplit(target, event)) {
             return [];
         }
         const { projectedPoint, transformationMatrix } = this.projectOnConnection(target, event);

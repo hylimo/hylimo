@@ -68,6 +68,11 @@ export class TransactionManager {
         }
         this.currentTransactionId = action.transactionId;
         if (this.edit == undefined) {
+            if (this.diagram.currentDiagram == undefined) {
+                // eslint-disable-next-line no-console
+                console.error("Cannot initialize transaction without a valid diagram");
+                return [];
+            }
             this.edit = new TransactionalEdit(action, this.diagram, this.utils.editHandlerRegistry);
         }
         this.edit.transformEdit(action, this.utils.config);

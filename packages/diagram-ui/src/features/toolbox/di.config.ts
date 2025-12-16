@@ -2,7 +2,7 @@ import { ContainerModule } from "inversify";
 import { configureActionHandler } from "sprotty";
 import { Toolbox } from "./toolbox.js";
 import { SelectAction, SelectAllAction, SetModelAction, UpdateModelAction } from "sprotty-protocol";
-import { EditorConfigUpdatedAction, TransactionalAction } from "@hylimo/diagram-protocol";
+import { DiagramErrorAction, EditorConfigUpdatedAction, TransactionalAction } from "@hylimo/diagram-protocol";
 import { TYPES } from "../types.js";
 import { ToolState } from "./toolState.js";
 import { SetToolAction } from "./setToolAction.js";
@@ -24,4 +24,5 @@ export const toolboxModule = new ContainerModule((bind, _unbind, isBound) => {
     configureActionHandler(context, SetToolAction.KIND, Toolbox);
     configureActionHandler(context, SelectAction.KIND, Toolbox);
     configureActionHandler(context, SelectAllAction.KIND, Toolbox);
+    configureActionHandler(context, DiagramErrorAction.KIND, Toolbox);
 });

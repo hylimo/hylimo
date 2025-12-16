@@ -75,14 +75,23 @@ export function generateConnectionToolboxItem(
     return h(
         "button.item",
         {
+            attrs: {
+                disabled: !context.isValid
+            },
             on: {
                 click: (event) => {
+                    if (!context.isValid) {
+                        return;
+                    }
                     context.selectedConnection = connectionEdit.name;
                     context.connectionSearchString = undefined;
                     event.stopPropagation();
                     context.update();
                 },
                 mouseenter: () => {
+                    if (!context.isValid) {
+                        return;
+                    }
                     context.showPreview(connectionEdit);
                 },
                 mouseleave: () => {

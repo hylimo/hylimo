@@ -42,6 +42,7 @@ import { MouseListener } from "../../base/mouseListener.js";
 import { TYPES } from "../types.js";
 import type { ConfigManager } from "../config/configManager.js";
 import type { SettingsProvider } from "../settings/settingsProvider.js";
+import type { DiagramStateProvider } from "../diagram-state/diagramStateProvider.js";
 
 /**
  * If a resize scale exceeds this value, instead resize with scale 1 in the opposite direction is performed.
@@ -73,8 +74,14 @@ export class MoveEditCanvasContentMouseListener extends MouseListener {
      */
     @inject(TYPES.SettingsProvider) protected settingsProvider!: SettingsProvider;
 
+    /**
+     * The diagram state provider
+     */
+    @inject(TYPES.DiagramStateProvider) protected diagramStateProvider!: DiagramStateProvider;
+
     override mouseDown(target: SModelElementImpl, event: MouseEvent): Action[] {
         if (
+            this.diagramStateProvider.valid &&
             event.button === 0 &&
             !(event.ctrlKey || event.altKey) &&
             this.isRegularInteractionTool() &&

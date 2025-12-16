@@ -20,6 +20,7 @@ import type { TransactionStateProvider } from "../transaction/transactionStatePr
 import { MouseListener } from "../../base/mouseListener.js";
 import type { SettingsProvider } from "../settings/settingsProvider.js";
 import { projectPointOnLine } from "../../base/projectPointOnLine.js";
+import type { DiagramStateProvider } from "../diagram-state/diagramStateProvider.js";
 
 /**
  * Mouse listener for updating the connection creation UI based on mouse movements
@@ -41,8 +42,17 @@ export class CreateConnectionMouseListener extends MouseListener {
      */
     @inject(TYPES.SettingsProvider) protected settingsProvider!: SettingsProvider;
 
+    /**
+     * The diagram state provider
+     */
+    @inject(TYPES.DiagramStateProvider) protected diagramStateProvider!: DiagramStateProvider;
+
     override mouseDown(target: SModelElementImpl, event: MouseEvent): Action[] {
-        if (this.toolTypeProvider.toolType !== ToolboxToolType.CONNECT || this.isForcedScroll(event)) {
+        if (
+            !this.diagramStateProvider.valid ||
+            this.toolTypeProvider.toolType !== ToolboxToolType.CONNECT ||
+            this.isForcedScroll(event)
+        ) {
             return [];
         }
         const root = target.root as SRoot;

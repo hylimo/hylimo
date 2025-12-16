@@ -150,7 +150,12 @@ export class CanvasConnectionView extends EditableCanvasContentView implements I
      */
     private renderSplitSegmentPreview(model: Readonly<SCanvasConnection>): VNode | undefined {
         const provider = model.splitPreviewDataProvider;
-        if (provider == undefined || !model.selected || !this.keyState.isShiftPressed) {
+        if (
+            provider == undefined ||
+            !model.selected ||
+            !this.keyState.isShiftPressed ||
+            !this.diagramStateProvider.valid
+        ) {
             return undefined;
         }
         const projectionResult = provider();

@@ -23,10 +23,12 @@ import {
 } from "@hylimo/diagram-common";
 import type { ConnectionEdit, ToolboxEdit } from "@hylimo/diagram-protocol";
 import {
+    DiagramErrorAction,
     EditorConfigUpdatedAction,
     ToolboxEditPredictionRequestAction,
     TransactionalAction
 } from "@hylimo/diagram-protocol";
+import type { Diagnostic } from "@hylimo/diagram-protocol";
 import { TYPES } from "../types.js";
 import type { ConfigManager } from "../config/configManager.js";
 import MiniSearch from "minisearch";
@@ -97,6 +99,11 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler, Conn
      * The selected connection.
      */
     selectedConnection?: string;
+
+    /**
+     * The error state if the diagram is not in a valid state.
+     */
+    errorState?: ErrorState;
 
     /**
      * The search index.
@@ -185,6 +192,7 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler, Conn
 
     handle(action: Action): ICommand | Action | void {
         if (action.kind === UpdateModelAction.KIND || action.kind === SetModelAction.KIND) {
+            this.updateErrorState(undefined);
             this.handleUpdateModelAction(action as UpdateModelAction | SetModelAction);
         } else if (TransactionalAction.isTransactionalAction(action)) {
             this.handleTransactionalAction(action);
@@ -195,6 +203,27 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler, Conn
             this.updateTool(action.tool, false);
         } else if (action.kind === SelectAction.KIND || action.kind === SelectAllAction.KIND) {
             this.handleSelectAction(action as SelectAction | SelectAllAction);
+        } else if (DiagramErrorAction.is(action)) {
+            this.updateErrorState({
+                diagnostics: action.diagnostics
+            });
+            this.update();
+        }
+    }
+
+    /**
+     * Updates the error state of the toolbox.
+     *
+     * @param errorState The new error state
+     */
+    private updateErrorState(errorState: ErrorState | undefined): void {
+        this.errorState = errorState;
+        if (this.toolState.toolType === ToolboxToolType.CONNECT) {
+            const action: UpdateCursorAction = {
+                kind: UpdateCursorAction.KIND,
+                toolCursor: errorState == undefined ? "cursor-crosshair" : null
+            };
+            this.actionDispatcher.dispatch(action);
         }
     }
 
@@ -219,6 +248,7 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler, Conn
      */
     private handleUpdateModelAction(action: UpdateModelAction | SetModelAction): void {
         if (action.newRoot?.type !== Root.TYPE) {
+            this.errorState = undefined;
             return;
         }
         const root = action.newRoot as Root;
@@ -662,6 +692,13 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler, Conn
     get selectedElementMode(): boolean {
         return this.selectedElements.size === 1;
     }
+
+    /**
+     * Checks if the diagram is in a valid state (no errors).
+     */
+    get isValid(): boolean {
+        return this.errorState === undefined;
+    }
 }
 
 /**
@@ -706,4 +743,14 @@ export interface ConnectionEditEntry {
      * The full key of the edit
      */
     edit: `connection/${string}`;
+}
+
+/**
+ * The error state of the diagram
+ */
+export interface ErrorState {
+    /**
+     * The diagnostics of the error state
+     */
+    diagnostics: Diagnostic[];
 }

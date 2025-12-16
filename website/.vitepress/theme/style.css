@@ -182,6 +182,8 @@ html {
     --toolbox-background-2: var(--vp-c-gray-2);
     --toolbox-background-3: var(--vp-c-gray-3);
     --toolbox-scrollbar-thumb-background: var(--vp-c-text-3);
+    --toolbox-error-background: var(--vp-c-danger-soft);
+    --toolbox-error-color: var(--vp-c-danger-1);
 }
 
 .dark {

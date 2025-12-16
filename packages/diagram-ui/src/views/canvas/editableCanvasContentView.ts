@@ -13,6 +13,7 @@ import type { ToolTypeProvider } from "../../features/toolbox/toolState.js";
 import { ToolboxToolType } from "../../features/toolbox/toolType.js";
 import type { SElement } from "../../model/sElement.js";
 import { findViewportZoom } from "../../base/findViewportZoom.js";
+import type { DiagramStateProvider } from "../../features/diagram-state/diagramStateProvider.js";
 
 /**
  * Base class for CanvasElementView and CanvasConnectionView
@@ -35,12 +36,20 @@ export abstract class EditableCanvasContentView {
     @inject(TYPES.ToolTypeProvider) protected readonly toolTypeProvider!: ToolTypeProvider;
 
     /**
+     * The diagram state provider
+     */
+    @inject(TYPES.DiagramStateProvider) protected readonly diagramStateProvider!: DiagramStateProvider;
+
+    /**
      * Renders the create connection preview
      *
      * @param model the SRoot model
      * @returns the rendered create connection preview
      */
     protected renderCreateConnection(model: Readonly<SCanvasElement | SCanvasConnection>): VNode | undefined {
+        if (!this.diagramStateProvider.valid) {
+            return undefined;
+        }
         if (
             this.toolTypeProvider.toolType !== ToolboxToolType.CONNECT &&
             !this.transactionStateProvider.isInCreateConnectionTransaction
