@@ -107,7 +107,7 @@ export class MovedElementsSelector {
                 }
                 movedX.add(element);
                 result.add(element.id);
-                const dependencies = this.dependsOnX.get(element);
+                const dependencies = this.dependedOnX.get(element);
                 if (dependencies != undefined) {
                     for (const dep of dependencies.x) {
                         newElementsX.add(dep);
@@ -123,7 +123,7 @@ export class MovedElementsSelector {
                 }
                 movedY.add(element);
                 result.add(element.id);
-                const dependencies = this.dependsOnY.get(element);
+                const dependencies = this.dependedOnY.get(element);
                 if (dependencies != undefined) {
                     for (const dep of dependencies.x) {
                         newElementsX.add(dep);
