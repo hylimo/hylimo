@@ -67,12 +67,12 @@ export class LanguageServer {
     /**
      * The connection to use
      */
-    private readonly connection: Connection;
+    protected readonly connection: Connection;
 
     /**
      * Used to sync textdocuments
      */
-    private readonly textDocuments = new TextDocuments({
+    protected readonly textDocuments = new TextDocuments({
         create: TextDocument.create,
         update: this.updateTextDocument.bind(this)
     });
@@ -80,28 +80,28 @@ export class LanguageServer {
     /**
      * Formatter to use for formatting requests
      */
-    private readonly formatter: Formatter;
+    protected readonly formatter: Formatter;
 
     /**
      * Lookup of all known diagrams
      */
-    private readonly diagrams = new Map<string, Diagram>();
+    protected readonly diagrams = new Map<string, Diagram>();
 
     /**
      * Manages diagram servers
      */
-    private readonly diagramServerManager: DiagramServerManager;
+    protected readonly diagramServerManager: DiagramServerManager;
 
     /**
      * Shared utils for diagrams
      */
-    private readonly diagramUtils: SharedDiagramUtils;
+    protected readonly diagramUtils: SharedDiagramUtils;
 
     /**
      * Manages layouted diagrams.
      * Can be either a local or remote implementation
      */
-    private layoutedDiagramManager: DiagramImplementationManager;
+    protected layoutedDiagramManager: DiagramImplementationManager;
 
     /**
      * Creates a new language server
@@ -159,7 +159,7 @@ export class LanguageServer {
      *
      * @returns the init result including capabilities
      */
-    private onInitialize(): InitializeResult {
+    protected onInitialize(): InitializeResult {
         const capabilities: ServerCapabilities = {
             documentFormattingProvider: true,
             completionProvider: {
@@ -174,7 +174,7 @@ export class LanguageServer {
      *
      * @param e the provided event
      */
-    private onDidOpenTextDocument(e: TextDocumentChangeEvent<TextDocument>): void {
+    protected onDidOpenTextDocument(e: TextDocumentChangeEvent<TextDocument>): void {
         this.diagrams.set(e.document.uri, new Diagram(e.document, this.diagramUtils, this.layoutedDiagramManager));
     }
 
@@ -183,7 +183,7 @@ export class LanguageServer {
      *
      * @param e the provided event
      */
-    private onDidCloseTextDocument(e: TextDocumentChangeEvent<TextDocument>): void {
+    protected onDidCloseTextDocument(e: TextDocumentChangeEvent<TextDocument>): void {
         this.diagrams.delete(e.document.uri);
     }
 
@@ -195,7 +195,7 @@ export class LanguageServer {
      * @param version the new version of the document
      * @returns the updated document
      */
-    private updateTextDocument(
+    protected updateTextDocument(
         document: TextDocument,
         changes: TextDocumentContentChangeEvent[],
         version: number
@@ -210,7 +210,7 @@ export class LanguageServer {
      *
      * @param e the provided event
      */
-    private async onDidChangeContentTextDocument(e: TextDocumentChangeEvent<TextDocument>): Promise<void> {
+    protected async onDidChangeContentTextDocument(e: TextDocumentChangeEvent<TextDocument>): Promise<void> {
         const diagram = this.diagrams.get(e.document.uri)!;
         await diagram.onDidChangeContent();
     }
@@ -221,7 +221,7 @@ export class LanguageServer {
      * @param params defines the document and additional options
      * @returns edits which define how to update the document
      */
-    private async onDocumentFormatting(params: DocumentFormattingParams): Promise<TextEdit[]> {
+    protected async onDocumentFormatting(params: DocumentFormattingParams): Promise<TextEdit[]> {
         const diagram = this.diagrams.get(params.textDocument.uri)!;
         return [
             TextEdit.replace(
@@ -240,7 +240,7 @@ export class LanguageServer {
      * @param params defines the document and position
      * @returns the completion items
      */
-    private async onCompletion(params: CompletionParams): Promise<CompletionItem[] | undefined> {
+    protected async onCompletion(params: CompletionParams): Promise<CompletionItem[] | undefined> {
         const diagram = this.diagrams.get(params.textDocument.uri)!;
         return diagram.generateCompletionItems(params.position);
     }
@@ -250,7 +250,7 @@ export class LanguageServer {
      *
      * @param params defines the id of the client and the diagram to open
      */
-    private onOpenDiagram(params: OpenDiagramMessage): void {
+    protected onOpenDiagram(params: OpenDiagramMessage): void {
         const diagram = this.diagrams.get(params.diagramUri);
         if (!diagram) {
             throw new Error(`Unknown diagram: ${params.diagramUri}`);
@@ -264,7 +264,7 @@ export class LanguageServer {
      * @param params defines the diagram to request
      * @returns the requested diagram
      */
-    private onRequestDiagram(params: DiagramRequestMessage): DiagramResponseMessage {
+    protected onRequestDiagram(params: DiagramRequestMessage): DiagramResponseMessage {
         const diagram = this.diagrams.get(params.diagramUri);
         if (!diagram) {
             throw new Error(`Unknown diagram: ${params.diagramUri}`);
@@ -279,7 +279,7 @@ export class LanguageServer {
      *
      * @param id the id of the secondary language server
      */
-    private onSetSecondaryLanguageServer(id: number): void {
+    protected onSetSecondaryLanguageServer(id: number): void {
         if (id > 0) {
             this.layoutedDiagramManager = new LocalDiagramImplementationManager(this.diagramUtils, id);
         }
@@ -290,7 +290,7 @@ export class LanguageServer {
      *
      * @param params the new config
      */
-    private onUpdateConfig(params: DynamicLanguageServerConfig): void {
+    protected onUpdateConfig(params: DynamicLanguageServerConfig): void {
         this.diagramUtils.config = new Config(params);
         this.diagramServerManager.onDidChangeConfig(this.diagramUtils.config);
         for (const diagram of this.diagrams.values()) {

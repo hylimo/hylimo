@@ -183,7 +183,7 @@ export class LineEngine {
      * @param line the line to normalize the position for
      * @returns the normalized position and segment index
      */
-    private normalizePosition(
+    normalizePosition(
         position: number,
         segment: number | undefined,
         line: Line

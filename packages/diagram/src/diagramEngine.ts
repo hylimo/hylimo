@@ -1,8 +1,13 @@
-import type { CstResult, ExecutableExpression, InterpretationResult, InterpreterModule } from "@hylimo/core";
+import type {
+    CstResult,
+    ExecutableExpression,
+    InterpretationResult,
+    InterpreterModule,
+    RuntimeError
+} from "@hylimo/core";
 import {
     Interpreter,
     Parser,
-    RuntimeError,
     SemanticFieldNames,
     defaultModules,
     id,
@@ -30,6 +35,9 @@ export interface RenderErrors extends Pick<CstResult, "lexingErrors" | "parserEr
     layoutErrors: Error[];
 }
 
+/**
+ * The result of rendering a diagram
+ */
 export interface RenderResult {
     /**
      * All errors combined
@@ -42,21 +50,38 @@ export interface RenderResult {
 }
 
 /**
+ * Render result with a generic result type and errors
+ *
+ * @template T the result type
+ * @template E the error type
+ */
+export interface RenderResultBase<T, E extends object> {
+    /**
+     * All errors combined
+     */
+    errors: RenderErrors | (RenderErrors & E);
+    /**
+     * The result, if present
+     */
+    result?: T;
+}
+
+/**
  * A diagram engine that can render a diagram from source code and config using a parser, interpreter, and a layout engine
  */
 export class DiagramEngine {
     /**
      * The parser to use
      */
-    private readonly parser = new Parser(false);
+    protected readonly parser = new Parser(false);
     /**
      * The interpreter to use
      */
-    private readonly interpreter: Interpreter;
+    protected readonly interpreter: Interpreter;
     /**
      * The layout engine to use
      */
-    private readonly layoutEngine = new LayoutEngine();
+    protected readonly layoutEngine = new LayoutEngine();
 
     /**
      * Creates a new DiagramEngine
@@ -81,40 +106,81 @@ export class DiagramEngine {
      * @returns the render result including the potential diagram and all errors
      */
     async render(source: string, config: DiagramConfig, predictionMode: boolean = false): Promise<RenderResult> {
+        const result = await this.renderInternal<LayoutedDiagram, object>(source, config, async (layoutWithRoot) => {
+            try {
+                return {
+                    errors: this.generateErrors({}),
+                    result: await this.layoutEngine.layout(layoutWithRoot, config, predictionMode)
+                };
+            } catch (e) {
+                return {
+                    errors: this.generateErrors({
+                        layoutErrors: [e as Error]
+                    })
+                };
+            }
+        });
+        return {
+            errors: result.errors,
+            layoutedDiagram: result.result
+        };
+    }
+
+    /**
+     * Renders a diagram internally with a customizable final step
+     *
+     * @param source the source to execute
+     * @param config additional config
+     * @param generateResult function to generate the final result from the layout with root
+     * @returns the render result including the potential diagram and all errors
+     */
+    protected async renderInternal<T, E extends object>(
+        source: string,
+        config: DiagramConfig,
+        generateResult: (layoutWithRoot: LayoutWithRoot) => Promise<RenderResultBase<T, E>>
+    ): Promise<RenderResultBase<T, E>> {
         const parserResult = this.parser.parse(source);
-        if (parserResult.ast == undefined) {
+        if (
+            parserResult.ast == undefined ||
+            parserResult.parserErrors.length > 0 ||
+            parserResult.lexingErrors.length > 0
+        ) {
             return {
-                errors: {
-                    lexingErrors: parserResult.lexingErrors,
-                    parserErrors: parserResult.parserErrors,
-                    interpreterErrors: [],
-                    layoutErrors: []
-                }
+                errors: this.generateErrors(parserResult)
             };
         }
         const expressions = toExecutable(parserResult.ast, true);
-        let layoutedDiagram: LayoutedDiagram | undefined = undefined;
-        const layoutErrors: Error[] = [];
         const interpretationResult = this.execute(expressions, config);
-        if (interpretationResult.result != undefined) {
-            try {
-                const diagram = interpretationResult.result;
-                if (!isWrapperObject(diagram) || !(diagram.wrapped instanceof LayoutWithRoot)) {
-                    throw new RuntimeError("No diagram returned");
-                }
-                layoutedDiagram = await this.layoutEngine.layout(diagram.wrapped, config, predictionMode);
-            } catch (e) {
-                layoutErrors.push(e as Error);
-            }
+        if (interpretationResult.result == undefined) {
+            return {
+                errors: this.generateErrors({
+                    interpreterErrors: [interpretationResult.error]
+                })
+            };
         }
+        const diagram = interpretationResult.result;
+        if (!isWrapperObject(diagram) || !(diagram.wrapped instanceof LayoutWithRoot)) {
+            return {
+                errors: this.generateErrors({
+                    layoutErrors: [new Error("No diagram returned")]
+                })
+            };
+        }
+        return await generateResult(diagram.wrapped);
+    }
+
+    /**
+     * Generates a complete RenderErrors object from partial errors
+     *
+     * @param errors the partial errors
+     * @returns the complete RenderErrors object
+     */
+    protected generateErrors(errors: Partial<RenderErrors>): RenderErrors {
         return {
-            layoutedDiagram,
-            errors: {
-                lexingErrors: [],
-                parserErrors: [],
-                interpreterErrors: interpretationResult.error != undefined ? [interpretationResult.error] : [],
-                layoutErrors
-            }
+            lexingErrors: errors.lexingErrors ?? [],
+            parserErrors: errors.parserErrors ?? [],
+            interpreterErrors: errors.interpreterErrors ?? [],
+            layoutErrors: errors.layoutErrors ?? []
         };
     }
 

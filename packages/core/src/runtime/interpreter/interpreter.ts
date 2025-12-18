@@ -6,22 +6,46 @@ import { InterpreterContext } from "./interpreterContext.js";
 import { InterpreterModule } from "./interpreterModule.js";
 
 /**
- * The result of an interpreter run
+ * The result of an interpretation run
  */
-export interface InterpretationResult {
+export type InterpretationResult = ValidInterpretationResult | ErrorInterpretationResult;
+
+/**
+ * The result of a valid interpreter run
+ */
+export interface ValidInterpretationResult {
     /**
      * The result of the execution
      */
-    result?: BaseObject;
+    result: BaseObject;
     /**
      * The global scope, can be used to process results
      * Only provided if no error was thrown
      */
-    globalScope?: FullObject;
+    globalScope: FullObject;
     /**
      * If existing, the error which caused the abortion of the execution
      */
-    error?: RuntimeError;
+    error?: undefined;
+}
+
+/**
+ * The result of an erroring interpreter run
+ */
+export interface ErrorInterpretationResult {
+    /**
+     * The result of the execution
+     */
+    result?: undefined;
+    /**
+     * The global scope, can be used to process results
+     * Only provided if no error was thrown
+     */
+    globalScope?: undefined;
+    /**
+     * If existing, the error which caused the abortion of the execution
+     */
+    error: RuntimeError;
 }
 
 /**

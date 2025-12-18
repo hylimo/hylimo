@@ -116,7 +116,7 @@ export class FontManager {
      *
      * @param fontLoadingConfig the font config, used to determine if font subsetting is enabled and if external fonts are enabled
      * @param config the config of the font
-     * @returns the fetched
+     * @returns the fetched font buffer and its id
      */
     private async fetchFont(config: FontConfig, fontLoadingConfig: FontLoadingConfig) {
         if (!fontLoadingConfig.enableExternalFonts && !config.url.startsWith("data:")) {
