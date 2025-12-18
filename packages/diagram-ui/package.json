@@ -1,6 +1,6 @@
 {
     "name": "@hylimo/diagram-ui",
-    "version": "2.2.0",
+    "version": "2.2.1",
     "license": "EPL-2.0",
     "type": "module",
     "repository": {
@@ -27,9 +27,9 @@
         "build": "tsc"
     },
     "dependencies": {
-        "@hylimo/diagram-common": "^2.2.0",
-        "@hylimo/diagram-protocol": "^2.2.0",
-        "@hylimo/diagram-render-svg": "^2.2.0",
+        "@hylimo/diagram-common": "^2.2.1",
+        "@hylimo/diagram-protocol": "^2.2.1",
+        "@hylimo/diagram-render-svg": "^2.2.1",
         "@mapbox/unitbezier": "^0.0.1",
         "bezier-js": "^6.1.4",
         "inversify": "^6.2.2",
