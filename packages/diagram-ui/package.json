@@ -8,11 +8,20 @@
         "url": "git+https://github.com/hylimo/hylimo.git",
         "directory": "packages/diagram-ui"
     },
-    "main": "lib/index.js",
-    "types": "lib/index.d.ts",
+    "exports": {
+        ".": {
+            "import": {
+                "types": "./lib/index.d.ts",
+                "default": "./lib/index.js"
+            }
+        },
+        "./css/hylimo.css": "./css/hylimo.css",
+        "./css/toolbox.css": "./css/toolbox.css"
+    },
     "files": [
         "lib",
-        "src"
+        "src",
+        "css"
     ],
     "scripts": {
         "build": "tsc"

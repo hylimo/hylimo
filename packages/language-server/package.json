@@ -8,8 +8,14 @@
         "url": "git+https://github.com/hylimo/hylimo.git",
         "directory": "packages/language-server"
     },
-    "main": "lib/index.js",
-    "types": "lib/index.d.ts",
+    "exports": {
+        ".": {
+            "import": {
+                "types": "./lib/index.d.ts",
+                "default": "./lib/index.js"
+            }
+        }
+    },
     "files": [
         "lib",
         "src"
