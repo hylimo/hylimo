@@ -127,17 +127,6 @@
             margin-top: var(--toolbox-margin);
         }
 
-        @supports selector(::-webkit-scrollbar) {
-            ::-webkit-scrollbar {
-                height: 4px;
-                width: 4px;
-            }
-
-            ::-webkit-scrollbar-thumb {
-                background: var(--toolbox-scrollbar-thumb-background);
-            }
-        }
-
         .items {
             overflow-y: auto;
             overflow-x: hidden;
@@ -263,7 +252,8 @@
 
         .toolbox-errors-container {
             background: var(--toolbox-error-background);
-            padding: var(--tool-button-margin);
+            display: flex;
+            overflow: hidden;
         }
 
         .toolbox-error-button {
@@ -280,7 +270,9 @@
             flex-direction: column;
             opacity: 0;
             transition: opacity 0.2s ease;
-            width: calc(var(--toolbox-width) - 2 * var(--tool-button-margin));
+            width: var(--toolbox-width);
+            padding: 0 var(--tool-button-margin);
+            margin: var(--tool-button-margin) 0;
 
             .error-item {
                 padding: 5px;
@@ -313,6 +305,20 @@
 
             .error-item {
                 white-space: normal;
+            }
+        }
+    }
+
+    .toolbox-details,
+    .toolbox-errors-container {
+        @supports selector(::-webkit-scrollbar) {
+            ::-webkit-scrollbar {
+                height: 4px;
+                width: 4px;
+            }
+
+            ::-webkit-scrollbar-thumb {
+                background: var(--toolbox-scrollbar-thumb-background);
             }
         }
     }

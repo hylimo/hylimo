@@ -330,9 +330,6 @@ export class Layout {
         if (styles.width != undefined) {
             width = styles.width;
         }
-        if (element.size?.width != undefined) {
-            width = element.size.width;
-        }
         if (horizontalAlignment === HorizontalAlignment.RIGHT) {
             x += size.width - (width + layoutInformation.marginRight);
         } else if (horizontalAlignment === HorizontalAlignment.CENTER) {
@@ -378,9 +375,6 @@ export class Layout {
         }
         if (styles.height != undefined) {
             height = styles.height;
-        }
-        if (element.size?.height != undefined) {
-            height = element.size.height;
         }
         if (verticalAlignment === VerticalAlignment.BOTTOM) {
             y += size.height - (height + layoutInformation.marginBottom);
