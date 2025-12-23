@@ -79,6 +79,9 @@ export class AxisAlignedSegmentEditMoveHandler extends SnapMoveHandler<AxisAlign
         }
         super(snapHandler, snappingEnabled, transformationMatrix, moveCursor);
         this.element = segment.id;
+        if (start === end) {
+            throw new Error("Start and end coordinates cannot be the same for AxisAlignedSegmentEditMoveHandler");
+        }
     }
 
     override handleMove(x: number, y: number, event: MouseEvent, target: SModelElementImpl): HandleMoveResult {

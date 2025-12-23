@@ -187,6 +187,9 @@ export class MoveEditCanvasContentMouseListener extends MouseListener {
             otherStart = layout.originalStart.x;
             otherEnd = layout.originalEnd.x;
         }
+        if (start === end) {
+            return undefined;
+        }
         return new AxisAlignedSegmentEditMoveHandler(
             current,
             start,
