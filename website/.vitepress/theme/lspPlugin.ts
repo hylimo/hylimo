@@ -26,10 +26,12 @@ import {
 import { useData } from "vitepress";
 import { useLocalStorage, watchThrottled } from "@vueuse/core";
 import { languageServerConfigKey, languageClientKey, diagramIdProviderKey } from "./injectionKeys";
-import { Worker as MonacoWorker } from "monaco-languageclient/workerFactory";
-import { useWorkerFactory } from "monaco-languageclient/workerFactory";
 import { LogLevel } from "@codingame/monaco-vscode-api";
-import { MonacoVscodeApiWrapper, type MonacoVscodeApiConfig } from "monaco-languageclient/vscodeApiWrapper";
+import {
+    getEnhancedMonacoEnvironment,
+    MonacoVscodeApiWrapper,
+    type MonacoVscodeApiConfig
+} from "monaco-languageclient/vscodeApiWrapper";
 import { defaultDiagramConfig, defaultEditorConfig, defaultSharedSettings } from "./defaultSettings";
 
 /**
@@ -184,18 +186,17 @@ async function setupLanguageClient(isDark: boolean) {
         },
         logLevel: LogLevel.Warning,
         monacoWorkerFactory: () => {
-            useWorkerFactory({
-                workerLoaders: {
-                    editorWorkerService: () =>
-                        new MonacoWorker(
-                            new URL(
-                                "@codingame/monaco-vscode-editor-api/esm/vs/editor/editor.worker.js",
-                                import.meta.url
-                            ),
-                            { type: "module" }
-                        )
+            const envEnhanced = getEnhancedMonacoEnvironment();
+            envEnhanced.getWorker = (workerId, label) => {
+                if (label === "editorWorkerService") {
+                    return new Worker(
+                        new URL("@codingame/monaco-vscode-editor-api/esm/vs/editor/editor.worker.js", import.meta.url),
+                        { type: "module" }
+                    );
+                } else {
+                    throw new Error(`Unknown worker label: ${label}`);
                 }
-            });
+            };
         }
     };
     const vscodeApi = new MonacoVscodeApiWrapper(vscodeApiConfig);
