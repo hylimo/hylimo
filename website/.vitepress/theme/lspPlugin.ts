@@ -25,8 +25,8 @@ import {
 } from "@hylimo/monaco-editor-support";
 import { useData } from "vitepress";
 import { useLocalStorage, watchThrottled } from "@vueuse/core";
-import monacoEditorWorker from "monaco-editor/esm/vs/editor/editor.worker?worker";
 import { languageServerConfigKey, languageClientKey, diagramIdProviderKey } from "./injectionKeys";
+import { Worker as MonacoWorker } from "monaco-languageclient/workerFactory";
 import { useWorkerFactory } from "monaco-languageclient/workerFactory";
 import { LogLevel } from "@codingame/monaco-vscode-api";
 import { MonacoVscodeApiWrapper, type MonacoVscodeApiConfig } from "monaco-languageclient/vscodeApiWrapper";
@@ -186,7 +186,14 @@ async function setupLanguageClient(isDark: boolean) {
         monacoWorkerFactory: () => {
             useWorkerFactory({
                 workerLoaders: {
-                    TextEditorWorker: () => new monacoEditorWorker()
+                    editorWorkerService: () =>
+                        new MonacoWorker(
+                            new URL(
+                                "@codingame/monaco-vscode-editor-api/esm/vs/editor/editor.worker.js",
+                                import.meta.url
+                            ),
+                            { type: "module" }
+                        )
                 }
             });
         }
