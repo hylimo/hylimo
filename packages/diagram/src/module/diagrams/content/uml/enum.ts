@@ -69,7 +69,6 @@ export const enumModule = ContentModule.create(
                                         A
                                         B
                                     }
-                                    }
                                 }
                             `
                         )

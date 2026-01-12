@@ -28,7 +28,7 @@
         "@hylimo/diagram": "^2.2.1",
         "@hylimo/diagram-common": "^2.2.1",
         "@hylimo/diagram-protocol": "^2.2.1",
-        "chevrotain": "^11.0.3",
+        "chevrotain": "^11.1.0",
         "jsonata": "^2.1.0",
         "prettier": "^3.7.4",
         "sprotty-protocol": "^1.4.0",
