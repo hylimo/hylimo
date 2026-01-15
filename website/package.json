@@ -27,8 +27,8 @@
         "vue": "^3.5.26"
     },
     "dependencies": {
-        "@codingame/monaco-vscode-api": "^24.3.0",
-        "@codingame/monaco-vscode-editor-api": "^24.3.0",
+        "@codingame/monaco-vscode-api": "^25.0.0",
+        "@codingame/monaco-vscode-editor-api": "^25.0.0",
         "@github/relative-time-element": "^5.0.0",
         "@hylimo/diagram-common": "^2.2.1",
         "@hylimo/diagram-protocol": "^2.2.1",
@@ -42,14 +42,14 @@
         "idb": "^8.0.3",
         "js-base64": "^3.7.8",
         "minisearch": "^7.2.0",
-        "monaco-editor": "npm:@codingame/monaco-vscode-editor-api@^24.3.0",
-        "monaco-languageclient": "^10.5.0",
+        "monaco-editor": "npm:@codingame/monaco-vscode-editor-api@^25.0.0",
+        "monaco-languageclient": "^10.6.0",
         "pako": "^2.1.0",
         "reflect-metadata": "^0.2.2",
         "splitpanes": "^4.0.4",
         "sprotty": "^1.4.0",
         "sprotty-protocol": "^1.4.0",
-        "vscode": "npm:@codingame/monaco-vscode-extension-api@^24.3.0",
+        "vscode": "npm:@codingame/monaco-vscode-extension-api@^25.0.0",
         "vscode-languageclient": "^9.0.1",
         "vscode-languageserver": "^9.0.1",
         "vscode-languageserver-protocol": "^3.17.5"
