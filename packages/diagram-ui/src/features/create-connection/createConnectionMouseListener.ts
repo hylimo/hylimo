@@ -106,6 +106,7 @@ export class CreateConnectionMouseListener extends MouseListener {
                     edit,
                     start,
                     this.settingsProvider.settings,
+                    this.elementFinder,
                     root.getMouseTransformationMatrix()
                 )
         };

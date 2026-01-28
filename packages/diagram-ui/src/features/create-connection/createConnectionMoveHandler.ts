@@ -5,6 +5,7 @@ import { MoveHandler, type HandleMoveResult } from "../move/moveHandler.js";
 import type { Matrix } from "transformation-matrix";
 import { isLineProvider } from "./lineProvider.js";
 import { projectPointOnLine } from "../../base/projectPointOnLine.js";
+import type { ElementFinder } from "../element-finder/elementFinder.js";
 
 /**
  * Move handler for creating connections
@@ -22,13 +23,15 @@ export class CreateConnectionMoveHandler extends MoveHandler {
         private readonly edit: `connection/${string}`,
         private readonly start: ConnectionEnd,
         private readonly settings: SharedSettings | undefined,
+        private readonly elementFinder: ElementFinder,
         transformationMatrix: Matrix
     ) {
         super(transformationMatrix, "cursor-crosshair", false);
     }
 
     override handleMove(x: number, y: number, event: MouseEvent, target: SModelElementImpl): HandleMoveResult {
-        const lineProvider = findParentByFeature(target, isLineProvider);
+        const elementAtPoint = this.elementFinder.findElementAtPoint(target.root, event.clientX, event.clientY);
+        const lineProvider = findParentByFeature(elementAtPoint ?? target, isLineProvider);
         let end: ConnectionEnd = { x, y };
         if (lineProvider != undefined) {
             const root = lineProvider.root;
