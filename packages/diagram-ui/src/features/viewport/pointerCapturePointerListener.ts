@@ -5,7 +5,6 @@ import { inject } from "inversify";
 import { TYPES } from "../types.js";
 import type { ToolTypeProvider } from "../toolbox/toolState.js";
 import type { KeyState } from "../key-state/keyState.js";
-import { ToolboxToolType } from "../toolbox/toolType.js";
 
 /**
  * Pointer listener that captures the pointer when the pointer is down on an element
@@ -33,9 +32,7 @@ export class PointerCapturePointerListener extends PointerListener {
     }
 
     override pointerDown(target: SModelElementImpl, event: PointerEvent): (Action | Promise<Action>)[] {
-        if (this.toolTypeProvider.toolType !== ToolboxToolType.CONNECT || this.isForcedScroll(event)) {
-            (event.target as HTMLElement | undefined)?.setPointerCapture(event.pointerId);
-        }
+        (event.target as HTMLElement | undefined)?.setPointerCapture(event.pointerId);
         return [];
     }
 }

@@ -21,6 +21,7 @@ import { MouseListener } from "../../base/mouseListener.js";
 import type { SettingsProvider } from "../settings/settingsProvider.js";
 import { projectPointOnLine } from "../../base/projectPointOnLine.js";
 import type { DiagramStateProvider } from "../diagram-state/diagramStateProvider.js";
+import type { ElementFinder } from "../element-finder/elementFinder.js";
 
 /**
  * Mouse listener for updating the connection creation UI based on mouse movements
@@ -46,6 +47,11 @@ export class CreateConnectionMouseListener extends MouseListener {
      * The diagram state provider
      */
     @inject(TYPES.DiagramStateProvider) protected diagramStateProvider!: DiagramStateProvider;
+
+    /**
+     * Helper to find elements at specific positions
+     */
+    @inject(TYPES.ElementFinder) protected elementFinder!: ElementFinder;
 
     override mouseDown(target: SModelElementImpl, event: MouseEvent): Action[] {
         if (
@@ -113,7 +119,8 @@ export class CreateConnectionMouseListener extends MouseListener {
             return [];
         }
         let data: CreateConnectionHoverData;
-        const lineProvider = findParentByFeature(target, isLineProvider);
+        const elementAtPoint = this.elementFinder.findElementAtPoint(target.root, event.clientX, event.clientY);
+        const lineProvider = findParentByFeature(elementAtPoint ?? target.root, isLineProvider);
         const root = target.root as SRoot;
         const rootPos = root.getPosition(event);
         if (lineProvider == undefined || lineProvider.editExpression == undefined) {

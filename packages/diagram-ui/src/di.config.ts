@@ -81,6 +81,7 @@ import { contribModule } from "./features/contrib/di.config.js";
 import { snapModule } from "./features/snap/di.config.js";
 import { settingsModule } from "./features/settings/di.config.js";
 import { diagramStateModule } from "./features/diagram-state/di.config.js";
+import { elementFinderModule } from "./features/element-finder/di.config.js";
 
 /**
  * The module used
@@ -159,7 +160,8 @@ export function createContainer(widgetId: string): Container {
         snapModule,
         contribModule,
         settingsModule,
-        diagramStateModule
+        diagramStateModule,
+        elementFinderModule
     );
     container.load(diagramModule);
 

@@ -18,5 +18,6 @@ export const TYPES = {
     ITouchListener: Symbol("ITouchListener"),
     IPointerListener: Symbol("IPointerListener"),
     SnapLinesStateManager: Symbol("SnapLinesStateManager"),
-    DiagramStateProvider: Symbol("DiagramStateProvider")
+    DiagramStateProvider: Symbol("DiagramStateProvider"),
+    ElementFinder: Symbol("ElementFinder")
 };
