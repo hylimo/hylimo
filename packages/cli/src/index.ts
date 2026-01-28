@@ -68,10 +68,47 @@ const config: DiagramConfig = {
 
 (async () => {
     const diagram = await diagramEngine.render(inputFileContent, config);
+
+    if (diagram.errors.lexingErrors.length > 0) {
+        console.error("Lexer Errors:");
+        for (const error of diagram.errors.lexingErrors) {
+            console.error(`  Line ${error.line}, Column ${error.column}: ${error.message}`);
+        }
+    }
+
+    if (diagram.errors.parserErrors.length > 0) {
+        console.error("Parser Errors:");
+        for (const error of diagram.errors.parserErrors) {
+            const token = error.token;
+            console.error(`  Line ${token.startLine}, Column ${token.startColumn}: ${error.message}`);
+        }
+    }
+
+    if (diagram.errors.interpreterErrors.length > 0) {
+        console.error("Interpreter Errors:");
+        for (const error of diagram.errors.interpreterErrors) {
+            console.error(`  ${error.message}`);
+        }
+    }
+
+    if (diagram.errors.layoutErrors.length > 0) {
+        console.error("Layout Errors:");
+        for (const error of diagram.errors.layoutErrors) {
+            console.error(`  ${error.message}`);
+        }
+    }
+
     const rootElement = diagram.layoutedDiagram?.rootElement;
 
     if (!rootElement) {
-        console.error("Error: No root element found");
+        const hasErrors =
+            diagram.errors.lexingErrors.length > 0 ||
+            diagram.errors.parserErrors.length > 0 ||
+            diagram.errors.interpreterErrors.length > 0 ||
+            diagram.errors.layoutErrors.length > 0;
+        if (!hasErrors) {
+            console.error("Error: No root element found");
+        }
         process.exit(1);
     }
 

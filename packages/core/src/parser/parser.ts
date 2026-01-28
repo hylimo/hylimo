@@ -12,6 +12,7 @@ import type { Expression } from "../ast/expression.js";
 import type { Range } from "../ast/range.js";
 import { generateCstToAstTransfromer } from "./cstToAstTransformer.js";
 import type { TokenType } from "./lexer.js";
+import { lexerErrorMessageProvider } from "./lexerErrorMessageProvider.js";
 import {
     CloseCurlyBracket,
     CloseRoundBracket,
@@ -100,7 +101,9 @@ export class Parser extends CstParser {
     /**
      * Lexer used to split text into tokens
      */
-    private readonly lexer = new Lexer(lexerDefinition);
+    private readonly lexer = new Lexer(lexerDefinition, {
+        errorMessageProvider: lexerErrorMessageProvider
+    });
 
     /**
      * Visitor to be used to generate the AST
