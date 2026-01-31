@@ -90,8 +90,15 @@ export class SRoot extends ViewportRootElementImpl implements CanvasLike {
      */
     incrementalUpdateCount = 0;
 
+    /**
+     * Creates a new SRoot
+     * Initializes the zoom to 0 to prevent rendering before the bound have been set
+     *
+     * @param index the model index
+     */
     constructor(index = new ModelIndexImpl()) {
         super(index);
+        this.zoom = 0;
     }
 
     /**

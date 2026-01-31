@@ -55,7 +55,7 @@ export class RootView extends CanvasLikeView implements IView {
     @inject(TYPES.ConfigManager) protected configManager!: ConfigManager;
 
     render(model: Readonly<SRoot>, context: RenderingContext, _args?: IViewArgs | undefined): VNode {
-        if (context.targetKind == "hidden") {
+        if (context.targetKind === "hidden" || model.zoom === 0) {
             return svg("svg.hylimo", null);
         }
         const transform = `scale(${model.zoom}) translate(${-model.scroll.x},${-model.scroll.y})`;

@@ -42,6 +42,7 @@ import type { SettingsProvider } from "../settings/settingsProvider.js";
 import jsonata, { type ExprNode } from "jsonata";
 import type { TransactionIdProvider } from "../transaction/transactionIdProvider.js";
 import type { ErrorState } from "../diagram-state/diagramStateProvider.js";
+import type { SRoot } from "../../model/sRoot.js";
 
 /**
  * UI Extension which displays the graphical toolbox.
@@ -586,6 +587,7 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler, Conn
         const size = result.root?.rootBounds?.size;
         if (result.root != undefined && size?.height && size?.width) {
             const model = this.modelFactory.createRoot(result.root);
+            (model as SRoot).zoom = 1;
             preview = this.renderer.renderElement(model);
         }
         this.elementPreviews.set(key, preview);
