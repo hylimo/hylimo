@@ -24,13 +24,13 @@
         "build": "rollup -c"
     },
     "dependencies": {
-        "harfbuzzjs": "^0.7.0",
+        "harfbuzzjs": "^0.8.0",
         "simplify-svg-path": "^1.0.1"
     },
     "devDependencies": {
         "@rollup/plugin-node-resolve": "^16.0.3",
         "@rollup/plugin-typescript": "^12.3.0",
         "@rollup/plugin-wasm": "^6.2.2",
-        "glob": "^13.0.0"
+        "glob": "^13.0.1"
     }
 }

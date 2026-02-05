@@ -81,10 +81,6 @@
 
 .VPNavBarSearch {
     padding-left: 10px;
-
-    .DocSearch-Button {
-        background-color: var(--docsearch-searchbox-background);
-    }
 }
 
 .VPNavBarMenu {
