@@ -26,7 +26,7 @@
     "dependencies": {
         "@hylimo/diagram": "^2.2.1",
         "@hylimo/diagram-common": "^2.2.1",
-        "fast-xml-parser": "^5.3.4",
+        "fast-xml-parser": "^5.3.5",
         "simplify-svg-path": "^1.0.1"
     },
     "devDependencies": {
