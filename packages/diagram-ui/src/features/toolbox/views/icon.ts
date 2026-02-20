@@ -34,6 +34,12 @@ function renderIcon(icon: IconNode, cls: string[]): VNode {
             },
             class: Object.fromEntries(cls.map((entry) => [entry, true]))
         },
-        icon.map(([tag, attrs]) => h(tag, { attrs }))
+        icon.map(([tag, attrs]) =>
+            h(tag, {
+                attrs: Object.fromEntries(
+                    Object.entries(attrs).filter(([_key, value]) => value != undefined)
+                ) as Record<string, string | number>
+            })
+        )
     );
 }

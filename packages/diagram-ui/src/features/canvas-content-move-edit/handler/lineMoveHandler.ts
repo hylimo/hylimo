@@ -88,7 +88,7 @@ export class LineMoveHandler extends SnapMoveHandler<LineSnapHandler> {
     override handleMove(x: number, y: number, event: MouseEvent, target: SModelElementImpl): HandleMoveResult {
         let pos: number | [number, number] | undefined;
         let dist: number | undefined;
-        let snapLines: SnapLines | undefined = undefined;
+        let snapLines: SnapLines | undefined;
         const root = target.root as SRoot;
 
         if (this.isSnappingEnabled(event)) {

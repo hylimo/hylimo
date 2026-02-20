@@ -1,6 +1,6 @@
 {
     "name": "@hylimo/diagram-render-svg",
-    "version": "2.2.1",
+    "version": "2.2.2",
     "license": "MIT",
     "type": "module",
     "repository": {
@@ -24,8 +24,8 @@
         "build": "tsc"
     },
     "dependencies": {
-        "@hylimo/diagram": "^2.2.1",
-        "@hylimo/diagram-common": "^2.2.1",
+        "@hylimo/diagram": "^2.2.2",
+        "@hylimo/diagram-common": "^2.2.2",
         "fast-xml-parser": "^5.3.7",
         "simplify-svg-path": "^1.0.1"
     },
