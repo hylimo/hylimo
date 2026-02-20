@@ -31,6 +31,6 @@
         "@rollup/plugin-node-resolve": "^16.0.3",
         "@rollup/plugin-typescript": "^12.3.0",
         "@rollup/plugin-wasm": "^6.2.2",
-        "glob": "^13.0.2"
+        "glob": "^13.0.6"
     }
 }
