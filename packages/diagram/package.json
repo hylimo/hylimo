@@ -38,6 +38,6 @@
         "uuid": "^13.0.0"
     },
     "devDependencies": {
-        "@types/fontkit": "^2.0.8"
+        "@types/fontkit": "^2.0.9"
     }
 }
