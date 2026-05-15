@@ -176,6 +176,7 @@ export class LayoutEngine {
             this.collapseNonPredictionElements(root);
         }
         const canvas = this.layoutElement(layout, root);
+        const rootMargins = root.layoutInformation!;
         return {
             rootElement: {
                 type: "root",
@@ -184,7 +185,10 @@ export class LayoutEngine {
                 edits: canvas.edits,
                 rootBounds: {
                     position: { x: -canvas.dx, y: -canvas.dy },
-                    size: { width: canvas.width, height: canvas.height }
+                    size: {
+                        width: canvas.width + rootMargins.marginLeft + rootMargins.marginRight,
+                        height: canvas.height + rootMargins.marginTop + rootMargins.marginBottom
+                    }
                 },
                 fonts: this.generateSubsettedFontData(layout),
                 preview: predictionMode
