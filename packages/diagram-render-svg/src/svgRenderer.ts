@@ -1,7 +1,7 @@
 import type { Root, Rect, Path, Canvas, Element, Ellipse, SimplifiedText, FontData } from "@hylimo/diagram-common";
 import { convertFontsToCssStyle } from "@hylimo/diagram-common";
 import { SimplifiedDiagramVisitor } from "@hylimo/diagram-common";
-import { XMLBuilder } from "fast-xml-parser";
+import XMLBuilder from "fast-xml-builder";
 import {
     extractFillAttributes,
     extractLayoutAttributes,
@@ -56,7 +56,7 @@ export class SVGRenderer {
     }
 
     /**
-     * Converts an SVGNode to the object format expected by fast-xml-parser
+     * Converts an SVGNode to the object format expected by fast-xml-builder
      *
      * @param node the node to convert
      * @returns the xml object
