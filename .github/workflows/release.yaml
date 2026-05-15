@@ -12,14 +12,12 @@ jobs:
     name: Release Packages
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: actions/setup-node@v6
         with:
-          node-version: 22.x
-          cache: npm
-          registry-url: "https://registry.npmjs.org"
-      - name: Update npm
-        run: npm install -g npm@latest
+          node-version: 24.x
+          registry-url: https://registry.npmjs.org
+          package-manager-cache: false
       - name: Install dependencies
         run: npm ci
       - name: Build packages
