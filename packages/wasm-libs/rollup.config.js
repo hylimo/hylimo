@@ -9,10 +9,7 @@ import { fileURLToPath, URL } from "node:url";
 const HARFBUZZ_SUBSET_IMPORT = "harfbuzzjs-subset-wasm";
 
 const harfbuzzSubsetWasmPath = fileURLToPath(
-    new URL(
-        "../../node_modules/harfbuzzjs/dist/harfbuzz-subset.wasm",
-        import.meta.url
-    )
+    new URL("../../node_modules/harfbuzzjs/dist/harfbuzz-subset.wasm", import.meta.url)
 );
 
 function resolveHarfbuzzSubsetPlugin() {
