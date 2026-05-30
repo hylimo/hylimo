@@ -2,7 +2,7 @@ import type { IActionDispatcher, SModelElementImpl, SModelRootImpl } from "sprot
 import { findParentByFeature, isViewport, limit, ZoomMouseListener as SprottyZoomMouseListener } from "sprotty";
 import { inject, injectable } from "inversify";
 import type { Action, Viewport } from "sprotty-protocol";
-import UnitBezier from "@mapbox/unitbezier";
+import bezier from "@mapbox/unitbezier";
 import type { Point } from "@hylimo/diagram-common";
 import type { SetViewportAction } from "./viewport.js";
 import { TYPES } from "../types.js";
@@ -33,23 +33,6 @@ const WHEEL_DELAY = 40;
  * Animation duration for zooming with the mouse wheel.
  */
 const WHEEL_ANIMATION_DURATION = 250;
-
-/**
- * Given given (x, y), (x1, y1) control points for a bezier curve,
- * return a function that interpolates along that curve.
- *
- * @param p1x control point 1 x coordinate
- * @param p1y control point 1 y coordinate
- * @param p2x control point 2 x coordinate
- * @param p2y control point 2 y coordinate
- */
-function bezier(p1x: number, p1y: number, p2x: number, p2y: number): (t: number) => number {
-    // weird ts error, probably due to commonjs module
-    const bezier = new (UnitBezier as any)(p1x, p1y, p2x, p2y);
-    return (t: number) => {
-        return bezier.solve(t);
-    };
-}
 
 /**
  * Mouse listener that handles zooming with the mouse wheel.

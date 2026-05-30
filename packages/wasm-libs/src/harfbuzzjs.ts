@@ -1,3 +1,3 @@
-import wasm from "harfbuzzjs/hb-subset.wasm";
+import wasm from "harfbuzzjs-subset-wasm";
 
 export const harfbuzzjsSubset = wasm;
