@@ -24,7 +24,7 @@ export const packageModule = ContentModule.create(
                     packageElement = canvasElement(
                         class = list("package-element"),
                         contents = list(
-                            container(
+                            rect(
                                 contents = list(
                                     container(contents = list(scope.internal.defaultTitle(name, keywords)), class = list("title-wrapper")),
                                     path(path = "M 0 0 V 1", hAlign = "left"),
@@ -100,6 +100,7 @@ export const packageModule = ContentModule.create(
                         }
                         minWidth = 100
                         hAlign = "left"
+                        stroke = unset
                     }
                     cls("title") {
                         hAlign = "center"
