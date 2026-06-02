@@ -1,6 +1,6 @@
 {
     "name": "@hylimo/diagram",
-    "version": "2.2.2",
+    "version": "2.2.3",
     "license": "MIT",
     "type": "module",
     "repository": {
@@ -24,10 +24,10 @@
         "build": "tsc"
     },
     "dependencies": {
-        "@hylimo/core": "^2.2.2",
-        "@hylimo/diagram-common": "^2.2.2",
-        "@hylimo/fonts": "^2.2.2",
-        "@hylimo/wasm-libs": "^2.2.2",
+        "@hylimo/core": "^2.2.3",
+        "@hylimo/diagram-common": "^2.2.3",
+        "@hylimo/fonts": "^2.2.3",
+        "@hylimo/wasm-libs": "^2.2.3",
         "buffer": "^6.0.3",
         "dedent": "^1.7.2",
         "fontkit": "^2.0.4",
