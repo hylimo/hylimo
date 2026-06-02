@@ -220,9 +220,6 @@ export function getSnapReferenceData(
         const canvasPointIds: string[] = [];
         while (elementQueue.length > 0) {
             const element = elementQueue.pop()!;
-            if (ignoredElements.has(element.id)) {
-                continue;
-            }
             if (CanvasElement.isCanvasElement(element)) {
                 if (ignoredElements.has(element.id)) {
                     continue;
@@ -247,9 +244,6 @@ export function getSnapReferenceData(
                 bounds.push(Bounds.ofPoints(targetPoints));
                 elementQueue.push(...element.children);
             } else if (CanvasConnection.isCanvasConnection(element)) {
-                if (ignoredElements.has(element.id)) {
-                    continue;
-                }
                 canvasPointIds.push(element.start);
                 elementQueue.push(...element.children);
             } else if (

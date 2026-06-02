@@ -44,7 +44,7 @@ export function getGaps(referenceBounds: Bounds[]): Gaps {
  * @returns the horizontal gaps between elements
  */
 function getHorizontalGaps(referenceBounds: Bounds[]): Gap[] {
-    const horizontallySorted = referenceBounds.sort((a, b) => a.position.x - b.position.x);
+    const horizontallySorted = [...referenceBounds].sort((a, b) => a.position.x - b.position.x);
     const horizontalGaps: Gap[] = [];
 
     for (let i = 0; i < horizontallySorted.length; i++) {
@@ -92,7 +92,7 @@ function getHorizontalGaps(referenceBounds: Bounds[]): Gap[] {
  * @returns the vertical gaps between elements
  */
 function getVerticalGaps(referenceBounds: Bounds[]): Gap[] {
-    const verticallySorted = referenceBounds.sort((a, b) => a.position.y - b.position.y);
+    const verticallySorted = [...referenceBounds].sort((a, b) => a.position.y - b.position.y);
     const verticalGaps: Gap[] = [];
 
     for (let i = 0; i < verticallySorted.length; i++) {
