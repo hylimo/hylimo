@@ -158,8 +158,10 @@ For additional connection types (associations, aggregations, etc.), refer to the
 
 The following config properties are available for class diagrams:
 
-| Variable             | Meaning                                                           | Default value (in pixels) | Comment |
-| -------------------- | ----------------------------------------------------------------- | ------------------------- | ------- |
-| `abstractAsProperty` | Whether to show { abstract } after the name of abstract classes   | false                     | -       |
-| `providesDistance`   | Default distance of provided interfaces to the classifier outline | 100                       | -       |
-| `requiresDistance`   | Default distance of required interfaces to the classifier outline | 100                       | -       |
+| Variable               | Meaning                                                           | Default value (in pixels) | Comment |
+| ---------------------- | ----------------------------------------------------------------- | ------------------------- | ------- |
+| `abstractAsProperty`   | Whether to show { abstract } after the name of abstract classes   | false                     | -       |
+| `providesDistance`     | Default distance of provided interfaces to the classifier outline | 100                       | -       |
+| `requiresDistance`     | Default distance of required interfaces to the classifier outline | 100                       | -       |
+| `showComponentKeyword` | Whether to show the component keyword                             | true                      | -       |
+| `showComponentSymbol`  | Whether to show the component symbol                              | true                      | -       |

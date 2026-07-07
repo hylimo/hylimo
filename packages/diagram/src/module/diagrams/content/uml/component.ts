@@ -1,4 +1,4 @@
-import { booleanType, fun, functionType, id, listType, object, optional, str } from "@hylimo/core";
+import { bool, booleanType, fun, functionType, id, listType, object, optional, str } from "@hylimo/core";
 import { PREDICTION_STYLE_CLASS_ASSIGNMENT_EXPRESSION, SCOPE } from "../../../base/dslModule.js";
 import { ContentModule } from "../contentModule.js";
 import { stringOrSpanListType } from "../../../base/types.js";
@@ -40,10 +40,15 @@ export const componentModule = ContentModule.create(
                 fun(
                     `
                         (name, callback) = args
-                        keywords = list("component")
                         otherKeywords = args.keywords
-                        if(otherKeywords != null) {
-                            keywords.addAll(otherKeywords)
+                        keywords = if(scope.internal.config.showComponentKeyword) {
+                            keywords = list("component")
+                            if(otherKeywords != null) {
+                                keywords.addAll(otherKeywords)
+                            }
+                            keywords
+                        } {
+                            otherKeywords
                         }
                         _component(name, callback, title = name, keywords = keywords, abstract = args.abstract, args = args)
                     `,
@@ -100,5 +105,6 @@ export const componentModule = ContentModule.create(
                     }
                 ])
             )
-    ]
+    ],
+    [["showComponentKeyword", "Whether to show the component keyword", booleanType, bool(true)]]
 );

@@ -1,3 +1,4 @@
+import { bool, booleanType } from "@hylimo/core";
 import { ContentModule } from "../../contentModule.js";
 
 /**
@@ -17,13 +18,18 @@ export const componentTitleModule = ContentModule.create(
         scope.internal.componentTitleContentHandler = [
             { },
             {
-                args.contents += container(
-                    contents = list(
-                        scope.internal.defaultTitle(args.args.title, args.args.keywords, args.args.abstract),
-                        path(path = "${componentIconPath}", class = list("component-icon"))
-                    ),
-                    class = list("component-title-container")
-                )
+                providedArgs = args.args
+                args.contents += if(scope.internal.config.showComponentSymbol) {
+                    container(
+                        contents = list(
+                            scope.internal.defaultTitle(providedArgs.title, providedArgs.keywords, providedArgs.abstract),
+                            path(path = "${componentIconPath}", class = list("component-icon"))
+                        ),
+                        class = list("component-title-container")
+                    )
+                } {
+                    scope.internal.defaultTitle(providedArgs.title, providedArgs.keywords, providedArgs.abstract)
+                }
             }  
         ]
 
@@ -44,5 +50,6 @@ export const componentTitleModule = ContentModule.create(
                 }
             }
         }
-    `
+    `,
+    [["showComponentSymbol", "Whether to show the component symbol", booleanType, bool(true)]]
 );
