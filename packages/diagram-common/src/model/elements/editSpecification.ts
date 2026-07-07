@@ -93,9 +93,7 @@ export interface AddArgEditSpecificationEntry extends BaseEditSpecificationEntry
  * entry in a edit specification
  */
 export type EditSpecificationEntry =
-    | AddEditSpecificationEntry
-    | ReplaceEditSpecificationEntry
-    | AddArgEditSpecificationEntry;
+    AddEditSpecificationEntry | ReplaceEditSpecificationEntry | AddArgEditSpecificationEntry;
 
 export namespace EditSpecification {
     /**
