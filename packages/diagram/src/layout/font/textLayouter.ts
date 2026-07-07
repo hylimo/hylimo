@@ -201,9 +201,9 @@ class TextLayoutInstance {
                     textContentOffset = lastBreakOpportunityTextContentOffset;
                     continue;
                 } else if (i > 0) {
-                    this.addTextElement(textContent.substring(textContentStart, i));
+                    this.addTextElement(textContent.substring(textContentStart, textContentOffset));
                     this.doBreak();
-                    textContentStart = i;
+                    textContentStart = textContentOffset;
                 }
             }
             textContentOffset += glyph.codePoints.length;
@@ -214,8 +214,8 @@ class TextLayoutInstance {
                 lastBreakOpportunityTextContentOffset = textContentOffset;
                 lastBreakOpportunityOffsetX = this.offsetX;
                 if (lineBreak.required) {
-                    this.addTextElement(textContent.substring(textContentStart, i + 1));
-                    textContentStart = i + 1;
+                    this.addTextElement(textContent.substring(textContentStart, textContentOffset));
+                    textContentStart = textContentOffset;
                     this.doBreak();
                 }
                 lineBreak = lineBreaker.nextBreak();
