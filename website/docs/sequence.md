@@ -231,26 +231,27 @@ sequenceDiagram {
 ## Config properties
 
 The following config properties are available for sequence diagrams:
-|Variable|Meaning|Default value (in pixels)|Comment|
-|--------|-------|-------------------------|-------|
-|`activityShift`| How far on the x axis subsequent simultaneously active activity indicators on the same participant are shifted | 3 |-|
-|`activityWidth`| How wide an activity indicator should be | 10|-|
-|`minActivityHeight`| Minimum height of an activity indicator | 10 |-|
-|`strokeMargin`| Margin for strokes | 1 |-|
-|`connectionMargin`| Default distance required after a connection between participants | 20 |-|
-|`deactivateMargin`| Default distance required after a deactivation | 10 |-|
-|`destroyingCrossSize`| The width and height of a participant-destruction cross | 20 |-|
-|`externalMessageDiameter`| Width and height of the circle of lost and found messages | 20 |-|
-|`frameMargin`| Default distance required after a frame | 20 |-|
-|`fragmentMargin`| Default distance required after a fragment | 20 |-|
-|`externalMessageMargin`| How far away on the x axis a lost or found message should be drawn | 95 | 100-(0.5\*activityWidth), chosen so that it aligns on the grid when sending a message against one activity indicator |
-|`frameMarginX`| Default margin to apply on the left and right side of frames | 15 |-|
-|`frameMarginTop`| Default margin to apply on the top of frames | 30 |-|
-|`frameMarginBottom`| Default margin to apply on the bottom of frames | 5 |-|
-|`frameSubtextMargin`| Default horizontal margin for frame subtexts | 10 |-|
-|`eventDefaultMargin`| Default margin for events on a participant when no other margin is specified | 5 |-|
-|`participantMargin`| How far apart subsequent participants should be | 200 | Multiple of `100` to align participants on the grid |
-|`initialMargin`| Default distance required after a new participant | 20 |-|
+
+| Variable                  | Meaning                                                                                                        | Default value (in pixels) | Comment                                                                                                              |
+| ------------------------- | -------------------------------------------------------------------------------------------------------------- | ------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| `activityShift`           | How far on the x axis subsequent simultaneously active activity indicators on the same participant are shifted | 3                         | -                                                                                                                    |
+| `activityWidth`           | How wide an activity indicator should be                                                                       | 10                        | -                                                                                                                    |
+| `minActivityHeight`       | Minimum height of an activity indicator                                                                        | 10                        | -                                                                                                                    |
+| `strokeMargin`            | Margin for strokes                                                                                             | 1                         | -                                                                                                                    |
+| `connectionMargin`        | Default distance required after a connection between participants                                              | 20                        | -                                                                                                                    |
+| `deactivateMargin`        | Default distance required after a deactivation                                                                 | 10                        | -                                                                                                                    |
+| `destroyingCrossSize`     | The width and height of a participant-destruction cross                                                        | 20                        | -                                                                                                                    |
+| `externalMessageDiameter` | Width and height of the circle of lost and found messages                                                      | 20                        | -                                                                                                                    |
+| `frameMargin`             | Default distance required after a frame                                                                        | 20                        | -                                                                                                                    |
+| `fragmentMargin`          | Default distance required after a fragment                                                                     | 20                        | -                                                                                                                    |
+| `externalMessageMargin`   | How far away on the x axis a lost or found message should be drawn                                             | 95                        | 100-(0.5\*activityWidth), chosen so that it aligns on the grid when sending a message against one activity indicator |
+| `frameMarginX`            | Default margin to apply on the left and right side of frames                                                   | 15                        | -                                                                                                                    |
+| `frameMarginTop`          | Default margin to apply on the top of frames                                                                   | 30                        | -                                                                                                                    |
+| `frameMarginBottom`       | Default margin to apply on the bottom of frames                                                                | 5                         | -                                                                                                                    |
+| `frameSubtextMargin`      | Default horizontal margin for frame subtexts                                                                   | 10                        | -                                                                                                                    |
+| `eventDefaultMargin`      | Default margin for events on a participant when no other margin is specified                                   | 5                         | -                                                                                                                    |
+| `participantMargin`       | How far apart subsequent participants should be                                                                | 200                       | Multiple of `100` to align participants on the grid                                                                  |
+| `initialMargin`           | Default distance required after a new participant                                                              | 20                        | -                                                                                                                    |
 
 ## Precise method documentation
 

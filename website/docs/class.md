@@ -287,6 +287,7 @@ The following operators are supported:
 ## Config properties
 
 The following config properties are available for class diagrams:
-|Variable|Meaning|Default value (in pixels)|Comment|
-|--------|-------|-------------------------|-------|
-|`abstractAsProperty`| Whether to show { abstract } after the name of abstract classes | false |-|
+
+| Variable             | Meaning                                                         | Default value (in pixels) | Comment |
+| -------------------- | --------------------------------------------------------------- | ------------------------- | ------- |
+| `abstractAsProperty` | Whether to show { abstract } after the name of abstract classes | false                     | -       |
