@@ -230,6 +230,7 @@ class AxisAlignedSegmentEditSnapHandler extends SnapHandler {
             snapX: this.effectivelyVertical,
             snapY: !this.effectivelyVertical,
             snapGaps: false,
+            snapSegmentGaps: false,
             snapPoints: true,
             snapSize: false
         });

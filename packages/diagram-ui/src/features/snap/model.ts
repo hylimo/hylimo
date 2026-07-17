@@ -92,6 +92,12 @@ export interface Gap {
      * Length of the gap between the elements
      */
     length: number;
+    /**
+     * True if the end of this gap is a connection line segment instead of a regular element.
+     * Such gaps only produce side snaps (equal distance on both sides of the segment), never center snaps,
+     * as centering an element between an element and a line is not a meaningful alignment.
+     */
+    isSegmentGap: boolean;
 }
 
 /**
@@ -310,6 +316,18 @@ export interface ContextSnapReferenceData {
      */
     bounds: Bounds[];
     /**
+     * Degenerate (zero-width) bounds representing vertical connection line segments, aligned with the root
+     * coordinate system, sorted. Used to snap elements (e.g. labels) to an equal distance on both sides of a
+     * vertical line segment.
+     */
+    verticalSegmentBounds: Bounds[];
+    /**
+     * Degenerate (zero-height) bounds representing horizontal connection line segments, aligned with the root
+     * coordinate system, sorted. Used to snap elements (e.g. labels) to an equal distance on both sides of a
+     * horizontal line segment.
+     */
+    horizontalSegmentBounds: Bounds[];
+    /**
      * The global rotation of the canvas
      */
     globalRotation: number;
@@ -403,6 +421,11 @@ export interface SnapOptions {
      * If true or a GapSnapOptions object, gap snapping is enabled
      */
     snapGaps: boolean | GapSnapOptions;
+    /**
+     * If true, snapping to an equal distance on both sides of a vertical/horizontal connection line segment
+     * is enabled. Reuses the gap snapping mechanism with the line segments as additional (degenerate) bounds.
+     */
+    snapSegmentGaps: boolean;
     /**
      * If not false, parameters required for size snapping
      */

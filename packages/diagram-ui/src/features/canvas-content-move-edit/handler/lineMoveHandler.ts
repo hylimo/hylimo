@@ -378,6 +378,7 @@ class LineSnapHandler extends SnapHandler {
             snapX: true,
             snapY: true,
             snapGaps: false,
+            snapSegmentGaps: true,
             snapPoints: true,
             snapSize: false
         });

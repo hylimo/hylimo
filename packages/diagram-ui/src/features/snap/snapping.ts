@@ -59,8 +59,15 @@ export function getSnaps(
         if (!referenceInfo) {
             continue;
         }
-        const visibleGaps = getGaps(referenceInfo.bounds);
-        if (options.snapGaps != false && info.bounds != undefined) {
+        const includeElementGaps = options.snapGaps != false;
+        if ((includeElementGaps || options.snapSegmentGaps) && info.bounds != undefined) {
+            const visibleGaps = getGaps(
+                referenceInfo.bounds,
+                referenceInfo.verticalSegmentBounds,
+                referenceInfo.horizontalSegmentBounds,
+                includeElementGaps,
+                options.snapSegmentGaps
+            );
             getGapSnaps(info.bounds, elementOffset, visibleGaps, snapState, context, options);
         }
         if (options.snapPoints) {

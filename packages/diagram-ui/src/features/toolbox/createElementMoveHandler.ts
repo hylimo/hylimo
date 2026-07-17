@@ -130,6 +130,7 @@ class CreateElementSnapHandler extends SnapHandler {
                 snapX: true,
                 snapY: true,
                 snapGaps: false,
+                snapSegmentGaps: false,
                 snapPoints: true,
                 snapSize: false
             }

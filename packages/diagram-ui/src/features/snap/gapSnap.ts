@@ -27,14 +27,108 @@ const VISIBLE_GAPS_LIMIT_PER_AXIS = 99999;
  * Computes the gaps between elements
  * Used in {@code getGapSnaps}
  *
+ * Vertical connection line segments are treated as zero-width bounds and only contribute to horizontal gaps,
+ * horizontal connection line segments are treated as zero-height bounds and only contribute to vertical gaps.
+ * This allows snapping an element (e.g. a label) to the same distance from such a line segment as another
+ * element already placed on the opposite side.
+ *
  * @param referenceBounds the bounds of elements to compute gaps for (usually visible, non-selected elements)
+ * @param verticalSegmentBounds zero-width bounds of vertical connection line segments
+ * @param horizontalSegmentBounds zero-height bounds of horizontal connection line segments
  * @returns the gaps between elements
  */
-export function getGaps(referenceBounds: Bounds[]): Gaps {
-    return {
-        horizontalGaps: getHorizontalGaps(referenceBounds),
-        verticalGaps: getVerticalGaps(referenceBounds)
-    };
+export function getGaps(
+    referenceBounds: Bounds[],
+    verticalSegmentBounds: Bounds[],
+    horizontalSegmentBounds: Bounds[],
+    includeElementGaps: boolean,
+    includeSegmentGaps: boolean
+): Gaps {
+    const horizontalGaps: Gap[] = [];
+    const verticalGaps: Gap[] = [];
+    if (includeElementGaps) {
+        horizontalGaps.push(...getHorizontalGaps(referenceBounds));
+        verticalGaps.push(...getVerticalGaps(referenceBounds));
+    }
+    if (includeSegmentGaps) {
+        horizontalGaps.push(...getCrossHorizontalGaps(referenceBounds, verticalSegmentBounds));
+        verticalGaps.push(...getCrossVerticalGaps(referenceBounds, horizontalSegmentBounds));
+    }
+    return { horizontalGaps, verticalGaps };
+}
+
+/**
+ * Creates a horizontal gap between two bounds if the left one ends before the right one begins and their
+ * y-ranges overlap.
+ *
+ * @param startBounds the left bounds
+ * @param endBounds the right bounds
+ * @param isSegmentGap whether the gap pairs an element with a connection line segment
+ * @returns the created gap, or undefined if no gap exists
+ */
+function createHorizontalGap(startBounds: Bounds, endBounds: Bounds, isSegmentGap: boolean): Gap | undefined {
+    const startMinY = startBounds.position.y;
+    const startMaxY = startMinY + startBounds.size.height;
+    const startMaxX = startBounds.position.x + startBounds.size.width;
+    const endMinX = endBounds.position.x;
+    const endMinY = endBounds.position.y;
+    const endMaxY = endMinY + endBounds.size.height;
+
+    if (startMaxX < endMinX && rangesOverlap([startMinY, startMaxY], [endMinY, endMaxY])) {
+        return {
+            startBounds,
+            endBounds,
+            startSide: [
+                { x: startMaxX, y: startMinY },
+                { x: startMaxX, y: startMaxY }
+            ],
+            endSide: [
+                { x: endMinX, y: endMinY },
+                { x: endMinX, y: endMaxY }
+            ],
+            length: endMinX - startMaxX,
+            overlap: rangeIntersection([startMinY, startMaxY], [endMinY, endMaxY])!,
+            isSegmentGap
+        };
+    }
+    return undefined;
+}
+
+/**
+ * Creates a vertical gap between two bounds if the top one ends before the bottom one begins and their
+ * x-ranges overlap.
+ *
+ * @param startBounds the top bounds
+ * @param endBounds the bottom bounds
+ * @param isSegmentGap whether the gap pairs an element with a connection line segment
+ * @returns the created gap, or undefined if no gap exists
+ */
+function createVerticalGap(startBounds: Bounds, endBounds: Bounds, isSegmentGap: boolean): Gap | undefined {
+    const startMinX = startBounds.position.x;
+    const startMaxX = startMinX + startBounds.size.width;
+    const startMaxY = startBounds.position.y + startBounds.size.height;
+    const endMinX = endBounds.position.x;
+    const endMinY = endBounds.position.y;
+    const endMaxX = endMinX + endBounds.size.width;
+
+    if (startMaxY < endMinY && rangesOverlap([startMinX, startMaxX], [endMinX, endMaxX])) {
+        return {
+            startBounds,
+            endBounds,
+            startSide: [
+                { x: startMinX, y: startMaxY },
+                { x: startMaxX, y: startMaxY }
+            ],
+            endSide: [
+                { x: endMinX, y: endMinY },
+                { x: endMaxX, y: endMinY }
+            ],
+            length: endMinY - startMaxY,
+            overlap: rangeIntersection([startMinX, startMaxX], [endMinX, endMaxX])!,
+            isSegmentGap
+        };
+    }
+    return undefined;
 }
 
 /**
@@ -48,41 +142,62 @@ function getHorizontalGaps(referenceBounds: Bounds[]): Gap[] {
     const horizontalGaps: Gap[] = [];
 
     for (let i = 0; i < horizontallySorted.length; i++) {
-        const startBounds = horizontallySorted[i];
-
         for (let j = i + 1; j < horizontallySorted.length; j++) {
             if (horizontalGaps.length >= VISIBLE_GAPS_LIMIT_PER_AXIS) {
                 return horizontalGaps;
             }
-
-            const endBounds = horizontallySorted[j];
-            const startMinY = startBounds.position.y;
-            const startMaxY = startMinY + startBounds.size.height;
-            const startMaxX = startBounds.position.x + startBounds.size.width;
-            const endMinX = endBounds.position.x;
-            const endMinY = endBounds.position.y;
-            const endMaxY = endMinY + endBounds.size.height;
-
-            if (startMaxX < endMinX && rangesOverlap([startMinY, startMaxY], [endMinY, endMaxY])) {
-                horizontalGaps.push({
-                    startBounds,
-                    endBounds,
-                    startSide: [
-                        { x: startMaxX, y: startMinY },
-                        { x: startMaxX, y: startMaxY }
-                    ],
-                    endSide: [
-                        { x: endMinX, y: endMinY },
-                        { x: endMinX, y: endMaxY }
-                    ],
-                    length: endMinX - startMaxX,
-                    overlap: rangeIntersection([startMinY, startMaxY], [endMinY, endMaxY])!
-                });
+            const gap = createHorizontalGap(horizontallySorted[i], horizontallySorted[j], false);
+            if (gap != undefined) {
+                horizontalGaps.push(gap);
             }
         }
     }
 
     return horizontalGaps;
+}
+
+/**
+ * Computes horizontal gaps between each element bound and each vertical segment bound.
+ * These gaps enable snapping to an equal distance on both sides of a vertical line segment.
+ *
+ * @param elementBounds the bounds of the reference elements
+ * @param verticalSegmentBounds the zero-width bounds of vertical line segments
+ * @returns the cross gaps
+ */
+function getCrossHorizontalGaps(elementBounds: Bounds[], verticalSegmentBounds: Bounds[]): Gap[] {
+    const gaps: Gap[] = [];
+    for (const element of elementBounds) {
+        for (const segment of verticalSegmentBounds) {
+            const [start, end] = element.position.x <= segment.position.x ? [element, segment] : [segment, element];
+            const gap = createHorizontalGap(start, end, true);
+            if (gap != undefined) {
+                gaps.push(gap);
+            }
+        }
+    }
+    return gaps;
+}
+
+/**
+ * Computes vertical gaps between each element bound and each horizontal segment bound.
+ * These gaps enable snapping to an equal distance on both sides of a horizontal line segment.
+ *
+ * @param elementBounds the bounds of the reference elements
+ * @param horizontalSegmentBounds the zero-height bounds of horizontal line segments
+ * @returns the cross gaps
+ */
+function getCrossVerticalGaps(elementBounds: Bounds[], horizontalSegmentBounds: Bounds[]): Gap[] {
+    const gaps: Gap[] = [];
+    for (const element of elementBounds) {
+        for (const segment of horizontalSegmentBounds) {
+            const [start, end] = element.position.y <= segment.position.y ? [element, segment] : [segment, element];
+            const gap = createVerticalGap(start, end, true);
+            if (gap != undefined) {
+                gaps.push(gap);
+            }
+        }
+    }
+    return gaps;
 }
 
 /**
@@ -96,37 +211,13 @@ function getVerticalGaps(referenceBounds: Bounds[]): Gap[] {
     const verticalGaps: Gap[] = [];
 
     for (let i = 0; i < verticallySorted.length; i++) {
-        const startBounds = verticallySorted[i];
-
         for (let j = i + 1; j < verticallySorted.length; j++) {
             if (verticalGaps.length >= VISIBLE_GAPS_LIMIT_PER_AXIS) {
                 return verticalGaps;
             }
-
-            const endBounds = verticallySorted[j];
-
-            const startMinX = startBounds.position.x;
-            const startMaxX = startMinX + startBounds.size.width;
-            const startMaxY = startBounds.position.y + startBounds.size.height;
-            const endMinX = endBounds.position.x;
-            const endMinY = endBounds.position.y;
-            const endMaxX = endMinX + endBounds.size.width;
-
-            if (startMaxY < endMinY && rangesOverlap([startMinX, startMaxX], [endMinX, endMaxX])) {
-                verticalGaps.push({
-                    startBounds,
-                    endBounds,
-                    startSide: [
-                        { x: startMinX, y: startMaxY },
-                        { x: startMaxX, y: startMaxY }
-                    ],
-                    endSide: [
-                        { x: endMinX, y: endMinY },
-                        { x: endMaxX, y: endMinY }
-                    ],
-                    length: endMinY - startMaxY,
-                    overlap: rangeIntersection([startMinX, startMaxX], [endMinX, endMaxX])!
-                });
+            const gap = createVerticalGap(verticallySorted[i], verticallySorted[j], false);
+            if (gap != undefined) {
+                verticalGaps.push(gap);
             }
         }
     }
@@ -154,7 +245,9 @@ export function getGapSnaps(
 ): void {
     const { horizontalGaps, verticalGaps } = visibleGaps;
     let snapGaps: GapSnapOptions;
-    if (options.snapGaps === true) {
+    if (typeof options.snapGaps === "object") {
+        snapGaps = options.snapGaps;
+    } else {
         snapGaps = {
             left: true,
             right: true,
@@ -163,8 +256,6 @@ export function getGapSnaps(
             centerHorizontal: true,
             centerVertical: true
         };
-    } else {
-        snapGaps = options.snapGaps as GapSnapOptions;
     }
 
     if (options.snapX) {
@@ -212,6 +303,7 @@ function getHorizontalGapSnaps(
 
         if (
             snapGaps.centerHorizontal &&
+            !gap.isSegmentGap &&
             gapIsLargerThanSelection &&
             shouldAddSnapX(snapState, centerOffset - elementOffset.x)
         ) {
@@ -301,6 +393,7 @@ function getVerticalGapSnaps(
 
         if (
             snapGaps.centerVertical &&
+            !gap.isSegmentGap &&
             gapIsLargerThanSelection &&
             shouldAddSnapY(snapState, centerOffset - elementOffset.y)
         ) {

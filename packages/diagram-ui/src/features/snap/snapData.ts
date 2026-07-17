@@ -7,7 +7,8 @@ import {
     CanvasBezierSegment,
     Bounds,
     Point,
-    CanvasPoint
+    CanvasPoint,
+    LineSegment
 } from "@hylimo/diagram-common";
 import { applyToPoint, compose, rotateDEG, type Matrix } from "transformation-matrix";
 import type { SCanvas } from "../../model/canvas/sCanvas.js";
@@ -215,6 +216,8 @@ export function getSnapReferenceData(
         const elementQueue: SElement[] = [];
         const points: Point[] = [];
         const bounds: Bounds[] = [];
+        const verticalSegmentBounds: Bounds[] = [];
+        const horizontalSegmentBounds: Bounds[] = [];
         elementQueue.push(...(canvas.children as SElement[]));
         const contextToTarget = rotateDEG(canvas.globalRotation);
         const canvasPointIds: string[] = [];
@@ -245,6 +248,17 @@ export function getSnapReferenceData(
                 elementQueue.push(...element.children);
             } else if (CanvasConnection.isCanvasConnection(element)) {
                 canvasPointIds.push(element.start);
+                if (!ignoredElements.has(element.id)) {
+                    collectConnectionSegmentBounds(
+                        element,
+                        context,
+                        contextToTarget,
+                        visibleBounds,
+                        layoutEngine,
+                        verticalSegmentBounds,
+                        horizontalSegmentBounds
+                    );
+                }
                 elementQueue.push(...element.children);
             } else if (
                 CanvasLineSegment.isCanvasLineSegment(element) ||
@@ -277,6 +291,8 @@ export function getSnapReferenceData(
         result.set(context, {
             points: points.sort(Point.compare),
             bounds: bounds.sort(Bounds.compare),
+            verticalSegmentBounds: verticalSegmentBounds.sort(Bounds.compare),
+            horizontalSegmentBounds: horizontalSegmentBounds.sort(Bounds.compare),
             globalRotation: canvas.globalRotation
         });
     }
@@ -302,11 +318,120 @@ export function intersectSnapReferenceDatas(a: SnapReferenceData, b: SnapReferen
         }
         const points = intersectSortedArrays(aInfo.points, bInfo.points, Point.compare);
         const bounds = intersectSortedArrays(aInfo.bounds, bInfo.bounds, Bounds.compare);
+        const verticalSegmentBounds = intersectSortedArrays(
+            aInfo.verticalSegmentBounds,
+            bInfo.verticalSegmentBounds,
+            Bounds.compare
+        );
+        const horizontalSegmentBounds = intersectSortedArrays(
+            aInfo.horizontalSegmentBounds,
+            bInfo.horizontalSegmentBounds,
+            Bounds.compare
+        );
         result.set(context, {
             points,
             bounds,
+            verticalSegmentBounds,
+            horizontalSegmentBounds,
             globalRotation: aInfo.globalRotation
         });
     }
     return result;
+}
+
+/**
+ * Epsilon used to decide whether a line segment is axis-aligned in the target coordinate system.
+ */
+const SEGMENT_AXIS_ALIGNED_EPSILON = 10 ** -6;
+
+/**
+ * Collects the axis-aligned (vertical/horizontal) straight line segments of a connection as degenerate bounds.
+ * Only segments which remain axis-aligned in the target (root-aligned) coordinate system are collected;
+ * this automatically handles canvas rotations which are multiples of 90 degrees and discards diagonal segments.
+ *
+ * @param connection the connection whose segments should be collected
+ * @param context the id of the context (canvas) the reference data is computed for
+ * @param contextToTarget the transformation from the context to the target coordinate system
+ * @param visibleBounds the currently visible bounds in the target coordinate system; segments outside are ignored
+ * @param layoutEngine the layout engine used to obtain the connection geometry
+ * @param verticalSegmentBounds collected zero-width bounds of vertical segments (modified)
+ * @param horizontalSegmentBounds collected zero-height bounds of horizontal segments (modified)
+ */
+function collectConnectionSegmentBounds(
+    connection: CanvasConnection,
+    context: string,
+    contextToTarget: Matrix,
+    visibleBounds: Bounds,
+    layoutEngine: CanvasLayoutEngine,
+    verticalSegmentBounds: Bounds[],
+    horizontalSegmentBounds: Bounds[]
+): void {
+    const { line, transform } = layoutEngine.layoutLine(connection, context);
+    const toTarget = compose(contextToTarget, transform);
+    let previous = applyToPoint(toTarget, line.start);
+    for (const segment of line.segments) {
+        const current = applyToPoint(toTarget, segment.end);
+        if (segment.type === LineSegment.TYPE) {
+            const segmentBounds = createAxisAlignedSegmentBounds(previous, current);
+            if (segmentBounds != undefined && boundsOverlap(segmentBounds.bounds, visibleBounds)) {
+                if (segmentBounds.vertical) {
+                    verticalSegmentBounds.push(segmentBounds.bounds);
+                } else {
+                    horizontalSegmentBounds.push(segmentBounds.bounds);
+                }
+            }
+        }
+        previous = current;
+    }
+}
+
+/**
+ * Creates degenerate bounds for a straight line segment if it is axis-aligned.
+ * A vertical segment results in zero-width bounds, a horizontal segment in zero-height bounds.
+ *
+ * @param start the start of the segment
+ * @param end the end of the segment
+ * @returns the created bounds together with the orientation, or undefined if the segment is not axis-aligned
+ */
+function createAxisAlignedSegmentBounds(start: Point, end: Point): { bounds: Bounds; vertical: boolean } | undefined {
+    const deltaX = Math.abs(end.x - start.x);
+    const deltaY = Math.abs(end.y - start.y);
+    if (deltaX < SEGMENT_AXIS_ALIGNED_EPSILON && deltaY < SEGMENT_AXIS_ALIGNED_EPSILON) {
+        return undefined;
+    }
+    if (deltaX < SEGMENT_AXIS_ALIGNED_EPSILON) {
+        return {
+            bounds: {
+                position: { x: start.x, y: Math.min(start.y, end.y) },
+                size: { width: 0, height: deltaY }
+            },
+            vertical: true
+        };
+    }
+    if (deltaY < SEGMENT_AXIS_ALIGNED_EPSILON) {
+        return {
+            bounds: {
+                position: { x: Math.min(start.x, end.x), y: start.y },
+                size: { width: deltaX, height: 0 }
+            },
+            vertical: false
+        };
+    }
+    return undefined;
+}
+
+/**
+ * Checks whether two bounds overlap (including touching edges).
+ *
+ * @param a the first bounds
+ * @param b the second bounds
+ * @returns true if the bounds overlap
+ */
+function boundsOverlap(a: Bounds, b: Bounds): boolean {
+    return (
+        a.position.x <= b.position.x + b.size.width &&
+        a.position.x + a.size.width >= b.position.x &&
+        a.position.y <= b.position.y + b.size.height &&
+        a.position.y + a.size.height >= b.position.y
+    );
 }

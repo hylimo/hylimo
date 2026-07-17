@@ -203,6 +203,7 @@ class TranslationSnapHandler extends SnapHandler {
                 snapX,
                 snapY,
                 snapGaps: true,
+                snapSegmentGaps: true,
                 snapPoints: true,
                 snapSize: false
             }

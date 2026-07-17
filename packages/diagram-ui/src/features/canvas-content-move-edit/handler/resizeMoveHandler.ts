@@ -363,6 +363,7 @@ class ResizeSnapHandler extends SnapHandler {
                 snapX: this.gapSnapOptions.left || this.gapSnapOptions.right,
                 snapY: this.gapSnapOptions.top || this.gapSnapOptions.bottom,
                 snapGaps: this.gapSnapOptions,
+                snapSegmentGaps: true,
                 snapPoints: true,
                 snapSize: {
                     horizontal: 1 / ((axisFlipped ? this.scaleY : this.scaleX) ?? 1),
