@@ -39,7 +39,8 @@ export default withPwa(
                     items: [
                         { text: "UML Class Diagram", link: "/docs/class" },
                         { text: "UML Component Diagram", link: "/docs/component" },
-                        { text: "UML Sequence Diagram", link: "/docs/sequence" }
+                        { text: "UML Sequence Diagram", link: "/docs/sequence" },
+                        { text: "UML Activity Diagram", link: "/docs/activity" }
                     ]
                 }
             ],

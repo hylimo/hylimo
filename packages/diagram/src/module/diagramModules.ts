@@ -2,6 +2,7 @@ import type { InterpreterModule } from "@hylimo/core";
 import { DiagramModule } from "./base/diagramModule.js";
 import { dslModule } from "./base/dslModule.js";
 import { editModule } from "./base/editModule.js";
+import { activityDiagramModule } from "./diagrams/activityDiagramModule.js";
 import { baseDiagramModule } from "./diagrams/baseDiagramModule.js";
 import { classDiagramModule } from "./diagrams/classDiagramModule.js";
 import { componentDiagramModule } from "./diagrams/componentDiagramModule.js";
@@ -27,6 +28,7 @@ export function createBaseDiagramModules(layoutEngine: LayoutEngine): Interprete
  * - base diagram: diagram
  * - UML class diagram: classDiagram
  * - UML component diagram: componentDiagram
+ * - UML activity diagram: activityDiagram
  * - (arbitrary) UML diagram: umlDiagram
  */
 export const defaultDiagramModules = [
@@ -34,5 +36,6 @@ export const defaultDiagramModules = [
     classDiagramModule,
     componentDiagramModule,
     sequenceDiagramModule,
+    activityDiagramModule,
     umlDiagramModule
 ];

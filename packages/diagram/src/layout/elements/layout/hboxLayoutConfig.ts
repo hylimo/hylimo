@@ -125,6 +125,9 @@ export class HBoxLayoutConfig extends BoxLayoutConfig {
     }
 
     override layout(layout: Layout, element: LayoutElement, position: Point, size: Size): Element[] {
+        if (element.children.length === 0) {
+            return [];
+        }
         let lengths: number[];
         if (element.hboxLayout.width === size.width) {
             lengths = element.hboxLayout.lengths;

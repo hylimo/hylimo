@@ -37,12 +37,23 @@ import { participantModule } from "./uml/sequence/participant.js";
 import { keywordsModule } from "./uml/keywords.js";
 import { sequenceDiagramStateModule } from "./uml/sequence/sequenceDiagramState.js";
 import { timeControlModule } from "./uml/sequence/timeControl.js";
+import { actionModule } from "./uml/activity/action.js";
+import { activityNodeModule } from "./uml/activity/activityNode.js";
+import { connectorModule } from "./uml/activity/connector.js";
+import { decisionAndMergeModule } from "./uml/activity/decisionAndMerge.js";
+import { forkAndJoinModule } from "./uml/activity/forkAndJoin.js";
+import { initialAndFinalModule } from "./uml/activity/initialAndFinal.js";
+import { objectsModule } from "./uml/activity/objects.js";
+import { pinsModule } from "./uml/activity/pins.js";
+import { signalsModule } from "./uml/activity/signals.js";
 
 /**
  * All content modules
  */
 export const contents: ContentModule[] = [
+    actionModule,
     activityIndicatorModule,
+    activityNodeModule,
     actorModule,
     associationsModule,
     createParticipantMoule,
@@ -52,7 +63,9 @@ export const contents: ContentModule[] = [
     componentModule,
     componentTitleModule,
     compositionAndAggregationModule,
+    connectorModule,
     contentModule,
+    decisionAndMergeModule,
     defaultMarkersModule,
     defaultShapesModule,
     defaultStylesModule,
@@ -61,14 +74,18 @@ export const contents: ContentModule[] = [
     entriesModule,
     enumModule,
     extendsAndImplementsModule,
+    forkAndJoinModule,
     importedParticipantsModule,
+    initialAndFinalModule,
     instanceModule,
     interfaceModule,
     keywordsModule,
     lostFoundMessageModule,
     nonNavigableAssociationsModule,
+    objectsModule,
     packageModule,
     participantModule,
+    pinsModule,
     portsModule,
     propertiesAndMethodsModule,
     providesAndRequiresModule,
@@ -78,6 +95,7 @@ export const contents: ContentModule[] = [
     sequenceDiagramAssociationsModule,
     sequenceDiagramCreateConnectionOperatorModule,
     sequenceDiagramStateModule,
+    signalsModule,
     timeControlModule,
     valuesModule
 ];

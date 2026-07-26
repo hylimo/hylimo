@@ -125,6 +125,9 @@ export class VBoxLayoutConfig extends BoxLayoutConfig {
     }
 
     override layout(layout: Layout, element: LayoutElement, position: Point, size: Size): Element[] {
+        if (element.children.length === 0) {
+            return [];
+        }
         let lengths: number[];
         if (element.vboxLayout.height === size.height) {
             lengths = element.vboxLayout.lengths;

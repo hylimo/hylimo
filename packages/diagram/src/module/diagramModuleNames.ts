@@ -9,5 +9,6 @@ export enum DiagramModuleNames {
     UML_DIAGRAM = "baselib/diagram/uml",
     CLASS_DIAGRAM = "baselib/diagram/uml/class",
     COMPONENT_DIAGRAM = "baselib/diagram/uml/component",
-    SEQUENCE_DIAGRAM = "baselib/diagram/uml/sequence"
+    SEQUENCE_DIAGRAM = "baselib/diagram/uml/sequence",
+    ACTIVITY_DIAGRAM = "baselib/diagram/uml/activity"
 }
