@@ -1,4 +1,4 @@
-import { Bounds, DefaultEditTypes } from "@hylimo/diagram-common";
+import { Bounds, DefaultEditTypes, type Point } from "@hylimo/diagram-common";
 import { SharedSettings, type Edit, type ResizeEdit } from "@hylimo/diagram-protocol";
 import { compose, inverse, rotateDEG, scale, type Matrix } from "transformation-matrix";
 import { type HandleMoveResult } from "../../move/moveHandler.js";
@@ -407,7 +407,7 @@ class ResizeSnapHandler extends SnapHandler {
 
         return compose(
             this.elementToTargetMatrix,
-            scale((roundedFactors.factorX ?? 1) / (factorX ?? 1), (roundedFactors.factorY ?? 1) / (factorY ?? 1)),
+            scale(relativeScale(roundedFactors.factorX, factorX), relativeScale(roundedFactors.factorY, factorY)),
             this.targetToElementMatrix
         );
     }
@@ -525,14 +525,16 @@ class ResizeSnapHandler extends SnapHandler {
             }
         } else {
             const target = this.getHorizontalSnapTarget(snapX);
-            const index = findMinIndexBy(resizedCorners, (corner) => Math.abs(corner.x - target));
-            const value = this.corners[index].x;
-            const x2 = this.corners[(index + 1) % 4].x;
-            const y2 = this.corners[(index + 2) % 4].x;
-            const cx = index % 2 === 0 ? this.dxRelative : 1 - this.dxRelative;
-            const cy = index < 2 ? this.dyRelative : 1 - this.dyRelative;
-
-            if (!this.adaptFactor(value, target, x2, cx, y2, cy, SnapDirection.HORIZONTAL, factorX, factorY, context)) {
+            const adapted = this.adaptFactorForNearestCorner(
+                resizedCorners,
+                target,
+                (corner) => corner.x,
+                SnapDirection.HORIZONTAL,
+                factorX,
+                factorY,
+                context
+            );
+            if (!adapted) {
                 result.nearestSnapsX.length = 0;
             }
         }
@@ -566,17 +568,64 @@ class ResizeSnapHandler extends SnapHandler {
             }
         } else {
             const target = this.getVerticalSnapTarget(snapY);
-            const index = findMinIndexBy(resizedCorners, (corner) => Math.abs(corner.y - target));
-            const value = this.corners[index].y;
-            const x2 = this.corners[(index + 1) % 4].y;
-            const y2 = this.corners[(index + 2) % 4].y;
-            const cx = index % 2 === 0 ? this.dxRelative : 1 - this.dxRelative;
-            const cy = index < 2 ? this.dyRelative : 1 - this.dyRelative;
-
-            if (!this.adaptFactor(value, target, x2, cx, y2, cy, SnapDirection.VERTICAL, factorX, factorY, context)) {
+            const adapted = this.adaptFactorForNearestCorner(
+                resizedCorners,
+                target,
+                (corner) => corner.y,
+                SnapDirection.VERTICAL,
+                factorX,
+                factorY,
+                context
+            );
+            if (!adapted) {
                 result.nearestSnapsY.length = 0;
             }
         }
+    }
+
+    /**
+     * Adapts the factors so that the corner closest to the snap target lands on it.
+     *
+     * The corners are tried in order of their distance to the target rather than only the closest
+     * one, because not every corner can be moved onto it: a corner the resize holds in place - the
+     * anchor the element is scaled around - has no factor that reaches the target at all, and the
+     * corners become indistinguishable once the element has collapsed along the snapped axis, where
+     * all four of them share a coordinate. Picking such a corner used to leave {@link adaptFactor}
+     * solving `0 / 0`, and the resulting `NaN` factor travelled all the way into the emitted edit.
+     *
+     * @param resizedCorners the corners of the resized element
+     * @param target the position to snap to
+     * @param coordinate reads the coordinate the snap acts on from a corner
+     * @param snapDirection the snap direction (horizontal or vertical)
+     * @param factorX the current x resize factor
+     * @param factorY the current y resize factor
+     * @param context the snap factor context to update
+     * @returns true if any corner yielded a usable factor
+     */
+    private adaptFactorForNearestCorner(
+        resizedCorners: ReturnType<typeof getCanvasElementCorners>,
+        target: number,
+        coordinate: (corner: Point) => number,
+        snapDirection: SnapDirection,
+        factorX: number | undefined,
+        factorY: number | undefined,
+        context: SnapFactorContext
+    ): boolean {
+        const byDistance = [0, 1, 2, 3].sort(
+            (a, b) =>
+                Math.abs(coordinate(resizedCorners[a]) - target) - Math.abs(coordinate(resizedCorners[b]) - target)
+        );
+        for (const index of byDistance) {
+            const value = coordinate(this.corners[index]);
+            const x2 = coordinate(this.corners[(index + 1) % 4]);
+            const y2 = coordinate(this.corners[(index + 2) % 4]);
+            const cx = index % 2 === 0 ? this.dxRelative : 1 - this.dxRelative;
+            const cy = index < 2 ? this.dyRelative : 1 - this.dyRelative;
+            if (this.adaptFactor(value, target, x2, cx, y2, cy, snapDirection, factorX, factorY, context)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -622,6 +671,11 @@ class ResizeSnapHandler extends SnapHandler {
     /**
      * Adapts factors based on snap constraints.
      *
+     * Both solves divide by the distance the corner travels per unit factor, which is zero for a
+     * corner the resize holds in place and for every corner once the element has collapsed along that
+     * axis. Such a candidate is not a factor at all - it is +-Infinity, or NaN where the corner
+     * already sits on the target - so it is rejected rather than emitted as a resize.
+     *
      * @param value The original position value
      * @param target The target position value to snap to
      * @param x2 the neighboring position value in the x direction
@@ -648,20 +702,18 @@ class ResizeSnapHandler extends SnapHandler {
     ): boolean {
         const factorXNew = (target - (value + (x2 - value) * cx)) / ((value - x2) * cx);
         const factorYNew = (target - (value + (y2 - value) * cy)) / ((value - y2) * cy);
+        const hasX = factorX != undefined && Number.isFinite(factorXNew);
+        const hasY = factorY != undefined && Number.isFinite(factorYNew);
 
-        if (factorX != undefined) {
-            if (factorY == undefined || Math.abs(factorXNew - factorX) < Math.abs(factorYNew - factorY)) {
-                context.overrideFactorX = factorXNew;
-                context.factorXDirection = snapDirection;
-                return true;
-            }
+        if (hasX && (!hasY || Math.abs(factorXNew - factorX!) < Math.abs(factorYNew - factorY!))) {
+            context.overrideFactorX = factorXNew;
+            context.factorXDirection = snapDirection;
+            return true;
         }
-        if (factorY != undefined) {
-            if (factorX == undefined || Math.abs(factorYNew - factorY) < Math.abs(factorXNew - factorX)) {
-                context.overrideFactorY = factorYNew;
-                context.factorYDirection = snapDirection;
-                return true;
-            }
+        if (hasY && (!hasX || Math.abs(factorYNew - factorY!) < Math.abs(factorXNew - factorX!))) {
+            context.overrideFactorY = factorYNew;
+            context.factorYDirection = snapDirection;
+            return true;
         }
         return false;
     }
@@ -722,21 +774,15 @@ class ResizeSnapHandler extends SnapHandler {
 }
 
 /**
- * Finds the index of the minimum value in an array based on a callback function.
+ * Computes how much the snapped resize scales the element relative to the unsnapped one.
+ * Falls back to 1 whenever the two cannot be related: an unsnapped factor of 0 is an element that
+ * has collapsed to a point along that axis, which no further scaling maps anywhere else.
  *
- * @param array The array to search through.
- * @param callback A function that takes an element of the array and returns a numeric value to compare.
- * @returns The index of the element with the minimum value as determined by the callback function.
+ * @param rounded the rounded factor after snapping, or undefined if the axis is not resized
+ * @param base the factor before snapping, or undefined if the axis is not resized
+ * @returns the relative scale, 1 if it is not a finite number
  */
-function findMinIndexBy<T>(array: T[], callback: (value: T) => number): number {
-    let minIndex = -1;
-    let minValue = Number.POSITIVE_INFINITY;
-    for (let i = 0; i < array.length; i++) {
-        const value = callback(array[i]);
-        if (value < minValue) {
-            minValue = value;
-            minIndex = i;
-        }
-    }
-    return minIndex;
+function relativeScale(rounded: number | undefined, base: number | undefined): number {
+    const result = (rounded ?? 1) / (base ?? 1);
+    return Number.isFinite(result) ? result : 1;
 }
