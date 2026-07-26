@@ -9,11 +9,14 @@ import { connectionEditFragments } from "../base/canvasConnection.js";
 import { stringOrSpanListType } from "../../../base/types.js";
 
 /**
- * Module providing the comment element
+ * Module providing the comment element, rendered as a note: the folded corner is part of the
+ * outline, so connections dock on it and the text is fitted inside the actual silhouette. The
+ * minimum height keeps the note taller than twice its (fixed-size) fold, below which the outline
+ * would fold back on itself.
  */
 export const commentModule = ContentModule.create(
     "uml/comment",
-    ["uml/associations"],
+    ["uml/associations", "common/defaultShapes"],
     [],
     [
         assign(
@@ -26,20 +29,10 @@ export const commentModule = ContentModule.create(
                     }
                     commentElement = canvasElement(
                         contents = list(
-                            path(path = "M0 0 H 1", vAlign = "top", class = list("comment-top")),
-                            path(path = "M0 0 H 1", vAlign = "bottom"),
-                            path(path = "M0 0 V 1", hAlign = "left"),
-                            path(path = "M0 0 V 1", hAlign = "right", class = list("comment-right")),
-                            container(
-                                contents = list(
-                                    path(
-                                        path = "M 0 0 V 1 H 1 Z",
-                                        hAlign = "right",
-                                        vAlign = "top",
-                                        class = list("comment-triangle")
-                                    ),
-                                    text(contents = textContent, class = list("comment"))
-                                )
+                            shape(
+                                shape = scope.defaultShapes.note,
+                                class = list("comment"),
+                                contents = list(text(contents = textContent, class = list("comment-text")))
                             )
                         ),
                         class = list("comment-element")
@@ -73,33 +66,11 @@ export const commentModule = ContentModule.create(
                     vAlign = "center"
                     hAlign = "center"
                     minWidth = 80
+                    minHeight = 46
                     maxWidth = 300
 
-                    vars {
-                        commentTriangleSize = 20
-                    }
-
-                    cls("comment") {
-                        marginRight = 5
-                        marginLeft = 5
-                        marginBottom = 5
-                    }
-                    cls("comment-right") {
-                        marginTop = var("commentTriangleSize")
-                    }
-                    cls("comment-top") {
-                        marginRight = var("commentTriangleSize")
-                    }
-                    cls("comment-triangle") {
-                        width = var("commentTriangleSize")
-                        height = var("commentTriangleSize")
-                    }
-                    type("path") {
-                        stroke = var("primary")
-                        strokeWidth = var("strokeWidth")
-                    }
-                    type("container") {
-                        layout = "vbox"
+                    cls("comment-text") {
+                        margin = 5
                     }
                 }
             }

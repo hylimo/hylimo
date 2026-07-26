@@ -304,7 +304,6 @@ The following [style variables](./diagram.md#style-variables) are used by the cl
 | ----------------------- | ---------------------------------------------- | ------------------------- |
 | `providedInterfaceSize` | Diameter of the circle of a provided interface | 30                        |
 | `requiredInterfaceSize` | Size of the socket of a required interface     | 45                        |
-| `commentTriangleSize`   | Size of the folded corner of a comment         | 20                        |
 
 ## Example
 

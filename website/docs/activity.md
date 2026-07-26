@@ -353,14 +353,13 @@ The activity diagram does not provide any config properties.
 
 The following [style variables](./diagram.md#style-variables) are used by the activity diagram elements:
 
-| Variable              | Meaning                                         | Default value (in pixels) |
-| --------------------- | ----------------------------------------------- | ------------------------- |
-| `barLength`           | Length of a fork / join bar                     | 200                       |
-| `barThickness`        | Thickness of a fork / join bar                  | 10                        |
-| `terminalNodeSize`    | Diameter of the `start`, `stop` and `end` nodes | 30                        |
-| `pinSize`             | Edge length of a pin                            | 20                        |
-| `pinLabelDistance`    | Distance of a pin label to the pin              | 8                         |
-| `commentTriangleSize` | Size of the folded corner of a comment          | 20                        |
+| Variable           | Meaning                                         | Default value (in pixels) |
+| ------------------ | ----------------------------------------------- | ------------------------- |
+| `barLength`        | Length of a fork / join bar                     | 200                       |
+| `barThickness`     | Thickness of a fork / join bar                  | 10                        |
+| `terminalNodeSize` | Diameter of the `start`, `stop` and `end` nodes | 30                        |
+| `pinSize`          | Edge length of a pin                            | 20                        |
+| `pinLabelDistance` | Distance of a pin label to the pin              | 8                         |
 
 ## Example
 

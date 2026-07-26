@@ -370,7 +370,6 @@ The following [style variables](./diagram.md#style-variables) are used by the ge
 | `componentIconSize`     | Size of the component symbol in the title       | 25                        |
 | `providedInterfaceSize` | Diameter of the circle of a provided interface  | 30                        |
 | `requiredInterfaceSize` | Size of the socket of a required interface      | 45                        |
-| `commentTriangleSize`   | Size of the folded corner of a comment          | 20                        |
 | `barLength`             | Length of a fork / join bar                     | 200                       |
 | `barThickness`          | Thickness of a fork / join bar                  | 10                        |
 | `terminalNodeSize`      | Diameter of the `start`, `stop` and `end` nodes | 30                        |

@@ -636,14 +636,6 @@ The following config properties are available for sequence diagrams:
 | `participantMargin`       | How far apart subsequent participants should be                                                                | 200                       | Multiple of `100` to align participants on the grid                                                                  |
 | `initialMargin`           | Default distance required after a new participant                                                              | 20                        | -                                                                                                                    |
 
-## Styling
-
-The following [style variables](./diagram.md#style-variables) are used by the sequence diagram elements:
-
-| Variable              | Meaning                                | Default value (in pixels) |
-| --------------------- | -------------------------------------- | ------------------------- |
-| `commentTriangleSize` | Size of the folded corner of a comment | 20                        |
-
 ## Available class names
 
 The following class names are available for styling/layout purposes within sequence diagrams:
