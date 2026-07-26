@@ -1,4 +1,4 @@
-import { assign, fun, id, jsFun, native, num } from "../../runtime/executableAstHelper.js";
+import { assign, fun, id, jsFun, native, num, object } from "../../runtime/executableAstHelper.js";
 import { ExecutableConstExpression } from "../../runtime/ast/executableConstExpression.js";
 import { InterpreterModule } from "../../runtime/interpreter/interpreterModule.js";
 import type { BaseObject } from "../../runtime/objects/baseObject.js";
@@ -36,7 +36,7 @@ export const listModule = InterpreterModule.create(
     [],
     [
         fun([
-            assign(listProto, id("object").call()),
+            assign(listProto, object([])),
             id(listProto).assignField(
                 "add",
                 jsFun(

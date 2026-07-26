@@ -1,10 +1,9 @@
 import { DefaultModuleNames } from "../defaultModuleNames.js";
 import { InterpreterModule } from "../../runtime/interpreter/interpreterModule.js";
-import { assign, fun, id, jsFun, native, num, str } from "../../runtime/executableAstHelper.js";
+import { assign, fun, id, jsFun, num, str } from "../../runtime/executableAstHelper.js";
 import { SemanticFieldNames } from "../../runtime/semanticFieldNames.js";
 import { assertFunction, assertIndex, assertNumber, assertObject, isObject } from "../typeHelpers.js";
 import type { LabeledValue } from "../../runtime/objects/labeledValue.js";
-import { generateArgs } from "../../runtime/objects/generateArgs.js";
 import { or } from "../../types/or.js";
 import { stringType } from "../../types/string.js";
 import { numberType } from "../../types/number.js";
@@ -222,20 +221,6 @@ export const objectModule = InterpreterModule.create(
                 )
             )
         ]).call(),
-        assign(
-            "object",
-            native(
-                (args, context, _staticScope, callExpression) => {
-                    const evaluatedArgs = generateArgs(args.slice(1), context, undefined, callExpression);
-                    return { value: evaluatedArgs, source: undefined };
-                },
-                {
-                    docs: "Function which returns its arguments. Can be used to construct an object",
-                    params: [[0, "all positional arguments: any"]],
-                    returns: "An object with all provided params"
-                }
-            )
-        ),
         assign(
             "isObject",
             jsFun(

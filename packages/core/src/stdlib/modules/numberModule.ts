@@ -1,5 +1,5 @@
 import { ExecutableNativeExpression } from "../../runtime/ast/executableNativeExpression.js";
-import { assign, fun, id, jsFun, num } from "../../runtime/executableAstHelper.js";
+import { assign, fun, id, jsFun, num, object } from "../../runtime/executableAstHelper.js";
 import { InterpreterModule } from "../../runtime/interpreter/interpreterModule.js";
 import { SemanticFieldNames } from "../../runtime/semanticFieldNames.js";
 import { numberType } from "../../types/number.js";
@@ -217,7 +217,7 @@ export const numberModule = InterpreterModule.create(
         assign(
             mathObject,
             fun([
-                id(SemanticFieldNames.THIS).assignField(mathObject, id("object").call()),
+                id(SemanticFieldNames.THIS).assignField(mathObject, object([])),
                 id(mathObject).assignField(
                     "floor",
                     jsFun(

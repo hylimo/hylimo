@@ -21,6 +21,7 @@ import {
     literal,
     namedType,
     nullType,
+    object,
     objectType,
     optional,
     or,
@@ -244,7 +245,7 @@ export class DiagramModule implements InterpreterModule {
     runtimeDependencies = [];
     expressions = [
         fun([
-            assign("_elementProto", id("object").call({ name: "_type", value: str("element") })),
+            assign("_elementProto", object([{ name: "_type", value: str("element") }])),
             assign(
                 "_evaluateElement",
                 fun(
@@ -292,11 +293,11 @@ export class DiagramModule implements InterpreterModule {
                 }
             )
         ),
-        assign("unset", id("object").call({ name: "_type", value: str("unset") })),
+        assign("unset", object([{ name: "_type", value: str("unset") }])),
         assign(
             "styles",
             fun([
-                assign(selectorProto, id("object").call({ name: "_type", value: str("selectorProto") })),
+                assign(selectorProto, object([{ name: "_type", value: str("selectorProto") }])),
                 assign(
                     "validateSelector",
                     jsFun((args, context) => {
@@ -490,7 +491,7 @@ export class DiagramModule implements InterpreterModule {
         ),
         assign(
             "defaultFonts",
-            id("object").call(
+            object([
                 {
                     name: "roboto",
                     value: id("fontFamily").call(
@@ -521,7 +522,7 @@ export class DiagramModule implements InterpreterModule {
                         font("boldItalic", sourceCodePro.boldItalic)
                     )
                 }
-            )
+            ])
         ),
         assign(
             "createDiagram",
