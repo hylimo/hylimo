@@ -12,6 +12,8 @@ componentDiagram {
 }
 ```
 
+All elements described below are also available in the [general UML diagram](./uml.md).
+
 ## Elements
 
 ### `component`
@@ -83,10 +85,10 @@ componentDiagram {
 
 - **Syntax:**
   - `provides([name], pos, [target], dist = dist, namePos = [x, y])`
-  - `requires(pos, [target])`
+  - `requires([name], pos, [target], dist = dist, namePos = [x, y])`
   - All arguments are optional.
   - `name` is the interface name (can be omitted).
-  - `pos` is the relative position on the component outline (0 = top, 0.5 = right, etc.).
+  - `pos` is the relative position on the component outline (0 = right, 0.25 = bottom, 0.5 = left, 0.75 = top).
   - `target` can be used for directly connected notation.
   - `dist` controls the distance of the interface symbol from the component.
   - `namePos` can adjust the label position.
@@ -121,11 +123,11 @@ componentDiagram {
 }
 ```
 
-### Connections / Associations
+## Connections / Associations
 
-#### `dependsOn`
+### `dependsOn`
 
-Instead of directly connecting a `required` to a `provided` interface, a `dependsOn`dashed arrow can be used:
+Instead of directly connecting a `required` to a `provided` interface, a `dependsOn` dashed arrow can be used:
 
 ```hylimo
 componentDiagram {
@@ -150,13 +152,13 @@ Also, do not use the `..>` operator for this use case.
 
 :::
 
-#### Further Connections
+### Further Connections
 
 For additional connection types (associations, aggregations, etc.), refer to the [class diagram documentation](class.md).
 
 ## Config properties
 
-The following config properties are available for class diagrams:
+The following config properties are available for component diagrams:
 
 | Variable               | Meaning                                                           | Default value (in pixels) | Comment |
 | ---------------------- | ----------------------------------------------------------------- | ------------------------- | ------- |
@@ -165,3 +167,64 @@ The following config properties are available for class diagrams:
 | `requiresDistance`     | Default distance of required interfaces to the classifier outline | 100                       | -       |
 | `showComponentKeyword` | Whether to show the component keyword                             | true                      | -       |
 | `showComponentSymbol`  | Whether to show the component symbol                              | true                      | -       |
+
+## Styling
+
+The following [style variables](./diagram.md#style-variables) are used by the component diagram elements:
+
+| Variable                | Meaning                                        | Default value (in pixels) |
+| ----------------------- | ---------------------------------------------- | ------------------------- |
+| `componentIconSize`     | Size of the component symbol in the title      | 25                        |
+| `providedInterfaceSize` | Diameter of the circle of a provided interface | 30                        |
+| `requiredInterfaceSize` | Size of the socket of a required interface     | 45                        |
+| `commentTriangleSize`   | Size of the folded corner of a comment         | 20                        |
+
+## Example
+
+The following example shows the architecture of a small shop, using most of the elements described above:
+
+```hylimo
+componentDiagram {
+    component("Shop", keywords = list("subsystem")) {
+        component("Catalog")
+
+        component("Cart") layout {
+            pos = apos(0, 240)
+        }
+
+        Cart ..> Catalog with {
+            over = start(Position.Top).line(end(Position.Bottom))
+        }
+    } layout {
+        pos = apos(0, 0)
+    }
+
+    Shop.port(0.75).provides("Web", 0.75)
+
+    component("PaymentService") {
+        public {
+            authorize(amount : Money) : Token
+        }
+    } layout {
+        pos = apos(0, 380)
+    }
+
+    PaymentService.provides("Payment", 0.75, dist = 60, namePos = [60, -9])
+    Shop.requires(0.25, Payment)
+
+    component("Warehouse") layout {
+        pos = apos(800, 0)
+    }
+
+    Warehouse.provides("Stock", 0.5, namePos = [0, -34])
+    stockRequired = Shop.requires(0)
+    stockRequired dependsOn Stock
+
+    note = comment("The shop is deployed as a single container") layout {
+        pos = apos(-600, 0)
+    }
+    Shop .. note with {
+        over = start(0.5).line(end(0))
+    }
+}
+```

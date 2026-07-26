@@ -12,6 +12,8 @@ classDiagram {
 }
 ```
 
+All elements described below are also available in the [general UML diagram](./uml.md).
+
 ## Elements
 
 The following elements are supported:
@@ -288,6 +290,138 @@ The following operators are supported:
 
 The following config properties are available for class diagrams:
 
-| Variable             | Meaning                                                         | Default value (in pixels) | Comment |
-| -------------------- | --------------------------------------------------------------- | ------------------------- | ------- |
-| `abstractAsProperty` | Whether to show { abstract } after the name of abstract classes | false                     | -       |
+| Variable             | Meaning                                                           | Default value (in pixels) | Comment |
+| -------------------- | ----------------------------------------------------------------- | ------------------------- | ------- |
+| `abstractAsProperty` | Whether to show { abstract } after the name of abstract classes   | false                     | -       |
+| `providesDistance`   | Default distance of provided interfaces to the classifier outline | 100                       | -       |
+| `requiresDistance`   | Default distance of required interfaces to the classifier outline | 100                       | -       |
+
+## Styling
+
+The following [style variables](./diagram.md#style-variables) are used by the class diagram elements:
+
+| Variable                | Meaning                                        | Default value (in pixels) |
+| ----------------------- | ---------------------------------------------- | ------------------------- |
+| `providedInterfaceSize` | Diameter of the circle of a provided interface | 30                        |
+| `requiredInterfaceSize` | Size of the socket of a required interface     | 45                        |
+| `commentTriangleSize`   | Size of the folded corner of a comment         | 20                        |
+
+## Example
+
+The following example shows the domain model of a small shop, using most of the elements described above:
+
+```hylimo
+classDiagram {
+    package("ordering") {
+        interface("Payable") {
+            public {
+                pay(amount : Money) : void
+            }
+        } layout {
+            pos = apos(0, -320)
+        }
+
+        class("Order") {
+            public {
+                id : String
+                state : OrderState
+            }
+            public(abstract = true) {
+                total() : Money
+            }
+            public(static = true) {
+                create(customer : Customer) : Order
+            }
+            section("{ total = sum(items.price) }")
+        } layout {
+            pos = apos(0, 0)
+        }
+
+        class("OrderItem") {
+            public {
+                amount : Int
+                price : Money
+            }
+        } layout {
+            pos = apos(0, 420)
+        }
+
+        enum("OrderState") {
+            entries {
+                NEW
+                PAID
+                SHIPPED
+            }
+        } layout {
+            pos = apos(540, 0)
+        }
+
+        package("payment") {
+            interface("PaymentMethod")
+
+            class("CreditCard") layout {
+                pos = apos(0, 240)
+            }
+
+            CreditCard implements PaymentMethod with {
+                over = start(Position.Top).line(end(Position.Bottom))
+            }
+        } layout {
+            pos = apos(540, 260)
+        }
+
+        class("Customer", abstract = true) {
+            public {
+                name : String
+            }
+        } layout {
+            pos = apos(-580, 0)
+        }
+
+        class("PrivateCustomer") layout {
+            pos = apos(-760, 320)
+        }
+
+        class("BusinessCustomer", keywords = list("legal entity")) layout {
+            pos = apos(-400, 320)
+        }
+
+        note = comment("Customers are imported from the CRM") layout {
+            pos = apos(-580, -320)
+        }
+
+        Order implements Payable with {
+            over = start(Position.Top).line(end(Position.Bottom))
+        }
+
+        Order *--> OrderItem with {
+            over = start(Position.Bottom).line(end(Position.Top))
+            label("1", 0.15, -12)
+            label("+items", 0.5, -32)
+            label("1..*", 0.78, -14)
+        }
+
+        Order --> OrderState with {
+            over = start(Position.Right).line(end(Position.Left))
+            label("+state", 0.5, -12)
+        }
+
+        Customer --> Order with {
+            over = start(Position.Right).line(end(Position.Left))
+            label("0..*", 0.85, -12)
+        }
+
+        PrivateCustomer extends Customer with {
+            over = start(Position.Top).axisAligned(-0.5, end(Position.BottomLeft))
+        }
+
+        BusinessCustomer extends Customer with {
+            over = start(Position.Top).axisAligned(-0.5, end(Position.BottomRight))
+        }
+
+        note .. Customer with {
+            over = start(0.25).line(end(0.75))
+        }
+    }
+}
+```

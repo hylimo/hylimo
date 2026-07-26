@@ -128,6 +128,20 @@ any {
 }
 ```
 
+### Style variables
+
+The following style variables are diagram type independent and therefore available in every diagram:
+
+| Variable          | Meaning                                                    | Default value              |
+| ----------------- | ---------------------------------------------------------- | -------------------------- |
+| `primary`         | Color used for strokes and texts                           | primary color of the theme |
+| `background`      | Color used to fill elements which hide what is behind them | background color of theme  |
+| `strokeWidth`     | Width of strokes in pixels                                 | 2                          |
+| `fontSize`        | Font size of texts in pixels                               | 16                         |
+| `subcanvasMargin` | Margin around the contents of a nested canvas in pixels    | 40                         |
+
+The style variables of the individual diagram types are documented on their respective page.
+
 ## Canvas Constructs
 
 Canvas is the most important diagram element for graph-based diagrams.
