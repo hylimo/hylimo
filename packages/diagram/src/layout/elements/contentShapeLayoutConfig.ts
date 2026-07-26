@@ -1,6 +1,6 @@
 import type { AttributeConfig, LayoutElement } from "../layoutElement.js";
 import { ContentCardinality } from "../layoutElement.js";
-import { ShapeLayoutConfig } from "./shapeLayoutConfig.js";
+import { BaseShapeLayoutConfig } from "./baseShapeLayoutConfig.js";
 import { simpleElementType } from "../../module/base/types.js";
 import { objectToList, type FullObject } from "@hylimo/core";
 import { containerStyleAttributes } from "./attributes.js";
@@ -8,7 +8,7 @@ import { containerStyleAttributes } from "./attributes.js";
 /**
  * Base class for all shape layout configs with a content
  */
-export abstract class ContentShapeLayoutConfig extends ShapeLayoutConfig {
+export abstract class ContentShapeLayoutConfig extends BaseShapeLayoutConfig {
     /**
      * Creats a new ContentShapeLayoutconfig
      *

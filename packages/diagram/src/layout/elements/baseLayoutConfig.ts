@@ -1,4 +1,4 @@
-import { ArcSegment, type Size, type Line, LineSegment, type Point, type Element } from "@hylimo/diagram-common";
+import { type Size, type Line, LineSegment, type Point, type Element } from "@hylimo/diagram-common";
 import type { Layout } from "../engine/layout.js";
 import type { LayoutElement, SizeConstraints } from "../layoutElement.js";
 
@@ -79,45 +79,6 @@ export abstract class BaseLayoutConfig {
                 x,
                 y
             },
-            origin,
-            originSegment
-        };
-    }
-
-    /**
-     * Helper to create a clockwise arc segment
-     *
-     * @param cx x coordinate of the center
-     * @param cy y coordinate of the center
-     * @param endX x coordinate of the end
-     * @param endY y coordinate of the end
-     * @param radius both x and y radius
-     * @param origin the origin of the segment
-     * @param originSegment the index of the segment of {@link origin} this segment originates from
-     * @returns the created arc segment
-     */
-    protected arcSegment(
-        cx: number,
-        cy: number,
-        endX: number,
-        endY: number,
-        radius: number,
-        origin: string,
-        originSegment: number
-    ): ArcSegment {
-        return {
-            type: ArcSegment.TYPE,
-            clockwise: true,
-            end: {
-                x: endX,
-                y: endY
-            },
-            center: {
-                x: cx,
-                y: cy
-            },
-            radiusX: radius,
-            radiusY: radius,
             origin,
             originSegment
         };

@@ -5,10 +5,8 @@ import {
     Canvas,
     CanvasConnection,
     CanvasElement,
-    Ellipse,
     LinePoint,
     Path,
-    Rect,
     RelativePoint,
     Text
 } from "@hylimo/diagram-common";
@@ -47,7 +45,7 @@ export const canvasContentType = elementType(
 /**
  * Type for any simple element which can e.g. be used inside a rect or container
  */
-export const simpleElementType = elementType(Canvas.TYPE, Text.TYPE, Rect.TYPE, Ellipse.TYPE, Path.TYPE, "container");
+export const simpleElementType = elementType(Canvas.TYPE, Text.TYPE, "shape", Path.TYPE, "container");
 
 /**
  * Type for either a string or a list of span elements

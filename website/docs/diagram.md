@@ -25,8 +25,7 @@ The diagram must always be the returned value in the global scope and thus shoul
 Elements are the building blocks of diagrams.
 Different types of elements exist:
 
-- rect: a rectangle with an optional content
-- ellipse: an ellipse with an optional content
+- shape: a parametric shape (rectangle, ellipse, diamond, database, …) with an optional content — see [Shapes](./shapes.md)
 - path: an SVG path
 - text: a text element containing at least one span
   - span: a span of text with associated styling
@@ -52,7 +51,7 @@ Each of these elements can be created as a function, which takes element type-sp
 All these functions have in common, that they take a function as only positional argument, which is executed to create inner elements:
 
 ```
-rect(fill = "green") {
+shape(shape = defaultShapes.rect, fill = "green") {
     text {
         span(text = "Hello World")
     }
@@ -64,7 +63,7 @@ rect(fill = "green") {
 Styling allows to manipulate the appearance of elements.
 Available style attributes depend on the element type.
 For example, shape-like elements provide `fill`, `fillOpacity`, `stroke`, `strokeWidth`, `strokeOpacity`, `strokeDash`, and `strokeDashSpace` attributes.
-Layouted elements, including `vbox`, `hbox`, `stack`, `rect`, `ellipse` and `path` also provide attributes to affect their layouting:
+Layouted elements, including `vbox`, `hbox`, `stack`, `shape` and `path` also provide attributes to affect their layouting:
 
 - `width`, `minWidth`, and `maxWidth` for defining its width, here `width` takes precedence over `minWidth` and `maxWidth`
 - `height`, `minHeight`, and `maxHeight` for defining its height, here `height` takes precedence over `minHeight` and `maxHeight`
@@ -102,7 +101,7 @@ Supported selectors include cls, which matches elements with a specific class, t
 To support theming, CSS-inspired variables can be used in styles:
 
 ```
-type("rect") {
+type("shape") {
     border = var("primary")
 }
 ```
@@ -157,7 +156,7 @@ element {
 Can be applied to any element to define element-specific styles:
 
 ```
-rect() styles {
+shape() styles {
     fill = green
     any {
         fontSize = 10
@@ -168,11 +167,11 @@ rect() styles {
 Also allows to set style classes:
 
 ```
-rect() styles {
-    class += "test-rect"
+shape() styles {
+    class += "test-shape"
 }
 // is equivalent to
-rect(class = list("test-rect"))
+shape(class = list("test-shape"))
 ```
 
 ### `layout` operator

@@ -12,6 +12,8 @@ import { layouts } from "../layouts.js";
 import { FontCollection } from "../font/fontCollection.js";
 import { LayoutCache } from "./layoutCache.js";
 import type { StretchMode } from "../elements/pathLayoutConfig.js";
+import type { ShapeLayoutResult } from "../shape/fixpoint.js";
+import type { ShapeStroke, SizingMode } from "../shape/types.js";
 import { Layout } from "./layout.js";
 import type { SubsettedFont } from "../font/fontFamily.js";
 import { SubsetCollector } from "../font/subsetCollector.js";
@@ -72,6 +74,41 @@ export interface LayoutedPath {
 }
 
 /**
+ * Cache key for the parametric shape fixpoint. Everything that determines the solved outline is
+ * captured, so an unchanged shape re-uses the (relatively expensive) iterative result.
+ */
+interface ShapeCacheKey {
+    /**
+     * The outline path source (with `w`/`h`/`r` placeholders)
+     */
+    path: string;
+    /**
+     * The optional decoration path source
+     */
+    decoration: string | undefined;
+    /**
+     * The resolved stroke
+     */
+    stroke: ShapeStroke;
+    /**
+     * The corner rounding (`r`)
+     */
+    rounding: number;
+    /**
+     * Whether the target is the outer bounds or the content box
+     */
+    mode: SizingMode;
+    /**
+     * The target size
+     */
+    target: Size;
+    /**
+     * The content size the resulting content box has to hold, if any
+     */
+    required?: Size;
+}
+
+/**
  * The root element of the layout with the layout
  */
 export class LayoutWithRoot {
@@ -117,6 +154,11 @@ export class LayoutEngine {
      * Cache for path layouting
      */
     readonly pathCache = new LayoutCache<PathCacheKey, LayoutedPath>(CACHE_TTL);
+
+    /**
+     * Cache for the parametric shape fixpoint
+     */
+    readonly shapeCache = new LayoutCache<ShapeCacheKey, ShapeLayoutResult>(CACHE_TTL);
 
     /**
      * Cache for subsetted fonts
@@ -231,6 +273,7 @@ export class LayoutEngine {
     nextCacheGeneration(): void {
         this.textCache.nextIteration();
         this.pathCache.nextIteration();
+        this.shapeCache.nextIteration();
         this.subsetFontCache.nextIteration();
     }
 

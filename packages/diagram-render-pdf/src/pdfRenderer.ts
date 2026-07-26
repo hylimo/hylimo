@@ -1,9 +1,7 @@
 import type {
     Canvas,
     Element,
-    Ellipse,
     Path,
-    Rect,
     Root,
     Shape,
     SimplifiedCanvasElement,
@@ -12,11 +10,7 @@ import type {
 import { SimplifiedDiagramVisitor } from "@hylimo/diagram-common";
 import PDFDocument from "pdfkit/js/pdfkit.standalone.js";
 import type { ShapeStyleAttributes } from "@hylimo/diagram-render-svg";
-import {
-    extractFillAttributes,
-    extractOutlinedShapeAttributes,
-    extractShapeStyleAttributes
-} from "@hylimo/diagram-render-svg";
+import { extractFillAttributes, extractShapeStyleAttributes } from "@hylimo/diagram-render-svg";
 import { Buffer } from "buffer/index.js";
 
 /**
@@ -87,41 +81,6 @@ export class PDFDiagramVisitor extends SimplifiedDiagramVisitor<PDFKit.PDFDocume
         this.visitChildren(element, context);
     }
 
-    override visitRect(element: Rect, context: PDFKit.PDFDocument): void {
-        if (this.isShapeVisible(element)) {
-            const shapeAttributes = extractOutlinedShapeAttributes(element);
-            if (element.cornerRadius) {
-                const radius = Math.min(element.cornerRadius, element.width / 2, element.height / 2);
-                context.roundedRect(
-                    shapeAttributes.x,
-                    shapeAttributes.y,
-                    shapeAttributes.width,
-                    shapeAttributes.height,
-                    radius
-                );
-            } else {
-                context.rect(shapeAttributes.x, shapeAttributes.y, shapeAttributes.width, shapeAttributes.height);
-            }
-            this.drawShape(context, shapeAttributes, element);
-        }
-        this.visitChildren(element, context);
-    }
-
-    override visitEllipse(element: Ellipse, context: PDFKit.PDFDocument): void {
-        if (this.isShapeVisible(element)) {
-            const shapeAttributes = extractShapeStyleAttributes(element);
-            const strokeWidth = element.stroke?.width ?? 0;
-            context.ellipse(
-                element.x + element.width / 2,
-                element.y + element.height / 2,
-                (element.width - strokeWidth) / 2,
-                (element.height - strokeWidth) / 2
-            );
-            this.drawShape(context, shapeAttributes, element);
-        }
-        this.visitChildren(element, context);
-    }
-
     override visitPath(element: Path, context: PDFKit.PDFDocument): void {
         if (this.isShapeVisible(element)) {
             const shapeAttributes = extractShapeStyleAttributes(element);
@@ -129,8 +88,13 @@ export class PDFDiagramVisitor extends SimplifiedDiagramVisitor<PDFKit.PDFDocume
             context.translate(element.x, element.y);
             context.path(element.path);
             this.drawShape(context, shapeAttributes, element);
+            if (element.decoration != undefined) {
+                context.path(element.decoration);
+                this.drawShape(context, { ...shapeAttributes, fill: "none" }, element);
+            }
             context.restore();
         }
+        this.visitChildren(element, context);
     }
 
     override visitText(element: SimplifiedText, context: PDFKit.PDFDocument): void {

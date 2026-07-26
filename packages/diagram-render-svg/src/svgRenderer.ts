@@ -1,13 +1,8 @@
-import type { Root, Rect, Path, Canvas, Element, Ellipse, SimplifiedText, FontData } from "@hylimo/diagram-common";
+import type { Root, Path, Canvas, Element, SimplifiedText, FontData } from "@hylimo/diagram-common";
 import { convertFontsToCssStyle } from "@hylimo/diagram-common";
 import { SimplifiedDiagramVisitor } from "@hylimo/diagram-common";
 import XMLBuilder from "fast-xml-builder";
-import {
-    extractFillAttributes,
-    extractLayoutAttributes,
-    extractOutlinedShapeAttributes,
-    extractShapeStyleAttributes
-} from "./attributeHelpers.js";
+import { extractFillAttributes, extractLayoutAttributes, extractShapeStyleAttributes } from "./attributeHelpers.js";
 import type { SimplifiedCanvasElement } from "@hylimo/diagram-common";
 import type { Font } from "fontkit";
 import { createFont } from "@hylimo/diagram";
@@ -232,34 +227,7 @@ class SVGDiagramVisitor extends SimplifiedDiagramVisitor<SVGRendererContext, SVG
         return [result];
     }
 
-    override visitRect(element: Rect, context: SVGRendererContext): SVGNode[] {
-        const result: SVGNode = {
-            type: "rect",
-            children: [],
-            ...extractOutlinedShapeAttributes(element)
-        };
-        if (element.cornerRadius) {
-            const strokeWidth = element.stroke?.width;
-            result.rx = Math.max(0, element.cornerRadius - (strokeWidth ? strokeWidth / 2 : 0));
-        }
-        return [result, ...this.visitChildren(element, context)];
-    }
-
-    override visitEllipse(element: Ellipse, context: SVGRendererContext): SVGNode[] {
-        const strokeWidth = element.stroke?.width ?? 0;
-        const result: SVGNode = {
-            type: "ellipse",
-            children: [],
-            ...extractShapeStyleAttributes(element),
-            cx: element.x + element.width / 2,
-            cy: element.y + element.height / 2,
-            rx: (element.width - strokeWidth) / 2,
-            ry: (element.height - strokeWidth) / 2
-        };
-        return [result, ...this.visitChildren(element, context)];
-    }
-
-    override visitPath(element: Path): SVGNode[] {
+    override visitPath(element: Path, context: SVGRendererContext): SVGNode[] {
         const result: SVGNode = {
             type: "path",
             children: [],
@@ -267,7 +235,20 @@ class SVGDiagramVisitor extends SimplifiedDiagramVisitor<SVGRendererContext, SVG
             d: element.path,
             transform: `translate(${element.x}, ${element.y})`
         };
-        return [result];
+        const decoration: SVGNode[] =
+            element.decoration != undefined
+                ? [
+                      {
+                          type: "path",
+                          children: [],
+                          ...extractShapeStyleAttributes(element),
+                          fill: "none",
+                          d: element.decoration,
+                          transform: `translate(${element.x}, ${element.y})`
+                      }
+                  ]
+                : [];
+        return [result, ...decoration, ...this.visitChildren(element, context)];
     }
 
     override visitText(element: SimplifiedText, context: SVGRendererContext): SVGNode[] {

@@ -7,13 +7,12 @@ import { CanvasLineSegmentLayoutConfig } from "./elements/canvas/canvasLineSegme
 import { LinePointLayoutConfig } from "./elements/canvas/linePointLayoutConfig.js";
 import { MarkerLayoutConfig } from "./elements/canvas/markerLayoutConfig.js";
 import { RelativePointLayoutConfig } from "./elements/canvas/relativePointLayoutConfig.js";
-import { RectLayoutConfig } from "./elements/rectLayoutConfig.js";
 import { SpanLayoutConfig } from "./elements/spanLayoutConfig.js";
 import { TextLayoutConfig } from "./elements/textLayoutConfig.js";
 import type { LayoutConfig } from "./layoutElement.js";
 import { PathLayoutConfig } from "./elements/pathLayoutConfig.js";
 import { CanvasAxisAlignedSegmentLayoutConfig } from "./elements/canvas/canvasAxisAlignedSegmentLayoutConfig.js";
-import { EllipseLayoutConfig } from "./elements/ellipseLayoutConfig.js";
+import { ShapeLayoutConfig } from "./elements/shapeLayoutConfig.js";
 import { ContainerLayoutConfig } from "./elements/containerLayoutConfig.js";
 
 /**
@@ -21,7 +20,7 @@ import { ContainerLayoutConfig } from "./elements/containerLayoutConfig.js";
  */
 export const layouts: LayoutConfig[] = [
     new ContainerLayoutConfig(),
-    new RectLayoutConfig(),
+    new ShapeLayoutConfig(),
     new TextLayoutConfig(),
     new SpanLayoutConfig(),
     new CanvasLayoutConfig(),
@@ -34,6 +33,5 @@ export const layouts: LayoutConfig[] = [
     new RelativePointLayoutConfig(),
     new LinePointLayoutConfig(),
     new MarkerLayoutConfig(),
-    new PathLayoutConfig(),
-    new EllipseLayoutConfig()
+    new PathLayoutConfig()
 ];

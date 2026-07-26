@@ -8,7 +8,7 @@ import { stringOrSpanListType } from "../../../base/types.js";
  */
 export const packageModule = ContentModule.create(
     "uml/package",
-    ["uml/classifier/defaultTitle"],
+    ["uml/classifier/defaultTitle", "common/defaultShapes"],
     [],
     [
         assign(
@@ -24,7 +24,8 @@ export const packageModule = ContentModule.create(
                     packageElement = canvasElement(
                         class = list("package-element"),
                         contents = list(
-                            rect(
+                            shape(
+                                shape = scope.defaultShapes.rect,
                                 contents = list(
                                     container(contents = list(scope.internal.defaultTitle(name, keywords)), class = list("title-wrapper")),
                                     path(path = "M 0 0 V 1", hAlign = "left"),
@@ -33,7 +34,8 @@ export const packageModule = ContentModule.create(
                                 ),
                                 class = list("package")
                             ),
-                            rect(
+                            shape(
+                                shape = scope.defaultShapes.rect,
                                 contents = list(canvas(contents = result.contents, class = list("package-canvas"))),
                                 class = list("package-body")
                             )

@@ -1,166 +1,120 @@
 import { Math2D } from "../../common/math.js";
 import { Point } from "../../common/point.js";
-import type { ArcSegment } from "../model/arcSegment.js";
+import type { ArcCenterParametrization } from "../model/arcSegment.js";
+import { ArcSegment } from "../model/arcSegment.js";
 import { projectPointOnConic } from "./conicProjection.js";
 import type { NearestPointResult } from "./segmentEngine.js";
 import { SegmentEngine } from "./segmentEngine.js";
 
 /**
- * Segment engine for ArcSegment
+ * Segment engine for ArcSegment.
+ *
+ * Everything is evaluated on the center form the segment's endpoints imply (see
+ * {@link ArcSegment.centerParametrization}), so an ellipse of any eccentricity and rotation is
+ * handled exactly. A degenerate arc — no radius, or coincident endpoints — is treated as the
+ * straight line SVG draws for it.
  */
 export class ArcSegmentEngine extends SegmentEngine<ArcSegment> {
     override projectPoint(point: Point, segment: ArcSegment, segmentStartPoint: Point): NearestPointResult {
-        const { startAngle, deltaAngle } = this.getArcData(segmentStartPoint, segment);
-        const possiblePoints = [segmentStartPoint, segment.end];
-        possiblePoints.push(
-            ...projectPointOnConic(
-                this.conicEquationOfEllipse(segment.radiusX, segment.radiusY, segment.center.x, segment.center.y),
-                point
-            )
-        );
-        let minDist = Number.POSITIVE_INFINITY;
-        let minPos = 0;
-        let minPoint = possiblePoints[0];
-        for (let i = 0; i < possiblePoints.length; i++) {
-            const pos = possiblePoints[i];
-            const dist = Math2D.distance(pos, point);
-            if (dist < minDist) {
-                if (i <= 1) {
-                    minPos = i;
-                } else {
-                    const relativePos = Math2D.sub(pos, segment.center);
-                    const angle = Math2D.angle({
-                        x: relativePos.x / segment.radiusX,
-                        y: relativePos.y / segment.radiusY
-                    });
-                    let deltaPosAngle = angle - startAngle;
-                    if (deltaPosAngle < 0 && deltaAngle > 0) {
-                        deltaPosAngle += 2 * Math.PI;
-                    } else if (deltaAngle > 0 && deltaAngle < 0) {
-                        deltaPosAngle -= 2 * Math.PI;
-                    }
-                    if (Math.abs(deltaPosAngle) < Math.abs(deltaAngle)) {
-                        minPos = deltaPosAngle / deltaAngle;
-                    } else {
-                        continue;
-                    }
-                }
-                minPoint = pos;
-                minDist = dist;
-            }
+        const arc = ArcSegment.centerParametrization(segmentStartPoint, segment.end, segment);
+        if (arc == undefined) {
+            return this.projectPointOnChord(point, segment, segmentStartPoint);
         }
-
-        return {
-            point: minPoint,
-            distance: minDist,
-            position: minPos
+        let best: NearestPointResult = {
+            point: segmentStartPoint,
+            distance: Math2D.distance(segmentStartPoint, point),
+            position: 0
         };
-    }
-
-    /**
-     * Calculates the coefficients of the conic equation for an ellipse with the given semi-axes lengths and center coordinates.
-     *
-     * @param dx The semi-axis length in the x-direction.
-     * @param dy The semi-axis length in the y-direction.
-     * @param cx The x-coordinate of the center.
-     * @param cy The y-coordinate of the center.
-     * @returns A tuple with the coefficients A, B, C, D, E, and F of the conic equation, in that order.
-     */
-    private conicEquationOfEllipse(
-        dx: number,
-        dy: number,
-        cx: number,
-        cy: number
-    ): [number, number, number, number, number, number] {
-        const A = dy ** 2;
-        const B = 0;
-        const C = dx ** 2;
-        const D = -cx * A;
-        const E = -cy * C;
-        const F = A * cx * cx + C * cy * cy - dx * dx * dy * dy;
-        return [A, B, C, D, E, F];
+        const endDistance = Math2D.distance(segment.end, point);
+        if (endDistance < best.distance) {
+            best = { point: segment.end, distance: endDistance, position: 1 };
+        }
+        for (const candidate of projectPointOnConic(this.conicEquationOfEllipse(arc), point)) {
+            const distance = Math2D.distance(candidate, point);
+            if (distance >= best.distance) {
+                continue;
+            }
+            const position = ArcSegment.positionOf(arc, ArcSegment.angleOf(arc, candidate));
+            if (position == undefined) {
+                continue;
+            }
+            best = { point: candidate, distance, position };
+        }
+        return best;
     }
 
     override getPoint(position: number, distance: number, segment: ArcSegment, segmentStartPoint: Point): Point {
-        const { startAngle, deltaAngle } = this.getArcData(segmentStartPoint, segment);
-        const finalAngle = startAngle + position * deltaAngle;
-        const center = segment.center;
-        const normal = Math2D.scaleTo(this.getNormalVector(position, segment, segmentStartPoint), distance);
-        const point = {
-            x: center.x + segment.radiusX * Math.cos(finalAngle),
-            y: center.y + segment.radiusY * Math.sin(finalAngle)
-        };
-        return Math2D.add(point, normal);
+        const arc = ArcSegment.centerParametrization(segmentStartPoint, segment.end, segment);
+        const point =
+            arc != undefined
+                ? ArcSegment.pointAt(arc, arc.startAngle + position * arc.deltaAngle)
+                : Math2D.linearInterpolate(segmentStartPoint, segment.end, position);
+        if (distance === 0) {
+            return point;
+        }
+        const normal = this.getNormalVector(position, segment, segmentStartPoint);
+        return Math2D.add(point, Math2D.scale(normal, distance));
     }
 
     override getNormalVector(position: number, segment: ArcSegment, segmentStartPoint: Point): Point {
-        const { startAngle, deltaAngle } = this.getArcData(segmentStartPoint, segment);
-        const a = startAngle + position * deltaAngle;
-        const dx = segment.radiusX;
-        const dy = segment.radiusY;
-        const nx = (dy * Math.cos(a)) / Math.sqrt((dy * Math.cos(a)) ** 2 + (dx * Math.sin(a)) ** 2);
-        const ny = (dx * Math.sin(a)) / Math.sqrt((dy * Math.cos(a)) ** 2 + (dx * Math.sin(a)) ** 2);
-
-        return { x: nx, y: ny };
+        const arc = ArcSegment.centerParametrization(segmentStartPoint, segment.end, segment);
+        const tangent =
+            arc != undefined
+                ? ArcSegment.tangentAt(arc, arc.startAngle + position * arc.deltaAngle)
+                : Math2D.sub(segment.end, segmentStartPoint);
+        return Math2D.normalize(Math2D.normal(tangent));
     }
 
     override exists(segment: ArcSegment, segmentStartPoint: Point): boolean {
         return !Point.equals(segmentStartPoint, segment.end);
     }
 
+    override toSvgPath(segment: ArcSegment): string {
+        const rotation = (segment.rotation * 180) / Math.PI;
+        const largeArc = segment.largeArc ? 1 : 0;
+        const sweep = segment.sweep ? 1 : 0;
+        return `A ${segment.radiusX} ${segment.radiusY} ${rotation} ${largeArc} ${sweep} ${segment.end.x} ${segment.end.y}`;
+    }
+
     /**
-     * Generates additional data for an arc
+     * Calculates the coefficients of the conic equation `Ax² + 2Bxy + Cy² + 2Dx + 2Ey + F = 0` of the
+     * ellipse an arc lies on, which is what {@link projectPointOnConic} projects onto. The rotation
+     * of the ellipse is what makes the mixed term `B` non-zero.
      *
-     * @param segmentStartPoint the start point of the arc
-     * @param segment the arc
-     * @returns the additional data
+     * @param arc the arc whose ellipse the equation is built for
+     * @returns the coefficients A, B, C, D, E, and F, in that order
      */
-    private getArcData(segmentStartPoint: Point, segment: ArcSegment): ArcData {
-        const relativeStart = Math2D.sub(segmentStartPoint, segment.center);
-        const relativeEnd = Math2D.sub(segment.end, segment.center);
-        const startAngle = Math2D.angle(relativeStart);
-        const endAngle = Math2D.angle(relativeEnd);
-        let deltaAngle: number;
-        if (segment.clockwise) {
-            deltaAngle = endAngle - startAngle;
-            if (deltaAngle < 0) {
-                deltaAngle += 2 * Math.PI;
-            }
-        } else {
-            deltaAngle = startAngle - endAngle;
-            if (deltaAngle > 0) {
-                deltaAngle -= 2 * Math.PI;
-            }
-        }
-        return {
-            startAngle,
-            endAngle,
-            deltaAngle
-        };
+    private conicEquationOfEllipse(arc: ArcCenterParametrization): [number, number, number, number, number, number] {
+        const { x: cx, y: cy } = arc.center;
+        const cos = Math.cos(arc.rotation);
+        const sin = Math.sin(arc.rotation);
+        const squaredX = arc.radiusX ** 2;
+        const squaredY = arc.radiusY ** 2;
+        const A = squaredY * cos ** 2 + squaredX * sin ** 2;
+        const B = cos * sin * (squaredY - squaredX);
+        const C = squaredY * sin ** 2 + squaredX * cos ** 2;
+        const D = -(A * cx + B * cy);
+        const E = -(B * cx + C * cy);
+        const F = A * cx * cx + 2 * B * cx * cy + C * cy * cy - squaredX * squaredY;
+        return [A, B, C, D, E, F];
     }
 
-    override toSvgPath(segment: ArcSegment, start: Point): string {
-        const { deltaAngle } = this.getArcData(start, segment);
-        const largeArcFlag = Math.abs(deltaAngle) > Math.PI ? 1 : 0;
-        const sweepFlag = deltaAngle > 0 ? 1 : 0;
-        return `A ${segment.radiusX} ${segment.radiusY} 0 ${largeArcFlag} ${sweepFlag} ${segment.end.x} ${segment.end.y}`;
+    /**
+     * Projects a point on the chord of a degenerate arc, which SVG draws as a straight line
+     *
+     * @param point the point to project
+     * @param segment the degenerate arc
+     * @param segmentStartPoint the start position of the segment
+     * @returns the nearest point on the chord
+     */
+    private projectPointOnChord(point: Point, segment: ArcSegment, segmentStartPoint: Point): NearestPointResult {
+        const delta = Math2D.sub(segment.end, segmentStartPoint);
+        const squaredLength = delta.x ** 2 + delta.y ** 2;
+        const position =
+            squaredLength === 0
+                ? 0
+                : Math.min(Math.max(Math2D.dot(Math2D.sub(point, segmentStartPoint), delta) / squaredLength, 0), 1);
+        const closest = Math2D.linearInterpolate(segmentStartPoint, segment.end, position);
+        return { position, distance: Math2D.distance(closest, point), point: closest };
     }
-}
-
-/**
- * Some additional data about an arc
- */
-interface ArcData {
-    /**
-     * The angle of the start pos
-     */
-    startAngle: number;
-    /**
-     * The angle of the end pos
-     */
-    endAngle: number;
-    /**
-     * The delta of the two angles in the correct direction
-     */
-    deltaAngle: number;
 }

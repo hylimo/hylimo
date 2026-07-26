@@ -19,7 +19,14 @@ import {
 import { SRoot } from "../../model/sRoot.js";
 import type { ElmentLinearInterpolationAnimation } from "../animation/linearInterpolationAnimation.js";
 import { LinearInterpolationAnimation } from "../animation/linearInterpolationAnimation.js";
-import { computeCommonAnimatableFields, isLinearAnimatable } from "../animation/model.js";
+import {
+    computeCommonAnimatableFields,
+    computeCommonPathAnimatableFields,
+    isLinearAnimatable,
+    isPathAnimatable
+} from "../animation/model.js";
+import type { PathInterpolation } from "../animation/pathInterpolation.js";
+import { buildPathInterpolation } from "../animation/pathInterpolation.js";
 import { createFitToScreenAction } from "../viewport/fitToScreenAction.js";
 import { TYPES } from "../types.js";
 import type { TransactionStateProvider } from "../transaction/transactionStateProvider.js";
@@ -109,24 +116,56 @@ export class UpdateModelCommand extends BaseUpdateModelCommand {
         if (left instanceof SCanvasConnection && right instanceof SCanvasConnection) {
             left.splitPreviewDataProvider = right.splitPreviewDataProvider;
         }
+        const interpolations = new Map<string, [number, number]>();
         if (isLinearAnimatable(left) && isLinearAnimatable(right)) {
-            const commonFields = computeCommonAnimatableFields(left, right);
-            if (commonFields.length > 0) {
-                const interpolations = new Map<string, [number, number]>();
-                for (const field of commonFields) {
-                    const leftValue = (left as any)[field] as number;
-                    const rightValue = (right as any)[field] as number;
-                    if (leftValue != rightValue) {
-                        interpolations.set(field, [leftValue, rightValue]);
-                    }
+            for (const field of computeCommonAnimatableFields(left, right)) {
+                const leftValue = (left as any)[field] as number;
+                const rightValue = (right as any)[field] as number;
+                if (leftValue != rightValue) {
+                    interpolations.set(field, [leftValue, rightValue]);
                 }
-                return {
-                    element: right,
-                    interpolations
-                };
             }
         }
+        const pathInterpolations = this._computePathInterpolations(left, right);
+        if (interpolations.size > 0 || pathInterpolations !== undefined) {
+            return {
+                element: right,
+                interpolations,
+                pathInterpolations
+            };
+        }
         return undefined;
+    }
+
+    /**
+     * Computes path morph interpolations for the animatable path fields shared by two elements.
+     * Only fields whose value differs and whose old/new paths are structurally compatible (same
+     * command sequence) are morphed; the rest snap to their new value as before.
+     *
+     * @param left the old element
+     * @param right the new element
+     * @returns a map of field name to path interpolation, or undefined if there is nothing to morph
+     */
+    private _computePathInterpolations(
+        left: SModelElementImpl,
+        right: SModelElementImpl
+    ): Map<string, PathInterpolation> | undefined {
+        if (!isPathAnimatable(left) || !isPathAnimatable(right)) {
+            return undefined;
+        }
+        const pathInterpolations = new Map<string, PathInterpolation>();
+        for (const field of computeCommonPathAnimatableFields(left, right)) {
+            const leftValue = (left as any)[field] as string | undefined;
+            const rightValue = (right as any)[field] as string | undefined;
+            if (leftValue == undefined || rightValue == undefined || leftValue === rightValue) {
+                continue;
+            }
+            const interpolation = buildPathInterpolation(leftValue, rightValue);
+            if (interpolation !== undefined) {
+                pathInterpolations.set(field, interpolation);
+            }
+        }
+        return pathInterpolations.size > 0 ? pathInterpolations : undefined;
     }
 
     protected override performUpdate(

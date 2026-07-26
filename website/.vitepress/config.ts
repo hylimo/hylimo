@@ -29,7 +29,8 @@ export default withPwa(
                         { text: "HyLiMo", link: "/docs/docs" },
                         { text: "Hybrid Editor", link: "/docs/editor" },
                         { text: "SyncScript", link: "/docs/syncscript" },
-                        { text: "Diagram DSL", link: "/docs/diagram" }
+                        { text: "Diagram DSL", link: "/docs/diagram" },
+                        { text: "Shapes", link: "/docs/shapes" }
                     ]
                 },
                 {

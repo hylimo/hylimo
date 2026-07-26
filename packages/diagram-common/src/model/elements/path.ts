@@ -8,9 +8,15 @@ import type { Shape } from "./shape.js";
 export interface Path extends Shape {
     type: typeof Path.TYPE;
     /**
-     * Defines the path
+     * Defines the path (the filled + stroked outline)
      */
     path: string;
+    /**
+     * Optional additional stroke-only sub-path(s) drawn on top of the outline but never filled —
+     * the internal decoration of a compound shape (a database rim, a note crease, component ports).
+     * Painted with the same stroke as the outline; absent for a plain path.
+     */
+    decoration?: string;
 }
 
 export namespace Path {

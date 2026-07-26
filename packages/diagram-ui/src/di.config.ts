@@ -6,11 +6,9 @@ import {
     CanvasConnection,
     CanvasElement,
     CanvasLineSegment,
-    Ellipse,
     LinePoint,
     Marker,
     Path,
-    Rect,
     RelativePoint,
     Root,
     Text
@@ -43,7 +41,6 @@ import { SCanvasElement } from "./model/canvas/sCanvasElement.js";
 import { SCanvasLineSegment } from "./model/canvas/sCanvasLineSegment.js";
 import { SMarker } from "./model/canvas/sMarker.js";
 import { SRelativePoint } from "./model/canvas/sRelativePoint.js";
-import { SRect } from "./model/sRect.js";
 import { SRoot } from "./model/sRoot.js";
 import { SText } from "./model/sText.js";
 import { AbsolutePointView } from "./views/canvas/absolutePointView.js";
@@ -52,7 +49,6 @@ import { CanvasConnectionView } from "./views/canvas/canvasConnectionView.js";
 import { CanvasElementView } from "./views/canvas/canvasElementView.js";
 import { MarkerView } from "./views/canvas/markerView.js";
 import { RelativePointView } from "./views/canvas/relativePointView.js";
-import { RectView } from "./views/rectView.js";
 import { RootView } from "./views/rootView.js";
 import { TextView } from "./views/textView.js";
 import { SLinePoint } from "./model/canvas/sLinePoint.js";
@@ -60,8 +56,6 @@ import { LinePointView } from "./views/canvas/linePointView.js";
 import { SPath } from "./model/sPath.js";
 import { PathView } from "./views/pathView.js";
 import { SCanvasAxisAlignedSegment } from "./model/canvas/sCanvasAxisAlignedSegment.js";
-import { SEllipse } from "./model/sEllipse.js";
-import { EllipseView } from "./views/ellipseView.js";
 import { navigationModule } from "./features/navigation/di.config.js";
 import { canvasContentMoveEditModule } from "./features/canvas-content-move-edit/di.config.js";
 import { resetCanvasBoundsModule } from "./features/canvas-bounds/di.config.js";
@@ -92,8 +86,6 @@ const diagramModule = new ContainerModule((bind, unbind, isBound, rebind) => {
     rebind(TYPES.ICommandStack).to(CommandStack).inSingletonScope();
 
     configureModelElement(context, Root.TYPE, SRoot, RootView);
-    configureModelElement(context, Rect.TYPE, SRect, RectView);
-    configureModelElement(context, Ellipse.TYPE, SEllipse, EllipseView);
     configureModelElement(context, Path.TYPE, SPath, PathView);
     configureModelElement(context, Text.TYPE, SText, TextView);
     configureModelElement(context, Canvas.TYPE, SCanvas, CanvasView);

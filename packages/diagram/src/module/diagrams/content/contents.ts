@@ -1,4 +1,5 @@
 import { defaultMarkersModule } from "./common/defaultMarkers.js";
+import { defaultShapesModule } from "./common/defaultShapes.js";
 import { defaultStylesModule } from "./common/defaultStyles.js";
 import { elementModule } from "./common/element.js";
 import { associationsModule } from "./uml/associations.js";
@@ -53,6 +54,7 @@ export const contents: ContentModule[] = [
     compositionAndAggregationModule,
     contentModule,
     defaultMarkersModule,
+    defaultShapesModule,
     defaultStylesModule,
     defaultTitleModule,
     elementModule,

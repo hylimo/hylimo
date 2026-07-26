@@ -1,6 +1,7 @@
 import type { CommandExecutionContext, SModelElementImpl, SModelRootImpl } from "sprotty";
 import { CancelableAnimation } from "./cancelableAnimation.js";
-import type { LinearAnimatable } from "./model.js";
+import type { PathInterpolation } from "./pathInterpolation.js";
+import { interpolatePath } from "./pathInterpolation.js";
 
 /**
  * Linear interpolation animation
@@ -30,6 +31,9 @@ export class LinearInterpolationAnimation extends CancelableAnimation {
                 }
                 (animation.element as any)[field] = newValue;
             });
+            animation.pathInterpolations?.forEach((interpolation, field) => {
+                (animation.element as any)[field] = interpolatePath(interpolation, t);
+            });
         }
         return this.newModel;
     }
@@ -42,9 +46,14 @@ export interface ElmentLinearInterpolationAnimation {
     /**
      * The element to animate
      */
-    element: SModelElementImpl & LinearAnimatable;
+    element: SModelElementImpl;
     /**
      * Animations, map of field name to [from, to] pair
      */
     interpolations: Map<string, [number, number]>;
+    /**
+     * Path morph animations, map of field name to the structure-matched path interpolation. Used
+     * for string fields holding an SVG path whose geometry should morph rather than snap.
+     */
+    pathInterpolations?: Map<string, PathInterpolation>;
 }

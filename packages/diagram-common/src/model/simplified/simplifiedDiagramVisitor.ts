@@ -3,7 +3,6 @@ import { Canvas } from "../elements/canvas/canvas.js";
 import { CanvasElement } from "../elements/canvas/canvasElement.js";
 import type { MarkerLayoutInformation } from "../elements/canvas/marker.js";
 import { Path } from "../elements/path.js";
-import { Rect } from "../elements/rect.js";
 import { Root } from "../elements/root.js";
 import type { SimplifiedCanvasElement, SimplifiedText } from "./simplifiedTypes.js";
 import type { Element } from "../elements/base/element.js";
@@ -12,7 +11,6 @@ import { Text } from "../elements/text.js";
 import { CanvasConnection } from "../elements/canvas/canvasConnection.js";
 import { Point } from "../../common/point.js";
 import type { LayoutedElement } from "../elements/base/layoutedElement.js";
-import { Ellipse } from "../elements/ellipse.js";
 import { LineCap, LineJoin } from "../elements/base/colored.js";
 
 /**
@@ -50,9 +48,7 @@ export class DiagramSimplifier {
      */
     simplify(element: Element): Element {
         switch (element.type) {
-            case Rect.TYPE:
             case Path.TYPE:
-            case Ellipse.TYPE:
                 return this.simplifyLayoutedElement(element as LayoutedElement);
             case Root.TYPE:
             case Canvas.TYPE:
@@ -245,10 +241,6 @@ export abstract class SimplifiedDiagramVisitor<C, O> {
         switch (element.type) {
             case Root.TYPE:
                 return this.visitRoot(element as Root, context);
-            case Rect.TYPE:
-                return this.visitRect(element as Rect, context);
-            case Ellipse.TYPE:
-                return this.visitEllipse(element as Ellipse, context);
             case Path.TYPE:
                 return this.visitPath(element as Path, context);
             case Text.TYPE:
@@ -263,8 +255,6 @@ export abstract class SimplifiedDiagramVisitor<C, O> {
     }
 
     abstract visitRoot(element: Root, context: C): O;
-    abstract visitRect(element: Rect, context: C): O;
-    abstract visitEllipse(element: Ellipse, context: C): O;
     abstract visitPath(element: Path, context: C): O;
     abstract visitText(element: Text, context: C): O;
     abstract visitCanvas(element: Canvas, context: C): O;

@@ -359,11 +359,19 @@ class PathBBoxCalculator {
      * If the miter length is greater than the miter limit, a bevel join is used instead.
      * Caution: both vectors must point towards the intersection point.
      *
+     * The two flat stroke sides of the adjoining segments are always included as well. The miter tip
+     * only extends the outer corner; the perpendicular ±halfWidth offsets of each segment still reach
+     * the bbox right at the join, and must be captured independently. This also makes the result
+     * robust at (near-)tangent junctions — e.g. a rounded corner's arc meeting the straight edge
+     * collinearly — where the miter vector is an ill-conditioned near-zero quantity whose sign would
+     * otherwise decide, unstably, which side gets included.
+     *
      * @param point the point where the two line segments meet
      * @param startVector the vector in the direction of the first line segment
      * @param endVector the vector in the direction of the second line segment
      */
     private applyMiterJoin(point: Point, startVector: Point, endVector: Point): void {
+        this.applyBevelJoin(point, startVector, endVector);
         const normalizedStartVector = Math2D.normalize(startVector);
         const normalizedEndVector = Math2D.normalize(endVector);
         const theta = Math2D.angleBetween(normalizedStartVector, normalizedEndVector);
@@ -371,14 +379,10 @@ class PathBBoxCalculator {
         const miterLength = halfWidth / Math.sin(theta / 2);
         if (miterLength <= this.styles.miterLimit * halfWidth) {
             const miterVector = Math2D.add(normalizedStartVector, normalizedEndVector);
-            if (Math2D.length(miterVector) === 0) {
-                this.applyButtEndPoint(point, startVector);
-            } else {
+            if (Math2D.length(miterVector) !== 0) {
                 const miterPoint = Math2D.add(point, Math2D.scaleTo(miterVector, miterLength));
                 this.bbox.includePoint(miterPoint);
             }
-        } else {
-            this.applyBevelJoin(point, startVector, endVector);
         }
     }
 
@@ -544,6 +548,11 @@ class PathBBoxCalculator {
      * Start and end points have to be handled separately.
      * Modified version of https://github.com/kpym/SVGPathy/blob/acd1a50c626b36d81969f6e98e8602e128ba4302/lib/box.js#L127
      *
+     * The derivative of a cubic is a quadratic, so there can be *two* extrema in ]0,1[ — one local
+     * minimum and one local maximum (an S-shaped segment, e.g. a wave). Both are accumulated:
+     * returning on the first one found silently drops the crest and under-sizes the bounding box,
+     * letting the curve spill past it.
+     *
      * @template A defines the cubic bezier curve as [A0, A1, A2, A3]
      * @returns the min and max of the curve
      */
@@ -574,7 +583,8 @@ class PathBBoxCalculator {
             max = Math.max(A[0], A[3]);
 
         const L = A[0] - 2 * A[1] + A[2];
-        // check local extrema
+        let resultMin = Number.POSITIVE_INFINITY;
+        let resultMax = Number.NEGATIVE_INFINITY;
         for (let R = (L + S) / K, i = 1; i <= 2; R = (L - S) / K, i++) {
             if (R > 0 && R < 1) {
                 // if the extrema is for R in [0,1]
@@ -583,19 +593,16 @@ class PathBBoxCalculator {
                     A[1] * 3 * (1 - R) * (1 - R) * R +
                     A[2] * 3 * (1 - R) * R * R +
                     A[3] * R * R * R;
-                let newMin = Number.POSITIVE_INFINITY;
                 if (Q < min) {
-                    newMin = Q;
+                    resultMin = Math.min(resultMin, Q);
                 }
-                let newMax = Number.NEGATIVE_INFINITY;
                 if (Q > max) {
-                    newMax = Q;
+                    resultMax = Math.max(resultMax, Q);
                 }
-                return [newMin, newMax];
             }
         }
 
-        return [Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY];
+        return [resultMin, resultMax];
     }
 }
 

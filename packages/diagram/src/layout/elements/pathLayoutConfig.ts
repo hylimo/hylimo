@@ -8,7 +8,7 @@ import type { LayoutElement, SizeConstraints } from "../layoutElement.js";
 import { ContentCardinality } from "../layoutElement.js";
 import type { LayoutedPath } from "../engine/layoutEngine.js";
 import type { Layout } from "../engine/layout.js";
-import { ShapeLayoutConfig } from "./shapeLayoutConfig.js";
+import { BaseShapeLayoutConfig } from "./baseShapeLayoutConfig.js";
 
 /**
  * The maximum number of iterations
@@ -36,7 +36,7 @@ export enum StretchMode {
 /**
  * Layout config for path
  */
-export class PathLayoutConfig extends ShapeLayoutConfig {
+export class PathLayoutConfig extends BaseShapeLayoutConfig {
     override type = Path.TYPE;
 
     constructor() {

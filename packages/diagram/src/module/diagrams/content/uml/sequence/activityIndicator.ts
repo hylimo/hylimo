@@ -11,7 +11,7 @@ import { DefaultEditTypes } from "@hylimo/diagram-common";
  */
 export const activityIndicatorModule = ContentModule.create(
     "uml/sequence/activityIndicator",
-    ["uml/sequence/defaultValues", "uml/sequence/diagramState"],
+    ["uml/sequence/defaultValues", "uml/sequence/diagramState", "common/defaultShapes"],
     [],
     [
         id(SCOPE).assignField(
@@ -62,7 +62,7 @@ export const activityIndicatorModule = ContentModule.create(
                     this.width = scope.internal.config.activityWidth
 
                     activityIndicatorElement = canvasElement(
-                        contents = list(rect(class = list("activity-indicator"))),
+                        contents = list(shape(shape = scope.defaultShapes.rect, class = list("activity-indicator"))),
                         class = list("activity-indicator-element"),
                         width = width,
                         height = scope.internal.config.minActivityHeight,

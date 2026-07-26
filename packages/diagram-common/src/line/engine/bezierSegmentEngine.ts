@@ -23,16 +23,21 @@ export class BezierSegmentEngine extends SegmentEngine<BezierSegment> {
         const curve = new Bezier(segmentStartPoint, segment.startControlPoint, segment.endControlPoint, segment.end);
         const linePoint = curve.get(position);
         if (distance != 0) {
-            const normal = curve.normal(position);
+            const normal = this.getNormalVector(position, segment, segmentStartPoint);
             linePoint.x += normal.x * distance;
             linePoint.y += normal.y * distance;
         }
         return linePoint;
     }
 
+    /**
+     * The normal is the direction of travel turned by -90°, the same convention every other engine
+     * uses — and the opposite of what bezier-js' own `normal` returns, which would put a point at a
+     * positive distance on the other side of a bezier than of a line.
+     */
     override getNormalVector(position: number, segment: BezierSegment, segmentStartPoint: Point): Point {
         const curve = new Bezier(segmentStartPoint, segment.startControlPoint, segment.endControlPoint, segment.end);
-        return curve.normal(position);
+        return Math2D.normalize(Math2D.normal(curve.derivative(position)));
     }
 
     override exists(segment: BezierSegment, segmentStartPoint: Point): boolean {

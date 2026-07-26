@@ -13,7 +13,7 @@ function message(type: string): string {
     return `
         diameter = scope.internal.config.externalMessageDiameter
         dot = canvasElement(
-            contents = list(ellipse(class = list("${type}-message"))),
+            contents = list(shape(shape = scope.defaultShapes.ellipse, class = list("${type}-message"))),
             width = diameter,
             height = diameter,
             class = list("${type}-message-element")
@@ -35,7 +35,7 @@ function message(type: string): string {
  */
 export const lostFoundMessageModule = ContentModule.create(
     "uml/sequence/lostFound",
-    ["uml/sequence/defaultValues"],
+    ["uml/sequence/defaultValues", "common/defaultShapes"],
     [],
     [
         `

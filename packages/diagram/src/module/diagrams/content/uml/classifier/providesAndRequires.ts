@@ -23,7 +23,7 @@ const nameLabelPosType = optional(
  */
 export const providesAndRequiresModule = ContentModule.create(
     "uml/classifier/providesAndRequires",
-    ["common/defaultMarkers"],
+    ["common/defaultMarkers", "common/defaultShapes"],
     [],
     [
         id(SCOPE)
@@ -67,7 +67,7 @@ export const providesAndRequiresModule = ContentModule.create(
                                             endMarkerFactory = {
                                                 marker(
                                                     contents = list(
-                                                        ellipse(class = list("provided-interface"))
+                                                        shape(shape = scope.defaultShapes.ellipse, class = list("provided-interface"))
                                                     ),
                                                     lineStart = 0,
                                                     refX = 0.5,

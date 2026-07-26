@@ -8,7 +8,7 @@ import { ContentModule } from "../../contentModule.js";
  */
 export const classifierModule = ContentModule.create(
     "uml/classifier/classifier",
-    [],
+    ["common/defaultShapes"],
     [],
     [
         id(SCOPE)
@@ -26,7 +26,8 @@ export const classifierModule = ContentModule.create(
                             result = []
 
                             classifierContents = list()
-                            renderedClassifier = rect(
+                            renderedClassifier = shape(
+                                shape = scope.defaultShapes.rect,
                                 class = list("classifier", type),
                                 contents = list(container(contents = classifierContents, class = list("classifier-container")))
                             )

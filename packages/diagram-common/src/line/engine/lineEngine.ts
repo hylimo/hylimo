@@ -5,10 +5,12 @@ import { ArcSegment } from "../model/arcSegment.js";
 import { BezierSegment } from "../model/bezierSegment.js";
 import type { Line, TransformedLine } from "../model/line.js";
 import { LineSegment } from "../model/lineSegment.js";
+import { QuadraticBezierSegment } from "../model/quadraticBezierSegment.js";
 import type { Segment } from "../model/segment.js";
 import { ArcSegmentEngine } from "./arcSegmentEngine.js";
 import { BezierSegmentEngine } from "./bezierSegmentEngine.js";
 import { LineSegmentEngine } from "./lineSegmentEngine.js";
+import { QuadraticBezierSegmentEngine } from "./quadraticBezierSegmentEngine.js";
 import type { NearestPointResult, SegmentEngine } from "./segmentEngine.js";
 import { Math2D } from "../../common/math.js";
 
@@ -34,6 +36,7 @@ export class LineEngine {
     private engines = new Map<string, SegmentEngine<any>>([
         [LineSegment.TYPE, new LineSegmentEngine()],
         [BezierSegment.TYPE, new BezierSegmentEngine()],
+        [QuadraticBezierSegment.TYPE, new QuadraticBezierSegmentEngine()],
         [ArcSegment.TYPE, new ArcSegmentEngine()]
     ]);
 

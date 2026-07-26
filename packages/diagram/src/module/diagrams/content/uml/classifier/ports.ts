@@ -8,7 +8,7 @@ import { ContentModule } from "../../contentModule.js";
  */
 export const portsModule = ContentModule.create(
     "uml/classifier/ports",
-    ["uml/classifier/providesAndRequires"],
+    ["uml/classifier/providesAndRequires", "common/defaultShapes"],
     [],
     [
         id(SCOPE)
@@ -36,7 +36,7 @@ export const portsModule = ContentModule.create(
                                         callback = optionalCallback ?? {}
                                         portElement = canvasElement(
                                             class = list("port-element"),
-                                            contents = list(rect(class = list("port"))),
+                                            contents = list(shape(shape = scope.defaultShapes.rect, class = list("port"))),
                                             pos = canvasScope.lpos(element, pos)
                                         )
                                         portElement.pos.class = list("port-pos")

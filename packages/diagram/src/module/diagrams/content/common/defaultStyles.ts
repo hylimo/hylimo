@@ -24,11 +24,7 @@ export const defaultStylesModule = ContentModule.create(
                 stroke = var("primary")
                 strokeWidth = var("strokeWidth")
             }
-            type("rect") {
-                stroke = var("primary")
-                strokeWidth = var("strokeWidth")
-            }
-            type("ellipse") {
+            type("shape") {
                 stroke = var("primary")
                 strokeWidth = var("strokeWidth")
             }
