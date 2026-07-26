@@ -27,6 +27,22 @@ export class FullObject extends BaseObject {
      */
     private proto?: FullObject;
 
+    /**
+     * Creates a new FullObject.
+     * If a proto is provided, it is set directly (both as the typed proto reference and as the `proto` field),
+     * bypassing the checks in {@link setLocalFieldInternal}. This is safe for freshly created objects where the
+     * provided proto is a valid existing object (and thus cannot form a proto loop).
+     *
+     * @param proto the prototype of this object, or undefined to create an object without a proto
+     */
+    constructor(proto?: FullObject) {
+        super();
+        if (proto !== undefined) {
+            this.proto = proto;
+            this.fields.set(SemanticFieldNames.PROTO, { value: proto, source: undefined });
+        }
+    }
+
     override get isNull(): boolean {
         return false;
     }
@@ -144,6 +160,21 @@ export class FullObject extends BaseObject {
                 this.fields.set(key, value);
             }
         }
+    }
+
+    /**
+     * Sets a field directly in the local fields map, bypassing the proto-chain property lookup
+     * and the proto handling of {@link setLocalFieldInternal}.
+     *
+     * Only safe to use when the key is guaranteed not to be `proto` and when no property with
+     * this key can exist on this object or its prototype chain (e.g. freshly created,
+     * engine-controlled objects whose prototype is known to not define matching properties).
+     *
+     * @param key the identifier of the field, must not be `proto`
+     * @param value the new field entry
+     */
+    setLocalFieldDirect(key: string | number, value: LabeledValue): void {
+        this.fields.set(key, value);
     }
 
     /**

@@ -2,13 +2,20 @@ import type { OperatorExpression } from "../../ast/operatorExpression.js";
 import type { InterpreterContext } from "../interpreter/interpreterContext.js";
 import type { LabeledValue } from "../objects/labeledValue.js";
 import { SemanticFieldNames } from "../semanticFieldNames.js";
-import { ExecutableConstExpression } from "./executableConstExpression.js";
+import type { ExecutableListEntry } from "./executableListEntry.js";
 import { ExecutableExpression } from "./executableExpression.js";
+import { selfExpression } from "./executableSelfExpression.js";
 
 /**
  * Executable OperatorExpression
  */
 export class ExecutableOperatorExpression extends ExecutableExpression<OperatorExpression> {
+    /**
+     * The argument list passed to invoke (implicit `self` plus left and right operand). As all entries
+     * are constant for this operator, the list is built once instead of on every evaluation.
+     */
+    private readonly invocationArguments: ExecutableListEntry[];
+
     /**
      * Creates a new OperatorExpression consisting of an operator expression, and a left and right side expression.
      *
@@ -24,26 +31,15 @@ export class ExecutableOperatorExpression extends ExecutableExpression<OperatorE
         readonly target: ExecutableExpression<any>
     ) {
         super(expression);
+        this.invocationArguments = [
+            { value: selfExpression, name: SemanticFieldNames.SELF },
+            { value: left },
+            { value: right }
+        ];
     }
 
     override evaluateInternal(context: InterpreterContext): LabeledValue {
         const targetValue = this.target.evaluate(context).value;
-        return targetValue.invoke(
-            [
-                {
-                    value: new ExecutableConstExpression({ value: context.currentScope, source: undefined }),
-                    name: SemanticFieldNames.SELF
-                },
-                {
-                    value: this.left
-                },
-                {
-                    value: this.right
-                }
-            ],
-            context,
-            undefined,
-            this.expression
-        );
+        return targetValue.invoke(this.invocationArguments, context, undefined, this.expression);
     }
 }

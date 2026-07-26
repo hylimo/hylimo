@@ -49,7 +49,13 @@ export abstract class ExecutableAbstractFunctionExpression<
         super(expression);
     }
 
-    protected convertDocumentationToObject(context: InterpreterContext): BaseObject {
+    /**
+     * Converts the documentation of this function into an object usable from within the DSL
+     *
+     * @param context context in which this is performed
+     * @returns the documentation object, or null if this function has no documentation
+     */
+    convertDocumentationToObject(context: InterpreterContext): BaseObject {
         if (this.documentation == undefined) {
             return context.null;
         }

@@ -28,35 +28,40 @@ export function generateArgs(
 ): FullObject {
     let argsObject: FullObject;
     if (expression != undefined && expression instanceof AbstractInvocationExpression) {
-        argsObject = new ArgsFullObject(expression);
-        argsObject.setLocalField(
-            SemanticFieldNames.PROTO,
-            { value: context.objectPrototype, source: undefined },
-            context
-        );
+        argsObject = new ArgsFullObject(expression, context.objectPrototype);
     } else {
         argsObject = context.newObject();
     }
     let indexCounter = 0;
     for (const argumentExpression of args) {
         const value = argumentExpression.value.evaluateWithSource(context);
-        argsObject.setLocalField(argumentExpression.name ?? indexCounter++, value, context);
+        const key = argumentExpression.name ?? indexCounter++;
+        if (key === SemanticFieldNames.PROTO) {
+            argsObject.setLocalField(key, value, context);
+        } else {
+            argsObject.setLocalFieldDirect(key, value);
+        }
     }
-    for (const entry of documentation?.params ?? []) {
-        const [key, description, type] = entry;
-        if (type != undefined) {
-            const argValue = argsObject.getFieldValue(key, context);
-            validate(type, `Invalid value for parameter ${key}: ${description}`, argValue, context, () => {
-                if (typeof key === "number") {
-                    const indexArguments = args.filter((arg) => arg.name == undefined);
-                    if (indexArguments[key]) {
-                        return indexArguments[key].value.expression;
-                    }
-                } else if (typeof key === "string") {
-                    return [...args].reverse().find((arg) => arg.name === key)?.value?.expression;
+    const params = documentation?.params;
+    if (params !== undefined) {
+        for (const entry of params) {
+            const [key, description, type] = entry;
+            if (type != undefined) {
+                const argValue = argsObject.getFieldValue(key, context);
+                if (type.matches(argValue, context) !== true) {
+                    validate(type, `Invalid value for parameter ${key}: ${description}`, argValue, context, () => {
+                        if (typeof key === "number") {
+                            const indexArguments = args.filter((arg) => arg.name == undefined);
+                            if (indexArguments[key]) {
+                                return indexArguments[key].value.expression;
+                            }
+                        } else if (typeof key === "string") {
+                            return [...args].reverse().find((arg) => arg.name === key)?.value?.expression;
+                        }
+                        return undefined;
+                    });
                 }
-                return undefined;
-            });
+            }
         }
     }
     return argsObject;
@@ -69,10 +74,14 @@ class ArgsFullObject extends FullObject {
     /**
      * Generates a new ArgsFullObject
      *
-     * @param expression the
+     * @param expression the invocation the arguments belong to, used as the source of missing arguments
+     * @param proto the prototype of this object
      */
-    constructor(readonly expression: AbstractInvocationExpression) {
-        super();
+    constructor(
+        readonly expression: AbstractInvocationExpression,
+        proto: FullObject
+    ) {
+        super(proto);
     }
 
     protected override getDefaultValue(key: string | number, context: InterpreterContext): LabeledValue {

@@ -164,9 +164,7 @@ export class InterpreterContext {
      * @returns the created empty FullObject
      */
     newObject(): FullObject {
-        const instance = new FullObject();
-        instance.setLocalField(SemanticFieldNames.PROTO, { value: this.objectPrototype, source: undefined }, this);
-        return instance;
+        return new FullObject(this.objectPrototype);
     }
 
     /**

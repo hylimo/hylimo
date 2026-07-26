@@ -17,18 +17,37 @@ import { generateArgs } from "./generateArgs.js";
  */
 export abstract class AbstractFunctionObject<T extends ExecutableAbstractFunctionExpression<any>> extends SimpleObject {
     /**
+     * The documentation of this function, materialized lazily on first access.
+     * undefined means it has not been built yet.
+     */
+    private lazyDocs?: BaseObject;
+
+    /**
      * Defines parentScope
      *
      * @param parentScope the parent scope, on exec a new scope with this as parent is created
      * @param proto the prototype of this object
-     * @param docs the documentation of this function
+     * @param creationContext the context this function was created in, used to lazily build the documentation
      */
     constructor(
         readonly definition: T,
         readonly parentScope: FullObject,
-        public docs: BaseObject
+        private readonly creationContext: InterpreterContext
     ) {
         super();
+    }
+
+    /**
+     * The documentation of this function.
+     * Building the documentation object is comparatively expensive and almost never needed while
+     * rendering, so it is deferred until the first access.
+     */
+    get docs(): BaseObject {
+        return (this.lazyDocs ??= this.definition.convertDocumentationToObject(this.creationContext));
+    }
+
+    set docs(value: BaseObject) {
+        this.lazyDocs = value;
     }
 
     override getProto(context: InterpreterContext): FullObject {
@@ -99,10 +118,10 @@ export class FunctionObject extends AbstractFunctionObject<ExecutableFunctionExp
      *
      * @param definition defines the function (what to execute)
      * @param parentScope the parent scope, on exec a new scope with this as parent is created
-     * @param docs the documentation of this function
+     * @param context the context this function was created in, used to lazily build the documentation
      */
-    constructor(definition: ExecutableFunctionExpression, parentScope: FullObject, docs: BaseObject) {
-        super(definition, parentScope, docs);
+    constructor(definition: ExecutableFunctionExpression, parentScope: FullObject, context: InterpreterContext) {
+        super(definition, parentScope, context);
     }
 
     override invoke(
@@ -114,13 +133,12 @@ export class FunctionObject extends AbstractFunctionObject<ExecutableFunctionExp
         context.nextStep();
         const oldScope = context.currentScope;
         if (scope == undefined) {
-            scope = new FullObject();
-            scope.setLocalField(SemanticFieldNames.PROTO, { value: this.parentScope, source: undefined }, context);
+            scope = new FullObject(this.parentScope);
         }
-        scope.setLocalField(SemanticFieldNames.THIS, { value: scope, source: undefined }, context);
+        scope.setLocalFieldDirect(SemanticFieldNames.THIS, { value: scope, source: undefined });
         const generatedArgs = generateArgs(args, context, this.definition.documentation, callExpression);
-        scope.setLocalField(SemanticFieldNames.ARGS, { value: generatedArgs, source: callExpression }, context);
-        scope.setLocalField(SemanticFieldNames.IT, generatedArgs.getField(0, context), context);
+        scope.setLocalFieldDirect(SemanticFieldNames.ARGS, { value: generatedArgs, source: callExpression });
+        scope.setLocalFieldDirect(SemanticFieldNames.IT, generatedArgs.getField(0, context));
         context.currentScope = scope;
         let lastValue: BaseObject = context.null;
         for (const expression of this.definition.expressions) {
@@ -145,10 +163,10 @@ export class NativeFunctionObject extends AbstractFunctionObject<ExecutableNativ
      *
      * @param definition defines the function (what to execute)
      * @param parentScope the parent scope, on exec a new scope with this as parent is created
-     * @param docs the documentation of this function
+     * @param context the context this function was created in, used to lazily build the documentation
      */
-    constructor(definition: ExecutableNativeFunctionExpression, parentScope: FullObject, docs: BaseObject) {
-        super(definition, parentScope, docs);
+    constructor(definition: ExecutableNativeFunctionExpression, parentScope: FullObject, context: InterpreterContext) {
+        super(definition, parentScope, context);
     }
 
     override invoke(

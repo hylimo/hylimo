@@ -226,8 +226,7 @@ export const objectModule = InterpreterModule.create(
             "object",
             native(
                 (args, context, _staticScope, callExpression) => {
-                    args.shift();
-                    const evaluatedArgs = generateArgs(args, context, undefined, callExpression);
+                    const evaluatedArgs = generateArgs(args.slice(1), context, undefined, callExpression);
                     return { value: evaluatedArgs, source: undefined };
                 },
                 {
