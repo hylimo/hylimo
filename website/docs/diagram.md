@@ -4,154 +4,125 @@ outline: deep
 
 # Diagram DSL
 
-HyLiMo provides several diagram type-independent features
+The diagram DSL is the layer between [SyncScript](./syncscript.md) and the concrete diagram types.
+It provides everything which is not specific to a notation: elements, styles, positions and
+connections.
 
-## Diagram
+You meet it in two situations: when you want to go beyond what a diagram type offers - a custom
+shape, an extra label, a color which depends on a variable - and when you draw something which is not
+a UML diagram at all.
 
-Diagrams are a triple of a root element, styles and font families.
-Diagrams can be created using the `createDiagram` function.
-However, usually the `diagram` function is not used directly, but rather the `diagram` DSL function (or the diagram type-specific equivalent) is used:
+## Creating a diagram
 
-```
+Every diagram is created by a diagram function, and the diagram must be the value of the file, so it
+is usually the last (and only) top-level expression:
+
+```hyl
 diagram {
     // diagram content
 }
 ```
 
-The diagram must always be the returned value in the global scope and thus should usually be the last and/or only statement in the file.
+`diagram` is the plain one: a canvas and nothing else.
+The [diagram types](./class.md) are the same function with an additional vocabulary, so everything
+below works in `classDiagram`, `sequenceDiagram` and the others as well.
+
+::: details The low-level function
+`createDiagram` creates a diagram from a root element, styles and fonts.
+The diagram functions are built on it, and there is rarely a reason to call it directly.
+:::
 
 ## Elements
 
-Elements are the building blocks of diagrams.
-Different types of elements exist:
+Elements are the building blocks of a diagram.
+Each element is created by a function of its name, takes element-specific attributes as named
+arguments, and takes its children in a trailing lambda:
 
-- shape: a parametric shape (rectangle, ellipse, diamond, database, …) with an optional content — see [Shapes](./shapes.md)
-- path: an SVG path
-- text: a text element containing at least one span
-  - span: a span of text with associated styling
-- vbox: stacks elements vertically
-- hbox: stacks elements horizontally
-- stack: stacks elements on the z-axis
-- canvas: a canvas where elements and connections can be used
-  - canvasElement: a container with a position on the canvas
-  - points: three different types of points are supported
-    - absolutePoint: a point with absolute coordinates
-    - relativePoint: a point with coordinates relative to another point or canvasElement
-    - linePoint: point on a canvasConnection or the outline of a canvasElement, defined by its relative position on the line, and an optional distance to the line
-  - canvasConnection: connection between two canvas elements / points, consists of a list of segments, at least one
-    - marker: element positioned at the start / end of the canvasConnection
-    - canvasConnectionSegment: segments which make up the connection, three types of segments exist:
-      - canvasLineSegemtn: straight line between two points
-      - canvasBezierSegment: cubic bezier curve between two points using two control points
-      - canvasAxisAlignedSegment: axis-aligned poly line, consisting of one to three line segments
-
-Elements are usually used by developers to create new diagram types.
-However, diagrammers can also use elements directly to extend the graphical appearance of their diagrams.
-Each of these elements can be created as a function, which takes element type-specific parameters.
-All these functions have in common, that they take a function as only positional argument, which is executed to create inner elements:
-
-```
-shape(shape = defaultShapes.rect, fill = "green") {
-    text {
-        span(text = "Hello World")
-    }
-}
-```
-
-## Styles
-
-Styling allows to manipulate the appearance of elements.
-Available style attributes depend on the element type.
-For example, shape-like elements provide `fill`, `fillOpacity`, `stroke`, `strokeWidth`, `strokeOpacity`, `strokeDash`, and `strokeDashSpace` attributes.
-Layouted elements, including `vbox`, `hbox`, `stack`, `shape` and `path` also provide attributes to affect their layouting:
-
-- `width`, `minWidth`, and `maxWidth` for defining its width, here `width` takes precedence over `minWidth` and `maxWidth`
-- `height`, `minHeight`, and `maxHeight` for defining its height, here `height` takes precedence over `minHeight` and `maxHeight`
-- `margin`, and its variants `marginTop`, `marginRight`, `marginBottom`, and `marginLeft` for defining the margin around the element
-- `vAlign` and `hAlign` for defining the vertical and horizontal alignment of the element within its parent
-
-Style attributes can be set in two ways:
-First, they can be defined directly on the element.
-However, this makes styling more verbose and less reusable.
-Therefore, styles can also be defined using the SCSS-inspired `styles` function:
-
-```
-styles {
-    any {
-        fill = "green"
-    }
-}
-```
-
-This function takes a function as only positional argument, which is executed to define the styles.
-Selectors can be nested to limit to which elements the styles apply, similar to SCSS, selectors can be nested:.
-
-```
-styles {
-    cls("class") {
-        cls("title") {
-            fontWeight = "bold"
+```hylimo
+diagram {
+    element(shape(shape = defaultShapes.rect, fill = "#dbeafe") {
+        text {
+            span(text = "Hello World")
+        } styles {
+            margin = 16
         }
-    }
+    })
 }
 ```
 
-Supported selectors include cls, which matches elements with a specific class, type, which matches elements of a specific type, and any, which matches all elements.
+| Element                    | What it is                                                                                                      |
+| -------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| `shape`                    | A parametric shape - rectangle, ellipse, diamond, database … - with optional content, see [Shapes](./shapes.md) |
+| `path`                     | An SVG path                                                                                                     |
+| `text`                     | A text element, containing at least one span                                                                    |
+| `span`                     | A run of text with its own styling                                                                              |
+| `container`                | A container which lays out its children, see [below](#containers)                                               |
+| `canvas`                   | A canvas on which elements and connections are positioned                                                       |
+| `canvasElement`            | An element with a position on a canvas                                                                          |
+| `canvasConnection`         | A connection between two points or elements, made up of segments                                                |
+| `canvasLineSegment`        | A straight line between two points                                                                              |
+| `canvasBezierSegment`      | A cubic bezier curve, defined by two control points                                                             |
+| `canvasAxisAlignedSegment` | An axis-aligned poly line of one to three parts                                                                 |
+| `absolutePoint`            | A point with absolute coordinates                                                                               |
+| `relativePoint`            | A point relative to another point or canvas element                                                             |
+| `linePoint`                | A point on a connection or on the outline of an element                                                         |
+| `marker`                   | An element at the start or end of a connection, such as an arrow tip                                            |
 
-To support theming, CSS-inspired variables can be used in styles:
+Canvas elements, connections and points are rarely created through these functions directly - the
+[canvas constructs](#canvas-constructs) below are the comfortable way to do it.
 
-```
-type("shape") {
-    border = var("primary")
+### Containers
+
+A `container` stacks its children, and how it does that is decided by its `layout` style:
+
+| `layout`  | Effect                                           |
+| --------- | ------------------------------------------------ |
+| `"stack"` | Children are stacked on the z-axis (the default) |
+| `"vbox"`  | Children are stacked vertically                  |
+| `"hbox"`  | Children are stacked horizontally                |
+
+```hylimo
+diagram {
+    element(container(layout = "hbox") {
+        text {
+            span(text = "left")
+        } styles {
+            marginRight = 20
+        }
+        text {
+            span(text = "right")
+        }
+    })
 }
 ```
 
-The value of variable can be defined in selectors:
+### Text
 
-```
-any {
-    variables.primary = "green"
+A `text` contains one or more `span`s, and each span carries its own font styling, which makes mixed
+formatting possible:
+
+```hylimo
+diagram {
+    element(text {
+        span(text = "normal ")
+        span(text = "bold", fontWeight = "bold")
+        span(text = " and ")
+        span(text = "italic", fontStyle = "italic")
+    })
 }
 ```
 
-Also, to define variables for nested elements, we provide the `vars` construct which wrapps set variables into an `any` selector:
+## Canvas constructs
 
-```
-vars {
-    primary = "green"
-    secondary = "blue"
-}
-// is equivalent to
-any {
-    variables.primary = "green"
-    variables.secondary = "blue"
-}
-```
+A canvas is what makes a graph-based diagram: it positions elements freely and connects them.
+The content of every `diagram` block is a canvas, and the following constructs are available inside
+it.
 
-### Style variables
+### `element`
 
-The following style variables are diagram type independent and therefore available in every diagram:
+Puts arbitrary content onto the canvas:
 
-| Variable          | Meaning                                                    | Default value              |
-| ----------------- | ---------------------------------------------------------- | -------------------------- |
-| `primary`         | Color used for strokes and texts                           | primary color of the theme |
-| `background`      | Color used to fill elements which hide what is behind them | background color of theme  |
-| `strokeWidth`     | Width of strokes in pixels                                 | 2                          |
-| `fontSize`        | Font size of texts in pixels                               | 16                         |
-| `subcanvasMargin` | Margin around the contents of a nested canvas in pixels    | 40                         |
-
-The style variables of the individual diagram types are documented on their respective page.
-
-## Canvas Constructs
-
-Canvas is the most important diagram element for graph-based diagrams.
-To allow separating layouting and styling from the contents of elements, and create a consistant user experience, inside `diagram` blocks, several constructs are available:
-
-### `element` function
-
-can be used to create a canvas element with some content:
-
-```
+```hyl
 element {
     text {
         span(text = "Hello World")
@@ -159,40 +130,23 @@ element {
 }
 ```
 
-### Point functions
+### Points
 
-- `apos`: creates an absolute point, takes x and y as arguments
-- `rpos`: creates a relative point, takes target, x and y as arguments
-- `lpos`: creates a line point, takes target, pos, and distance as arguments
+| Function | Creates                                                                                       |
+| -------- | --------------------------------------------------------------------------------------------- |
+| `apos`   | An absolute point, from `x` and `y`                                                           |
+| `rpos`   | A point relative to a target, from `target`, `x` and `y`                                      |
+| `lpos`   | A point on a line, from `target`, the relative position on it, and an optional distance to it |
 
-### `styles` operator
-
-Can be applied to any element to define element-specific styles:
-
-```
-shape() styles {
-    fill = green
-    any {
-        fontSize = 10
-    }
-}
-```
-
-Also allows to set style classes:
-
-```
-shape() styles {
-    class += "test-shape"
-}
-// is equivalent to
-shape(class = list("test-shape"))
-```
+Relative points are what keeps a diagram maintainable: if a class is placed with
+`rpos(OtherClass, 300, 0)`, moving `OtherClass` moves it along.
 
 ### `layout` operator
 
-Can be used to set width, height and position of a canvasElement (**not** other diagram elements):
+Sets the position and size of a canvas element - and **only** of a canvas element, not of arbitrary
+diagram elements:
 
-```
+```hyl
 element {
     // some content
 } layout {
@@ -204,48 +158,54 @@ element {
 
 ### `with` operator
 
-Can be used to customize canvasConnections, by adding labels to the canvas connection and defining the segments using a custom fluent builder syntax:
+Shapes a connection: it defines the route the connection takes, and the labels along it.
 
-```
+```hyl
 aCanvasConnection with {
     over = start().line(apos(10, 20)).line(end())
-    // a label in the middle of the connection with distance 100
+    // a label in the middle of the connection, 100 away from it
     label("the text of the label", 0.5, 100)
 }
 ```
 
-The builder for creating the segments supports the following methods:
+The route is built with a fluent builder.
+`start` and `end` take the relative position on the outline if the endpoint is an element, and no
+argument if it is a point:
 
-- start: starts the line, if the start element is a canvasElement takes the relative position on the outline as argument
-  ```
-  // canvas element start:
-  start(0)
-  // point start
-  start()
-  ```
-- end: ends the line, if the end element is a canvasElement takes the relative position on the outline as argument
-  ```
-  // canvas element end
-  end(0)
-  // point end
-  end()
-  ```
-- line: adds a line segment for each positional argument
-  ```
+```hyl
+// canvas element start / end
+start(0)
+end(0)
+// point start / end
+start()
+end()
+```
+
+Between them, any number of segments can be added:
+
+- `line` adds a straight segment per positional argument:
+  ```hyl
   // 1 segment
   start(0).line(end(0))
   // 2 segments
   start(0).line(apos(100, 100), end(0))
   ```
-- bezier: adds a bezier segment, first takes relative coordinates for the start control point, next the end point, and last the relative coordinates for the end control point. Also supports adding multiple segments at once by repeating the first two parameters for each segment, control points are mirrored at each inner point.
-  ```
+- `bezier` adds a cubic bezier segment.
+  It takes the relative coordinates of the start control point, the end point, and the relative
+  coordinates of the end control point.
+  Repeating the first two parameters adds further segments, whose control points are mirrored at each
+  inner point:
+  ```hyl
   // 1 segment
   over = start(0).bezier(100, 100, end(0), 100, 100)
   // 2 segments
   over = start(0).bezier(100, 100, apos(100, 100), 100, 100, end(0), 100, 100)
   ```
-- axisAligned: adds an axis-aligned segment, takes the end point and a relative position between -1 and 1 for the center part of the segment. If the provided position is positive, the position defines the relative position of the vertical segment, if negative the relative position of the horizontal segment. Similar to other segment types, inputs can be repeated for multiple segments.
-  ```
+- `axisAligned` adds an axis-aligned segment.
+  It takes a relative position between -1 and 1 and the end point: a positive value is the relative
+  position of the vertical part, a negative value the relative position of the horizontal part.
+  Inputs can be repeated for multiple segments:
+  ```hyl
   // 1 segment, horizontal first
   over = start(0).axisAligned(0.5, end(0))
   // 1 segment, vertical first
@@ -254,5 +214,280 @@ The builder for creating the segments supports the following methods:
   over = start(0).axisAligned(0.5, apos(100, 100), -0.5, end(0))
   ```
 
-Label allows to create a label on the connection.
-The function takes the text to display, the relative position on the connection, and the distance to the connection as arguments.
+`label` takes the text, the relative position on the connection, and the distance to the connection.
+Both are what the graphical editor writes when a label is dragged.
+
+### Connection operators
+
+The operators which create connections - `--`, `-->`, `..>` and their relatives - are defined by the
+diagram types, because which connections exist is part of the notation.
+See the diagram type pages, for example [associations](./class.md#associations).
+
+::: details Custom connection operators
+A plain `diagram` has no connection operators, but one can be created with
+`internal.createConnectionOperator`, optionally with markers and a style class.
+This is an internal API and may change.
+
+```hyl
+diagram {
+    a = element {
+        text {
+            span(text = "A")
+        }
+    }
+    b = element {
+        text {
+            span(text = "B")
+        }
+    } layout {
+        pos = apos(300, 0)
+    }
+
+    -- = internal.createConnectionOperator()
+
+    a -- b with {
+        over = start(Position.Right).line(end(Position.Left))
+        label("connects", 0.5, 25)
+    }
+}
+```
+
+:::
+
+## Styles
+
+Styles decide how elements look.
+They can be written directly on an element, which is short but neither reusable nor overridable:
+
+```hyl
+span(text = "Hello World", fontWeight = "bold")
+```
+
+Or they can be defined in a `styles` block, which works like SCSS: selectors, nesting, and one rule
+for many elements.
+
+```hyl
+styles {
+    any {
+        fill = "green"
+    }
+}
+```
+
+### Selectors
+
+| Selector | Matches                                      |
+| -------- | -------------------------------------------- |
+| `type`   | All elements of a type, e.g. `type("shape")` |
+| `cls`    | All elements with a style class              |
+| `any`    | All elements                                 |
+
+Selectors can be nested, and a nested selector applies to the descendants of the outer one:
+
+```hyl
+styles {
+    cls("class") {
+        cls("title") {
+            fontWeight = "bold"
+        }
+    }
+}
+```
+
+Style classes are assigned with the `class` attribute, or added with the `styles` operator:
+
+```hylimo
+diagram {
+    element(shape(shape = defaultShapes.rect, class = list("box")) {
+        text {
+            span(text = "normal")
+        }
+    })
+
+    element(shape(shape = defaultShapes.rect, class = list("box", "highlight")) {
+        text {
+            span(text = "highlighted")
+        }
+    }) layout {
+        pos = apos(220, 0)
+    }
+
+    styles {
+        cls("box") {
+            width = 160
+            height = 60
+            fill = var("background")
+            type("text") {
+                hAlign = HAlign.Center
+                vAlign = VAlign.Center
+            }
+        }
+        cls("highlight") {
+            stroke = var("accent")
+            strokeWidth = var("strokeWidth") * 2
+        }
+        vars {
+            accent = "#e36209"
+        }
+    }
+}
+```
+
+### `styles` operator
+
+Applied to a single element, `styles` defines styles for exactly that element, including nested
+selectors for its children:
+
+```hyl
+shape(shape = defaultShapes.rect) styles {
+    fill = "green"
+    any {
+        fontSize = 10
+    }
+}
+```
+
+It is also the way to add a style class to an element after it has been created:
+
+```hyl
+shape(shape = defaultShapes.rect) styles {
+    class += "test-shape"
+}
+// is equivalent to
+shape(shape = defaultShapes.rect, class = list("test-shape"))
+```
+
+### Variables
+
+Variables work like CSS custom properties: `var("name")` reads one, and a selector defines them.
+
+```hyl
+type("shape") {
+    stroke = var("primary")
+}
+```
+
+```hyl
+any {
+    variables.primary = "green"
+}
+```
+
+Because setting variables for a whole diagram is common, `vars` does the same with less noise:
+
+```hyl
+vars {
+    primary = "green"
+    secondary = "blue"
+}
+// is equivalent to
+any {
+    variables.primary = "green"
+    variables.secondary = "blue"
+}
+```
+
+Variables can be calculated with, so a value can be derived instead of duplicated:
+
+```hyl
+strokeWidth = var("strokeWidth") * 2
+```
+
+A style attribute can also be reset to its default with `unset`.
+
+### Style variables
+
+The following style variables exist in every diagram, independent of its type:
+
+| Variable          | Meaning                                                    | Default value              |
+| ----------------- | ---------------------------------------------------------- | -------------------------- |
+| `primary`         | Color used for strokes and texts                           | primary color of the theme |
+| `background`      | Color used to fill elements which hide what is behind them | background color of theme  |
+| `strokeWidth`     | Width of strokes in pixels                                 | 2                          |
+| `fontSize`        | Font size of texts in pixels                               | 16                         |
+| `subcanvasMargin` | Margin around the contents of a nested canvas in pixels    | 40                         |
+
+The variables of the individual diagram types are documented on their respective pages.
+
+::: tip Theming
+`primary` and `background` follow the light/dark theme and the colors configured in the
+[settings](./editor.md#theme).
+Using them instead of fixed colors is what makes a diagram render correctly in both modes.
+:::
+
+### Style attributes
+
+Which attributes an element supports depends on its type.
+
+**Layout** - supported by all elements which are laid out, such as `shape`, `path`, `container` and
+`text`:
+
+| Attribute                                                          | Meaning                                                                |
+| ------------------------------------------------------------------ | ---------------------------------------------------------------------- |
+| `width`, `minWidth`, `maxWidth`                                    | Width of the element, `width` takes precedence over the other two      |
+| `height`, `minHeight`, `maxHeight`                                 | Height of the element, `height` takes precedence over the other two    |
+| `margin`, `marginTop`, `marginRight`, `marginBottom`, `marginLeft` | Space around the element                                               |
+| `hAlign`, `vAlign`                                                 | Horizontal and vertical alignment within the parent                    |
+| `visibility`                                                       | `"visible"`, `"hidden"` (invisible, still takes space) or `"collapse"` |
+| `grow`, `shrink`, `base`                                           | How the element grows and shrinks in an `hbox` or `vbox`               |
+| `layout`                                                           | Only for `container`: `"stack"`, `"vbox"` or `"hbox"`                  |
+
+For the attributes which take one of a fixed set of values, enum objects exist, so `HAlign.Center`
+can be written instead of `"center"`: `HAlign`, `VAlign`, `Visibility` and - for relative positions
+on an outline - `Position`.
+
+**Stroke and fill** - supported by shape-like elements, meaning `shape`, `path` and connections:
+
+| Attribute                                             | Meaning                                        |
+| ----------------------------------------------------- | ---------------------------------------------- |
+| `stroke`, `strokeOpacity`, `strokeWidth`              | Color, opacity and width of the stroke         |
+| `strokeDash`, `strokeDashSpace`                       | Dash length and gap length, for dashed strokes |
+| `strokeLineJoin`, `strokeLineCap`, `strokeMiterLimit` | How corners and ends of the stroke are drawn   |
+| `fill`, `fillOpacity`                                 | Color and opacity of the fill                  |
+
+**Text** - supported by `span`, and inherited from the enclosing `text`:
+
+| Attribute                                                                                                    | Meaning                          |
+| ------------------------------------------------------------------------------------------------------------ | -------------------------------- |
+| `fill`                                                                                                       | Color of the text                |
+| `fontFamily`, `fontSize`, `fontWeight`, `fontStyle`, `fontFeatureSettings`                                   | Which font is used and how       |
+| `underline`, `underlineOpacity`, `underlineWidth`, `underlineDash`, `underlineDashSpace`                     | Underline and its appearance     |
+| `strikethrough`, `strikethroughOpacity`, `strikethroughWidth`, `strikethroughDash`, `strikethroughDashSpace` | Strikethrough and its appearance |
+
+`shape` additionally supports `shape` and `cornerRounding`, see [Shapes](./shapes.md).
+
+## Fonts
+
+A diagram carries a list of font families, available as `fonts` in the diagram scope.
+By default it contains Roboto, Open Sans and Source Code Pro, and the first entry is the font used
+unless a `fontFamily` style says otherwise.
+
+A font family is created with `fontFamily`, and each of its four faces with `font`:
+
+```hyl
+diagram {
+    fonts.add(
+        fontFamily(
+            "My Font",
+            normal = font("https://example.com/MyFont-Regular.ttf"),
+            italic = font("https://example.com/MyFont-Italic.ttf"),
+            bold = font("https://example.com/MyFont-Bold.ttf"),
+            boldItalic = font("https://example.com/MyFont-BoldItalic.ttf")
+        )
+    )
+
+    styles {
+        type("span") {
+            fontFamily = "My Font"
+        }
+    }
+}
+```
+
+`font` optionally takes variation settings as a second argument, either the name of a named variation
+or an object with values for the variation axes.
+
+::: warning External fonts
+Loading a font from a URL requires _External fonts_ to be enabled in the
+[settings](./editor.md#diagram), as it makes the editor fetch data from a third party.
+:::

@@ -1,0 +1,57 @@
+sequenceDiagram {
+    user = actor("user") {
+        values {
+            loggedIn = true
+        }
+    }
+    participant("ourShop", "Shop")
+    instance("Cart")
+    component("Payment")
+
+    activate(user, after = 25)
+    activate(ourShop)
+    user --> ourShop with {
+        label("checkout()", 0.5)
+    }
+
+    activate(Cart, after = 25)
+    ourShop -->> Cart with {
+        label("getItems()", 0.5)
+    }
+
+    activate(ourShop, after = 25)
+    ourShop <<.. Cart with {
+        label("items", 0.5, -8)
+    }
+    deactivate(Cart)
+
+    frame("alt", subtext = "cart not empty", after = 20) {
+        activate(Payment, after = 50)
+        ourShop -->> Payment with {
+            label("pay(total)", 0.5)
+        }
+
+        frame("ref", subtext = "fraud check", left = ourShop, right = Payment, after = 15) {
+            delay(40)
+        }
+
+        ourShop <<.. Payment with {
+            label("receipt", 0.5, -8)
+        }
+        deactivate(Payment)
+
+        fragment("else", after = 40)
+        ourShop -->> lostMessage(distance = 150) with {
+            label("logEmpty()", 0.5)
+        }
+    }
+
+    delay(15)
+    user <.. ourShop with {
+        label("confirmation", 0.5)
+    }
+    deactivate(ourShop)
+    deactivate(ourShop)
+    destroy(Cart)
+    deactivate(user, after = 25)
+}

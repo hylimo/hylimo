@@ -26,7 +26,7 @@ export default withPwa(
                     text: "Getting Started",
                     collapsed: false,
                     items: [
-                        { text: "HyLiMo", link: "/docs/docs" },
+                        { text: "Introduction", link: "/docs/docs" },
                         { text: "Hybrid Editor", link: "/docs/editor" },
                         { text: "SyncScript", link: "/docs/syncscript" },
                         { text: "Diagram DSL", link: "/docs/diagram" },

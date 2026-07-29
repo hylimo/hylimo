@@ -4,119 +4,128 @@ outline: deep
 
 # SyncScript
 
-SyncScript is a general-purpose programming language with focus on flexibility and implementing internal DSLs.
-Characteristings:
+SyncScript is the language a `.hyl` file is written in.
+It is a general-purpose language, but it was designed with one goal in mind: hosting internal DSLs
+which read like a notation of their own.
+Everything that looks like special diagram syntax - `classDiagram { … }`, `layout { … }`,
+`A --> B with { … }` - is an ordinary function call in this language.
 
-- Dynamic typing
-- Strong typing
-- Static/lexical scoping
-- Prototype-based object system
+```hyl
+classDiagram {
+    class("Movie")
+}
+```
 
-Main data types available are
+::: tip The one thing to remember
+SyncScript has **no keywords**.
+`if`, `while`, `class` and even `+` are variables which happen to hold functions, and every construct
+is built out of function calls, blocks and objects.
+Once that clicks, the rest of the language is small.
+:::
 
-- object
-- string
-- number
-- boolean
-- function
-- null
+| Property                    | What it means here                                                 |
+| --------------------------- | ------------------------------------------------------------------ |
+| Dynamically typed           | Values carry their type, variables do not                          |
+| Strongly typed              | No implicit conversions between unrelated types                    |
+| Statically/lexically scoped | A function sees the scope it was written in                        |
+| Prototype-based             | Objects inherit from a prototype, like in JavaScript               |
+| Expression-oriented         | Everything evaluates to a value, including blocks and control flow |
+
+The available data types are `object`, `string`, `number`, `boolean`, `function` and `null`.
 
 ## Syntax
 
-The syntax of SyncScript focuses on flexibility for implementing DSLs.
-It is inspired by JavaScript, Kotlin and Scala.
-Following, we introduce the main syntactic constructs:
+The syntax is inspired by JavaScript, Kotlin and Scala.
 
 ### Literals
 
-Literals, including number and string literals are written as in JavaScript:
+Number and string literals are written as in JavaScript:
 
-```
+```hyl
 1
 3.14
 "Hello World"
 ```
 
+Strings support the escape sequences `\\`, `\"`, `\n`, `\t` and `\uXXXX`, and can embed expressions:
+
+```hyl
+name = "World"
+greeting = "Hello ${name}!"
+```
+
 ### Comments
 
-Similar, C-Style comments are supported:
+C-style comments are supported:
 
-```
+```hyl
 // This is a line-end comment
 /* This is a block comment */
 ```
 
 ### Identifiers
 
-SyncScript uses no keywords, including operator support.
-Thus, identifiers are the most important tokens.
-Two types of identifiers exist: alphanumeric identifiers and symbolic identifiers.
-Alphanumeric identifiers can contain letters, digits, the underscore and the dollar sign.
-Examples include:
+As there are no keywords, identifiers are the most important tokens, and there are three kinds of
+them.
 
-```
+**Alphanumeric identifiers** contain letters, digits, the underscore and the dollar sign, and do not
+start with a digit:
+
+```hyl
 test
 test2
 hello_world
 $variable
 ```
 
-Symbolic identifiers are sequences of symbols.
-Supported symbols are: `!#%&*+-/:<=>?@^|~.`.
-Note that some limitations exist: first, a single equal sign is not allowed.
-Next, dots are only supported when using at least two consecutive dots.
-Examples include:
+**Symbolic identifiers** are sequences of symbols out of `!#%&*+-/:<=>?@^|~.`.
+They are what makes operators possible: an operator is nothing but an identifier.
 
-```
+```hyl
 +
 ==
 !=
 ...
 ```
 
-Also, underscores and dollar signs are allowed in symbolic identifiers, however, they **must not** be followed by an alphanumerical character.
-Examples include:
+Two limitations exist: a single equal sign is not allowed, as it is the assignment operator, and a
+single dot is not allowed either, as it is the access operator - at least two consecutive dots are
+needed.
+Underscores and dollar signs may be used, but **must not** be followed by an alphanumeric character:
 
-```
+```hyl
 // allowed
 __>
 // not allowed
 -_test
 ```
 
-### Field Access
+**Escaped identifiers** are wrapped in backticks and may contain anything except a newline or a
+backtick, which allows names which would otherwise be impossible:
 
-To access fields, the dot operator is used:
-
+```hyl
+`my identifier` = 42
 ```
+
+Because alphanumeric and symbolic identifiers use disjoint character sets, they need no separator:
+`a+b` and `a + b` are the same expression.
+
+### Fields
+
+Fields are accessed with the dot operator and assigned with the assignment operator:
+
+```hyl
 hello.world
-```
-
-To assign values to fields, the assignment operator is used:
-
-```
 theAnswer = 42
-```
-
-The assignment operator can also be used to assign values to fields of objects:
-
-```
 hello.world = "Hello World"
 ```
 
-### Functions & Function Calls
+### Functions
 
-Functions are created by placing expressions into curly braces:
+A function is written as a block of expressions in curly braces, and evaluates to the value of its
+last expression:
 
-```
-testFunction = {
-    // body of the function
-}
-```
-
-Functions always evaluate to their last inner value
-
-```
+```hyl
 testFunction = {
     1
     2
@@ -124,62 +133,54 @@ testFunction = {
 }
 ```
 
-To invoke a function, one uses the call-operator:
+Calling a function uses the call operator, with positional and - as in Kotlin - named arguments:
 
-```
+```hyl
 testFunction()
-```
-
-Similar to JavaScript, arguments can be provided to the call-operator by placing them in parentheses:
-
-```
 testFunction(1, 2, 3)
-```
-
-Furthermore, like Kotlin, named arguments are supported:
-
-```
 testFunction(a = 1, b = 2, c = 3)
 ```
 
-Arguments are provided to the function as a single object under the name `args`:
+Inside the function, all arguments are available as a single object called `args`:
 
-```
+```hyl
 createPoint = {
     x = args.x
     y = args.y
-    // TODO
 }
 ```
 
-The first index-based argument cal also be accessed under the name `it`:
+The first positional argument is also available as `it`, and further positional arguments can be
+taken apart with a destructuring expression:
 
-```
+```hyl
 printWrapper = {
     println(it)
 }
-```
 
-To access further index-based arguments, the destructuring expression can be used:
-
-```
-printWrapper = {
+printAll = {
     (a, b, c) = args
+    println(a)
+    println(b)
+    println(c)
 }
-printWrapper(1, 2, 3)
+printAll(1, 2, 3)
 ```
 
-The current scope is available under the name `this` and is always an object:
+Two more names are always available: `this` is the current scope as an object, and `self` is the
+object a function was called on - for a call like `point.translate()` that is `point`, and for the
+call of a plain variable it is the current scope.
 
-```
+```hyl
 println(this.x)
 ```
 
-When calling a function using a field access expression, the object on which function is called is available under the name `self`.
-If a variable is called instead, the current scope is provided as `self`.
-Similar to Kotlin, to support higher-order functions, the trailing-lambda syntax can be used when providing a function as the last argument:
+#### Trailing lambdas
 
-```
+If the last argument is a function, it can be written after the parentheses - this is what makes the
+diagram DSL readable:
+
+```hyl
 testFunction("test") {
     // body of the function
 }
@@ -189,9 +190,10 @@ testFunction("test", {
 })
 ```
 
-Note that unlike Kotlin, multiple trailing lambdas can be used
+Unlike Kotlin, **several** trailing lambdas are allowed, which is how two-branch control flow works
+without any special syntax:
 
-```
+```hyl
 if(condition) {
     // if branch
 } {
@@ -207,11 +209,10 @@ if(condition, {
 
 ### Operators
 
-Syntactically, an oprator is an identifier.
-At runtime, operators are resolved to functions.
-For more flexibility, field access expressions are also supported as operators:
+Syntactically, an operator is just an identifier, and at runtime it is resolved to a function.
+Field access expressions may be used as operators as well:
 
-```
+```hyl
 a + b
 // is equivalent to
 +(a, b)
@@ -220,42 +221,47 @@ a + b
 a this.+ b
 ```
 
-As SyncScript differentiates between alphanumerical and symbolic identifiers, in many cases, separating the operator from the operands is not necessary.
+For flexibility, the global operators delegate to an implementation on their left-hand side operand,
+so a type can define what an operator means for it:
 
-```
-a+b
-// is equivalent to
-a + b
-```
-
-For flexibility and a good user experience, operators are usually called on the left-hand side operand:
-
-```
+```hyl
 + = {
     (left, right) = args
     left.+(right)
 }
 
-// thus, the following are equivalent with this implementation:
+// with this implementation, all of these are equivalent:
 a + b
 +(a, b)
 a.+(b)
 ```
 
-### Object Literals
+::: warning No operator precedence
+As operators are ordinary functions, there is no precedence: expressions are evaluated strictly from
+left to right.
+Use brackets whenever the order matters.
 
-Objects can be created using square brackets:
-
+```hyl
+a + b * c
+// is equivalent to
+(a + b) * c
+// to get the expected result, use brackets:
+a + (b * c)
 ```
+
+:::
+
+### Objects
+
+Objects are created with square brackets.
+Entries without a name are assigned to the next free index, exactly like positional arguments:
+
+```hyl
 point = [
     x = 1
     y = 2
 ]
-```
 
-Similar to how function arguments work, entries without an identifier are assigned to an appropriate index:
-
-```
 test = [
     0, // index 0
     x = 1
@@ -265,94 +271,131 @@ test = [
 ]
 ```
 
-### Brackets
+Fields are read and written with the access operator - `point.x` - or with `get` and `set` if the
+name is computed.
 
-As SyncScript uses functions for operators, no operator priority is defined.
-Instead, all expressions are evaluated left to right.
-To group expressions, brackets can be used:
+## Standard library
 
+### Operators by type
+
+| Type      | Operators                                                                              |
+| --------- | -------------------------------------------------------------------------------------- |
+| `string`  | `==`, `!=`, `<`, `<=`, `>`, `>=`, `+` (concatenation, the right side may be any value) |
+| `number`  | `==`, `!=`, `<`, `<=`, `>`, `>=`, `+`, `-`, `*`, `/`, `%`                              |
+| `boolean` | `==`, `!=`, `&&`, `\|\|` (short circuiting), `&`, `\|`                                 |
+| `object`  | `==`, `!=`                                                                             |
+| `null`    | `==`, `!=`                                                                             |
+
+The `??` operator works on any value: it returns its left side, or its right side if the left side is
+`null`.
+The right side is only evaluated if it is needed.
+
+### Object functions
+
+| Function         | Description                                                                       |
+| ---------------- | --------------------------------------------------------------------------------- |
+| `get`            | Reads the field with the given name                                               |
+| `rawGet`         | Like `get`, but does **not** consider the prototype chain                         |
+| `set`            | Sets the field with the given name to the given value                             |
+| `defineProperty` | Defines a field with a custom getter and setter                                   |
+| `delete`         | Deletes the field with the given name                                             |
+| `forEach`        | Calls the given function for each field, with the value and the name as arguments |
+| `toString`       | Converts the object to a string                                                   |
+
+### Function functions
+
+| Function        | Description                                                                                                  |
+| --------------- | ------------------------------------------------------------------------------------------------------------ |
+| `callWithScope` | Calls the function with a given scope object - this is what makes DSL blocks such as `layout { … }` possible |
+
+### Lists
+
+A list is created with the `list` function, taking any number of positional arguments:
+
+```hyl
+numbers = list(1, 2, 3)
 ```
-a + b * c
-// is equivalent to
-(a + b) * c
-// to achive the expected result, use brackets:
-a + (b * c)
+
+| Member    | Description                                                                     |
+| --------- | ------------------------------------------------------------------------------- |
+| `length`  | Field holding the current length, should not be modified                        |
+| `+`       | Concatenates two lists                                                          |
+| `+=`      | Appends all elements of another list in place                                   |
+| `add`     | Appends one element                                                             |
+| `addAll`  | Appends all elements of another list                                            |
+| `remove`  | Removes and returns the last element                                            |
+| `forEach` | Calls the given function for each entry, with the value and the index           |
+| `map`     | Like `forEach`, but collects the results into a new list                        |
+| `filter`  | Returns a new list with the entries for which the given function returns `true` |
+| `some`    | Returns whether the given function returns `true` for at least one entry        |
+| `join`    | Joins the entries into a string, with an optional separator                     |
+| `toList`  | Converts the index-based fields of an object into a list                        |
+
+### Math
+
+`Math` provides the usual numerical functions:
+`abs`, `sign`, `floor`, `ceil`, `round`, `trunc`, `min`, `max`, `pow`, `sqrt`, `cbrt`, `hypot`,
+`exp`, `expm1`, `log`, `log2`, `log10`, `log1p`, the trigonometric functions `sin`, `cos`, `tan`,
+`asin`, `acos`, `atan`, `atan2` and their hyperbolic counterparts, as well as the constants `PI`,
+`E`, `LN2`, `LN10`, `LOG2E`, `LOG10E`, `SQRT2` and `SQRT1_2`.
+
+### Global functions
+
+| Function                                                      | Description                                                                                                      |
+| ------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `if`                                                          | Takes a condition and one or two functions, and calls the first if the condition is `true`, otherwise the second |
+| `while`                                                       | Takes a condition **function** and a body function, and calls the body as long as the condition returns `true`   |
+| `range`                                                       | Returns a list with the numbers from `0` up to (excluding) the given number, with an optional step               |
+| `list`                                                        | Creates a list from its positional arguments                                                                     |
+| `error`                                                       | Throws an error with the given message                                                                           |
+| `println`                                                     | Prints its arguments, primarily useful for debugging                                                             |
+| `toStr`                                                       | Converts any value, including `null`, to a string                                                                |
+| `isNumber`, `isString`, `isBoolean`, `isObject`, `isFunction` | Type checks                                                                                                      |
+| `!`                                                           | Negates a boolean                                                                                                |
+| `-`                                                           | Negates a number                                                                                                 |
+| `noedit`                                                      | Takes a locally defined function, executes it immediately and marks it as not editable from the graphical editor |
+
+The condition of `while` is a function, so that it can be evaluated again for each iteration:
+
+```hyl
+i = 0
+while { i < 10 } {
+    println(i)
+    i = i + 1
+}
 ```
 
-## Data Types
+### Global constants
 
-Following, we go over the supported functionality for all basic data types.
+`null`, `true` and `false`.
 
-### Supported operators
+## Putting it together
 
-#### String
+Nothing in the diagram DSL is magic - it is this language plus a set of functions.
+The example below defines a function which creates a class with a standard set of members, and uses a
+loop to place several of them; the same techniques you would use in any other language.
 
-- Comparison: `==`, `!=`, `<`, `<=`, `>`, `>=`
-- Concatenation: `+` (also works if one operand is not a string)
+```hylimo
+classDiagram {
+    entity = {
+        (name, index) = args
+        class(name) {
+            public {
+                id : UUID
+            }
+        } layout {
+            pos = apos(index * 360, 0)
+        }
+    }
 
-#### Number
+    list("Movie", "Actor", "Studio").forEach {
+        (name, index) = args
+        entity(name, index)
+    }
+}
+```
 
-- Comparison: `==`, `!=`, `<`, `<=`, `>`, `>=`
-- Arithmetic: `+`, `-`, `*`, `/`, `%` (modulo)
-
-#### Boolean
-
-- Comparison: `==`, `!=`, `<`, `<=`, `>`, `>=`
-- Logical: `&&`, `||` (short circuiting)
-
-#### Object
-
-- Comparison: `==`, `!=`
-
-#### Null
-
-- Comparison: `==`, `!=`
-
-### Other functionality
-
-#### Object functions
-
-- `get`: retrieves a field from an object, takes the name of the field as an argument
-- `rawGet`: similar to get, but does **not** consider the prototype chain
-- `set`: sets a field on an object, takes the name of the field and the value as arguments
-- `delete`: deletes a field from an object, takes the name of the field as an argument
-- `forEach`: takes a function as argument and calls it for each field of the object, the function is called with the name of the field and the value of the field as arguments
-
-#### Function functions
-
-- `callWithScope`: calls a function with a given scope, takes the scope and the arguments object as arguments. Useful for implementing DSL scope-like structures
-
-## Global functionality
-
-Global available functions, in particular control flow structures:
-
-- `if`: if-statement, takes the conditions and 1-2 functions as arguments. If the condition is true, the first function is called, otherwise the second function is called (if provided)
-- `while`: while-loop, takes the condition and a function as arguments. As long as the condition is true, the function is called.
-- `error`: throws an error, takes the error message as argument
-- `Math`: object containing the mathematical functions `floor`, `ceil`, and `round`
-- `println`: prints the given arguments to the console, primarily used for debugging
-- `!`: negates the given boolean value
-- `-`: negates the given number value
-- `noedit`: takes a locally-defined function as argument which is executed immediately, marks this function as non-editable from the interactive graphical editor.
-- `range`: takes a number as argument and returns a list containing all numbers from 0 to the given number (exclusive)
-
-Global constants:
-
-- `null`: the null value
-- `true`: the boolean value true
-- `false`: the boolean value false
-
-### Custom Data Types
-
-#### List
-
-To create a list, use the `list` function with any amount of index-based arguments.
-A list supports the following functions and fields, and operators:
-
-- `+` (operator): concatenates two lists
-- `length` (field): the current length of the list, should not be modified
-- `add`: adds the provided element to the end of the list
-- `addAll`: adds all elements in the provided list to the list
-- `remove`: removes and returns the last element of the list
-- `forEach`: similar to object `forEach`, however only iterates over the index-based fields, thus over the list entries
-- `map`: similar to forEach, but returns a new list containing the return values of the provided function
+::: info Execution limit
+A diagram is re-interpreted on every keystroke, so an endless loop would hang the editor.
+The interpreter therefore aborts after a fixed number of execution steps and reports an error.
+:::

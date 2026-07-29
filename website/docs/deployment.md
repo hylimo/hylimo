@@ -6,7 +6,7 @@ outline: deep
 
 To create a UML deployment diagram, use the `deploymentDiagram` function:
 
-```
+```hyl
 deploymentDiagram {
     // define elements
 }
@@ -258,43 +258,4 @@ elements:
 The following example shows the deployment of a small shop, using most of the elements described
 above:
 
-```hylimo
-deploymentDiagram {
-    device("appHost", "ApplicationHost") {
-        executionEnvironment("JVM") {
-            artifact("shop.war")
-        }
-    } layout {
-        pos = apos(0, 0)
-    }
-
-    device("dbHost", "DatabaseHost") {
-        artifact("schema.sql")
-    } layout {
-        pos = apos(700, 0)
-    }
-
-    appHost -- dbHost with {
-        over = start(Position.Right).line(end(Position.Left))
-        label(keyword("JDBC"), 0.486, -15.1)
-    }
-
-    component("Shop") layout {
-        pos = apos(-20, 500)
-    }
-
-    `shop.war` ..> Shop with {
-        over = start(Position.Bottom).line(end(Position.Top))
-        label(keyword("manifest"), 0.487, -39)
-    }
-
-    deploymentSpec("shopDeployment") {
-        values {
-            deploymentLocation = "/opt/shop"
-            executionLocation = "/opt/shop/bin"
-        }
-    } layout {
-        pos = apos(700, 500)
-    }
-}
-```
+<DiagramExample id="deployment" />

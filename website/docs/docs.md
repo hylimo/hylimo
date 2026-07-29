@@ -1,453 +1,278 @@
+---
+outline: deep
+---
+
 # HyLiMo
 
-HyLiMo is a textual DSL and hybrid editor for efficient modular diagramming.
-A deployed web-based version of our editor and documentation can be found at https://hylimo.github.io.
-This documentation is still under construction, and thus currently focuses on the usage aspects of the editor.
-For technical aspects, we refer to the code documentation.
+HyLiMo is a hybrid diagram editor: a textual DSL for diagrams, and an editor in which the text and
+the picture are two views of the very same diagram.
+Type, and the picture follows.
+Drag, and the text follows.
 
-## Important features
+Diagrams are plain text files (`.hyl`), so they can be reviewed, diffed and versioned like any other
+source file - while everything that is genuinely visual (where a box sits, how a connection bends)
+stays a matter of dragging it into place.
 
-- Hybrid graphical-textual approach
-- Live-synced editing
-- Graphical edits manipulate the textual definition
-- Textual DSL for defining diagrams
-- Programming language features, including custom functions and control-flow constructs
-- Styling
-- Theming
-- Modular approach, with initial support for UML class diagrams
+::: tip Everything here is editable
+Many code blocks in this documentation are live editors.
+Change the code and the diagram re-renders; drag something in the diagram and the code is rewritten
+for you.
+Nothing is saved to the page, so feel free to break things - reload to get the original back.
+:::
 
-## Example diagrams
+## Hybrid editing in one example
+
+The diagram below is the complete definition of a small class diagram.
+Try it: drag the `Actor` class around, drag the middle of the connection, or double-click an element
+to jump to the code which defines it.
+
+```hylimo
+classDiagram {
+    class("Movie") {
+        public {
+            title : String
+        }
+    }
+
+    class("Actor") layout {
+        pos = rpos(Movie, 400, 0)
+    }
+
+    Actor -- Movie with {
+        over = start(Position.Left).line(end(Position.Right))
+        label("plays in", 0.5, -25)
+    }
+}
+```
+
+Two things are worth noticing.
+First, the diagram never contains coordinates you did not ask for: `Actor` is placed _relative to_
+`Movie`, and moving `Movie` takes `Actor` with it.
+Second, the graphical editor did not add a hidden layout file - `pos = rpos(Movie, 400, 0)` is the
+whole layout information, and it is right there in the source.
+
+## Why text
+
+- **Reviewable and versionable** - a diagram change is a diff, not a binary blob.
+- **Reusable** - [SyncScript](./syncscript.md) is a real programming language: extract a recurring
+  construct into a function, loop over a list of elements, compute positions.
+- **Consistent** - [styles](./diagram.md#styles) work like SCSS and apply to a whole class of
+  elements at once, instead of being reapplied by hand per element.
+- **Themeable** - colors and sizes are [variables](./diagram.md#style-variables), so the same source
+  renders in light and dark mode.
+
+## Why a graphical editor
+
+Writing coordinates by hand is miserable, and reading a diagram as text is not the point of a
+diagram.
+So the graphical editor is not a preview: it is an editor, and every graphical edit is translated
+back into a source edit.
+
+- Move, resize and rotate elements, drag connections into shape, split a connection into segments.
+- Create elements and connections from the toolbox.
+- Snapping, a grid and gap snapping keep things aligned without micromanaging numbers.
+- Undo/redo is shared: `Ctrl` + `Z` undoes graphical and textual edits alike, because there is only
+  one document.
+
+The [Hybrid Editor](./editor.md) page describes all of this in detail.
+
+## The three layers of the language
+
+A `.hyl` file is a program which evaluates to a diagram.
+It is written in three layers, each one built on the layer below:
+
+| Layer                         | What it gives you                                                                                                       |
+| ----------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| [SyncScript](./syncscript.md) | The language itself: values, functions, objects, control flow. No diagram-specific concept at all.                      |
+| [Diagram DSL](./diagram.md)   | Diagram-independent building blocks: elements, [shapes](./shapes.md), styles, canvases, points and connections.         |
+| Diagram type DSLs             | The vocabulary of a concrete notation: [`classDiagram`](./class.md), [`sequenceDiagram`](./sequence.md) and the others. |
+
+Most of the time you work in the topmost layer, which reads like a notation-specific language:
+
+```hyl
+classDiagram {
+    class("Movie")
+}
+```
+
+Nothing stops you from reaching down, though: the layers are not walls.
+The following diagram mixes all three - a UML class, a hand-made shape, and a function which creates
+several of them:
 
 ```hylimo
 classDiagram {
     class("Movie")
 
-    class("Actor") layout {
-        pos = rpos(Movie, 600, 0)
-    }
-
-    Actor -- Movie with {
-        over = start(Position.Left).line(end(Position.Right))
-    }
-}
-```
-
-### Class diagram showcasing class, interface, package and comment
-
-<br>
-
-```hylimo
-classDiagram {
-    package("Automotive") {
-        class("Car") {
-            private {
-                weight : Double
+    tag = {
+        (label, y) = args
+        element(shape(shape = defaultShapes.note) {
+            text {
+                span(text = label)
+            } styles {
+                hAlign = HAlign.Center
+                vAlign = VAlign.Center
             }
-            public {
-                startEngine() : void
-            }
-        } layout {
-            pos = apos(-42, 96)
-        }
-
-        interface("CarPart") {
-
-        } layout {
-            pos = rpos(Car, 450, 0)
-        }
-
-        class("CarDoor") {
-            private {
-                color : Color
-            }
-        } layout {
-            pos = rpos(CarPart, 0, 150)
-        }
-
-        Car *-- CarPart with {
-            over = start(Position.Right).line(end(Position.Left))
-            label("1..*", 0.827, 24.1)
-            label("+parts", 0.749, -4.7)
-        }
-
-        CarDoor implements CarPart with {
-            over = start(Position.Top).line(end(Position.Bottom))
-        }
-
-        comment("Drives on roads, and sometimes not on roads") layout {
-            width = 177.0234375
-            pos = apos(33, 243)
-        } .. Car with {
-            over = start(0.8015633964429145).line(end(0.19))
-        }
-    } layout {
-        pos = apos(-213, -11)
-    }
-}
-```
-
-### Class diagram for the HyLiMo language server
-
-<br>
-
-```hylimo
-classDiagram {
-    vdist = 190
-    hdist = 450
-
-    class("LanguageServer") layout {
-        height = 92.2
-        pos = apos(-315.3, -172.5)
-    }
-    class("DiagramImplementationManager", abstract = true) layout {
-        pos = rpos(LanguageServer, 0, vdist * 1.2)
-    }
-
-    class("LocalDiagramImplementationManager") layout {
-        pos = rpos(DiagramImplementationManager, hdist / -2, vdist)
-    }
-
-    class("RemoteDiagramImplementationManager") layout {
-        pos = rpos(DiagramImplementationManager, hdist / 2, vdist)
-    }
-
-    class("LocalDiagramImplementation") layout {
-        pos = rpos(LocalDiagramImplementationManager, 0, vdist)
-    }
-
-    class("RemoteDiagramImplementation") layout {
-        pos = rpos(RemoteDiagramImplementationManager, 0, vdist)
-    }
-
-    class("DiagramImplementation", abstract = true) layout {
-        pos = rpos(DiagramImplementationManager, 0, 3 * vdist)
-    }
-
-    class("TextDocument") layout {
-        pos = rpos(LanguageServer, hdist, 0)
-    }
-
-    class("DiagramServerManager") layout {
-        pos = rpos(TextDocument, 0, -(vdist))
-    }
-
-    class("DiagramServer") layout {
-        pos = rpos(DiagramServerManager, hdist, 0)
-    }
-
-    class("Diagram") layout {
-        pos = rpos(TextDocument, 0, vdist)
-    }
-
-    class("DiagramEngine") layout {
-        pos = rpos(LanguageServer, -(hdist), vdist / 2)
-    }
-
-    class("CompletionEngine") layout {
-        pos = rpos(LanguageServer, -(hdist), vdist / -2)
-    }
-
-    LanguageServer *--> Diagram with {
-        over = start(Position.BottomRight).line(end(Position.Left))
-        label("0..*", 0.75, -9.9, 39.1)
-    }
-
-    LanguageServer *--> TextDocument with {
-        over = start(Position.Right).line(end(Position.Left))
-        label("0..*", 0.7, -3.2)
-    }
-
-    LanguageServer *--> DiagramImplementationManager with {
-        over = start(Position.Bottom).line(end(Position.Top))
-        label("1", 0.6, -9.6)
-    }
-
-    LocalDiagramImplementationManager extends DiagramImplementationManager with {
-        over = start(Position.Top).axisAligned(
-            -0.3,
-            end(Position.BottomLeft - 0.05)
-        )
-    }
-
-    RemoteDiagramImplementationManager extends DiagramImplementationManager with {
-        over = start(Position.Top).axisAligned(
-            -0.3,
-            end(Position.BottomRight + 0.05)
-        )
-    }
-
-    LocalDiagramImplementation extends DiagramImplementation with {
-        over = start(Position.Bottom).axisAligned(
-            -0.3,
-            end(Position.TopLeft + 0.05)
-        )
-    }
-
-    RemoteDiagramImplementation extends DiagramImplementation with {
-        over = start(Position.Bottom).axisAligned(
-            -0.3,
-            end(Position.TopRight - 0.05)
-        )
-    }
-
-    DiagramServerManager *--> DiagramServer with {
-        over = start(Position.Right).line(end(Position.Left))
-        label("0..*", 0.7, -6.3)
-    }
-
-    LanguageServer *--> DiagramEngine with {
-        over = start(0.375).line(end(0))
-        label("1", 0.761, 8.2)
-    }
-
-    LanguageServer *--> CompletionEngine with {
-        over = start(0.625).line(end(0))
-        label("1", 0.8, 5.2)
-    }
-
-    LanguageServer *--> DiagramServerManager with {
-        over = start(0.875).line(end(Position.Left))
-        label("1", 0.882, -5.8)
-    }
-
-    DiagramServer !--> Diagram with {
-        over = start(Position.Bottom).axisAligned(0, end(Position.Right))
-        label("1", 1.0, 19.8)
-        label("0..*", 0.363, -23.1)
-    }
-
-    LocalDiagramImplementationManager *--> LocalDiagramImplementation with {
-        over = start(Position.Bottom).line(end(Position.Top))
-        label("{subsets implementations}\n+implementations", 0.56, -109)
-        label("0..*", 0.705, 22.6)
-    }
-
-    RemoteDiagramImplementationManager *--> RemoteDiagramImplementation with {
-        over = start(Position.Bottom).line(end(Position.Top))
-        label("{subsets implementations}\n+implementations", 0.56, -107.8)
-        label("0..*", 0.705, 23.9)
-    }
-
-    Diagram -- DiagramImplementation with {
-        over = start(0.2).axisAligned(0, end(Position.Right))
-        label("1", 0.3, 11.6)
-        label("0..1", 0.976, -25.7)
-    }
-
-    DiagramImplementationManager *--> DiagramImplementation with {
-        over = start(Position.Bottom).line(end(Position.Top))
-        label("+implementations", 0.797, -28.3, -90)
-        label("0..*", 0.9, 12.3, -90)
-    }
-
-    TextDocument <--! Diagram with {
-        over = start(Position.Bottom).line(end(Position.Top))
-        label("1", 0.16, -10.1)
-        label("1", 0.7, -10.1)
-    }
-}
-```
-
-### Package diagram of HyLiMo
-
-<br>
-
-```hylimo
-classDiagram {
-    customPackage = {
-        name = it
-        package("") {
-            element {
-                text {
-                    span(text = name) styles {
-                        fontSize = 15
-                        fontWeight = "bold"
-                    }
-                }
-            }
-        } layout {
-            width = 200
+        }) layout {
+            pos = apos(320, y)
+            width = 150
+            height = 70
         }
     }
+
+    tag("planned", -70)
+    tag("in review", 30)
 
     styles {
-        cls("package-canvas") {
-            variables.subcanvasMargin = 15
-            hAlign = HAlign.Center
-        }
-        cls("title-wrapper") {
-            //visibility = Visibility.Collapse
-        }
-        cls("package") {
-            width = 60
-            height = 25
-        }
-        cls("package-element") {
-            vAlign = VAlign.Bottom
-            hAlign = HAlign.Center
-        }
-    }
-
-    vdist = 150
-
-    hdist = 300
-
-    top = 0.1608
-    left = [4, 0.5]
-    right = [2, 0.5]
-    bottom = [3, 0.5]
-
-    chevrotain = customPackage("Chevrotaion") styles {
-        class += "foreign"
-    }
-
-    vscodeLSP = customPackage("vscode-languageserver") styles {
-        class += "foreign"
-    } layout {
-        pos = rpos(chevrotain, 0, 2 * vdist)
-    }
-
-    core = customPackage("core") layout {
-        pos = rpos(chevrotain, hdist, 0)
-    }
-
-    diagram = customPackage("diagram") layout {
-        pos = rpos(core, 0, vdist)
-    }
-
-    diagramCommon = customPackage("diagram-common") layout {
-        pos = rpos(diagram, hdist, 0)
-    }
-
-    _fonts = customPackage("fonts") layout {
-        pos = rpos(core, hdist, 0)
-    }
-
-    languageServer = customPackage("language-server") layout {
-        pos = rpos(diagram, 0, vdist)
-    }
-
-    diagramProtocol = customPackage("diagram-protocol") layout {
-        pos = rpos(languageServer, hdist, 0)
-    }
-
-    diagramUI = customPackage("diagram-ui") layout {
-        pos = rpos(diagramProtocol, hdist, 0)
-    }
-
-    renderPdf = customPackage("diagram-render-pdf") layout {
-        pos = rpos(languageServer, 0, vdist)
-    }
-
-    renderSvg = customPackage("diagram-render-svg") layout {
-        pos = rpos(renderPdf, hdist, 0)
-    }
-
-    sprotty = customPackage("sprotty") layout {
-        pos = rpos(diagramUI, hdist, 0)
-    } styles {
-        class += "foreign"
-    }
-
-    pdfkit = customPackage("PDFKit") layout {
-        pos = rpos(renderPdf, 0, vdist)
-    } styles {
-        class += "foreign"
-    }
-
-    diagram --> core with {
-        over = start(top).line(end(bottom))
-    }
-
-    diagram --> diagramCommon with {
-        over = start(right).line(end(left))
-    }
-
-    diagram --> _fonts with {
-        over = start(0.2).axisAligned(-0.51, end(bottom))
-    }
-
-    renderSvg --> diagramCommon with {
-        over = start(right).axisAligned(
-            -1,
-            rpos(diagramUI, 137, 0),
-            0,
-            end(right)
-        )
-    }
-
-    renderPdf --> renderSvg with {
-        over = start(right).line(end(left))
-    }
-
-    renderPdf --> diagram with {
-        over = start(left).axisAligned(
-            1,
-            rpos(languageServer, -149, 2),
-            0,
-            end(left)
-        )
-    }
-
-    languageServer --> diagram with {
-        over = start(top).line(end(bottom))
-    }
-
-    languageServer --> diagramProtocol with {
-        over = start(right).line(end(left))
-    }
-
-    diagramUI --> diagramProtocol with {
-        over = start(left).line(end(right))
-    }
-
-    diagramUI --> diagramCommon with {
-        over = start(top).axisAligned(0, end(right))
-    }
-
-    languageServer --> vscodeLSP with {
-        over = start(left).line(end(right))
-    }
-
-    core --> chevrotain with {
-        over = start(left).line(end(right))
-    }
-
-    renderPdf --> pdfkit with {
-        over = start(bottom).line(end(top))
-    }
-
-    diagramUI --> sprotty with {
-        over = start(right).line(end(left))
-    }
-
-    globe = {
-        target = it
-        element(
-            path(
-                path = "m210,15v390m195-195H15M59,90a260,260 0 0,0 302,0 m0,240 a260,260 0 0,0-302,0M195,20a250,250 0 0,0 0,382 m30,0 a250,250 0 0,0 0-382 M209,15a195,195 0 1,0 2,0z"
-            )
-        ) layout {
-            pos = rpos(target, 76.80471820620753, -46.57664161215641)
-            width = 20
-            height = 20
-        } styles {
-            type("path") {
-                stroke = var("primary")
-                strokeWidth = 1.5
-            }
-        }
-    }
-
-    globe(diagramUI)
-    globe(sprotty)
-    styles {
-        cls("foreign") {
-            any {
-                strokeDash = 10
-                strokeDashSpace = 5
-            }
+        type("shape") {
+            fill = var("background")
         }
     }
 }
 ```
+
+## Diagram types
+
+| Diagram type                              | Function            |
+| ----------------------------------------- | ------------------- |
+| [UML class diagram](./class.md)           | `classDiagram`      |
+| [UML component diagram](./component.md)   | `componentDiagram`  |
+| [UML sequence diagram](./sequence.md)     | `sequenceDiagram`   |
+| [UML activity diagram](./activity.md)     | `activityDiagram`   |
+| [UML deployment diagram](./deployment.md) | `deploymentDiagram` |
+| [General UML diagram](./uml.md)           | `umlDiagram`        |
+| [Anything else](./diagram.md)             | `diagram`           |
+
+Each diagram type comes with its own toolbox, its own set of graphical edits and its own style
+variables.
+`umlDiagram` combines all UML elements except the sequence diagram ones, and `diagram` is the plain
+canvas the others are built on.
+
+## Ways to use HyLiMo
+
+### The web editor
+
+<https://hylimo.github.io> is the editor these docs are built around.
+It is a progressive web app: it runs entirely in your browser - there is no server which sees your
+diagrams - it works offline once loaded, and it can be installed like a native app, including opening
+`.hyl` files directly.
+Diagrams live in the browser's storage, can be saved to disk, exported as SVG or PDF, and shared as a
+link which contains the compressed source.
+
+### The command line
+
+`@hylimo/cli` renders a `.hyl` file to SVG or PDF, which is what you want in a build pipeline:
+
+```sh
+npx @hylimo/cli --input diagram.hyl --output diagram.svg
+```
+
+| Option                      | Meaning                                                         |
+| --------------------------- | --------------------------------------------------------------- |
+| `-f`, `--input <file>`      | The `.hyl` file to render                                       |
+| `-o`, `--output <file>`     | Output file, `.svg` or `.pdf` selects the format                |
+| `--dark`                    | Render in dark mode                                             |
+| `--primary <color>`         | Stroke and text color, defaults to black (light) / white (dark) |
+| `--background <color>`      | Background color, defaults to white (light) / black (dark)      |
+| `--text-as-path`            | Render text as paths instead of embedding fonts, SVG only       |
+| `--disable-font-subsetting` | Embed complete fonts instead of only the used glyphs            |
+| `--enable-external-fonts`   | Allow loading fonts from external URLs                          |
+
+### Embedded in another application
+
+The editor can be embedded in an iframe by adding the `embedded` query parameter.
+In this mode it does not use the browser storage: the host application provides the diagram and
+receives `saveDiagram` and `requestExit` messages via `postMessage`.
+
+## How it fits together
+
+The editor is a language client, and everything that understands the language lives in a language
+server - in the web app, that server runs in a web worker next to the editor.
+
+```hylimo
+componentDiagram {
+    styles {
+        type("shape") {
+            fill = var("background")
+        }
+    }
+
+    editor = component("Editor") {
+        textEditor = component("Text editor")
+        component("Graphical editor") layout {
+            pos = rpos(textEditor, 0, 90)
+        }
+    }
+
+    server = component("Language server") {
+        interpreter = component("Interpreter")
+        component("Layout engine") layout {
+            pos = rpos(interpreter, 0, 90)
+        }
+    } layout {
+        pos = rpos(editor, 700, 0)
+    }
+
+    editor --> server with {
+        over = start(0.94).line(end(0.56))
+        label("document & graphical edits", 0.5, 25)
+    }
+
+    server --> editor with {
+        over = start(0.44).line(end(0.06))
+        label("diagram, completions, diagnostics", 0.5, 25)
+    }
+}
+```
+
+A graphical edit therefore takes the following route: the graphical editor sends a _what changed_
+description to the language server, the language server turns it into a concrete text edit, the text
+document changes, and the changed document is interpreted, laid out and sent back as a new diagram.
+This is why graphical edits appear in the undo stack of the text editor, and why they can only do
+what the source allows - an element whose position is computed by a function cannot be dragged to an
+arbitrary place.
+
+### Packages
+
+The implementation is split into packages, all in the
+[hylimo/hylimo](https://github.com/hylimo/hylimo) repository:
+
+| Package                         | Responsibility                                                                       |
+| ------------------------------- | ------------------------------------------------------------------------------------ |
+| `@hylimo/core`                  | SyncScript: lexer, parser, interpreter                                               |
+| `@hylimo/diagram`               | Diagram DSL, the diagram types, and the layout engine                                |
+| `@hylimo/diagram-common`        | The rendered diagram model, shared between server, renderers and UI                  |
+| `@hylimo/diagram-protocol`      | The LSP extensions used for diagram rendering and graphical edits                    |
+| `@hylimo/language-server`       | Language server: diagnostics, completion, formatting, rendering, edit generation     |
+| `@hylimo/diagram-ui`            | The graphical editor, based on [Sprotty](https://github.com/eclipse-sprotty/sprotty) |
+| `@hylimo/diagram-render-svg`    | SVG renderer                                                                         |
+| `@hylimo/diagram-render-pdf`    | PDF renderer                                                                         |
+| `@hylimo/monaco-editor-support` | Syntax highlighting and language configuration for the Monaco based text editor      |
+| `@hylimo/fonts`                 | The bundled default fonts                                                            |
+| `@hylimo/wasm-libs`             | Text shaping (HarfBuzz) and SVG path simplification                                  |
+| `@hylimo/cli`                   | Command line renderer                                                                |
+
+All packages are MIT licensed, except `@hylimo/diagram-ui`, which is EPL-2.0.
+
+::: info Documentation status
+These pages document how to _use_ HyLiMo.
+For the internals - the interpreter, the layout engine, the edit generation - the code documentation
+in the repository is the reference.
+:::
+
+## Where to go next
+
+| If you want to …                                        | Read                                             |
+| ------------------------------------------------------- | ------------------------------------------------ |
+| know what the editor can do, and which shortcut does it | [Hybrid Editor](./editor.md)                     |
+| understand the language the diagrams are written in     | [SyncScript](./syncscript.md)                    |
+| style, position or extend diagrams, or build your own   | [Diagram DSL](./diagram.md)                      |
+| know which shapes exist and how they size themselves    | [Shapes](./shapes.md)                            |
+| draw a concrete UML diagram                             | the diagram type pages, e.g. [class](./class.md) |
+
+## Gallery
+
+Every diagram type comes with a complete example.
+Pick one to open it in the editor - it is the same diagram as on the page of its diagram type, and
+just as editable as everything else here.
+
+<DiagramGallery />

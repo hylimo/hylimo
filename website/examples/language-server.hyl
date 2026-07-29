@@ -1,0 +1,155 @@
+classDiagram {
+    vdist = 190
+    hdist = 450
+
+    class("LanguageServer") layout {
+        height = 92.2
+        pos = apos(-315.3, -172.5)
+    }
+    class("DiagramImplementationManager", abstract = true) layout {
+        pos = rpos(LanguageServer, 0, vdist * 1.2)
+    }
+
+    class("LocalDiagramImplementationManager") layout {
+        pos = rpos(DiagramImplementationManager, hdist / -2, vdist)
+    }
+
+    class("RemoteDiagramImplementationManager") layout {
+        pos = rpos(DiagramImplementationManager, hdist / 2, vdist)
+    }
+
+    class("LocalDiagramImplementation") layout {
+        pos = rpos(LocalDiagramImplementationManager, 0, vdist)
+    }
+
+    class("RemoteDiagramImplementation") layout {
+        pos = rpos(RemoteDiagramImplementationManager, 0, vdist)
+    }
+
+    class("DiagramImplementation", abstract = true) layout {
+        pos = rpos(DiagramImplementationManager, 0, 3 * vdist)
+    }
+
+    class("TextDocument") layout {
+        pos = rpos(LanguageServer, hdist, 0)
+    }
+
+    class("DiagramServerManager") layout {
+        pos = rpos(TextDocument, 0, -(vdist))
+    }
+
+    class("DiagramServer") layout {
+        pos = rpos(DiagramServerManager, hdist, 0)
+    }
+
+    class("Diagram") layout {
+        pos = rpos(TextDocument, 0, vdist)
+    }
+
+    class("DiagramEngine") layout {
+        pos = rpos(LanguageServer, -(hdist), vdist / 2)
+    }
+
+    class("CompletionEngine") layout {
+        pos = rpos(LanguageServer, -(hdist), vdist / -2)
+    }
+
+    LanguageServer *--> Diagram with {
+        over = start(Position.BottomRight).line(end(Position.Left))
+        label("0..*", 0.75, -9.9, 39.1)
+    }
+
+    LanguageServer *--> TextDocument with {
+        over = start(Position.Right).line(end(Position.Left))
+        label("0..*", 0.7, -3.2)
+    }
+
+    LanguageServer *--> DiagramImplementationManager with {
+        over = start(Position.Bottom).line(end(Position.Top))
+        label("1", 0.6, -9.6)
+    }
+
+    LocalDiagramImplementationManager extends DiagramImplementationManager with {
+        over = start(Position.Top).axisAligned(
+            -0.3,
+            end(Position.BottomLeft - 0.05)
+        )
+    }
+
+    RemoteDiagramImplementationManager extends DiagramImplementationManager with {
+        over = start(Position.Top).axisAligned(
+            -0.3,
+            end(Position.BottomRight + 0.05)
+        )
+    }
+
+    LocalDiagramImplementation extends DiagramImplementation with {
+        over = start(Position.Bottom).axisAligned(
+            -0.3,
+            end(Position.TopLeft + 0.05)
+        )
+    }
+
+    RemoteDiagramImplementation extends DiagramImplementation with {
+        over = start(Position.Bottom).axisAligned(
+            -0.3,
+            end(Position.TopRight - 0.05)
+        )
+    }
+
+    DiagramServerManager *--> DiagramServer with {
+        over = start(Position.Right).line(end(Position.Left))
+        label("0..*", 0.7, -6.3)
+    }
+
+    LanguageServer *--> DiagramEngine with {
+        over = start(0.375).line(end(0))
+        label("1", 0.761, 8.2)
+    }
+
+    LanguageServer *--> CompletionEngine with {
+        over = start(0.625).line(end(0))
+        label("1", 0.8, 5.2)
+    }
+
+    LanguageServer *--> DiagramServerManager with {
+        over = start(0.875).line(end(Position.Left))
+        label("1", 0.882, -5.8)
+    }
+
+    DiagramServer !--> Diagram with {
+        over = start(Position.Bottom).axisAligned(0, end(Position.Right))
+        label("1", 1.0, 19.8)
+        label("0..*", 0.363, -23.1)
+    }
+
+    LocalDiagramImplementationManager *--> LocalDiagramImplementation with {
+        over = start(Position.Bottom).line(end(Position.Top))
+        label("{subsets implementations}\n+implementations", 0.56, -109)
+        label("0..*", 0.705, 22.6)
+    }
+
+    RemoteDiagramImplementationManager *--> RemoteDiagramImplementation with {
+        over = start(Position.Bottom).line(end(Position.Top))
+        label("{subsets implementations}\n+implementations", 0.56, -107.8)
+        label("0..*", 0.705, 23.9)
+    }
+
+    Diagram -- DiagramImplementation with {
+        over = start(0.2).axisAligned(0, end(Position.Right))
+        label("1", 0.3, 11.6)
+        label("0..1", 0.976, -25.7)
+    }
+
+    DiagramImplementationManager *--> DiagramImplementation with {
+        over = start(Position.Bottom).line(end(Position.Top))
+        label("+implementations", 0.797, -28.3, -90)
+        label("0..*", 0.9, 12.3, -90)
+    }
+
+    TextDocument <--! Diagram with {
+        over = start(Position.Bottom).line(end(Position.Top))
+        label("1", 0.16, -10.1)
+        label("1", 0.7, -10.1)
+    }
+}

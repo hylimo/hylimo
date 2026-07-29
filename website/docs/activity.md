@@ -6,7 +6,7 @@ outline: deep
 
 To create a UML activity diagram, one uses the `activityDiagram` diagram function:
 
-```
+```hyl
 activityDiagram {
     // define elements
 }
@@ -365,106 +365,4 @@ The following [style variables](./diagram.md#style-variables) are used by the ac
 
 The following example shows the handling of an order, using most of the elements described above:
 
-```hylimo
-activityDiagram {
-    start("begin") layout {
-        pos = apos(0, 0)
-    }
-    action("Receive order") layout {
-        pos = apos(0, 90)
-    }
-    object("Order", state = "accepted") layout {
-        pos = apos(0, 210)
-    }
-    decision("Order valid?") layout {
-        pos = apos(0, 330)
-    }
-    action("Reject order") layout {
-        pos = apos(340, 330)
-    }
-    end("rejected") layout {
-        pos = apos(340, 500)
-    }
-    fork("split") layout {
-        pos = apos(0, 500)
-    }
-    action("Ship order") {
-        pin(0.25, "shipment", namePos = [-60, 0])
-    } layout {
-        pos = apos(-190, 620)
-    }
-    action("Send invoice") layout {
-        pos = apos(190, 620)
-    }
-    join("sync") layout {
-        pos = apos(0, 800)
-    }
-    outgoing = connector("A") layout {
-        pos = apos(0, 900)
-    }
-
-    incoming = connector("A") layout {
-        pos = apos(700, 0)
-    }
-    sendSignal("Order shipped") layout {
-        pos = apos(700, 120)
-    }
-    acceptEvent("Payment received") layout {
-        pos = apos(700, 260)
-    }
-    stop("done") layout {
-        pos = apos(700, 400)
-    }
-
-    begin --> `Receive order` with {
-        over = start(0.25).line(end(0.75))
-    }
-    `Receive order` --> Order with {
-        over = start(0.25).line(end(0.75))
-    }
-    Order --> `Order valid?` with {
-        over = start(0.25).line(end(0.75))
-    }
-    `Order valid?` --> split with {
-        over = start(0.25).line(end(0.75))
-        label("[yes]", 0.5, -20)
-    }
-    `Order valid?` --> `Reject order` with {
-        label("[no]", 0.5, -20)
-    }
-    `Reject order` --> rejected with {
-        over = start(0.25).line(end(0.75))
-    }
-    split --> `Ship order` with {
-        over = start(0.3).axisAligned(-0.5, end(0.75))
-    }
-    split --> `Send invoice` with {
-        over = start(0.2).axisAligned(-0.5, end(0.75))
-    }
-    shipment --> sync with {
-        over = start(0.25).axisAligned(-0.5, end(0.7))
-    }
-    `Send invoice` --> sync with {
-        over = start(0.25).axisAligned(-0.5, end(0.8))
-    }
-    sync --> outgoing with {
-        over = start(0.25).line(end(0.75))
-    }
-    incoming --> `Order shipped` with {
-        over = start(0.25).line(end(0.75))
-    }
-    `Order shipped` --> `Payment received` with {
-        over = start(0.25).line(end(0.75))
-    }
-    `Payment received` --> done with {
-        over = start(0.25).line(end(0.75))
-    }
-
-    note = comment("The order is closed once both flows have finished") layout {
-        pos = apos(430, 800)
-    }
-    sync .. note with {
-        over = start(0).line(end(0.5))
-    }
-}
-```
+<DiagramExample id="activity" />

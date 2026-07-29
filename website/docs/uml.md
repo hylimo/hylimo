@@ -6,7 +6,7 @@ outline: deep
 
 To create a general UML diagram, one uses the `umlDiagram` diagram function:
 
-```
+```hyl
 umlDiagram {
     // define elements
 }
@@ -448,113 +448,4 @@ The following [style variables](./diagram.md#style-variables) are used by the ge
 The following example mixes the elements of several UML diagram types in one diagram:
 the `Shop` component, the classes it operates on, and the activity it performs.
 
-```hylimo
-umlDiagram {
-    component("Shop") {
-        public {
-            checkout(cart : Cart) : Order
-        }
-    } layout {
-        pos = apos(0, 0)
-    }
-
-    Shop.provides("Web", 0.75)
-
-    class("Order") {
-        public {
-            id : String
-            state : OrderState
-        }
-    } layout {
-        pos = apos(-620, 260)
-    }
-
-    enum("OrderState") {
-        entries {
-            NEW
-            PAID
-        }
-    } layout {
-        pos = apos(-620, 560)
-    }
-
-    instance("order", "Order") {
-        values {
-            id = "4711"
-        }
-    } layout {
-        pos = apos(-180, 560)
-    }
-
-    actor("Customer") layout {
-        pos = apos(-300, -100)
-    }
-
-    Shop ..> Order with {
-        over = start(0.5).axisAligned(-0.5, end(0.75))
-    }
-
-    Order --> OrderState with {
-        over = start(0.25).line(end(0.75))
-        label("+state", 0.5, -12)
-    }
-
-    order ..> Order with {
-        over = start(0.75).line(end(0.19))
-    }
-
-    Customer --> Shop with {
-        over = start(0).line(end(0.5))
-        label("uses", 0.5, -12)
-    }
-
-    start("begin") layout {
-        pos = apos(500, 40)
-    }
-    action("Receive order") layout {
-        pos = apos(500, 140)
-    }
-    decision("Order valid?") layout {
-        pos = apos(500, 280)
-    }
-    action("Reject order") layout {
-        pos = apos(840, 280)
-    }
-    end("rejected") layout {
-        pos = apos(840, 450)
-    }
-    action("Ship order") layout {
-        pos = apos(500, 450)
-    }
-    stop("done") layout {
-        pos = apos(500, 590)
-    }
-
-    begin --> `Receive order` with {
-        over = start(0.25).line(end(0.75))
-    }
-    `Receive order` --> `Order valid?` with {
-        over = start(0.25).line(end(0.75))
-    }
-    `Order valid?` --> `Ship order` with {
-        over = start(0.25).line(end(0.75))
-        label("[yes]", 0.5, -20)
-    }
-    `Order valid?` --> `Reject order` with {
-        label("[no]", 0.5, -20)
-    }
-    `Reject order` --> rejected with {
-        over = start(0.25).line(end(0.75))
-    }
-    `Ship order` --> done with {
-        over = start(0.25).line(end(0.75))
-    }
-
-    note = comment("The activity is performed by the shop") layout {
-        pos = apos(0, 300)
-    }
-    Shop .. note with {
-        over = start(0.25).line(end(0.75))
-    }
-}
-```
+<DiagramExample id="uml" />

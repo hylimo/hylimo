@@ -1,4 +1,5 @@
 import type { MarkdownRenderer, MarkdownOptions } from "vitepress";
+import { hylLanguage } from "./hylLanguage";
 
 function config(renderer: MarkdownRenderer) {
     const defaultRenderer = renderer.renderer.rules.fence;
@@ -19,5 +20,9 @@ function config(renderer: MarkdownRenderer) {
 }
 
 export default {
-    config
+    config,
+    languages: [hylLanguage],
+    languageLabel: {
+        hyl: "HyLiMo"
+    }
 } satisfies MarkdownOptions;

@@ -1,0 +1,197 @@
+classDiagram {
+    customPackage = {
+        name = it
+        package("") {
+            element {
+                text {
+                    span(text = name) styles {
+                        fontSize = 15
+                        fontWeight = "bold"
+                    }
+                }
+            }
+        } layout {
+            width = 200
+        }
+    }
+
+    styles {
+        cls("package-canvas") {
+            variables.subcanvasMargin = 15
+            hAlign = HAlign.Center
+        }
+        cls("title-wrapper") {
+            //visibility = Visibility.Collapse
+        }
+        cls("package") {
+            width = 60
+            height = 25
+        }
+        cls("package-element") {
+            vAlign = VAlign.Bottom
+            hAlign = HAlign.Center
+        }
+    }
+
+    vdist = 150
+
+    hdist = 300
+
+    top = 0.1608
+    left = [4, 0.5]
+    right = [2, 0.5]
+    bottom = [3, 0.5]
+
+    chevrotain = customPackage("Chevrotaion") styles {
+        class += "foreign"
+    }
+
+    vscodeLSP = customPackage("vscode-languageserver") styles {
+        class += "foreign"
+    } layout {
+        pos = rpos(chevrotain, 0, 2 * vdist)
+    }
+
+    core = customPackage("core") layout {
+        pos = rpos(chevrotain, hdist, 0)
+    }
+
+    diagram = customPackage("diagram") layout {
+        pos = rpos(core, 0, vdist)
+    }
+
+    diagramCommon = customPackage("diagram-common") layout {
+        pos = rpos(diagram, hdist, 0)
+    }
+
+    _fonts = customPackage("fonts") layout {
+        pos = rpos(core, hdist, 0)
+    }
+
+    languageServer = customPackage("language-server") layout {
+        pos = rpos(diagram, 0, vdist)
+    }
+
+    diagramProtocol = customPackage("diagram-protocol") layout {
+        pos = rpos(languageServer, hdist, 0)
+    }
+
+    diagramUI = customPackage("diagram-ui") layout {
+        pos = rpos(diagramProtocol, hdist, 0)
+    }
+
+    renderPdf = customPackage("diagram-render-pdf") layout {
+        pos = rpos(languageServer, 0, vdist)
+    }
+
+    renderSvg = customPackage("diagram-render-svg") layout {
+        pos = rpos(renderPdf, hdist, 0)
+    }
+
+    sprotty = customPackage("sprotty") layout {
+        pos = rpos(diagramUI, hdist, 0)
+    } styles {
+        class += "foreign"
+    }
+
+    pdfkit = customPackage("PDFKit") layout {
+        pos = rpos(renderPdf, 0, vdist)
+    } styles {
+        class += "foreign"
+    }
+
+    diagram --> core with {
+        over = start(top).line(end(bottom))
+    }
+
+    diagram --> diagramCommon with {
+        over = start(right).line(end(left))
+    }
+
+    diagram --> _fonts with {
+        over = start(0.2).axisAligned(-0.51, end(bottom))
+    }
+
+    renderSvg --> diagramCommon with {
+        over = start(right).axisAligned(
+            -1,
+            rpos(diagramUI, 137, 0),
+            0,
+            end(right)
+        )
+    }
+
+    renderPdf --> renderSvg with {
+        over = start(right).line(end(left))
+    }
+
+    renderPdf --> diagram with {
+        over = start(left).axisAligned(
+            1,
+            rpos(languageServer, -149, 2),
+            0,
+            end(left)
+        )
+    }
+
+    languageServer --> diagram with {
+        over = start(top).line(end(bottom))
+    }
+
+    languageServer --> diagramProtocol with {
+        over = start(right).line(end(left))
+    }
+
+    diagramUI --> diagramProtocol with {
+        over = start(left).line(end(right))
+    }
+
+    diagramUI --> diagramCommon with {
+        over = start(top).axisAligned(0, end(right))
+    }
+
+    languageServer --> vscodeLSP with {
+        over = start(left).line(end(right))
+    }
+
+    core --> chevrotain with {
+        over = start(left).line(end(right))
+    }
+
+    renderPdf --> pdfkit with {
+        over = start(bottom).line(end(top))
+    }
+
+    diagramUI --> sprotty with {
+        over = start(right).line(end(left))
+    }
+
+    globe = {
+        target = it
+        element(
+            path(
+                path = "m210,15v390m195-195H15M59,90a260,260 0 0,0 302,0 m0,240 a260,260 0 0,0-302,0M195,20a250,250 0 0,0 0,382 m30,0 a250,250 0 0,0 0-382 M209,15a195,195 0 1,0 2,0z"
+            )
+        ) layout {
+            pos = rpos(target, 76.80471820620753, -46.57664161215641)
+            width = 20
+            height = 20
+        } styles {
+            type("path") {
+                stroke = var("primary")
+                strokeWidth = 1.5
+            }
+        }
+    }
+
+    globe(diagramUI)
+    globe(sprotty)
+    styles {
+        cls("foreign") {
+            any {
+                strokeDash = 10
+                strokeDashSpace = 5
+            }
+        }
+    }
+}

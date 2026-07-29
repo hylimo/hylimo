@@ -5,6 +5,8 @@ import "./icons.css";
 import "@hylimo/diagram-ui/css/hylimo.css";
 import "@hylimo/diagram-ui/css/toolbox.css";
 import EmbeddedHylimoEditor from "../components/EmbeddedHylimoEditor.vue";
+import DiagramExample from "../components/DiagramExample.vue";
+import DiagramGallery from "../components/DiagramGallery.vue";
 import NavTeleportTarget from "../components/NavTeleportTarget.vue";
 import Settings from "../components/settings/Settings.vue";
 import { h } from "vue";
@@ -16,6 +18,8 @@ export default {
     extends: DefaultTheme,
     async enhanceApp({ app }) {
         app.component("EmbeddedHylimoEditor", EmbeddedHylimoEditor);
+        app.component("DiagramExample", DiagramExample);
+        app.component("DiagramGallery", DiagramGallery);
         app.component("NavTeleportTarget", NavTeleportTarget);
         app.component("CustomNavBarMenuLink", CustomNavBarMenuLink);
         app.component("Settings", Settings);

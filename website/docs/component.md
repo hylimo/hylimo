@@ -6,7 +6,7 @@ outline: deep
 
 To create a UML component diagram, use the `componentDiagram` function with component elements:
 
-```
+```hyl
 componentDiagram {
     // define elements
 }
@@ -182,48 +182,4 @@ The following [style variables](./diagram.md#style-variables) are used by the co
 
 The following example shows the architecture of a small shop, using most of the elements described above:
 
-```hylimo
-componentDiagram {
-    component("Shop", keywords = list("subsystem")) {
-        component("Catalog")
-
-        component("Cart") layout {
-            pos = apos(0, 240)
-        }
-
-        Cart ..> Catalog with {
-            over = start(Position.Top).line(end(Position.Bottom))
-        }
-    } layout {
-        pos = apos(0, 0)
-    }
-
-    Shop.port(0.75).provides("Web", 0.75)
-
-    component("PaymentService") {
-        public {
-            authorize(amount : Money) : Token
-        }
-    } layout {
-        pos = apos(0, 380)
-    }
-
-    PaymentService.provides("Payment", 0.75, dist = 60, namePos = [60, -9])
-    Shop.requires(0.25, Payment)
-
-    component("Warehouse") layout {
-        pos = apos(800, 0)
-    }
-
-    Warehouse.provides("Stock", 0.5, namePos = [0, -34])
-    stockRequired = Shop.requires(0)
-    stockRequired dependsOn Stock
-
-    note = comment("The shop is deployed as a single container") layout {
-        pos = apos(-600, 0)
-    }
-    Shop .. note with {
-        over = start(0.5).line(end(0))
-    }
-}
-```
+<DiagramExample id="component" />

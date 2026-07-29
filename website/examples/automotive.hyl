@@ -1,0 +1,47 @@
+classDiagram {
+    package("Automotive") {
+        class("Car") {
+            private {
+                weight : Double
+            }
+            public {
+                startEngine() : void
+            }
+        } layout {
+            pos = apos(-42, 96)
+        }
+
+        interface("CarPart") {
+
+        } layout {
+            pos = rpos(Car, 450, 0)
+        }
+
+        class("CarDoor") {
+            private {
+                color : Color
+            }
+        } layout {
+            pos = rpos(CarPart, 0, 150)
+        }
+
+        Car *-- CarPart with {
+            over = start(Position.Right).line(end(Position.Left))
+            label("1..*", 0.827, 24.1)
+            label("+parts", 0.749, -4.7)
+        }
+
+        CarDoor implements CarPart with {
+            over = start(Position.Top).line(end(Position.Bottom))
+        }
+
+        comment("Drives on roads, and sometimes not on roads") layout {
+            width = 177.0234375
+            pos = apos(33, 243)
+        } .. Car with {
+            over = start(0.8015633964429145).line(end(0.19))
+        }
+    } layout {
+        pos = apos(-213, -11)
+    }
+}
