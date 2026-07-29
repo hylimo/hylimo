@@ -44,11 +44,11 @@ onBeforeMount(async () => {
         immediate: true,
         onOfflineReady,
         onRegistered() {
-            // eslint-disable-next-line no-console
+            // oxlint-disable-next-line no-console
             console.info("Service Worker registered");
         },
         onRegisterError(e) {
-            // eslint-disable-next-line no-console
+            // oxlint-disable-next-line no-console
             console.error("Service Worker registration error!", e);
         }
     });

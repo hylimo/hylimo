@@ -20,7 +20,7 @@ export const debugModule = InterpreterModule.create(
                 (args, context) => {
                     const value = args.getFieldValue(0, context);
                     const stringValue = assertString(value);
-                    // eslint-disable-next-line no-console
+                    // oxlint-disable-next-line no-console
                     console.log(stringValue);
                     return context.null;
                 },

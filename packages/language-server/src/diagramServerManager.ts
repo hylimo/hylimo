@@ -94,7 +94,7 @@ export class DiagramServerManager {
         (this.diagramServersByDocument.get(id) ?? [])
             .map((clientId) => this.diagramServers.get(clientId)!)
             .forEach((diagramServer) => {
-                diagramServer.updateModel(newRoot);
+                void diagramServer.updateModel(newRoot);
             });
     }
 
@@ -114,7 +114,7 @@ export class DiagramServerManager {
         (this.diagramServersByDocument.get(id) ?? [])
             .map((clientId) => this.diagramServers.get(clientId)!)
             .forEach((diagramServer) => {
-                diagramServer.dispatch(action);
+                void diagramServer.dispatch(action);
             });
     }
 
@@ -128,7 +128,7 @@ export class DiagramServerManager {
         (this.diagramServersByDocument.get(id) ?? [])
             .map((clientId) => this.diagramServers.get(clientId)!)
             .forEach((diagramServer) => {
-                diagramServer.dispatch(errorAction);
+                void diagramServer.dispatch(errorAction);
             });
     }
 
@@ -161,8 +161,8 @@ export class DiagramServerManager {
             kind: SettingsUpdatedAction.KIND,
             settings: config.settings
         };
-        diagramServer.dispatch(configUpdatedAction);
-        diagramServer.dispatch(settingsUpdatedAction);
+        void diagramServer.dispatch(configUpdatedAction);
+        void diagramServer.dispatch(settingsUpdatedAction);
     }
 
     /**

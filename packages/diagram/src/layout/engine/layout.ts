@@ -412,7 +412,9 @@ export class Layout {
     getElementId(element: FullObject): string {
         const elementId = this.elementIdLookup.get(element);
         if (!elementId) {
-            throw new RuntimeError(`Could not find ID of the element. Did you register ${element} in the canvas?`);
+            throw new RuntimeError(
+                `Could not find ID of the element. Did you register ${element.toString(this.context)} in the canvas?`
+            );
         }
         return elementId;
     }

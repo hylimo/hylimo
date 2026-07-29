@@ -7,7 +7,7 @@ const identifierPattern =
 /**
  * Patter for identifiers which can be used in quotes
  */
-// eslint-disable-next-line no-control-regex
+// oxlint-disable-next-line no-control-regex
 const quotedIdentifierPattern = /^[^\u0000-\u001f\u2028\u2029\u0085\u007f\n`]+$/;
 
 /**
@@ -68,7 +68,7 @@ export function identifierNeedsQuotes(name: string): boolean {
  * @returns the key as a string
  */
 function keyToString(key: string): string {
-    // eslint-disable-next-line no-control-regex
+    // oxlint-disable-next-line no-control-regex
     const disallowedPattern = /[\\"\u0000-\u001f\u2028\u2029\u0085\u007f\n]|(\$\{)/g;
     const escapedKey = key.replaceAll(disallowedPattern, (match) => {
         if (match === "\n") {

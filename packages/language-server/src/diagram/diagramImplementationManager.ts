@@ -19,7 +19,7 @@ export abstract class DiagramImplementationManager {
         private readonly id: number
     ) {
         connection.onNotification(RemoteNotification.type, (message) => {
-            this.handleNotification(message.payload, message.from);
+            void this.handleNotification(message.payload, message.from);
         });
         connection.onRequest(RemoteRequest.type, async (message) => {
             const payload = await this.handleRequest(message.payload, message.from);

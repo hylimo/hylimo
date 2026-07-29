@@ -24,11 +24,7 @@ export class CanvasConnectionView extends EditableCanvasContentView implements I
      */
     @inject(TYPES.KeyState) protected readonly keyState!: KeyState;
 
-    render(
-        model: Readonly<SCanvasConnection>,
-        context: RenderingContext,
-        _args?: IViewArgs | undefined
-    ): VNode | undefined {
+    render(model: Readonly<SCanvasConnection>, context: RenderingContext, _args?: IViewArgs): VNode | undefined {
         const segments = model.children.filter(
             (child) => child instanceof SCanvasConnectionSegment
         ) as SCanvasConnectionSegment[];

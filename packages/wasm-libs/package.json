@@ -1,6 +1,6 @@
 {
     "name": "@hylimo/wasm-libs",
-    "version": "2.2.4",
+    "version": "3.0.0-alpha.1",
     "license": "MIT",
     "type": "module",
     "repository": {
@@ -21,16 +21,14 @@
         "src"
     ],
     "scripts": {
-        "build": "rollup -c"
+        "build": "tsc -p tsconfig.json --emitDeclarationOnly && rolldown -c"
     },
     "dependencies": {
         "harfbuzzjs": "^1.4.0",
         "simplify-svg-path": "^1.0.1"
     },
     "devDependencies": {
-        "@rollup/plugin-node-resolve": "^16.0.3",
-        "@rollup/plugin-typescript": "^12.3.0",
-        "@rollup/plugin-wasm": "^6.2.2",
-        "glob": "^13.0.6"
+        "glob": "^13.0.6",
+        "rolldown": "^1.2.1"
     }
 }

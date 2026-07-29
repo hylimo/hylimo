@@ -1,4 +1,4 @@
-/* eslint @typescript-eslint/no-unused-vars: 0 */
+/* oxlint-disable no-unused-vars */
 import { inject, injectable, multiInject, optional } from "inversify";
 import type { VNode } from "snabbdom";
 import { on, SModelRootImpl, type IActionDispatcher, type IVNodePostprocessor, type SModelElementImpl } from "sprotty";
@@ -45,10 +45,10 @@ export class TouchTool implements IVNodePostprocessor {
             event.preventDefault();
             for (const actionOrPromise of actions) {
                 if (isAction(actionOrPromise)) {
-                    this.actionDispatcher.dispatch(actionOrPromise);
+                    void this.actionDispatcher.dispatch(actionOrPromise);
                 } else {
-                    actionOrPromise.then((action: Action) => {
-                        this.actionDispatcher.dispatch(action);
+                    void actionOrPromise.then((action: Action) => {
+                        void this.actionDispatcher.dispatch(action);
                     });
                 }
             }

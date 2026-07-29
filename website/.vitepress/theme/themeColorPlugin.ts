@@ -16,7 +16,7 @@ export const themeColorPlugin: Plugin = {
             updateThemeColor(value);
         });
 
-        nextTick(() => {
+        void nextTick(() => {
             updateThemeColor(isDark.value);
         });
     }

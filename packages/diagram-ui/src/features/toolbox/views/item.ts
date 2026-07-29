@@ -208,7 +208,7 @@ function handleMoveAction(context: Toolbox, toolboxEdit: ToolboxEditEntry, event
     }
     context.pointerEventsDisabled = true;
     context.update();
-    context.actionDispatcher.dispatch(action);
+    void context.actionDispatcher.dispatch(action);
 }
 
 /**
@@ -238,5 +238,5 @@ function handleCreateAction(context: Toolbox, toolboxEdit: ToolboxEditEntry, eve
     if (!context.toolState.isLocked) {
         (event.target as HTMLElement | undefined)?.setPointerCapture(event.pointerId);
     }
-    context.actionDispatcher.dispatch(action);
+    void context.actionDispatcher.dispatch(action);
 }

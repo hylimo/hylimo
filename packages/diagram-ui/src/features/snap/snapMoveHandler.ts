@@ -21,7 +21,7 @@ export abstract class SnapMoveHandler<T extends SnapHandler | undefined> extends
         protected readonly snapHandler: T,
         private readonly snappingEnabled: boolean,
         transformationMatrix: Matrix,
-        moveCursor: Cursor | undefined = undefined,
+        moveCursor?: Cursor,
         requiresMove: boolean = true
     ) {
         super(transformationMatrix, moveCursor, requiresMove);

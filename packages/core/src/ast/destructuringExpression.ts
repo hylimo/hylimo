@@ -13,7 +13,7 @@ export class DestructuringExpression extends Expression {
 
     static readonly WRAPPER_ENTRIES = new Map([
         ...Expression.expressionWrapperObjectEntries<DestructuringExpression>(DestructuringExpression.TYPE),
-        ["names", (wrapped, context) => context.newListWrapperObject(wrapped.names, context.newString)],
+        ["names", (wrapped, context) => context.newListWrapperObject(wrapped.names, (name, c) => c.newString(name))],
         ["value", (wrapped, context) => wrapped.value.toWrapperObject(context)]
     ]);
 

@@ -33,7 +33,7 @@ export class SVGRenderer {
         const simplifySvgPathModule: SimplifySvgPathModule | undefined = textAsPath
             ? await SimplifySvgPathInit({
                   instantiateWasm: (imports, successCallback) => {
-                      simplifySvgPath(imports).then((source) => {
+                      void simplifySvgPath(imports).then((source) => {
                           successCallback(source.instance);
                       });
                       return undefined;
@@ -327,7 +327,7 @@ class SVGDiagramVisitor extends SimplifiedDiagramVisitor<SVGRendererContext, SVG
         }
 
         if (glyphs.length === 1) {
-            // eslint-disable-next-line no-console
+            // oxlint-disable-next-line no-console
             console.warn(`Failed to simplify glyph path for text "${text}"`);
             return [
                 {

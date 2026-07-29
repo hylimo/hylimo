@@ -1,6 +1,6 @@
 {
     "name": "@hylimo/language-server",
-    "version": "2.2.4",
+    "version": "3.0.0-alpha.1",
     "license": "MIT",
     "type": "module",
     "repository": {
@@ -24,13 +24,13 @@
         "build": "tsc"
     },
     "dependencies": {
-        "@hylimo/core": "^2.2.4",
-        "@hylimo/diagram": "^2.2.4",
-        "@hylimo/diagram-common": "^2.2.4",
-        "@hylimo/diagram-protocol": "^2.2.4",
-        "chevrotain": "^12.0.0",
-        "jsonata": "^2.2.1",
-        "prettier": "^3.9.4",
+        "@hylimo/core": "^3.0.0-alpha.1",
+        "@hylimo/diagram": "^3.0.0-alpha.1",
+        "@hylimo/diagram-common": "^3.0.0-alpha.1",
+        "@hylimo/diagram-protocol": "^3.0.0-alpha.1",
+        "chevrotain": "^13.0.0",
+        "jsonata": "^2.2.2",
+        "prettier": "^3.9.6",
         "sprotty-protocol": "^1.4.0",
         "vscode-languageserver": "9.0.1",
         "vscode-languageserver-textdocument": "^1.0.12"

@@ -10,7 +10,7 @@ import { CanvasLikeView } from "./canvasLikeView.js";
  */
 @injectable()
 export class CanvasView extends CanvasLikeView implements IView {
-    render(model: Readonly<SCanvas>, context: RenderingContext, _args?: IViewArgs | undefined): VNode | undefined {
+    render(model: Readonly<SCanvas>, context: RenderingContext, _args?: IViewArgs): VNode | undefined {
         return svg(
             "g",
             {

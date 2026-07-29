@@ -34,7 +34,7 @@ export class ConfigManager {
                 kind: UpdateEditorConfigAction.KIND,
                 config: this.config
             };
-            this.actionDispatcher.dispatch(action);
+            void this.actionDispatcher.dispatch(action);
         }
     }
 }

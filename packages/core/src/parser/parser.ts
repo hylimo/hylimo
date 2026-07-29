@@ -254,6 +254,7 @@ export class Parser extends CstParser {
                             this.withError(
                                 () => this.SUBRULE(this.listEntry),
                                 "Expected a function parameter",
+                                // oxlint-disable-next-line typescript/unbound-method -- withError rebinds via .call(this, ...)
                                 this.OR1
                             );
                             this.MANY({
@@ -262,6 +263,7 @@ export class Parser extends CstParser {
                                     this.withError(
                                         () => this.SUBRULE1(this.listEntry),
                                         "Expected a function parameter",
+                                        // oxlint-disable-next-line typescript/unbound-method -- withError rebinds via .call(this, ...)
                                         this.OR2
                                     );
                                 }
@@ -315,6 +317,7 @@ export class Parser extends CstParser {
             {
                 ALT: () => {
                     this.CONSUME(OpenSquareBracket, { ERR_MSG: "Opening '[' of index access is missing" });
+                    // oxlint-disable-next-line typescript/unbound-method -- withError rebinds via .call(this, ...)
                     this.withError(() => this.SUBRULE(this.expression), "Index access is missing its index", this.OR1);
                     this.CONSUME(CloseSquareBracket, { ERR_MSG: "Closing ']' of index access is missing" });
                 }
@@ -427,6 +430,7 @@ export class Parser extends CstParser {
         this.withError(
             () => this.SUBRULE(this.operatorExpression),
             `Assignment expression '(${this.elementsToText(elements)}' is missing the value(s) you want to store`,
+            // oxlint-disable-next-line typescript/unbound-method -- withError rebinds via .call(this, ...)
             this.OR1
         );
     });
@@ -457,6 +461,7 @@ export class Parser extends CstParser {
                                 this.withError(
                                     () => this.SUBRULE2(this.operatorExpression),
                                     `Assignment expression '${this.getText(leftSide)}${equals.image}' is missing the value you want to store`,
+                                    // oxlint-disable-next-line typescript/unbound-method -- withError rebinds via .call(this, ...)
                                     this.OR1
                                 );
                             }
@@ -498,6 +503,7 @@ export class Parser extends CstParser {
      * @returns the result returned by the subrule, so probably a CST Token or the literal token
      */
     private withError<Type>(rule: () => Type, errorMessage: string, or?: typeof this.OR): Type {
+        // oxlint-disable-next-line typescript/unbound-method -- withError rebinds via .call(this, ...)
         return (or ?? this.OR).call(this, {
             DEF: [{ ALT: rule }],
             ERR_MSG: errorMessage

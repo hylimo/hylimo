@@ -41,11 +41,7 @@ export class CanvasElementView extends EditableCanvasContentView implements IVie
      */
     static readonly ROTATE_ICON_DISTANCE = 30;
 
-    render(
-        model: Readonly<SCanvasElement>,
-        context: RenderingContext,
-        _args?: IViewArgs | undefined
-    ): VNode | undefined {
+    render(model: Readonly<SCanvasElement>, context: RenderingContext, _args?: IViewArgs): VNode | undefined {
         const position = model.position;
         const children = context.renderChildren(model);
         if (model.selected) {

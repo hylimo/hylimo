@@ -151,7 +151,7 @@ export function parse(expressions: ParseableExpressions): ExecutableExpression[]
                 (error) => `${error.message} in '${error.token.image}' at index ${error.token.startOffset}`
             )
         ];
-        throw new Error(`Invalid fun to parse: ${errors}`);
+        throw new Error(`Invalid fun to parse: ${errors.join(", ")}`);
     }
     return toExecutable(parserResult.ast!, false);
 }

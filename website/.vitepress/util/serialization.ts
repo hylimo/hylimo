@@ -23,7 +23,7 @@ export function serialize(data: string, type: SerializationType): string {
             return `base64:${Base64.toBase64(data, true)}`;
         }
         default: {
-            throw new Error(`Unknown serialization type: ${type}`);
+            throw new Error(`Unknown serialization type: ${String(type)}`);
         }
     }
 }

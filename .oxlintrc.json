@@ -1,0 +1,35 @@
+{
+    "$schema": "./node_modules/oxlint/configuration_schema.json",
+    "ignorePatterns": [
+        "packages/*/lib/",
+        "packages/*/.rollup.cache/",
+        "website/.vitepress/dist/",
+        "website/.vitepress/cache/",
+        "website/dev-dist/",
+        "packages/wasm-libs/rolldown.config.js"
+    ],
+    "plugins": ["typescript"],
+    "categories": {
+        "correctness": "error"
+    },
+    "rules": {
+        "no-console": "error",
+        "no-async-promise-executor": "off",
+        "no-unused-vars": [
+            "error",
+            {
+                "argsIgnorePattern": "^_"
+            }
+        ],
+        "typescript/consistent-type-imports": "error",
+        "typescript/no-deprecated": "error",
+        "typescript/no-explicit-any": "off",
+        "typescript/no-non-null-assertion": "off",
+        "typescript/no-namespace": "off",
+        "typescript/no-unsafe-argument": "off",
+        "typescript/no-unsafe-assignment": "off",
+        "typescript/no-unsafe-call": "off",
+        "typescript/no-unsafe-member-access": "off",
+        "typescript/no-unsafe-return": "off"
+    }
+}

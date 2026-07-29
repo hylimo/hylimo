@@ -22,5 +22,17 @@ jobs:
         run: npm ci
       - name: Build packages
         run: npm run build
+      - name: Determine dist-tag
+        id: dist-tag
+        run: |
+          version=$(node -p "require('./package.json').version")
+          if [[ "$version" == *-* ]]; then
+            prerelease="${version#*-}"
+            tag="${prerelease%%.*}"
+          else
+            tag=latest
+          fi
+          echo "Publishing $version with dist-tag $tag"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
       - name: Publish packages
-        run: npm publish --provenance --access public --workspaces
+        run: npm publish --provenance --access public --workspaces --tag ${{ steps.dist-tag.outputs.tag }}

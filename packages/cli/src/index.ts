@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/* eslint-disable no-console */
+/* oxlint-disable no-console */
 import * as fs from "fs";
 import * as path from "path";
 import { program } from "commander";
@@ -52,7 +52,7 @@ let inputFileContent: string;
 try {
     inputFileContent = fs.readFileSync(inputFile, "utf-8");
 } catch (error) {
-    console.error(`Error reading input file: ${error}`);
+    console.error(`Error reading input file: ${error instanceof Error ? error.message : String(error)}`);
     process.exit(1);
 }
 
@@ -66,7 +66,7 @@ const config: DiagramConfig = {
     enableExternalFonts: options.enableExternalFonts
 };
 
-(async () => {
+void (async () => {
     const diagram = await diagramEngine.render(inputFileContent, config);
 
     if (diagram.errors.lexingErrors.length > 0) {

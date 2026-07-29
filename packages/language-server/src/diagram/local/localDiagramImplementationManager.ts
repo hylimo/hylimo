@@ -39,7 +39,7 @@ export class LocalDiagramImplementationManager extends DiagramImplementationMana
         const registerMessage: RegisterRemoteLanguageServerMessage = {
             type: RegisterRemoteLanguageServerMessage.type
         };
-        this.sendNotification(registerMessage, 0);
+        void this.sendNotification(registerMessage, 0);
     }
 
     protected override async handleNotification(_message: RemoteMessagePayload, _from: number): Promise<void> {
@@ -134,7 +134,7 @@ export class LocalDiagramImplementationManager extends DiagramImplementationMana
         return result;
     }
 
-    override getNewDiagramImplementation(id: string, old?: DiagramImplementation | undefined): DiagramImplementation {
+    override getNewDiagramImplementation(id: string, old?: DiagramImplementation): DiagramImplementation {
         if (old != undefined) {
             return old;
         } else {

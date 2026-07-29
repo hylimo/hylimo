@@ -59,7 +59,7 @@ export class TransactionManager {
      */
     async handleAction(action: TransactionalAction): Promise<IncrementalUpdate[]> {
         if (this.currentTransactionId != undefined && this.currentTransactionId != action.transactionId) {
-            // eslint-disable-next-line no-console
+            // oxlint-disable-next-line no-console
             console.error("Concurrent transactions are not supported yet");
             this.resetActionState();
         }
@@ -69,7 +69,7 @@ export class TransactionManager {
         this.currentTransactionId = action.transactionId;
         if (this.edit == undefined) {
             if (this.diagram.currentDiagram == undefined) {
-                // eslint-disable-next-line no-console
+                // oxlint-disable-next-line no-console
                 console.error("Cannot initialize transaction without a valid diagram");
                 return [];
             }
@@ -95,7 +95,7 @@ export class TransactionManager {
             this.hasUpdatedDiagram = false;
             const textDocumentEdit = await this.edit.applyAction(this.lastKnownAction);
             this.lastAppliedAction = this.lastKnownAction;
-            this.diagram.applyEdit(textDocumentEdit);
+            void this.diagram.applyEdit(textDocumentEdit);
             this.lastAppliedAction = this.lastKnownAction;
         }
         if (this.lastAppliedAction?.committed) {
@@ -160,7 +160,7 @@ export class TransactionManager {
             };
         }
         this.hasUpdatedDiagram = true;
-        this.updateTextDocumentIfPossible();
+        void this.updateTextDocumentIfPossible();
     }
 
     /**

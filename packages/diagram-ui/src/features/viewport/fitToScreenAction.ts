@@ -5,6 +5,6 @@ import { FitToScreenAction } from "sprotty-protocol";
  *
  * @param animate whether to animate the action
  */
-export function createFitToScreenAction(animate: boolean | undefined = undefined): FitToScreenAction {
+export function createFitToScreenAction(animate?: boolean): FitToScreenAction {
     return FitToScreenAction.create([], { padding: 50, maxZoom: 2, animate });
 }

@@ -140,7 +140,7 @@ export const lspPlugin: Plugin = {
         app.provide(languageClientKey, shallowRef(client));
         app.provide(diagramIdProviderKey, () => idCounter.value++);
 
-        client.then((value) => {
+        void client.then((value) => {
             value.onNotification(UpdateEditorConfigNotification.type, (config) => {
                 editorConfig.value = config;
             });
@@ -152,7 +152,7 @@ export const lspPlugin: Plugin = {
                 () => {
                     const configValue = languageServerConfig.value;
                     if (value) {
-                        value.sendNotification(ConfigNotification.type, {
+                        void value.sendNotification(ConfigNotification.type, {
                             diagramConfig: toRaw(configValue.diagramConfig),
                             settings: toRaw(configValue.settings),
                             editorConfig: toRaw(configValue.editorConfig)
@@ -228,10 +228,10 @@ async function setupLanguageClient(isDark: boolean) {
     await client.start();
 
     client.onNotification(RemoteNotification.type, (message) => {
-        secondaryConnection.sendNotification(RemoteNotification.type, message);
+        void secondaryConnection.sendNotification(RemoteNotification.type, message);
     });
     secondaryConnection.onNotification(RemoteNotification.type, (message) => {
-        client.sendNotification(RemoteNotification.type, message);
+        void client.sendNotification(RemoteNotification.type, message);
     });
     client.onRequest(RemoteRequest.type, async (request) => {
         return secondaryConnection.sendRequest(RemoteRequest.type, request);
@@ -239,7 +239,7 @@ async function setupLanguageClient(isDark: boolean) {
     secondaryConnection.onRequest(RemoteRequest.type, (request) => {
         return client.sendRequest(RemoteRequest.type, request);
     });
-    secondaryConnection.sendNotification(SetLanguageServerIdNotification.type, 1);
+    await secondaryConnection.sendNotification(SetLanguageServerIdNotification.type, 1);
 
     return new LanguageClientProxy(client);
 }

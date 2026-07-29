@@ -35,7 +35,7 @@ export class DiagramServer extends SprottyDiagramServer {
         } else if (UpdateEditorConfigAction.is(action)) {
             return this.diagram.handleUpdateEditorConfigAction(action);
         } else if (ToolboxEditPredictionRequestAction.is(action)) {
-            this.dispatch(await this.diagram.handleToolboxEditPredictionRequestAction(action));
+            void this.dispatch(await this.diagram.handleToolboxEditPredictionRequestAction(action));
         } else {
             return super.handleAction(action);
         }

@@ -196,7 +196,7 @@ function layoutViewportIfNecessary(
 ) {
     const { ratioOfDivergence } = calculateLevenshteinDistance(oldElements, newElements);
     if (ratioOfDivergence >= 0.5) {
-        dispatcher.dispatch(createFitToScreenAction());
+        void dispatcher.dispatch(createFitToScreenAction());
     }
 }
 

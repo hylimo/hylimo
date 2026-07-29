@@ -9,7 +9,7 @@ import type { SMarker } from "../../model/canvas/sMarker.js";
  */
 @injectable()
 export class MarkerView implements IView {
-    render(model: Readonly<SMarker>, context: RenderingContext, _args?: IViewArgs | undefined): VNode | undefined {
+    render(model: Readonly<SMarker>, context: RenderingContext, _args?: IViewArgs): VNode | undefined {
         return svg(
             "g.marker",
             {

@@ -77,7 +77,7 @@ export class FullObject extends BaseObject {
      */
     getFieldInternal(key: string | number, context: InterpreterContext, self: BaseObject): LabeledValue {
         this.checkValidKey(key);
-        // eslint-disable-next-line @typescript-eslint/no-this-alias
+        // oxlint-disable-next-line typescript/no-this-alias
         let target: FullObject | undefined = this;
         do {
             const property = target.properties?.get(key);
@@ -197,7 +197,7 @@ export class FullObject extends BaseObject {
      */
     hasField(key: string | number): boolean {
         this.checkValidKey(key);
-        // eslint-disable-next-line @typescript-eslint/no-this-alias
+        // oxlint-disable-next-line typescript/no-this-alias
         let target: FullObject | undefined = this;
         do {
             if (target.fields.has(key) || target.properties?.has(key)) {
@@ -281,7 +281,7 @@ export class FullObject extends BaseObject {
      * @returns the property or undefined if not found
      */
     private getProperty(key: string | number): Property | undefined {
-        // eslint-disable-next-line @typescript-eslint/no-this-alias
+        // oxlint-disable-next-line typescript/no-this-alias
         let target: FullObject | undefined = this;
         do {
             const property = target.properties?.get(key);
@@ -328,7 +328,7 @@ export class FullObject extends BaseObject {
      * Throws an error if a loop is detected.
      */
     private validateProto(): void {
-        // eslint-disable-next-line @typescript-eslint/no-this-alias
+        // oxlint-disable-next-line typescript/no-this-alias
         let current: FullObject | undefined = this;
         while (current !== undefined) {
             current = current.proto;

@@ -46,6 +46,12 @@ import type { SRoot } from "../../model/sRoot.js";
 import { ScrollAreaController } from "../../base/scrollArea.js";
 
 /**
+ * A jsonata expression node or an arbitrarily nested array thereof.
+ * Nesting occurs because ExprNode.lhs may be a list of node pairs.
+ */
+type ExprNodeTree = ExprNode | ExprNodeTree[];
+
+/**
  * UI Extension which displays the graphical toolbox.
  * Supports
  * - creating elements by dragging them from the toolbox or clicking them
@@ -235,7 +241,7 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler, Conn
                 kind: UpdateCursorAction.KIND,
                 toolCursor: errorState == undefined ? "cursor-crosshair" : null
             };
-            this.actionDispatcher.dispatch(action);
+            void this.actionDispatcher.dispatch(action);
         }
     }
 
@@ -402,7 +408,7 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler, Conn
             if (tool == ToolboxToolType.CONNECT || tool == ToolboxToolType.HAND) {
                 actions.push(SelectAllAction.create({ select: false }));
             }
-            this.actionDispatcher.dispatchAll(actions);
+            void this.actionDispatcher.dispatchAll(actions);
         }
         this.toolState.toolType = tool;
         this.toolState.isLocked = locked;
@@ -484,7 +490,7 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler, Conn
      * @param info The info object to update
      */
     private extractTemplateInformationRecursive(
-        node: ExprNode | ExprNode[] | undefined,
+        node: ExprNodeTree | undefined,
         info: Pick<ToolboxEditEntry, "canMove" | "requiresExpression">
     ): void {
         if (node == undefined) {
@@ -538,7 +544,7 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler, Conn
     showPreview(edit: ToolboxEditEntry | ConnectionEditEntry): void {
         this.showPreviewFor = edit.edit;
         if (!this.elementPreviews.has(edit.edit)) {
-            this.requestPrediction(this.generatePredictionEdit(edit), edit.edit);
+            void this.requestPrediction(this.generatePredictionEdit(edit), edit.edit);
         } else {
             this.update();
         }

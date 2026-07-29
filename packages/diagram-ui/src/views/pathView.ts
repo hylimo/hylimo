@@ -14,7 +14,7 @@ import { extractShapeStyleAttributes } from "@hylimo/diagram-render-svg";
  */
 @injectable()
 export class PathView implements IView {
-    render(model: Readonly<SPath>, context: RenderingContext, _args?: IViewArgs | undefined): VNode | undefined {
+    render(model: Readonly<SPath>, context: RenderingContext, _args?: IViewArgs): VNode | undefined {
         const attrs: Attrs = {
             ...extractShapeStyleAttributes(model),
             d: model.path,

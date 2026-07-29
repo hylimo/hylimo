@@ -12,7 +12,7 @@ import type { TextLine } from "@hylimo/diagram-common";
  */
 @injectable()
 export class TextView implements IView {
-    render(model: Readonly<SText>, _context: RenderingContext, _args?: IViewArgs | undefined): VNode | undefined {
+    render(model: Readonly<SText>, _context: RenderingContext, _args?: IViewArgs): VNode | undefined {
         const elements: VNode[] = [];
         const fillAttributes = extractFillAttributes(model);
         const fontFeatureSettings = model.fontFeatureSettings?.map((feature) => `"${feature}"`).join(", ");

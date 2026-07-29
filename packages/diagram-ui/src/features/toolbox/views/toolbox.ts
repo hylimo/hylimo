@@ -44,10 +44,10 @@ function generateToolboxInternal(context: Toolbox): VNode {
             },
             on: {
                 keydown: (event: KeyboardEvent) => {
-                    context.actionDispatcher.dispatchAll(generateUpdateKeyStateActions(event, true));
+                    void context.actionDispatcher.dispatchAll(generateUpdateKeyStateActions(event, true));
                 },
                 keyup: (event: KeyboardEvent) => {
-                    context.actionDispatcher.dispatchAll(generateUpdateKeyStateActions(event, false));
+                    void context.actionDispatcher.dispatchAll(generateUpdateKeyStateActions(event, false));
                 }
             }
         },

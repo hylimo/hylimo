@@ -1,5 +1,6 @@
 import { injectable, inject } from "inversify";
-import { SModelElementImpl, SModelRootImpl, TYPES } from "sprotty";
+import type { SModelElementImpl, SModelRootImpl } from "sprotty";
+import { TYPES } from "sprotty";
 import type { DOMHelper } from "sprotty/lib/base/views/dom-helper.js";
 
 /**

@@ -95,7 +95,7 @@ export class Diagram {
     private async updateDiagramAndPublishDiagnostics(): Promise<void> {
         const diagnostics = await this.updateDiagram();
         if (diagnostics != undefined) {
-            this.utils.connection.sendDiagnostics({
+            void this.utils.connection.sendDiagnostics({
                 uri: this.document.uri,
                 diagnostics: diagnostics
             });
@@ -239,7 +239,7 @@ export class Diagram {
      * @param edit the edit to apply
      */
     async applyEdit(edit: TextDocumentEdit): Promise<void> {
-        this.utils.connection.workspace.applyEdit({
+        await this.utils.connection.workspace.applyEdit({
             documentChanges: [edit]
         });
     }

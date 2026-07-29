@@ -1,6 +1,6 @@
 {
     "name": "@hylimo/diagram-common",
-    "version": "2.2.4",
+    "version": "3.0.0-alpha.1",
     "license": "MIT",
     "type": "module",
     "repository": {

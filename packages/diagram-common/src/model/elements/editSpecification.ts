@@ -239,7 +239,7 @@ export namespace IndexedModificationSpecificationEntry {
             ...new Map(
                 edits.map((edit) => {
                     const spec = edit.spec;
-                    return [`${edit.index} ${spec.key} ${spec.template}`, edit] as const;
+                    return [`${edit.index} ${spec.key} ${JSON.stringify(spec.template)}`, edit] as const;
                 })
             ).values()
         ];

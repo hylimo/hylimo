@@ -177,7 +177,7 @@ export function useDiagramStorage(): DiagramStorage {
         ) {
             this.code = ref(code);
             watch(this.code, () => {
-                this.saveToStorage();
+                void this.saveToStorage();
             });
         }
 

@@ -271,7 +271,9 @@ export class TransactionalEdit {
         const addEdits = edits.filter((e) => IndexedModificationSpecificationEntry.is(e, "add"));
         for (const edits of groupBy(addEdits, (edit) => edit.spec.range[0]).values()) {
             const uniqueEdits = [
-                ...new Map(edits.map((edit) => [`${edit.index} ${edit.spec.template}`, edit] as const)).values()
+                ...new Map(
+                    edits.map((edit) => [`${edit.index} ${JSON.stringify(edit.spec.template)}`, edit] as const)
+                ).values()
             ];
             const firstSpec = uniqueEdits[0].spec;
             const indentation = this.extractIndentation(textDocument, firstSpec.range[1]);

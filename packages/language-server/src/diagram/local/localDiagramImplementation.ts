@@ -85,10 +85,10 @@ export class LocalDiagramImplementation extends DiagramImplementation {
      * @returns the created diagnostic item
      */
     private convertInterpretationError(error: RenderErrors["interpreterErrors"][0]): Diagnostic {
-        /* eslint-disable no-console */
+        /* oxlint-disable no-console */
         console.error(error);
         console.error(error.interpretationStack);
-        /* eslint-enable no-console */
+        /* oxlint-enable no-console */
         //TODO do sth else with error
         const range = error.findFirstRange();
         const message = error.message || "[no message provided]";

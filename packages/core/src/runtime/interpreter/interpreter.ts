@@ -102,7 +102,7 @@ export class Interpreter {
                 return { error: e };
             } else {
                 if (!("completionItems" in e)) {
-                    // eslint-disable-next-line no-console
+                    // oxlint-disable-next-line no-console
                     console.error(e);
                 }
                 throw e;

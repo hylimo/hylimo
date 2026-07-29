@@ -133,7 +133,7 @@ export class LanguageServer {
         this.connection.onCompletion(this.onCompletion.bind(this));
         this.connection.onNotification(DiagramOpenNotification.type, this.onOpenDiagram.bind(this));
         this.connection.onNotification(DiagramActionNotification.type, (message) => {
-            this.diagramServerManager.acceptAction(message);
+            void this.diagramServerManager.acceptAction(message);
         });
         this.connection.onNotification(DiagramCloseNotification.type, (clientId) => {
             this.diagramServerManager.removeClient(clientId);
@@ -294,7 +294,7 @@ export class LanguageServer {
         this.diagramUtils.config = new Config(params);
         this.diagramServerManager.onDidChangeConfig(this.diagramUtils.config);
         for (const diagram of this.diagrams.values()) {
-            diagram.onDidChangeConfig();
+            void diagram.onDidChangeConfig();
         }
     }
 }

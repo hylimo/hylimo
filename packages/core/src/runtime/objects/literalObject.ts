@@ -17,7 +17,7 @@ export abstract class LiteralObject<T> extends SimpleObject {
     }
 
     override toString(): string {
-        return `${this.value}`;
+        return String(this.value);
     }
 
     override toNative(): any {

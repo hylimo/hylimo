@@ -1,6 +1,6 @@
 {
     "name": "@hylimo/diagram",
-    "version": "2.2.4",
+    "version": "3.0.0-alpha.1",
     "license": "MIT",
     "type": "module",
     "repository": {
@@ -24,15 +24,15 @@
         "build": "tsc"
     },
     "dependencies": {
-        "@hylimo/core": "^2.2.4",
-        "@hylimo/diagram-common": "^2.2.4",
-        "@hylimo/fonts": "^2.2.4",
-        "@hylimo/wasm-libs": "^2.2.4",
+        "@hylimo/core": "^3.0.0-alpha.1",
+        "@hylimo/diagram-common": "^3.0.0-alpha.1",
+        "@hylimo/fonts": "^3.0.0-alpha.1",
+        "@hylimo/wasm-libs": "^3.0.0-alpha.1",
         "buffer": "^6.0.3",
         "dedent": "^1.7.2",
         "fontkit": "^2.0.4",
         "linebreak": "^1.1.0",
-        "p-limit": "^7.3.0",
+        "p-limit": "^7.3.1",
         "svgpath": "^2.6.0",
         "transformation-matrix": "^3.1.0",
         "uuid": "^14.0.1"
