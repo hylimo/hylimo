@@ -86,7 +86,10 @@ export const portsModule = ContentModule.create(
                         value: fun(
                             `
                                 this.classifierArgs = args.args
-                                this.optionalCallback = classifierArgs.args[1]
+                                // the callback is taken from the classifier call, not from the user call:
+                                // an element which parses its arguments, e.g. a node with an instance
+                                // specification, may well take its callback at another position
+                                this.optionalCallback = classifierArgs[1]
                                 this.element = args.element
                                 if(optionalCallback == null) {
                                     element.edits["toolbox/Port/Add port"] = createAppendScopeEdit(

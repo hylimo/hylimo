@@ -153,7 +153,7 @@ export const canvasConnectionModule = ContentModule.create(
                         connection.startProvider = startProvider
                         connection.endProvider = endProvider
                         scope.internal.registerCanvasElement(connection, target, canvasScope)
-        
+
                         connection
                     `,
                     {

@@ -53,7 +53,7 @@ diagram {
 
 The `defaultShapes` object is available in every diagram and provides ready-made shape definitions.
 Pass one as the `shape` attribute: `shape(shape = defaultShapes.<name>)`. Available shapes: `rect`,
-`ellipse`, `circle`, `diamond`, `hexagon`, `parallelogram`, `note`, `database`, `chevron`,
+`ellipse`, `circle`, `diamond`, `hexagon`, `parallelogram`, `note`, `box3d`, `database`, `chevron`,
 `chevronStart`, and `chevronEnd`.
 
 Each shape below is shown once, with the dashed content box filling it. Where a shape reacts to the
@@ -231,6 +231,35 @@ diagram {
     }) layout {
         width = 140
         height = 90
+    }
+    styles {
+        type("shape") {
+            fill = var("background")
+        }
+        cls("content-box") {
+            fill = "none"
+            strokeWidth = 1
+            strokeDash = 4
+        }
+    }
+}
+```
+
+### 3D box
+
+A box drawn in perspective, the notation UML uses for a node. Its two hidden edges are a
+`decoration`, which is what keeps the content inside the front face: the content box is the largest
+rectangle clear of every stroke, and the front face is exactly that.
+Like the note's fold, the depth is a fixed 20 pixels rather than a share of the box, so the shape
+only makes sense from about twice that in each direction.
+
+```hylimo
+diagram {
+    element(shape(shape = defaultShapes.box3d) {
+        shape(shape = defaultShapes.rect, class = list("content-box"))
+    }) layout {
+        width = 160
+        height = 100
     }
     styles {
         type("shape") {

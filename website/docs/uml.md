@@ -13,11 +13,12 @@ umlDiagram {
 ```
 
 The general UML diagram provides the elements of all other UML diagram types except the sequence diagram, so it can be used for diagrams which do not fit exactly one diagram type, or which mix several of them.
+It is also the diagram type to reach for when a deployment diagram is combined with the elements of another type - deploying a component onto a node needs nothing but both elements in one diagram.
 Each element behaves exactly like in the diagram type it belongs to, therefore this page only gives one example per element and links to the diagram type documenting it in detail.
 
 ::: tip
 
-If your diagram is a class, component or activity diagram, prefer the respective diagram type: it offers the same elements, but its toolbox and its generated edits are tailored to that diagram type.
+If your diagram is a class, component, activity or deployment diagram, prefer the respective diagram type: it offers the same elements, but its toolbox and its generated edits are tailored to that diagram type.
 Sequence diagrams are not part of the general UML diagram at all, as their participants require the [sequence diagram specific layouting](./sequence.md#positioning) - use `sequenceDiagram` for them.
 
 :::
@@ -91,6 +92,50 @@ umlDiagram {
         values {
             id = "4711"
             paid = true
+        }
+    }
+}
+```
+
+### `node`, `device` and `executionEnvironment`
+
+Create the deployment targets, rendered as a 3D box, see [UML Deployment Diagram](./deployment.md#node).
+`device` and `executionEnvironment` are nodes carrying the respective keyword.
+Naming a type as the second argument turns any of them into an instance specification:
+
+```hylimo
+umlDiagram {
+    node("ApplicationServer")
+
+    device("dbHost", "DatabaseHost") layout {
+        pos = apos(400, 0)
+    }
+
+    executionEnvironment("JVM") layout {
+        pos = apos(800, 0)
+    }
+}
+```
+
+### `artifact`
+
+Creates an artifact, see [UML Deployment Diagram](./deployment.md#artifact):
+
+```hylimo
+umlDiagram {
+    artifact("shop.war")
+}
+```
+
+### `deploymentSpec`
+
+Creates a deployment specification, see [UML Deployment Diagram](./deployment.md#deploymentspec):
+
+```hylimo
+umlDiagram {
+    deploymentSpec("shopDeployment") {
+        values {
+            deploymentLocation = "/opt/shop"
         }
     }
 }
@@ -349,17 +394,38 @@ umlDiagram {
 
 The `-->` operator is also used for the control and object flows of an activity, see [UML Activity Diagram](./activity.md#connections-flows), and `dependsOn` connects a required to a provided interface, see [UML Component Diagram](./component.md#dependson).
 
+The stereotyped dependencies of a deployment diagram are the dashed arrow `..>` with a keyword label, see [UML Deployment Diagram](./deployment.md#deployment-and-manifestation):
+
+```hylimo
+umlDiagram {
+    artifact("shop.war")
+
+    node("appServer", "ApplicationServer") layout {
+        pos = apos(0, 400)
+    }
+
+    `shop.war` ..> appServer with {
+        over = start(Position.Bottom).line(end(Position.Top))
+        label(keyword("deploy"), 0.5, -25)
+    }
+}
+```
+
 ## Config properties
 
 The following config properties are available for general UML diagrams:
 
-| Variable               | Meaning                                                           | Default value (in pixels) | Comment |
-| ---------------------- | ----------------------------------------------------------------- | ------------------------- | ------- |
-| `abstractAsProperty`   | Whether to show { abstract } after the name of abstract classes   | false                     | -       |
-| `providesDistance`     | Default distance of provided interfaces to the classifier outline | 100                       | -       |
-| `requiresDistance`     | Default distance of required interfaces to the classifier outline | 100                       | -       |
-| `showComponentKeyword` | Whether to show the component keyword                             | true                      | -       |
-| `showComponentSymbol`  | Whether to show the component symbol                              | true                      | -       |
+| Variable                          | Meaning                                                           | Default value (in pixels) | Comment |
+| --------------------------------- | ----------------------------------------------------------------- | ------------------------- | ------- |
+| `abstractAsProperty`              | Whether to show { abstract } after the name of abstract classes   | false                     | -       |
+| `providesDistance`                | Default distance of provided interfaces to the classifier outline | 100                       | -       |
+| `requiresDistance`                | Default distance of required interfaces to the classifier outline | 100                       | -       |
+| `showArtifactIcon`                | Whether to show the artifact symbol                               | true                      | -       |
+| `showArtifactKeyword`             | Whether to show the artifact keyword                              | true                      | -       |
+| `showComponentKeyword`            | Whether to show the component keyword                             | true                      | -       |
+| `showComponentSymbol`             | Whether to show the component symbol                              | true                      | -       |
+| `showDeviceKeyword`               | Whether to show the device keyword                                | true                      | -       |
+| `showExecutionEnvironmentKeyword` | Whether to show the executionEnvironment keyword                  | true                      | -       |
 
 ## Styling
 
@@ -367,6 +433,7 @@ The following [style variables](./diagram.md#style-variables) are used by the ge
 
 | Variable                | Meaning                                         | Default value (in pixels) |
 | ----------------------- | ----------------------------------------------- | ------------------------- |
+| `artifactIconSize`      | Width of the artifact symbol in the title       | 20                        |
 | `componentIconSize`     | Size of the component symbol in the title       | 25                        |
 | `providedInterfaceSize` | Diameter of the circle of a provided interface  | 30                        |
 | `requiredInterfaceSize` | Size of the socket of a required interface      | 45                        |

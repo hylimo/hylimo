@@ -46,6 +46,11 @@ import { initialAndFinalModule } from "./uml/activity/initialAndFinal.js";
 import { objectsModule } from "./uml/activity/objects.js";
 import { pinsModule } from "./uml/activity/pins.js";
 import { signalsModule } from "./uml/activity/signals.js";
+import { artifactTitleModule } from "./uml/classifier/artifactTitle.js";
+import { artifactModule } from "./uml/deployment/artifact.js";
+import { deploymentSpecificationModule } from "./uml/deployment/deploymentSpecification.js";
+import { nodeModule } from "./uml/deployment/node.js";
+import { deploymentDiagramToolboxEditsModule } from "./uml/deploymentDiagramToolboxEdits.js";
 
 /**
  * All content modules
@@ -55,6 +60,8 @@ export const contents: ContentModule[] = [
     activityIndicatorModule,
     activityNodeModule,
     actorModule,
+    artifactModule,
+    artifactTitleModule,
     associationsModule,
     createParticipantMoule,
     classModule,
@@ -70,6 +77,8 @@ export const contents: ContentModule[] = [
     defaultShapesModule,
     defaultStylesModule,
     defaultTitleModule,
+    deploymentDiagramToolboxEditsModule,
+    deploymentSpecificationModule,
     elementModule,
     entriesModule,
     enumModule,
@@ -81,6 +90,7 @@ export const contents: ContentModule[] = [
     interfaceModule,
     keywordsModule,
     lostFoundMessageModule,
+    nodeModule,
     nonNavigableAssociationsModule,
     objectsModule,
     packageModule,

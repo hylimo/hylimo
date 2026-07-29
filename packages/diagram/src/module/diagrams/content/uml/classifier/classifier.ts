@@ -18,6 +18,7 @@ export const classifierModule = ContentModule.create(
                 fun(
                     `
                         (type, contentHandlers) = args
+                        classifierShape = args.shape ?? scope.defaultShapes.rect
                         {
                             classifierArgs = args
                             canvasScope = classifierArgs.args.self
@@ -27,7 +28,7 @@ export const classifierModule = ContentModule.create(
 
                             classifierContents = list()
                             renderedClassifier = shape(
-                                shape = scope.defaultShapes.rect,
+                                shape = classifierShape,
                                 class = list("classifier", type),
                                 contents = list(container(contents = classifierContents, class = list("classifier-container")))
                             )
@@ -87,7 +88,8 @@ export const classifierModule = ContentModule.create(
                         `,
                         params: [
                             [0, "The type of the classifier, e.g. class"],
-                            [1, "The content handlers, e.g. for properties and methods"]
+                            [1, "The content handlers, e.g. for properties and methods"],
+                            ["shape", "The shape the classifier is rendered with, defaults to a rectangle"]
                         ],
                         returns: "A function that creates a classifier."
                     }

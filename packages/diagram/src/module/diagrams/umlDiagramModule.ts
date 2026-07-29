@@ -25,6 +25,10 @@ import { forkAndJoinModule } from "./content/uml/activity/forkAndJoin.js";
 import { initialAndFinalModule } from "./content/uml/activity/initialAndFinal.js";
 import { signalsModule } from "./content/uml/activity/signals.js";
 import { connectorModule } from "./content/uml/activity/connector.js";
+import { nodeModule } from "./content/uml/deployment/node.js";
+import { artifactModule } from "./content/uml/deployment/artifact.js";
+import { deploymentSpecificationModule } from "./content/uml/deployment/deploymentSpecification.js";
+import { deploymentDiagramToolboxEditsModule } from "./content/uml/deploymentDiagramToolboxEdits.js";
 
 /**
  * Module for (arbitrary) UML diagrams
@@ -41,6 +45,7 @@ export const umlDiagramModule = InterpreterModule.create(
         extendsAndImplementsModule,
         actionModule,
         actorModule,
+        artifactModule,
         classDiagramToolboxEditsModule,
         classModule,
         commentModule,
@@ -48,12 +53,15 @@ export const umlDiagramModule = InterpreterModule.create(
         componentModule,
         connectorModule,
         decisionAndMergeModule,
+        deploymentDiagramToolboxEditsModule,
+        deploymentSpecificationModule,
         elementModule,
         enumModule,
         forkAndJoinModule,
         initialAndFinalModule,
         instanceModule,
         interfaceModule,
+        nodeModule,
         objectsModule,
         packageModule,
         readingDirectionModule,

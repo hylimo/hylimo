@@ -60,6 +60,25 @@ export const instanceModule = ContentModule.create(
                 }
                 [name, title, callback]
             }
+
+            // the underline of an instance specification is marked on the title spans themselves,
+            // not on the element: a classifier nested in an instance is not an instance by that fact,
+            // so a rule on the element would wrongly reach its title as well
+            scope.internal.instanceTitle = {
+                (title) = args
+                if(isString(title)) {
+                    list(span(text = title, class = list("title", "instance-title")))
+                } {
+                    title.forEach {
+                        if(it.class == null) {
+                            it.class = list("instance-title")
+                        } {
+                            it.class += "instance-title"
+                        }
+                    }
+                    title
+                }
+            }
         `,
         id(SCOPE)
             .field("internal")
@@ -69,7 +88,13 @@ export const instanceModule = ContentModule.create(
                 fun(
                     `
                         (name, title, callback) = scope.internal.parseInstanceArgs(args)
-                        scope.internal.createInstance(name, callback, title = title, keywords = args.keywords, args = args)
+                        scope.internal.createInstance(
+                            name,
+                            callback,
+                            title = scope.internal.instanceTitle(title),
+                            keywords = args.keywords,
+                            args = args
+                        )
                     `,
                     {
                         docs: "Creates an instance.",
@@ -117,10 +142,8 @@ export const instanceModule = ContentModule.create(
             ),
         `
             scope.styles {
-                cls("instance-element") {
-                    cls("title") {
-                        underline = true
-                    }
+                cls("instance-title") {
+                    underline = true
                 }
             }
         `
