@@ -1,8 +1,9 @@
 import type { ConnectionEditEntry, Toolbox } from "../toolbox.js";
 import type { VNode } from "snabbdom";
 import { h } from "snabbdom";
-import { generatePreviewIfAvailable } from "./preview.js";
+import { generateCurrentPreview } from "./preview.js";
 import { generateIcon } from "./icon.js";
+import { generateScrollView } from "./scrollView.js";
 import { ArrowUpRight } from "lucide";
 
 /**
@@ -11,10 +12,11 @@ import { ArrowUpRight } from "lucide";
  * @param context The toolbox context
  * @returns The toolbox UI for the connection operator
  */
-export function generateToolboxConnectDetails(context: Toolbox): VNode[] {
-    const res = [generateSearchBox(context)];
+export function generateToolboxConnectDetails(context: Toolbox): (VNode | undefined)[] {
+    const res: (VNode | undefined)[] = [generateSearchBox(context)];
     if (context.connectionSearchString != undefined) {
-        res.push(h("div.items", generateConnectionToolboxItems(context)));
+        res.push(generateScrollView(context.detailsScrollArea, "div.items", [generateConnectionToolboxItems(context)]));
+        res.push(generateCurrentPreview(context));
     }
     return res;
 }
@@ -76,7 +78,8 @@ export function generateConnectionToolboxItem(
         "button.item",
         {
             attrs: {
-                disabled: !context.isValid
+                disabled: !context.isValid,
+                "data-edit": connectionEdit.edit
             },
             on: {
                 click: (event) => {
@@ -105,7 +108,7 @@ export function generateConnectionToolboxItem(
                 selected
             }
         },
-        [connectionEdit.name, generatePreviewIfAvailable(context, connectionEdit)]
+        connectionEdit.name
     );
 }
 

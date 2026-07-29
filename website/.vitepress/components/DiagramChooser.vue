@@ -28,62 +28,88 @@
             }"
         />
         <Transition name="dialog">
-            <div v-show="showDialog && diagramEntries.length > 0" class="dialog" @mousemove="onMouseMove">
-                <div
-                    v-for="(diagram, index) in diagramEntries"
-                    :key="diagram.filename"
-                    class="item"
-                    :class="{
-                        selected: index === selectedIndex,
-                        current: diagram.filename === diagramSource?.filename && diagram.type === diagramSource?.type
-                    }"
-                    :data-index="index"
-                    @mouseenter="!disableMouseOver && (selectedIndex = index)"
-                    @focusin="selectedIndex = index"
-                    @click="selectDiagram(diagram)"
-                >
-                    <template v-if="diagram.type === 'new'">
-                        <span class="filename"
-                            >Create new: <span class="available-diagram-filename">{{ diagram.filename }}</span></span
-                        >
-                        <div class="icon">
-                            <span class="vpi-plus" />
-                        </div>
-                    </template>
-                    <template v-else-if="diagram.type === 'file'">
-                        <span class="filename">{{ diagram.filename }}</span>
-                        <div class="icon">
-                            <span class="vpi-file" />
-                        </div>
-                    </template>
-                    <template v-else-if="diagram.type === 'open-file'">
-                        <span class="filename">Open file...</span>
-                        <div class="icon">
-                            <span class="vpi-folder-open" />
-                        </div>
-                    </template>
-                    <template v-else>
-                        <span class="filename">{{ diagram.filename }}</span>
-                        <span class="info">
-                            last edited
-                            <relative-time :datetime="diagram.lastChange" />
-                        </span>
-                        <button class="delete-button icon" @click.stop="deleteDiagram(diagram)">
-                            <span class="vpi-trashcan" />
-                        </button>
-                    </template>
-                </div>
+            <div v-show="showDialog && diagramEntries.length > 0" class="dialog-anchor">
+                <ScrollArea ref="scrollArea" class="dialog" @mousemove="onMouseMove">
+                    <div
+                        v-for="(diagram, index) in diagramEntries"
+                        :key="diagram.filename"
+                        class="item"
+                        :class="{
+                            selected: index === selectedIndex,
+                            current:
+                                diagram.filename === diagramSource?.filename && diagram.type === diagramSource?.type
+                        }"
+                        :data-index="index"
+                        @mouseenter="!disableMouseOver && (selectedIndex = index)"
+                        @focusin="selectedIndex = index"
+                        @click="selectDiagram(diagram)"
+                    >
+                        <template v-if="diagram.type === 'new'">
+                            <span class="filename"
+                                >Create new:
+                                <span class="available-diagram-filename">{{ diagram.filename }}</span></span
+                            >
+                            <div class="icon">
+                                <span class="vpi-plus" />
+                            </div>
+                        </template>
+                        <template v-else-if="diagram.type === 'file'">
+                            <span class="filename">{{ diagram.filename }}</span>
+                            <div class="icon">
+                                <span class="vpi-file" />
+                            </div>
+                        </template>
+                        <template v-else-if="diagram.type === 'open-file'">
+                            <span class="filename">Open file...</span>
+                            <div class="icon">
+                                <span class="vpi-folder-open" />
+                            </div>
+                        </template>
+                        <template v-else>
+                            <span class="filename">{{ diagram.filename }}</span>
+                            <span class="info">
+                                last edited
+                                <relative-time :datetime="diagram.lastChange" />
+                            </span>
+                            <button class="delete-button icon" @click.stop="deleteDiagram(diagram)">
+                                <span class="vpi-trashcan" />
+                            </button>
+                        </template>
+                    </div>
+                </ScrollArea>
             </div>
+        </Transition>
+        <!-- the preview svg is generated by the diagram renderer, and thus safe to inject -->
+        <Transition name="dialog">
+            <div
+                v-if="showDialog && previewSvg != undefined"
+                ref="previewElement"
+                class="preview"
+                :style="{ top: `${previewTop}px`, '--preview-max-width': `${previewMaxWidth}px` }"
+                v-html="previewSvg"
+            />
         </Transition>
     </div>
 </template>
 <script setup lang="ts">
-import { computed, markRaw, nextTick, ref, watch, type PropType } from "vue";
-import { onClickOutside, onKeyStroke, watchImmediate } from "@vueuse/core";
+import { computed, inject, markRaw, nextTick, ref, watch, type PropType } from "vue";
+import {
+    onClickOutside,
+    onKeyStroke,
+    useEventListener,
+    useResizeObserver,
+    useWindowSize,
+    watchDebounced,
+    watchImmediate
+} from "@vueuse/core";
+import { useData } from "vitepress";
 import "@github/relative-time-element";
 import MiniSearch, { type SearchResult } from "minisearch";
 import type { DiagramMetadata } from "../util/diagramStorageSource";
 import type { DiagramSource } from "../util/diagramSource";
+import { useDiagramPreviewProvider } from "../util/diagramPreview";
+import { languageServerConfigKey } from "../theme/injectionKeys";
+import ScrollArea from "./ScrollArea.vue";
 
 interface DiagramEntry extends DiagramMetadata {
     type: "file" | "open-file" | "new" | "browser";
@@ -101,8 +127,38 @@ const props = defineProps({
     readonly: {
         type: Boolean,
         required: true
+    },
+    loadDiagram: {
+        type: Function as PropType<(filename: string) => Promise<string | undefined>>,
+        required: true
     }
 });
+
+/**
+ * Time to wait before rendering the preview of the selected diagram.
+ * Prevents rendering previews of all diagrams the mouse passes over.
+ */
+const previewDebounce = 150;
+
+/**
+ * Minimal distance the preview keeps from the edges of the viewport.
+ */
+const previewViewportMargin = 16;
+
+/**
+ * Horizontal gap between the dialog and the preview.
+ */
+const previewGap = 12;
+
+/**
+ * Maximum width of the preview.
+ */
+const previewMaxSize = 400;
+
+/**
+ * Width the preview needs at least, previews are not rendered at all if less space is available.
+ */
+const previewMinSize = 180;
 
 const emit = defineEmits<{
     openDiagram: [value: string];
@@ -257,9 +313,103 @@ watch(diagramEntries, (r) => {
 
 function scrollToSelectedResult() {
     nextTick(() => {
-        const selectedEl = document.querySelector(".result.selected");
+        const selectedEl = diagramChooser.value?.querySelector(".item.selected");
         selectedEl?.scrollIntoView({ block: "nearest" });
     });
+}
+
+const languageServerConfig = inject(languageServerConfigKey)!;
+const { isDark } = useData();
+const { width: windowWidth } = useWindowSize();
+const previewProvider = useDiagramPreviewProvider();
+const scrollArea = ref<InstanceType<typeof ScrollArea> | null>(null);
+const previewElement = ref<HTMLElement | null>(null);
+const previewSvg = ref<string>();
+const previewTop = ref(0);
+const previewMaxWidth = ref(0);
+let previewRequestId = 0;
+
+const diagramBackground = computed(() => {
+    const config = languageServerConfig.diagramConfig.value;
+    return isDark.value ? config.darkBackgroundColor : config.lightBackgroundColor;
+});
+
+const selectedEntry = computed(() => (showDialog.value ? diagramEntries.value[selectedIndex.value] : undefined));
+const previewFits = computed(() => previewMaxWidth.value >= previewMinSize);
+
+watch(selectedEntry, () => {
+    previewRequestId++;
+    previewSvg.value = undefined;
+});
+watchDebounced([selectedEntry, previewFits, previewProvider.revision], updatePreview, { debounce: previewDebounce });
+watch([windowWidth, showDialog], () => nextTick(updatePreviewMaxWidth), { immediate: true });
+watch(previewSvg, () => nextTick(updatePreviewPosition));
+useResizeObserver(previewElement, updatePreviewPosition);
+useEventListener(
+    () => scrollArea.value?.viewport,
+    "scroll",
+    () => updatePreviewPosition()
+);
+
+/**
+ * Updates the width available to the preview next to the dialog.
+ * Only meaningful while the dialog is shown, as it has no size otherwise.
+ */
+function updatePreviewMaxWidth(): void {
+    const dialog = diagramChooser.value?.querySelector(".dialog");
+    if (!showDialog.value || dialog == undefined) {
+        return;
+    }
+    const available = window.innerWidth - dialog.getBoundingClientRect().right - previewGap - previewViewportMargin;
+    previewMaxWidth.value = Math.min(previewMaxSize, Math.max(0, available));
+}
+
+/**
+ * Returns the source of the diagram associated with the provided entry, if it has one.
+ *
+ * @param entry the entry to get the source of
+ * @returns the source of the diagram, or undefined if the entry does not represent an existing diagram
+ */
+async function getDiagramCode(entry: DiagramEntry | undefined): Promise<string | undefined> {
+    if (entry?.type === "browser") {
+        return props.loadDiagram(entry.filename);
+    } else if (entry?.type === "file") {
+        return props.diagramSource?.code.value;
+    } else {
+        return undefined;
+    }
+}
+
+/**
+ * Renders the preview of the currently selected entry.
+ * Outdated results are discarded, as previews are rendered one after another.
+ */
+async function updatePreview(): Promise<void> {
+    const requestId = ++previewRequestId;
+    const code = previewFits.value ? await getDiagramCode(selectedEntry.value) : undefined;
+    const preview = code != undefined ? await previewProvider.getPreview(code) : undefined;
+    if (requestId === previewRequestId) {
+        previewSvg.value = preview;
+    }
+}
+
+/**
+ * Vertically aligns the preview with the selected entry, while keeping it inside the dialog and the viewport.
+ */
+function updatePreviewPosition(): void {
+    const chooser = diagramChooser.value;
+    const preview = previewElement.value;
+    const item = chooser?.querySelector(".item.selected");
+    const dialog = chooser?.querySelector(".dialog");
+    if (chooser == undefined || preview == undefined || item == undefined || dialog == undefined) {
+        return;
+    }
+    const chooserTop = chooser.getBoundingClientRect().top;
+    const dialogRect = dialog.getBoundingClientRect();
+    const bottom = Math.min(dialogRect.bottom, window.innerHeight - previewViewportMargin);
+    const minTop = dialogRect.top - chooserTop;
+    const maxTop = bottom - preview.offsetHeight - chooserTop;
+    previewTop.value = Math.max(minTop, Math.min(item.getBoundingClientRect().top - chooserTop, maxTop));
 }
 
 onKeyStroke("ArrowUp", (event) => {
@@ -322,9 +472,22 @@ function onMouseMove(e: MouseEvent) {
 </script>
 <style scoped>
 .diagram-chooser {
+    --dialog-width: min(75vw, 500px);
+
     margin-left: 10px;
     position: relative;
     flex: 0 1 30ch;
+}
+
+/*
+ * From here on there is a realistic chance of fitting a preview next to the list,
+ * so the list gives up some of its width. Whether a preview is actually shown is decided
+ * by the component based on the space that is really left next to the dialog.
+ */
+@media (min-width: 700px) {
+    .diagram-chooser {
+        --dialog-width: min(45vw, 500px);
+    }
 }
 
 @media (max-width: 500px) {
@@ -377,27 +540,63 @@ function onMouseMove(e: MouseEvent) {
     font-style: italic;
 }
 
-.dialog {
+/*
+ * The dialog is positioned by a wrapper, as reka-ui sets position: relative on the scroll area
+ * root as an inline style, which cannot be overwritten by a class.
+ */
+.dialog-anchor {
     position: absolute;
     top: calc(var(--vp-nav-height) - 6px);
     left: 0;
+    width: var(--dialog-width);
     transition:
         opacity 0.25s,
         visibility 0.25s;
     opacity: 1;
+}
+
+.dialog {
     border-radius: 12px;
     padding: 12px;
     border: 1px solid var(--vp-c-divider);
     background-color: var(--vp-c-bg-elv);
     box-shadow: var(--vp-shadow-3);
-    width: min(75vw, 500px);
+    width: 100%;
     max-height: calc(80vh - var(--vp-nav-height));
-    overflow-y: auto;
+    box-sizing: border-box;
 }
 
 .dialog-enter-from,
 .dialog-leave-to {
     opacity: 0;
+}
+
+.preview {
+    /* --preview-max-width is provided by the component, based on the space left next to the dialog */
+    --preview-max-height: min(400px, 50vh);
+
+    position: absolute;
+    left: calc(var(--dialog-width) + 12px);
+    transition:
+        opacity 0.25s,
+        visibility 0.25s;
+    opacity: 1;
+    display: flex;
+    padding: 12px;
+    border-radius: 12px;
+    border: 1px solid var(--vp-c-divider);
+    background-color: v-bind(diagramBackground);
+    box-shadow: var(--vp-shadow-3);
+    box-sizing: border-box;
+    pointer-events: none;
+}
+
+/* the limits are applied to the svg itself, as percentages do not work in a container sized by its content */
+.preview :deep(svg) {
+    width: auto;
+    height: auto;
+    max-width: var(--preview-max-width);
+    max-height: var(--preview-max-height);
 }
 
 .item {

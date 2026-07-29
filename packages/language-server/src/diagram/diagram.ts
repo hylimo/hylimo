@@ -53,6 +53,11 @@ export class Diagram {
     private implementation?: DiagramImplementation;
 
     /**
+     * Resolves once the update triggered by the most recent content or config change has been applied
+     */
+    private pendingUpdate: Promise<void> = Promise.resolve();
+
+    /**
      * Creates a new diagram
      *
      * @param document the document on which it is based
@@ -69,6 +74,25 @@ export class Diagram {
      * Called when the content of the associated document changes
      */
     async onDidChangeContent(): Promise<void> {
+        this.pendingUpdate = this.updateDiagramAndPublishDiagnostics();
+        return this.pendingUpdate;
+    }
+
+    /**
+     * Waits until the update triggered by the most recent content or config change has been applied
+     * and returns the resulting diagram.
+     *
+     * @returns the current diagram, or undefined if it could not be computed
+     */
+    async getCurrentDiagram(): Promise<BaseLayoutedDiagram | undefined> {
+        await this.pendingUpdate;
+        return this.currentDiagram;
+    }
+
+    /**
+     * Updates the diagram and publishes the resulting diagnostics
+     */
+    private async updateDiagramAndPublishDiagnostics(): Promise<void> {
         const diagnostics = await this.updateDiagram();
         if (diagnostics != undefined) {
             this.utils.connection.sendDiagnostics({

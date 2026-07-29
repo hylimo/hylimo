@@ -4,8 +4,9 @@ import type { Toolbox, ToolboxEditEntry } from "../toolbox.js";
 import type { SearchResult } from "minisearch";
 import { TransactionalMoveAction } from "../../move/transactionalMoveAction.js";
 import { CreateElementMoveHandler } from "../createElementMoveHandler.js";
-import { generatePreviewIfAvailable } from "./preview.js";
+import { generateCurrentPreview } from "./preview.js";
 import { generateIcon } from "./icon.js";
+import { generateScrollView } from "./scrollView.js";
 import { Search } from "lucide";
 import { ToolboxToolType } from "../toolType.js";
 import { TransactionalAction, type ToolboxEdit } from "@hylimo/diagram-protocol";
@@ -16,18 +17,20 @@ import { TransactionalAction, type ToolboxEdit } from "@hylimo/diagram-protocol"
  * @param context The toolbox context
  * @returns The UI for the toolbox items
  */
-export function generateToolboxAddElementDetails(context: Toolbox): VNode[] {
+export function generateToolboxAddElementDetails(context: Toolbox): (VNode | undefined)[] {
     if (context.getToolboxEdits().length === 0) {
         return [];
     }
     return [
         generateSearchBox(context),
-        h(
+        generateScrollView(
+            context.detailsScrollArea,
             "div.items",
             context.searchString.length > 0
-                ? generateFilteredToolboxItems(context, context.searchString)
+                ? [generateFilteredToolboxItems(context, context.searchString)]
                 : generateGroupedToolboxItems(context)
-        )
+        ),
+        generateCurrentPreview(context)
     ];
 }
 
@@ -94,7 +97,8 @@ function generateToolboxItem(context: Toolbox, toolboxEdit: ToolboxEditEntry): V
         "button.item",
         {
             attrs: {
-                disabled: !context.isValid
+                disabled: !context.isValid,
+                "data-edit": toolboxEdit.edit
             },
             on: {
                 pointerdown: (event) => {
@@ -126,7 +130,7 @@ function generateToolboxItem(context: Toolbox, toolboxEdit: ToolboxEditEntry): V
                 }
             }
         },
-        [toolboxEdit.name, generatePreviewIfAvailable(context, toolboxEdit)]
+        toolboxEdit.name
     );
 }
 

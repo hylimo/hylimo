@@ -79,6 +79,13 @@ export interface DiagramStorage {
      */
     openDiagram: (filename: string) => Promise<DiagramSource>;
     /**
+     * Load the code of a diagram from the storage without opening it.
+     *
+     * @param filename the filename of the diagram
+     * @returns the code of the diagram, or undefined if it does not exist
+     */
+    loadDiagram: (filename: string) => Promise<string | undefined>;
+    /**
      * Promise that resolves when the storage is initialized.
      */
     initialized: Promise<void>;
@@ -98,6 +105,7 @@ export function useDiagramStorage(): DiagramStorage {
             openDiagram: async () => {
                 throw new Error("Method not implemented.");
             },
+            loadDiagram: async () => undefined,
             initialized: Promise.resolve()
         };
     }
@@ -210,6 +218,7 @@ export function useDiagramStorage(): DiagramStorage {
         addDiagram,
         removeDiagram,
         openDiagram,
+        loadDiagram,
         initialized
     };
 }

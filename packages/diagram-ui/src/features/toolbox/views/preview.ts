@@ -1,39 +1,49 @@
-import type { ConnectionEditEntry, Toolbox, ToolboxEditEntry } from "../toolbox.js";
+import type { Toolbox } from "../toolbox.js";
 import type { VNode } from "snabbdom";
 import { h } from "snabbdom";
 
 /**
- * Generates the preview for a toolbox/connection edit if available.
- * If no preview is available, undefined is returned.
+ * Generates the preview for the currently hovered toolbox/connection edit if available.
+ * The preview is intentionally not part of the scrollable item list, as it is rendered outside of
+ * the toolbox and would therefore be clipped by the scroll area.
+ * Instead, it is aligned with the item it belongs to based on the actual item position.
  *
  * @param context The toolbox context
- * @param editEntry The toolbox/connection edit
- * @returns The preview or undefined
+ * @returns The preview or undefined if no preview is available
  */
-export function generatePreviewIfAvailable(
-    context: Toolbox,
-    editEntry: ToolboxEditEntry | ConnectionEditEntry
-): VNode | undefined {
-    if (context.showPreviewFor != editEntry.edit) {
+export function generateCurrentPreview(context: Toolbox): VNode | undefined {
+    const edit = context.showPreviewFor;
+    if (edit == undefined) {
         return undefined;
     }
-    const preview = context.elementPreviews.get(editEntry.edit);
+    const preview = context.elementPreviews.get(edit);
     if (preview == undefined) {
         return undefined;
     }
     return h(
         "div.preview",
         {
+            key: edit,
             hook: {
-                insert: (vnode) => {
-                    const element = vnode.elm as HTMLElement;
-                    const parent = element.parentElement!;
-                    const toolbox = parent.closest(".toolbox")!;
-                    const offset = parent.getBoundingClientRect().top - toolbox.getBoundingClientRect().top;
-                    element.style.top = `${offset}px`;
-                }
+                insert: (vnode) => alignPreviewWithItem(vnode.elm as HTMLElement, edit),
+                postpatch: (_oldVnode, vnode) => alignPreviewWithItem(vnode.elm as HTMLElement, edit)
             }
         },
         preview
     );
+}
+
+/**
+ * Vertically aligns the preview with the item it belongs to.
+ *
+ * @param element The preview element
+ * @param edit The edit the preview belongs to
+ */
+function alignPreviewWithItem(element: HTMLElement, edit: string): void {
+    const offsetParent = element.offsetParent;
+    const item = element.closest(".toolbox")?.querySelector(`[data-edit="${CSS.escape(edit)}"]`);
+    if (offsetParent == undefined || item == undefined) {
+        return;
+    }
+    element.style.top = `${item.getBoundingClientRect().top - offsetParent.getBoundingClientRect().top}px`;
 }

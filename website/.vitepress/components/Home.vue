@@ -16,6 +16,7 @@
                     :diagram-source="diagramSource"
                     :all-diagrams="allDiagrams"
                     :readonly="isEmbedded"
+                    :load-diagram="loadDiagram"
                     @open-diagram="openDiagram($event).then((diagram) => (diagramSource = diagram))"
                     @open-file="openFile()"
                     @create-diagram="createDiagram($event, diagramSource?.code.value ?? defaultDiagram)"
@@ -98,7 +99,7 @@ const diagramSource = shallowRef<DiagramSource>();
 
 const fileBaseName = computed(() => diagramSource.value?.baseName || "diagram");
 
-const { diagrams, addDiagram, removeDiagram, openDiagram, initialized } = useDiagramStorage();
+const { diagrams, addDiagram, removeDiagram, openDiagram, loadDiagram, initialized } = useDiagramStorage();
 
 const allDiagrams = computed(() => {
     return Object.values(diagrams.value)

@@ -1,6 +1,11 @@
 import type { Plugin, Ref } from "vue";
 import { computed, ref, shallowRef, toRaw, watch } from "vue";
-import type { NotificationHandler, NotificationType, Disposable } from "vscode-languageserver-protocol/browser";
+import type {
+    NotificationHandler,
+    NotificationType,
+    RequestType,
+    Disposable
+} from "vscode-languageserver-protocol/browser";
 import {
     BrowserMessageReader,
     BrowserMessageWriter,
@@ -278,5 +283,12 @@ export class LanguageClientProxy {
      */
     sendNotification<P>(type: NotificationType<P>, params?: P): Promise<void> {
         return this.client.sendNotification(type, params);
+    }
+
+    /**
+     * @see MonacoLanguageClient.sendRequest
+     */
+    sendRequest<P, R>(type: RequestType<P, R, any>, params: P): Promise<R> {
+        return this.client.sendRequest(type, params);
     }
 }

@@ -2,6 +2,7 @@ import type { VNode } from "snabbdom";
 import { h } from "snabbdom";
 import { AlertTriangle } from "lucide";
 import { generateIcon } from "./icon.js";
+import { generateScrollView } from "./scrollView.js";
 import type { Toolbox } from "../toolbox.js";
 
 /**
@@ -17,7 +18,8 @@ export function generateErrorDisplay(context: Toolbox): VNode | undefined {
     return h("div.toolbox-errors", [
         h("div.toolbox-errors-container", [
             h("div.toolbox-error-button.toolbox-icon-button", [generateIcon(AlertTriangle)]),
-            h(
+            generateScrollView(
+                context.errorScrollArea,
                 "div.error-list",
                 context.errorState.diagnostics.map((d) => h("div.error-item", d.message))
             )

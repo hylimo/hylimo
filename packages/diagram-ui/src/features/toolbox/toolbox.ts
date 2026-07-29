@@ -43,6 +43,7 @@ import jsonata, { type ExprNode } from "jsonata";
 import type { TransactionIdProvider } from "../transaction/transactionIdProvider.js";
 import type { ErrorState } from "../diagram-state/diagramStateProvider.js";
 import type { SRoot } from "../../model/sRoot.js";
+import { ScrollAreaController } from "../../base/scrollArea.js";
 
 /**
  * UI Extension which displays the graphical toolbox.
@@ -130,6 +131,16 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler, Conn
      * Cached rendered element previews.
      */
     elementPreviews: Map<string, VNode | undefined> = new Map();
+
+    /**
+     * The scroll area of the item list in the details panel.
+     */
+    readonly detailsScrollArea = new ScrollAreaController();
+
+    /**
+     * The scroll area of the error list.
+     */
+    readonly errorScrollArea = new ScrollAreaController();
 
     /**
      * The model renderer.

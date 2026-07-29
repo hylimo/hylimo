@@ -264,13 +264,13 @@ export class LanguageServer {
      * @param params defines the diagram to request
      * @returns the requested diagram
      */
-    protected onRequestDiagram(params: DiagramRequestMessage): DiagramResponseMessage {
+    protected async onRequestDiagram(params: DiagramRequestMessage): Promise<DiagramResponseMessage> {
         const diagram = this.diagrams.get(params.diagramUri);
         if (!diagram) {
             throw new Error(`Unknown diagram: ${params.diagramUri}`);
         }
         return {
-            diagram: diagram.currentDiagram
+            diagram: await diagram.getCurrentDiagram()
         };
     }
 

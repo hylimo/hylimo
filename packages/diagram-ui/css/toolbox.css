@@ -128,13 +128,14 @@
         }
 
         .items {
-            overflow-y: auto;
-            overflow-x: hidden;
             margin-bottom: var(--toolbox-margin);
             flex-shrink: 10000000000;
-            display: flex;
-            flex-direction: column;
-            gap: calc(var(--toolbox-margin) * 0.75);
+
+            .scroll-area-content {
+                display: flex;
+                flex-direction: column;
+                gap: calc(var(--toolbox-margin) * 0.75);
+            }
         }
 
         .group {
@@ -156,22 +157,6 @@
             outline: none;
             padding: calc(var(--toolbox-margin) / 2);
             border-radius: 8px;
-
-            .preview {
-                position: absolute;
-                right: calc(100% + 8px);
-                width: 100%;
-                padding: 0px;
-                border-radius: var(--toolbox-border-radius);
-                border: 5px solid var(--toolbox-background);
-                box-shadow: var(--toolbox-box-shadow);
-                overflow: hidden;
-                display: none;
-
-                svg {
-                    padding: 10px;
-                }
-            }
         }
 
         .item.selected,
@@ -184,9 +169,18 @@
             opacity: 0.7;
         }
 
-        .item:hover {
-            .preview {
-                display: block;
+        .preview {
+            position: absolute;
+            right: calc(100% + 8px);
+            width: 100%;
+            padding: 0px;
+            border-radius: var(--toolbox-border-radius);
+            border: 5px solid var(--toolbox-background);
+            box-shadow: var(--toolbox-box-shadow);
+            overflow: hidden;
+
+            svg {
+                padding: 10px;
             }
         }
 
@@ -262,6 +256,7 @@
             background: var(--toolbox-error-background);
             display: flex;
             overflow: hidden;
+            min-height: 0;
         }
 
         .toolbox-error-button {
@@ -273,14 +268,16 @@
         }
 
         .error-list {
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
             opacity: 0;
             transition: opacity 0.2s ease;
             width: var(--toolbox-width);
             padding: 0 var(--tool-button-margin);
             margin: var(--tool-button-margin) 0;
+
+            .scroll-area-content {
+                display: flex;
+                flex-direction: column;
+            }
 
             .error-item {
                 padding: 5px;
@@ -317,17 +314,79 @@
         }
     }
 
-    .toolbox-details,
-    .toolbox-errors-container {
-        @supports selector(::-webkit-scrollbar) {
-            ::-webkit-scrollbar {
-                height: 4px;
-                width: 4px;
-            }
+    /*
+     * Styles for scroll areas managed by ScrollAreaController.
+     * The native scrollbar is hidden and replaced by an overlaying custom scrollbar which
+     * only becomes visible while the scroll area is hovered or scrolled.
+     * Based on the reka-ui ScrollArea (https://github.com/unovue/reka-ui), see the LICENSES file.
+     */
 
-            ::-webkit-scrollbar-thumb {
-                background: var(--toolbox-scrollbar-thumb-background);
-            }
+    .scroll-area {
+        --scroll-area-scrollbar-size: 10px;
+        --scroll-area-scrollbar-padding: 2px;
+        --scroll-area-thumb-background: color-mix(in srgb, currentColor 25%, transparent);
+        --scroll-area-thumb-background-hover: color-mix(in srgb, currentColor 45%, transparent);
+
+        position: relative;
+        display: flex;
+        min-height: 0;
+    }
+
+    .scroll-area-viewport {
+        flex: 1 1 auto;
+        min-height: 0;
+        width: 100%;
+        overflow-x: hidden;
+        overflow-y: scroll;
+        overscroll-behavior: contain;
+        scrollbar-width: none;
+    }
+
+    .scroll-area-viewport::-webkit-scrollbar {
+        display: none;
+    }
+
+    .scroll-area-scrollbar {
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        display: none;
+        width: var(--scroll-area-scrollbar-size);
+        padding: var(--scroll-area-scrollbar-padding);
+        box-sizing: border-box;
+        touch-action: none;
+        user-select: none;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.2s ease;
+    }
+
+    .scroll-area[data-scrollable="true"] > .scroll-area-scrollbar {
+        display: flex;
+    }
+
+    .scroll-area-scrollbar[data-state="visible"] {
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    .scroll-area-thumb {
+        flex: 1 1 auto;
+        border-radius: 9999px;
+        background: var(--scroll-area-thumb-background);
+        transition: background-color 0.2s ease;
+    }
+
+    .scroll-area-thumb:hover,
+    .scroll-area-thumb[data-dragging] {
+        background: var(--scroll-area-thumb-background-hover);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .scroll-area-scrollbar,
+        .scroll-area-thumb {
+            transition: none;
         }
     }
 }

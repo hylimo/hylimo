@@ -88,7 +88,7 @@ function generateToolboxTools(context: Toolbox): VNode {
  */
 function generateToolboxDetails(context: Toolbox): VNode {
     const tool = context.toolState.toolType;
-    let details: VNode[] | undefined = undefined;
+    let details: (VNode | undefined)[] | undefined = undefined;
     if (tool === ToolboxToolType.ADD_ELEMENT) {
         details = generateToolboxAddElementDetails(context);
     } else if (tool === ToolboxToolType.CONNECT) {
