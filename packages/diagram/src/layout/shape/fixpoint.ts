@@ -328,7 +328,8 @@ const HEIGHT_SEARCH_TOLERANCE = 0.004;
  * measurement comes out the wrong way round, keeps the previous slope: an outline that really does not
  * open up as it widens is caught by the runaway bound instead, which cannot misfire on noise. Once the
  * content fits, a single secant step lands on the root, as the response is affine in the width wherever
- * the same walls bound the region, and a nudge by the tolerance keeps it on the fitting side.
+ * the same walls bound the region, and a nudge by the tolerance keeps it on the fitting side. A step
+ * that cannot be taken at a finite geometry is treated as a runaway, see {@link widthFor}.
  *
  * What remains is a one-dimensional minimisation of the area
  * over that family, run as a golden-section search on the share of the shape's height the content
@@ -388,6 +389,16 @@ function solveInner(
      * The least width whose content region holds the content at this height, `Infinity` if the shape
      * would have to run away to hold it — which is how a height too close to the content's own is
      * ruled out for an outline that tapers, such as an ellipse.
+     *
+     * A width the search cannot use is `Infinity` too, never `NaN`: a geometry at which nothing fits
+     * at all makes {@link widestBand} report a width of `-Infinity`, and a secant taken across that
+     * has no finite slope to offer, so the next step would be `-Infinity / Infinity`. The two guards
+     * below keep that from leaving the search — one so an unusable measurement keeps the previous
+     * slope, as an unmeasurably small step already does, the other so the step itself is only ever
+     * taken at a finite geometry. Both matter beyond this function: {@link buildContentProfile} at a
+     * `NaN` box evaluates the outline to `NaN` and reports every slab empty, and a `NaN` width ends
+     * up as a `NaN` area, which compares false against everything and so silently defeats the
+     * early-out of the height search.
      */
     const widthFor = (height: number): number => {
         let w = Math.max(MIN_DIM, warmWidth);
@@ -396,12 +407,12 @@ function solveInner(
         for (let step = 0; step < MAX_WIDTH_STEPS && !(margin >= 0 && margin <= tolerance); step++) {
             const stepped = w - margin / slope;
             const next = Math.max(MIN_DIM, Math.min(Math.max(stepped, w / WIDTH_STEP_LIMIT), w * WIDTH_STEP_LIMIT));
-            if (next > runaway) {
+            if (!Number.isFinite(next) || next > runaway) {
                 return Number.POSITIVE_INFINITY;
             }
             const nextMargin = marginAt(next, height);
             const measured = (nextMargin - margin) / (next - w);
-            if (Math.abs(next - w) > MIN_DIM && measured > 0) {
+            if (Math.abs(next - w) > MIN_DIM && measured > 0 && Number.isFinite(measured)) {
                 slope = measured;
                 warmSlope = measured;
             }
@@ -410,7 +421,7 @@ function solveInner(
         }
         if (margin < 0) {
             w += -margin / slope + tolerance;
-            if (w > runaway || marginAt(w, height) < 0) {
+            if (!Number.isFinite(w) || w > runaway || marginAt(w, height) < 0) {
                 return Number.POSITIVE_INFINITY;
             }
         }
@@ -505,7 +516,7 @@ export function layoutShape(
         final = measure(ir, w, h, rounding, stroke);
     }
     const profile = buildContentProfile(ir, w, h, rounding, stroke);
-    const content = contentBoxFromProfile(profile, ir, w, h, rounding, stroke, mode === "inner" ? target : required);
+    const content = contentBoxFromProfile(profile, w, h, stroke, mode === "inner" ? target : required);
 
     const dx = -final.originX + final.overflowLeft;
     const dy = -final.originY + final.overflowTop;

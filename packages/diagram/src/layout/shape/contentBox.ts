@@ -1,6 +1,5 @@
 import type { ShapeIR, Pt } from "./shapeIr.js";
 import { evaluateDecorations, evaluateVertices } from "./shapeIr.js";
-import { evalAffine } from "./expr.js";
 import { decorationToSvgPath, outlineToSvgPath } from "./geometry.js";
 import { LineJoin, LineCap } from "./types.js";
 import type { ShapeStroke, Box } from "./types.js";
@@ -708,13 +707,31 @@ function buildStrokeRegion(outline: Polyline, decorations: Polyline[], stroke: S
 }
 
 /**
- * Start of the interval the last {@link freeSpan} found
+ * The free interval one {@link freeSpan} call found. It is filled in place rather than returned so
+ * the profile build, which asks once per slab, does not allocate an object apiece — that allocation
+ * is the most expensive part of the answer. Each caller owns the instance it passes, so one
+ * measurement can never be read as another's, and `min`/`max` mean nothing unless the call that
+ * filled them returned true.
  */
-let spanMin = 0;
+export interface Span {
+    /**
+     * Left bound of the interval
+     */
+    min: number;
+    /**
+     * Right bound of the interval
+     */
+    max: number;
+}
+
 /**
- * End of the interval the last {@link freeSpan} found
+ * Creates a span to measure into
+ *
+ * @returns the created span
  */
-let spanMax = 0;
+function createSpan(): Span {
+    return { min: 0, max: 0 };
+}
 
 /**
  * Scratch buffer holding the sorted crossing coordinates of one scanline
@@ -1002,25 +1019,20 @@ function addDiscSpan(region: StrokeRegion, index: number, ya: number, yb: number
  * inside there and never comes within the stroke of the outline cannot have left the outline on the
  * way down, since leaving it means crossing it.
  *
- * The authored inset is breathing room *inside* the space the stroke leaves, so it comes off the free
- * gap rather than off the outline — subtracting it first would let the two overlap.
- *
  * @param index the index over the flattened outline
  * @param region the stroked region
  * @param ya the top of the slab
  * @param yb the bottom of the slab
- * @param clearLeft the authored inset from the left
- * @param clearRight the authored inset from the right
+ * @param span filled with the interval that was found
  * @param around the x an interval has to contain, or undefined to take the widest one
- * @returns true if an interval was found, which is then left in {@link spanMin}/{@link spanMax}
+ * @returns true if an interval was found, which is then left in `span`
  */
 function freeSpan(
     index: OutlineIndex,
     region: StrokeRegion,
     ya: number,
     yb: number,
-    clearLeft: number,
-    clearRight: number,
+    span: Span,
     around?: number
 ): boolean {
     const found = interiorCrossings(index, ya);
@@ -1052,9 +1064,9 @@ function freeSpan(
                 hi = Math.min(hi, spanLow);
             }
         }
-        spanMin = lo + clearLeft;
-        spanMax = hi - clearRight;
-        return spanMax > spanMin;
+        span.min = lo;
+        span.max = hi;
+        return span.max > span.min;
     }
     sortBlocked();
     let bestMin = 0;
@@ -1085,9 +1097,9 @@ function freeSpan(
             bestMax = end;
         }
     }
-    spanMin = bestMin + clearLeft;
-    spanMax = bestMax - clearRight;
-    return spanMax > spanMin;
+    span.min = bestMin;
+    span.max = bestMax;
+    return span.max > span.min;
 }
 
 /**
@@ -1139,19 +1151,17 @@ export interface ContentProfile {
     /**
      * The free interval over an arbitrary range, for the exact answers the fixed slabs cannot give:
      * the tail of a band that ends between two slabs, and the refinement of a fitted box. The
-     * interval is left in {@link spanMin}/{@link spanMax} rather than returned, since the profile
-     * build asks this once per slab and an object apiece is the most expensive part of the answer.
+     * interval is filled into the caller's {@link Span} rather than returned, see there.
      */
-    readonly measure: (ya: number, yb: number, around?: number) => boolean;
+    readonly measure: (ya: number, yb: number, span: Span, around?: number) => boolean;
 }
 
 /**
  * Samples the free space of a shape at a concrete size into a {@link ContentProfile}.
  *
- * The usable height is the outline's own extent shrunk by any authored top/bottom inset, and each
- * slab holds what the stroke leaves free across it, shrunk by any authored left/right inset. The
- * stroke of a decoration blocks exactly as the outline's does, so content flows around a component's
- * ports and below a database's rim without any shape-specific knowledge.
+ * The usable height is the outline's own extent, and each slab holds what the stroke leaves free
+ * across it. The stroke of a decoration blocks exactly as the outline's does, so content flows around
+ * a component's ports and below a database's rim without any shape-specific knowledge.
  *
  * The slabs start where content can: a box edge cannot come closer than the stroke half-width to the
  * outline's own top or bottom, so laying the grid out from there makes a shape with a flat top and
@@ -1173,10 +1183,6 @@ export function buildContentProfile(
     stroke: ShapeStroke
 ): ContentProfile {
     const half = stroke.width / 2;
-    const clearLeft = Math.max(0, evalAffine(ir.content.left, width, height, rounding));
-    const clearRight = Math.max(0, evalAffine(ir.content.right, width, height, rounding));
-    const clearTop = Math.max(0, evalAffine(ir.content.top, width, height, rounding));
-    const clearBottom = Math.max(0, evalAffine(ir.content.bottom, width, height, rounding));
 
     const outline = flattenPath(outlineToSvgPath(evaluateVertices(ir, width, height, rounding)), true, FLATNESS);
     const decorations = evaluateDecorations(ir, width, height, rounding).map((decoration) =>
@@ -1192,20 +1198,21 @@ export function buildContentProfile(
         maxY = Math.max(maxY, value);
     }
 
-    const measure = (ya: number, yb: number, around?: number): boolean =>
-        freeSpan(index, region, ya, yb, clearLeft, clearRight, around);
+    const measure = (ya: number, yb: number, span: Span, around?: number): boolean =>
+        freeSpan(index, region, ya, yb, span, around);
 
-    const top = minY + half + clearTop;
-    const bottom = maxY - half - clearBottom;
+    const top = minY + half;
+    const bottom = maxY - half;
     const step = bottom > top ? (bottom - top) / SCANLINES : 0;
     const left = new Float64Array(SCANLINES);
     const right = new Float64Array(SCANLINES);
     let fullLeft = -Infinity;
     let fullRight = Infinity;
+    const span = createSpan();
     for (let k = 0; k < SCANLINES; k++) {
-        if (step > 0 && measure(top + k * step, top + (k + 1) * step)) {
-            left[k] = spanMin;
-            right[k] = spanMax;
+        if (step > 0 && measure(top + k * step, top + (k + 1) * step, span)) {
+            left[k] = span.min;
+            right[k] = span.max;
         } else {
             left[k] = Infinity;
             right[k] = -Infinity;
@@ -1257,6 +1264,7 @@ function bandInterval(
     const lastSlab = Math.min(SCANLINES - 1, Math.ceil((y1 - top) / step - FIT_EPSILON) - 1);
     let lo = -Infinity;
     let hi = Infinity;
+    const span = createSpan();
     for (let k = firstSlab; k <= lastSlab; k++) {
         const slabTop = top + k * step;
         const slabBottom = slabTop + step;
@@ -1266,11 +1274,11 @@ function bandInterval(
             slabLeft = left[k];
             slabRight = right[k];
         } else {
-            if (!profile.measure(Math.max(y0, slabTop), Math.min(y1, slabBottom))) {
+            if (!profile.measure(Math.max(y0, slabTop), Math.min(y1, slabBottom), span)) {
                 return null;
             }
-            slabLeft = spanMin;
-            slabRight = spanMax;
+            slabLeft = span.min;
+            slabRight = span.max;
         }
         lo = Math.max(lo, slabLeft);
         hi = Math.min(hi, slabRight);
@@ -1369,8 +1377,11 @@ export function widestBand(profile: ContentProfile, height: number): number {
 function refine(profile: ContentProfile, box: Box): Box {
     const { step } = profile;
     const middle = box.x + box.width / 2;
+    const span = createSpan();
     const holds = (ya: number, yb: number): boolean =>
-        profile.measure(ya, yb, middle) && spanMin <= box.x + FIT_EPSILON && spanMax >= box.x + box.width - FIT_EPSILON;
+        profile.measure(ya, yb, span, middle) &&
+        span.min <= box.x + FIT_EPSILON &&
+        span.max >= box.x + box.width - FIT_EPSILON;
     let top = box.y;
     let bottom = box.y + box.height;
     let low = bottom;
@@ -1395,10 +1406,12 @@ function refine(profile: ContentProfile, box: Box): Box {
         }
     }
     top = high;
-    if (!profile.measure(top, bottom, middle)) {
+    // the bisections above left `span` on whichever probe they tried last, so measure the box the
+    // two of them actually settled on before reading its interval off
+    if (!profile.measure(top, bottom, span, middle)) {
         return box;
     }
-    return { x: spanMin, y: top, width: spanMax - spanMin, height: bottom - top };
+    return { x: span.min, y: top, width: span.max - span.min, height: bottom - top };
 }
 
 /**
@@ -1464,23 +1477,19 @@ export function bestContentBox(profile: ContentProfile, minWidth: number, minHei
 /**
  * The content box for a shape at a concrete size: the largest-area inscribed rectangle, held to one
  * that also fits `required` where that is given. Falls back to the unconstrained box, and finally to
- * plain per-side insets for geometry too degenerate to fit anything at all.
+ * the box the stroke alone leaves for geometry too degenerate to fit anything at all.
  *
  * @param profile the profile of the shape at this size
- * @param ir the shape the profile was built from
  * @param width the geometry width
  * @param height the geometry height
- * @param rounding the corner rounding
  * @param stroke the stroke the shape is painted with
  * @param required the content size the result has to hold, if any
  * @returns the content box
  */
 export function contentBoxFromProfile(
     profile: ContentProfile,
-    ir: ShapeIR,
     width: number,
     height: number,
-    rounding: number,
     stroke: ShapeStroke,
     required?: {
         /**
@@ -1504,14 +1513,10 @@ export function contentBoxFromProfile(
         return box;
     }
     const half = stroke.width / 2;
-    const clearLeft = half + Math.max(0, evalAffine(ir.content.left, width, height, rounding));
-    const clearRight = half + Math.max(0, evalAffine(ir.content.right, width, height, rounding));
-    const clearTop = half + Math.max(0, evalAffine(ir.content.top, width, height, rounding));
-    const clearBottom = half + Math.max(0, evalAffine(ir.content.bottom, width, height, rounding));
     return {
-        x: clearLeft,
-        y: clearTop,
-        width: Math.max(0, width - clearLeft - clearRight),
-        height: Math.max(0, height - clearTop - clearBottom)
+        x: half,
+        y: half,
+        width: Math.max(0, width - 2 * half),
+        height: Math.max(0, height - 2 * half)
     };
 }

@@ -1,7 +1,6 @@
 import type { Affine } from "./expr.js";
 import { parseAffine, constant, affineEquals, ExprError } from "./expr.js";
 import type { Decoration, ShapeIR, Vertex, EdgeCurve } from "./shapeIr.js";
-import { noInset } from "./shapeIr.js";
 
 /**
  * Error thrown for a malformed shape path, carrying a human-readable message
@@ -54,7 +53,7 @@ function scanPathTokens(data: string): {
     const pushVertex = (x: Affine, y: Affine, edge?: EdgeCurve): void => {
         lastX = x;
         lastY = y;
-        vertices.push({ x, y, corner: "sharp", radius: constant(0), edge });
+        vertices.push({ x, y, edge });
     };
     const take = (count: number): string[] => {
         if (i + count > tokens.length) {
@@ -268,7 +267,6 @@ export function parseShape(path: string, decoration?: string): ShapeIR {
     const decorations = (decoration ? splitDecorationSubpaths(decoration) : []).map(parseDecoration);
     return {
         vertices,
-        content: noInset,
         decorations: decorations.length > 0 ? decorations : undefined
     };
 }

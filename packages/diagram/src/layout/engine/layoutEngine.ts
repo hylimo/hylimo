@@ -213,6 +213,7 @@ export class LayoutEngine {
         config: DiagramConfig,
         predictionMode: boolean
     ): Promise<LayoutedDiagram> {
+        this.nextCacheGeneration();
         await this.initFonts(root, fontFamilies, layout, config);
         if (predictionMode) {
             this.collapseNonPredictionElements(root);
@@ -268,7 +269,9 @@ export class LayoutEngine {
     }
 
     /**
-     * Starts the next iteration for each cache
+     * Starts the next iteration for each cache, which is the only path evicting stale entries.
+     * Called once per render at the start of {@link layout}, before the entries of that render are
+     * touched, so everything the render uses ends it with its age reset.
      */
     nextCacheGeneration(): void {
         this.textCache.nextIteration();

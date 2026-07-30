@@ -16,7 +16,7 @@ const layoutMap = new Map<string, ContentLayoutConfig>(layouts.map((layout) => [
 
 /**
  * Gets the content layout config for a given container element
- * Falls back to hbox if the layout is not defined
+ * Falls back to stack if the layout is not defined
  *
  * @param element the container element to get the layout config for
  * @returns the content layout config

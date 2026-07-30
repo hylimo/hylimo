@@ -62,48 +62,15 @@ export function isConstant(a: Affine): boolean {
 /**
  * The box width as an affine value (`w`)
  */
-export const VAR_W: Affine = { w: 1, h: 0, r: 0, c: 0 };
+const VAR_W: Affine = { w: 1, h: 0, r: 0, c: 0 };
 /**
  * The box height as an affine value (`h`)
  */
-export const VAR_H: Affine = { w: 0, h: 1, r: 0, c: 0 };
+const VAR_H: Affine = { w: 0, h: 1, r: 0, c: 0 };
 /**
  * The corner rounding as an affine value (`r`)
  */
-export const VAR_R: Affine = { w: 0, h: 0, r: 1, c: 0 };
-
-/**
- * Adds two affine values
- *
- * @param a the left summand
- * @param b the right summand
- * @returns the sum
- */
-export function affineAdd(a: Affine, b: Affine): Affine {
-    return { w: a.w + b.w, h: a.h + b.h, r: a.r + b.r, c: a.c + b.c };
-}
-
-/**
- * Subtracts two affine values
- *
- * @param a the minuend
- * @param b the subtrahend
- * @returns the difference
- */
-export function affineSub(a: Affine, b: Affine): Affine {
-    return { w: a.w - b.w, h: a.h - b.h, r: a.r - b.r, c: a.c - b.c };
-}
-
-/**
- * Scales an affine value by a constant factor
- *
- * @param a the affine value to scale
- * @param s the factor to scale by
- * @returns the scaled value
- */
-export function affineScale(a: Affine, s: number): Affine {
-    return { w: a.w * s, h: a.h * s, r: a.r * s, c: a.c * s };
-}
+const VAR_R: Affine = { w: 0, h: 0, r: 1, c: 0 };
 
 /**
  * Checks whether two affine values are equal, meaning they behave identically at every box size
@@ -124,7 +91,7 @@ export function affineEquals(a: Affine, b: Affine): boolean {
  * @returns the sum
  */
 function add(a: Affine, b: Affine): Affine {
-    return affineAdd(a, b);
+    return { w: a.w + b.w, h: a.h + b.h, r: a.r + b.r, c: a.c + b.c };
 }
 
 /**
@@ -135,7 +102,7 @@ function add(a: Affine, b: Affine): Affine {
  * @returns the difference
  */
 function sub(a: Affine, b: Affine): Affine {
-    return affineSub(a, b);
+    return { w: a.w - b.w, h: a.h - b.h, r: a.r - b.r, c: a.c - b.c };
 }
 
 /**

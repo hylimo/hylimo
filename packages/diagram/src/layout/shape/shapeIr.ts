@@ -1,12 +1,5 @@
 import type { Affine } from "./expr.js";
-import { constant, evalAffine } from "./expr.js";
-
-/**
- * How the shape's own outline corner is treated. This is the *geometry* of the corner
- * (part of the path), independent of the stroke `lineJoin` (which only affects how the
- * stroke is painted around whatever geometry there is).
- */
-export type CornerStyle = "sharp" | "round" | "chamfer";
+import { evalAffine } from "./expr.js";
 
 /**
  * A 2D point whose coordinates are affine functions of the box
@@ -25,8 +18,9 @@ export interface AffinePt {
 /**
  * How the edge *leading into* a vertex is drawn. Absent means a straight line (the common
  * case). A curved edge lets the outline bulge or round with true curves — cubic/quadratic
- * Béziers or an elliptical arc — which a corner-rounding radius (circular only) cannot express.
- * All control values are affine in the box, so the curve reshapes with the box like everything else.
+ * Béziers or an elliptical arc. All control values are affine in the box, so the curve reshapes
+ * with the box like everything else; a rounded corner is authored as an `r`-radius arc and
+ * therefore collapses to a sharp one when the corner rounding is 0.
  */
 export type EdgeCurve =
     | {
@@ -95,41 +89,9 @@ export interface Vertex {
      */
     readonly y: Affine;
     /**
-     * How the outline corner at this vertex is shaped
-     */
-    readonly corner: CornerStyle;
-    /**
-     * Radius (round) or cut depth (chamfer). Ignored for sharp corners.
-     */
-    readonly radius: Affine;
-    /**
      * Curve of the edge from the previous vertex to this one. Absent means a straight line.
      */
     readonly edge?: EdgeCurve;
-}
-
-/**
- * The affine inset of the content box from each side of the (centerline) outline box.
- * The stroke half-width is added on top of this at layout time so content never overlaps
- * the stroke.
- */
-export interface ContentInset {
-    /**
-     * The inset from the left edge
-     */
-    readonly left: Affine;
-    /**
-     * The inset from the right edge
-     */
-    readonly right: Affine;
-    /**
-     * The inset from the top edge
-     */
-    readonly top: Affine;
-    /**
-     * The inset from the bottom edge
-     */
-    readonly bottom: Affine;
 }
 
 /**
@@ -159,10 +121,6 @@ export interface ShapeIR {
      * The vertices of the outline, in order
      */
     readonly vertices: Vertex[];
-    /**
-     * The inset of the content box from the outline box
-     */
-    readonly content: ContentInset;
     /**
      * Extra internal strokes for compound shapes (database rim, component ports, …)
      */
@@ -243,14 +201,6 @@ export type EvaluatedEdge =
  */
 export interface EvaluatedVertex extends Pt {
     /**
-     * How the outline corner at this vertex is shaped
-     */
-    readonly corner: CornerStyle;
-    /**
-     * Radius (round) or cut depth (chamfer). Ignored for sharp corners.
-     */
-    readonly radius: number;
-    /**
      * Evaluated curve of the edge leading into this vertex, if any
      */
     readonly edge?: EvaluatedEdge;
@@ -327,8 +277,6 @@ function evalVertex(vertex: Vertex, width: number, height: number, rounding: num
     return {
         x: evalAffine(vertex.x, width, height, rounding),
         y: evalAffine(vertex.y, width, height, rounding),
-        corner: vertex.corner,
-        radius: Math.max(0, evalAffine(vertex.radius, width, height, rounding)),
         edge: vertex.edge ? evalEdge(vertex.edge, width, height, rounding) : undefined
     };
 }
@@ -366,24 +314,3 @@ export function evaluateDecorations(
         closed: decoration.closed
     }));
 }
-
-/**
- * Convenience builder for a sharp vertex
- *
- * @param x the x coordinate
- * @param y the y coordinate
- * @returns the created vertex
- */
-export function sharpVertex(x: Affine, y: Affine): Vertex {
-    return { x, y, corner: "sharp", radius: constant(0) };
-}
-
-/**
- * An all-zero content inset
- */
-export const noInset: ContentInset = {
-    left: constant(0),
-    right: constant(0),
-    top: constant(0),
-    bottom: constant(0)
-};
