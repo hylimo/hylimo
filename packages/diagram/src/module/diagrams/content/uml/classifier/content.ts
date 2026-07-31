@@ -18,7 +18,7 @@ export const contentModule = ContentModule.create(
                 if (innerContents.length > 0) {
                     this.innerCanvasClass = list()
                     if(innerContents.some { (it.type == "canvasElement") || (it.type == "canvasConnection") }) {
-                        contents += path(path = "M 0 0 L 1 0", class = list("separator"))
+                        contents += divider(class = list("separator"))
                         innerCanvasClass += "classifier-canvas"
                     }
                     contents += canvas(

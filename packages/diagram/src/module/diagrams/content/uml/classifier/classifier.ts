@@ -30,7 +30,7 @@ export const classifierModule = ContentModule.create(
                             renderedClassifier = shape(
                                 shape = classifierShape,
                                 class = list("classifier", type),
-                                contents = list(container(contents = classifierContents, class = list("classifier-container")))
+                                contents = classifierContents
                             )
                             if(classifierArgs.abstract == true) {
                                 renderedClassifier.class += "abstract"
@@ -128,16 +128,12 @@ export const classifierModule = ContentModule.create(
                     minWidth = 300
 
                     cls("classifier") {
-                        cls("classifier-container") {
-                            margin = 5
-                            layout = "vbox"
-                        }
+                        layout = "vbox"
+                        padding = 5
                     }
                     cls("separator") {
                         marginTop = 5
                         marginBottom = 5
-                        marginLeft = -5
-                        marginRight = -5
                     }
                     cls("abstract") {
                         cls("title") {

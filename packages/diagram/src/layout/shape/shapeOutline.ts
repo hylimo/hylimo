@@ -1,5 +1,12 @@
 import type { ArcCenterParametrization, ArcDefinition, Line, Point, Vector } from "@hylimo/diagram-common";
-import { ArcSegment, BezierSegment, LineSegment, Math2D, QuadraticBezierSegment } from "@hylimo/diagram-common";
+import {
+    ArcSegment,
+    BezierSegment,
+    LineEngine,
+    LineSegment,
+    Math2D,
+    QuadraticBezierSegment
+} from "@hylimo/diagram-common";
 import svgpath from "svgpath";
 import type { ShapeStroke } from "./types.js";
 import { LineJoin } from "./types.js";
@@ -783,21 +790,33 @@ function offsetSegment(
 }
 
 /**
- * Offsets the whole ring outward by half the stroke width, so the outline traces the *outer* edge of
- * the stroke rather than its centerline
+ * Offsets the whole ring by half the stroke width, so it traces one of the two edges of the stroke
+ * rather than its centerline.
+ *
+ * Outward is the connection outline: the edge the stroke paints around the outside of the shape, so
+ * every corner is offset the way its join is painted. Inward is the *inner parallel body*, the region
+ * the stroke leaves free — and there every corner takes the plain miter, at any depth. That is not
+ * merely the outward case with its signs flipped: a join is painted on the outside of a turn only, so
+ * on the inner edge neither the round nor the bevelled form of a corner is ever visible, and the miter
+ * limit — which is about how far a join may spill *outwards* — has nothing to say about it either.
+ * What remains inside is the intersection of the two offset edges, which is what the `!convex` branch
+ * of {@link offsetVertex} computes, numerical floor included.
  *
  * @param segments the segments of the ring, in order
  * @param stroke the stroke the shape is painted with
  * @param area twice the signed area of the ring, whose sign tells which side of it is out
+ * @param inward whether to offset into the shape instead of out of it
  * @returns the offset ring
  */
-function offsetRing(segments: OutlineSegment[], stroke: ShapeStroke, area: number): OutlineSegment[] {
+function offsetRing(
+    segments: OutlineSegment[],
+    stroke: ShapeStroke,
+    area: number,
+    inward: boolean = false
+): OutlineSegment[] {
     const distance = stroke.width / 2;
-    const clockwise = area > 0;
-    const outward = (direction: Vector): Vector => {
-        const normal = Math2D.normalize(Math2D.normal(direction));
-        return clockwise ? normal : Math2D.scale(normal, -1);
-    };
+    const sign = (area > 0 ? 1 : -1) * (inward ? -1 : 1);
+    const outward = (direction: Vector): Vector => Math2D.scale(Math2D.normalize(Math2D.normal(direction)), sign);
     const startDirections = segments.map(startDirection);
     const endDirections = segments.map(endDirection);
     const vertices = segments.map((segment, index) => {
@@ -805,7 +824,7 @@ function offsetRing(segments: OutlineSegment[], stroke: ShapeStroke, area: numbe
         const incoming = endDirections[previous];
         const outgoing = startDirections[index];
         // a corner turning the way the ring winds turns away from the shape, and is where a join is painted
-        const convex = cross(incoming, outgoing) * area > 0;
+        const convex = !inward && cross(incoming, outgoing) * area > 0;
         return offsetVertex(segment.start, outward(incoming), outward(outgoing), convex, distance, stroke);
     });
     return segments.map((segment, index) =>
@@ -884,6 +903,44 @@ function toLineSegment(
  * @param id the id of the element the outline belongs to
  * @returns the outline, or null if the path is not a usable ring
  */
+/**
+ * The origin, as the clip path lives in the same local space the rendered outline path does
+ */
+const ORIGIN: Point = { x: 0, y: 0 };
+
+/**
+ * Builds the region *inside* a shape that its own stroke leaves free, as a closed SVG path: the
+ * outline pulled in by half the stroke width, in the same (local, translated-to-origin) coordinates
+ * the rendered outline path is in.
+ *
+ * This is what a divider is clipped by. The runs a divider is drawn as are measured conservatively —
+ * over a whole band rather than at one height — so against a slanted or curved border they stop a
+ * fraction of the stroke short of it. Overshooting them and clipping here makes the termination exact
+ * without anything having to reason about slopes, and one clip serves every divider in the shape.
+ *
+ * A shape with no stroke clips against its outline itself, which is the same thing at width 0.
+ *
+ * @param path the rendered (local, translated-to-origin) outline path string
+ * @param stroke the stroke the shape is painted with, whose width the ring is pulled in by
+ * @returns the clip path, or undefined if the path is not a usable ring
+ */
+export function buildShapeClipPath(path: string, stroke: ShapeStroke): string | undefined {
+    const parsed = parseOutline(path, ORIGIN);
+    if (parsed.length < 2) {
+        return undefined;
+    }
+    const area = signedArea(parsed);
+    if (area === 0) {
+        return undefined;
+    }
+    const ring = stroke.width > 0 ? offsetRing(parsed, stroke, area, true) : parsed;
+    return LineEngine.DEFAULT.getSvgPath({
+        start: ring[0].start,
+        segments: ring.map((segment, index) => toLineSegment(segment, "", index)),
+        isClosed: true
+    });
+}
+
 export function buildShapeOutline(path: string, position: Point, stroke: ShapeStroke, id: string): Line | null {
     const parsed = parseOutline(path, position);
     if (parsed.length < 2) {

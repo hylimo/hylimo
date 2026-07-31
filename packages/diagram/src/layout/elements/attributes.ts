@@ -81,13 +81,9 @@ export const layoutStyleAttributes = [
 ];
 
 /**
- * Default style attributes, including margin, alignment, and size attributes
+ * Margin style attributes, the space an element keeps around itself
  */
-export const defaultStyleAttributes = [
-    ...visibilityStyleAttributes,
-    ...sizeStyleAttributes,
-    ...alignStyleAttributes,
-    ...layoutStyleAttributes,
+export const marginStyleAttributes = [
     { name: "marginTop", description: "optional top margin of the element, must be a number", type: finiteNumberType },
     {
         name: "marginRight",
@@ -105,6 +101,17 @@ export const defaultStyleAttributes = [
         type: finiteNumberType
     },
     { name: "margin", description: "optional margin of the element, must be a number", type: finiteNumberType }
+];
+
+/**
+ * Default style attributes, including margin, alignment, and size attributes
+ */
+export const defaultStyleAttributes = [
+    ...visibilityStyleAttributes,
+    ...sizeStyleAttributes,
+    ...alignStyleAttributes,
+    ...layoutStyleAttributes,
+    ...marginStyleAttributes
 ];
 
 /**
@@ -170,6 +177,11 @@ export const containerStyleAttributes = [
         name: "layout",
         description: "the layout of the container, must be one of 'vbox', 'hbox', 'grid' or 'absolute'",
         type: enumType(ContainerLayout)
+    },
+    {
+        name: "padding",
+        description: "optional space kept between the element and its contents, on all four sides",
+        type: finiteNumberType
     }
 ];
 

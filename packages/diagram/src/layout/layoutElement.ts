@@ -47,6 +47,70 @@ export function addToSize(size: Size, additiveWidth: number, additiveHeight: num
 }
 
 /**
+ * Reads the padding of an element: the space it keeps between itself and its contents, on all four
+ * sides. Unlike a margin, which is space around an element negotiated with its siblings, this is
+ * space the element itself takes up and hands out to nobody.
+ *
+ * @param styles the computed styles of the element
+ * @returns the padding, never negative
+ */
+export function extractPadding(styles: Record<string, any>): number {
+    return Math.max(0, (styles.padding as number | undefined) ?? 0);
+}
+
+/**
+ * Shrinks a size by the padding on either side of both axes, never below zero. An unbounded extent
+ * stays unbounded.
+ *
+ * @param size the size to shrink
+ * @param padding the padding kept on each side
+ * @returns the shrunk size
+ */
+export function removePadding(size: Size, padding: number): Size {
+    return {
+        width: Math.max(0, size.width - 2 * padding),
+        height: Math.max(0, size.height - 2 * padding)
+    };
+}
+
+/**
+ * Grows a size by the padding on either side of both axes
+ *
+ * @param size the size to grow
+ * @param padding the padding kept on each side
+ * @returns the grown size
+ */
+export function addPadding(size: Size, padding: number): Size {
+    return { width: size.width + 2 * padding, height: size.height + 2 * padding };
+}
+
+/**
+ * Shrinks both ends of a pair of size constraints by the padding, so the contents are measured
+ * against the space that is really left for them
+ *
+ * @param constraints the constraints to shrink
+ * @param padding the padding kept on each side
+ * @returns the shrunk constraints
+ */
+export function removePaddingFromConstraints(constraints: SizeConstraints, padding: number): SizeConstraints {
+    return {
+        min: removePadding(constraints.min, padding),
+        max: removePadding(constraints.max, padding)
+    };
+}
+
+/**
+ * Moves a position in by the padding, to where the contents of the element start
+ *
+ * @param position the position of the element
+ * @param padding the padding kept on each side
+ * @returns the position of the contents
+ */
+export function addPaddingToPosition(position: Point, padding: number): Point {
+    return { x: position.x + padding, y: position.y + padding };
+}
+
+/**
  * Creats a size that fits the constraints, assuming the constraints are well-defined
  *
  * @param size the size to fit

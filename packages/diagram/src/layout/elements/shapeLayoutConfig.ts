@@ -3,9 +3,16 @@ import { finiteNumberType, objectType, optional, stringType } from "@hylimo/core
 import type { Element, Size, Point, Line } from "@hylimo/diagram-common";
 import { Path } from "@hylimo/diagram-common";
 import type { LayoutElement, SizeConstraints } from "../layoutElement.js";
-import { matchToConstraints } from "../layoutElement.js";
+import {
+    addPadding,
+    addPaddingToPosition,
+    extractPadding,
+    matchToConstraints,
+    removePadding
+} from "../layoutElement.js";
 import type { Layout } from "../engine/layout.js";
 import { ContentShapeLayoutConfig } from "./contentShapeLayoutConfig.js";
+import { shapeContentType } from "../../module/base/types.js";
 import { getContentLayoutConfig } from "./layout/contentLayout.js";
 import type { ShapeIR } from "../shape/shapeIr.js";
 import type { ShapeStroke, SizingMode } from "../shape/types.js";
@@ -66,6 +73,27 @@ interface ResolvedShape {
 }
 
 /**
+ * What a shape leaves behind on its layout element once it has been laid out, so its children can
+ * ask about the shape they sit in. A `divider` needs all three: the solved outline it terminates at,
+ * the stroke that outline is painted with, and the origin the outline's own coordinates are relative
+ * to, which is where its runs and its clip region are expressed.
+ */
+export interface ShapeLayoutState {
+    /**
+     * The solved shape at its final size
+     */
+    laidOut: ShapeLayoutResult;
+    /**
+     * The stroke the shape is painted with
+     */
+    stroke: ShapeStroke;
+    /**
+     * The absolute position of the shape's rendered top-left, the origin of `laidOut.path`
+     */
+    origin: Point;
+}
+
+/**
  * Layout config for the generic parametric `shape`.
  *
  * A shape is defined by a `shape` attribute holding an SVG-like `path` (and an optional stroke-only
@@ -101,10 +129,24 @@ export class ShapeLayoutConfig extends ContentShapeLayoutConfig {
                     description: "the corner rounding radius, usable as `r` in the shape path",
                     type: finiteNumberType
                 }
-            ]
+            ],
+            shapeContentType
         );
     }
 
+    /**
+     * Measures the shape: the contents are measured against what the outline leaves them, and the
+     * outline is then solved for the size those contents came back with.
+     *
+     * A content layout does not have to fill the space it was offered — a box whose children cannot
+     * grow reports their sum and no more — but the shape is still going to be at least its minimum
+     * size, so the region it is solved for is the larger of the two.
+     *
+     * @param layout performs the layout
+     * @param element the element to measure
+     * @param constraints defines min and max size
+     * @returns the calculated size
+     */
     override measure(layout: Layout, element: LayoutElement, constraints: SizeConstraints): Size {
         this.normalizeStrokeWidth(element);
         const shape = this.resolveShape(element);
@@ -112,16 +154,21 @@ export class ShapeLayoutConfig extends ContentShapeLayoutConfig {
             element.shapeContentSize = undefined;
             return constraints.min;
         }
-        const innerMin = this.innerSize(layout, shape, constraints.min);
-        let innerMax = this.innerSize(layout, shape, constraints.max);
+        const padding = extractPadding(element.styles);
+        const innerMin = removePadding(this.innerSize(layout, shape, constraints.min), padding);
+        let innerMax = removePadding(this.innerSize(layout, shape, constraints.max), padding);
         let contentsSize: Size;
         let result: ShapeLayoutResult;
         for (let pass = 0; ; pass++) {
-            contentsSize = getContentLayoutConfig(element).measure(layout, element, {
+            const measured = getContentLayoutConfig(element).measure(layout, element, {
                 min: innerMin,
                 max: innerMax
             });
-            result = this.solve(layout, shape, "inner", contentsSize);
+            contentsSize = {
+                width: Math.max(measured.width, innerMin.width),
+                height: Math.max(measured.height, innerMin.height)
+            };
+            result = this.solve(layout, shape, "inner", addPadding(contentsSize, padding));
             if (pass >= MAX_MEASURE_PASSES) {
                 break;
             }
@@ -130,10 +177,13 @@ export class ShapeLayoutConfig extends ContentShapeLayoutConfig {
             if (!exceeds) {
                 break;
             }
-            const tightened = this.innerSize(layout, shape, {
-                width: Math.min(constraints.max.width, result.size.width),
-                height: Math.min(constraints.max.height, result.size.height)
-            });
+            const tightened = removePadding(
+                this.innerSize(layout, shape, {
+                    width: Math.min(constraints.max.width, result.size.width),
+                    height: Math.min(constraints.max.height, result.size.height)
+                }),
+                padding
+            );
             const next: Size = {
                 width: Math.min(innerMax.width, tightened.width),
                 height: Math.min(innerMax.height, tightened.height)
@@ -143,13 +193,14 @@ export class ShapeLayoutConfig extends ContentShapeLayoutConfig {
             }
             innerMax = next;
         }
-        element.shapeContentSize = contentsSize;
+        element.shapeContentSize = addPadding(contentsSize, padding);
         return matchToConstraints(result.size, constraints);
     }
 
     override layout(layout: Layout, element: LayoutElement, position: Point, size: Size, id: string): Element[] {
         const shape = this.resolveShape(element);
         const laidOut = this.solve(layout, shape, "outer", size, element.shapeContentSize as Size | undefined);
+        element.shapeLayoutState = { laidOut, stroke: shape.stroke, origin: position } satisfies ShapeLayoutState;
         const result: Path = {
             type: Path.TYPE,
             id,
@@ -163,8 +214,9 @@ export class ShapeLayoutConfig extends ContentShapeLayoutConfig {
         };
         if (element.children.length > 0) {
             const box = laidOut.contentBox;
-            const contentPosition = { x: position.x + box.x, y: position.y + box.y };
-            const contentSize = { width: box.width, height: box.height };
+            const padding = extractPadding(element.styles);
+            const contentPosition = addPaddingToPosition({ x: position.x + box.x, y: position.y + box.y }, padding);
+            const contentSize = removePadding({ width: box.width, height: box.height }, padding);
             result.children.push(
                 ...getContentLayoutConfig(element).layout(layout, element, contentPosition, contentSize, id)
             );

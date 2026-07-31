@@ -14,6 +14,7 @@ import { LayoutCache } from "./layoutCache.js";
 import type { StretchMode } from "../elements/pathLayoutConfig.js";
 import type { ShapeLayoutResult } from "../shape/fixpoint.js";
 import type { ShapeStroke, SizingMode } from "../shape/types.js";
+import type { DividerAxis, DividerGeometry } from "../shape/divider.js";
 import { Layout } from "./layout.js";
 import type { SubsettedFont } from "../font/fontFamily.js";
 import { SubsetCollector } from "../font/subsetCollector.js";
@@ -109,6 +110,32 @@ interface ShapeCacheKey {
 }
 
 /**
+ * Cache key for the divider geometry of a shape. One entry per shape per solved size, shared by
+ * every divider in that shape — the per-divider query on top of it is cheap enough not to need one
+ * of its own.
+ */
+interface DividerGeometryKey {
+    /**
+     * The solved outline path, in shape-local coordinates
+     */
+    path: string;
+    /**
+     * The solved decoration sub-paths, if the shape has any
+     */
+    decoration: string | undefined;
+    /**
+     * The stroke the shape is painted with
+     */
+    stroke: ShapeStroke;
+    /**
+     * The axis the dividers of the shape run along. A shape has exactly one flow direction, so this
+     * still leaves one entry per shape; it is part of the key because the geometry is transposed
+     * once, at build time, so that the vertical case needs no second implementation.
+     */
+    axis: DividerAxis;
+}
+
+/**
  * The root element of the layout with the layout
  */
 export class LayoutWithRoot {
@@ -159,6 +186,11 @@ export class LayoutEngine {
      * Cache for the parametric shape fixpoint
      */
     readonly shapeCache = new LayoutCache<ShapeCacheKey, ShapeLayoutResult>(CACHE_TTL);
+
+    /**
+     * Cache for the divider geometry of a shape
+     */
+    readonly dividerCache = new LayoutCache<DividerGeometryKey, DividerGeometry>(CACHE_TTL);
 
     /**
      * Cache for subsetted fonts
@@ -277,6 +309,7 @@ export class LayoutEngine {
         this.textCache.nextIteration();
         this.pathCache.nextIteration();
         this.shapeCache.nextIteration();
+        this.dividerCache.nextIteration();
         this.subsetFontCache.nextIteration();
     }
 

@@ -3,7 +3,14 @@ import { finiteNumberType, objectToList } from "@hylimo/core";
 import type { Size, Point, Element } from "@hylimo/diagram-common";
 import { Marker } from "@hylimo/diagram-common";
 import type { LayoutElement, SizeConstraints } from "../../layoutElement.js";
-import { ContentCardinality } from "../../layoutElement.js";
+import {
+    addPadding,
+    addPaddingToPosition,
+    ContentCardinality,
+    extractPadding,
+    removePadding,
+    removePaddingFromConstraints
+} from "../../layoutElement.js";
 import type { Layout } from "../../engine/layout.js";
 import { StyledElementLayoutConfig } from "../styledElementLayoutConfig.js";
 import { simpleElementType } from "../../../module/base/types.js";
@@ -43,11 +50,18 @@ export class MarkerLayoutConfig extends StyledElementLayoutConfig {
     }
 
     override measure(layout: Layout, element: LayoutElement, constraints: SizeConstraints): Size {
-        return getContentLayoutConfig(element).measure(layout, element, constraints);
+        const padding = extractPadding(element.styles);
+        const contents = getContentLayoutConfig(element).measure(
+            layout,
+            element,
+            removePaddingFromConstraints(constraints, padding)
+        );
+        return addPadding(contents, padding);
     }
 
     override layout(layout: Layout, element: LayoutElement, _position: Point, size: Size, id: string): Element[] {
         const contentLayoutConfig = getContentLayoutConfig(element);
+        const padding = extractPadding(element.styles);
         const refX = element.styles.refX ?? 1;
         const refY = element.styles.refY ?? 0.5;
         const result: Marker = {
@@ -60,8 +74,8 @@ export class MarkerLayoutConfig extends StyledElementLayoutConfig {
             children: contentLayoutConfig.layout(
                 layout,
                 element,
-                { x: -size.width * refX, y: -size.height * refY },
-                size,
+                addPaddingToPosition({ x: -size.width * refX, y: -size.height * refY }, padding),
+                removePadding(size, padding),
                 id
             ),
             pos: element.position,

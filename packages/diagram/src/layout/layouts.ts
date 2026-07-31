@@ -14,6 +14,7 @@ import { PathLayoutConfig } from "./elements/pathLayoutConfig.js";
 import { CanvasAxisAlignedSegmentLayoutConfig } from "./elements/canvas/canvasAxisAlignedSegmentLayoutConfig.js";
 import { ShapeLayoutConfig } from "./elements/shapeLayoutConfig.js";
 import { ContainerLayoutConfig } from "./elements/containerLayoutConfig.js";
+import { DividerLayoutConfig } from "./elements/dividerLayoutConfig.js";
 
 /**
  * Known layouts
@@ -21,6 +22,7 @@ import { ContainerLayoutConfig } from "./elements/containerLayoutConfig.js";
 export const layouts: LayoutConfig[] = [
     new ContainerLayoutConfig(),
     new ShapeLayoutConfig(),
+    new DividerLayoutConfig(),
     new TextLayoutConfig(),
     new SpanLayoutConfig(),
     new CanvasLayoutConfig(),

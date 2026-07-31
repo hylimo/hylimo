@@ -32,6 +32,10 @@ export const defaultStylesModule = ContentModule.create(
                 stroke = var("primary")
                 strokeWidth = var("strokeWidth")
             }
+            type("divider") {
+                stroke = var("primary")
+                strokeWidth = var("strokeWidth")
+            }
             cls("label-element") {
                 hAlign = "center"
             }

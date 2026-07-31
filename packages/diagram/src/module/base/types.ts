@@ -48,6 +48,15 @@ export const canvasContentType = elementType(
 export const simpleElementType = elementType(Canvas.TYPE, Text.TYPE, "shape", Path.TYPE, "container");
 
 /**
+ * Type for the contents of a shape: everything {@link simpleElementType} allows, plus `divider`.
+ *
+ * That extra entry is the whole of the containment rule for dividers. Because no other content type
+ * admits one — `container`'s in particular does not — a divider anywhere but *directly* inside a
+ * shape is a type error, so "direct child of a shape" needs no validation of its own.
+ */
+export const shapeContentType = elementType(Canvas.TYPE, Text.TYPE, "shape", Path.TYPE, "container", "divider");
+
+/**
  * Type for either a string or a list of span elements
  */
 export const stringOrSpanListType = or(stringType, listType(elementType("span")));

@@ -81,6 +81,12 @@ A `container` stacks its children, and how it does that is decided by its `layou
 | `"vbox"`  | Children are stacked vertically                  |
 | `"hbox"`  | Children are stacked horizontally                |
 
+A `padding` style keeps space between the container and its children. Unlike a `margin`, which is
+space _around_ an element that its siblings have to make room for, padding is space the element
+itself takes up and hands out to nobody — the container grows by it, and every child stays inside it
+without having to say so. The same style works on every element that lays out contents: `container`,
+`shape`, `canvasElement` and `marker`.
+
 ```hylimo
 diagram {
     element(container(layout = "hbox") {
@@ -430,7 +436,8 @@ Which attributes an element supports depends on its type.
 | `hAlign`, `vAlign`                                                 | Horizontal and vertical alignment within the parent                    |
 | `visibility`                                                       | `"visible"`, `"hidden"` (invisible, still takes space) or `"collapse"` |
 | `grow`, `shrink`, `base`                                           | How the element grows and shrinks in an `hbox` or `vbox`               |
-| `layout`                                                           | Only for `container`: `"stack"`, `"vbox"` or `"hbox"`                  |
+| `layout`                                                           | How the element lays out its contents: `"stack"`, `"vbox"` or `"hbox"` |
+| `padding`                                                          | Space the element keeps between itself and its contents                |
 
 For the attributes which take one of a fixed set of values, enum objects exist, so `HAlign.Center`
 can be written instead of `"center"`: `HAlign`, `VAlign`, `Visibility` and - for relative positions

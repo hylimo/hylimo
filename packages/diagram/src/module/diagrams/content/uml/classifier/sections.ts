@@ -34,7 +34,7 @@ export const sectionsModule = ContentModule.create(
                 args.callScope.sections.forEach {
                     this.section = it
                     if (section != null) {
-                        contents += path(path = "M 0 0 L 1 0", class = list("separator"))
+                        contents += divider(class = list("separator"))
                         section.forEach {
                             sectionContent = it
                             if(isString(sectionContent)) {

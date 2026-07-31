@@ -81,11 +81,23 @@ export class PDFDiagramVisitor extends SimplifiedDiagramVisitor<PDFKit.PDFDocume
         this.visitChildren(element, context);
     }
 
+    /**
+     * Renders a path, through its clip region where it has one. pdfkit clips with the current path,
+     * and the clip is part of the graphics state, so it is set inside the save/restore pair the
+     * translation has already opened and lifted again with it.
+     *
+     * @param element the path to render
+     * @param context the pdf document to render into
+     */
     override visitPath(element: Path, context: PDFKit.PDFDocument): void {
         if (this.isShapeVisible(element)) {
             const shapeAttributes = extractShapeStyleAttributes(element);
             context.save();
             context.translate(element.x, element.y);
+            if (element.clip != undefined) {
+                context.path(element.clip);
+                context.clip();
+            }
             context.path(element.path);
             this.drawShape(context, shapeAttributes, element);
             if (element.decoration != undefined) {

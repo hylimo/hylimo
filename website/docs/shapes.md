@@ -341,6 +341,94 @@ diagram {
 }
 ```
 
+## Padding
+
+A shape keeps its content off its own border with the `padding` style, a single number inset on all
+four sides of the fitted content box. It is a property of the shape rather than of what is in it, so
+the shape grows by it and every child stays clear of the outline without any of them saying so.
+
+`padding` is not specific to shapes — every element that lays out contents takes it, so a `container`,
+a `canvasElement` and a `marker` inset theirs the same way. See
+[the DSL reference](/docs/diagram#containers) for how it differs from a margin.
+
+## Dividers
+
+A `divider` is a rule drawn across the interior of a shape. It is not a `path` that happens to look
+like a line: it reaches the shape's border **exactly**, whatever that border does there, and it breaks
+wherever a decoration is in its way.
+
+```hylimo
+diagram {
+    element(shape(
+        shape = defaultShapes.hexagon,
+        contents = list(
+            text(contents = list(span(text = "a hexagon"))),
+            divider(),
+            text(contents = list(span(text = "cut in two")))
+        ),
+        class = list("panel")
+    )) layout {
+        pos = apos(0, 0)
+    }
+    element(shape(
+        shape = defaultShapes.database,
+        contents = list(
+            text(contents = list(span(text = "left"))),
+            divider(),
+            text(contents = list(span(text = "right")))
+        ),
+        class = list("panel", "sideways")
+    )) layout {
+        pos = apos(320, 0)
+    }
+    styles {
+        type("shape") {
+            fill = var("background")
+            strokeWidth = 4
+        }
+        cls("panel") {
+            layout = "vbox"
+            padding = 10
+        }
+        cls("sideways") {
+            layout = "hbox"
+        }
+        type("divider") {
+            stroke = "#e2574c"
+            strokeWidth = 4
+            margin = 8
+        }
+    }
+}
+```
+
+Three things about it are decided for you rather than declared:
+
+- **Where it may appear.** A divider is only valid as a _direct_ child of a `shape`. Nothing else
+  accepts one — not even a `container` inside a shape — so putting one anywhere else is an error the
+  type system reports, not something that renders oddly.
+- **Which way it runs.** It follows the flow of the shape it sits in: horizontal in a `vbox`,
+  vertical in an `hbox`. The two panels above differ only in the shape's `layout`. A `stack` has no
+  flow, so a divider in one is an error.
+- **How far it reaches.** To the outline, and to any decoration it meets on the way — the database
+  above is one shape, and its rim stops the rule exactly as the border does. A shape whose interior
+  falls apart at that height gets one rule per piece, and where the border bites into the rule rather
+  than merely ending it — a thick rule sitting on a chevron's notch — the rule takes the bite.
+
+Padding does not apply to it. Content is held off the border, a divider bleeds to it; that is the
+point of the two being separate.
+
+A divider is a stroke, not a box. It takes the `stroke*` styles, the `margin*` styles and
+`visibility`, and nothing else: it has no fill, and no size, alignment or flex properties, because it
+has no size of its own to give — it spans whatever the shape leaves it, and contributes nothing to
+how wide or tall the shape has to be. `strokeLineJoin`, `strokeLineCap` and `strokeMiterLimit` are
+not among the styles it takes either: a rule is straight, so it has no corner to join, and it ends
+where the shape's border does, which leaves a cap nowhere to go.
+
+The gallery has [a divider in every predefined shape](/#gallery), drawn in a contrasting colour and
+with a heavy stroke, which is the honest way to look at a termination: a rule painted like its outline
+hides exactly the gap or overlap one is looking for.
+
 ## Custom shapes
 
 A shape definition is an object with a `path` and an optional `decoration`, both SVG-like path

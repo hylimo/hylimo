@@ -2,13 +2,32 @@ import type { Root, Path, Canvas, Element, SimplifiedText, FontData } from "@hyl
 import { convertFontsToCssStyle } from "@hylimo/diagram-common";
 import { SimplifiedDiagramVisitor } from "@hylimo/diagram-common";
 import XMLBuilder from "fast-xml-builder";
-import { extractFillAttributes, extractLayoutAttributes, extractShapeStyleAttributes } from "./attributeHelpers.js";
+import {
+    extractFillAttributes,
+    extractLayoutAttributes,
+    extractShapeStyleAttributes,
+    extractStrokeAsFillAttributes
+} from "./attributeHelpers.js";
 import type { SimplifiedCanvasElement } from "@hylimo/diagram-common";
 import type { Font } from "fontkit";
 import { createFont } from "@hylimo/diagram";
 import type { SimplifySvgPathModule } from "simplify-svg-path";
 import SimplifySvgPathInit from "simplify-svg-path";
 import { simplifySvgPath } from "@hylimo/wasm-libs";
+
+/**
+ * Distinguishes the ids one rendered document defines from those of the next one.
+ *
+ * An id is only unique within the diagram that generated it, but a rendered svg is routinely inlined
+ * into a page next to others — a documentation page shows a dozen — and inline svg shares the
+ * document's single id space. Two diagrams both defining `0_e0_0_d0-clip` would leave every
+ * `url(#…)` in the second one resolving to the first one's clip region, so its dividers would be
+ * clipped against a shape somewhere else entirely.
+ *
+ * A counter rather than a random token, so that a process which renders one diagram — the CLI, and
+ * every batch that runs one file per process — produces byte-identical output every time.
+ */
+let renderCounter = 0;
 
 /**
  * Renderer which renders a diagram to svg
@@ -40,7 +59,7 @@ export class SVGRenderer {
                   }
               })
             : undefined;
-        const svg = visitor.visit(root, new SVGRendererContext(root, simplifySvgPathModule))[0];
+        const svg = visitor.visit(root, new SVGRendererContext(root, `d${renderCounter++}`, simplifySvgPathModule))[0];
         const xmlObj = this.svgNodeToXmlObject(svg);
         const builder = new XMLBuilder({
             ignoreAttributes: false,
@@ -143,9 +162,12 @@ class SVGRendererContext {
      * Creates a new svg renderer context
      *
      * @param root the root element of the diagram, provides the fonts
+     * @param idPrefix distinguishes the ids of this document from those of any other inlined beside it
+     * @param simplifySvgPath the module used to simplify glyph paths
      */
     constructor(
         root: Root,
+        readonly idPrefix: string,
         private readonly simplifySvgPath?: SimplifySvgPathModule
     ) {
         this.fontDatas = new Map(root.fonts.map((fontData) => [fontData.fontFamily, fontData]));
@@ -228,6 +250,9 @@ class SVGDiagramVisitor extends SimplifiedDiagramVisitor<SVGRendererContext, SVG
     }
 
     override visitPath(element: Path, context: SVGRendererContext): SVGNode[] {
+        if (this.textAsPath && element.clipFill != undefined) {
+            return [this.renderClipAsFill(element), ...this.visitChildren(element, context)];
+        }
         const result: SVGNode = {
             type: "path",
             children: [],
@@ -248,7 +273,64 @@ class SVGDiagramVisitor extends SimplifiedDiagramVisitor<SVGRendererContext, SVG
                       }
                   ]
                 : [];
-        return [result, ...decoration, ...this.visitChildren(element, context)];
+        const painted = [result, ...decoration];
+        if (element.clip != undefined) {
+            return [this.clipPath(element, painted, context), ...this.visitChildren(element, context)];
+        }
+        return [...painted, ...this.visitChildren(element, context)];
+    }
+
+    /**
+     * Paints the area a clipped stroke covers as a filled region instead of clipping it.
+     *
+     * `textAsPath` renders a diagram for consumers that cannot be relied on to have a font — and the
+     * same consumers are the ones least likely to support `clipPath`, which many svg importers drop
+     * silently, leaving a rule running out of its shape and across the page. The model carries the
+     * exact area the clipped stroke covers for that reason, so the region is painted rather than
+     * approximated here.
+     *
+     * @param element the path whose clipped area is painted
+     * @returns the filled region
+     */
+    private renderClipAsFill(element: Path): SVGNode {
+        return {
+            type: "path",
+            children: [],
+            ...extractStrokeAsFillAttributes(element),
+            stroke: "none",
+            d: element.clipFill!,
+            transform: `translate(${element.x}, ${element.y})`
+        };
+    }
+
+    /**
+     * Wraps the painted parts of a path in a clipped group.
+     *
+     * The translation moves from the element's own attributes onto the group, because `clip-path`
+     * resolves against the coordinate system the clipped element establishes *for its children*, and
+     * a `transform` on the clipped element itself is applied after the clip — which would offset the
+     * two against each other by exactly the element's position.
+     *
+     * @param element the path whose clip region is applied
+     * @param painted the nodes to clip, which lose their own transform to the group
+     * @param context provides the prefix keeping the id unique in the document the svg ends up in
+     * @returns the clipped group
+     */
+    private clipPath(element: Path, painted: SVGNode[], context: SVGRendererContext): SVGNode {
+        const id = `${context.idPrefix}-${element.id}-clip`;
+        return {
+            type: "g",
+            transform: `translate(${element.x}, ${element.y})`,
+            "clip-path": `url(#${id})`,
+            children: [
+                {
+                    type: "clipPath",
+                    id,
+                    children: [{ type: "path", children: [], d: element.clip! }]
+                },
+                ...painted.map((node): SVGNode => (typeof node === "string" ? node : { ...node, transform: false }))
+            ]
+        };
     }
 
     override visitText(element: SimplifiedText, context: SVGRendererContext): SVGNode[] {

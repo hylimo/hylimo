@@ -4,7 +4,16 @@ import type { Size, Point, Element } from "@hylimo/diagram-common";
 import { CanvasElement, DefaultEditTypes } from "@hylimo/diagram-common";
 import { canvasPointType, simpleElementType } from "../../../module/base/types.js";
 import type { LayoutElement, SizeConstraints } from "../../layoutElement.js";
-import { ContentCardinality, HorizontalAlignment, VerticalAlignment } from "../../layoutElement.js";
+import {
+    addPadding,
+    addPaddingToPosition,
+    ContentCardinality,
+    extractPadding,
+    HorizontalAlignment,
+    removePadding,
+    removePaddingFromConstraints,
+    VerticalAlignment
+} from "../../layoutElement.js";
 import type { Layout } from "../../engine/layout.js";
 import {
     alignStyleAttributes,
@@ -49,9 +58,27 @@ export class CanvasElementLayoutConfig extends EditableCanvasContentLayoutConfig
     }
 
     override measure(layout: Layout, element: LayoutElement, constraints: SizeConstraints): Size {
-        return getContentLayoutConfig(element).measure(layout, element, constraints);
+        const padding = extractPadding(element.styles);
+        const contents = getContentLayoutConfig(element).measure(
+            layout,
+            element,
+            removePaddingFromConstraints(constraints, padding)
+        );
+        return addPadding(contents, padding);
     }
 
+    /**
+     * Lays out the element, at the position its alignment puts it. The padded box is what the
+     * contents get and what the outline is taken from alike: a connection docks against what is
+     * drawn, which with a padding sits inside the element's own bounds.
+     *
+     * @param layout performs the layout
+     * @param element the element to lay out
+     * @param position offset in current context
+     * @param size the size of the element
+     * @param id the id of the element
+     * @returns the laid out element
+     */
     override layout(layout: Layout, element: LayoutElement, position: Point, size: Size, id: string): Element[] {
         const contentLayoutConfig = getContentLayoutConfig(element);
         let dx = 0;
@@ -69,10 +96,9 @@ export class CanvasElementLayoutConfig extends EditableCanvasContentLayoutConfig
             dy = -size.height / 2;
         }
 
-        const contentPosition = {
-            x: dx,
-            y: dy
-        };
+        const padding = extractPadding(element.styles);
+        const contentPosition = addPaddingToPosition({ x: dx, y: dy }, padding);
+        const contentSize = removePadding(size, padding);
         const result: CanvasElement = {
             id,
             type: CanvasElement.TYPE,
@@ -81,8 +107,8 @@ export class CanvasElementLayoutConfig extends EditableCanvasContentLayoutConfig
             dy,
             pos: this.extractPos(layout, element),
             rotation: element.element.getLocalFieldOrUndefined("_rotation")?.value?.toNative() ?? 0,
-            children: contentLayoutConfig.layout(layout, element, contentPosition, size, id),
-            outline: contentLayoutConfig.outline(layout, element, contentPosition, size, id),
+            children: contentLayoutConfig.layout(layout, element, contentPosition, contentSize, id),
+            outline: contentLayoutConfig.outline(layout, element, contentPosition, contentSize, id),
             edits: element.edits,
             editExpression: element.element.getLocalFieldOrUndefined("editExpression")?.value?.toNative()
         };

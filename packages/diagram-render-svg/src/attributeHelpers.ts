@@ -114,6 +114,26 @@ export function extractFillAttributes(model: Readonly<FilledElement>): FillAttri
 }
 
 /**
+ * Extracts the paint of a stroke as fill attributes, which is what paints the area a stroke covers
+ * where the area is drawn as a region rather than stroked
+ *
+ * @param model the model which provides the attributes
+ * @returns the extracted attributes
+ */
+export function extractStrokeAsFillAttributes(model: Readonly<StrokedElement>): FillAttributes {
+    const res: FillAttributes = {
+        fill: "none"
+    };
+    if (model.stroke != undefined) {
+        res.fill = model.stroke.color;
+        if (model.stroke.opacity != 1) {
+            res["fill-opacity"] = model.stroke.opacity;
+        }
+    }
+    return res;
+}
+
+/**
  * SVG shape attributes, includes layout and stroke attributes
  */
 export interface ShapeStyleAttributes extends StrokeAttributes, FillAttributes {}

@@ -45,7 +45,7 @@ import svgpath from "svgpath";
  * curve *and* the stroke is widened by it wherever it is derived from a chord, so the approximation
  * can only ever cost content a sliver of room — it can never let content out through a curve.
  */
-const FLATNESS = 0.02;
+export const FLATNESS = 0.02;
 
 /**
  * Ceiling on the chords one curve is cut into, for a curve too large to meet {@link FLATNESS}
@@ -190,7 +190,7 @@ function evaluateCubic(c: Cubic, t: number): Pt {
  * A flattened sub-path. `curved[i]` marks the edge from vertex `i` to vertex `i + 1` as a curve
  * chord, which is the only kind of edge that carries a flattening error.
  */
-interface Polyline {
+export interface Polyline {
     /**
      * The x coordinate of each vertex
      */
@@ -220,7 +220,7 @@ interface Polyline {
  * @param flatness how far a chord may stray from the curve
  * @returns the flattened polyline
  */
-function flattenPath(pathStr: string, closed: boolean, flatness: number): Polyline {
+export function flattenPath(pathStr: string, closed: boolean, flatness: number): Polyline {
     const x: number[] = [];
     const y: number[] = [];
     const curved: boolean[] = [];
@@ -281,7 +281,7 @@ function flattenPath(pathStr: string, closed: boolean, flatness: number): Polyli
  *
  * The pieces are bucketed by height so a query only visits those near it.
  */
-interface StrokeRegion {
+export interface StrokeRegion {
     /**
      * Convex pieces, four vertices each (a triangle repeats its last), x/y interleaved
      */
@@ -697,7 +697,7 @@ function buildBuckets(
  * @param stroke the stroke everything is painted with
  * @returns the stroked region
  */
-function buildStrokeRegion(outline: Polyline, decorations: Polyline[], stroke: ShapeStroke): StrokeRegion {
+export function buildStrokeRegion(outline: Polyline, decorations: Polyline[], stroke: ShapeStroke): StrokeRegion {
     const builder = new StrokeRegionBuilder(stroke);
     builder.add(outline);
     for (const decoration of decorations) {
@@ -807,7 +807,7 @@ function sortBlocked(): void {
  * An index over the flattened outline that answers "which parts of this height are inside" without
  * rescanning every edge. Each non-horizontal edge is bucketed into the cells its y-range covers.
  */
-interface OutlineIndex {
+export interface OutlineIndex {
     /**
      * The flattened outline the index is built over
      */
@@ -837,7 +837,7 @@ interface OutlineIndex {
  * @param line the flattened outline to index
  * @returns the built index
  */
-function buildOutlineIndex(line: Polyline): OutlineIndex {
+export function buildOutlineIndex(line: Polyline): OutlineIndex {
     const count = line.x.length;
     let minY = Infinity;
     let maxY = -Infinity;
@@ -1100,6 +1100,74 @@ function freeSpan(
     span.min = bestMin;
     span.max = bestMax;
     return span.max > span.min;
+}
+
+/**
+ * A half-open interval along the axis a run is measured on
+ */
+export interface Run {
+    /**
+     * Where the interval starts
+     */
+    from: number;
+    /**
+     * Where the interval ends
+     */
+    to: number;
+}
+
+/**
+ * Every free interval of the outline's interior between `ya` and `yb`, rather than only the widest
+ * one {@link freeSpan} keeps. That is the difference between fitting a rectangle — which can only
+ * ever sit in one of them — and drawing a rule, which occupies all of them: a rule crossing a
+ * decoration comes back as two intervals with the decoration's stroke between them, and one crossing
+ * a shape that falls into several lobes at this height comes back once per lobe.
+ *
+ * The interior is read at `ya` alone, exactly as {@link freeSpan} reads it, and for the same reason:
+ * a point inside there that never comes within the stroke of the outline cannot have left the
+ * outline on the way down. Its crossings are read out before the blocked spans are collected, as the
+ * two share no buffer but a nested measurement would overwrite them.
+ *
+ * @param index the index over the flattened outline
+ * @param region the stroked region blocking the intervals
+ * @param ya the top of the band
+ * @param yb the bottom of the band
+ * @returns the free intervals, in order, empty if the band holds nothing
+ */
+export function freeRuns(index: OutlineIndex, region: StrokeRegion, ya: number, yb: number): Run[] {
+    const found = interiorCrossings(index, ya);
+    if (found < 2) {
+        return [];
+    }
+    const interior: number[] = [];
+    for (let i = 0; i < found; i++) {
+        interior.push(crossings[i]);
+    }
+    collectBlocked(region, ya, yb);
+    sortBlocked();
+    const runs: Run[] = [];
+    for (let i = 0; i + 1 < found; i += 2) {
+        let cursor = interior[i];
+        const end = interior[i + 1];
+        for (let s = 0; s < blockedCount && cursor < end; s++) {
+            const lo = blocked[2 * s];
+            const hi = blocked[2 * s + 1];
+            if (hi <= cursor) {
+                continue;
+            }
+            if (lo >= end) {
+                break;
+            }
+            if (lo > cursor) {
+                runs.push({ from: cursor, to: lo });
+            }
+            cursor = hi;
+        }
+        if (end > cursor) {
+            runs.push({ from: cursor, to: end });
+        }
+    }
+    return runs;
 }
 
 /**
