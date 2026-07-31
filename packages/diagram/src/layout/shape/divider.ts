@@ -1,56 +1,64 @@
-import type { OutlineIndex, Polyline, Run, StrokeRegion } from "./contentBox.js";
-import { buildOutlineIndex, buildStrokeRegion, flattenPath, freeRuns, FLATNESS } from "./contentBox.js";
+import { svgPathBbox } from "@hylimo/diagram-common";
+import svgpath from "svgpath";
+import { buildExactRegionFromPath } from "./exactRegion.js";
+import type { ExactRegion } from "./exactRegion.js";
 import { buildShapeClipPath } from "./shapeOutline.js";
 import type { ShapeStroke } from "./types.js";
+
+/**
+ * A half-open interval along the axis a run is measured on
+ */
+export interface Run {
+    /**
+     * Where the interval starts
+     */
+    from: number;
+    /**
+     * Where the interval ends
+     */
+    to: number;
+}
 
 /**
  * Geometry for the dividers of one shape at one solved size.
  *
  * A divider is a rule across the interior of a shape that has to stop at the outline and at every
- * decoration. Both are answered by the machinery the content box already uses: the outline's own
- * stroke and every decoration's stroke are modelled as the region they really cover
- * ({@link buildStrokeRegion}), and the free intervals of a band through that region are exactly the
- * pieces the rule may be drawn as. A decoration therefore blocks a divider by the very mechanism it
- * blocks content by, with nothing shape-specific anywhere.
+ * decoration. Both are answered by the machinery the content box already uses: {@link ExactRegion}
+ * models the outline's own stroke and every decoration's stroke as the material they really cover,
+ * and the free intervals of a band through that region are exactly the pieces the rule may be drawn
+ * as. A decoration therefore blocks a divider by the very mechanism it blocks content by, with
+ * nothing shape-specific anywhere.
  *
- * The whole thing is expensive enough to be worth caching per shape (one flattening, two stroke
- * regions and an inward offset of the ring), while the per-divider query on top of it is a scan over
- * a handful of buckets.
+ * The whole thing is expensive enough to be worth caching per shape (two regions and an inward
+ * offset of the ring), while the per-divider query on top of it is a scan over a handful of pieces.
  */
 export interface DividerGeometry {
     /**
      * The axis the runs of this geometry are measured along. The vertical case is not a second
-     * implementation: the flattened polylines are transposed once, here, and everything below runs
-     * the identical horizontal code — see {@link buildDividerGeometry}.
+     * implementation: the paths are transposed once, here, and everything below runs the identical
+     * horizontal code — see {@link buildDividerGeometry}.
      */
     readonly axis: DividerAxis;
     /**
-     * The flattened outline, in query space
+     * The region the outline and every decoration leave free, in query space, or undefined for an
+     * outline with no extent at all
      */
-    readonly outline: Polyline;
+    readonly region: ExactRegion | undefined;
     /**
-     * The index over {@link outline}, answering which parts of a height are inside
-     */
-    readonly index: OutlineIndex;
-    /**
-     * The region the outline's stroke and every decoration's stroke cover, in query space
-     */
-    readonly region: StrokeRegion;
-    /**
-     * The region the outline's stroke alone covers, which is what tells a run end terminating at the
+     * The region the outline alone leaves free, which is what tells a run end terminating at the
      * border from one terminating at a decoration
      */
-    readonly outlineRegion: StrokeRegion;
+    readonly outlineRegion: ExactRegion | undefined;
     /**
      * The interior of the shape as a closed path in shape-local (not query) coordinates, or
      * undefined for an outline that is not a usable ring
      */
     readonly clipPath: string | undefined;
     /**
-     * {@link clipPath} flattened into query space, which is what the area of a clipped rule is
-     * computed against
+     * {@link clipPath} flattened into query space as interleaved coordinates, which is what the area
+     * of a clipped rule is computed against
      */
-    readonly clipRing: Polyline | undefined;
+    readonly clipRing: number[] | undefined;
     /**
      * The extent of the outline along the run axis. A rule that ends at the border is drawn out to
      * here and terminated by the clip, which is as far as it can ever need to go.
@@ -65,22 +73,17 @@ export interface DividerGeometry {
 export type DividerAxis = "horizontal" | "vertical";
 
 /**
- * Transposes a flattened sub-path, swapping x and y. Running the horizontal code over the transposed
- * geometry answers the vertical question, and the interval it reports back needs no transformation:
- * an interval along the transposed x *is* an interval along the real y.
- *
- * @param line the polyline to transpose
- * @returns the transposed polyline
+ * The matrix that swaps x and y. Running the horizontal code over the transposed geometry answers
+ * the vertical question, and the interval it reports back needs no transformation: an interval
+ * along the transposed x *is* an interval along the real y.
  */
-function transpose(line: Polyline): Polyline {
-    return { x: line.y, y: line.x, curved: line.curved, closed: line.closed };
-}
+const TRANSPOSE: [number, number, number, number, number, number] = [0, 1, 1, 0, 0, 0];
 
 /**
  * Splits a path string into its sub-paths, one per `M` command. The decorations of a shape arrive as
- * one string ({@link decorationsToSvgPath} joins them), and flattening that as a single polyline
- * would invent an edge from the end of one sub-path to the start of the next — a stroke the shape
- * does not have, blocking dividers that should pass.
+ * one string ({@link decorationsToSvgPath} joins them), and taking that as a single sub-path would
+ * invent an edge from the end of one to the start of the next — a stroke the shape does not have,
+ * blocking dividers that should pass.
  *
  * @param path the path string to split
  * @returns the sub-path strings, in order
@@ -113,36 +116,45 @@ export function buildDividerGeometry(
     stroke: ShapeStroke,
     axis: DividerAxis
 ): DividerGeometry {
-    const vertical = axis === "vertical";
-    const raw = flattenPath(path, true, FLATNESS);
-    const outline = vertical ? transpose(raw) : raw;
-    const decorations = (decoration != undefined ? subPaths(decoration) : []).map((part) => {
-        const line = flattenPath(part, false, FLATNESS);
-        return vertical ? transpose(line) : line;
-    });
-    const outlineRegion = buildStrokeRegion(outline, [], stroke);
-    let from = Infinity;
-    let to = -Infinity;
-    for (const value of outline.x) {
-        from = Math.min(from, value);
-        to = Math.max(to, value);
-    }
+    const toQuerySpace = (subject: string): string =>
+        axis === "vertical" ? svgpath(subject).matrix(TRANSPOSE).toString() : subject;
+    const outlinePath = toQuerySpace(path);
+    const decorations = (decoration != undefined ? subPaths(decoration) : []).map((part) => ({
+        path: toQuerySpace(part),
+        closed: false
+    }));
+    const outlineRegion = buildExactRegionFromPath(outlinePath, [], stroke);
     const clipPath = buildShapeClipPath(path, stroke);
-    let clipRing: Polyline | undefined = undefined;
-    if (clipPath != undefined) {
-        const flattened = flattenPath(clipPath, true, FLATNESS);
-        clipRing = vertical ? transpose(flattened) : flattened;
-    }
+    const box = svgPathBbox(outlinePath, undefined);
     return {
         axis,
-        outline,
-        index: buildOutlineIndex(outline),
-        region: decorations.length > 0 ? buildStrokeRegion(outline, decorations, stroke) : outlineRegion,
+        region: decorations.length > 0 ? buildExactRegionFromPath(outlinePath, decorations, stroke) : outlineRegion,
         outlineRegion,
         clipPath,
-        clipRing,
-        bounds: { from, to }
+        clipRing: clipPath != undefined ? flattenRing(toQuerySpace(clipPath)) : undefined,
+        bounds: { from: box.x, to: box.x + box.width }
     };
+}
+
+/**
+ * The free intervals of a band through a region, as the runs a rule may be drawn as
+ *
+ * @param region the region to query, or undefined for a shape with no geometry to measure
+ * @param from the near edge of the band
+ * @param to the far edge of the band
+ * @returns the free intervals, in order
+ */
+function freeRuns(region: ExactRegion | undefined, from: number, to: number): Run[] {
+    if (region == undefined) {
+        return [];
+    }
+    const found: number[] = [];
+    region.runs(from, to, found);
+    const runs: Run[] = [];
+    for (let i = 0; i + 1 < found.length; i += 2) {
+        runs.push({ from: found[i], to: found[i + 1] });
+    }
+    return runs;
 }
 
 /**
@@ -183,7 +195,7 @@ export function dividerRuns(
         throw new Error(`divider geometry was built for ${geometry.axis} runs, not ${axis}`);
     }
     const half = Math.max(thickness, 0) / 2;
-    const runs = freeRuns(geometry.index, geometry.region, coordinate - half, coordinate + half);
+    const runs = freeRuns(geometry.region, coordinate - half, coordinate + half);
     const reached = runs.filter((run) => run.to > span.from + RUN_EPSILON && run.from < span.to - RUN_EPSILON);
     return reached.length > 0 ? reached : runs;
 }
@@ -215,12 +227,12 @@ export function dividerRuns(
  * @param thickness the thickness of the divider
  * @returns the extended runs
  */
-export function overshootRuns(geometry: DividerGeometry, runs: Run[], coordinate: number, thickness: number): Run[] {
+function overshootRuns(geometry: DividerGeometry, runs: Run[], coordinate: number, thickness: number): Run[] {
     if (runs.length === 0) {
         return runs;
     }
     const half = Math.max(thickness, 0) / 2;
-    const lobes = freeRuns(geometry.index, geometry.outlineRegion, coordinate - half, coordinate + half);
+    const lobes = freeRuns(geometry.outlineRegion, coordinate - half, coordinate + half);
     return runs.map((run) => {
         const index = lobes.findIndex((lobe) => lobe.from <= run.from + RUN_EPSILON && lobe.to >= run.to - RUN_EPSILON);
         if (index < 0) {
@@ -390,18 +402,14 @@ function dashRuns(run: Run, dash: DividerDash | undefined): Run[] {
  * own border. Those enclose no area, so the result fills exactly as the pieces would — which is all
  * it is ever used for.
  *
- * @param ring the closed polyline to clip
+ * @param ring the closed polygon to clip, as interleaved coordinates
  * @param run the extent of the rectangle along the run axis
  * @param top the near edge of the rectangle across the run axis
  * @param bottom the far edge of the rectangle across the run axis
  * @returns the clipped polygon, as interleaved coordinates
  */
-function clipToRectangle(ring: Polyline, run: Run, top: number, bottom: number): number[] {
-    let polygon: number[] = [];
-    for (let i = 0; i < ring.x.length; i++) {
-        polygon.push(ring.x[i], ring.y[i]);
-    }
-    polygon = clipHalfPlane(polygon, 0, run.from, false);
+function clipToRectangle(ring: readonly number[], run: Run, top: number, bottom: number): number[] {
+    let polygon = clipHalfPlane(ring, 0, run.from, false);
     polygon = clipHalfPlane(polygon, 0, run.to, true);
     polygon = clipHalfPlane(polygon, 1, top, false);
     polygon = clipHalfPlane(polygon, 1, bottom, true);
@@ -418,7 +426,7 @@ function clipToRectangle(ring: Polyline, run: Run, top: number, bottom: number):
  * @param keepBelow whether to keep what is below the line rather than what is above it
  * @returns the clipped polygon, as interleaved coordinates
  */
-function clipHalfPlane(polygon: number[], axis: 0 | 1, bound: number, keepBelow: boolean): number[] {
+function clipHalfPlane(polygon: readonly number[], axis: 0 | 1, bound: number, keepBelow: boolean): number[] {
     const count = polygon.length / 2;
     const result: number[] = [];
     if (count === 0) {
@@ -503,7 +511,7 @@ function format(value: number): string {
  * @param coordinate the position of the divider on the axis across the runs
  * @returns the SVG path string, empty if there are no runs
  */
-export function runsToSvgPath(runs: Run[], axis: DividerAxis, coordinate: number): string {
+function runsToSvgPath(runs: Run[], axis: DividerAxis, coordinate: number): string {
     return runs
         .map((run) =>
             axis === "horizontal"
@@ -536,4 +544,81 @@ function polygonToSvgPath(polygon: number[], axis: DividerAxis): string {
         lastY = y;
     }
     return parts.length < 3 ? "" : `${parts.join(" ")} Z`;
+}
+
+/**
+ * How far (px) a chord of the flattened clip ring may stray from the curve it stands in for.
+ *
+ * The ring is the one polyline left anywhere in the shape layout, and it is not a measurement: it
+ * only ever decides how much *area* a clipped rule covers, and whether that area is a plain
+ * rectangle. A curved border fails the rectangle test at any tolerance, and a straight one is
+ * reproduced exactly, so this only has to be fine enough that the filled region looks right.
+ */
+const CLIP_FLATNESS = 0.02;
+
+/**
+ * Ceiling on the chords one curve is cut into, for a curve too large to meet {@link CLIP_FLATNESS}
+ */
+const MAX_CURVE_CHORDS = 512;
+
+/**
+ * Flattens a closed path into the polygon it encloses. Arcs and the two reflected curve commands
+ * are spelled out by svgpath first, so this sees nothing but lines and Béziers, and a curve is cut
+ * into as many chords as its own second derivative asks for: a polyline taken at `n` equal steps of
+ * `t` is off by at most `max|p''| / (8n²)`, and `max|p''|` is bounded by the control points. A
+ * quadratic is raised to the cubic drawing exactly the same curve, so one code path covers both.
+ *
+ * @param pathStr the closed path to flatten
+ * @returns the polygon, as interleaved coordinates
+ */
+function flattenRing(pathStr: string): number[] {
+    const ring: number[] = [];
+    const cubic = (p: number[]): void => {
+        const ax = p[0] - 2 * p[2] + p[4];
+        const ay = p[1] - 2 * p[3] + p[5];
+        const bx = p[2] - 2 * p[4] + p[6];
+        const by = p[3] - 2 * p[5] + p[7];
+        const second = 6 * Math.sqrt(Math.max(ax * ax + ay * ay, bx * bx + by * by));
+        const chords =
+            second > 0
+                ? Math.max(1, Math.min(MAX_CURVE_CHORDS, Math.ceil(Math.sqrt(second / (8 * CLIP_FLATNESS)))))
+                : 1;
+        for (let k = 1; k <= chords; k++) {
+            const t = k / chords;
+            const mt = 1 - t;
+            const wa = mt * mt * mt;
+            const wb = 3 * mt * mt * t;
+            const wc = 3 * mt * t * t;
+            const wd = t * t * t;
+            ring.push(wa * p[0] + wb * p[2] + wc * p[4] + wd * p[6], wa * p[1] + wb * p[3] + wc * p[5] + wd * p[7]);
+        }
+    };
+    svgpath(pathStr)
+        .abs()
+        .unshort()
+        .unarc()
+        .iterate((seg, _index, penX, penY) => {
+            const cmd = seg[0];
+            if (cmd === "M" || cmd === "L") {
+                ring.push(seg[1], seg[2]);
+            } else if (cmd === "H") {
+                ring.push(seg[1], penY);
+            } else if (cmd === "V") {
+                ring.push(penX, seg[1]);
+            } else if (cmd === "C") {
+                cubic([penX, penY, seg[1], seg[2], seg[3], seg[4], seg[5], seg[6]]);
+            } else if (cmd === "Q") {
+                cubic([
+                    penX,
+                    penY,
+                    penX + (2 / 3) * (seg[1] - penX),
+                    penY + (2 / 3) * (seg[2] - penY),
+                    seg[3] + (2 / 3) * (seg[1] - seg[3]),
+                    seg[4] + (2 / 3) * (seg[2] - seg[4]),
+                    seg[3],
+                    seg[4]
+                ]);
+            }
+        });
+    return ring;
 }

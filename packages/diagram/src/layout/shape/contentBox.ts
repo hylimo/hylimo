@@ -1,728 +1,49 @@
-import type { ShapeIR, Pt } from "./shapeIr.js";
+import type { ShapeIR } from "./shapeIr.js";
 import { evaluateDecorations, evaluateVertices } from "./shapeIr.js";
-import { decorationToSvgPath, outlineToSvgPath } from "./geometry.js";
-import { LineJoin, LineCap } from "./types.js";
+
 import type { ShapeStroke, Box } from "./types.js";
-import svgpath from "svgpath";
+import { buildExactRegion } from "./exactRegion.js";
+import type { ExactRegion, Span } from "./exactRegion.js";
 
 /**
  * Content fitting for a shape outline.
  *
- * Content may go anywhere inside the outline that the stroke does not already cover. The stroke is
- * taken as the region it really is — a rectangle per segment, a wedge per join, a cap per open end
- * ({@link buildStrokeRegion}) — rather than as a distance the outline is shrunk by, because no
- * single shrink is right: pulling a scanline's interval in by the half-width is exact against a
- * vertical boundary, leaves `half/√2` against a diagonal one, and does nothing at all against a
- * boundary running along the scanline, such as the crest of a wavy edge.
+ * Content may go anywhere inside the outline that the stroke does not already cover. Where that is
+ * lives entirely in {@link ExactRegion}, which measures it on the segments, arcs and curves the
+ * renderer draws; this module is the search on top of it, and it answers the two questions the
+ * layout asks:
+ * - given the outer size, the largest inscribed rectangle ({@link bestContentBox}),
+ * - given the content, how wide a band of the content's height would be ({@link widestBand}), which
+ *   is the constraint the `inner` solver minimises the shape's area against.
  *
- * Everything is then derived from one data structure, the {@link ContentProfile}: the outline is cut
- * into {@link SCANLINES} horizontal slabs, each recording the widest interval that is free — inside
- * the outline and clear of the stroke — over the *whole* slab, not just at one height. A rectangle
- * fits exactly when it stays inside the free interval of every slab it covers, so an inscribed
- * rectangle is a *band* of slabs, its width the narrowest free interval over that band. Because a
- * slab's interval already accounts for everything between its two edges, a band can miss nothing
- * that happens between samples, and the rectangle it yields is guaranteed clear of the stroke.
+ * Both go through one data structure, the {@link ContentProfile}: the shape cut into horizontal
+ * slabs, each recording the widest interval that is free over the *whole* slab rather than at one
+ * height. A rectangle fits exactly when it stays inside the free interval of every slab it covers,
+ * so an inscribed rectangle is a *band* of slabs, its width the narrowest free interval over that
+ * band.
  *
- * That reduces both questions the layout asks to a scan over bands:
- * - given the outer size, the largest content box is the band of maximal area
- *   ({@link bestContentBox}), refined to the exact height its constraint binds at,
- * - given the content, the smallest outer size is searched for by asking how wide a band of the
- *   content's height would be ({@link widestBand}), which is the constraint the `inner` solver
- *   minimises the shape's area against.
+ * The slabs are cut at the shape's own breakpoints ({@link ExactRegion.candidates}) rather than at
+ * a chosen resolution, and that is what makes a slab exact rather than a conservative sample of
+ * itself: no piece of the outline or of the stroke begins or ends inside one, so every boundary
+ * bounding it is a single smooth monotone branch and the slab holds precisely what its two edges
+ * say. A default shape needs 2 to 14 of them.
  *
- * The slabs sit at fixed *fractions* of the outline's height, and every outline coordinate is affine
- * in the box, so every band measurement is a smooth function of the box — the fixpoint sees no
- * sampling jitter as it moves.
+ * Neither answer can be read off the slabs alone, because neither optimum has to sit on a
+ * breakpoint — a diamond's widest band does not, and an ellipse's largest rectangle has its edges
+ * at `h/(2√2)`, where nothing whatsoever happens to the outline. So both are searched rather than
+ * enumerated, each bounded from the profile so that only a handful of positions is ever measured.
  *
- * A slab may well be cut into several free intervals — a wavy lower edge leaves a lobe at either end
- * just below its crest — and only one of them is recorded, the widest. That can under-use a shape
- * whose lobes trade places from one slab to the next, but it can never over-use one: whichever
- * interval a slab contributes is genuinely free, so any band, being their intersection, is free too.
+ * A slab may well be cut into several free intervals — a wavy lower edge leaves a lobe at either
+ * end just below its crest — and only one of them is recorded, the widest. That can under-use a
+ * shape whose lobes trade places from one slab to the next, but it can never over-use one:
+ * whichever interval a slab contributes is genuinely free, so any band, being their intersection,
+ * is free too.
  */
 
 /**
- * How far (px) a flattened curve may stray from the true one. Every chord is kept within this of the
- * curve *and* the stroke is widened by it wherever it is derived from a chord, so the approximation
- * can only ever cost content a sliver of room — it can never let content out through a curve.
+ * Tolerance (px) for the "at least this wide/tall" comparisons
  */
-export const FLATNESS = 0.02;
-
-/**
- * Ceiling on the chords one curve is cut into, for a curve too large to meet {@link FLATNESS}
- */
-const MAX_CURVE_CHORDS = 512;
-
-/**
- * The number of chords a curve needs to stay within {@link FLATNESS} of it, from a bound on its
- * second derivative: a polyline taken at `n` equal steps of `t` is off by at most `max|p''| / (8n²)`.
- * The bound comes from the control points themselves — the same way {@link svgPathBbox} reads a
- * curve's extrema off its coefficients instead of sampling for them — so the count is a property of
- * the curve rather than of a chosen resolution, and a curve split in two (as `unarc` splits an arc,
- * once or twice depending on its sweep) is flattened to the same fidelity either way.
- *
- * @param secondDerivative a bound on `max|p''|` of the curve
- * @param flatness how far the chords may stray from the curve
- * @returns the number of chords to cut the curve into
- */
-function chordCount(secondDerivative: number, flatness: number): number {
-    if (!(secondDerivative > 0)) {
-        return 1;
-    }
-    const exact = Math.ceil(Math.sqrt(secondDerivative / (8 * flatness)));
-    return Math.max(1, Math.min(MAX_CURVE_CHORDS, exact));
-}
-
-/**
- * Computes `max|p''|` of a cubic: `6 · max(|p0 - 2c1 + c2|, |c1 - 2c2 + p1|)`
- *
- * @param p0 the start point
- * @param c1 the first control point
- * @param c2 the second control point
- * @param p1 the end point
- * @returns the bound on the second derivative
- */
-function cubicSecondDerivative(p0: Pt, c1: Pt, c2: Pt, p1: Pt): number {
-    const ax = p0.x - 2 * c1.x + c2.x;
-    const ay = p0.y - 2 * c1.y + c2.y;
-    const bx = c1.x - 2 * c2.x + p1.x;
-    const by = c1.y - 2 * c2.y + p1.y;
-    return 6 * Math.sqrt(Math.max(ax * ax + ay * ay, bx * bx + by * by));
-}
-
-/**
- * A cubic Bézier, as the pieces one authored curve is made of
- */
-interface Cubic {
-    /**
-     * The start point
-     */
-    readonly p0: Pt;
-    /**
-     * The first control point
-     */
-    readonly c1: Pt;
-    /**
-     * The second control point
-     */
-    readonly c2: Pt;
-    /**
-     * The end point
-     */
-    readonly p1: Pt;
-}
-
-/**
- * Raises a quadratic to the cubic that draws exactly the same curve, so one code path samples every
- * curved edge. Degree elevation is exact, and the elevated control points give back the quadratic's
- * own `|p''|` — both differences come out as `(p0 - 2c1 + p1) / 3` — so the chord count is unchanged.
- *
- * @param p0 the start point
- * @param c1 the control point
- * @param p1 the end point
- * @returns the equivalent cubic
- */
-function quadToCubic(p0: Pt, c1: Pt, p1: Pt): Cubic {
-    return {
-        p0,
-        c1: { x: (p0.x + 2 * c1.x) / 3, y: (p0.y + 2 * c1.y) / 3 },
-        c2: { x: (p1.x + 2 * c1.x) / 3, y: (p1.y + 2 * c1.y) / 3 },
-        p1
-    };
-}
-
-/**
- * Converts one arc into the cubics svgpath's `unarc` would produce for it — the same conversion the
- * renderer's own path goes through. Returns an empty list for a degenerate arc (coincident endpoints,
- * or a zero radius), which SVG draws as a straight line.
- *
- * The run's ends are pinned to the arc's own endpoints, which the conversion otherwise only lands on
- * to about `1e-6` px: an arc that spans exactly a quarter of its ellipse leaves the center it solves
- * for as the square root of a cancelled-out zero, and that halves the digits. An arc *ends where it
- * says it ends*, and a closed ring has to come back to the point it started at exactly, or the
- * profile is walked with a sliver of a segment that the shape does not have.
- *
- * @param from the current pen position
- * @param seg the absolute arc segment, as `A rx ry rotation largeArc sweep x y`
- * @returns the cubics the arc is made of, in order
- */
-function arcToCubics(from: Pt, seg: (string | number)[]): Cubic[] {
-    const [, rx, ry, rotation, largeArc, sweep, x, y] = seg as [string, ...number[]];
-    const cubics: Cubic[] = [];
-    svgpath(`M ${from.x} ${from.y} A ${rx} ${ry} ${rotation} ${largeArc} ${sweep} ${x} ${y}`)
-        .unarc()
-        .iterate((s, _index, penX, penY) => {
-            if (s[0] === "C") {
-                cubics.push({
-                    p0: { x: penX, y: penY },
-                    c1: { x: s[1], y: s[2] },
-                    c2: { x: s[3], y: s[4] },
-                    p1: { x: s[5], y: s[6] }
-                });
-            }
-        });
-    if (cubics.length > 0) {
-        cubics[0] = { ...cubics[0], p0: from };
-        cubics[cubics.length - 1] = { ...cubics[cubics.length - 1], p1: { x, y } };
-    }
-    return cubics;
-}
-
-/**
- * Evaluates a cubic at `t`
- *
- * @param c the cubic to evaluate
- * @param t the parameter to evaluate at, between 0 and 1
- * @returns the point on the curve
- */
-function evaluateCubic(c: Cubic, t: number): Pt {
-    const mt = 1 - t;
-    const wa = mt * mt * mt;
-    const wb = 3 * mt * mt * t;
-    const wc = 3 * mt * t * t;
-    const wd = t * t * t;
-    return {
-        x: wa * c.p0.x + wb * c.c1.x + wc * c.c2.x + wd * c.p1.x,
-        y: wa * c.p0.y + wb * c.c1.y + wc * c.c2.y + wd * c.p1.y
-    };
-}
-
-/**
- * A flattened sub-path. `curved[i]` marks the edge from vertex `i` to vertex `i + 1` as a curve
- * chord, which is the only kind of edge that carries a flattening error.
- */
-export interface Polyline {
-    /**
-     * The x coordinate of each vertex
-     */
-    readonly x: number[];
-    /**
-     * The y coordinate of each vertex
-     */
-    readonly y: number[];
-    /**
-     * Whether the edge leaving each vertex is a curve chord
-     */
-    readonly curved: boolean[];
-    /**
-     * Whether the sub-path closes back to its first vertex
-     */
-    readonly closed: boolean;
-}
-
-/**
- * Samples an SVG path into a polyline, cutting each curve into as many chords as it takes to stay
- * within `flatness` of it. Curves go through exactly the conversion the renderer's own path does
- * (arcs to cubics by svgpath), so anything fitted to these points tracks the same curve the user
- * sees — no separate arc math to drift out of sync.
- *
- * @param pathStr the path to flatten
- * @param closed whether the sub-path closes back to its first vertex
- * @param flatness how far a chord may stray from the curve
- * @returns the flattened polyline
- */
-export function flattenPath(pathStr: string, closed: boolean, flatness: number): Polyline {
-    const x: number[] = [];
-    const y: number[] = [];
-    const curved: boolean[] = [];
-    const push = (px: number, py: number, isCurve: boolean): void => {
-        if (x.length > 0) {
-            curved.push(isCurve);
-        }
-        x.push(px);
-        y.push(py);
-    };
-    const pushCurve = (cubics: Cubic[]): void => {
-        for (const cubic of cubics) {
-            const chords = chordCount(cubicSecondDerivative(cubic.p0, cubic.c1, cubic.c2, cubic.p1), flatness);
-            for (let k = 1; k <= chords; k++) {
-                const point = evaluateCubic(cubic, k / chords);
-                push(point.x, point.y, true);
-            }
-        }
-    };
-    svgpath(pathStr)
-        .abs()
-        .iterate((seg, _index, penX, penY) => {
-            const cmd = seg[0];
-            if (cmd === "M" || cmd === "L") {
-                push(seg[1], seg[2], false);
-            } else if (cmd === "H") {
-                push(seg[1], penY, false);
-            } else if (cmd === "V") {
-                push(penX, seg[1], false);
-            } else if (cmd === "C") {
-                pushCurve([
-                    {
-                        p0: { x: penX, y: penY },
-                        c1: { x: seg[1], y: seg[2] },
-                        c2: { x: seg[3], y: seg[4] },
-                        p1: { x: seg[5], y: seg[6] }
-                    }
-                ]);
-            } else if (cmd === "Q") {
-                pushCurve([quadToCubic({ x: penX, y: penY }, { x: seg[1], y: seg[2] }, { x: seg[3], y: seg[4] })]);
-            } else if (cmd === "A") {
-                const cubics = arcToCubics({ x: penX, y: penY }, seg);
-                if (cubics.length === 0) {
-                    push(seg[6], seg[7], false);
-                } else {
-                    pushCurve(cubics);
-                }
-            }
-        });
-    return { x, y, curved, closed };
-}
-
-/**
- * The region the stroke covers, kept as the convex pieces it is made of: a rectangle per segment,
- * and per join or cap either a wedge (a quad for a miter, a triangle for a bevel) or a disc (a round
- * join or cap). Every piece is convex, so the span it blocks across a slab is an interval that falls
- * out of clipping it to that slab — which is what makes an exact answer cheap.
- *
- * The pieces are bucketed by height so a query only visits those near it.
- */
-export interface StrokeRegion {
-    /**
-     * Convex pieces, four vertices each (a triangle repeats its last), x/y interleaved
-     */
-    readonly polygons: Float64Array;
-    /**
-     * How many convex pieces {@link polygons} holds
-     */
-    readonly polygonCount: number;
-    /**
-     * Discs, as `cx, cy, r`
-     */
-    readonly discs: Float64Array;
-    /**
-     * How many discs {@link discs} holds
-     */
-    readonly discCount: number;
-    /**
-     * Top of the bucketed y-range
-     */
-    readonly minY: number;
-    /**
-     * Height of one bucket cell
-     */
-    readonly yStep: number;
-    /**
-     * The convex pieces bucketed by height
-     */
-    readonly polygonBuckets: BucketIndex;
-    /**
-     * The discs bucketed by height
-     */
-    readonly discBuckets: BucketIndex;
-}
-
-/**
- * Vertices per convex piece
- */
-const POLYGON_VERTICES = 4;
-/**
- * Offset of a convex piece's cached bounding box (minX, maxX, minY, maxY) within its record
- */
-const POLYGON_BOUNDS = POLYGON_VERTICES * 2;
-/**
- * Numbers one convex piece occupies: its vertices followed by its cached bounding box
- */
-const POLYGON_STRIDE = POLYGON_BOUNDS + 4;
-/**
- * Numbers one disc occupies
- */
-const DISC_STRIDE = 3;
-
-/**
- * Number of cells the stroke pieces and the outline edges are bucketed into. Building the profile is
- * the hottest thing the fixpoint does — one query per slab, every iteration — and rescanning every
- * piece per query would dominate.
- */
-const SPAN_BUCKETS = 128;
-
-/**
- * Tolerance for the "touches but does not overlap" comparisons; a stroke's edge is not inside it
- */
-const TOUCH_EPSILON = 1e-9;
-
-/**
- * How far (px) a join may reach past the segments it joins before it is worth modelling at all
- */
-const JOIN_EPSILON = 1e-3;
-
-/**
- * Computes the cell index of a coordinate on an axis spanning `[min, min + step*SPAN_BUCKETS]`
- *
- * @param v the coordinate to look up
- * @param min the start of the bucketed range
- * @param step the height of one cell
- * @returns the cell index, clamped to the bucketed range
- */
-function cellIndex(v: number, min: number, step: number): number {
-    if (!(step > 0)) {
-        return 0;
-    }
-    const c = Math.floor((v - min) / step);
-    return c < 0 ? 0 : c > SPAN_BUCKETS ? SPAN_BUCKETS : c;
-}
-
-/**
- * Collects the convex pieces of a stroke, growing its buffers as it goes
- */
-class StrokeRegionBuilder {
-    /**
-     * The convex pieces collected so far, x/y interleaved and followed by the cached bounding box
-     */
-    private polygons = new Float64Array(64 * POLYGON_STRIDE);
-    /**
-     * How many convex pieces {@link polygons} holds
-     */
-    private polygonCount = 0;
-    /**
-     * The discs collected so far, as `cx, cy, r`
-     */
-    private discs = new Float64Array(64 * DISC_STRIDE);
-    /**
-     * How many discs {@link discs} holds
-     */
-    private discCount = 0;
-
-    /**
-     * Creates a new builder for a stroke
-     *
-     * @param stroke the stroke whose region is built
-     */
-    constructor(private readonly stroke: ShapeStroke) {}
-
-    /**
-     * Appends a convex piece and its bounding box, growing the buffer if needed.
-     * A triangle is passed as a quad which repeats its last vertex.
-     *
-     * @param x0 the x coordinate of the first vertex
-     * @param y0 the y coordinate of the first vertex
-     * @param x1 the x coordinate of the second vertex
-     * @param y1 the y coordinate of the second vertex
-     * @param x2 the x coordinate of the third vertex
-     * @param y2 the y coordinate of the third vertex
-     * @param x3 the x coordinate of the fourth vertex
-     * @param y3 the y coordinate of the fourth vertex
-     */
-    private addPolygon(
-        x0: number,
-        y0: number,
-        x1: number,
-        y1: number,
-        x2: number,
-        y2: number,
-        x3: number,
-        y3: number
-    ): void {
-        if (this.polygonCount * POLYGON_STRIDE === this.polygons.length) {
-            const grown = new Float64Array(this.polygons.length * 2);
-            grown.set(this.polygons);
-            this.polygons = grown;
-        }
-        const o = this.polygonCount * POLYGON_STRIDE;
-        this.polygons[o] = x0;
-        this.polygons[o + 1] = y0;
-        this.polygons[o + 2] = x1;
-        this.polygons[o + 3] = y1;
-        this.polygons[o + 4] = x2;
-        this.polygons[o + 5] = y2;
-        this.polygons[o + 6] = x3;
-        this.polygons[o + 7] = y3;
-        this.polygons[o + POLYGON_BOUNDS] = Math.min(x0, x1, x2, x3);
-        this.polygons[o + POLYGON_BOUNDS + 1] = Math.max(x0, x1, x2, x3);
-        this.polygons[o + POLYGON_BOUNDS + 2] = Math.min(y0, y1, y2, y3);
-        this.polygons[o + POLYGON_BOUNDS + 3] = Math.max(y0, y1, y2, y3);
-        this.polygonCount++;
-    }
-
-    /**
-     * Appends a disc, growing the buffer if needed
-     *
-     * @param cx the x coordinate of the center
-     * @param cy the y coordinate of the center
-     * @param r the radius
-     */
-    private addDisc(cx: number, cy: number, r: number): void {
-        if (this.discCount * DISC_STRIDE === this.discs.length) {
-            const grown = new Float64Array(this.discs.length * 2);
-            grown.set(this.discs);
-            this.discs = grown;
-        }
-        const o = this.discCount * DISC_STRIDE;
-        this.discs[o] = cx;
-        this.discs[o + 1] = cy;
-        this.discs[o + 2] = r;
-        this.discCount++;
-    }
-
-    /**
-     * Adds the stroke of one sub-path: a rectangle per segment, a wedge or disc per join, and the
-     * caps of an open end. A join only ever adds material on the *outside* of its turn — on the
-     * inside the two segment rectangles already overlap — which is why the wedge is built from the
-     * outward normals of the two edges.
-     *
-     * @param line the flattened sub-path to stroke
-     */
-    add(line: Polyline): void {
-        const { x, y, curved, closed } = line;
-        const count = x.length;
-        if (count < 2) {
-            return;
-        }
-        const half = this.stroke.width / 2;
-        const edges = closed ? count : count - 1;
-        /**
-         * Radius the edge leaving vertex `i` is stroked with, the flattening allowance included
-         */
-        const radiusOf = (i: number): number => half + (curved[i] === true ? FLATNESS : 0);
-        for (let i = 0; i < edges; i++) {
-            const j = (i + 1) % count;
-            let ax = x[i];
-            let ay = y[i];
-            let bx = x[j];
-            let by = y[j];
-            const length = Math.sqrt((bx - ax) * (bx - ax) + (by - ay) * (by - ay));
-            if (length < TOUCH_EPSILON) {
-                continue;
-            }
-            const dx = (bx - ax) / length;
-            const dy = (by - ay) / length;
-            const r = radiusOf(i);
-            if (this.stroke.lineCap === LineCap.Square && !closed) {
-                if (i === 0) {
-                    ax -= dx * half;
-                    ay -= dy * half;
-                }
-                if (i === edges - 1) {
-                    bx += dx * half;
-                    by += dy * half;
-                }
-            }
-            const nx = -dy * r;
-            const ny = dx * r;
-            this.addPolygon(ax + nx, ay + ny, bx + nx, by + ny, bx - nx, by - ny, ax - nx, ay - ny);
-        }
-        const joins = closed ? count : count - 2;
-        for (let k = 0; k < joins; k++) {
-            const v = closed ? k : k + 1;
-            const u = (v - 1 + count) % count;
-            const w = (v + 1) % count;
-            this.addJoin(x[u], y[u], x[v], y[v], x[w], y[w], Math.max(radiusOf(u), radiusOf(v)));
-        }
-        if (!closed && this.stroke.lineCap === LineCap.Round) {
-            this.addDisc(x[0], y[0], half);
-            this.addDisc(x[count - 1], y[count - 1], half);
-        }
-    }
-
-    /**
-     * Adds the material a join covers on the outside of its turn: a disc for a round join, the quad up
-     * to the miter tip for a miter within its limit, and the triangle between the two offset corners
-     * for a bevel or a miter past its limit.
-     *
-     * A turn gentle enough that its miter barely reaches past the segments — every vertex a flattened
-     * curve is made of — is skipped: the notch it leaves between the two segment rectangles is
-     * shallower than the join is wide, and filling it would double the pieces the profile has to walk
-     * for a fraction of the flattening tolerance.
-     *
-     * @param ux the x coordinate of the vertex the arriving edge starts at
-     * @param uy the y coordinate of the vertex the arriving edge starts at
-     * @param vx the x coordinate of the vertex the join sits at
-     * @param vy the y coordinate of the vertex the join sits at
-     * @param wx the x coordinate of the vertex the leaving edge ends at
-     * @param wy the y coordinate of the vertex the leaving edge ends at
-     * @param r the radius the join is as wide as
-     */
-    private addJoin(ux: number, uy: number, vx: number, vy: number, wx: number, wy: number, r: number): void {
-        const inLength = Math.sqrt((vx - ux) * (vx - ux) + (vy - uy) * (vy - uy));
-        const outLength = Math.sqrt((wx - vx) * (wx - vx) + (wy - vy) * (wy - vy));
-        if (inLength < TOUCH_EPSILON || outLength < TOUCH_EPSILON) {
-            return;
-        }
-        const d1x = (vx - ux) / inLength;
-        const d1y = (vy - uy) / inLength;
-        const d2x = (wx - vx) / outLength;
-        const d2y = (wy - vy) / outLength;
-        const cross = d1x * d2y - d1y * d2x;
-        if (Math.abs(cross) < TOUCH_EPSILON) {
-            return;
-        }
-        if (this.stroke.lineJoin === LineJoin.Round) {
-            this.addDisc(vx, vy, r);
-            return;
-        }
-        const s = cross > 0 ? 1 : -1;
-        const n1x = s * d1y * r;
-        const n1y = -s * d1x * r;
-        const n2x = s * d2y * r;
-        const n2y = -s * d2x * r;
-        const p1x = vx + n1x;
-        const p1y = vy + n1y;
-        const p2x = vx + n2x;
-        const p2y = vy + n2y;
-        if (this.stroke.lineJoin === LineJoin.Miter) {
-            const t = ((p2x - p1x) * d2y - (p2y - p1y) * d2x) / cross;
-            const tipX = p1x + d1x * t;
-            const tipY = p1y + d1y * t;
-            const miter = Math.sqrt((tipX - vx) * (tipX - vx) + (tipY - vy) * (tipY - vy));
-            if (miter - r < JOIN_EPSILON) {
-                return;
-            }
-            if (miter <= this.stroke.miterLimit * (this.stroke.width / 2) + TOUCH_EPSILON) {
-                this.addPolygon(vx, vy, p1x, p1y, tipX, tipY, p2x, p2y);
-                return;
-            }
-        }
-        this.addPolygon(vx, vy, p1x, p1y, p2x, p2y, p2x, p2y);
-    }
-
-    /**
-     * Buckets everything collected so far by height and hands out the finished region
-     *
-     * @returns the stroked region
-     */
-    build(): StrokeRegion {
-        let minY = Infinity;
-        let maxY = -Infinity;
-        for (let i = 0; i < this.polygonCount; i++) {
-            const o = i * POLYGON_STRIDE + POLYGON_BOUNDS;
-            minY = Math.min(minY, this.polygons[o + 2]);
-            maxY = Math.max(maxY, this.polygons[o + 3]);
-        }
-        for (let i = 0; i < this.discCount * DISC_STRIDE; i += DISC_STRIDE) {
-            minY = Math.min(minY, this.discs[i + 1] - this.discs[i + 2]);
-            maxY = Math.max(maxY, this.discs[i + 1] + this.discs[i + 2]);
-        }
-        const yStep = (maxY - minY) / SPAN_BUCKETS;
-        const polygons = this.polygons;
-        const discs = this.discs;
-        const polygonBuckets = buildBuckets(this.polygonCount, minY, yStep, (i, out) => {
-            const o = i * POLYGON_STRIDE + POLYGON_BOUNDS;
-            out[0] = polygons[o + 2];
-            out[1] = polygons[o + 3];
-        });
-        const discBuckets = buildBuckets(this.discCount, minY, yStep, (i, out) => {
-            const o = i * DISC_STRIDE;
-            out[0] = discs[o + 1] - discs[o + 2];
-            out[1] = discs[o + 1] + discs[o + 2];
-        });
-        return {
-            polygons: this.polygons,
-            polygonCount: this.polygonCount,
-            discs: this.discs,
-            discCount: this.discCount,
-            minY,
-            yStep,
-            polygonBuckets,
-            discBuckets
-        };
-    }
-}
-
-/**
- * Items bucketed by height, flat: the ids in cell `c` are `items[offsets[c] .. offsets[c + 1])`. A
- * query runs the hottest loop there is here, so it walks a typed array by index rather than an array
- * of arrays by iterator.
- */
-interface BucketIndex {
-    /**
-     * Where each cell starts in {@link items}, with one extra entry holding the total
-     */
-    readonly offsets: Int32Array;
-    /**
-     * The item ids, grouped by cell
-     */
-    readonly items: Int32Array;
-}
-
-/**
- * Builds a {@link BucketIndex} over `count` items. An item with no extent at all, such as a horizontal
- * edge which can never be crossed, is left out entirely.
- *
- * @param count how many items to bucket
- * @param minY the start of the bucketed range
- * @param yStep the height of one cell
- * @param extent writes the y-range of the item with the given index into the passed buffer
- * @returns the built index
- */
-function buildBuckets(
-    count: number,
-    minY: number,
-    yStep: number,
-    extent: (index: number, out: Float64Array) => void
-): BucketIndex {
-    const range = new Float64Array(2);
-    const counts = new Int32Array(SPAN_BUCKETS + 2);
-    let total = 0;
-    for (let i = 0; i < count; i++) {
-        extent(i, range);
-        if (range[0] > range[1]) {
-            continue;
-        }
-        const first = cellIndex(range[0], minY, yStep);
-        const last = cellIndex(range[1], minY, yStep);
-        for (let c = first; c <= last; c++) {
-            counts[c + 1]++;
-        }
-        total += last - first + 1;
-    }
-    const offsets = new Int32Array(SPAN_BUCKETS + 2);
-    for (let c = 1; c < offsets.length; c++) {
-        offsets[c] = offsets[c - 1] + counts[c];
-    }
-    const cursor = offsets.slice();
-    const items = new Int32Array(total);
-    for (let i = 0; i < count; i++) {
-        extent(i, range);
-        if (range[0] > range[1]) {
-            continue;
-        }
-        const first = cellIndex(range[0], minY, yStep);
-        const last = cellIndex(range[1], minY, yStep);
-        for (let c = first; c <= last; c++) {
-            items[cursor[c]++] = i;
-        }
-    }
-    return { offsets, items };
-}
-
-/**
- * Builds the stroked region of an outline and its decorations
- *
- * @param outline the flattened outline
- * @param decorations the flattened decoration sub-paths
- * @param stroke the stroke everything is painted with
- * @returns the stroked region
- */
-export function buildStrokeRegion(outline: Polyline, decorations: Polyline[], stroke: ShapeStroke): StrokeRegion {
-    const builder = new StrokeRegionBuilder(stroke);
-    builder.add(outline);
-    for (const decoration of decorations) {
-        builder.add(decoration);
-    }
-    return builder.build();
-}
-
-/**
- * The free interval one {@link freeSpan} call found. It is filled in place rather than returned so
- * the profile build, which asks once per slab, does not allocate an object apiece — that allocation
- * is the most expensive part of the answer. Each caller owns the instance it passes, so one
- * measurement can never be read as another's, and `min`/`max` mean nothing unless the call that
- * filled them returned true.
- */
-export interface Span {
-    /**
-     * Left bound of the interval
-     */
-    min: number;
-    /**
-     * Right bound of the interval
-     */
-    max: number;
-}
+const FIT_EPSILON = 1e-9;
 
 /**
  * Creates a span to measure into
@@ -734,462 +55,23 @@ function createSpan(): Span {
 }
 
 /**
- * Scratch buffer holding the sorted crossing coordinates of one scanline
- */
-let crossings = new Float64Array(64);
-/**
- * Scratch buffer holding the blocked spans of one slab, as `lo, hi` pairs sorted by `lo`
- */
-let blocked = new Float64Array(256);
-/**
- * How many spans {@link blocked} holds
- */
-let blockedCount = 0;
-
-/**
- * Inserts a coordinate into the sorted prefix `crossings[0..count)`, growing the buffer if needed
- *
- * @param x the coordinate to insert
- * @param count how many coordinates the sorted prefix holds
- */
-function insertCrossing(x: number, count: number): void {
-    if (count === crossings.length) {
-        const grown = new Float64Array(count * 2);
-        grown.set(crossings);
-        crossings = grown;
-    }
-    let i = count;
-    while (i > 0 && crossings[i - 1] > x) {
-        crossings[i] = crossings[i - 1];
-        i--;
-    }
-    crossings[i] = x;
-}
-
-/**
- * Appends a span to {@link blocked}, in whatever order it is found
- *
- * @param lo the start of the span
- * @param hi the end of the span
- */
-function pushBlocked(lo: number, hi: number): void {
-    if (2 * blockedCount === blocked.length) {
-        const grown = new Float64Array(blocked.length * 2);
-        grown.set(blocked);
-        blocked = grown;
-    }
-    blocked[2 * blockedCount] = lo;
-    blocked[2 * blockedCount + 1] = hi;
-    blockedCount++;
-}
-
-/**
- * Sorts the collected spans by where they start, which only the search for the *widest* gap needs —
- * looking up the one gap that holds a given x is a single unordered pass, and that is the query a
- * tall range (where there can be hundreds of spans) is asked.
- */
-function sortBlocked(): void {
-    for (let i = 1; i < blockedCount; i++) {
-        const lo = blocked[2 * i];
-        const hi = blocked[2 * i + 1];
-        let j = i;
-        while (j > 0 && blocked[2 * (j - 1)] > lo) {
-            blocked[2 * j] = blocked[2 * (j - 1)];
-            blocked[2 * j + 1] = blocked[2 * (j - 1) + 1];
-            j--;
-        }
-        blocked[2 * j] = lo;
-        blocked[2 * j + 1] = hi;
-    }
-}
-
-/**
- * An index over the flattened outline that answers "which parts of this height are inside" without
- * rescanning every edge. Each non-horizontal edge is bucketed into the cells its y-range covers.
- */
-export interface OutlineIndex {
-    /**
-     * The flattened outline the index is built over
-     */
-    readonly line: Polyline;
-    /**
-     * Top of the bucketed y-range
-     */
-    readonly minY: number;
-    /**
-     * Height of one bucket cell
-     */
-    readonly yStep: number;
-    /**
-     * The outline edges bucketed by height
-     */
-    readonly buckets: BucketIndex;
-}
-
-/**
- * Buckets the non-horizontal edges of a flattened outline by height.
- *
- * Each edge is given one cell of slack on either end: an edge that ends exactly on a cell boundary
- * must not be able to fall out of the cell a query at that very height lands in, which rounding alone
- * could otherwise arrange — and a missed edge silently widens a span. A horizontal edge is left out
- * entirely; it can never be crossed.
- *
- * @param line the flattened outline to index
- * @returns the built index
- */
-export function buildOutlineIndex(line: Polyline): OutlineIndex {
-    const count = line.x.length;
-    let minY = Infinity;
-    let maxY = -Infinity;
-    for (const value of line.y) {
-        minY = Math.min(minY, value);
-        maxY = Math.max(maxY, value);
-    }
-    const yStep = (maxY - minY) / SPAN_BUCKETS;
-    const buckets = buildBuckets(count, minY, yStep, (i, out) => {
-        const j = (i + 1) % count;
-        if (line.y[i] === line.y[j]) {
-            out[0] = Infinity;
-            out[1] = -Infinity;
-        } else {
-            out[0] = Math.min(line.y[i], line.y[j]) - yStep;
-            out[1] = Math.max(line.y[i], line.y[j]) + yStep;
-        }
-    });
-    return { line, minY, yStep, buckets };
-}
-
-/**
- * Collects the intervals the horizontal line at `y` cuts out of the outline's interior into
- * {@link crossings}, returning how many crossings it found.
- *
- * The crossings are kept in x order and pair off: for a closed polygon the first pair spans inside,
- * the next gap outside, and so on, so a shape that falls apart into several lobes at this height
- * reports each of them rather than one span bridging the gap between.
- *
- * The crossing test is deliberately half-open (`a.y <= y < b.y`), so a vertex sitting exactly on the
- * line is counted once and the alternation stays intact — the inclusive test counts it twice and
- * turns the inside/outside pairing inside out. At the very top and bottom of the outline that test
- * leaves no crossing at all; there the extent of the edges merely touching the line stands in.
- *
- * @param index the index over the flattened outline
- * @param y the height to cut at
- * @returns how many crossings were found
- */
-function interiorCrossings(index: OutlineIndex, y: number): number {
-    const { line } = index;
-    const count = line.x.length;
-    const cell = cellIndex(y, index.minY, index.yStep);
-    const { offsets, items } = index.buckets;
-    let found = 0;
-    let touchMin = Infinity;
-    let touchMax = -Infinity;
-    for (let slot = offsets[cell]; slot < offsets[cell + 1]; slot++) {
-        const i = items[slot];
-        const j = (i + 1) % count;
-        const ay = line.y[i];
-        const by = line.y[j];
-        if ((ay > y && by > y) || (ay < y && by < y)) {
-            continue;
-        }
-        const xx = line.x[i] + ((y - ay) / (by - ay)) * (line.x[j] - line.x[i]);
-        touchMin = Math.min(touchMin, xx);
-        touchMax = Math.max(touchMax, xx);
-        if ((ay <= y && by > y) || (by <= y && ay > y)) {
-            insertCrossing(xx, found++);
-        }
-    }
-    if (found >= 2) {
-        return found;
-    }
-    if (touchMax >= touchMin) {
-        crossings[0] = touchMin;
-        crossings[1] = touchMax;
-        return 2;
-    }
-    return 0;
-}
-
-/**
- * Collects everything the stroke blocks between two heights into {@link blocked}
- *
- * @param region the stroked region to query
- * @param ya the top of the slab
- * @param yb the bottom of the slab
- */
-function collectBlocked(region: StrokeRegion, ya: number, yb: number): void {
-    blockedCount = 0;
-    const firstCell = cellIndex(ya, region.minY, region.yStep);
-    const lastCell = cellIndex(yb, region.minY, region.yStep);
-    const polygons = region.polygonBuckets;
-    const discs = region.discBuckets;
-    for (let c = firstCell; c <= lastCell; c++) {
-        for (let i = polygons.offsets[c]; i < polygons.offsets[c + 1]; i++) {
-            addPolygonSpan(region, polygons.items[i], ya, yb);
-        }
-        for (let i = discs.offsets[c]; i < discs.offsets[c + 1]; i++) {
-            addDiscSpan(region, discs.items[i], ya, yb);
-        }
-    }
-}
-
-/**
- * Adds the x-span a convex piece covers between `ya` and `yb`: the piece clipped to the slab, which
- * for a convex piece is the extent of its vertices inside the slab together with where its edges
- * cross the two slab boundaries. A piece that only *touches* a boundary covers nothing — content
- * that reaches exactly the edge of the stroke is still clear of it. A piece that does reach inside is
- * measured over the closed slab, so an extreme sitting exactly on a boundary still counts: a miter tip
- * lands on one whenever the corner it belongs to does, and it is what the content has to clear.
- *
- * @param region the stroked region the piece belongs to
- * @param index the index of the piece
- * @param ya the top of the slab
- * @param yb the bottom of the slab
- */
-function addPolygonSpan(region: StrokeRegion, index: number, ya: number, yb: number): void {
-    const o = index * POLYGON_STRIDE;
-    const p = region.polygons;
-    const pieceTop = p[o + POLYGON_BOUNDS + 2];
-    const pieceBottom = p[o + POLYGON_BOUNDS + 3];
-    if (pieceBottom <= ya + TOUCH_EPSILON || pieceTop >= yb - TOUCH_EPSILON) {
-        return;
-    }
-    if (pieceTop >= ya && pieceBottom <= yb) {
-        pushBlocked(p[o + POLYGON_BOUNDS], p[o + POLYGON_BOUNDS + 1]);
-        return;
-    }
-    let lo = Infinity;
-    let hi = -Infinity;
-    for (let k = 0; k < POLYGON_VERTICES; k++) {
-        const at = o + 2 * k;
-        const x0 = p[at];
-        const y0 = p[at + 1];
-        const to = k === POLYGON_VERTICES - 1 ? o : at + 2;
-        const x1 = p[to];
-        const y1 = p[to + 1];
-        if (y0 >= ya && y0 <= yb) {
-            lo = Math.min(lo, x0);
-            hi = Math.max(hi, x0);
-        }
-        if (y0 !== y1) {
-            if ((y0 < ya && y1 > ya) || (y1 < ya && y0 > ya)) {
-                const xx = x0 + ((ya - y0) / (y1 - y0)) * (x1 - x0);
-                lo = Math.min(lo, xx);
-                hi = Math.max(hi, xx);
-            }
-            if ((y0 < yb && y1 > yb) || (y1 < yb && y0 > yb)) {
-                const xx = x0 + ((yb - y0) / (y1 - y0)) * (x1 - x0);
-                lo = Math.min(lo, xx);
-                hi = Math.max(hi, xx);
-            }
-        }
-    }
-    if (hi > lo) {
-        pushBlocked(lo, hi);
-    }
-}
-
-/**
- * Adds the x-span a disc covers between two heights, at its widest within the slab
- *
- * @param region the stroked region the disc belongs to
- * @param index the index of the disc
- * @param ya the top of the slab
- * @param yb the bottom of the slab
- */
-function addDiscSpan(region: StrokeRegion, index: number, ya: number, yb: number): void {
-    const o = index * DISC_STRIDE;
-    const cx = region.discs[o];
-    const cy = region.discs[o + 1];
-    const r = region.discs[o + 2];
-    const dy = Math.max(0, Math.max(ya - cy, cy - yb));
-    if (dy >= r - TOUCH_EPSILON) {
-        return;
-    }
-    const reach = Math.sqrt(r * r - dy * dy);
-    pushBlocked(cx - reach, cx + reach);
-}
-
-/**
- * The widest interval of the outline's interior between `ya` and `yb` that the stroke leaves free,
- * or null if there is none. With `around` given, the interval containing that x is returned instead
- * of the widest, which is what lets a box already sitting in one lobe be measured against that lobe.
- *
- * The interior is read at `ya` alone even though the answer covers the whole slab: a point that is
- * inside there and never comes within the stroke of the outline cannot have left the outline on the
- * way down, since leaving it means crossing it.
- *
- * @param index the index over the flattened outline
- * @param region the stroked region
- * @param ya the top of the slab
- * @param yb the bottom of the slab
- * @param span filled with the interval that was found
- * @param around the x an interval has to contain, or undefined to take the widest one
- * @returns true if an interval was found, which is then left in `span`
- */
-function freeSpan(
-    index: OutlineIndex,
-    region: StrokeRegion,
-    ya: number,
-    yb: number,
-    span: Span,
-    around?: number
-): boolean {
-    const found = interiorCrossings(index, ya);
-    if (found < 2) {
-        return false;
-    }
-    collectBlocked(region, ya, yb);
-    if (around != undefined) {
-        let lo = -Infinity;
-        let hi = Infinity;
-        for (let i = 0; i + 1 < found; i += 2) {
-            if (crossings[i] <= around && crossings[i + 1] >= around) {
-                lo = crossings[i];
-                hi = crossings[i + 1];
-            }
-        }
-        if (lo > around || hi < around) {
-            return false;
-        }
-        for (let s = 0; s < blockedCount; s++) {
-            const spanLow = blocked[2 * s];
-            const spanHigh = blocked[2 * s + 1];
-            if (spanLow <= around && spanHigh >= around) {
-                return false;
-            }
-            if (spanHigh <= around) {
-                lo = Math.max(lo, spanHigh);
-            } else {
-                hi = Math.min(hi, spanLow);
-            }
-        }
-        span.min = lo;
-        span.max = hi;
-        return span.max > span.min;
-    }
-    sortBlocked();
-    let bestMin = 0;
-    let bestMax = 0;
-    let bestWidth = 0;
-    for (let i = 0; i + 1 < found; i += 2) {
-        let cursor = crossings[i];
-        const end = crossings[i + 1];
-        for (let s = 0; s < blockedCount && cursor < end; s++) {
-            const lo = blocked[2 * s];
-            const hi = blocked[2 * s + 1];
-            if (hi <= cursor) {
-                continue;
-            }
-            if (lo >= end) {
-                break;
-            }
-            if (lo - cursor > bestWidth) {
-                bestWidth = lo - cursor;
-                bestMin = cursor;
-                bestMax = lo;
-            }
-            cursor = hi;
-        }
-        if (end - cursor > bestWidth) {
-            bestWidth = end - cursor;
-            bestMin = cursor;
-            bestMax = end;
-        }
-    }
-    span.min = bestMin;
-    span.max = bestMax;
-    return span.max > span.min;
-}
-
-/**
- * A half-open interval along the axis a run is measured on
- */
-export interface Run {
-    /**
-     * Where the interval starts
-     */
-    from: number;
-    /**
-     * Where the interval ends
-     */
-    to: number;
-}
-
-/**
- * Every free interval of the outline's interior between `ya` and `yb`, rather than only the widest
- * one {@link freeSpan} keeps. That is the difference between fitting a rectangle — which can only
- * ever sit in one of them — and drawing a rule, which occupies all of them: a rule crossing a
- * decoration comes back as two intervals with the decoration's stroke between them, and one crossing
- * a shape that falls into several lobes at this height comes back once per lobe.
- *
- * The interior is read at `ya` alone, exactly as {@link freeSpan} reads it, and for the same reason:
- * a point inside there that never comes within the stroke of the outline cannot have left the
- * outline on the way down. Its crossings are read out before the blocked spans are collected, as the
- * two share no buffer but a nested measurement would overwrite them.
- *
- * @param index the index over the flattened outline
- * @param region the stroked region blocking the intervals
- * @param ya the top of the band
- * @param yb the bottom of the band
- * @returns the free intervals, in order, empty if the band holds nothing
- */
-export function freeRuns(index: OutlineIndex, region: StrokeRegion, ya: number, yb: number): Run[] {
-    const found = interiorCrossings(index, ya);
-    if (found < 2) {
-        return [];
-    }
-    const interior: number[] = [];
-    for (let i = 0; i < found; i++) {
-        interior.push(crossings[i]);
-    }
-    collectBlocked(region, ya, yb);
-    sortBlocked();
-    const runs: Run[] = [];
-    for (let i = 0; i + 1 < found; i += 2) {
-        let cursor = interior[i];
-        const end = interior[i + 1];
-        for (let s = 0; s < blockedCount && cursor < end; s++) {
-            const lo = blocked[2 * s];
-            const hi = blocked[2 * s + 1];
-            if (hi <= cursor) {
-                continue;
-            }
-            if (lo >= end) {
-                break;
-            }
-            if (lo > cursor) {
-                runs.push({ from: cursor, to: lo });
-            }
-            cursor = hi;
-        }
-        if (end > cursor) {
-            runs.push({ from: cursor, to: end });
-        }
-    }
-    return runs;
-}
-
-/**
- * Number of slabs a profile is cut into. Divisible by 32, so the fractions land exactly on the
- * breakpoints of every predefined shape (a chevron's notch at `h/2`, a note's fold at `0.25h`).
- */
-const SCANLINES = 128;
-
-/**
- * Tolerance (px) for the "at least this wide/tall" comparisons
- */
-const FIT_EPSILON = 1e-9;
-
-/**
  * Steps of bisection used to grow a fitted box to where its constraint really binds
  */
 const REFINE_STEPS = 30;
 
 /**
- * The free space of a shape, cut into {@link SCANLINES} slabs of equal height. `left[k]`/`right[k]`
- * bound the interval content may occupy anywhere within slab `k`; an empty slab is recorded as
- * `left = +Infinity`, `right = -Infinity` so it poisons any band covering it.
+ * The free space of a shape, cut into slabs. `left[k]`/`right[k]` bound the interval content may
+ * occupy anywhere within slab `k`; an empty slab is recorded as `left = +Infinity`,
+ * `right = -Infinity` so it poisons any band covering it.
+ *
+ * The slabs are cut at the shape's *own* breakpoints — the heights where a piece of the outline or
+ * of the stroke begins or ends, {@link ExactRegion.candidates} — not at a chosen resolution. Every
+ * boundary of the region is then a single smooth branch across a whole slab, so the slab's interval
+ * is *exactly* what it holds rather than a conservative sample of it, and a default shape needs 2
+ * to 14 slabs to say so.
+ *
+ * A shape whose path holds no segment of any length has no slabs at all, and the caller falls back
+ * to the box the stroke alone leaves.
  */
 export interface ContentProfile {
     /**
@@ -1201,9 +83,14 @@ export interface ContentProfile {
      */
     readonly bottom: number;
     /**
-     * Height of one slab; `0` for a geometry too degenerate to hold anything
+     * The slab boundaries, ascending, `slabs + 1` of them: `heights[0]` is {@link top} and
+     * `heights[slabs]` is {@link bottom}
      */
-    readonly step: number;
+    readonly heights: Float64Array;
+    /**
+     * How many slabs the profile holds; `0` for a geometry too degenerate to hold anything
+     */
+    readonly slabs: number;
     /**
      * Left bound of the free interval of each slab
      */
@@ -1213,35 +100,58 @@ export interface ContentProfile {
      */
     readonly right: Float64Array;
     /**
+     * Widest the region gets *anywhere* inside each slab, which no band touching that slab can
+     * exceed. {@link left} and {@link right} bound what a band covering the whole slab may occupy;
+     * this bounds what one merely passing through it may, and that is what lets {@link widestBand}
+     * rule out a stretch of band positions without measuring any of them.
+     *
+     * Every boundary inside a slab is monotone, so the slab's extremes are at its two edges and
+     * this costs no measurement of its own.
+     */
+    readonly outer: Float64Array;
+    /**
      * Width of the band covering the whole profile (negative if not even that band is free)
      */
     readonly fullWidth: number;
     /**
-     * The free interval over an arbitrary range, for the exact answers the fixed slabs cannot give:
-     * the tail of a band that ends between two slabs, and the refinement of a fitted box. The
-     * interval is filled into the caller's {@link Span} rather than returned, see there.
+     * The geometry the slabs were measured from, which is asked directly for everything the slabs
+     * cannot answer: the tail of a band that ends between two of them, and the refinement of a
+     * fitted box. {@link EMPTY_REGION} for a shape with no geometry to measure.
      */
-    readonly measure: (ya: number, yb: number, span: Span, around?: number) => boolean;
+    readonly region: ExactRegion;
 }
 
 /**
- * Samples the free space of a shape at a concrete size into a {@link ContentProfile}.
+ * Stands in for the region of a shape whose path holds no segment of any length. It reports nothing
+ * free anywhere, which is the truth about such a shape, and saves every caller a branch it would
+ * only ever take together with `slabs === 0`.
+ */
+const EMPTY_REGION: ExactRegion = {
+    top: 0,
+    bottom: 0,
+    candidates: [],
+    runs: () => undefined,
+    measure: () => false
+};
+
+/**
+ * Measures the free space of a shape at a concrete size into a {@link ContentProfile}.
  *
  * The usable height is the outline's own extent, and each slab holds what the stroke leaves free
  * across it. The stroke of a decoration blocks exactly as the outline's does, so content flows around
  * a component's ports and below a database's rim without any shape-specific knowledge.
  *
  * The slabs start where content can: a box edge cannot come closer than the stroke half-width to the
- * outline's own top or bottom, so laying the grid out from there makes a shape with a flat top and
- * bottom — the common one — measure its content height exactly rather than to the nearest slab. A
- * shape whose extreme is a lone spike gives up the sliver above it.
+ * outline's own top or bottom, so laying them out from there makes a shape with a flat top and
+ * bottom — the common one — measure its content height exactly. A shape whose extreme is a lone
+ * spike gives up the sliver above it.
  *
- * @param ir the shape to sample
+ * @param ir the shape to measure
  * @param width the geometry width
  * @param height the geometry height
  * @param rounding the corner rounding
  * @param stroke the stroke the shape is painted with
- * @returns the sampled profile
+ * @returns the measured profile
  */
 export function buildContentProfile(
     ir: ShapeIR,
@@ -1250,55 +160,158 @@ export function buildContentProfile(
     rounding: number,
     stroke: ShapeStroke
 ): ContentProfile {
-    const half = stroke.width / 2;
-
-    const outline = flattenPath(outlineToSvgPath(evaluateVertices(ir, width, height, rounding)), true, FLATNESS);
-    const decorations = evaluateDecorations(ir, width, height, rounding).map((decoration) =>
-        flattenPath(decorationToSvgPath(decoration.vertices, decoration.closed), decoration.closed, FLATNESS)
+    const region = buildExactRegion(
+        evaluateVertices(ir, width, height, rounding),
+        evaluateDecorations(ir, width, height, rounding),
+        stroke
     );
-    const index = buildOutlineIndex(outline);
-    const region = buildStrokeRegion(outline, decorations, stroke);
-
-    let minY = Infinity;
-    let maxY = -Infinity;
-    for (const value of outline.y) {
-        minY = Math.min(minY, value);
-        maxY = Math.max(maxY, value);
+    if (region == undefined) {
+        return emptyProfile();
     }
-
-    const measure = (ya: number, yb: number, span: Span, around?: number): boolean =>
-        freeSpan(index, region, ya, yb, span, around);
-
-    const top = minY + half;
-    const bottom = maxY - half;
-    const step = bottom > top ? (bottom - top) / SCANLINES : 0;
-    const left = new Float64Array(SCANLINES);
-    const right = new Float64Array(SCANLINES);
+    const top = region.top;
+    const bottom = region.bottom;
+    const heights = slabHeights(top, bottom, region);
+    const slabs = Math.max(0, heights.length - 1);
+    const left = new Float64Array(slabs);
+    const right = new Float64Array(slabs);
+    const outer = new Float64Array(slabs);
     let fullLeft = -Infinity;
     let fullRight = Infinity;
     const span = createSpan();
-    for (let k = 0; k < SCANLINES; k++) {
-        if (step > 0 && measure(top + k * step, top + (k + 1) * step, span)) {
+    /**
+     * Left bound of the region at a single slab boundary, which every band through that height
+     * stays inside
+     */
+    const pointLeft = new Float64Array(slabs + 1);
+    /**
+     * Right bound of the region at a single slab boundary
+     */
+    const pointRight = new Float64Array(slabs + 1);
+    for (let k = 0; k <= slabs; k++) {
+        if (region.measure(heights[k], heights[k], span)) {
+            pointLeft[k] = span.min;
+            pointRight[k] = span.max;
+        } else {
+            pointLeft[k] = Infinity;
+            pointRight[k] = -Infinity;
+        }
+    }
+    for (let k = 0; k < slabs; k++) {
+        if (region.measure(heights[k], heights[k + 1], span)) {
             left[k] = span.min;
             right[k] = span.max;
         } else {
             left[k] = Infinity;
             right[k] = -Infinity;
         }
+        outer[k] = Math.max(pointRight[k], pointRight[k + 1]) - Math.min(pointLeft[k], pointLeft[k + 1]);
         fullLeft = Math.max(fullLeft, left[k]);
         fullRight = Math.min(fullRight, right[k]);
     }
-    return { top, bottom, step, left, right, fullWidth: fullRight - fullLeft, measure };
+    return { top, bottom, heights, slabs, left, right, outer, fullWidth: fullRight - fullLeft, region };
 }
 
 /**
- * Scratch deque of slab indices for the left bound of the sliding window in {@link widestBand}
+ * A profile for a shape with no geometry to measure — one whose path holds no segment of any length.
+ * Every band of it is empty, so {@link bestContentBox} finds nothing and the caller falls back to
+ * the box the stroke alone leaves.
+ *
+ * @returns the empty profile
  */
-const windowMax = new Int32Array(SCANLINES + 2);
+function emptyProfile(): ContentProfile {
+    const nothing = new Float64Array(0);
+    return {
+        top: 0,
+        bottom: 0,
+        heights: nothing,
+        slabs: 0,
+        left: nothing,
+        right: nothing,
+        outer: nothing,
+        fullWidth: -Infinity,
+        region: EMPTY_REGION
+    };
+}
+
 /**
- * Scratch deque of slab indices for the right bound of the sliding window in {@link widestBand}
+ * The slab boundaries of a profile: the shape's own breakpoints, bracketed by the top and bottom of
+ * the region. A breakpoint too close to its neighbour to separate them is dropped — it would only
+ * cost a slab without narrowing anything.
+ *
+ * @param top the top of the region
+ * @param bottom the bottom of the region
+ * @param region the exact region
+ * @returns the slab boundaries, ascending
  */
-const windowMin = new Int32Array(SCANLINES + 2);
+function slabHeights(top: number, bottom: number, region: ExactRegion): Float64Array {
+    if (!(bottom > top)) {
+        return new Float64Array(0);
+    }
+    const kept: number[] = [top];
+    for (const y of region.candidates) {
+        if (y > kept[kept.length - 1] + FIT_EPSILON && y < bottom - FIT_EPSILON) {
+            kept.push(y);
+        }
+    }
+    kept.push(bottom);
+    return Float64Array.from(kept);
+}
+
+/**
+ * The first of an ascending list of heights that lies strictly below a height
+ *
+ * @param heights the heights to search, ascending
+ * @param y the height to start from
+ * @param fallback what to return if there is none
+ * @returns the next height below
+ */
+function nextHeight(heights: Float64Array, y: number, fallback: number): number {
+    for (let k = 0; k < heights.length; k++) {
+        if (heights[k] > y + FIT_EPSILON) {
+            return heights[k];
+        }
+    }
+    return fallback;
+}
+
+/**
+ * The last of an ascending list of heights that lies strictly above a height
+ *
+ * @param heights the heights to search, ascending
+ * @param y the height to start from
+ * @param fallback what to return if there is none
+ * @returns the previous height above
+ */
+function previousHeight(heights: Float64Array, y: number, fallback: number): number {
+    for (let k = heights.length - 1; k >= 0; k--) {
+        if (heights[k] < y - FIT_EPSILON) {
+            return heights[k];
+        }
+    }
+    return fallback;
+}
+
+/**
+ * The index of the slab a height falls in, or the nearest one if it falls outside
+ *
+ * @param profile the profile to search
+ * @param y the height to look up
+ * @returns the index of the slab containing the height
+ */
+function slabAt(profile: ContentProfile, y: number): number {
+    const heights = profile.heights;
+    let low = 0;
+    let high = profile.slabs - 1;
+    while (low < high) {
+        const middle = (low + high + 1) >> 1;
+        if (heights[middle] <= y) {
+            low = middle;
+        } else {
+            high = middle - 1;
+        }
+    }
+    return low;
+}
 
 /**
  * The free interval over an arbitrary band: the slabs it covers whole read straight off the profile,
@@ -1311,50 +324,191 @@ const windowMin = new Int32Array(SCANLINES + 2);
  * @param profile the profile to query
  * @param y0 the top of the band
  * @param y1 the bottom of the band
- * @returns the free interval, or null if the band holds nothing
+ * @param into filled with the free interval that was found
+ * @returns true if the band holds anything, which is then left in `into`
  */
-function bandInterval(
-    profile: ContentProfile,
-    y0: number,
-    y1: number
-): {
-    /**
-     * Left bound of the free interval
-     */
-    min: number;
-    /**
-     * Right bound of the free interval
-     */
-    max: number;
-} | null {
-    const { top, step, left, right } = profile;
-    const firstSlab = Math.max(0, Math.floor((y0 - top) / step + FIT_EPSILON));
-    const lastSlab = Math.min(SCANLINES - 1, Math.ceil((y1 - top) / step - FIT_EPSILON) - 1);
+function bandInterval(profile: ContentProfile, y0: number, y1: number, into: Span): boolean {
+    const { heights, left, right, slabs } = profile;
+    if (slabs === 0) {
+        return false;
+    }
+    const firstSlab = slabAt(profile, y0 + FIT_EPSILON);
+    const lastSlab = slabAt(profile, Math.max(y0, y1 - FIT_EPSILON));
     let lo = -Infinity;
     let hi = Infinity;
-    const span = createSpan();
     for (let k = firstSlab; k <= lastSlab; k++) {
-        const slabTop = top + k * step;
-        const slabBottom = slabTop + step;
+        const slabTop = heights[k];
+        const slabBottom = heights[k + 1];
         let slabLeft: number;
         let slabRight: number;
         if (y0 <= slabTop + FIT_EPSILON && y1 >= slabBottom - FIT_EPSILON) {
             slabLeft = left[k];
             slabRight = right[k];
         } else {
-            if (!profile.measure(Math.max(y0, slabTop), Math.min(y1, slabBottom), span)) {
-                return null;
+            if (!profile.region.measure(Math.max(y0, slabTop), Math.min(y1, slabBottom), into)) {
+                return false;
             }
-            slabLeft = span.min;
-            slabRight = span.max;
+            slabLeft = into.min;
+            slabRight = into.max;
         }
         lo = Math.max(lo, slabLeft);
         hi = Math.min(hi, slabRight);
         if (hi <= lo) {
-            return null;
+            return false;
         }
     }
-    return lo > -Infinity ? { min: lo, max: hi } : null;
+    if (!(lo > -Infinity)) {
+        return false;
+    }
+    into.min = lo;
+    into.max = hi;
+    return true;
+}
+
+/**
+ * The width of the slabs a band covers *whole*, which is an upper bound on the width of any band
+ * that covers them and more. Constraints are only dropped, never added, so this can be used to rule
+ * a whole stretch of band positions out without measuring any of them.
+ *
+ * @param profile the profile to query
+ * @param y0 the top of the range every candidate band covers
+ * @param y1 the bottom of that range
+ * @returns the upper bound, `Infinity` if the range is empty and nothing can be ruled out
+ */
+function coreWidth(profile: ContentProfile, y0: number, y1: number): number {
+    if (!(y1 > y0) || profile.slabs === 0) {
+        return Infinity;
+    }
+    const { heights, left, right, slabs } = profile;
+    let lo = -Infinity;
+    let hi = Infinity;
+    for (let k = slabAt(profile, y0); k < slabs && heights[k] < y1; k++) {
+        if (heights[k] >= y0 - FIT_EPSILON && heights[k + 1] <= y1 + FIT_EPSILON) {
+            lo = Math.max(lo, left[k]);
+            hi = Math.min(hi, right[k]);
+        }
+    }
+    return hi > lo ? hi - lo : lo === -Infinity ? Infinity : -Infinity;
+}
+
+/**
+ * The golden section's shorter part, for the steps of {@link maximize} that cannot use a parabola
+ */
+const GOLDEN_SECTION = 0.381966011250105;
+
+/**
+ * Most probes {@link maximize} may spend on one stretch, which it reaches only where the width has
+ * a kink and the parabola is no help
+ */
+const BAND_SEARCH_STEPS = 16;
+
+/**
+ * Relative width the bracket in {@link maximize} is narrowed to. A smooth maximum is flat, so the
+ * width is found far more accurately than the position it sits at; even at a kink, where the two
+ * converge together, this leaves a residue some four orders below the width tolerance the `inner`
+ * solver stops at. Nothing downstream is finer: the reported box is measured by {@link refine}.
+ */
+const BAND_SEARCH_TOLERANCE = 1e-7;
+
+/**
+ * Stands in for a band that holds nothing, so the parabola stays arithmetic
+ */
+const NOTHING = -1e300;
+
+/**
+ * The greatest value of a function over a bracket, by Brent's method: fit a parabola through the
+ * three best probes so far and jump to its vertex, falling back to a golden step whenever that jump
+ * would be wild or leave the bracket.
+ *
+ * Which matters because of what is being maximised. The width of a band as it slides is smooth —
+ * it is built from boundaries that are lines and arcs — and on a smooth function a parabola
+ * converges quadratically where the golden section only ever removes a fixed fraction. That is the
+ * difference between about ten probes and about forty, and every probe is a measurement of the
+ * shape. Where the width has a kink, which is where the constraint binding one edge of the band
+ * hands over to another, the parabola is rejected and the search degrades to the golden section it
+ * would otherwise have been.
+ *
+ * @param f the function to maximise, which may return {@link NOTHING} where it has no value
+ * @param low the lower end of the bracket
+ * @param high the upper end of the bracket
+ * @param out filled with where the greatest value was found
+ * @returns the greatest value found
+ */
+function maximize(f: (x: number) => number, low: number, high: number, out: Span): number {
+    let a = low;
+    let b = high;
+    let x = a + GOLDEN_SECTION * (b - a);
+    let w = x;
+    let v = x;
+    let fx = f(x);
+    let fw = fx;
+    let fv = fx;
+    let step = 0;
+    let previousStep = 0;
+    for (let iteration = 0; iteration < BAND_SEARCH_STEPS; iteration++) {
+        const middle = 0.5 * (a + b);
+        const tolerance = BAND_SEARCH_TOLERANCE * Math.abs(x) + 1e-12;
+        if (Math.abs(x - middle) <= 2 * tolerance - 0.5 * (b - a)) {
+            break;
+        }
+        let parabolic = false;
+        if (Math.abs(previousStep) > tolerance) {
+            const r = (x - w) * (fx - fv);
+            let q = (x - v) * (fx - fw);
+            let p = (x - v) * q - (x - w) * r;
+            q = 2 * (q - r);
+            if (q > 0) {
+                p = -p;
+            } else {
+                q = -q;
+            }
+            const before = previousStep;
+            previousStep = step;
+            if (Math.abs(p) < Math.abs(0.5 * q * before) && p > q * (a - x) && p < q * (b - x)) {
+                step = p / q;
+                if (x + step - a < 2 * tolerance || b - (x + step) < 2 * tolerance) {
+                    step = middle >= x ? tolerance : -tolerance;
+                }
+                parabolic = true;
+            }
+        }
+        if (!parabolic) {
+            previousStep = x >= middle ? a - x : b - x;
+            step = GOLDEN_SECTION * previousStep;
+        }
+        const u = Math.abs(step) >= tolerance ? x + step : x + (step >= 0 ? tolerance : -tolerance);
+        const fu = f(u);
+        if (fu >= fx) {
+            if (u >= x) {
+                a = x;
+            } else {
+                b = x;
+            }
+            v = w;
+            w = x;
+            x = u;
+            fv = fw;
+            fw = fx;
+            fx = fu;
+        } else {
+            if (u < x) {
+                a = u;
+            } else {
+                b = u;
+            }
+            if (fu >= fw || w === x) {
+                v = w;
+                w = u;
+                fv = fw;
+                fw = fu;
+            } else if (fu >= fv || v === x || v === w) {
+                v = u;
+                fv = fu;
+            }
+        }
+    }
+    out.min = x;
+    return fx;
 }
 
 /**
@@ -1364,96 +518,175 @@ function bandInterval(
  * that eats into itself as it gets taller (a chevron's notch, a hexagon's corners, a note's fold) it
  * *shrinks* with the height, which is precisely what makes such a shape settle flat.
  *
- * The band is placed at every slab in turn, and the part of a slab its lower edge cuts through is
- * measured exactly rather than interpolated, so the result is a smooth function of the shape rather
- * than one that snaps to the sampling grid. A shape too short to hold the band at all reports the
- * width of its whole profile minus the height it is missing, which keeps the value continuous and
- * still pointing outwards.
+ * A shape too short to hold the band at all reports the width of its whole profile minus the height
+ * it is missing, which keeps the value continuous and still pointing outwards.
  *
- * The sliding window runs over whole slabs, rounded up: a band measured that way is at most one slab
- * taller than the content asks for, so the width it reports is one a box of exactly this height can
- * really be given — which is what keeps this and {@link bestContentBox} from disagreeing about whether
- * the content fits. The winning position is then measured at the exact height, which can only be wider.
+ * Where the band sits is searched rather than sampled. Slide it and the set of slabs it covers only
+ * changes when one of its two edges crosses a slab boundary, so the positions where the binding
+ * constraint changes are exactly `heights[i]` and `heights[i] - height` — a few dozen, all measured
+ * outright. Between two of them every bound moves smoothly, and the optimum can sit strictly
+ * inside: for a diamond it sits where the right bound at the band's top crosses the one at its
+ * bottom, which is a local *maximum* of their minimum and therefore at no breakpoint at all. Those
+ * stretches are searched by golden section, but only the ones worth searching — a stretch cannot
+ * beat a band wider than {@link coreWidth} of the slabs every position in it covers, and that bound
+ * is read straight off the profile.
  *
  * @param profile the profile to query
  * @param height the height of the band
  * @returns the width of the widest band of that height
  */
 export function widestBand(profile: ContentProfile, height: number): number {
-    const usable = profile.bottom - profile.top;
-    if (profile.step <= 0 || height > usable + FIT_EPSILON) {
-        return profile.fullWidth - Math.max(0, height - usable);
-    }
-    const { top, step, left, right } = profile;
-    const span = Math.min(SCANLINES, Math.max(1, Math.ceil(height / step - FIT_EPSILON)));
-    const lastFirst = Math.max(0, SCANLINES - span);
-    let maxHead = 0;
-    let maxTail = 0;
-    let minHead = 0;
-    let minTail = 0;
-    const pushMax = (index: number): void => {
-        while (maxTail > maxHead && left[windowMax[maxTail - 1]] <= left[index]) {
-            maxTail--;
-        }
-        windowMax[maxTail++] = index;
-    };
-    const pushMin = (index: number): void => {
-        while (minTail > minHead && right[windowMin[minTail - 1]] >= right[index]) {
-            minTail--;
-        }
-        windowMin[minTail++] = index;
-    };
-    for (let k = 0; k < span; k++) {
-        pushMax(k);
-        pushMin(k);
-    }
-    let widest = -Infinity;
-    let bestFirst = 0;
-    for (let first = 0; first <= lastFirst; first++) {
-        while (maxHead < maxTail && windowMax[maxHead] < first) {
-            maxHead++;
-        }
-        while (minHead < minTail && windowMin[minHead] < first) {
-            minHead++;
-        }
-        const width = right[windowMin[minHead]] - left[windowMax[maxHead]];
-        if (width > widest) {
-            widest = width;
-            bestFirst = first;
-        }
-        const next = first + span;
-        if (next < SCANLINES) {
-            pushMax(next);
-            pushMin(next);
-        }
-    }
-    const bandTop = top + bestFirst * step;
-    const free = bandInterval(profile, bandTop, bandTop + height);
-    return free == undefined ? widest : Math.max(widest, free.max - free.min);
+    return widestBandSearch(profile, height, createSpan());
 }
 
 /**
- * Grows a fitted box to where its constraint really binds, so its edges are not left on the sampling
- * grid: each of the four is pushed outwards by bisection against the exact free space, bottom and
- * top first (which is where a band can only end on a slab boundary) and then the two sides, which
+ * The widest band of exactly `height` and where it sits, which is {@link widestBand} plus the one
+ * thing {@link bestContentBox} needs from it: the position.
+ *
+ * The two have to agree. What the solver is told a shape can hold and what the finished shape is
+ * then given must be the same measurement, or a shape solved to fit its content exactly is handed
+ * a box that does not hold it — and since the solver settles on a shape that fits with no slack at
+ * all, sharing the search is the only way to be sure.
+ *
+ * @param profile the profile to query
+ * @param height the height of the band
+ * @param at filled with the height the widest band starts at, in `min`
+ * @returns the width of the widest band of that height
+ */
+function widestBandSearch(profile: ContentProfile, height: number, at: Span): number {
+    const usable = profile.bottom - profile.top;
+    at.min = profile.top;
+    if (profile.slabs === 0 || height > usable + FIT_EPSILON) {
+        return profile.fullWidth - Math.max(0, height - usable);
+    }
+    const { top, bottom, heights, slabs } = profile;
+    const lastTop = bottom - height;
+    const interval = createSpan();
+    const widthAt = (y0: number): number =>
+        bandInterval(profile, y0, y0 + height, interval) ? interval.max - interval.min : -Infinity;
+
+    const stops: number[] = [top, lastTop];
+    for (let i = 0; i <= slabs; i++) {
+        for (const y of [heights[i], heights[i] - height]) {
+            if (y > top + FIT_EPSILON && y < lastTop - FIT_EPSILON) {
+                stops.push(y);
+            }
+        }
+    }
+    stops.sort((a, b) => a - b);
+
+    let widest = -Infinity;
+    for (const stop of stops) {
+        const width = widthAt(stop);
+        if (width > widest) {
+            widest = width;
+            at.min = stop;
+        }
+    }
+
+    /**
+     * The widest any band starting in a stretch can be, bounded two ways, both read straight off
+     * the profile. Every band starting in the stretch covers whatever lies between the stretch's
+     * own end and the far edge of the earliest band, so those slabs bound them all; and every band
+     * in it passes through the slabs its two edges start in, so the widest the region gets anywhere
+     * in those bounds them too — which is the bound that bites when the band is short next to the
+     * slabs, where the first one has nothing to say.
+     */
+    const bound = (i: number): number =>
+        Math.min(
+            coreWidth(profile, stops[i + 1], stops[i] + height),
+            profile.outer[slabAt(profile, stops[i] + FIT_EPSILON)],
+            profile.outer[slabAt(profile, Math.max(stops[i], stops[i] + height - FIT_EPSILON))]
+        );
+    const pending: number[] = [];
+    for (let i = 0; i + 1 < stops.length; i++) {
+        if (stops[i + 1] - stops[i] > FIT_EPSILON) {
+            pending.push(i);
+        }
+    }
+    pending.sort((a, b) => bound(b) - bound(a));
+    const spanA = createSpan();
+    const spanB = createSpan();
+    /**
+     * Where the maximum of a stretch was found — a span of its own, as the search is measuring into
+     * the other two as it goes
+     */
+    const position = createSpan();
+    for (const i of pending) {
+        const low = stops[i];
+        const high = stops[i + 1];
+        if (!(bound(i) > widest + FIT_EPSILON)) {
+            continue;
+        }
+        const firstSlab = slabAt(profile, low + FIT_EPSILON);
+        const lastSlab = slabAt(profile, Math.max(low, low + height - FIT_EPSILON));
+        let coreLeft = -Infinity;
+        let coreRight = Infinity;
+        for (let k = firstSlab + 1; k < lastSlab; k++) {
+            coreLeft = Math.max(coreLeft, profile.left[k]);
+            coreRight = Math.min(coreRight, profile.right[k]);
+        }
+        /**
+         * The width of the band starting at a height inside this stretch. Which slabs the band
+         * covers whole is what a breakpoint changes, so across one stretch it is fixed: those slabs
+         * fold into the two constants above and only the two partial ends stay to be measured,
+         * which is the difference between re-walking the band and touching its edges.
+         */
+        const stretchWidth = (y0: number): number => {
+            if (firstSlab === lastSlab) {
+                return profile.region.measure(y0, y0 + height, spanA) ? spanA.max - spanA.min : NOTHING;
+            }
+            if (
+                !profile.region.measure(y0, heights[firstSlab + 1], spanA) ||
+                !profile.region.measure(heights[lastSlab], y0 + height, spanB)
+            ) {
+                return NOTHING;
+            }
+            const lo = Math.max(coreLeft, spanA.min, spanB.min);
+            const hi = Math.min(coreRight, spanA.max, spanB.max);
+            return hi > lo ? hi - lo : NOTHING;
+        };
+        const found = maximize(stretchWidth, low, high, position);
+        if (found > widest) {
+            widest = found;
+            at.min = position.min;
+        }
+    }
+    return widest;
+}
+
+/**
+ * Grows a fitted box to where its constraint really binds: each of the four edges is pushed
+ * outwards by bisection against the free space, bottom and top first and then the two sides, which
  * fall out of measuring the free space over the final height.
+ *
+ * The winning box comes out of a search that stops at a local optimum per cell — and, where the
+ * cheap enumeration of whole-slab bands wins, out of edges sitting exactly on two slab boundaries.
+ * Neither is where the shape actually stops giving way, and this is what closes that gap. It grows
+ * the box it is handed rather than re-deriving one, so the result is that band measured to where it
+ * binds and not necessarily the largest rectangle of the whole shape.
+ *
+ * Growing can only ever find more room, so a box that satisfied a required size before still does
+ * after, which is the one guarantee the whole search rests on.
+ *
+ * An edge can only have been left on one of the heights it was chosen from, so the next one over
+ * brackets where it can have moved to, and each bisection has somewhere finite to search.
  *
  * @param profile the profile the box was fitted against
  * @param box the fitted box
+ * @param bounds the heights the box's edges were chosen from, which bracket where they can move to
  * @returns the grown box, or the passed one if it cannot be measured
  */
-function refine(profile: ContentProfile, box: Box): Box {
-    const { step } = profile;
+function refine(profile: ContentProfile, box: Box, bounds: Float64Array): Box {
     const middle = box.x + box.width / 2;
     const span = createSpan();
+    const measure = (ya: number, yb: number, into: Span): boolean => profile.region.measure(ya, yb, into, middle);
     const holds = (ya: number, yb: number): boolean =>
-        profile.measure(ya, yb, span, middle) &&
-        span.min <= box.x + FIT_EPSILON &&
-        span.max >= box.x + box.width - FIT_EPSILON;
+        measure(ya, yb, span) && span.min <= box.x + FIT_EPSILON && span.max >= box.x + box.width - FIT_EPSILON;
     let top = box.y;
     let bottom = box.y + box.height;
     let low = bottom;
-    let high = Math.min(profile.bottom, bottom + step);
+    let high = Math.min(profile.bottom, nextHeight(bounds, bottom, profile.bottom));
     for (let i = 0; i < REFINE_STEPS && high - low > FIT_EPSILON; i++) {
         const middleY = (low + high) / 2;
         if (holds(top, middleY)) {
@@ -1463,7 +696,7 @@ function refine(profile: ContentProfile, box: Box): Box {
         }
     }
     bottom = low;
-    low = Math.max(profile.top, top - step);
+    low = Math.max(profile.top, previousHeight(bounds, top, profile.top));
     high = top;
     for (let i = 0; i < REFINE_STEPS && high - low > FIT_EPSILON; i++) {
         const middleY = (low + high) / 2;
@@ -1474,34 +707,57 @@ function refine(profile: ContentProfile, box: Box): Box {
         }
     }
     top = high;
-    // the bisections above left `span` on whichever probe they tried last, so measure the box the
-    // two of them actually settled on before reading its interval off
-    if (!profile.measure(top, bottom, span, middle)) {
+    /*
+     * The bisections above left `span` on whichever probe they tried last, so the box the two of
+     * them actually settled on is measured before its interval is read off.
+     */
+    if (!measure(top, bottom, span)) {
         return box;
     }
     return { x: span.min, y: top, width: span.max - span.min, height: bottom - top };
 }
 
 /**
+ * Rounds of coordinate ascent spent on one cell in {@link bestContentBox}
+ */
+const FIT_ROUNDS = 3;
+
+/**
  * The largest-area axis-aligned rectangle that fits inside the outline clear of the stroke, or null
  * if nothing fits.
  *
- * `minWidth`/`minHeight` constrain the result to rectangles that still hold a required content size;
- * a band of exactly `minHeight` is always considered, so a content box that was solved to fit
- * tightly is found even when its height falls between two slabs. That band is measured over exactly
- * the required height rather than over the slabs it happens to straddle, which is the same measurement
- * {@link widestBand} reports to the solver, so a shape solved to hold its content really does.
+ * `minWidth`/`minHeight` constrain the result to rectangles that still hold a required content size.
+ * A band of exactly `minHeight` is always considered, found by the same search {@link widestBand}
+ * reports to the solver — so a shape solved to hold its content really does, which matters all the
+ * more now that the solver leaves it no slack.
+ *
+ * The largest rectangle itself cannot be enumerated the way that band can. Sliding a band of known
+ * height, the binding constraint only changes at a slab boundary; here *both* edges are free and
+ * the area peaks at a breakpoint of nothing — an ellipse's largest inscribed rectangle has its
+ * edges at `h/(2√2)`, a height at which nothing whatsoever happens to the outline.
+ *
+ * So it is searched rather than sampled. Which slabs a rectangle covers whole is fixed by which
+ * slabs its two edges fall in, so the pairs of slabs `(i, j)` cut the problem into cells, and inside
+ * a cell the area is a smooth function of the two edges — smooth because within a slab every
+ * boundary of the region is a single monotone branch. Moving one edge at a time crawls along a
+ * ridge, and the largest rectangle sits on one: a rounded rectangle's grows by giving way at the
+ * top and the bottom together, and neither move pays on its own. So each round also searches the
+ * two directions that move both edges — apart, and along — which is what actually reaches it. Each cell carries an upper bound that costs
+ * nothing to compute: its tallest possible rectangle times the narrowest the region gets over the
+ * slabs every rectangle in it must cover. Cells are taken best-bound first and dropped as soon as
+ * that bound falls below the best rectangle already found, which for a shape of a dozen slabs
+ * leaves a handful to actually search.
  *
  * @param profile the profile to fit against
  * @param minWidth the width the result has to hold
  * @param minHeight the height the result has to hold
  * @returns the largest fitting rectangle, or null if nothing fits
  */
-export function bestContentBox(profile: ContentProfile, minWidth: number, minHeight: number): Box | null {
-    if (profile.step <= 0) {
+function bestContentBox(profile: ContentProfile, minWidth: number, minHeight: number): Box | null {
+    if (profile.slabs === 0) {
         return null;
     }
-    const { top, step, left, right } = profile;
+    const { heights, left, right, outer, slabs } = profile;
     let best: Box | null = null;
     let bestArea = 0;
     const record = (x: number, y: number, boxWidth: number, boxHeight: number): void => {
@@ -1517,29 +773,141 @@ export function bestContentBox(profile: ContentProfile, minWidth: number, minHei
             best = { x, y, width: boxWidth, height: boxHeight };
         }
     };
-    for (let first = 0; first < SCANLINES; first++) {
-        const bandTop = top + first * step;
-        const end = bandTop + minHeight;
-        const endSlab = Math.floor((end - top) / step - FIT_EPSILON);
-        if (minHeight > 0 && end <= profile.bottom + FIT_EPSILON) {
-            const free = bandInterval(profile, bandTop, end);
-            if (free != undefined) {
-                record(free.min, bandTop, free.max - free.min, minHeight);
-            }
+    /**
+     * Records the band of exactly the required height starting at a given top
+     */
+    const interval = createSpan();
+    const required = (bandTop: number): void => {
+        if (minHeight <= 0 || bandTop < profile.top - FIT_EPSILON) {
+            return;
         }
+        const end = bandTop + minHeight;
+        if (end > profile.bottom + FIT_EPSILON) {
+            return;
+        }
+        if (bandInterval(profile, bandTop, end, interval)) {
+            record(interval.min, bandTop, interval.max - interval.min, minHeight);
+        }
+    };
+    /**
+     * The area of the rectangle a band yields, or {@link NOTHING} where it yields none
+     */
+    const areaOf = (y0: number, y1: number): number => {
+        if (y1 - y0 < Math.max(minHeight, 0) - FIT_EPSILON || y1 <= y0) {
+            return NOTHING;
+        }
+        if (!bandInterval(profile, y0, y1, interval)) {
+            return NOTHING;
+        }
+        const width = interval.max - interval.min;
+        if (width <= 0 || width < minWidth - FIT_EPSILON) {
+            return NOTHING;
+        }
+        record(interval.min, y0, width, y1 - y0);
+        return width * (y1 - y0);
+    };
+
+    /*
+     * The band the solver was promised, at the position it was promised at.
+     */
+    if (minHeight > 0) {
+        const at = createSpan();
+        widestBandSearch(profile, minHeight, at);
+        required(at.min);
+        for (let k = 0; k <= slabs; k++) {
+            required(heights[k]);
+            required(heights[k] - minHeight);
+        }
+    }
+    /*
+     * An incumbent from the bands that span whole slabs, which costs only array reads and gives the
+     * bounds below something to beat.
+     */
+    for (let first = 0; first < slabs; first++) {
         let bandLeft = -Infinity;
         let bandRight = Infinity;
-        for (let last = first; last < SCANLINES; last++) {
+        for (let last = first; last < slabs; last++) {
             bandLeft = Math.max(bandLeft, left[last]);
             bandRight = Math.min(bandRight, right[last]);
-            record(bandLeft, bandTop, bandRight - bandLeft, (last - first + 1) * step);
-            const bandWidth = bandRight - bandLeft;
-            if (last >= endSlab && (bandWidth <= 0 || bandWidth < minWidth - FIT_EPSILON)) {
-                break;
+            record(bandLeft, heights[first], bandRight - bandLeft, heights[last + 1] - heights[first]);
+        }
+    }
+
+    const cells: number[] = [];
+    const bounds: number[] = [];
+    for (let i = 0; i < slabs; i++) {
+        let coreLeft = -Infinity;
+        let coreRight = Infinity;
+        for (let j = i; j < slabs; j++) {
+            if (j >= i + 2) {
+                coreLeft = Math.max(coreLeft, left[j - 1]);
+                coreRight = Math.min(coreRight, right[j - 1]);
+            }
+            const tallest = heights[j + 1] - heights[i];
+            if (tallest < minHeight - FIT_EPSILON) {
+                continue;
+            }
+            const core = coreLeft === -Infinity ? Infinity : coreRight - coreLeft;
+            const widest = Math.min(core, outer[i], outer[j]);
+            if (!(widest > 0) || widest < minWidth - FIT_EPSILON) {
+                continue;
+            }
+            cells.push(i * slabs + j);
+            bounds.push(tallest * widest);
+        }
+    }
+    const order = cells.map((_, index) => index).sort((a, b) => bounds[b] - bounds[a]);
+
+    const position = createSpan();
+    for (const index of order) {
+        if (!(bounds[index] > bestArea + FIT_EPSILON)) {
+            break;
+        }
+        const i = Math.floor(cells[index] / slabs);
+        const j = cells[index] % slabs;
+        /*
+         * Two starts, as coordinate ascent only ever climbs to the nearest peak: the cell's tallest
+         * band, and the one spanning the middles of its two slabs.
+         */
+        for (const start of [0, 1]) {
+            let y0 = start === 0 ? heights[i] : 0.5 * (heights[i] + heights[i + 1]);
+            let y1 = start === 0 ? heights[j + 1] : 0.5 * (heights[j] + heights[j + 1]);
+            if (y1 <= y0) {
+                continue;
+            }
+            for (let round = 0; round < FIT_ROUNDS; round++) {
+                const topHigh = Math.min(heights[i + 1], y1 - Math.max(minHeight, 0));
+                if (topHigh > heights[i] + FIT_EPSILON) {
+                    maximize((y) => areaOf(y, y1), heights[i], topHigh, position);
+                    y0 = position.min;
+                }
+                const bottomLow = Math.max(heights[j], y0 + Math.max(minHeight, 0));
+                if (heights[j + 1] > bottomLow + FIT_EPSILON) {
+                    maximize((y) => areaOf(y0, y), bottomLow, heights[j + 1], position);
+                    y1 = position.min;
+                }
+                let low = Math.max(y0 - heights[i + 1], heights[j] - y1);
+                let high = Math.min(y0 - heights[i], heights[j + 1] - y1);
+                if (high > low + FIT_EPSILON) {
+                    const at = maximize((t) => areaOf(y0 - t, y1 + t), low, high, position) > NOTHING;
+                    if (at) {
+                        y0 -= position.min;
+                        y1 += position.min;
+                    }
+                }
+                low = Math.max(heights[i] - y0, heights[j] - y1);
+                high = Math.min(heights[i + 1] - y0, heights[j + 1] - y1);
+                if (high > low + FIT_EPSILON) {
+                    const at = maximize((t) => areaOf(y0 + t, y1 + t), low, high, position) > NOTHING;
+                    if (at) {
+                        y0 += position.min;
+                        y1 += position.min;
+                    }
+                }
             }
         }
     }
-    return best == undefined ? null : refine(profile, best);
+    return best == undefined ? null : refine(profile, best, heights);
 }
 
 /**
