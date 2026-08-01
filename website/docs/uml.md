@@ -141,6 +141,32 @@ umlDiagram {
 }
 ```
 
+### `useCase`
+
+Creates a use case, rendered as an ellipse, see [UML Use Case Diagram](./usecase.md#usecase):
+
+```hylimo
+umlDiagram {
+    useCase("Place order") {
+        extensionPoints {
+            "Payment declined"
+        }
+    }
+}
+```
+
+### `subject`
+
+Creates the subject, the system boundary of a use case diagram, see [UML Use Case Diagram](./usecase.md#subject):
+
+```hylimo
+umlDiagram {
+    subject("Online Shop") {
+        useCase("Place order")
+    }
+}
+```
+
 ### `actor`
 
 Creates an actor, see [UML Sequence Diagram](./sequence.md#actor):
@@ -148,6 +174,16 @@ Creates an actor, see [UML Sequence Diagram](./sequence.md#actor):
 ```hylimo
 umlDiagram {
     actor("Customer")
+}
+```
+
+### `systemActor`
+
+Creates an actor in the rectangle notation, used for non-human actors, see [UML Use Case Diagram](./usecase.md#systemactor):
+
+```hylimo
+umlDiagram {
+    systemActor("Payment Gateway")
 }
 ```
 
@@ -216,6 +252,20 @@ umlDiagram {
         entries {
             NEW
             PAID
+        }
+    }
+}
+```
+
+### `extensionPoints`
+
+Adds the extension points of a use case, see [UML Use Case Diagram](./usecase.md#extension-points):
+
+```hylimo
+umlDiagram {
+    useCase("Place order") {
+        extensionPoints {
+            "Payment declined"
         }
     }
 }
@@ -394,6 +444,23 @@ umlDiagram {
 
 The `-->` operator is also used for the control and object flows of an activity, see [UML Activity Diagram](./activity.md#connections-flows), and `dependsOn` connects a required to a provided interface, see [UML Component Diagram](./component.md#dependson).
 
+The `«include»` and `«extend»` of a use case diagram are the dashed arrow `..>` with a keyword label, see [UML Use Case Diagram](./usecase.md#include-and-extend), and `extends` is the generalization between two actors or two use cases:
+
+```hylimo
+umlDiagram {
+    useCase("Place order")
+
+    useCase("Authenticate") layout {
+        pos = apos(550, 0)
+    }
+
+    `Place order` ..> Authenticate with {
+        over = start(Position.Right).line(end(Position.Left))
+        label(keyword("include"), 0.5, -25)
+    }
+}
+```
+
 The stereotyped dependencies of a deployment diagram are the dashed arrow `..>` with a keyword label, see [UML Deployment Diagram](./deployment.md#deployment-and-manifestation):
 
 ```hylimo
@@ -446,6 +513,7 @@ The following [style variables](./diagram.md#style-variables) are used by the ge
 ## Example
 
 The following example mixes the elements of several UML diagram types in one diagram:
-the `Shop` component, the classes it operates on, and the activity it performs.
+the `Place order` use case a customer performs, the `Shop` component realizing it, the classes it
+operates on, and the activity it performs.
 
 <DiagramExample id="uml" />

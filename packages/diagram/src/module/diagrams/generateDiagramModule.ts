@@ -25,20 +25,41 @@ const baseModules: ContentModule[] = [
 ];
 
 /**
+ * Options for {@link createDiagramModule}
+ */
+export interface DiagramModuleOptions {
+    /**
+     * All available contents, defaults to {@link contents}
+     */
+    allContents?: ContentModule[];
+    /**
+     * Default values overriding the ones the config properties declare, by property name.
+     *
+     * A config property is declared once, by the module that reads it, but its default is only right
+     * for most diagram types rather than for all of them - a use case diagram draws its connections
+     * as straight lines where every other diagram routes them axis-aligned. Overriding the default
+     * here keeps the property itself in the one module that owns it, and leaves it settable per
+     * diagram exactly as before.
+     */
+    configDefaults?: Record<string, ExecutableExpression>;
+}
+
+/**
  * Creates the executable expressions for a diagram module
  *
  * @param diagramName the name of the diagram function
  * @param docs the documentation for the diagram function
  * @param requiredContents the contents for the diagram
- * @param allContents all available contents, defaults to {@link contents}
+ * @param options further options, see {@link DiagramModuleOptions}
  * @returns the executable expressions for the diagram module
  */
 export function createDiagramModule(
     diagramName: string,
     docs: string,
     requiredContents: ContentModule[],
-    allContents: ContentModule[] = contents
+    options: DiagramModuleOptions = {}
 ): ExecutableExpression[] {
+    const { allContents = contents, configDefaults = {} } = options;
     const modules = InterpreterModule.computeModules(
         [...baseModules, ...requiredContents],
         [...baseModules, ...allContents]
@@ -47,6 +68,14 @@ export function createDiagramModule(
     const configParams = configProperties.map(
         ([name, description, type]) => [name, description, optional(type)] as const
     );
+    const unknownDefaults = Object.keys(configDefaults).filter(
+        (name) => !configProperties.some(([property]) => property === name)
+    );
+    if (unknownDefaults.length > 0) {
+        throw new Error(
+            `${diagramName} overrides the default of unknown config properties: ${unknownDefaults.join(", ")}`
+        );
+    }
     return [
         assign(
             diagramName,
@@ -59,7 +88,12 @@ export function createDiagramModule(
                             createWithConfigFunction(configParams)
                         ]),
                         id(SemanticFieldNames.ARGS),
-                        object(configProperties.map(([name, , , defaultValue]) => ({ name, value: defaultValue })))
+                        object(
+                            configProperties.map(([name, , , defaultValue]) => ({
+                                name,
+                                value: configDefaults[name] ?? defaultValue
+                            }))
+                        )
                     )
                 ],
                 {

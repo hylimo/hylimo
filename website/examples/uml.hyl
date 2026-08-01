@@ -39,6 +39,10 @@ umlDiagram {
         pos = apos(-300, -100)
     }
 
+    useCase("Place order") layout {
+        pos = apos(-300, -320)
+    }
+
     Shop ..> Order with {
         over = start(0.5).axisAligned(-0.5, end(0.75))
     }
@@ -55,6 +59,14 @@ umlDiagram {
     Customer --> Shop with {
         over = start(0).line(end(0.5))
         label("uses", 0.5, -12)
+    }
+
+    Customer -- `Place order` with {
+        over = start(Position.Top).line(end(Position.Bottom))
+    }
+
+    Shop implements `Place order` with {
+        over = start(Position.TopLeft).line(end(Position.Right))
     }
 
     start("begin") layout {

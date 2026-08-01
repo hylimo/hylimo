@@ -139,6 +139,7 @@ classDiagram {
 | [UML sequence diagram](./sequence.md)     | `sequenceDiagram`   |
 | [UML activity diagram](./activity.md)     | `activityDiagram`   |
 | [UML deployment diagram](./deployment.md) | `deploymentDiagram` |
+| [UML use case diagram](./usecase.md)      | `useCaseDiagram`    |
 | [General UML diagram](./uml.md)           | `umlDiagram`        |
 | [Anything else](./diagram.md)             | `diagram`           |
 

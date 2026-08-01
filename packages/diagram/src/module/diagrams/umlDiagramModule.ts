@@ -29,6 +29,10 @@ import { nodeModule } from "./content/uml/deployment/node.js";
 import { artifactModule } from "./content/uml/deployment/artifact.js";
 import { deploymentSpecificationModule } from "./content/uml/deployment/deploymentSpecification.js";
 import { deploymentDiagramToolboxEditsModule } from "./content/uml/deploymentDiagramToolboxEdits.js";
+import { useCaseModule } from "./content/uml/usecase/useCase.js";
+import { subjectModule } from "./content/uml/usecase/subject.js";
+import { systemActorModule } from "./content/uml/usecase/systemActor.js";
+import { useCaseDiagramToolboxEditsModule } from "./content/uml/useCaseDiagramToolboxEdits.js";
 
 /**
  * Module for (arbitrary) UML diagrams
@@ -65,6 +69,10 @@ export const umlDiagramModule = InterpreterModule.create(
         objectsModule,
         packageModule,
         readingDirectionModule,
-        signalsModule
+        signalsModule,
+        subjectModule,
+        systemActorModule,
+        useCaseDiagramToolboxEditsModule,
+        useCaseModule
     ])
 );

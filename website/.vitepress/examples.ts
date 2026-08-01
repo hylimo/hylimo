@@ -7,6 +7,7 @@ import languageServer from "../examples/language-server.hyl?raw";
 import packages from "../examples/packages.hyl?raw";
 import sequence from "../examples/sequence.hyl?raw";
 import uml from "../examples/uml.hyl?raw";
+import usecase from "../examples/usecase.hyl?raw";
 
 /**
  * An example diagram, shown in the gallery and on the page of its diagram type
@@ -88,9 +89,17 @@ export const diagramExamples: DiagramExample[] = [
         docs: { text: "UML Deployment Diagram", link: "/docs/deployment" }
     },
     {
+        id: "usecase",
+        title: "Use case diagram",
+        description: "Who uses the shop, and what for",
+        group: "Diagram types",
+        source: usecase,
+        docs: { text: "UML Use Case Diagram", link: "/docs/usecase" }
+    },
+    {
         id: "uml",
         title: "Mixed UML diagram",
-        description: "A component, the classes it uses and what it does",
+        description: "A use case, the component realizing it, and what it does",
         group: "Diagram types",
         source: uml,
         docs: { text: "UML Diagram", link: "/docs/uml" }

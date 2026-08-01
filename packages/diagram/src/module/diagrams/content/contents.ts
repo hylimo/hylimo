@@ -51,6 +51,11 @@ import { artifactModule } from "./uml/deployment/artifact.js";
 import { deploymentSpecificationModule } from "./uml/deployment/deploymentSpecification.js";
 import { nodeModule } from "./uml/deployment/node.js";
 import { deploymentDiagramToolboxEditsModule } from "./uml/deploymentDiagramToolboxEdits.js";
+import { extensionPointsModule } from "./uml/usecase/extensionPoints.js";
+import { subjectModule } from "./uml/usecase/subject.js";
+import { systemActorModule } from "./uml/usecase/systemActor.js";
+import { useCaseModule } from "./uml/usecase/useCase.js";
+import { useCaseDiagramToolboxEditsModule } from "./uml/useCaseDiagramToolboxEdits.js";
 
 /**
  * All content modules
@@ -83,6 +88,7 @@ export const contents: ContentModule[] = [
     entriesModule,
     enumModule,
     extendsAndImplementsModule,
+    extensionPointsModule,
     forkAndJoinModule,
     importedParticipantsModule,
     initialAndFinalModule,
@@ -106,6 +112,10 @@ export const contents: ContentModule[] = [
     sequenceDiagramCreateConnectionOperatorModule,
     sequenceDiagramStateModule,
     signalsModule,
+    subjectModule,
+    systemActorModule,
     timeControlModule,
+    useCaseDiagramToolboxEditsModule,
+    useCaseModule,
     valuesModule
 ];

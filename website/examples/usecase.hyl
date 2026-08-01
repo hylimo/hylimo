@@ -1,0 +1,59 @@
+useCaseDiagram {
+    actor("Customer") layout {
+        pos = apos(0, 300)
+    }
+
+    actor("Warehouse worker") layout {
+        pos = apos(0, 700)
+    }
+
+    subject("Online Shop") {
+        useCase("Browse catalog") layout {
+            pos = apos(0, 0)
+        }
+
+        useCase("Place order") {
+            extensionPoints {
+                "Payment declined"
+            }
+        } layout {
+            pos = apos(0, 250)
+        }
+
+        useCase("Authenticate") layout {
+            pos = apos(500, 120)
+        }
+
+        useCase("Offer voucher") layout {
+            pos = apos(500, 380)
+        }
+
+        useCase("Ship order") layout {
+            pos = apos(0, 500)
+        }
+    } layout {
+        pos = apos(400, 60)
+    }
+
+    systemActor("Payment Gateway") layout {
+        pos = apos(1500, 400)
+    }
+
+    Customer -- `Browse catalog`
+
+    Customer -- `Place order`
+
+    `Warehouse worker` -- `Ship order`
+
+    `Place order` ..> Authenticate with {
+        over = start(0.94).line(end(Position.Left))
+        label(keyword("include"), 0.5, -38)
+    }
+
+    `Offer voucher` ..> `Place order` with {
+        over = start(Position.Left).line(end(0.06))
+        label(keyword("extend"), 0.5, -38)
+    }
+
+    `Place order` -- `Payment Gateway`
+}

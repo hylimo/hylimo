@@ -9,6 +9,7 @@ import { componentDiagramModule } from "./diagrams/componentDiagramModule.js";
 import { deploymentDiagramModule } from "./diagrams/deploymentDiagramModule.js";
 import { sequenceDiagramModule } from "./diagrams/sequenceDiagramModule.js";
 import { umlDiagramModule } from "./diagrams/umlDiagramModule.js";
+import { useCaseDiagramModule } from "./diagrams/useCaseDiagramModule.js";
 import type { LayoutEngine } from "../layout/engine/layoutEngine.js";
 
 /**
@@ -31,6 +32,7 @@ export function createBaseDiagramModules(layoutEngine: LayoutEngine): Interprete
  * - UML component diagram: componentDiagram
  * - UML activity diagram: activityDiagram
  * - UML deployment diagram: deploymentDiagram
+ * - UML use case diagram: useCaseDiagram
  * - (arbitrary) UML diagram: umlDiagram
  */
 export const defaultDiagramModules = [
@@ -40,5 +42,6 @@ export const defaultDiagramModules = [
     sequenceDiagramModule,
     activityDiagramModule,
     deploymentDiagramModule,
+    useCaseDiagramModule,
     umlDiagramModule
 ];
