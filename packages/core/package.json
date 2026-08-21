@@ -24,7 +24,7 @@
         "build": "tsc"
     },
     "dependencies": {
-        "chevrotain": "^13.0.0",
+        "chevrotain": "^13.2.0",
         "dedent": "^1.7.2"
     }
 }

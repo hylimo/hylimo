@@ -83,8 +83,17 @@
     padding-left: 10px;
 }
 
+/*
+ * The nav menu is hidden on small screens by default, but the teleport targets are needed there too.
+ * VitePress wraps every nav item in a list item, which is made transparent so that the teleport
+ * targets stay direct children of the flex container and can still grow.
+ */
 .VPNavBarMenu {
-    display: flex !important;
+    display: block !important;
+}
+
+.VPNavBarMenu .list > li {
+    display: contents;
 }
 
 .VPNavBarMenuLink {

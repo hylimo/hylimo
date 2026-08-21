@@ -1,5 +1,5 @@
 import type { MarkdownRenderer, MarkdownOptions } from "vitepress";
-import { hylLanguage } from "./hylLanguage";
+import { hylLanguage } from "./hylLanguage.js";
 
 function config(renderer: MarkdownRenderer) {
     const defaultRenderer = renderer.renderer.rules.fence;

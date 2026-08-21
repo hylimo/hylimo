@@ -28,7 +28,7 @@
         "@hylimo/diagram": "^3.0.0-alpha.1",
         "@hylimo/diagram-common": "^3.0.0-alpha.1",
         "@hylimo/diagram-protocol": "^3.0.0-alpha.1",
-        "chevrotain": "^13.0.0",
+        "chevrotain": "^13.2.0",
         "jsonata": "^2.2.2",
         "prettier": "^3.9.6",
         "sprotty-protocol": "^1.4.0",

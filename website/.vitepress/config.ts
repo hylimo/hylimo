@@ -1,5 +1,5 @@
 import { defineConfig } from "vitepress";
-import markdown from "./theme/markdown";
+import markdown from "./theme/markdown.js";
 import { withPwa } from "@vite-pwa/vitepress";
 
 export default withPwa(
