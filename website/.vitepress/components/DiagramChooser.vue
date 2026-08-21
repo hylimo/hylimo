@@ -463,7 +463,7 @@ function onMouseMove(e: MouseEvent) {
         return;
     }
     const el = (e.target as HTMLElement)?.closest<HTMLAnchorElement>(".item");
-    const index = Number.parseInt(el?.dataset.index!);
+    const index = Number.parseInt(el?.dataset.index ?? "");
     if (index >= 0 && index !== selectedIndex.value) {
         selectedIndex.value = index;
     }
