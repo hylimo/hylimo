@@ -40,11 +40,19 @@ export const positionModule = ContentModule.create(
                     this.rposArgs = args
                     if (isNumber(targetY) || (targetY == null)) {
                         this.point = relativePoint(targetX = targetX, targetY = targetX, offsetX = targetY, offsetY = offsetX)
-                        scope.internal.registerCanvasContent(point, rposArgs, rposArgs.self)
+                        scope.internal.registerCanvasContent(
+                            point,
+                            rposArgs,
+                            scope.internal.resolveCanvasScope(rposArgs.self, list(targetX))
+                        )
                         point
                     } {
                         this.point = relativePoint(targetX = targetX, targetY = targetY, offsetX = offsetX, offsetY = offsetY)
-                        scope.internal.registerCanvasContent(point, rposArgs, rposArgs.self)
+                        scope.internal.registerCanvasContent(
+                            point,
+                            rposArgs,
+                            scope.internal.resolveCanvasScope(rposArgs.self, list(targetX, targetY))
+                        )
                         point
                     }
                 `,
@@ -70,7 +78,11 @@ export const positionModule = ContentModule.create(
                 `
                     (lineProvider, pos, distance) = args
                     point = linePoint(lineProvider = lineProvider, pos = pos, distance = distance)
-                    scope.internal.registerCanvasContent(point, args, args.self)
+                    scope.internal.registerCanvasContent(
+                        point,
+                        args,
+                        scope.internal.resolveCanvasScope(args.self, list(lineProvider))
+                    )
                     point
                 `,
                 {

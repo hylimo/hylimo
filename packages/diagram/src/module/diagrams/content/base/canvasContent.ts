@@ -11,6 +11,48 @@ export const canvasContentModule = ContentModule.create(
     [],
     [],
     [
+        `
+            scope.internal.canvasScopeCounter = 0
+
+            scope.internal.createCanvasScope = {
+                (parentCanvasScope) = args
+                scope.internal.canvasScopeCounter = scope.internal.canvasScopeCounter + 1
+                [
+                    contents = list(),
+                    parentCanvasScope = parentCanvasScope,
+                    canvasScopeId = scope.internal.canvasScopeCounter,
+                    canvasScopeDepth = parentCanvasScope.canvasScopeDepth + 1
+                ]
+            }
+
+            scope.internal.canvasScopeAncestor = {
+                (canvasScope, steps) = args
+                this.current = canvasScope
+                this.i = 0
+                while { i < steps } {
+                    current = current.parentCanvasScope
+                    i = i + 1
+                }
+                current
+            }
+
+            scope.internal.resolveCanvasScope = {
+                (currentScope, targets) = args
+                this.result = currentScope
+                targets.forEach {
+                    this.other = it.canvasScope
+                    this.depth = Math.min(result.canvasScopeDepth, other.canvasScopeDepth)
+                    this.a = scope.internal.canvasScopeAncestor(result, result.canvasScopeDepth - depth)
+                    this.b = scope.internal.canvasScopeAncestor(other, other.canvasScopeDepth - depth)
+                    while { a.canvasScopeId != b.canvasScopeId } {
+                        a = a.parentCanvasScope
+                        b = b.parentCanvasScope
+                    }
+                    result = a
+                }
+                result
+            }
+        `,
         id(SCOPE)
             .field("internal")
             .assignField(

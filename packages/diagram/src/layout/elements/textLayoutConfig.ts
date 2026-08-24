@@ -7,6 +7,7 @@ import { ContentCardinality } from "../layoutElement.js";
 import type { Layout } from "../engine/layout.js";
 import { StyledElementLayoutConfig } from "./styledElementLayoutConfig.js";
 import { elementType } from "../../module/base/types.js";
+import { enumType } from "@hylimo/core";
 
 /**
  * Layout config for text
@@ -15,23 +16,42 @@ export class TextLayoutConfig extends StyledElementLayoutConfig {
     override type = Text.TYPE;
 
     constructor() {
-        super([], [], elementType("span"), ContentCardinality.Many);
+        super(
+            [],
+            [
+                {
+                    name: "direction",
+                    description:
+                        'the direction the text runs in, must be one of "horizontal", "clockwise" (reading top to ' +
+                        'bottom) or "counterclockwise" (reading bottom to top)',
+                    type: enumType(TextDirection)
+                }
+            ],
+            elementType("span"),
+            ContentCardinality.Many
+        );
     }
 
     override measure(layout: Layout, element: LayoutElement, constraints: SizeConstraints): Size {
         const contents = element.children;
         if (contents.length > 0) {
             contents.forEach((content) => layout.measure(content, constraints));
+            const turned = this.isTurned(element);
+            const maxWidth = turned ? constraints.max.height : constraints.max.width;
             const layoutRes = layout.engine.textCache.getOrCompute(
                 {
-                    maxWidth: constraints.max.width,
+                    maxWidth,
                     spans: element.children.map((content) => content.styles)
                 },
                 () => {
-                    return layout.engine.textLayouter.layout(element, layout.fonts, constraints.max.width);
+                    return layout.engine.textLayouter.layout(element, layout.fonts, maxWidth);
                 }
             );
             element.layoutedContents = layoutRes.elements.map((element) => ({ ...element }));
+            element.textBlockSize = layoutRes.size;
+            if (turned) {
+                return { width: layoutRes.size.height, height: layoutRes.size.width };
+            }
             return layoutRes.size;
         } else {
             return constraints.min;
@@ -43,13 +63,52 @@ export class TextLayoutConfig extends StyledElementLayoutConfig {
             return [];
         }
         const elements = element.layoutedContents as Text[];
+        const direction = (element.styles.direction as TextDirection | undefined) ?? TextDirection.Horizontal;
+        const blockSize = element.textBlockSize as Size;
         for (let i = 0; i < elements.length; i++) {
-            const element = elements[i];
-            element.id = `${id}_${i}`;
-            element.x += position.x;
-            element.y += position.y;
+            const line = elements[i];
+            line.id = `${id}_${i}`;
+            if (direction === TextDirection.Horizontal) {
+                line.x += position.x;
+                line.y += position.y;
+            } else {
+                const anchor = this.turnAnchor(direction, line, blockSize);
+                line.x = position.x + anchor.x;
+                line.y = position.y + anchor.y;
+                line.rotation = direction === TextDirection.Clockwise ? 90 : -90;
+            }
         }
         return elements;
+    }
+
+    /**
+     * Maps a line's anchor from the coordinates the text layouter produced into the turned ones.
+     *
+     * The layouter always works horizontally: a line's anchor is the left end of its baseline within a block of
+     * `blockSize`. A quarter turn maps that block onto its transpose, and the rendered line is then rotated around
+     * the anchor this returns, so the text runs along the turned axis.
+     *
+     * @param direction the direction to turn in, never horizontal
+     * @param line the line to map, in the layouter's coordinates
+     * @param blockSize the size of the untuned text block
+     * @returns the anchor of the line in the turned coordinates
+     */
+    private turnAnchor(direction: TextDirection, line: Text, blockSize: Size): Point {
+        if (direction === TextDirection.Clockwise) {
+            return { x: blockSize.height - line.y, y: line.x };
+        }
+        return { x: line.y, y: blockSize.width - line.x };
+    }
+
+    /**
+     * Checks whether the text is turned, meaning it runs along the vertical axis
+     *
+     * @param element the element to check
+     * @returns true if the text is turned
+     */
+    private isTurned(element: LayoutElement): boolean {
+        const direction = element.styles.direction as TextDirection | undefined;
+        return direction != undefined && direction !== TextDirection.Horizontal;
     }
 
     override getChildren(element: LayoutElement): FullObject[] {
@@ -60,4 +119,23 @@ export class TextLayoutConfig extends StyledElementLayoutConfig {
             return [];
         }
     }
+}
+
+/**
+ * The direction a text runs in
+ */
+export enum TextDirection {
+    /**
+     * The ordinary case, reading left to right
+     */
+    Horizontal = "horizontal",
+    /**
+     * Turned a quarter clockwise, reading top to bottom
+     */
+    Clockwise = "clockwise",
+    /**
+     * Turned a quarter counter-clockwise, reading bottom to top.
+     * This is what a header on the left edge of a lane conventionally uses.
+     */
+    CounterClockwise = "counterclockwise"
 }

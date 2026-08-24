@@ -25,6 +25,7 @@ import { forkAndJoinModule } from "./content/uml/activity/forkAndJoin.js";
 import { initialAndFinalModule } from "./content/uml/activity/initialAndFinal.js";
 import { signalsModule } from "./content/uml/activity/signals.js";
 import { connectorModule } from "./content/uml/activity/connector.js";
+import { swimlanesModule } from "./content/uml/activity/swimlanes.js";
 import { nodeModule } from "./content/uml/deployment/node.js";
 import { artifactModule } from "./content/uml/deployment/artifact.js";
 import { deploymentSpecificationModule } from "./content/uml/deployment/deploymentSpecification.js";
@@ -56,6 +57,7 @@ export const umlDiagramModule = InterpreterModule.create(
         componentDiagramToolboxEditsModule,
         componentModule,
         connectorModule,
+        swimlanesModule,
         decisionAndMergeModule,
         deploymentDiagramToolboxEditsModule,
         deploymentSpecificationModule,

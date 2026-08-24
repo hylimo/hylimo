@@ -115,11 +115,18 @@ export class PDFDiagramVisitor extends SimplifiedDiagramVisitor<PDFKit.PDFDocume
         const fillAttributes = extractFillAttributes(element);
         context.fillColor(fillAttributes.fill);
         context.fillOpacity(fillAttributes["fill-opacity"] ?? 1);
+        if (element.rotation != undefined) {
+            context.save();
+            context.rotate(element.rotation, { origin: [element.x, element.y] });
+        }
         context.text(element.text, element.x, element.y, {
             lineBreak: false,
             baseline: "alphabetic",
             features: element.fontFeatureSettings as any[] | undefined
         });
+        if (element.rotation != undefined) {
+            context.restore();
+        }
         this.visitChildren(element, context);
     }
 

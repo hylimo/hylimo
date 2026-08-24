@@ -66,6 +66,9 @@ export const dslModule = InterpreterModule.create(
                     this.scope = [
                         fonts = list(defaultFonts.roboto, defaultFonts.openSans, defaultFonts.sourceCodePro),
                         contents = list(),
+                        parentCanvasScope = null,
+                        canvasScopeId = 0,
+                        canvasScopeDepth = 0,
                         internal = [
                             classCounter = 0,
                             styles = [styles = list()],

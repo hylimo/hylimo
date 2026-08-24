@@ -5,9 +5,11 @@ import type { FontCollection } from "../font/fontCollection.js";
 import type { LayoutElement, LayoutInformation, SizeConstraints, LayoutConfig } from "../layoutElement.js";
 import { addToSize, matchToConstraints, HorizontalAlignment, VerticalAlignment, Visibility } from "../layoutElement.js";
 import type { LayoutEngine } from "./layoutEngine.js";
-import type { Element } from "@hylimo/diagram-common";
+import type { Bounds, Element } from "@hylimo/diagram-common";
+import { Math2D } from "@hylimo/diagram-common";
 import { applyEdits } from "./edits.js";
 import { CanvasLayoutEngine } from "./canvasLayoutEngine.js";
+import type { CanvasSync } from "../elements/canvas/canvasLayoutConfig.js";
 import type { StyleContext } from "./styles.js";
 import { StyleEvaluator, StyleValueParser } from "./styles.js";
 
@@ -41,6 +43,12 @@ export class Layout {
      * Canvas layout engine to layout all canvases
      */
     readonly layoutEngine = new CanvasLayoutEngine(this);
+
+    /**
+     * State of all canvas groups, keyed by the id of the canvas a group is anchored at.
+     * See {@link resolveCanvasGroup} for how a group is resolved.
+     */
+    private readonly canvasGroups = new Map<string, CanvasGroupState>();
 
     /**
      * Style evaluator handling style matching and parsing
@@ -252,6 +260,128 @@ export class Layout {
     }
 
     /**
+     * Discards any group anchored at the given canvas, so that measuring it again starts from nothing.
+     *
+     * @param id the id of the canvas the group is anchored at
+     */
+    clearCanvasGroup(id: string): void {
+        this.canvasGroups.delete(id);
+    }
+
+    /**
+     * Checks whether any canvas has joined the group anchored at the given canvas.
+     *
+     * An anchor is not marked as one: it learns that it anchors a group because members registered against it while
+     * it measured its contents. That is also why this is only meaningful between the two passes.
+     *
+     * @param id the id of the canvas the group is anchored at
+     * @returns true if at least one canvas joined
+     */
+    hasCanvasGroup(id: string): boolean {
+        return this.canvasGroups.has(id);
+    }
+
+    /**
+     * Unions the bounds registered by the members of a group, ending its first pass.
+     *
+     * A group makes its members share one coordinate space along the axes they name: the same minimum coordinate,
+     * so a position means the same place in every member, and the same extent, so a member with less content still
+     * reaches as far as the rest. Resolving it takes two measure passes over the anchor's contents, which is what
+     * {@link CanvasLayoutConfig.measure} performs: in the first the members report their own bounds and register
+     * them, then this unions them, and in the second the members report the union instead, so the synced sizes
+     * propagate through whatever lays them out.
+     *
+     * @param id the id of the canvas the group is anchored at
+     */
+    resolveCanvasGroup(id: string): void {
+        const state = this.canvasGroups.get(id)!;
+        state.resolved = Math2D.mergeBounds(state.raw);
+    }
+
+    /**
+     * Applies a group to the bounds one of its members measured.
+     *
+     * During the first pass this only records the bounds and returns them unchanged; during the second it returns
+     * the union along the axes the member syncs. Degenerate bounds are recorded as nothing, so an empty member does
+     * not drag the union to the origin — but it still receives the union, which is what lets an empty lane span the
+     * diagram.
+     *
+     * @param id the id of the canvas the group is anchored at
+     * @param bounds the bounds the member measured on its own
+     * @param sync the axes the member shares with the group
+     * @returns the bounds the member should report
+     */
+    applyCanvasGroup(id: string, bounds: Bounds, sync: CanvasSync): Bounds {
+        let state = this.canvasGroups.get(id);
+        if (state == undefined) {
+            state = { raw: [] };
+            this.canvasGroups.set(id, state);
+        }
+        if (state.resolved == undefined) {
+            if (bounds.size.width > 0 && bounds.size.height > 0) {
+                state.raw.push(bounds);
+            }
+            return bounds;
+        }
+        const resolved = state.resolved;
+        const degenerate = bounds.size.width <= 0 || bounds.size.height <= 0;
+        const x = this.syncAxis(
+            sync.x,
+            degenerate,
+            bounds.position.x,
+            bounds.size.width,
+            resolved.position.x,
+            resolved.size.width
+        );
+        const y = this.syncAxis(
+            sync.y,
+            degenerate,
+            bounds.position.y,
+            bounds.size.height,
+            resolved.position.y,
+            resolved.size.height
+        );
+        return {
+            position: { x: x.from, y: y.from },
+            size: { width: x.length, height: y.length }
+        };
+    }
+
+    /**
+     * Applies a resolved group to one axis of a member's bounds.
+     *
+     * A member takes the group's interval, which is what puts every member in one coordinate space, but never less
+     * than it actually covers: syncing changes member sizes, and content anchored to a member grows with it, so a
+     * member can end up larger than the union measured before that happened. Reporting the union alone would leave
+     * that content outside its own canvas' bounds, and so outside everything measured from them.
+     *
+     * @param synced whether this axis is shared at all
+     * @param degenerate whether the member measured no bounds, in which case it only receives
+     * @param from the member's own start on this axis
+     * @param length the member's own length on this axis
+     * @param groupFrom the group's start on this axis
+     * @param groupLength the group's length on this axis
+     * @returns the start and length the member should report
+     */
+    private syncAxis(
+        synced: boolean,
+        degenerate: boolean,
+        from: number,
+        length: number,
+        groupFrom: number,
+        groupLength: number
+    ): { from: number; length: number } {
+        if (!synced) {
+            return { from, length };
+        }
+        if (degenerate) {
+            return { from: groupFrom, length: groupLength };
+        }
+        const start = Math.min(from, groupFrom);
+        return { from: start, length: Math.max(from + length, groupFrom + groupLength) - start };
+    }
+
+    /**
      * Generates a new id based on the parent element
      *
      * @param layoutConfig the layout config of the element
@@ -436,4 +566,18 @@ export class Layout {
         }
         return false;
     }
+}
+
+/**
+ * The state of one canvas group while it is being resolved
+ */
+export interface CanvasGroupState {
+    /**
+     * The bounds the members reported during the first pass
+     */
+    raw: Bounds[];
+    /**
+     * The union of {@link raw}, undefined until the first pass has ended
+     */
+    resolved?: Bounds;
 }

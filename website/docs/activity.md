@@ -345,9 +345,122 @@ activityDiagram {
 The two flows leave the bar at different points instead of both starting in its middle.
 On a bar, `0.25` is the middle of its bottom edge and `0.75` the middle of its top edge, and `0.125` more or less walks from there all the way to a corner, so `0.2` and `0.3` are 40% of the way to the right and to the left end.
 
+## Swimlanes
+
+Activity partitions, better known as swimlanes, divide a diagram into lanes, each holding what one participant is responsible for.
+They are created with the `swimlanes` function, and the lanes inside it with `lane`:
+
+```hylimo
+activityDiagram {
+    swimlanes {
+        lane("Customer") {
+            start()
+            action("Place order") layout {
+                pos = apos(150, 0)
+            }
+        }
+        lane("Sales") {
+            action("Accept order") layout {
+                pos = apos(150, 0)
+            }
+        }
+    }
+}
+```
+
+Every lane is a canvas of its own, but all lanes share one coordinate system along the direction the flow runs in: a position means the same place in every lane, and a lane holding less than the others still spans the whole diagram.
+Both actions above are placed at the same position within their lane and line up accordingly, even though the first lane also contains the start node.
+Across the flow a lane sizes itself to its content, so lanes grow as nodes are added to them.
+
+Lanes appear in the order they are declared, and cannot be nested.
+A node belongs to the lane it is written in: dragging it past a border in the graphical editor moves it visually, but does not move it into the other lane.
+
+### Orientation
+
+By default lanes are rows: they are stacked from top to bottom, the flow runs from left to right, and the lane names are turned to read from bottom to top.
+The `orientation` named argument switches to columns, where the lanes are placed side by side, the flow runs from top to bottom, and the names are upright above their lane:
+
+```hylimo
+activityDiagram {
+    swimlanes(orientation = "columns") {
+        lane("Customer") {
+            action("Place order")
+        }
+        lane("Sales") {
+            action("Accept order") layout {
+                pos = apos(0, 150)
+            }
+        }
+    }
+}
+```
+
+The default for a whole diagram can be changed with the `swimlanesOrientation` [config property](#config-properties).
+
+### Flows between lanes
+
+A flow is placed on the nearest canvas containing both of its ends, so one that crosses a lane border can be written inside a lane just as well as next to the lanes, whichever reads better.
+Flows crossing a border are usually routed from one side of a node to the other, as described under [flow direction](#flow-direction):
+
+```hylimo
+activityDiagram {
+    swimlanes {
+        lane("Customer") {
+            start("begin")
+            action("Place order") layout {
+                pos = apos(150, 0)
+            }
+            begin --> `Place order`
+        }
+        lane("Sales") {
+            action("Accept order") layout {
+                pos = apos(150, 0)
+            }
+            `Place order` --> `Accept order` with {
+                over = start(0.25).line(end(0.75))
+            }
+        }
+    }
+}
+```
+
+### Nodes on a lane border
+
+A lane exposes the separator drawn after it as `separator`.
+A separator is a connection, so it can be used as the target of [`lpos`](./diagram.md#points), which is how a node belonging to two lanes is placed on the border between them.
+An object handed from one partition to the next is the usual case:
+
+```hylimo
+activityDiagram {
+    swimlanes {
+        lane("Sales") {
+            action("Accept order")
+        }
+        lane("Shipping") {
+            action("Ship order") layout {
+                pos = apos(300, 0)
+            }
+        }
+
+        object("Order") layout {
+            pos = lpos(Sales.separator, 0.5)
+        }
+    }
+}
+```
+
+The node is centered on the separator, and `0.5` places it halfway along it.
+A fork or join bar belonging to two lanes is placed the same way, though its length is not derived from the lanes it covers: set `width` or `height` in its `layout` block to size it.
+
+Nodes on a border are written next to the lanes rather than inside one, which is also where they belong: they are part of no single lane.
+
 ## Config properties
 
-The activity diagram does not provide any config properties.
+The following config properties are available for activity diagrams:
+
+| Variable               | Meaning                                                                                                                     | Default value |
+| ---------------------- | --------------------------------------------------------------------------------------------------------------------------- | ------------- |
+| `swimlanesOrientation` | Whether lanes default to `"rows"`, with the flow running left to right, or `"columns"`, with the flow running top to bottom | `"rows"`      |
 
 ## Styling
 

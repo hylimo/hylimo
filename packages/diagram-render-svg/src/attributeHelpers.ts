@@ -150,3 +150,14 @@ export function extractShapeStyleAttributes(model: Readonly<Shape>): ShapeStyleA
         ...extractFillAttributes(model)
     };
 }
+
+/**
+ * Renders the rotation of a turned text as an svg transform fragment, to be applied after the translation to its
+ * anchor. Empty for an ordinary horizontal text, which carries no rotation at all.
+ *
+ * @param model the text to render the rotation of
+ * @returns the transform fragment, starting with a space, or an empty string
+ */
+export function textRotation(model: Readonly<{ rotation?: number }>): string {
+    return model.rotation != undefined ? ` rotate(${model.rotation})` : "";
+}

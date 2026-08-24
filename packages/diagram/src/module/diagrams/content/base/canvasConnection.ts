@@ -71,7 +71,8 @@ export const canvasConnectionModule = ContentModule.create(
                 "createConnection",
                 fun(
                     `
-                        (start, end, class, target, canvasScope) = args
+                        (start, end, class, target, requestedCanvasScope) = args
+                        canvasScope = scope.internal.resolveCanvasScope(requestedCanvasScope, list(start, end))
                         startMarkerFactory = args.startMarkerFactory
                         endMarkerFactory = args.endMarkerFactory
                         lineType = args.lineType ?? scope.internal.config.defaultLineType

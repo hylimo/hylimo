@@ -71,6 +71,9 @@ diagram {
 Canvas elements, connections and points are rarely created through these functions directly - the
 [canvas constructs](#canvas-constructs) below are the comfortable way to do it.
 
+[Elements](./elements.md) documents the attributes, styles and permitted contents of each element
+type.
+
 ### Containers
 
 A `container` stacks its children, and how it does that is decided by its `layout` style:
@@ -423,45 +426,16 @@ Using them instead of fixed colors is what makes a diagram render correctly in b
 
 ### Style attributes
 
-Which attributes an element supports depends on its type.
-
-**Layout** - supported by all elements which are laid out, such as `shape`, `path`, `container` and
-`text`:
-
-| Attribute                                                          | Meaning                                                                |
-| ------------------------------------------------------------------ | ---------------------------------------------------------------------- |
-| `width`, `minWidth`, `maxWidth`                                    | Width of the element, `width` takes precedence over the other two      |
-| `height`, `minHeight`, `maxHeight`                                 | Height of the element, `height` takes precedence over the other two    |
-| `margin`, `marginTop`, `marginRight`, `marginBottom`, `marginLeft` | Space around the element                                               |
-| `hAlign`, `vAlign`                                                 | Horizontal and vertical alignment within the parent                    |
-| `visibility`                                                       | `"visible"`, `"hidden"` (invisible, still takes space) or `"collapse"` |
-| `grow`, `shrink`, `base`                                           | How the element grows and shrinks in an `hbox` or `vbox`               |
-| `layout`                                                           | How the element lays out its contents: `"stack"`, `"vbox"` or `"hbox"` |
-| `padding`                                                          | Space the element keeps between itself and its contents                |
+Which style attributes an element supports depends on its type.
+An attribute an element does not declare is accepted and then ignored, without a diagnostic, so the
+supported set is worth checking when a style has no effect.
+[Elements](./elements.md#style-attribute-groups) describes the groups - size, alignment, margin,
+flex, visibility, contents, stroke, fill, and the font attributes of a `span` - and lists which
+element supports which.
 
 For the attributes which take one of a fixed set of values, enum objects exist, so `HAlign.Center`
 can be written instead of `"center"`: `HAlign`, `VAlign`, `Visibility` and - for relative positions
 on an outline - `Position`.
-
-**Stroke and fill** - supported by shape-like elements, meaning `shape`, `path` and connections:
-
-| Attribute                                             | Meaning                                        |
-| ----------------------------------------------------- | ---------------------------------------------- |
-| `stroke`, `strokeOpacity`, `strokeWidth`              | Color, opacity and width of the stroke         |
-| `strokeDash`, `strokeDashSpace`                       | Dash length and gap length, for dashed strokes |
-| `strokeLineJoin`, `strokeLineCap`, `strokeMiterLimit` | How corners and ends of the stroke are drawn   |
-| `fill`, `fillOpacity`                                 | Color and opacity of the fill                  |
-
-**Text** - supported by `span`, and inherited from the enclosing `text`:
-
-| Attribute                                                                                                    | Meaning                          |
-| ------------------------------------------------------------------------------------------------------------ | -------------------------------- |
-| `fill`                                                                                                       | Color of the text                |
-| `fontFamily`, `fontSize`, `fontWeight`, `fontStyle`, `fontFeatureSettings`                                   | Which font is used and how       |
-| `underline`, `underlineOpacity`, `underlineWidth`, `underlineDash`, `underlineDashSpace`                     | Underline and its appearance     |
-| `strikethrough`, `strikethroughOpacity`, `strikethroughWidth`, `strikethroughDash`, `strikethroughDashSpace` | Strikethrough and its appearance |
-
-`shape` additionally supports `shape` and `cornerRounding`, see [Shapes](./shapes.md).
 
 ## Fonts
 

@@ -22,6 +22,10 @@ export class SText extends SLayoutedElement implements Text, LinearAnimatable {
      */
     fill?: Fill;
     /**
+     * The rotation in degrees, applied around the text's own anchor point, set by a turned text direction
+     */
+    rotation?: number;
+    /**
      * The font family to use
      */
     fontFamily!: string;

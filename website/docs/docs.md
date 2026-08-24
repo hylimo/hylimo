@@ -267,6 +267,7 @@ in the repository is the reference.
 | know what the editor can do, and which shortcut does it | [Hybrid Editor](./editor.md)                     |
 | understand the language the diagrams are written in     | [SyncScript](./syncscript.md)                    |
 | style, position or extend diagrams, or build your own   | [Diagram DSL](./diagram.md)                      |
+| look up what an element accepts and what it may contain | [Elements](./elements.md)                        |
 | know which shapes exist and how they size themselves    | [Shapes](./shapes.md)                            |
 | draw a concrete UML diagram                             | the diagram type pages, e.g. [class](./class.md) |
 

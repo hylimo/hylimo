@@ -13,6 +13,7 @@ import { forkAndJoinModule } from "./content/uml/activity/forkAndJoin.js";
 import { initialAndFinalModule } from "./content/uml/activity/initialAndFinal.js";
 import { signalsModule } from "./content/uml/activity/signals.js";
 import { connectorModule } from "./content/uml/activity/connector.js";
+import { swimlanesModule } from "./content/uml/activity/swimlanes.js";
 
 /**
  * Module for activity diagrams
@@ -32,6 +33,7 @@ export const activityDiagramModule = InterpreterModule.create(
         initialAndFinalModule,
         signalsModule,
         connectorModule,
+        swimlanesModule,
         commentModule,
         readingDirectionModule
     ])
