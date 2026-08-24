@@ -6,7 +6,8 @@ import {
     extractFillAttributes,
     extractLayoutAttributes,
     extractShapeStyleAttributes,
-    extractStrokeAsFillAttributes
+    extractStrokeAsFillAttributes,
+    textRotation
 } from "./attributeHelpers.js";
 import type { SimplifiedCanvasElement } from "@hylimo/diagram-common";
 import type { Font } from "fontkit";
@@ -365,7 +366,10 @@ class SVGDiagramVisitor extends SimplifiedDiagramVisitor<SVGRendererContext, SVG
         const scalingFactor = element.fontSize / font.unitsPerEm;
         const baseAttributes = {
             ...extractFillAttributes(element),
-            transform: `translate(${element.x}, ${element.y}) scale(${scalingFactor}, ${-scalingFactor})`
+            transform:
+                `translate(${element.x}, ${element.y})` +
+                textRotation(element) +
+                ` scale(${scalingFactor}, ${-scalingFactor})`
         };
 
         return this.simplifyGlyphs(glyphs, baseAttributes, context, element.text);
@@ -447,6 +451,9 @@ class SVGDiagramVisitor extends SimplifiedDiagramVisitor<SVGRendererContext, SVG
             ...extractFillAttributes(element),
             "font-family": element.fontFamily,
             "font-size": element.fontSize,
+            ...(element.rotation != undefined
+                ? { transform: `rotate(${element.rotation}, ${element.x}, ${element.y})` }
+                : {}),
             style: fontFeatureSettings != undefined ? `font-feature-settings: ${fontFeatureSettings}` : ""
         };
     }

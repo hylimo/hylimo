@@ -18,7 +18,7 @@ export const packageModule = ContentModule.create(
                     (name, optionalCallback, keywords) = args
     
                     callback = optionalCallback ?? {}
-                    result = [contents = list()]
+                    result = scope.internal.createCanvasScope(args.self)
                     callback.callWithScope(result)
     
                     packageElement = canvasElement(

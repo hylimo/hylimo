@@ -33,6 +33,11 @@ export interface Text extends LayoutedElement, FilledElement {
      * The font feature settings to use, if any
      */
     fontFeatureSettings?: string[];
+    /**
+     * The rotation in degrees, applied around the text's own anchor point.
+     * Set by a turned text direction, absent for the ordinary horizontal case.
+     */
+    rotation?: number;
 }
 
 /**

@@ -175,7 +175,7 @@ export const shapeStyleAttributes = [...strokeStyleAttributes, ...fillStyleAttri
 export const containerStyleAttributes = [
     {
         name: "layout",
-        description: "the layout of the container, must be one of 'vbox', 'hbox', 'grid' or 'absolute'",
+        description: "the layout of the container, must be one of 'stack', 'vbox' or 'hbox'",
         type: enumType(ContainerLayout)
     },
     {

@@ -17,6 +17,7 @@ import { ContentCardinality } from "../../layoutElement.js";
 import type { Layout } from "../../engine/layout.js";
 import { StyledElementLayoutConfig } from "../styledElementLayoutConfig.js";
 import { elementType } from "../../../module/base/types.js";
+import { booleanType, objectType, optional } from "@hylimo/core";
 import type { CanvasContentLayoutConfig } from "./canvasContentLayoutConfig.js";
 
 /**
@@ -27,7 +28,24 @@ export class CanvasLayoutConfig extends StyledElementLayoutConfig {
 
     constructor() {
         super(
-            [],
+            [
+                {
+                    name: "syncWith",
+                    description:
+                        "if set, this canvas joins the group anchored at the given canvas, which must be one of " +
+                        "its ancestors, and shares a coordinate space with the group's other members along the " +
+                        "axes set to true",
+                    type: optional(
+                        objectType(
+                            new Map([
+                                ["canvas", elementType(Canvas.TYPE)],
+                                ["x", optional(booleanType)],
+                                ["y", optional(booleanType)]
+                            ])
+                        )
+                    )
+                }
+            ],
             [],
             elementType(
                 CanvasElement.TYPE,
@@ -42,12 +60,12 @@ export class CanvasLayoutConfig extends StyledElementLayoutConfig {
 
     override measure(layout: Layout, element: LayoutElement): Size {
         const contents = element.children;
-        contents.map((content) =>
-            layout.measure(content, {
-                min: { width: 0, height: 0 },
-                max: { width: Number.POSITIVE_INFINITY, height: Number.POSITIVE_INFINITY }
-            })
-        );
+        layout.clearCanvasGroup(element.id);
+        this.measureContents(layout, contents);
+        if (layout.hasCanvasGroup(element.id)) {
+            layout.resolveCanvasGroup(element.id);
+            this.measureContents(layout, contents);
+        }
 
         const children: Element[] = [];
         const layoutChildren: Element[] = [];
@@ -67,11 +85,63 @@ export class CanvasLayoutConfig extends StyledElementLayoutConfig {
                 childBounds.push(...this.calculateConnectionBounds(child as CanvasConnection, layout));
             }
         }
-        const bounds = Math2D.mergeBounds(childBounds);
+        const ownBounds = Math2D.mergeBounds(childBounds);
+        const sync = this.extractSync(layout, element);
+        const bounds = sync != undefined ? layout.applyCanvasGroup(sync.anchor, ownBounds, sync) : ownBounds;
         element.childElements = [...children, ...layoutChildren];
         element.canvasBounds = bounds;
 
         return bounds.size;
+    }
+
+    /**
+     * Measures all contents of the canvas, without any size constraints.
+     *
+     * Re-measuring is safe: the layout element tree, and with it every id, is built once by `Layout.create`, which
+     * is what lets the box layouts re-measure a child whose final length differs too.
+     *
+     * @param layout performs the layout
+     * @param contents the contents to measure
+     */
+    private measureContents(layout: Layout, contents: LayoutElement[]): void {
+        for (const content of contents) {
+            layout.measure(content, {
+                min: { width: 0, height: 0 },
+                max: { width: Number.POSITIVE_INFINITY, height: Number.POSITIVE_INFINITY }
+            });
+        }
+    }
+
+    /**
+     * Reads the group this canvas joins, if it joins one.
+     *
+     * Membership is stated by the member naming its anchor, rather than inferred from sitting below a canvas that
+     * declared a group: nesting alone says nothing about intent, and a package drawn inside a swimlane would
+     * otherwise be stretched to the lane's flow extent merely for being there.
+     *
+     * The anchor has to be an ancestor. That is not a convention but what makes the group resolvable: a canvas
+     * measures all of its contents before laying any of them out, which is the barrier the two resolution passes
+     * rely on, and only an ancestor is guaranteed to provide it.
+     *
+     * @param layout performs the layout
+     * @param element the canvas to read
+     * @returns the group this canvas joins, or undefined if it joins none
+     */
+    private extractSync(layout: Layout, element: LayoutElement): CanvasSync | undefined {
+        const syncWith = element.element.getLocalFieldOrUndefined("syncWith")?.value as FullObject | undefined;
+        if (syncWith == undefined) {
+            return undefined;
+        }
+        const anchorElement = syncWith.getLocalFieldOrUndefined("canvas")?.value as FullObject;
+        const anchor = layout.getElementId(anchorElement);
+        if (!layout.isChildElement(layout.layoutElementLookup.get(anchor)!, element)) {
+            throw new Error("The canvas a canvas syncs with must be one of its ancestors");
+        }
+        return {
+            anchor,
+            x: syncWith.getLocalFieldOrUndefined("x")?.value?.toNative() === true,
+            y: syncWith.getLocalFieldOrUndefined("y")?.value?.toNative() === true
+        };
     }
 
     override layout(layout: Layout, element: LayoutElement, position: Point, size: Size, id: string): Element[] {
@@ -206,4 +276,22 @@ export class CanvasLayoutConfig extends StyledElementLayoutConfig {
             return [];
         }
     }
+}
+
+/**
+ * The group a canvas joins, and the axes it shares with the group's other members
+ */
+export interface CanvasSync {
+    /**
+     * The id of the canvas the group is anchored at, always an ancestor of the member
+     */
+    anchor: string;
+    /**
+     * Whether the x axis is shared, used by swimlanes whose flow runs left to right
+     */
+    x: boolean;
+    /**
+     * Whether the y axis is shared, used by swimlanes whose flow runs top to bottom
+     */
+    y: boolean;
 }

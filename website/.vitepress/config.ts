@@ -30,6 +30,7 @@ export default withPwa(
                         { text: "Hybrid Editor", link: "/docs/editor" },
                         { text: "SyncScript", link: "/docs/syncscript" },
                         { text: "Diagram DSL", link: "/docs/diagram" },
+                        { text: "Elements", link: "/docs/elements" },
                         { text: "Shapes", link: "/docs/shapes" }
                     ]
                 },

@@ -27,6 +27,9 @@ export class TextView implements IView {
                         "font-size": model.fontSize,
                         "font-style": model.fontStyle,
                         "font-weight": model.fontWeight,
+                        ...(model.rotation != undefined
+                            ? { transform: `rotate(${model.rotation}, ${model.x}, ${model.y})` }
+                            : {}),
                         style: fontFeatureSettings != undefined ? `font-feature-settings: ${fontFeatureSettings}` : ""
                     }
                 },
