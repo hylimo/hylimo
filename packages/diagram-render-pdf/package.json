@@ -1,6 +1,6 @@
 {
     "name": "@hylimo/diagram-render-pdf",
-    "version": "3.0.0-alpha.1",
+    "version": "3.0.0-alpha.2",
     "license": "MIT",
     "type": "module",
     "repository": {
@@ -24,8 +24,8 @@
         "build": "tsc"
     },
     "dependencies": {
-        "@hylimo/diagram-common": "^3.0.0-alpha.1",
-        "@hylimo/diagram-render-svg": "^3.0.0-alpha.1",
+        "@hylimo/diagram-common": "^3.0.0-alpha.2",
+        "@hylimo/diagram-render-svg": "^3.0.0-alpha.2",
         "pdfkit": "^0.20.1"
     },
     "devDependencies": {
