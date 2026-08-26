@@ -14,6 +14,8 @@
         "build": "npm run build:wasm-libs && npm run build:packages",
         "build:wasm-libs": "npm run build -w packages/wasm-libs",
         "build:packages": "tsc -b tsconfig.build.json",
+        "set-version": "npm version --workspaces --include-workspace-root --no-git-tag-version --no-workspaces-update",
+        "postset-version": "syncpack fix --dependencies @hylimo/** && syncpack fix --dependencies @hylimo/** && npm install --package-lock-only",
         "watch": "tsc -b tsconfig.build.json --watch",
         "dev": "npm run -w ./website dev",
         "format": "prettier --write .",
@@ -25,7 +27,23 @@
         "oxlint": "^1.80.0",
         "oxlint-tsgolint": "^7.0.2001",
         "prettier": "^3.9.6",
+        "syncpack": "^15.3.3",
         "typescript": "^7.0.2"
+    },
+    "syncpack": {
+        "semverGroups": [
+            {
+                "dependencies": [
+                    "@hylimo/**"
+                ],
+                "dependencyTypes": [
+                    "prod",
+                    "dev",
+                    "peer"
+                ],
+                "range": "^"
+            }
+        ]
     },
     "prettier": {
         "tabWidth": 4,
