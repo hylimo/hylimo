@@ -8,10 +8,32 @@ import type {
     SimplifiedText
 } from "@hylimo/diagram-common";
 import { SimplifiedDiagramVisitor } from "@hylimo/diagram-common";
-import PDFDocument from "pdfkit/js/pdfkit.standalone.js";
+import PDFDocument from "pdfkit";
 import type { ShapeStyleAttributes } from "@hylimo/diagram-render-svg";
 import { extractFillAttributes, extractShapeStyleAttributes } from "@hylimo/diagram-render-svg";
-import { Buffer } from "buffer/index.js";
+
+/**
+ * Decodes base64 encoded data to the bytes it represents
+ *
+ * @param data the base64 encoded data
+ * @returns the decoded bytes
+ */
+function decodeBase64(data: string): Uint8Array {
+    const binary = atob(data);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) {
+        bytes[i] = binary.charCodeAt(i);
+    }
+    return bytes;
+}
+
+/**
+ * Options used for every created PDF document.
+ * `font: false` skips pdfkit's default standard font: since pdfkit 0.20 browser builds no longer bundle
+ * the standard font data, and all fonts a diagram uses are registered explicitly anyway.
+ * `@types/pdfkit` does not know this option yet, hence the cast.
+ */
+const documentOptions = { autoFirstPage: false, font: false } as unknown as PDFKit.PDFDocumentOptions;
 
 /**
  * Renderer which renders a diagram to pdf
@@ -35,7 +57,7 @@ export class PDFRenderer {
         return new Promise(async (resolve, reject) => {
             try {
                 const parts: Uint8Array<ArrayBuffer>[] = [];
-                const document = new PDFDocument({ autoFirstPage: false });
+                const document = new PDFDocument(documentOptions);
                 const visitor = new PDFDiagramVisitor(this.margin, background);
                 document.on("data", (data: Uint8Array<ArrayBuffer>) => parts.push(data));
                 document.on("end", () => resolve(parts));
@@ -67,7 +89,7 @@ export class PDFDiagramVisitor extends SimplifiedDiagramVisitor<PDFKit.PDFDocume
 
     override visitRoot(element: Root, context: PDFKit.PDFDocument): void {
         for (const font of element.fonts) {
-            context.registerFont(font.fontFamily, Buffer.from(font.data, "base64"));
+            context.registerFont(font.fontFamily, decodeBase64(font.data));
         }
         const [width, height] = [
             element.rootBounds.size.width + 2 * this.margin,

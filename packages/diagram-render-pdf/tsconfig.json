@@ -15,6 +15,6 @@
             "path": "../diagram-render-svg"
         }
     ],
-    "include": ["src/**/*.ts", "types/*.d.ts"],
+    "include": ["src/**/*.ts"],
     "exclude": ["lib", "node_modules"]
 }

@@ -23,7 +23,15 @@
     "scripts": {
         "build": "tsc"
     },
+    "peerDependencies": {
+        "monaco-editor": "*"
+    },
+    "peerDependenciesMeta": {
+        "monaco-editor": {
+            "optional": true
+        }
+    },
     "devDependencies": {
-        "monaco-editor": "^0.55.1"
+        "monaco-editor": "npm:@codingame/monaco-vscode-editor-api@^25.1.2"
     }
 }

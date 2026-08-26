@@ -29,6 +29,6 @@
     },
     "devDependencies": {
         "glob": "^13.0.6",
-        "rolldown": "^1.2.5"
+        "rolldown": "^1.2.6"
     }
 }
