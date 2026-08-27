@@ -48,6 +48,9 @@ function generateToolboxInternal(context: Toolbox): VNode {
                 },
                 keyup: (event: KeyboardEvent) => {
                     void context.actionDispatcher.dispatchAll(generateUpdateKeyStateActions(event, false));
+                },
+                mouseleave: () => {
+                    context.hidePreview();
                 }
             }
         },

@@ -551,6 +551,17 @@ export class Toolbox extends AbstractUIExtension implements IActionHandler, Conn
     }
 
     /**
+     * Hides the currently shown preview, if any
+     */
+    hidePreview(): void {
+        if (this.showPreviewFor == undefined) {
+            return;
+        }
+        this.showPreviewFor = undefined;
+        this.update();
+    }
+
+    /**
      * Creates a prediction edit for a toolbox/connection edit entry.
      *
      * @param edit The toolbox edit to generate a prediction for

@@ -97,9 +97,6 @@ export function generateConnectionToolboxItem(
                     }
                     context.showPreview(connectionEdit);
                 },
-                mouseleave: () => {
-                    context.showPreviewFor = undefined;
-                },
                 mousedown: (event) => {
                     event.preventDefault();
                 }

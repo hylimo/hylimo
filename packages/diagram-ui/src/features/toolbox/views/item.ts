@@ -124,9 +124,6 @@ function generateToolboxItem(context: Toolbox, toolboxEdit: ToolboxEditEntry): V
                         return;
                     }
                     context.showPreview(toolboxEdit);
-                },
-                mouseleave: () => {
-                    context.showPreviewFor = undefined;
                 }
             }
         },
@@ -206,6 +203,7 @@ function handleMoveAction(context: Toolbox, toolboxEdit: ToolboxEditEntry, event
     if (!context.toolState.isLocked) {
         context.updateTool(ToolboxToolType.CURSOR, false);
     }
+    context.showPreviewFor = undefined;
     context.pointerEventsDisabled = true;
     context.update();
     void context.actionDispatcher.dispatch(action);
