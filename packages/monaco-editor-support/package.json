@@ -32,6 +32,6 @@
         }
     },
     "devDependencies": {
-        "monaco-editor": "npm:@codingame/monaco-vscode-editor-api@^25.1.2"
+        "monaco-editor": "npm:@codingame/monaco-vscode-editor-api@^37.6.1"
     }
 }

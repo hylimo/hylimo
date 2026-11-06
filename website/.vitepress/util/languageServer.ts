@@ -1,4 +1,4 @@
-import { createConnection, BrowserMessageReader, BrowserMessageWriter } from "vscode-languageserver/browser.js";
+import { createConnection, BrowserMessageReader, BrowserMessageWriter } from "vscode-languageserver/browser";
 import { LanguageServer } from "@hylimo/language-server";
 
 const messageReader = new BrowserMessageReader(self);

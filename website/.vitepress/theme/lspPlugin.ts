@@ -4,6 +4,7 @@ import type {
     NotificationHandler,
     NotificationType,
     RequestType,
+    RequestParam,
     Disposable
 } from "vscode-languageserver-protocol/browser";
 import {
@@ -38,6 +39,7 @@ import {
     type MonacoVscodeApiConfig
 } from "monaco-languageclient/vscodeApiWrapper";
 import { defaultDiagramConfig, defaultEditorConfig, defaultSharedSettings } from "./defaultSettings";
+import { language } from "./language";
 
 /**
  * Config for the diagram
@@ -86,11 +88,6 @@ export interface LanguageServerConfig {
      */
     editorConfig: Ref<EditorConfig>;
 }
-
-/**
- * The language identifier for the SyncScript language.
- */
-export const language = "syncscript";
 
 /**
  * A plugin that provides a language client for the SyncScript language.
@@ -281,14 +278,14 @@ export class LanguageClientProxy {
     /**
      * @see MonacoLanguageClient.sendNotification
      */
-    sendNotification<P>(type: NotificationType<P>, params?: P): Promise<void> {
+    sendNotification<P>(type: NotificationType<P>, params?: RequestParam<P>): Promise<void> {
         return this.client.sendNotification(type, params);
     }
 
     /**
      * @see MonacoLanguageClient.sendRequest
      */
-    sendRequest<P, R>(type: RequestType<P, R, any>, params: P): Promise<R> {
+    sendRequest<P, R>(type: RequestType<P, R, any>, params: RequestParam<P>): Promise<R> {
         return this.client.sendRequest(type, params);
     }
 }

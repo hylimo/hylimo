@@ -30,9 +30,9 @@
         "@hylimo/diagram-protocol": "^3.0.0-alpha.2",
         "chevrotain": "^13.2.0",
         "jsonata": "^2.2.2",
-        "prettier": "^3.9.6",
+        "prettier": "^3.9.10",
         "sprotty-protocol": "^1.4.0",
-        "vscode-languageserver": "9.0.1",
-        "vscode-languageserver-textdocument": "^1.0.12"
+        "vscode-languageserver": "10.1.2",
+        "vscode-languageserver-textdocument": "^1.0.16"
     }
 }

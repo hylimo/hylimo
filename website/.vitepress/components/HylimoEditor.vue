@@ -31,7 +31,7 @@ import { onMounted } from "vue";
 import { EditorApp, type EditorAppConfig } from "monaco-languageclient/editorApp";
 import { shallowRef } from "vue";
 import { inject } from "vue";
-import { language } from "../theme/lspPlugin";
+import { language } from "../theme/language";
 import { diagramIdProviderKey, languageClientKey, languageServerConfigKey } from "../theme/injectionKeys";
 import type { Disposable } from "vscode-languageserver-protocol";
 import { onKeyDown, useResizeObserver } from "@vueuse/core";

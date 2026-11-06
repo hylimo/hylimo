@@ -3,10 +3,10 @@ import type { EditEngine } from "./editEngine.js";
 import { ReplaceEditEngine } from "./replaceEditEngine.js";
 import type { Diagram } from "../../diagram/diagram.js";
 import type { TextDocument, TextEdit } from "vscode-languageserver-textdocument";
+import type { TextDocumentEdit } from "vscode-languageserver";
 import {
     Position,
     Range,
-    TextDocumentEdit,
     uinteger,
     VersionedTextDocumentIdentifier,
     TextDocumentContentChangeEvent
@@ -75,9 +75,9 @@ export class TransactionalEdit {
      * Applies the action and generates the text document edit based on it
      *
      * @param action the action to apply
-     * @returns the text document edit
+     * @returns the text document edit, only containing plain text edits
      */
-    async applyAction(action: TransactionalAction): Promise<TextDocumentEdit> {
+    async applyAction(action: TransactionalAction): Promise<TextDocumentEdit & { edits: TextEdit[] }> {
         const edits: TextEdit[] = [];
         if (action.sequenceNumber === this.initialSequenceNumber) {
             edits.push(...this.initialTextEdits);
@@ -90,10 +90,10 @@ export class TransactionalEdit {
                 newText: text
             });
         }
-        return TextDocumentEdit.create(
-            VersionedTextDocumentIdentifier.create(textDocument.uri, textDocument.version),
+        return {
+            textDocument: VersionedTextDocumentIdentifier.create(textDocument.uri, textDocument.version),
             edits
-        );
+        };
     }
 
     /**

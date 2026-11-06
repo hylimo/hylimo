@@ -1,5 +1,5 @@
 import type { Break } from "linebreak";
-import LineBreaker from "linebreak";
+import { LineBreaker } from "linebreak";
 import type { LayoutElement } from "../layoutElement.js";
 import type { Size, TextLine } from "@hylimo/diagram-common";
 import { Text, FontWeight, FontStyle } from "@hylimo/diagram-common";

@@ -1,13 +1,10 @@
 import { inject, ref, watch, type Ref } from "vue";
-import {
-    DidCloseTextDocumentNotification,
-    DidOpenTextDocumentNotification
-} from "vscode-languageserver-protocol/browser";
+import { DidCloseTextDocumentNotification, DidOpenTextDocumentNotification } from "vscode-languageserver-protocol";
 import { DiagramRequest } from "@hylimo/diagram-protocol";
 import { SVGRenderer } from "@hylimo/diagram-render-svg";
 import { useData } from "vitepress";
 import { languageClientKey, languageServerConfigKey } from "../theme/injectionKeys";
-import { language } from "../theme/lspPlugin";
+import { language } from "../theme/language";
 
 /**
  * The uri of the document used to render previews.

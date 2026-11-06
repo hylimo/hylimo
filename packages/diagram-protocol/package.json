@@ -26,6 +26,6 @@
     "dependencies": {
         "@hylimo/diagram-common": "^3.0.0-alpha.2",
         "sprotty-protocol": "^1.4.0",
-        "vscode-languageserver-protocol": "~3.17.5"
+        "vscode-languageserver-protocol": "3.18.4"
     }
 }

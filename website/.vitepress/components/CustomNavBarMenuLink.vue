@@ -1,12 +1,10 @@
 <template>
-    <VPNavScreenMenuLink v-if="screenMenu" :item="transformedItem" />
-    <VPNavBarMenuLink :item="transformedItem" />
+    <VPNavMenuLink :item="transformedItem" :screen="screenMenu" />
 </template>
 <script setup lang="ts">
 import { useUrlSearchParams } from "@vueuse/core";
 import type { DefaultTheme } from "vitepress";
-import VPNavBarMenuLink from "vitepress/dist/client/theme-default/components/VPNavBarMenuLink.vue";
-import VPNavScreenMenuLink from "vitepress/dist/client/theme-default/components/VPNavScreenMenuLink.vue";
+import VPNavMenuLink from "vitepress/dist/client/theme-default/components/VPNavMenuLink.vue";
 import { computed, type PropType } from "vue";
 
 const props = defineProps({

@@ -144,8 +144,8 @@ export default withPwa(
                 ],
                 file_handlers: [{ action: "./", accept: { "text/*": [".hyl"] } }]
             },
-            workbox: {
-                maximumFileSizeToCacheInBytes: 10 * 1024 ** 2,
+            maximumFileSizeToCacheInBytes: 10 * 1024 ** 2,
+            generateSW: {
                 skipWaiting: true,
                 clientsClaim: true
             },

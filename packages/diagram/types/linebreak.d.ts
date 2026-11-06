@@ -3,7 +3,7 @@ declare module "linebreak" {
         readonly position: number;
         readonly required: boolean;
     }
-    class LineBreaker {
+    export class LineBreaker {
         constructor(string: string);
         nextCodePoint(): number;
         nextCharClass(): number;
@@ -11,5 +11,4 @@ declare module "linebreak" {
         getPairTableBreak(lastClas: number): boolean;
         nextBreak(): Break | null;
     }
-    export default LineBreaker;
 }
