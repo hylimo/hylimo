@@ -47,6 +47,47 @@ export const keywordsModule = ContentModule.create(
                         }
                     `
                 )
+            ),
+        id(SCOPE)
+            .field("internal")
+            .assignField(
+                "resolveKeywords",
+                fun(
+                    `
+                        (defaultKeyword, elementArgs) = args
+                        this.givenKeyword = elementArgs.keyword
+                        this.mainKeyword = if(givenKeyword == null) {
+                            defaultKeyword
+                        } {
+                            if(isBoolean(givenKeyword)) {
+                                if(givenKeyword) { defaultKeyword } { null }
+                            } {
+                                givenKeyword
+                            }
+                        }
+                        this.allKeywords = list()
+                        if(mainKeyword != null) {
+                            allKeywords += mainKeyword
+                        }
+                        if(elementArgs.keywords != null) {
+                            allKeywords.addAll(elementArgs.keywords)
+                        }
+                        allKeywords
+                    `,
+                    {
+                        docs: `
+                            Computes the keywords of an element: its main keyword, followed by the additional
+                            keywords given by the keywords argument of the element.
+                            The main keyword is the keyword argument of the element if given, otherwise the
+                            default keyword. Setting the keyword argument to false hides the main keyword.
+                        `,
+                        params: [
+                            [0, "the default keyword of the element, null if it has none"],
+                            [1, "the arguments the element was created with"]
+                        ],
+                        returns: "The list of keywords to render"
+                    }
+                )
             )
     ]
 );

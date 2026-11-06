@@ -1,4 +1,4 @@
-import { fun, functionType, id, listType, object, optional, str } from "@hylimo/core";
+import { booleanType, fun, functionType, id, listType, object, optional, or, str } from "@hylimo/core";
 import { SCOPE } from "../../../../base/dslModule.js";
 import { ContentModule } from "../../contentModule.js";
 import { stringOrSpanListType } from "../../../../base/types.js";
@@ -42,13 +42,7 @@ export const systemActorModule = ContentModule.create(
                 fun(
                     `
                         (name, callback) = args
-                        otherKeywords = args.keywords
-                        // the keyword is the whole of this notation: without it the rectangle would
-                        // be indistinguishable from a class
-                        keywords = list("actor")
-                        if(otherKeywords != null) {
-                            keywords.addAll(otherKeywords)
-                        }
+                        keywords = scope.internal.resolveKeywords("actor", args)
                         _systemActor(name, callback, title = name, keywords = keywords, args = args)
                     `,
                     {
@@ -59,6 +53,11 @@ export const systemActorModule = ContentModule.create(
                         params: [
                             [0, "the name of the system actor", stringOrSpanListType],
                             [1, "the function defining the system actor content", optional(functionType)],
+                            [
+                                "keyword",
+                                "replaces the «actor» keyword, false hides it, which makes the system actor indistinguishable from a class",
+                                optional(or(stringOrSpanListType, booleanType))
+                            ],
                             [
                                 "keywords",
                                 "the additional keywords of the system actor",

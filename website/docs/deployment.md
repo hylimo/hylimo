@@ -110,6 +110,20 @@ deploymentDiagram {
 }
 ```
 
+The default keyword of a device, an execution environment, an artifact or a deployment specification
+can be replaced with the `keyword` named argument, which is how the more specific kinds of nodes UML
+diagrams commonly show are drawn; `keyword = false` hides it:
+
+```hylimo
+deploymentDiagram {
+    device("srv01", keyword = "server") {
+        executionEnvironment("Ubuntu", keyword = "OS") {
+            executionEnvironment("PostgreSQL", keyword = "database")
+        }
+    }
+}
+```
+
 ### `artifact`
 
 Creates an artifact, a physical piece of information such as a file.

@@ -1,4 +1,4 @@
-import { booleanType, fun, functionType, id, listType, object, optional, str } from "@hylimo/core";
+import { booleanType, fun, functionType, id, listType, object, optional, or, str } from "@hylimo/core";
 import { SCOPE } from "../../../base/dslModule.js";
 import { ContentModule } from "../contentModule.js";
 import { stringOrSpanListType } from "../../../base/types.js";
@@ -36,11 +36,7 @@ export const enumModule = ContentModule.create(
                 fun(
                     `
                         (name, callback) = args
-                        keywords = list("enumeration")
-                        otherKeywords = args.keywords
-                        if(otherKeywords != null) {
-                            keywords.addAll(otherKeywords)
-                        }
+                        keywords = scope.internal.resolveKeywords("enumeration", args)
                         _enum(name, callback, title = name, keywords = keywords, abstract = args.abstract, args = args, hasEntries = true)
                     `,
                     {
@@ -48,7 +44,16 @@ export const enumModule = ContentModule.create(
                         params: [
                             [0, "the name of the enum", stringOrSpanListType],
                             [1, "the function declaring the enum constants", optional(functionType)],
-                            ["keywords", "the keywords of the enum", optional(listType(stringOrSpanListType))],
+                            [
+                                "keyword",
+                                "replaces the «enumeration» keyword, false hides it",
+                                optional(or(stringOrSpanListType, booleanType))
+                            ],
+                            [
+                                "keywords",
+                                "the additional keywords of the enum",
+                                optional(listType(stringOrSpanListType))
+                            ],
                             ["abstract", "whether the enum is abstract", optional(booleanType)]
                         ],
                         snippet: `("$1") {\n    entries {\n        $2\n    }\n}`,

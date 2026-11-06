@@ -1,4 +1,4 @@
-import { booleanType, fun, functionType, id, listType, object, optional, str } from "@hylimo/core";
+import { booleanType, fun, functionType, id, listType, object, optional, or, str } from "@hylimo/core";
 import { SCOPE } from "../../../base/dslModule.js";
 import { ContentModule } from "../contentModule.js";
 import { stringOrSpanListType } from "../../../base/types.js";
@@ -34,11 +34,7 @@ export const interfaceModule = ContentModule.create(
                 fun(
                     `
                         (name, callback) = args
-                        keywords = list("interface")
-                        otherKeywords = args.keywords
-                        if(otherKeywords != null) {
-                            keywords.addAll(otherKeywords)
-                        }
+                        keywords = scope.internal.resolveKeywords("interface", args)
                         _interface(name, callback, title = name, keywords = keywords, abstract = args.abstract, args = args)
                     `,
                     {
@@ -46,7 +42,16 @@ export const interfaceModule = ContentModule.create(
                         params: [
                             [0, "the name of the interface", stringOrSpanListType],
                             [1, "the callback function for the interface", optional(functionType)],
-                            ["keywords", "the keywords of the interface", optional(listType(stringOrSpanListType))],
+                            [
+                                "keyword",
+                                "replaces the «interface» keyword, false hides it",
+                                optional(or(stringOrSpanListType, booleanType))
+                            ],
+                            [
+                                "keywords",
+                                "the additional keywords of the interface",
+                                optional(listType(stringOrSpanListType))
+                            ],
                             ["abstract", "whether the interface is abstract", optional(booleanType)]
                         ],
                         snippet: `("$1") {\n    $2\n}`,

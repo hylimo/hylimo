@@ -44,16 +44,10 @@ export const artifactModule = ContentModule.create(
                 fun(
                     `
                         (name, title, callback) = scope.internal.parseInstanceArgs(args)
-                        this.otherKeywords = args.keywords
-                        this.keywords = if(scope.internal.config.showArtifactKeyword) {
-                            this.allKeywords = list("artifact")
-                            if(otherKeywords != null) {
-                                allKeywords.addAll(otherKeywords)
-                            }
-                            allKeywords
-                        } {
-                            otherKeywords
-                        }
+                        this.keywords = scope.internal.resolveKeywords(
+                            if(scope.internal.config.showArtifactKeyword) { "artifact" } { null },
+                            args
+                        )
                         if((args[1] != null) && (isString(args[1]) || isObject(args[1]))) {
                             title = scope.internal.instanceTitle(title)
                         }
@@ -73,6 +67,11 @@ export const artifactModule = ContentModule.create(
                                 optional(or(stringOrSpanListType, functionType))
                             ],
                             [2, "the function defining the artifact content", optional(functionType)],
+                            [
+                                "keyword",
+                                "replaces the «artifact» keyword, false hides it",
+                                optional(or(stringOrSpanListType, booleanType))
+                            ],
                             [
                                 "keywords",
                                 "the additional keywords of the artifact",

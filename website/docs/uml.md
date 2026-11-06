@@ -209,6 +209,30 @@ umlDiagram {
 }
 ```
 
+### Replacing the default keyword
+
+`interface`, `enum`, `component`, `artifact`, `device`, `executionEnvironment`, `deploymentSpec` and
+`systemActor` carry a default keyword.
+The `keyword` named argument replaces it, and `keyword = false` hides it.
+Keywords given with `keywords` are still added after it:
+
+```hylimo
+umlDiagram {
+    component("Billing", keyword = "subsystem", keywords = list("legacy"))
+
+    executionEnvironment("Linux", keyword = "OS") layout {
+        pos = apos(300, 0)
+    }
+
+    interface("Shape", keyword = false) layout {
+        pos = apos(550, 0)
+    }
+}
+```
+
+An explicit `keyword` is shown even if the default keyword is turned off by a [config property](#config-properties).
+`node` has no default keyword, so there `keyword` simply adds a keyword in front of the other ones.
+
 ## Classifier content
 
 The content of a classifier is defined by the function passed to it, and works the same for all classifiers.

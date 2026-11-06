@@ -1,4 +1,4 @@
-import { bool, booleanType, fun, functionType, id, listType, object, optional, str } from "@hylimo/core";
+import { bool, booleanType, fun, functionType, id, listType, object, optional, or, str } from "@hylimo/core";
 import { PREDICTION_STYLE_CLASS_ASSIGNMENT_EXPRESSION, SCOPE } from "../../../base/dslModule.js";
 import { ContentModule } from "../contentModule.js";
 import { stringOrSpanListType } from "../../../base/types.js";
@@ -40,16 +40,10 @@ export const componentModule = ContentModule.create(
                 fun(
                     `
                         (name, callback) = args
-                        otherKeywords = args.keywords
-                        keywords = if(scope.internal.config.showComponentKeyword) {
-                            keywords = list("component")
-                            if(otherKeywords != null) {
-                                keywords.addAll(otherKeywords)
-                            }
-                            keywords
-                        } {
-                            otherKeywords
-                        }
+                        keywords = scope.internal.resolveKeywords(
+                            if(scope.internal.config.showComponentKeyword) { "component" } { null },
+                            args
+                        )
                         _component(name, callback, title = name, keywords = keywords, abstract = args.abstract, args = args)
                     `,
                     {
@@ -57,7 +51,16 @@ export const componentModule = ContentModule.create(
                         params: [
                             [0, "the name of the component", stringOrSpanListType],
                             [1, "the function defining the component content", optional(functionType)],
-                            ["keywords", "the keywords of the component", optional(listType(stringOrSpanListType))],
+                            [
+                                "keyword",
+                                "replaces the «component» keyword, false hides it",
+                                optional(or(stringOrSpanListType, booleanType))
+                            ],
+                            [
+                                "keywords",
+                                "the additional keywords of the component",
+                                optional(listType(stringOrSpanListType))
+                            ],
                             ["abstract", "whether the component is abstract", optional(booleanType)]
                         ],
                         snippet: `("$1") {\n    $2\n}`,

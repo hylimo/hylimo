@@ -49,15 +49,7 @@ export const nodeModule = ContentModule.create(
             _createDeploymentTarget = {
                 (targetKeyword, targetArgs) = args
                 (name, title, callback) = scope.internal.parseInstanceArgs(targetArgs)
-                this.keywords = if(targetKeyword != null) {
-                    this.allKeywords = list(targetKeyword)
-                    if(targetArgs.keywords != null) {
-                        allKeywords.addAll(targetArgs.keywords)
-                    }
-                    allKeywords
-                } {
-                    targetArgs.keywords
-                }
+                this.keywords = scope.internal.resolveKeywords(targetKeyword, targetArgs)
                 // naming a type as the second argument is what turns the target into an instance
                 // specification, and an instance specification underlines its name
                 if((targetArgs[1] != null) && (isString(targetArgs[1]) || isObject(targetArgs[1]))) {
@@ -89,6 +81,11 @@ export const nodeModule = ContentModule.create(
                                 optional(or(stringOrSpanListType, functionType))
                             ],
                             [2, "the function defining the node content", optional(functionType)],
+                            [
+                                "keyword",
+                                "the keyword of the node, shown before the other keywords",
+                                optional(or(stringOrSpanListType, booleanType))
+                            ],
                             ["keywords", "the keywords of the node", optional(listType(stringOrSpanListType))]
                         ],
                         snippet: `("$1") {\n    $2\n}`,
@@ -143,6 +140,11 @@ export const nodeModule = ContentModule.create(
                             ],
                             [2, "the function defining the device content", optional(functionType)],
                             [
+                                "keyword",
+                                "replaces the «device» keyword, false hides it",
+                                optional(or(stringOrSpanListType, booleanType))
+                            ],
+                            [
                                 "keywords",
                                 "the additional keywords of the device",
                                 optional(listType(stringOrSpanListType))
@@ -195,6 +197,11 @@ export const nodeModule = ContentModule.create(
                                 optional(or(stringOrSpanListType, functionType))
                             ],
                             [2, "the function defining the execution environment content", optional(functionType)],
+                            [
+                                "keyword",
+                                "replaces the «executionEnvironment» keyword, false hides it",
+                                optional(or(stringOrSpanListType, booleanType))
+                            ],
                             [
                                 "keywords",
                                 "the additional keywords of the execution environment",

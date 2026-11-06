@@ -89,6 +89,8 @@ useCaseDiagram {
 ```
 
 Both notations mean the same thing, and both are associated with a use case in exactly the same way.
+The `keyword` named argument replaces the `«actor»` keyword, e.g. with `keyword = "system"`,
+see [replacing the default keyword](./uml.md#replacing-the-default-keyword).
 
 ### `subject`
 

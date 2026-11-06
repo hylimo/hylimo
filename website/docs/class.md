@@ -175,6 +175,9 @@ classDiagram {
 }
 ```
 
+The `keyword` named argument replaces the `«interface»` keyword, and `keyword = false` hides it,
+see [replacing the default keyword](./uml.md#replacing-the-default-keyword).
+
 ### `enum`
 
 Creates an enumeration class. Enums are a special type of class and support all class functionality. You can define enum entries using the `entries` block:
@@ -204,6 +207,9 @@ classDiagram {
     }
 }
 ```
+
+The `keyword` named argument replaces the `«enumeration»` keyword, and `keyword = false` hides it,
+see [replacing the default keyword](./uml.md#replacing-the-default-keyword).
 
 Enums can also have additional properties and methods like regular classes:
 

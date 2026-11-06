@@ -40,6 +40,7 @@ For details, see [UML Class Diagram](./class.md#class)
 
 - **Properties and Methods:** Define public, private, protected, package, or default sections for properties and methods, just like in class diagrams.
 - **Abstract & Keywords:** Use `abstract = true` to mark a component as abstract, and `keywords = list("stereotype")` to add stereotypes or keywords in guillemets (`« »`).
+- **Replacing the keyword:** Use `keyword = "subsystem"` to replace the `«component»` keyword, or `keyword = false` to hide it, see [replacing the default keyword](./uml.md#replacing-the-default-keyword).
 
 #### Nesting
 

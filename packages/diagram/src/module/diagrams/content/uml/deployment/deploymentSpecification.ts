@@ -1,4 +1,4 @@
-import { fun, functionType, id, listType, object, optional, str } from "@hylimo/core";
+import { booleanType, fun, functionType, id, listType, object, optional, or, str } from "@hylimo/core";
 import { SCOPE } from "../../../../base/dslModule.js";
 import { ContentModule } from "../../contentModule.js";
 import { stringOrSpanListType } from "../../../../base/types.js";
@@ -41,11 +41,7 @@ export const deploymentSpecificationModule = ContentModule.create(
                 fun(
                     `
                         (name, callback) = args
-                        this.otherKeywords = args.keywords
-                        this.keywords = list("deployment spec")
-                        if(otherKeywords != null) {
-                            keywords.addAll(otherKeywords)
-                        }
+                        this.keywords = scope.internal.resolveKeywords("deployment spec", args)
                         _deploymentSpec(name, callback, title = name, keywords = keywords, args = args)
                     `,
                     {
@@ -53,6 +49,11 @@ export const deploymentSpecificationModule = ContentModule.create(
                         params: [
                             [0, "the name of the deployment specification", stringOrSpanListType],
                             [1, "the function defining the deployment specification content", optional(functionType)],
+                            [
+                                "keyword",
+                                "replaces the «deployment spec» keyword, false hides it",
+                                optional(or(stringOrSpanListType, booleanType))
+                            ],
                             [
                                 "keywords",
                                 "the additional keywords of the deployment specification",
