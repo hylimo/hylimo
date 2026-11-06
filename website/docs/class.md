@@ -292,6 +292,29 @@ The following operators are supported:
 - `-->` for an association navigatable in one direction
 - ... and several combinations of the above, e.g, `!--!`, `*-->`, ...
 
+### Connections between nested elements
+
+A connection can be written in any block, including inside a nested element.
+It is placed in the innermost element containing both of its ends, so connecting the contents of two different packages
+does not have to happen at the top level:
+
+```hylimo
+classDiagram {
+    package("Model") {
+        class("Order")
+    } layout {
+        pos = apos(500, 0)
+    }
+    package("Service") {
+        class("OrderService")
+        OrderService --> Order
+    }
+}
+```
+
+Elements themselves always stay in the block they are written in.
+Therefore, a nested element cannot be positioned relative to an element outside its parent, e.g. using `rpos`.
+
 ## Config properties
 
 The following config properties are available for class diagrams:

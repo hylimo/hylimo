@@ -160,8 +160,15 @@ export const withModule = ContentModule.create(
                 this.contents = self.canvasScope.contents
                 this.lastStartValue = 0
                 this.lastEndValue = 0.5
+                this.connectionCanvasScope = self.canvasScope
                 result = [
                     over = null,
+                    apos = {
+                        (x, y) = args
+                        this.point = absolutePoint(x = x, y = y)
+                        scope.internal.registerCanvasContent(point, args, connectionCanvasScope)
+                        point
+                    },
                     end = {
                         lastEndValue = it ?? ""
                         self.endProvider(it)

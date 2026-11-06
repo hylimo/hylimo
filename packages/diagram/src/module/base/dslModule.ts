@@ -71,6 +71,7 @@ export const dslModule = InterpreterModule.create(
                         canvasScopeDepth = 0,
                         internal = [
                             classCounter = 0,
+                            canvasScopeCounter = 0,
                             styles = [styles = list()],
                             canvasAddEdits = [],
                             config = config,

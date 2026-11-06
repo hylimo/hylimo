@@ -90,7 +90,7 @@ export const providesAndRequiresModule = ContentModule.create(
                                                 class = list("label-element"),
                                                 pos = nameLabelPos
                                             )
-                                            scope.internal.registerCanvasContent(nameLabel, interfaceArgs, canvasScope)
+                                            scope.internal.registerCanvasContent(nameLabel, interfaceArgs, interfaceConnection.canvasScope)
                                         }
                                         interfaceConnection
                                     `,
@@ -175,7 +175,7 @@ export const providesAndRequiresModule = ContentModule.create(
                                                 class = list("label-element"),
                                                 pos = nameLabelPos
                                             )
-                                            scope.internal.registerCanvasContent(nameLabel, interfaceArgs, canvasScope)
+                                            scope.internal.registerCanvasContent(nameLabel, interfaceArgs, interfaceConnection.canvasScope)
                                         }
                                         interfaceConnection
                                     `,

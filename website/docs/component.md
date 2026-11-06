@@ -56,6 +56,26 @@ componentDiagram {
 }
 ```
 
+Connections and interfaces between nested elements can be written where the elements are defined, also across
+components (see [connections between nested elements](./class.md#connections-between-nested-elements)):
+
+```hylimo
+componentDiagram {
+    component("Backend") {
+        component("API") {
+            provides("REST", 0.5)
+        }
+    } layout {
+        pos = apos(650, 0)
+    }
+    component("Frontend") {
+        component("Client") {
+            port(0).requires(0, REST)
+        }
+    }
+}
+```
+
 #### Ports
 
 Components can have ports, which are connection points for interfaces or other elements. Ports can be defined inside the component block or using dot notation outside:

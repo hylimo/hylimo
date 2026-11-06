@@ -10,7 +10,7 @@ export const contentModule = ContentModule.create(
     `
         scope.internal.contentContentHandler = [
             {
-                args.callScope.contents = list()
+                scope.internal.createCanvasScope(args.canvasScope, args.callScope)
             },
             {
                 this.innerContents = args.callScope.contents
